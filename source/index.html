@@ -12,6 +12,9 @@
 <body fullbleed layout vertical>
   
 <style type="text/css">
+  list-test {
+    display: block;
+  }
   .item {
     min-height: 100px;
   }
@@ -19,9 +22,9 @@
 
 <list-test></list-test>
 
-<polymer-element name="list-test" fullbleed layout vertical>
+<polymer-element name="list-test">
 <template>
-  <core-header-panel flex>
+  <core-header-panel fit>
     <core-toolbar>
       <div>Hello World!</div>
     </core-toolbar>
@@ -29,7 +32,7 @@
     <core-list data="{{chapters}}" fit>
       <template>
         <div class="item">
-          <h2>yo yo yo</h2>
+          <h2>{{model.book}}</h2>
         </div>
       </template>
     </core-list>
@@ -38,7 +41,7 @@
 <script>
 
 (function() {
-  Polymer('list-test', {
+  Polymer({
     ready: function() {
       this.chapters = [
         {

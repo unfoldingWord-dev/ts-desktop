@@ -1,9 +1,59 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>translationStudio</title>
-  </head>
-  <body>
-    <h1>Hello world!</h1>
-  </body>
+<head>
+  <title>translationStudio</title>
+  
+  <script src="../bower_components/webcomponentsjs/webcomponents.js"></script>
+  <link rel="import" href="../bower_components/core-list/core-list.html">
+  <link rel="import" href="../bower_components/core-header-panel/core-header-panel.html">
+  <link rel="import" href="../bower_components/core-toolbar/core-toolbar.html">
+  <link rel="import" href="../bower_components/polymer/polymer.html">
+</head>
+<body fullbleed layout vertical>
+  
+<style type="text/css">
+  .item {
+    min-height: 100px;
+  }
+</style>
+
+<list-test></list-test>
+
+<polymer-element name="list-test" fullbleed layout vertical>
+<template>
+  <core-header-panel flex>
+    <core-toolbar>
+      <div>Hello World!</div>
+    </core-toolbar>
+    
+    <core-list data="{{chapters}}" fit>
+      <template>
+        <div class="item">
+          <h2>yo yo yo</h2>
+        </div>
+      </template>
+    </core-list>
+  </core-header-panel>
+</template>
+<script>
+
+(function() {
+  Polymer('list-test', {
+    ready: function() {
+      this.chapters = [
+        {
+          book: "Genesis"
+        },
+        {
+          book: "Revelation"
+        }
+      ];
+    }
+  });
+})();
+
+</script>
+</polymer-element>
+
+</body>
 </html>

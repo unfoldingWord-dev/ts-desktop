@@ -3,6 +3,13 @@ translationStudio Desktop
 
 A tool to translate Bible stories into your own language  https://distantshores.org/translationStudio
 
+###Dependencies
+* [npm](http://nodejs.org/) (bundled with Node.js)
+* [Yeoman](http://yeoman.io/)
+* [Bower](http://bower.io/)
+* [Grunt](http://gruntjs.com/)
+
+
 
 ##Environment Setup
 Once you've cloned the repo you'll need to do some setting up before begining development. 

@@ -1,14 +1,19 @@
 {
   "name": "translationStudio",
-  "main": "/source/index.html",
-  "window": {
-  	"width":800,
-  	"height":600,
-  	"min_height":400,
-  	"min_width":400,
-  	"position":"center",
-  	"show":false,
-  	"toolbar":false,
-  	"frame":true
+  "version": "0.1.0",
+  "devDependencies": {
+    "adm-zip": "^0.4.7",
+    "curl": "^0.1.4",
+    "decompress-zip": "^0.1.0",
+    "download": "^4.0.0",
+    "file-exists": "^0.1.1",
+    "fs": "0.0.2",
+    "fstream": "^1.0.4",
+    "grunt": "^0.4.5",
+    "grunt-contrib-jshint": "~0.10.0",
+    "grunt-contrib-nodeunit": "~0.4.1",
+    "grunt-contrib-uglify": "~0.5.0",
+    "grunt-curl": "^2.1.0",
+    "unzip": "^0.1.11"
   }
 }

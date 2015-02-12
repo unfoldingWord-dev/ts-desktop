@@ -1,5 +1,4 @@
-.idea
-.c9
-bower_components
-bin
-node_modules
+node_modules/
+tmp/
+.DS_Store
+resources/

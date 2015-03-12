@@ -10,7 +10,10 @@
     "min_width": 650,
     "min_height": 400,
     "toolbar": false,
-    "position":"center"
+    "frame": false,
+    "position":"center",
+    "show":false,
+    "icon":"icon.png"
   },
   "chromium-args": "--child-clean-exit"
 }

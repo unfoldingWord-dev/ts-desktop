@@ -1,0 +1,66 @@
+<!--
+This is the tool bar to the application window
+-->
+<link rel="import" href="../components/core-icon-button/core-icon-button.html">
+<link rel="import" href="../components/core-toolbar/core-toolbar.html">
+<link rel="import" href="../components/core-icons/image-icons.html">
+<link rel="import" href="../components/core-icons/hardware-icons.html">
+
+<polymer-element name="ts-app-toolbar">
+
+    <template>
+        <style>
+            :host {
+                width:100%;
+                display:block;
+                color:#ffffff;
+                -webkit-app-region: drag;
+            }
+            core-toolbar {
+                background:#99cc00;
+            }
+            core-toolbar, core-toolbar::shadow .toolbar-tools {
+                height:30px;
+                padding: 0;
+            }
+            div.tools {
+                margin: 0;
+            }
+            core-icon-button::shadow core-icon {
+                height:18px;
+            }
+            core-icon-button {
+                -webkit-app-region: no-drag;
+            }
+        </style>
+
+        <core-toolbar>
+            <div tool>
+                translationStudio
+            </div>
+            <span tool flex></span>
+            <div class="tools" tool horizontal layout center>
+                <core-icon-button icon="hardware:keyboard-control" id="library" on-tap={{minimizeTapped}}></core-icon-button>
+                <core-icon-button icon="image:filter-none" id="library" on-tap={{expandTapped}}></core-icon-button>
+                <core-icon-button icon="close" id="library" on-tap={{closeTapped}}></core-icon-button>
+            </div>
+        </core-toolbar>
+
+    </template>
+    <script>
+
+        Polymer({
+            minimizeTapped: function() {
+                App.window.minimize();
+            },
+            expandTapped: function() {
+                App.toggleMaximize();
+            },
+            closeTapped: function() {
+                App.close();
+            }
+        });
+
+    </script>
+
+</polymer-element>

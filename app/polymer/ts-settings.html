@@ -69,6 +69,9 @@ This element handles all of the application settings.
     <script>
 
         Polymer({
+            ready: function() {
+                // TODO: it would be nice if we could load all the settings from a config file somewhere
+            },
             setting1Handler: function() {
                 alert("you clicked setting 1!");
             },

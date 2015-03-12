@@ -5,6 +5,7 @@ This elements displays the main dashboard for the application.
 <link rel="import" href="../components/core-header-panel/core-header-panel.html">
 <link rel="import" href="../components/core-toolbar/core-toolbar.html">
 <link rel="import" href="../components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../components/paper-ripple/paper-ripple.html">
 
 <polymer-element name="ts-dashboard" attributes="action">
 
@@ -21,13 +22,6 @@ This elements displays the main dashboard for the application.
       core-toolbar {
         background: #03a9f4;
         color: white;
-      }
-      prayer-list {
-        display:block;
-        height:100%;
-        width:100%;
-        overflow:auto;
-        margin: 0 auto;
       }
     </style>
 
@@ -47,7 +41,9 @@ This elements displays the main dashboard for the application.
             </div>
         </core-toolbar>
         <div class="container" fit>
-            hello world
+            <!-- This is where all the content goes! -->
+            <p horizontal layout center-justified>Welcome to translationStudio!</p>
+            <paper-ripple fit></paper-ripple>
         </div>
     </core-header-panel>
   </template>

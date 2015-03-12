@@ -6,9 +6,9 @@
   "window": {
     "title": "translationStudio",
     "width": 650,
-    "height": 650,
+    "height": 400,
     "min_width": 650,
-    "min_height": 650,
+    "min_height": 400,
     "toolbar": false,
     "position":"center"
   },

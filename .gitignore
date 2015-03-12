@@ -2,3 +2,6 @@ node_modules/
 tmp/
 .DS_Store
 resources/
+app/components/
+buildTmp/
+dist/

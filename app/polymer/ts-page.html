@@ -1,0 +1,37 @@
+<!--
+This is glue for the dashboard and settings menu
+-->
+<link rel="import" href="../components/polymer/polymer.html">
+<link rel="import" href="ts-menu-pusher.html">
+<link rel="import" href="ts-dashboard.html">
+<link rel="import" href="ts-settings.html">
+
+<polymer-element name="ts-page">
+
+    <template>
+        <style>
+            :host {
+                width:100%;
+                height:100%;
+                display:block;
+                background-color:#444;
+            }
+        </style>
+
+        <ts-menu-pusher id="menu" mode="{{settingsMode}}">
+            <ts-settings></ts-settings>
+            <ts-dashboard on-open-settings="{{settingsHandler}}"></ts-dashboard>
+        </ts-menu-pusher>
+    </template>
+    <script>
+
+        Polymer({
+            settingsHandler: function() {
+                this.$.menu.openMenu();
+
+            },
+        });
+
+    </script>
+
+</polymer-element>

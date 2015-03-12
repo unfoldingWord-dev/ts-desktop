@@ -1,0 +1,82 @@
+<!--
+This element handles all of the application settings.
+-->
+<link rel="import" href="../components/polymer/polymer.html">
+<link rel="import" href="ts-menu-pusher.html">
+<link rel="import" href="ts-dashboard.html">
+<link rel="import" href="../components/core-icon/core-icon.html">
+
+<polymer-element name="ts-settings">
+
+    <template>
+        <style>
+            :host {
+                display:block;
+                width:100%;
+                height:100%;
+                background: #48a770;
+            }
+            ul {
+                margin: 0;
+                padding: 0;
+                list-style: none;
+            }
+
+            h2 {
+                margin: 0;
+                padding: 1em;
+                color: rgba(0,0,0,0.4);
+                text-shadow: 0 0 1px rgba(0,0,0,0.1);
+                font-weight: 300;
+                font-size: 2em;
+            }
+
+            ul li a {
+                display: block;
+                padding: 1em 1em 1em 1.2em;
+                outline: none;
+                box-shadow: inset 0 -1px rgba(0,0,0,0.2);
+                color: #f3efe0;
+                text-transform: uppercase;
+                text-shadow: 0 0 1px rgba(255,255,255,0.1);
+                letter-spacing: 1px;
+                font-weight: 400;
+                -webkit-transition: background 0.3s, box-shadow 0.3s;
+                transition: background 0.3s, box-shadow 0.3s;
+                cursor: pointer;
+            }
+
+            ul li:first-child a {
+                box-shadow: inset 0 -1px rgba(0,0,0,0.2), inset 0 1px rgba(0,0,0,0.2);
+            }
+
+            ul li a:hover {
+                background: rgba(0,0,0,0.2);
+                box-shadow: inset 0 -1px rgba(0,0,0,0);
+                color: #fff;
+            }
+            h2 core-icon {
+                padding-right: 20px;
+            }
+        </style>
+        <h2 horizontal layout center><core-icon icon="settings"></core-icon> Settings</h2>
+        <ul>
+            <!-- Below are some sample settings -->
+            <li><a on-tap="{{setting1Handler}}">Setting 1</a></li>
+            <li><a on-tap="{{setting2Handler}}">Setting 2</a></li>
+        </ul>
+    </template>
+    <script>
+
+        Polymer({
+            setting1Handler: function() {
+                alert("you clicked setting 1!");
+            },
+            setting2Handler: function() {
+                alert("you clicked setting 2!");
+            }
+        });
+
+    </script>
+
+</polymer-element>

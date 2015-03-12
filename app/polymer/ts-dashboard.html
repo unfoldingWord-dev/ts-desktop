@@ -1,0 +1,93 @@
+<!--
+This elements displays the main dashboard for the application.
+-->
+<link rel="import" href="../components/core-scaffold/core-scaffold.html">
+<link rel="import" href="../components/core-header-panel/core-header-panel.html">
+<link rel="import" href="../components/core-toolbar/core-toolbar.html">
+<link rel="import" href="../components/paper-tabs/paper-tabs.html">
+
+<polymer-element name="ts-dashboard" attributes="action">
+
+  <template>
+    <style>
+      :host {
+
+      }
+      core-header-panel {
+        height: 100%;
+        overflow: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      core-toolbar {
+        background: #03a9f4;
+        color: white;
+      }
+      prayer-list {
+        display:block;
+        height:100%;
+        width:100%;
+        overflow:auto;
+        margin: 0 auto;
+      }
+    </style>
+
+    <core-header-panel>
+        <core-toolbar>
+            <span tool flex></span>
+            <div tool>
+                <core-icon-button icon="book" id="library" on-tap={{libraryTapped}}></core-icon-button>
+                <core-icon-button icon="description" id="resources" on-tap={{resourcesTapped}}></core-icon-button>
+                <core-icon-button icon="language" id="project-settings" on-tap={{projectSettingsTapped}}></core-icon-button>
+                <core-icon-button icon="autorenew" id="update" on-tap={{updateTapped}}></core-icon-button>
+                <core-icon-button icon="cloud-download" id="download" on-tap={{downloadTapped}}></core-icon-button>
+                <core-icon-button icon="bug-report" id="bug-report" on-tap={{bugReportTapped}}></core-icon-button>
+                <core-icon-button icon="file-upload" id="upload" on-tap={{uploadTapped}}></core-icon-button>
+                <core-icon-button icon="account-circle" id="account" on-tap={{accountTapped}}></core-icon-button>
+                <core-icon-button icon="settings" id="settings" on-tap={{settingsTapped}}></core-icon-button>
+            </div>
+        </core-toolbar>
+        <div class="container" fit>
+            hello world
+        </div>
+    </core-header-panel>
+  </template>
+
+  <script>
+
+    Polymer({
+        ready: function() {
+            // TODO: perform any startup operations here
+        },
+        libraryTapped: function() {
+            // TODO: impliment
+        },
+        resourcesTapped: function() {
+            // TODO: impliment
+        },
+        projectSettingsTapped: function() {
+            // TODO: impliment
+        },
+        updateTapped: function() {
+            // TODO: impliment
+        },
+        downloadTapped: function() {
+            // TODO: impliment
+        },
+        bugReportTapped: function() {
+            // TODO: impliment
+        },
+        uploadTapped: function() {
+            // TODO: impliment
+        },
+        accountTapped: function() {
+            // TODO: impliment
+        },
+        settingsTapped: function(event, detail, sender) {
+            event.stopPropagation();
+            this.fire('open-settings');
+        }
+    });
+
+  </script>
+
+</polymer-element>

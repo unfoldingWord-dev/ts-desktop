@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "",
   "keywords": [],
-  
+
     "homepage": "https://github.com/neutrinog/translationstudio",
     "bugs": "https://github.com/neutrinog/translationstudio/issues",
     "author": {
@@ -15,7 +15,7 @@
       "type": "git",
       "url": "git://github.com/neutrinog/translationstudio.git"
     },
-  
+
   "dependencies": {},
   "devDependencies": {
     "grunt": "~0.4.5",

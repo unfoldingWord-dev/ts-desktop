@@ -1,0 +1,7 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  background-color: #E5E5E5;
+  font-family: 'RobotoDraft', sans-serif;
+  overflow:hidden;
+}

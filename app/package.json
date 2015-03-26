@@ -9,8 +9,8 @@
     "height": 400,
     "min_width": 650,
     "min_height": 400,
-    "toolbar": false,
-    "frame": false,
+    "toolbar": true,
+    "frame": true,
     "position":"center",
     "show":false,
     "icon":"icon.png"

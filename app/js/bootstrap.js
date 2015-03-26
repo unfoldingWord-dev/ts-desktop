@@ -18,6 +18,25 @@ this.App = (function() {
        win.restore();
     }
     
+    /**
+     * A custom higher-order function that re-binds a function
+     *  but retains the original caller in the arguments list.
+     */
+    function wrap(fn, caller, args) {
+        args = args || [];
+        
+        return function() {
+            args.push(this);
+            let origArgs = [].slice.call(arguments);
+            let newArgs = args.concat(origArgs);
+            
+            return fn.apply(caller, newArgs);
+        }
+    }
+    
+    /**
+     * The App is the global application context object.
+     */
     let App = {
         appName: 'translationStudio',
         
@@ -50,6 +69,53 @@ this.App = (function() {
             }
         },
         
+        // NOTE: Ctrl and Alt will be mapped to Command and Option on Mac at runtime.
+        // "this" is bound to the App for convenience.
+        shortcuts: {
+            devInspector: {
+                key: 'Ctrl+Alt+I',
+                
+                active: function() {
+                    this.window.showDevTools('', true);
+                }
+            }
+        },
+        
+        registerEvents: function() {
+            let me = this;
+            let win = me.window;
+
+            Object.keys(me.events).forEach(function(event) {
+                win.on(event, me.events[event]);
+            });
+        },
+        
+        registerShortcuts: function() {
+            let me = this;
+            let win = me.window;
+            
+            var dummy = function() {};
+            
+            Object.keys(me.shortcuts).forEach(function(shortcut) {
+                let s = me.shortcuts[shortcut];
+                
+                let option = { key: s.key };
+                
+                if (s.active) {
+                    option.active = wrap(s.active, me);
+                }
+
+                if (s.failed) {
+                    option.failed = wrap(s.failed, me);
+                }
+                
+                var shortcut = new gui.Shortcut(option);
+
+                // Register global desktop shortcut, which can work without focus.
+                me.gui.App.registerGlobalHotKey(shortcut);
+            });
+        },
+        
         /**
          * Toggles the application maximize state
          */
@@ -74,11 +140,9 @@ this.App = (function() {
         
         init: function() {
             let me = this;
-            let win = me.window;
-
-            Object.keys(me.events).forEach(function(event) {
-                win.on(event, me.events[event]);
-            });
+            
+            me.registerEvents();
+            me.registerShortcuts();
             
             let platformInit = me.platformInit[process.platform];
             platformInit && platformInit.call(me);

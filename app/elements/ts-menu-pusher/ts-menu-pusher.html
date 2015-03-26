@@ -4,17 +4,17 @@ You can open and close the menu by setting the "mode" attribute or by one of the
 
 Inspired by http://tympanus.net/codrops/2013/08/28/transitions-for-off-canvas-navigations/
 -->
-<link rel="import" href="../components/polymer/polymer.html">
+<link rel="import" href="../../components/polymer/polymer.html">
 
-<polymer-element name="ts-menu-pusher">
+<polymer-element name="ts-menu-pusher" attributes="menu">
 
     <template>
         <style>
             :host {
-                width:100%;
-                height:100%;
-                display:block;
-                background-color:#444;
+                width: 100%;
+                height: 100%;
+                display: block;
+                background-color: #444;
             }
 
             *,
@@ -37,10 +37,12 @@ Inspired by http://tympanus.net/codrops/2013/08/28/transitions-for-off-canvas-na
             }
 
             .content,
-            .content-inner {
+            .content-inner,
+            ::content [main],
+            ::content [menus] {
                 position: relative;
-                height:100%;
-                width:100%;
+                height: 100%;
+                width: 100%;
             }
 
             .container {
@@ -145,11 +147,20 @@ Inspired by http://tympanus.net/codrops/2013/08/28/transitions-for-off-canvas-na
             .effect-scale-push.menu::after {
               display: none;
             }
+            
+            ::content [menus] > * {
+                display: none;
+            }
+            
+            ::content .ts-menu-selected {
+                display: block;
+            }
+            
         </style>
 
         <div id="container" class="container effect-scale-push menu-{{mode}}">
             <div class="menu effect-scale-push">
-                <content select="ts-settings"></content>
+                <content select="[menus]"></content>
             </div>
 
             <div class="pusher" on-tap="{{closeMenu}}">
@@ -167,15 +178,48 @@ Inspired by http://tympanus.net/codrops/2013/08/28/transitions-for-off-canvas-na
         Polymer({
             publish: {
                 mode: {
-                    value: "close",
+                    value: 'close',
                     reflect: true
                 }
             },
-            openMenu: function() {
-                this.mode = "open";
+            
+            selectedClass: 'ts-menu-selected',
+            
+            openMenu: function(menuName) {
+                var me = this;
+                
+                me.closeMenu();
+                
+                console.log(menuName);
+                var menu = me.querySelector('[label="' + menuName + '"]');
+                menu.classList.add(me.selectedClass);
+                console.log(menu);
+
+                me.mode = 'open';
             },
             closeMenu: function() {
-                this.mode = "close";
+                var me = this;
+                
+                var selected = '.' + me.selectedClass; 
+                var opened = me.querySelector(selected);
+                
+                if (opened) {
+                    setTimeout(function() {
+                        opened.classList.remove(me.selectedClass);
+                    }, 500);
+                }
+                
+                me.mode = 'close';
+                me.menu = null;
+            },
+            menuChanged: function(oldVal, newVal) {
+                var me = this;
+                
+                var menuName = newVal;
+                
+                if (menuName) {
+                    me.openMenu(menuName);
+                }
             }
         });
 

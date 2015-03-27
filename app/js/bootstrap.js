@@ -31,7 +31,7 @@ this.App = (function() {
             let newArgs = args.concat(origArgs);
             
             return fn.apply(caller, newArgs);
-        }
+        };
     }
     
     /**
@@ -92,24 +92,19 @@ this.App = (function() {
         
         registerShortcuts: function() {
             let me = this;
-            let win = me.window;
             
-            var dummy = function() {};
-            
-            Object.keys(me.shortcuts).forEach(function(shortcut) {
-                let s = me.shortcuts[shortcut];
+            Object.keys(me.shortcuts).forEach(function(shortcutName) {
+                let s = me.shortcuts[shortcutName];
                 
                 let option = { key: s.key };
                 
-                if (s.active) {
-                    option.active = wrap(s.active, me);
-                }
-
-                if (s.failed) {
-                    option.failed = wrap(s.failed, me);
-                }
+                ['active', 'failed'].filter(function(prop) {
+                    return typeof s[prop] === 'function';
+                }).forEach(function(prop) {
+                    option[prop] = wrap(s[prop], me);
+                });
                 
-                var shortcut = new gui.Shortcut(option);
+                var shortcut = new me.gui.Shortcut(option);
 
                 // Register global desktop shortcut, which can work without focus.
                 me.gui.App.registerGlobalHotKey(shortcut);

@@ -10,8 +10,6 @@ module.exports = function (grunt) {
   // load all grunt tasks
   require('time-grunt')(grunt);
   require('load-grunt-tasks')(grunt);
-  
-  grunt.loadNpmTasks('grunt-node-webkit-builder');
 
   // configurable paths
   var config = {
@@ -76,5 +74,6 @@ module.exports = function (grunt) {
     'sass',
     'nodewebkit'
   ]);
-
+  
+  grunt.registerTask('default', ['dist']);
 };

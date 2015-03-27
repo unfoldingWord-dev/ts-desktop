@@ -1,0 +1,55 @@
+<!--
+Resources drawer.
+-->
+<link rel="import" href="../../components/polymer/polymer.html">
+<link rel="import" href="../../components/core-icon/core-icon.html">
+
+<polymer-element name="ts-resources">
+
+    <template>
+        <style>
+            :host {
+                display: block;
+                width: 100%;
+                height: 100%;
+                background: #48a770;
+            }
+            ul {
+                margin: 0;
+                padding: 0;
+                list-style: none;
+            }
+
+            h2 {
+                margin: 0;
+                padding: 1em;
+                color: rgba(0,0,0,0.4);
+                text-shadow: 0 0 1px rgba(0,0,0,0.1);
+                font-weight: 300;
+                font-size: 2em;
+            }
+
+            h2 core-icon {
+                padding-right: 20px;
+            }
+            
+            .page {
+                padding: 1em;
+            }
+
+        </style>
+        
+        <h2 horizontal layout center><core-icon icon="description"></core-icon> Resources</h2>
+        
+        <div class="page">
+            <p>Welcome to resources.</p>
+            <p>Enjoy your stay.</p>
+        </div>
+    </template>
+    <script>
+
+        Polymer({});
+
+    </script>
+
+</polymer-element>

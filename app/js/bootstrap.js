@@ -19,22 +19,6 @@ this.App = (function() {
     }
     
     /**
-     * A custom higher-order function that re-binds a function
-     *  but retains the original caller in the arguments list.
-     */
-    function wrap(fn, caller, args) {
-        args = args || [];
-        
-        return function() {
-            args.push(this);
-            let origArgs = [].slice.call(arguments);
-            let newArgs = args.concat(origArgs);
-            
-            return fn.apply(caller, newArgs);
-        };
-    }
-    
-    /**
      * The App is the global application context object.
      */
     let App = {
@@ -69,8 +53,11 @@ this.App = (function() {
             }
         },
         
-        // NOTE: Ctrl and Alt will be mapped to Command and Option on Mac at runtime.
-        // "this" is bound to the App for convenience.
+        /**
+         * NOTE: Ctrl and Alt will be mapped to Command and Option on Mac at runtime.
+         *  Also, "this" is bound to the App for convenience,
+         *  and the shortcut is passed as first param.
+         */
         shortcuts: {
             devInspector: {
                 key: 'Ctrl+Alt+I',
@@ -101,7 +88,8 @@ this.App = (function() {
                 ['active', 'failed'].filter(function(prop) {
                     return typeof s[prop] === 'function';
                 }).forEach(function(prop) {
-                    option[prop] = wrap(s[prop], me);
+                    // bind "this" to "me" and pass in the shortcut as the first param
+                    option[prop] = s[prop].bind(me, s);
                 });
                 
                 var shortcut = new me.gui.Shortcut(option);

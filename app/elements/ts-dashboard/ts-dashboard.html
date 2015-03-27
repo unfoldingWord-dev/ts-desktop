@@ -27,8 +27,8 @@ This elements displays the main dashboard for the application.
         <core-toolbar>
             <span tool flex></span>
             <div tool>
-                <core-icon-button icon="book" id="library"></core-icon-button>
-                <core-icon-button icon="description" id="resources"></core-icon-button>
+                <core-icon-button icon="book" id="library" on-tap={{openMenu}}></core-icon-button>
+                <core-icon-button icon="description" id="resources" on-tap={{openMenu}}></core-icon-button>
                 <core-icon-button icon="language" id="project-settings"></core-icon-button>
                 <core-icon-button icon="autorenew" id="update"></core-icon-button>
                 <core-icon-button icon="cloud-download" id="download"></core-icon-button>
@@ -51,9 +51,6 @@ This elements displays the main dashboard for the application.
     Polymer({
         ready: function() {
             // TODO: perform any startup operations here
-        },
-        libraryTapped: function() {
-            // TODO: implement
         },
         resourcesTapped: function() {
             // TODO: implement

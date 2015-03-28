@@ -1,0 +1,107 @@
+<!--
+Library drawer.
+-->
+<link rel="import" href="../../components/polymer/polymer.html">
+<link rel="import" href="../../components/core-icon/core-icon.html">
+<link rel="import" href="../../components/core-pages/core-pages.html">
+<link rel="import" href="../../components/core-list/core-list.html">
+<link rel="import" href="../../components/paper-tabs/paper-tabs.html">
+
+<polymer-element name="ts-library">
+
+    <template>
+        <style>
+            :host {
+                display: block;
+                width: 100%;
+                height: 100%;
+                background: #48a770;
+            }
+            ul {
+                margin: 0;
+                padding: 0;
+                list-style: none;
+            }
+
+            h2 {
+                margin: 0;
+                padding: 1em;
+                color: rgba(0,0,0,0.4);
+                text-shadow: 0 0 1px rgba(0,0,0,0.1);
+                font-weight: 300;
+                font-size: 2em;
+            }
+
+            h2 core-icon {
+                padding-right: 20px;
+            }
+            
+            core-pages {
+                box-sizing: border-box;
+                width: 100%;
+                height: 100%;
+            }
+            
+            .page {
+                padding: 1em;
+                width: 100%;
+                height: 100%;
+                box-sizing: border-box;
+            }
+            
+            section.page-1 {
+                background: gray;
+            }
+            
+            section.page-2 {
+                background: yellow;
+            }
+            
+            section.page-3 {
+                background: black;
+                color: white;
+            }
+        </style>
+        
+        <h2 horizontal layout center><core-icon icon="book"></core-icon> Library</h2>
+        
+        <paper-tabs id="tabs" selected="{{selected}}">
+          <paper-tab>Tab 1</paper-tab>
+          <paper-tab>Tab 2</paper-tab>
+          <paper-tab>Tab 3</paper-tab>
+        </paper-tabs>
+
+        <core-pages selected="{{selected}}">
+          <section class="page page-1">
+              <div clas="page-1">
+                  <h3>Page 1</h3>
+                  <!-- <core-list></core-list> -->
+              </div>
+          </section>
+          <section class="page page-2">
+              <div class="page-2" hero-id="page-2" hero>
+                  <h3>Page 2</h3>
+                  <!-- <core-list></core-list> -->
+              </div>
+          </section>
+          <section class="page page-3">
+              <div class="page-3" hero-id="page-3" hero>
+                  <h3>Page 3</h3>
+                  <!-- <core-list></core-list> -->
+              </div>
+          </section>
+        </core-pages>
+    </template>
+    <script>
+
+        Polymer({
+            selected: 0,
+            
+            ready: function() {
+                // oh boy!
+            }
+        });
+
+    </script>
+
+</polymer-element>

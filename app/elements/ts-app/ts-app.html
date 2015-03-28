@@ -1,0 +1,41 @@
+<!--
+This is glue for the dashboard and settings menu
+-->
+<link rel="import" href="../../components/polymer/polymer.html">
+<link rel="import" href="../ts-menu-pusher/ts-menu-pusher.html">
+<link rel="import" href="../ts-dashboard/ts-dashboard.html">
+<link rel="import" href="../ts-settings/ts-settings.html">
+<link rel="import" href="../ts-library/ts-library.html">
+<link rel="import" href="../ts-resources/ts-resources.html">
+
+<polymer-element name="ts-app">
+
+    <template>
+        <style>
+            :host {
+                width:100%;
+                height:100%;
+                display:block;
+                background-color:#444;
+            }
+        </style>
+        
+        <ts-menu-pusher id="menu" menu="{{appMenu}}">
+            <aside menus>
+                <ts-settings label="settings"></ts-settings>
+                <ts-library label="library"></ts-library>
+                <ts-resources label="resources"></ts-resources>
+            </aside>
+            
+            <article main>
+                <ts-dashboard menu="{{appMenu}}"></ts-dashboard>
+            </article>
+        </ts-menu-pusher>
+    </template>
+    <script>
+
+        Polymer({});
+
+    </script>
+
+</polymer-element>

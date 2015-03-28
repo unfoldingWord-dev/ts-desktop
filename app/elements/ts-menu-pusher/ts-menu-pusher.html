@@ -1,0 +1,80 @@
+<!--
+Provides a fancy menu animation.
+You can open and close the menu by setting the "mode" attribute or by one of the openMenu() or closeMenu() methods.
+
+Inspired by http://tympanus.net/codrops/2013/08/28/transitions-for-off-canvas-navigations/
+-->
+<link rel="import" href="../../components/polymer/polymer.html">
+
+<polymer-element name="ts-menu-pusher" attributes="menu">
+
+    <template>
+        <link rel="stylesheet" href="ts-menu-pusher.css">
+
+        <div id="container" class="container effect-scale-push menu-{{mode}}">
+            <div class="menu effect-scale-push">
+                <content select="[menus]"></content>
+            </div>
+
+            <div class="pusher" on-tap="{{closeMenu}}">
+                <div class="content">
+                    <div class="content-inner">
+                        <content></content>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script>
+
+        Polymer({
+            publish: {
+                mode: {
+                    value: 'close',
+                    reflect: true
+                }
+            },
+            
+            selectedClass: 'ts-menu-selected',
+            
+            openMenu: function(menuName) {
+                var me = this;
+                
+                me.closeMenu();
+                
+                console.log('opening menu: ' + menuName);
+                var menu = me.querySelector('[label="' + menuName + '"]');
+                menu.classList.add(me.selectedClass);
+
+                me.mode = 'open';
+            },
+            closeMenu: function() {
+                var me = this;
+                
+                var selected = '.' + me.selectedClass; 
+                var opened = me.querySelector(selected);
+                
+                if (opened) {
+                    setTimeout(function() {
+                        opened.classList.remove(me.selectedClass);
+                    }, 500);
+                }
+                
+                me.mode = 'close';
+                me.menu = null;
+            },
+            menuChanged: function(oldVal, newVal) {
+                var me = this;
+                
+                var menuName = newVal;
+                
+                if (menuName) {
+                    me.openMenu(menuName);
+                }
+            }
+        });
+
+    </script>
+
+</polymer-element>

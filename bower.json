@@ -6,6 +6,9 @@
     "core-scaffold": "Polymer/core-scaffold#~0.5.5",
     "core-header-panel": "Polymer/core-header-panel#~0.5.5",
     "core-toolbar": "Polymer/core-toolbar#~0.5.5",
-    "paper-tabs": "Polymer/paper-tabs#~0.5.5"
+    "paper-tabs": "Polymer/paper-tabs#~0.5.5",
+    "core-animated-pages": "Polymer/core-animated-pages#~0.5.5",
+    "core-list": "Polymer/core-list#~0.5.5",
+    "core-pages": "Polymer/core-pages#~0.5.5"
   }
 }

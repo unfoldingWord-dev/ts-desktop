@@ -1,7 +1,6 @@
-node_modules/
-tmp/
 .DS_Store
-resources/
+node_modules/
 app/components/
-buildTmp/
 dist/
+cache/
+tmp/

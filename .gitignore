@@ -4,3 +4,4 @@ app/components/
 dist/
 cache/
 tmp/
+.brackets.json

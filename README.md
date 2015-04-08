@@ -26,3 +26,10 @@ That's it!
 ##Dev Inspector
 
 When running the app, `Ctrl-Alt-I` will open the Dev Inspector.
+
+##Standards
+Below are a list of project specific standards.
+* **Polymer** The visual components of this application are being developed using [Polymer](https://www.polymer-project.org)
+
+* **JS**
+All development on this application should be in Vanilla JavaScript and adhere to the [ECMAScript 6 specification](https://github.com/lukehoban/es6features).

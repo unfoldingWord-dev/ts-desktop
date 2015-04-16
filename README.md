@@ -27,9 +27,15 @@ That's it!
 
 When running the app, `Ctrl-Alt-I` will open the Dev Inspector.
 
-##Standards
-Below are a list of project specific standards.
-* **Polymer** The visual components of this application are being developed using [Polymer](https://www.polymer-project.org)
 
-* **JS**
-All development on this application should be in Vanilla JavaScript and adhere to the [ECMAScript 6 specification](https://github.com/lukehoban/es6features).
+##Standards
+* JavaScript written for this app should adhere to the [ECMAScript 6](https://github.com/lukehoban/es6features) specification or, in cases where documentation or implementation are incomplete, the [ECMAScript 5.1](http://www.ecma-international.org/ecma-262/5.1/) specification.
+
+
+##Libraries and Frameworks
+tS desktop is developed using a number of different frameworks and libraries.
+
+* [Polymer](https://www.polymer-project.org) - For building custom dom elements (no ugly Angular directives!)
+* [AngularJS](https://angularjs.org/) - Provides Models and Controllers in addition to other things (Views are provided by Polymer)
+* [Lo-Dash](https://lodash.com/) - Provides extra functional utilities.
+

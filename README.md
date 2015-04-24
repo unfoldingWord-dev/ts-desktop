@@ -3,6 +3,9 @@ translationStudio Desktop
 
 A tool to translate Bible stories into your own language  https://distantshores.org/translationStudio
 
+## Requirements Specification
+The official requirements are available at [tS Requirements](https://github.com/unfoldingWord-dev/ts-requirements).
+
 ##Dependencies
 * [npm](http://nodejs.org/) (bundled with Node.js)
 * [Bower](http://bower.io/)

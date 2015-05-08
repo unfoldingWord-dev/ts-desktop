@@ -39,6 +39,6 @@ When running the app, `Ctrl-Alt-I` will open the Dev Inspector.
 tS desktop is developed using a number of different frameworks and libraries.
 
 * [Polymer](https://www.polymer-project.org) - For building custom dom elements (no ugly Angular directives!)
-* [AngularJS](https://angularjs.org/) - Provides Models and Controllers in addition to other things (Views are provided by Polymer)
+* [AngularJS v2](https://angularjs.org/) - Provides Models and Controllers in addition to other things (Views are provided by Polymer)
 * [Lo-Dash](https://lodash.com/) - Provides extra functional utilities.
 

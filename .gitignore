@@ -5,3 +5,6 @@ dist/
 cache/
 tmp/
 .brackets.json
+.idea
+test.html
+testdata

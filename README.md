@@ -10,6 +10,7 @@ The official requirements are available at [tS Requirements](https://github.com/
 * [npm](http://nodejs.org/) (bundled with Node.js)
 * [Bower](http://bower.io/)
 * [Grunt](http://gruntjs.com/)
+* [mocha](http://mochajs.org/)
 
 ##Setup
 

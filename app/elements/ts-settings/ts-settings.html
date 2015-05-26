@@ -4,6 +4,7 @@ This element handles all of the application settings.
 <link rel="import" href="../../components/polymer/polymer.html">
 <link rel="import" href="../../components/core-icon/core-icon.html">
 <link rel="import" href="../ts-dashboard/ts-dashboard.html">
+var _ = require('lodash');
 
 <polymer-element name="ts-settings">
 
@@ -57,25 +58,72 @@ This element handles all of the application settings.
             h2 core-icon {
                 padding-right: 20px;
             }
+
+            .style1 {
+                font-size: .5rem;
+                color: red;
+            }
+
+            .style2 {
+                font-size: 2rem;
+                color: white;
+            }
+
+
+            .style3 {
+                font-size: 3rem;
+                color: blue;
+            }
         </style>
-        <h2 horizontal layout center><core-icon icon="settings"></core-icon> Settings</h2>
+        <p horizontal layout center><core-icon icon="settings"></core-icon> Settings</p>
         <ul>
-            <!-- Below are some sample settings -->
-            <li><a on-tap="{{setting1Handler}}">Setting 1</a></li>
-            <li><a on-tap="{{setting2Handler}}">Setting 2</a></li>
+            <template repeat="{{ setting in settings}}">
+                <li>
+                    <a on-tap={{buttonClick}} class="{{setting.binding}} {{setting.style}}"> {{setting.name}}
+                    </a>
+                </li>
+            </template>
         </ul>
     </template>
     <script>
-
         Polymer({
             ready: function() {
-                // TODO: it would be nice if we could load all the settings from a config file somewhere
+                this.settings = require('../config/ts-config.json');
             },
             setting1Handler: function() {
                 alert("you clicked setting 1!");
             },
             setting2Handler: function() {
                 alert("you clicked setting 2!");
+            },
+            buttonClick: function (event) {
+                var classes = event.currentTarget.className;
+
+                if (classes.indexOf('setting1Handler') >= 0) {
+                    this.setting1Handler();
+                } else  if (classes.indexOf('setting2Handler') >= 0) {
+                    this.setting2Handler();
+                } else  if (classes.indexOf('func1') >= 0) {
+                   this.func1();
+                } else  if (classes.indexOf('func2') >= 0) {
+                    this.func2();
+                }else  if (classes.indexOf('func3') >= 0) {
+                    this.func3();
+                }else  if (classes.indexOf('func4') >= 0) {
+                    this.func4();
+                }
+            },
+            func1: function () {
+                alert('function 1');
+            },
+            func2: function () {
+                alert('function 2');
+            },
+            func3: function () {
+                alert('function 3');
+            },
+            func4: function () {
+                alert('function 4');
             }
         });
 

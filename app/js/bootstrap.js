@@ -18,19 +18,6 @@ this.App = (function() {
        win.restore();
     }
 
-
-    function func1  () {
-        alert('function 1');
-    }
-    function func2  () {
-        alert('function 2');
-    }
-    function func3  () {
-        alert('function 3');
-    }
-    function func4  () {
-        alert('function 4');
-    }
     /**
      * The App is the global application context object.
      */

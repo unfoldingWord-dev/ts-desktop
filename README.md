@@ -1,7 +1,7 @@
 translationStudio Desktop
 ========================
 
-A tool to translate Bible stories into your own language  https://distantshores.org/translationStudio
+A tool to translate the Bible and [Open Bible Stories](http://distantshores.org/openbiblestories) into your own language. You can read more PR about this project at [unfoldingWord](https://unfoldingword.org/apps/#tS).
 
 ###Requirements Specification
 The official requirements are available at [tS Requirements](https://github.com/unfoldingWord-dev/ts-requirements).

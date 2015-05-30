@@ -20,6 +20,7 @@ Want more info? Checkout the [wiki articles](https://github.com/unfoldingWord-de
 
 ###Standards
 * JavaScript written for this app should adhere to the [ECMAScript 6](https://github.com/lukehoban/es6features) specification or, in cases where documentation or implementation are incomplete, the [ECMAScript 5.1](http://www.ecma-international.org/ecma-262/5.1/) specification.
+* [Promises](http://www.html5rocks.com/en/tutorials/es6/promises/)! This makes everything amazing so be sure to make lots of them.
 
 ###Platform
 The core of this project is powered by [nwjs](https://github.com/nwjs/nw.js).

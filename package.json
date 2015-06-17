@@ -1,10 +1,10 @@
 {
-  "name": "translationstudio",
-  "version": "0.0.0",
+  "name": "translationStudio",
+  "version": "0.1.0",
   "description": "",
   "keywords": [],
-  "homepage": "https://github.com/neutrinog/translationstudio",
-  "bugs": "https://github.com/neutrinog/translationstudio/issues",
+  "homepage": "https://github.com/unfoldingWord-dev/ts-desktop",
+  "bugs": "https://github.com/unfoldingWord-dev/ts-desktop/issues",
   "author": {
     "name": "Joel Lonbeck",
     "email": "",
@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/neutrinog/translationstudio.git"
+    "url": "git@github.com:unfoldingWord-dev/ts-desktop.git"
   },
   "dependencies": {
     "lodash": "^3.9.3",

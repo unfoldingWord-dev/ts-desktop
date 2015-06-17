@@ -15,7 +15,8 @@
     "url": "git://github.com/neutrinog/translationstudio.git"
   },
   "dependencies": {
-    "nw": "^0.12.0-1"
+    "lodash": "^3.9.3",
+    "nw": "^0.12.2"
   },
   "devDependencies": {
     "concat-files": "~0.1.0",
@@ -27,9 +28,11 @@
     "grunt-contrib-jshint": "~0.10.0",
     "grunt-contrib-rename": "0.0.3",
     "grunt-contrib-watch": "^0.6.1",
+    "grunt-mocha-test": "^0.12.7",
     "grunt-node-webkit-builder": "^1.0.2",
     "grunt-sass": "^0.18.1",
     "load-grunt-tasks": "^0.6.0",
+    "mocha": "^2.2.5",
     "time-grunt": "^0.4.0"
   },
   "engines": {

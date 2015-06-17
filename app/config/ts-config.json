@@ -1,0 +1,33 @@
+[
+    {
+        "name": "Setting 1",
+        "value": 1,
+        "binding": "setting1Handler"
+    },
+    {
+        "name": "Setting 2",
+        "value": 1,
+        "binding": "setting2Handler"
+    },
+    {
+        "name": "User",
+        "value": 1,
+        "binding": "func1"
+    },
+    {
+        "name": "Language",
+        "value": 2,
+        "binding": "func2"
+    },
+    {
+        "name": "Country",
+        "value": 3,
+        "binding": "func3"
+    },
+    {
+        "name": "Font",
+        "value": 1,
+        "binding": "func4"
+    }
+]
+

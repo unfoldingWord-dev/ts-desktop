@@ -23,7 +23,7 @@ module.exports = function (grunt) {
     nodewebkit: {
       options: {
           platforms: ['win', 'osx'],
-          buildDir: '<%= config.dist %>', // Where the build version of my node-webkit app is saved
+          buildDir: '<%= config.dist %>' // Where the build version of my node-webkit app is saved
       },
       
       src: ['<%= config.app %>/**/*', '!<%= config.app %>/**/*.{scss,sass}'] // Your node-webkit app

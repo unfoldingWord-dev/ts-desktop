@@ -7,7 +7,7 @@ A tool to translate the Bible and [Open Bible Stories](http://distantshores.org/
 The official requirements are available at [tS Requirements](https://github.com/unfoldingWord-dev/ts-requirements).
 
 ##Developement
-Want more info? Checkout the [wiki articles](https://github.com/unfoldingWord-dev/ts-desktop/wiki).
+Your code will not be accepted if it is missing appropriate tests. Want more info? Checkout the [wiki articles](https://github.com/unfoldingWord-dev/ts-desktop/wiki).
 
 ###Software Dependencies
 * [npm](http://nodejs.org/) (bundled with Node.js)

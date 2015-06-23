@@ -10,4 +10,5 @@ test.html
 testdata
 resources
 results.txt
-
+unit_tests/report.txt
+acceptance_tests/report.txt

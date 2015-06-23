@@ -1,8 +1,8 @@
 {
-  "feature": "tests/features",
+  "feature": "acceptance_tests/features",
   "require": [
-    "tests/steps",
-    "tests/widgets"
+    "acceptance_tests/steps",
+    "acceptance_tests/widgets"
   ],
   "format": "pioneerformat.js",
   "driver": "chrome",

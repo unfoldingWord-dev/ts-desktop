@@ -10,7 +10,7 @@ function paraPattern(paraType) {
     return new RegExp('<para\\s*style="' + paraType + '"\\s*>\\s*');
 }
 
-var render = {
+var renderer = {
     renderWhiteSpace: function (text) {
         'use strict';
         return text.replace(/\s+/g, ' ');
@@ -61,11 +61,11 @@ var render = {
 };
 
 
-exports.renderWhiteSpace = render.renderWhiteSpace;
-exports.renderLineBreaks = render.renderLineBreaks;
-exports.trimWhiteSpace = render.trimWhiteSpace;
-exports.renderVerse = render.renderVerse;
-exports.renderParagraph = render.renderParagraph;
-exports.renderCleanFrameHTML = render.renderCleanFrameHTML;
-exports.renderVerseHTML = render.renderVerseHTML;
-exports.renderParagraphHTML = render.renderParagraphHTML;
+exports.renderWhiteSpace = renderer.renderWhiteSpace;
+exports.renderLineBreaks = renderer.renderLineBreaks;
+exports.trimWhiteSpace = renderer.trimWhiteSpace;
+exports.renderVerse = renderer.renderVerse;
+exports.renderParagraph = renderer.renderParagraph;
+exports.renderCleanFrameHTML = renderer.renderCleanFrameHTML;
+exports.renderVerseHTML = renderer.renderVerseHTML;
+exports.renderParagraphHTML = renderer.renderParagraphHTML;

@@ -1,10 +1,10 @@
 /**
  * Created by delmarhager on 5/25/15.
  */
-var assert = require("assert");
-var render = require('../../app/js/render');
-var sourceText = require ('../data/source')
-describe('@Render', function(){
+var assert = require('assert');
+var render = require('../../app/js/renderer');
+var sourceText = require('./data/source')
+describe('@Renderer', function(){
     describe('@RemoveWhiteSpace ', function(){
         it('should remove extras white space', function(){
             var text = 'this  is  a test',

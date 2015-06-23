@@ -18,6 +18,10 @@ Your code will not be accepted if it is missing appropriate tests. Want more inf
 * [mocha](http://mochajs.org/) Unit testing framework
 * TODO: acceptance testing framework
 
+To execute unit tests run this command
+
+    $ grunt test
+
 ###Standards
 * JavaScript written for this app should adhere to the [ECMAScript 6](https://github.com/lukehoban/es6features) specification or, in cases where documentation or implementation are incomplete, the [ECMAScript 5.1](http://www.ecma-international.org/ecma-262/5.1/) specification.
 * [Promises](http://www.html5rocks.com/en/tutorials/es6/promises/)! This makes everything amazing so be sure to make lots of them.
@@ -38,16 +42,16 @@ tS desktop is developed using a number of different frameworks and libraries.
 
 Clone the repo. In the directory:
 
-`npm install && bower install`
+    $ npm install && bower install
 
 That's it!
 
 ###Tasks
 
-`grunt` will produce a distribution
-`grunt check` will check your JS files
-`grunt sass` will compile your Sass into CSS
-`npm start` will open up the project with NW.js
+* `$ grunt` will produce a distribution
+* `$ grunt check` will check your JS files
+* `$ grunt sass` will compile your Sass into CSS
+* `$ npm start` will open up the project with NW.js
 
 ###Dev Inspector
 

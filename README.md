@@ -22,6 +22,8 @@ To execute unit tests run this command
 
     $ grunt test
 
+Please make sure all **your** tests pass before submitting a pull request.
+
 ###Standards
 * JavaScript written for this app should adhere to the [ECMAScript 6](https://github.com/lukehoban/es6features) specification or, in cases where documentation or implementation are incomplete, the [ECMAScript 5.1](http://www.ecma-international.org/ecma-262/5.1/) specification.
 * [Promises](http://www.html5rocks.com/en/tutorials/es6/promises/)! This makes everything amazing so be sure to make lots of them.

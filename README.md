@@ -22,7 +22,7 @@ Then clone this repository and run the following command in the new directory to
 
     $ npm install && bower install
 
-For more information please read the [wiki](https://github.com/unfoldingWord-dev/ts-desktop/wiki)
+For more information please read the [wiki](https://github.com/unfoldingWord-dev/ts-desktop/wiki).
 
 ###Commands
 The following commands can be ran from within the project directory

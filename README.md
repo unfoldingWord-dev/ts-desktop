@@ -18,7 +18,8 @@ First make sure you have all the dependencies installed
 * [Bower](http://bower.io/)
 * [Grunt](http://gruntjs.com/)
 
-Then clone this repository and run the following command in the new directory to set up your environment
+Then fork this repository and clone your fork.
+After the repository has been cloned to your computer run the following command in the new directory to set up your environment
 
     $ npm install && bower install
 

@@ -7,7 +7,7 @@ A tool to translate the Bible and [Open Bible Stories](http://distantshores.org/
 
 ##Requirements
 The official development requirements are available at [tS Requirements](https://github.com/unfoldingWord-dev/ts-requirements).
-Additional documentation specific to the desktop platforms is available in the [wiki](https://github.com/unfoldingWord-dev/ts-desktop/wiki)
+Additional documentation specific to the desktop platforms is available in the [wiki](https://github.com/unfoldingWord-dev/ts-desktop/wiki).
 
 ##Contributing
 If you would like to contribute to this project please read the [Contributing](https://github.com/unfoldingWord-dev/ts-desktop/wiki/Contributing) article in the wiki.
@@ -25,10 +25,10 @@ Then clone this repository and run the following command in the new directory to
 ###Commands
 The following commands can be ran from within the project directory
 
-* `$ grunt` will produce a distribution
-* `$ grunt check` will check your JS files
-* `$ grunt sass` will compile your Sass into CSS
-* `$ grunt test` will run unit tests
-* `$ npm start` will open up the project with NW.js
+* `$ grunt` builds a distribution package
+* `$ grunt check` checks js files for errors
+* `$ grunt sass` compile Sass files into CSS
+* `$ grunt test` run all Mocha unit tests
+* `$ npm start` build and run the application
 
 > Note: You can open the chrome developer tools while the app is running by pressing `Ctrl+Alt+I`

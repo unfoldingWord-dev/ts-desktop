@@ -1,4 +1,4 @@
-[![Crowdin](https://d322cqt584bo4o.cloudfront.net/translation-studio/localized.png)](https://crowdin.com/project/translation-studio)
+[![Crowdin](https://d322cqt584bo4o.cloudfront.net/translation-studio/localized.png)](https://crowdin.com/project/translation-studio) [![Build Status](https://travis-ci.org/EmmittJ/ts-desktop.svg?branch=master)](https://travis-ci.org/EmmittJ/ts-desktop)
 
 translationStudio Desktop
 --

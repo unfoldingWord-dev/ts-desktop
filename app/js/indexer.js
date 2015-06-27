@@ -21,10 +21,7 @@ function readResourceFileContent (path) {
     return JSON.parse (data);
 }
 
-//index and rootDir are optional. These parameters are included for testing
-// purposes. The API will not mention these parameters
-// .
-function readProject (project, options) {
+function readProject (project) {
     var index = null;
     var rootDir = null;
     if (options) {
@@ -41,6 +38,7 @@ function read () {
     var index = null;
     var rootDir = null;
     var workingArgs = [];
+    var content, chapter, frame;
     pos = 0;
 
     if (options) {
@@ -63,8 +61,27 @@ function read () {
     if (arguments.length == 3) {
         path = path + '.source'
     }
-    console.log (path);
-    return readResourceFileContent (getResourcePath (path, index, rootDir));
+    if (arguments.length >= 5) {
+        frame = workingArgs.pop();
+    }
+    if (arguments.length >= 4) {
+        chapter = workingArgs.pop();
+        path = workingArgs.toString().replace(/,/g, '.') + '.source';
+    }
+    content = readResourceFileContent (getResourcePath (path, index, rootDir));
+    if (arguments.length < 4) {
+        return content;
+    }
+
+    if (arguments.length == 4) {
+         return content.chapters[chapter - 1];
+    }
+
+    if (arguments.length == 5) {
+        return content.chapters[chapter - 1].frames[frame - 1];
+    }
+
+
 }
 
 

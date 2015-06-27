@@ -50,6 +50,9 @@ function read () {
     }
 
     path = workingArgs.toString().replace(/,/g, '.');
+    if (arguments.length > 5) {
+        return null;
+    }
     if (arguments.length == 1) {
         path = path + '.lang_catalog'
     }

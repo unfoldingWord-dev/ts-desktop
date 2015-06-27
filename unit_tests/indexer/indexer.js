@@ -74,6 +74,19 @@ describe('@Indexer', function () {
             assert.equal(indexer.read('1co','en','udb','13','30'), null);
         })
     })
+    
+    describe('@ReadSourceChapterToManyArgs ', function () {
+        it('should not retrieve the 1co To many args', function () {
+            assert.equal(indexer.read('1co','en','udb','13','30','40'), null);
+        })
+    })
+
+
+    describe('@ReadSourceNoArgs ', function () {
+        it('should not retrieve no args', function () {
+            assert.equal(indexer.read(), null);
+        })
+    })
 
     describe('@ReadSourceChapterBadResource ', function () {
         it('should retrieve the 1co Bad Resource', function () {

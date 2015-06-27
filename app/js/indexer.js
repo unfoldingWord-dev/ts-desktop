@@ -13,7 +13,13 @@ function setResources (inResource) {
 }
 
 function getResourcePath (path) {
-    return setPath (_.get(resources.tsIndex, path), resources.rootDir);
+
+    try {
+        return setPath(_.get(resources.tsIndex, path), resources.rootDir);
+    } catch (e) {
+        return null;
+    }
+
 }
 
 function readResourceFileContent (path) {
@@ -34,7 +40,9 @@ function read () {
     var rootDir = resources.rootDir;
     var workingArgs = [];
     var content, chapter, frame;
-    pos = 0;
+    var pos = 0;
+    var resPath = null;
+
 
     while (pos < arguments.length) {
         workingArgs[pos] = arguments[pos];
@@ -58,18 +66,23 @@ function read () {
         chapter = workingArgs.pop();
         path = workingArgs.toString().replace(/,/g, '.') + '.source';
     }
-    content = readResourceFileContent (getResourcePath (path, index, rootDir));
-    if (arguments.length < 4) {
-        return content;
-    }
 
-    if (arguments.length == 4) {
-         return content.chapters[chapter - 1];
-    }
+    resPath = getResourcePath (path, index, rootDir);
+    if (resPath) {
+        content = readResourceFileContent(getResourcePath(path, index, rootDir));
+        if (arguments.length < 4) {
+            return content;
+        }
 
-    if (arguments.length == 5) {
-        return content.chapters[chapter - 1].frames[frame - 1];
+        if (arguments.length == 4) {
+            return content.chapters[chapter - 1];
+        }
+
+        if (arguments.length == 5) {
+            return content.chapters[chapter - 1].frames[frame - 1];
+        }
     }
+    return null;
 
 
 }

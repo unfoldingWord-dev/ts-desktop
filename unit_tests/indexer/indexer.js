@@ -68,6 +68,20 @@ describe('@Indexer', function () {
         })
     })
 
+
+    describe('@ReadSourceChapterBadFrame ', function () {
+        it('should retrieve the 1co Bad frame', function () {
+            assert.equal(indexer.read('1co','en','udb','13','30'), null);
+        })
+    })
+
+    describe('@ReadSourceChapterBadResource ', function () {
+        it('should retrieve the 1co Bad Resource', function () {
+            assert.equal(indexer.read('1co','en','ddd','13','30'), null);
+        })
+    })
+
+
     describe('@ReadProject ', function () {
         it('should retrieve the 1ch source', function () {
             assert.equal(JSON.stringify(indexer.read('1ch' )).replace(/ /g, ''), JSON.stringify(projectResource).replace(/ /g, ''));

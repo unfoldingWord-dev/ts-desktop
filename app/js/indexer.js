@@ -2,18 +2,18 @@ var _ = require('lodash');
 var utils = require('./lib/utils');
 var setPath = utils.setPath;
 var fs = require('fs');
-var resources = require('./loadResources');
+var resources = null;
 
 //options are used for testing. They are not normally set
 
 var options = null;
 
-function setOptions (newOptions) {
-    options = _.clone(newOptions);
+function setResources (inResource) {
+    resources = inResource;
 }
-function getResourcePath (path, index, rootDir) {
-    index = index || resources.tsIndex;
-    return setPath (_.get(index, path), rootDir);
+
+function getResourcePath (path) {
+    return setPath (_.get(resources.tsIndex, path), resources.rootDir);
 }
 
 function readResourceFileContent (path) {
@@ -22,29 +22,19 @@ function readResourceFileContent (path) {
 }
 
 function readProject (project) {
-    var index = null;
-    var rootDir = null;
-    if (options) {
-        index = options.index || resources.tsIndex;
-        rootDir = options.rootDir;
-    }
+
     var path = project + '.lang_catalog';
-    return readResourceFileContent (getResourcePath (path, index, rootDir));
+    return readResourceFileContent (getResourcePath (path, resources.tsIndex, resources.rootDir));
 
 }
 
 function read () {
     var path;
-    var index = null;
-    var rootDir = null;
+    var index = resources.tsIndex;
+    var rootDir = resources.rootDir;
     var workingArgs = [];
     var content, chapter, frame;
     pos = 0;
-
-    if (options) {
-        index = options.index || resources.tsIndex;
-        rootDir = options.rootDir;
-    }
 
     while (pos < arguments.length) {
         workingArgs[pos] = arguments[pos];
@@ -88,5 +78,5 @@ function read () {
 exports.getResourcePath = getResourcePath;
 exports.readProject = readProject;
 exports.read = read;
-exports.setOptions = setOptions;
 exports.readResourceFileContent = readResourceFileContent;
+exports.setResources = setResources;

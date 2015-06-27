@@ -5,6 +5,7 @@ var assert = require('assert');
 var indexer = require('../../app/js/indexer');
 var index = require('./data/resources');
 var path = require('path');
+var resources = require('../../app/js/loadResources');
 var dataDir = __dirname + path.sep + 'data';
 var bookSource = require('./data/1ch.en.ulb.source.json');
 var languageResource = require('./data/languageResource.json');
@@ -12,9 +13,12 @@ var projectResource = require('./data/projectResource.json');
 var firstCo = require('./data/1co.json');
 var firstCo13 = firstCo.chapters[12];
 var firstCo13Frame = firstCo.chapters[12].frames[2];
+var loadResources = new resources.resources(dataDir);
+
 describe('@Indexer', function () {
     beforeEach(function(done) {
-        indexer.setOptions ({index:index, rootDir:dataDir});
+        loadResources.setOptions ({index:index, rootDir:dataDir});
+        indexer.setResources(loadResources);
         done();
     });
 

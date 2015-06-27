@@ -16,7 +16,11 @@
   },
   "dependencies": {
     "lodash": "^3.9.3",
-    "nw": "^0.12.2"
+    "moment": "^2.10.3",
+    "nw": "^0.12.2",
+    "recursive-readdir": "^1.2.1",
+    "request": "^2.58.0",
+    "traverse": "^0.6.6"
   },
   "devDependencies": {
     "concat-files": "~0.1.0",

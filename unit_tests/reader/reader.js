@@ -15,6 +15,7 @@ var firstCo13 = firstCo.chapters[12];
 var firstCo13Frame = firstCo.chapters[12].frames[2];
 var loadResources = new resources.resources(dataDir);
 
+
 describe('@Reader', function () {
     beforeEach(function(done) {
         loadResources.setOptions ({index:index, rootDir:dataDir});

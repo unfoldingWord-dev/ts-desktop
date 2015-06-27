@@ -11,12 +11,14 @@ var utils = require('./lib/utils');
 var setPath = utils.setPath;
 var rootDir;
 var tsIndex = {};
-var tsStaleFiles = [];
+//var tsStaleFiles = [];
 var rootResourceUrl = null;
+var options;
 
 
 function resources (initResUrl) {
-
+    /*jshint validthis:true */
+    'use strict';
     rootResourceUrl = initResUrl;
 
     this.tsIndex = {};
@@ -27,23 +29,20 @@ function resources (initResUrl) {
         this.tsIndex = tsIndex;
         rootDir = options.rootDir;
         this.rootDir = rootDir;
-    }
+    };
 
     this.getTsIndex = function (){
         return tsIndex;
-    }
+    };
 
-    function filePathFromUrl(resourceUrl) {
-        return setPath(url.parse(resourceUrl).pathname, rootDir);
-    }
-
-    function fsCB(err, fd) {
+    function fsCB(err) {
         if (err) {
             console.log('fs err = ' + JSON.stringify(err));
         }
     }
 
     function setIndex(dataObject, resource) {
+
         var newUrlObj = url.parse(dataObject);
         var pathname = setPath(newUrlObj.pathname, rootDir);
         var propPath = _.dropRight(_.drop(newUrlObj.pathname.split('/'), 1), 1);
@@ -57,6 +56,7 @@ function resources (initResUrl) {
     }
 
     function getTSFiles(tsPathName, url, successCB) {
+
         recursive(tsPathName, function (err, files) {
             // Files is an array of filename
             if (!err) {
@@ -81,6 +81,7 @@ function resources (initResUrl) {
 
 
     function getTsResource(urlString, update) {
+
         var urlObj = url.parse(urlString);
         var response;
         if (urlObj.host) {
@@ -97,12 +98,13 @@ function resources (initResUrl) {
                         getTsResource(urlString, update);
                     }
                 }
-            })
+            });
         }
 
     }
 
     function canUpdateFile(urlString) {
+
         var urlObj = url.parse(urlString);
         var filePath = setPath(urlObj.pathname, rootDir);
         var dateString = urlObj.query.slice(-8, -4) + '-' + urlObj.query.slice(-4, -2) + '-' + urlObj.query.slice(-2);
@@ -111,7 +113,7 @@ function resources (initResUrl) {
                 return filePath === name;
             });
             var fileStat = fs.statSync(filePath);
-            if (fileStat.size == 0) {
+            if (fileStat.size === 0) {
                 return true;
             }
             if (fileStat.isFile()) {
@@ -126,6 +128,7 @@ function resources (initResUrl) {
     }
 
     function getTsResources(response, update) {
+
         var urlString = response.urlString;
         var body = response.body;
         var urlObj = url.parse(urlString);
@@ -154,7 +157,7 @@ function resources (initResUrl) {
                                         getTsResources(newResponse, false);
                                     }
                                 }
-                            })
+                            });
                         } else {
                             getTsResource(dataObject, false);
                         }
@@ -165,9 +168,10 @@ function resources (initResUrl) {
     }
 
     this.getTsResourcesFromCatalog = function () {
+
         rootDir = __dirname + path.sep + 'tsFiles';
         getTSFiles(rootDir, rootResourceUrl, getTsResource);
-    }
+    };
 }
 
 exports.resources = resources;

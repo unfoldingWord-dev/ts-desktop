@@ -1,21 +1,20 @@
 var _ = require('lodash');
 var utils = require('./lib/utils');
 var setPath = utils.setPath;
+var pathObj = require('path');
 var fs = require('fs');
 var resources = null;
 
-//options are used for testing. They are not normally set
-
-var options = null;
-
 function setResources (inResource) {
+    'use strict';
     resources = inResource;
 }
 
 function getResourcePath (path) {
+    'use strict';
 
     try {
-        return setPath(_.get(resources.tsIndex, path), resources.rootDir);
+        return setPath(_.get(resources.tsIndex, path), resources.rootDir + pathObj.sep + 'tsFiles');
     } catch (e) {
         return null;
     }
@@ -23,18 +22,20 @@ function getResourcePath (path) {
 }
 
 function readResourceFileContent (path) {
+    'use strict';
     var data = fs.readFileSync(path, 'utf8') ;
     return JSON.parse (data);
 }
 
 function readProject (project) {
-
+    'use strict';
     var path = project + '.lang_catalog';
     return readResourceFileContent (getResourcePath (path, resources.tsIndex, resources.rootDir));
 
 }
 
 function read () {
+    'use strict';
     var path;
     var index = resources.tsIndex;
     var rootDir = resources.rootDir;
@@ -53,14 +54,14 @@ function read () {
     if (arguments.length > 5) {
         return null;
     }
-    if (arguments.length == 1) {
-        path = path + '.lang_catalog'
+    if (arguments.length === 1) {
+        path = path + '.lang_catalog';
     }
-    if (arguments.length == 2) {
-        path = path + '.res_catalog'
+    if (arguments.length === 2) {
+        path = path + '.res_catalog';
     }
-    if (arguments.length == 3) {
-        path = path + '.source'
+    if (arguments.length === 3) {
+        path = path + '.source';
     }
     if (arguments.length >= 5) {
         frame = workingArgs.pop();
@@ -77,11 +78,11 @@ function read () {
             return content;
         }
 
-        if (arguments.length == 4) {
+        if (arguments.length === 4) {
             return content.chapters[chapter - 1];
         }
 
-        if (arguments.length == 5) {
+        if (arguments.length === 5) {
             return content.chapters[chapter - 1].frames[frame - 1];
         }
     }

@@ -3,11 +3,16 @@ var path = require('path');
 
 
 function setPath(pathname, baseDir) {
-    if (!path.isAbsolute(pathname)) {
-        pathname = path.sep + pathname;
+    if (pathname === undefined) {
+        pathname =  path.sep + dummy.txt;
+    } else  if (pathname.indexOf(path.sep) != 0){
+       pathname = path.sep + pathname;
     }
+
     baseDir = baseDir || __dirname;
-    return  baseDir + path.sep + 'tsFiles' + pathname;
+
+
+    return  baseDir +  pathname;
 }
 
 exports.setPath = setPath;

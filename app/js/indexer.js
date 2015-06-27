@@ -57,6 +57,13 @@ function read () {
     if (arguments.length == 1) {
         path = path + '.lang_catalog'
     }
+    if (arguments.length == 2) {
+        path = path + '.res_catalog'
+    }
+    if (arguments.length == 3) {
+        path = path + '.source'
+    }
+    console.log (path);
     return readResourceFileContent (getResourcePath (path, index, rootDir));
 }
 

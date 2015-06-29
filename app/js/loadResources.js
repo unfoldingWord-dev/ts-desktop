@@ -11,7 +11,7 @@ var utils = require('./lib/utils');
 var setPath = utils.setPath;
 var rootDir;
 var tsIndex = {};
-//var tsStaleFiles = [];
+
 var rootResourceUrl = null;
 var options;
 
@@ -58,10 +58,6 @@ function resources (initResUrl) {
     function getTSFiles(tsPathName, url, successCB) {
 
         recursive(tsPathName, function (err, files) {
-            // Files is an array of filename
-            if (!err) {
-                this.tsStaleFiles = _.clone(files);
-            }
             successCB(url, true);
         });
     }
@@ -109,9 +105,6 @@ function resources (initResUrl) {
         var filePath = setPath(urlObj.pathname, rootDir);
         var dateString = urlObj.query.slice(-8, -4) + '-' + urlObj.query.slice(-4, -2) + '-' + urlObj.query.slice(-2);
         if (fs.existsSync(filePath)) {
-            _.remove(this.tsStaleFiles, function (name) {
-                return filePath === name;
-            });
             var fileStat = fs.statSync(filePath);
             if (fileStat.size === 0) {
                 return true;

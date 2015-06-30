@@ -1,4 +1,4 @@
-[![Crowdin](https://d322cqt584bo4o.cloudfront.net/translation-studio/localized.png)](https://crowdin.com/project/translation-studio) [Travis-ci Status Image Here] (http://docs.travis-ci.com/user/status-images/)
+[![Crowdin](https://d322cqt584bo4o.cloudfront.net/translation-studio/localized.png)](https://crowdin.com/project/translation-studio) [![Travis](https://travis-ci.org/unfoldingWord-dev/ts-desktop.svg)](https://travis-ci.org/unfoldingWord-dev/ts-desktop)
 
 translationStudio Desktop
 --

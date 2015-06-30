@@ -17,5 +17,6 @@
     "trailing": true,
     "smarttabs": true,
     "white": true,
-    "expr": true
+    "expr": true,
+    "browser": true
 }

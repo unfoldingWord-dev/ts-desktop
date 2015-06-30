@@ -5,7 +5,7 @@
 
 this.App = (function() {
     'use strict';
-    let config = require('../config/ts-config.json');
+    let configurator = require('../js/configurator');
     let gui = require('nw.gui');
     let mainWindow = gui.Window.get();
 
@@ -26,7 +26,7 @@ this.App = (function() {
 
         gui: gui,
 
-        config: config,
+        configurator: configurator,
 
         window: mainWindow,
 
@@ -101,6 +101,20 @@ this.App = (function() {
             });
         },
 
+
+        /**
+         * Loads read-only and default configuration settings
+         */
+        loadConfigSettings: function() {
+            let me = this;
+
+            var config = require('../config/settings/private');
+            var defaults = require('../config/settings/defaults');
+
+            me.configurator.loadConfig(config);
+            me.configurator.loadDefaults(defaults);
+        },
+
         /**
          * Toggles the application maximize state
          */
@@ -128,6 +142,7 @@ this.App = (function() {
 
             me.registerEvents();
             me.registerShortcuts();
+            me.loadConfigSettings();
 
             let platformInit = me.platformInit[process.platform];
             platformInit && platformInit.call(me);

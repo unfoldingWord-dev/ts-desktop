@@ -91,10 +91,10 @@ var _ = require('lodash');
                 this.settings = require('../config/ts-config.json');
             },
             setting1Handler: function() {
-                alert("you clicked setting 1!");
+                alert(App.configurator.getInt('Setting1'));
             },
             setting2Handler: function() {
-                alert("you clicked setting 2!");
+                alert(App.configurator.getInt('Setting2'));
             },
             buttonClick: function (event) {
                 var classes = event.currentTarget.className;
@@ -114,16 +114,16 @@ var _ = require('lodash');
                 }
             },
             func1: function () {
-                alert('function 1');
+                alert(App.configurator.getString('User'));
             },
             func2: function () {
-                alert('function 2');
+                alert(App.configurator.getString('Language'));
             },
             func3: function () {
-                alert('function 3');
+                alert(App.configurator.getString('Country'));
             },
             func4: function () {
-                alert('function 4');
+                alert(App.configurator.getString('Font'));
             }
         });
 

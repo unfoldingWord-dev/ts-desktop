@@ -6,22 +6,23 @@ var path = require('path');
 var request = require('request');
 var traverse = require('traverse');
 var moment = require('moment');
-var recursive = require('recursive-readdir');
 var utils = require('./lib/utils');
 var setPath = utils.setPath;
 var rootDir;
-var tsIndex = {};
+var tsIndex = {a: 'a'};
 
 var rootResourceUrl = null;
 var options;
 
 
-function resources (initResUrl) {
+function resources(initResUrl) {
     /*jshint validthis:true */
     'use strict';
     rootResourceUrl = initResUrl;
+    this.setTsIndex = function (newIndex) {
+        tsIndex = _.cloneDeep(newIndex);
+    };
 
-    this.tsIndex = {};
     this.rootDir = null;
     this.setOptions = function (newOptions) {
         options = _.clone(newOptions);
@@ -31,20 +32,21 @@ function resources (initResUrl) {
         this.rootDir = rootDir;
     };
 
-    this.getTsIndex = function (){
+    this.tsIndex = function () {
         return tsIndex;
     };
 
     function fsCB(err) {
         if (err) {
-            console.log('fs err = ' + JSON.stringify(err));
+            //todo: error handler
         }
     }
 
-    function setIndex(dataObject, resource) {
+    function setIndex(dataObject) {
 
         var newUrlObj = url.parse(dataObject);
         var pathname = setPath(newUrlObj.pathname, rootDir);
+        var resource = newUrlObj.pathname.split('/').pop().split('.')[0];
         var propPath = _.dropRight(_.drop(newUrlObj.pathname.split('/'), 1), 1);
         if (propPath[0] === 'ts') {
             propPath = _.drop(propPath, 3);
@@ -55,11 +57,8 @@ function resources (initResUrl) {
 
     }
 
-    function getTSFiles(tsPathName, url, successCB) {
-
-        recursive(tsPathName, function (err, files) {
-            successCB(url, true);
-        });
+    function getTSFiles(url, successCB) {
+        successCB(url, true);
     }
 
     function mkdir(pathname, successCB) {
@@ -86,9 +85,9 @@ function resources (initResUrl) {
                     response = {body: body, urlString: urlString};
                     getTsResources(response, update);
                 } else if (!err) {
-                    console.log('not err status code = ' + res.statusCode);
+                    //todo: error handler
                 } else {
-//                console.log('err.code = ' +  err.code + ' - url : ' + urlString);
+
                     if (err.code === 'ETIMEDOUT') {
 
                         getTsResource(urlString, update);
@@ -134,7 +133,7 @@ function resources (initResUrl) {
             traverse(body).forEach(function (dataObject) {
 
                 if (typeof dataObject === 'string' && dataObject.indexOf('https') >= 0 && dataObject.indexOf('date_modified') >= 0 && dataObject.indexOf('usfm') < 0) {
-                    setIndex(dataObject, this.key);
+                    setIndex(dataObject);
                     if (dataObject.indexOf('date_modified') >= 0 && canUpdateFile(dataObject)) {
                         getTsResource(dataObject, true);
                     } else {
@@ -143,8 +142,7 @@ function resources (initResUrl) {
                         filePath = setPath(newUrlObj.pathname, rootDir);
                         if (fs.existsSync(filePath)) {
                             fs.readFile(filePath, 'utf8', function (err, data) {
-                                //                           console.log ('file to read = ' + filePath);
-                                if (!err) {
+                                 if (!err) {
                                     if (data.length > 0) {
                                         newResponse = {body: JSON.parse(data), urlString: dataObject};
                                         getTsResources(newResponse, false);
@@ -163,8 +161,28 @@ function resources (initResUrl) {
     this.getTsResourcesFromCatalog = function () {
 
         rootDir = __dirname + path.sep + 'tsFiles';
-        getTSFiles(rootDir, rootResourceUrl, getTsResource);
+        getTSFiles(rootResourceUrl, getTsResource);
+    };
+
+    this.refreshIndex = function () {
+        var rootDir = __dirname + path.sep + 'tsFiles';
+        tsIndex = {};
+        var newResponse;
+        var newUrlObj = url.parse(rootResourceUrl);
+        var filePath = setPath(newUrlObj.pathname, rootDir);
+
+        if (fs.existsSync(filePath)) {
+            fs.readFile(filePath, 'utf8', function (err, data) {
+                if (!err) {
+                    if (data.length > 0) {
+                        newResponse = {body: JSON.parse(data), urlString: newUrlObj};
+                        getTsResources(newResponse, false);
+                    }
+                }
+            });
+        }
     };
 }
 
 exports.resources = resources;
+

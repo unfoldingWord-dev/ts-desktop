@@ -15,6 +15,7 @@
     "url": "git@github.com:unfoldingWord-dev/ts-desktop.git"
   },
   "dependencies": {
+    "fs-readfile-promise": "^2.0.0",
     "lodash": "^3.9.3",
     "moment": "^2.10.3",
     "node-dir": "^0.1.8",

@@ -3,9 +3,10 @@ var path = require('path');
 
 
 function setPath(pathname, baseDir) {
-    if (pathname === undefined) {
-        pathname =  path.sep + dummy.txt;
-    } else  if (pathname.indexOf(path.sep) != 0){
+
+    if (pathname === undefined || pathname === '') {
+       return null;
+    } else if (pathname.indexOf(path.sep) != 0){
        pathname = path.sep + pathname;
     }
 

@@ -1,0 +1,93 @@
+{
+    "1ch": {
+        "ar": {
+            "avd": {
+                "source": "/ts/txt/2/1ch/ar/avd/source.json"
+            },
+            "res_catalog": "/ts/txt/2/1ch/ar/resources.json"
+        },
+        "en": {
+            "notes": "/ts/txt/2/1ch/en/notes.json",
+            "res_catalog": "/ts/txt/2/1ch/en/resources.json",
+            "udb": {
+                "source": "/ts/txt/2/1ch/en/udb/source.json"
+            },
+            "ulb": {
+                "source": "/ts/txt/2/1ch/en/ulb/source.json"
+            }
+        },
+        "lang_catalog": "/ts/txt/2/1ch/languages.json"
+    },
+    "1co": {
+        "ar": {
+            "avd": {
+                "source": "/ts/txt/2/1co/ar/avd/source.json"
+            },
+            "res_catalog": "/ts/txt/2/1co/ar/resources.json"
+        },
+        "en": {
+            "notes": "/ts/txt/2/1co/en/notes.json",
+            "res_catalog": "/ts/txt/2/1co/en/resources.json",
+            "udb": {
+                "source": "/ts/txt/2/1co/en/udb/source.json"
+            },
+            "ulb": {
+                "source": "/ts/txt/2/1co/en/ulb/source.json"
+            }
+        },
+        "lang_catalog": "/ts/txt/2/1co/languages.json"
+    },
+    "obs": {
+        "am": {
+            "res_catalog": "/ts/txt/2/obs/am/resources.json"
+        },
+        "en": {
+            "res_catalog": "/ts/txt/2/obs/en/resources.json"
+        },
+        "es": {
+            "res_catalog": "/ts/txt/2/obs/es/resources.json"
+        },
+        "fr": {
+            "res_catalog": "/ts/txt/2/obs/fr/resources.json"
+        },
+        "lang_catalog": "/ts/txt/2/obs/languages.json",
+        "pt-br": {
+            "res_catalog": "/ts/txt/2/obs/pt-br/resources.json"
+        },
+        "ru": {
+            "res_catalog": "/ts/txt/2/obs/ru/resources.json"
+        },
+        "tr": {
+            "res_catalog": "/ts/txt/2/obs/tr/resources.json"
+        },
+        "txt": [
+            null,
+            {
+                "am": {
+                    "source": "/obs/txt/1/am/obs-am.json"
+                },
+                "en": {
+                    "checking_questions": "/obs/txt/1/en/CQ-en.json",
+                    "notes": "/obs/txt/1/en/tN-en.json",
+                    "source": "/obs/txt/1/en/obs-en.json",
+                    "terms": "/obs/txt/1/en/kt-en.json"
+                },
+                "es": {
+                    "source": "/obs/txt/1/es/obs-es.json"
+                },
+                "fr": {
+                    "source": "/obs/txt/1/fr/obs-fr.json"
+                },
+                "pt-br": {
+                    "source": "/obs/txt/1/pt-br/obs-pt-br.json"
+                },
+                "ru": {
+                    "source": "/obs/txt/1/ru/obs-ru.json"
+                },
+                "tr": {
+                    "source": "/obs/txt/1/tr/obs-tr.json"
+                }
+            }
+        ]
+    }
+}

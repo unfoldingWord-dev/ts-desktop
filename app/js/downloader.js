@@ -42,23 +42,8 @@ function resources(initResUrl) {
         }
     }
 
-    function setIndex(dataObject) {
-
-        var newUrlObj = url.parse(dataObject);
-        var pathname = setPath(newUrlObj.pathname, rootDir);
-        var resource = newUrlObj.pathname.split('/').pop().split('.')[0];
-        var propPath = _.dropRight(_.drop(newUrlObj.pathname.split('/'), 1), 1);
-        if (propPath[0] === 'ts') {
-            propPath = _.drop(propPath, 3);
-        }
-        propPath.push(resource);
-        propPath = propPath.toString().replace(/,/g, '.');
-        _.set(tsIndex, propPath, pathname);
-
-    }
-
-    function getTSFiles(url, successCB) {
-        successCB(url, true);
+    function getTSFiles(urlPath, successCB) {
+        successCB(urlPath, true);
     }
 
     function mkdir(pathname, successCB) {
@@ -75,7 +60,9 @@ function resources(initResUrl) {
     }
 
 
-    function getTsResource(urlString, update) {
+    function getTsResource(urlString, fileUpdate) {
+
+        var update = fileUpdate || true;
 
         var urlObj = url.parse(urlString);
         var response;
@@ -133,7 +120,6 @@ function resources(initResUrl) {
             traverse(body).forEach(function (dataObject) {
 
                 if (typeof dataObject === 'string' && dataObject.indexOf('https') >= 0 && dataObject.indexOf('date_modified') >= 0 && dataObject.indexOf('usfm') < 0) {
-                    setIndex(dataObject);
                     if (dataObject.indexOf('date_modified') >= 0 && canUpdateFile(dataObject)) {
                         getTsResource(dataObject, true);
                     } else {
@@ -162,25 +148,6 @@ function resources(initResUrl) {
 
         rootDir = __dirname + path.sep + 'tsFiles';
         getTSFiles(rootResourceUrl, getTsResource);
-    };
-
-    this.refreshIndex = function () {
-        var rootDir = __dirname + path.sep + 'tsFiles';
-        tsIndex = {};
-        var newResponse;
-        var newUrlObj = url.parse(rootResourceUrl);
-        var filePath = setPath(newUrlObj.pathname, rootDir);
-
-        if (fs.existsSync(filePath)) {
-            fs.readFile(filePath, 'utf8', function (err, data) {
-                if (!err) {
-                    if (data.length > 0) {
-                        newResponse = {body: JSON.parse(data), urlString: newUrlObj};
-                        getTsResources(newResponse, false);
-                    }
-                }
-            });
-        }
     };
 }
 

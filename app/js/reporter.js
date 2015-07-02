@@ -54,7 +54,7 @@ var reporter = {
          * */
         var location = reporter.stackTrace().split('\n')[4];
         try {
-            location = location.split('\\');
+            location = location.split(/(\\|\/)/);
             location = location[location.length-1];
             location = location.substr(0,location.length-1);
         }

@@ -3,14 +3,13 @@
  */
 /* settings */
 var oauth_token = "temp";
-var host = "api.github.com";
 var logPath = "./";
 var logName = "log.txt";
 
 var version = require("../../package.json").version;
 var fs = require('fs');
 var os = require('os');
-var http = require('http');
+var https = require('https');
 
 var reporter = {
     logNotice: function(string) {
@@ -27,11 +26,11 @@ var reporter = {
     },
     reportBug: function(string) {
         'use strict';
-        this.toGithubIssue(0, string);
+        this.formGithubIssue(0, string);
     },
     reportCrash: function(string) {
         'use strict';
-        this.toGithubIssue(1, string);
+        this.formGithubIssue(1, string);
     },
     stackTrace: function () {
         'use strict';
@@ -78,7 +77,7 @@ var reporter = {
                 callback("No log file.");
         });
     },
-    toGithubIssue: function(type, string){
+    formGithubIssue: function(type, string){
         'use strict';
         var flag = "";
         switch(type) {
@@ -136,43 +135,35 @@ var reporter = {
         var paramsJson = JSON.stringify(params);
 
         var urlPath = "/repos/" + issue.user + "/" + issue.repo + "/issues";
-        console.log(urlPath);
-        var urlData = urlStringify(paramsJson);
         var post_options = {
-            host: host,
+            host: "api.github.com",
             port: 443,
             path: urlPath,
             method: 'POST',
             headers: {
                 'User-Agent': 'ts-desktop',
                 'Content-Type': 'application/json',
-                'Content-Length': Buffer.byteLength(urlData),
+                'Content-Length': paramsJson.length,
                 'Authorization': "token " + oauth_token
             }
         };
-        var post_req = http.request(post_options, function(res){
-            console.log(res.statusCode);
+
+        var post_req = https.request(post_options, function(res){
             res.setEncoding("utf8");
+            var resString = '';
             res.on("data", function(data) {
-                process.stdout.write(data);
+                if(data)
+                    reporter.logNotice("Issue Submitted");
+                else
+                    reporter.logWarning("Issue was not able to submit");
             });
+        }).on('error', function(err){
+            reporter.logError(err.message);
         });
-        post_req.on('error', function(err){
-            console.log(err.message);
-        });
-        post_req.write(urlData + "\n");
+        post_req.write(paramsJson);
         post_req.end();
     }
 };
-function urlStringify(json) {
-    var str = [];
-    for(var prop in json){
-        var s = encodeURIComponent(prop) + '=' + encodeURIComponent(json[prop]);
-        str.push(s);
-    }
-    return str.join('&');
-}
-reporter.reportBug();
 
 exports.logNotice = reporter.logNotice;
 exports.logWarning = reporter.logWarning;

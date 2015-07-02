@@ -8,6 +8,7 @@ this.App = (function() {
     let config = require('../config/ts-config.json');
     let gui = require('nw.gui');
     let mainWindow = gui.Window.get();
+    let reporter = require('../js/reporter.js');
 
     /**
      * FIX - This provides a fix to the native chrome shadow missing
@@ -29,6 +30,8 @@ this.App = (function() {
         config: config,
 
         window: mainWindow,
+
+        reporter: reporter,
 
         isMaximized: false,
 

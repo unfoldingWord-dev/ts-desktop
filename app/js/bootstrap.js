@@ -108,11 +108,9 @@ this.App = (function() {
         loadConfigSettings: function() {
             let me = this;
 
-            var config = require('../config/settings/private');
-            var defaults = require('../config/settings/defaults');
+            var config = require('../config/ts-config');
 
             me.configurator.loadConfig(config);
-            me.configurator.loadDefaults(defaults);
         },
 
         /**

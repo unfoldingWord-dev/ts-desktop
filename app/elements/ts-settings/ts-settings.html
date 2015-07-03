@@ -91,10 +91,10 @@ var _ = require('lodash');
                 this.settings = require('../config/ts-config.json');
             },
             setting1Handler: function() {
-                alert(App.configurator.getInt('Setting1'));
+                alert(App.configurator.getInt('Setting 1'));
             },
             setting2Handler: function() {
-                alert(App.configurator.getInt('Setting2'));
+                alert(App.configurator.getString('Setting 2'));
             },
             buttonClick: function (event) {
                 var classes = event.currentTarget.className;
@@ -111,6 +111,8 @@ var _ = require('lodash');
                     this.func3();
                 }else  if (classes.indexOf('func4') >= 0) {
                     this.func4();
+                }else  if (classes.indexOf('func5') >= 0) {
+                    this.func5();
                 }
             },
             func1: function () {
@@ -124,6 +126,9 @@ var _ = require('lodash');
             },
             func4: function () {
                 alert(App.configurator.getString('Font'));
+            },
+            func5: function () {
+                alert(App.configurator.getBool('Likes tS'));
             }
         });
 

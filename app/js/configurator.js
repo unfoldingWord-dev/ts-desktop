@@ -88,6 +88,7 @@ var configurator = {
             return 0;
         }
 
+
         return value;
     },
     getBool: function(key) {
@@ -105,16 +106,16 @@ var configurator = {
     },
     loadConfig: function(config) {
         'use strict';
-        var keys = Object.keys(config);
-        for(var i = 0; i < keys.length; i++){
-            setReadOnlyValue(keys[i], config[keys[i]]);
-        }
-    },
-    loadDefaults: function(config) {
-        'use strict';
-        var keys = Object.keys(config);
-        for(var i = 0; i < keys.length; i++){
-            setDefaultValue(keys[i], config[keys[i]]);
+
+        for (var i = 0; i < config.length; i++) {
+            if (config[i].default !== undefined) {
+                if (config[i].readonly) {
+                    setReadOnlyValue(config[i].name, config[i].default);
+                }
+                else {
+                    setDefaultValue(config[i].name, config[i].default);
+                }
+            }
         }
     },
     unsetValue: function(key, value) {
@@ -137,5 +138,4 @@ exports.getBool = configurator.getBool;
 exports.setValue = configurator.setValue;
 exports.unsetValue = configurator.unsetValue;
 exports.loadConfig = configurator.loadConfig;
-exports.loadDefaults = configurator.loadDefaults;
 exports.purgeValues = configurator.purgeValues;

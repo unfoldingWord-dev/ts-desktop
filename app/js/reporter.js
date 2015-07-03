@@ -20,7 +20,7 @@ var reporter = {
     logNotice: function(string) {
         'use strict';
         if(!string){
-            throw new Error("reporter.logNotice requires a message.");
+            throw new Error('reporter.logNotice requires a message.');
         }
         reporter.toLogFile('I', string);
     },
@@ -28,7 +28,7 @@ var reporter = {
     logWarning: function(string) {
         'use strict';
         if(!string){
-            throw new Error("reporter.logWarning requires a message.");
+            throw new Error('reporter.logWarning requires a message.');
         }
         reporter.toLogFile('W', string);
     },
@@ -36,7 +36,7 @@ var reporter = {
     logError: function(string) {
         'use strict';
         if(!string){
-            throw new Error("reporter.logError requires a message.");
+            throw new Error('reporter.logError requires a message.');
         }
         reporter.toLogFile('E', string);
     },
@@ -44,7 +44,7 @@ var reporter = {
     reportBug: function(string, callback) {
         'use strict';
         if(!string){
-            throw new Error("reporter.reportBug requires a message.");
+            throw new Error('reporter.reportBug requires a message.');
         }
         reporter.formGithubIssue('Bug Report', string, function(res){
             if(callback){
@@ -110,13 +110,14 @@ var reporter = {
     },
 
     truncateLogFile: function(){
+        'use strict';
         fs.stat(logPath+logName, function(err, stats){
             if(stats){
                 var kb = stats.size/1024;
                 if(kb >= maxLogFileKbs){
                     reporter.stringFromLogFile(function(res) {
-                        res = res.split('\n')
-                        res = res.slice(res.length/2, res.length-1)
+                        res = res.split('\n');
+                        res = res.slice(res.length/2, res.length-1);
                         res = res.join('\n');
                         fs.unlink(logPath+logName, function(){
                             fs.appendFile(logPath+logName, res, function(err){

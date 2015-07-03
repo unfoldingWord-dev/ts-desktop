@@ -109,6 +109,11 @@ describe('@Reporter', function() {
         });
     });
 
+    /* The tests below are activated by a flag at the top of the code
+     * They are disabled by default since they require a bit of configuration
+     * with an OAUTH Token and a user/repo name given. They also require an
+     * active internet connection
+     * */
     describe('@reportBug', function(){
         if(reportToGithub) {
             var title = '[Automated] Bug Report';

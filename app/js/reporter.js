@@ -9,6 +9,7 @@ var logName = 'log.txt';
 var oauth_token = '';
 var repoOwner = 'unfoldingWord-dev';
 var repo = 'ts-desktop';
+var maxLogFileKbs = 200;
 
 var version = require('../../package.json').version;
 var fs = require('fs');
@@ -79,14 +80,15 @@ var reporter = {
             location = location.substr(0,location.length-1);
         }
         catch(e){
-            console.log(e);
+            throw new Error(e.message);
         }
         var date = new Date();
         date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
         var message = date + ' ' + level + '/' + location + ': ' + string + '\r\n';
         fs.appendFile(logPath+logName, message, function(err) {
-            if(err){return console.log(err);}
+            if(err){throw new Error(err.message);}
         });
+        reporter.truncateLogFile();
     },
 
     stringFromLogFile: function(callback){
@@ -95,14 +97,34 @@ var reporter = {
             if(exists) {
                 fs.readFile(logPath + logName, {encoding: 'utf8'}, function (err, data) {
                     if (err){
-                        console.log(err);
                         callback('Could read log file. ERRNO: ' + err.number);
+                        throw new Error(err.message);
                     }
                     callback(data);
                 });
             }
             else{
                 callback('No log file.');
+            }
+        });
+    },
+
+    truncateLogFile: function(){
+        fs.stat(logPath+logName, function(err, stats){
+            if(stats){
+                var kb = stats.size/1024;
+                if(kb >= maxLogFileKbs){
+                    reporter.stringFromLogFile(function(res) {
+                        res = res.split('\n')
+                        res = res.slice(res.length/2, res.length-1)
+                        res = res.join('\n');
+                        fs.unlink(logPath+logName, function(){
+                            fs.appendFile(logPath+logName, res, function(err){
+                                if(err){throw new Error(err.message);}
+                            });
+                        });
+                    });
+                }
             }
         });
     },

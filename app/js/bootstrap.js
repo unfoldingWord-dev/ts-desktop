@@ -105,8 +105,10 @@ this.App = (function() {
         /**
          * Loads read-only and default configuration settings
          */
-        loadConfigSettings: function() {
+        initializeConfig: function() {
             let me = this;
+
+            me.configurator.setStorage(window.localStorage);
 
             var config = require('../config/ts-config');
 
@@ -140,7 +142,7 @@ this.App = (function() {
 
             me.registerEvents();
             me.registerShortcuts();
-            me.loadConfigSettings();
+            me.initializeConfig();
 
             let platformInit = me.platformInit[process.platform];
             platformInit && platformInit.call(me);

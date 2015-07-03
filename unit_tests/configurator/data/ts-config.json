@@ -1,50 +1,31 @@
 [
     {
-        "name": "Setting 1",
-        "default": 1,
-        "choices" : [
-            "1",
-            "22",
-            "434"
-        ],
-        "type": "int",
-        "binding": "setting1Handler"
+        "name": "string",
+        "default": "test string",
+        "type": "string"
     },
     {
-        "name": "Setting 2",
+        "name": "int",
+        "default": 111,
+        "type": "int"
+    },
+    {
+        "name": "bool",
+        "default": true,
+        "type": "bool"
+    },
+    {
+        "name": "readonly",
         "default": "I am immutable",
-        "readonly": true,
         "type": "string",
-        "binding": "setting2Handler"
+        "readonly": true
     },
     {
-        "name": "User",
-        "default": "SomeGuy",
+        "name": "willpurge",
+        "default": "this is the default",
         "type": "string",
-        "binding": "func1"
-    },
-    {
-        "name": "Language",
-        "default": "Greek",
-        "type": "string",
-        "binding": "func2"
-    },
-    {
-        "name": "Country",
-        "default": "Greece",
-        "type": "string",
-        "binding": "func3"
-    },
-    {
-        "name": "Font",
-        "default": "Tahoma",
-        "type": "string",
-        "binding": "func4"
-    },
-    {
-        "name": "Likes tS",
-        "default": "true",
-        "type": "bool",
-        "binding": "func5"
+        "readonly": true
     }
+
+
 ]

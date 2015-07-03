@@ -5,6 +5,8 @@
 const readOnlyPrefix = 'locked|';
 const defaultPrefix = 'default|';
 
+var storage;
+
 var getValue = function(key) {
     'use strict';
 
@@ -14,14 +16,14 @@ var getValue = function(key) {
     key = key.toLowerCase();
 
     // first check for a readonly setting
-    var value = window.localStorage[readOnlyPrefix + key];
+    var value = storage[readOnlyPrefix + key];
     if (value === undefined) {
         // then a regular setting
-        value = window.localStorage[key];
+        value = storage[key];
     }
     if (value === undefined) {
         // lastly use a default (if present)
-        value = window.localStorage[defaultPrefix + key];
+        value = storage[defaultPrefix + key];
     }
 
     return value;
@@ -29,12 +31,13 @@ var getValue = function(key) {
 
 var setValue = function(key, value) {
     'use strict';
-    if (key === undefined) {
-        return key;
+    if (key === undefined || value === undefined) {
+        return;
     }
     key = key.toLowerCase();
+    value = value.toString()
 
-    window.localStorage[key] = value;
+    storage[key] = value;
 };
 var unsetValue = function(key) {
     'use strict';
@@ -50,7 +53,12 @@ var unsetValue = function(key) {
     });
 
     if (unsetOk) {
-        window.localStorage.removeItem(key);
+        if (typeof storage.removeItem === 'function') {
+            storage.removeItem(key);
+        }
+        else {
+            storage[key] = undefined;
+        }
     }
 };
 var setReadOnlyValue = function(key, value) {
@@ -63,10 +71,15 @@ var setDefaultValue = function(key, value) {
 };
 var getKeys = function() {
     'use strict';
-    return Object.keys(window.localStorage);
+    return Object.keys(storage);
 };
 
 var configurator = {
+    setStorage: function(storeObject) {
+        'use strict';
+        storage = storeObject;
+    },
+
     getString: function(key) {
         'use strict';
         var value = getValue(key);
@@ -107,6 +120,10 @@ var configurator = {
     loadConfig: function(config) {
         'use strict';
 
+        if (storage === undefined) {
+            throw 'You must call setStorage with a valid storage object first';
+        }
+
         for (var i = 0; i < config.length; i++) {
             if (config[i].default !== undefined) {
                 if (config[i].readonly) {
@@ -131,7 +148,7 @@ var configurator = {
     }
 };
 
-
+exports.setStorage = configurator.setStorage;
 exports.getString = configurator.getString;
 exports.getInt = configurator.getInt;
 exports.getBool = configurator.getBool;

@@ -7,7 +7,7 @@
 var logPath = './';
 var logName = 'log.txt';
 var oauth_token = '';
-var repoOwner = 'EmmittJ';
+var repoOwner = 'unfoldingWord-dev';
 var repo = 'ts-desktop';
 
 var version = require('../../package.json').version;
@@ -18,27 +18,47 @@ var https = require('https');
 var reporter = {
     logNotice: function(string) {
         'use strict';
+        if(!string){
+            throw new Error("reporter.logNotice requires a message.");
+        }
         reporter.toLogFile('I', string);
     },
 
     logWarning: function(string) {
         'use strict';
+        if(!string){
+            throw new Error("reporter.logWarning requires a message.");
+        }
         reporter.toLogFile('W', string);
     },
 
     logError: function(string) {
         'use strict';
+        if(!string){
+            throw new Error("reporter.logError requires a message.");
+        }
         reporter.toLogFile('E', string);
     },
 
-    reportBug: function(string) {
+    reportBug: function(string, callback) {
         'use strict';
-        reporter.formGithubIssue('Bug Report', string);
+        if(!string){
+            throw new Error("reporter.reportBug requires a message.");
+        }
+        reporter.formGithubIssue('Bug Report', string, function(res){
+            if(callback){
+                callback(res);
+            }
+        });
     },
 
-    reportCrash: function(string) {
+    reportCrash: function(string, callback) {
         'use strict';
-        reporter.formGithubIssue('Crash Report', string);
+        reporter.formGithubIssue('Crash Report', string, function(res){
+            if(callback){
+                callback(res);
+            }
+        });
     },
 
     stackTrace: function () {
@@ -87,7 +107,7 @@ var reporter = {
         });
     },
 
-    formGithubIssue: function(type, string){
+    formGithubIssue: function(type, string, callback){
         'use strict';
         var issueObject = {};
         issueObject.user = repoOwner;
@@ -126,11 +146,15 @@ var reporter = {
         reporter.stringFromLogFile(function(results){
             bodyBuilder.push(results);
             issueObject.body = bodyBuilder.join('\n');
-            reporter.sendIssueToGithub(issueObject);
+            reporter.sendIssueToGithub(issueObject, function(res){
+                if(callback){
+                    callback(res);
+                }
+            });
         });
     },
 
-    sendIssueToGithub: function(issue){
+    sendIssueToGithub: function(issue, callback){
         'use strict';
         var params = {};
         params.title = issue.title;
@@ -154,16 +178,16 @@ var reporter = {
 
         var post_req = https.request(post_options, function(res){
             res.setEncoding('utf8');
-            res.on('data', function(data) {
-                if(data){
-                    reporter.logNotice('Issue Submitted');
-                }
-                else{
-                    reporter.logWarning('Issue was not able to submit');
+            var completeData = '';
+            res.on('data', function(partialData) {
+                completeData += partialData;
+            }).on('end', function(){
+                if(callback){
+                    callback(res);
                 }
             });
         }).on('error', function(err){
-            reporter.logError(err.message);
+            throw new Error(err.message);
         });
         post_req.write(paramsJson);
         post_req.end();

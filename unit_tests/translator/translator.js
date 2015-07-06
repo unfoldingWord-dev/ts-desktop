@@ -38,14 +38,14 @@ describe('@Translator', function () {
 
     describe('@getResourcePathProject ', function () {
         it('should retrieve a 1ch project lang_catalog path', function () {
-            var text =  dataDir + '/tsFiles/ts/txt/2/1ch/languages.json';
+            var text =  dataDir + '/tsFiles/ts/txt/2/1ch/languages.json'.replace(/\//gm, path.sep);
             assert.equal(translator.getResourcePath('1ch.lang_catalog', index, dataDir), text);
         })
     })
 
     describe('@getResourcePathArabicSource ', function () {
         it('should retrieve a 1ch ar udb source path', function () {
-            var text = dataDir + '/tsFiles/ts/txt/2/1co/ar/avd/source.json';
+            var text = dataDir + '/tsFiles/ts/txt/2/1co/ar/avd/source.json'.replace(/\//gm, path.sep);
             assert.equal(translator.getResourcePath('1co.ar.avd.source',index, dataDir), text);
         })
     })

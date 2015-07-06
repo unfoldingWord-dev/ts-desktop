@@ -15,7 +15,7 @@ var navigator = {
         'use strict';
 
         try {
-            return setPath(_.get(resources.tsIndex, path),
+            return setPath(_.get(resources.tsIndex, path).replace(/\//gm, pathObj.sep),
                 resources.rootDir + pathObj.sep + 'tsFiles');
         } catch (e) {
             return null;

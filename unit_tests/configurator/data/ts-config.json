@@ -1,0 +1,31 @@
+[
+    {
+        "name": "string",
+        "default": "test string",
+        "type": "string"
+    },
+    {
+        "name": "int",
+        "default": 111,
+        "type": "int"
+    },
+    {
+        "name": "bool",
+        "default": true,
+        "type": "bool"
+    },
+    {
+        "name": "readonly",
+        "default": "I am immutable",
+        "type": "string",
+        "readonly": true
+    },
+    {
+        "name": "willpurge",
+        "default": "this is the default",
+        "type": "string",
+        "readonly": true
+    }
+
+
+]

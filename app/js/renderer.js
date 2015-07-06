@@ -5,56 +5,56 @@
 var _ = require('lodash'),
     paraRegExp = /<\/para>\s*/g;
 
-function paraPattern(paraType) {
+function paraPattern (paraType) {
     'use strict';
     return new RegExp('<para\\s*style="' + paraType + '"\\s*>\\s*');
 }
 
 var renderer = {
-    renderWhiteSpace: function(text) {
+    renderWhiteSpace: function (text) {
         'use strict';
         return text.replace(/\s+/g, ' ');
     },
-    renderLineBreaks: function(text) {
+    renderLineBreaks: function (text) {
         'use strict';
         return text.replace(/\s*\n+\s*/g, ' ');
     },
-    renderNotes: function(text) {
+    renderNotes: function (text) {
         'use strict';
         return text.replace(/\s*\n+\s*/g, ' ');
     },
-    trimWhiteSpace: function(text) {
+    trimWhiteSpace: function (text) {
         'use strict';
         return text.replace(/^\s*|\s*$/g, '');
     },
-    renderVerse: function(text) {
+    renderVerse: function (text) {
         'use strict';
         return text.replace(/<verse\s+number=\"(\d+(-\d+)?)\"\s+style=\"v\"\s*\/>/g, '');
     },
-    renderVerseHTML: function(text) {
+    renderVerseHTML: function (text) {
         'use strict';
         var replacePre = '<span class="verse">',
             replacePost = '</span>';
         var output = text.replace(/<verse\s+number=\"(\d+(-\d+)?)\"\s+style=\"v\"\s*\/>/g,
-            function(match) {
+            function (match) {
                 return replacePre + _.parseInt(match.slice(match.search('"') + 1), 10) +
                     replacePost;
             });
         return output;
     },
-    renderParagraph: function(text) {
+    renderParagraph: function (text) {
         'use strict';
         var paraType = 'p',
             replacePara = paraPattern(paraType);
         return text.replace(replacePara, '').replace(paraRegExp, '');
     },
-    renderParagraphHTML: function(text) {
+    renderParagraphHTML: function (text) {
         'use strict';
         var paraType = 'p',
             replacePara = paraPattern(paraType);
         return text.replace(replacePara, '<p>').replace(paraRegExp, '</p>');
     },
-    renderCleanFrameHTML: function(text) {
+    renderCleanFrameHTML: function (text) {
         'use strict';
         return this.renderWhiteSpace(this.renderVerseHTML(this.renderParagraphHTML(text)));
     }

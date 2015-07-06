@@ -15,16 +15,16 @@ var rootResourceUrl = null;
 var options;
 
 
-function resources(initResUrl) {
+function resources (initResUrl) {
     /*jshint validthis:true */
     'use strict';
     rootResourceUrl = initResUrl;
-    this.setTsIndex = function(newIndex) {
+    this.setTsIndex = function (newIndex) {
         tsIndex = _.cloneDeep(newIndex);
     };
 
     this.rootDir = null;
-    this.setOptions = function(newOptions) {
+    this.setOptions = function (newOptions) {
         options = _.clone(newOptions);
         tsIndex = newOptions.index || tsIndex;
         this.tsIndex = tsIndex;
@@ -32,24 +32,24 @@ function resources(initResUrl) {
         this.rootDir = rootDir;
     };
 
-    this.tsIndex = function() {
+    this.tsIndex = function () {
         return tsIndex;
     };
 
-    function fsCB(err) {
+    function fsCB (err) {
         if (err) {
             // TODO: error handler
             // jscs:disable disallowEmptyBlocks
         }
     }
 
-    function getTSFiles(urlPath, successCB) {
+    function getTSFiles (urlPath, successCB) {
         successCB(urlPath, true);
     }
 
-    function mkdir(pathname, successCB) {
+    function mkdir (pathname, successCB) {
 
-        mkdirp(setPath(pathname, rootDir), function(err) {
+        mkdirp(setPath(pathname, rootDir), function (err) {
             if (err) {
                 // TODO: error handler
                 // jscs:disable disallowEmptyBlocks
@@ -62,14 +62,14 @@ function resources(initResUrl) {
     }
 
 
-    function getTsResource(urlString, fileUpdate) {
+    function getTsResource (urlString, fileUpdate) {
 
         var update = fileUpdate || true;
 
         var urlObj = url.parse(urlString);
         var response;
         if (urlObj.host) {
-            request.get(urlString, {json: true}, function(err, res, body) {
+            request.get(urlString, {json: true}, function (err, res, body) {
                 if (!err && res.statusCode === 200) {
                     response = {body: body, urlString: urlString};
                     getTsResources(response, update);
@@ -87,7 +87,7 @@ function resources(initResUrl) {
 
     }
 
-    function canUpdateFile(urlString) {
+    function canUpdateFile (urlString) {
 
         var urlObj = url.parse(urlString);
         var filePath = setPath(urlObj.pathname, rootDir);
@@ -108,18 +108,18 @@ function resources(initResUrl) {
         return true;
     }
 
-    function getTsResources(response, update) {
+    function getTsResources (response, update) {
 
         var urlString = response.urlString;
         var body = response.body;
         var urlObj = url.parse(urlString);
         var newUrlObj;
         var filePath;
-        mkdir(path.dirname(urlObj.pathname), function() {
+        mkdir(path.dirname(urlObj.pathname), function () {
             if (update) {
                 fs.writeFile(setPath(urlObj.pathname, rootDir), JSON.stringify(body), fsCB);
             }
-            traverse(body).forEach(function(dataObject) {
+            traverse(body).forEach(function (dataObject) {
 
                 if (typeof dataObject === 'string' && dataObject.indexOf('https') >= 0 && dataObject.indexOf('date_modified') >= 0 && dataObject.indexOf('usfm') < 0) {
                     if (dataObject.indexOf('date_modified') >= 0 && canUpdateFile(dataObject)) {
@@ -129,7 +129,7 @@ function resources(initResUrl) {
                         newUrlObj = url.parse(dataObject);
                         filePath = setPath(newUrlObj.pathname, rootDir);
                         if (fs.existsSync(filePath)) {
-                            fs.readFile(filePath, 'utf8', function(err, data) {
+                            fs.readFile(filePath, 'utf8', function (err, data) {
                                 if (!err) {
                                     if (data.length > 0) {
                                         newResponse = {body: JSON.parse(data), urlString: dataObject};
@@ -146,7 +146,7 @@ function resources(initResUrl) {
         });
     }
 
-    this.getTsResourcesFromCatalog = function() {
+    this.getTsResourcesFromCatalog = function () {
 
         rootDir = __dirname + path.sep + 'tsFiles';
         getTSFiles(rootResourceUrl, getTsResource);

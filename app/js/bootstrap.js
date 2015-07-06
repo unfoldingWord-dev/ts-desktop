@@ -3,7 +3,7 @@
  * This context will be available throughout the application
  */
 
-this.App = (function() {
+this.App = (function () {
     'use strict';
     let configurator = require('../js/configurator');
     let gui = require('nw.gui');
@@ -14,7 +14,7 @@ this.App = (function() {
      * FIX - This provides a fix to the native chrome shadow missing
      * see: https://github.com/nwjs/nw.js/issues/2903#issuecomment-77099590
      */
-    function shadowFix(win) {
+    function shadowFix (win) {
         win.minimize();
         win.restore();
     }
@@ -35,7 +35,7 @@ this.App = (function() {
 
         isMaximized: false,
 
-        display: function() {
+        display: function () {
             let win = this.window;
             win.show();
             win.focus();
@@ -44,16 +44,16 @@ this.App = (function() {
         /**
          * The application is shutting down
          */
-        close: function() {
+        close: function () {
             this.window.close();
         },
 
         events: {
-            maximize: function() {
+            maximize: function () {
                 this.isMaximized = true;
             },
 
-            minimize: function() {
+            minimize: function () {
                 this.isMaximized = false;
             }
         },
@@ -67,32 +67,32 @@ this.App = (function() {
             devInspector: {
                 key: 'Ctrl+Alt+I',
 
-                active: function() {
+                active: function () {
                     this.window.showDevTools('', true);
                 }
             }
         },
 
-        registerEvents: function() {
+        registerEvents: function () {
             let _this = this;
             let win = _this.window;
 
-            Object.keys(_this.events).forEach(function(event) {
+            Object.keys(_this.events).forEach(function (event) {
                 win.on(event, _this.events[event]);
             });
         },
 
-        registerShortcuts: function() {
+        registerShortcuts: function () {
             let _this = this;
 
-            Object.keys(_this.shortcuts).forEach(function(shortcutName) {
+            Object.keys(_this.shortcuts).forEach(function (shortcutName) {
                 let s = _this.shortcuts[shortcutName];
 
                 let option = {key: s.key};
 
-                ['active', 'failed'].filter(function(prop) {
+                ['active', 'failed'].filter(function (prop) {
                     return typeof s[prop] === 'function';
-                }).forEach(function(prop) {
+                }).forEach(function (prop) {
                     // bind "this" to "me" and pass in the shortcut as the first param
                     option[prop] = s[prop].bind(_this, s);
                 });
@@ -108,7 +108,7 @@ this.App = (function() {
         /**
          * Loads read-only and default configuration settings
          */
-        initializeConfig: function() {
+        initializeConfig: function () {
             let _this = this;
 
             _this.configurator.setStorage(window.localStorage);
@@ -121,7 +121,7 @@ this.App = (function() {
         /**
          * Toggles the application maximize state
          */
-        toggleMaximize: function() {
+        toggleMaximize: function () {
             let win = this.window;
             this.isMaximized ? win.unmaximize() : win.maximize();
         },
@@ -130,17 +130,17 @@ this.App = (function() {
          * Individual platform initializations (if needed)
          */
         platformInit: {
-            darwin: function() {
+            darwin: function () {
                 let mb = new this.gui.Menu({type: 'menubar'});
                 mb.createMacBuiltin(this.appName);
                 this.window.menu = mb;
             },
-            win32: function() {
+            win32: function () {
                 shadowFix(this.window);
             }
         },
 
-        init: function() {
+        init: function () {
             let _this = this;
 
             _this.registerEvents();

@@ -11,11 +11,11 @@ var _ = require('lodash');
 var indexer = {
 
 
-    indexFiles: function(rootNodeFile, rootDir) {
+    indexFiles: function (rootNodeFile, rootDir) {
         'use strict';
         var index = {};
 
-        function setIndex(index, dataObject, resource) {
+        function setIndex (index, dataObject, resource) {
 
             var newUrlObj = url.parse(dataObject);
             var pathname = newUrlObj.pathname;
@@ -30,11 +30,11 @@ var indexer = {
         }
 
 
-        function getTsResources(response) {
+        function getTsResources (response) {
             var body = response.body;
             var newUrlObj;
 
-            traverse(body).forEach(function(dataObject) {
+            traverse(body).forEach(function (dataObject) {
                 var filepath, newResponse;
                 if (typeof dataObject === 'string' && dataObject.indexOf('https') >= 0 && dataObject.indexOf('date_modified') >= 0 && dataObject.indexOf('usfm') < 0) {
                     setIndex(index, dataObject, this.key);

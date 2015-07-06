@@ -9,18 +9,6 @@
     "disallowSpaceBeforeBinaryOperators": [
         ","
     ],
-    "disallowSpacesInFunctionExpression": {
-        "beforeOpeningRoundBrace": true
-    },
-    "disallowSpacesInNamedFunctionExpression": {
-        "beforeOpeningRoundBrace": true
-    },
-    "disallowSpacesInFunctionDeclaration": {
-        "beforeOpeningRoundBrace": true
-    },
-    "disallowSpacesInAnonymousFunctionExpression": {
-        "beforeOpeningRoundBrace": true
-    },
     "disallowMixedSpacesAndTabs": true,
     "disallowTrailingWhitespace": true,
     "disallowYodaConditions": true,
@@ -44,6 +32,18 @@
     "requireDotNotation": true,
     "requireSpacesInForStatement": true,
     "requireSpaceBetweenArguments": true,
+    "requireSpacesInFunctionExpression": {
+        "beforeOpeningRoundBrace": true
+    },
+    "requireSpacesInNamedFunctionExpression": {
+        "beforeOpeningRoundBrace": true
+    },
+    "requireSpacesInFunctionDeclaration": {
+        "beforeOpeningRoundBrace": true
+    },
+    "requireSpacesInAnonymousFunctionExpression": {
+        "beforeOpeningRoundBrace": true
+    },
     "requireCurlyBraces": [
         "do"
     ],
@@ -62,7 +62,6 @@
     ],
     "requireSemicolons": true,
     "safeContextKeyword": "_this",
-    "validateLineBreaks": "LF",
     "validateQuoteMarks": "'",
     "validateIndentation": 4
 }

@@ -7,7 +7,7 @@ const defaultPrefix = 'default|';
 
 var storage;
 
-var getValue = function(key) {
+var getValue = function (key) {
     'use strict';
 
     if (key === undefined) {
@@ -29,7 +29,7 @@ var getValue = function(key) {
     return value;
 };
 
-var setValue = function(key, value) {
+var setValue = function (key, value) {
     'use strict';
     if (key === undefined || value === undefined) {
         return;
@@ -39,7 +39,7 @@ var setValue = function(key, value) {
 
     storage[key] = value;
 };
-var unsetValue = function(key) {
+var unsetValue = function (key) {
     'use strict';
     if (key === undefined) {
         return;
@@ -48,7 +48,7 @@ var unsetValue = function(key) {
 
     // Don't allow unsetting of read-only or default values
     var unsetOk = true;
-    [defaultPrefix, readOnlyPrefix].forEach(function(prefix) {
+    [defaultPrefix, readOnlyPrefix].forEach(function (prefix) {
         unsetOk = unsetOk && key.substr(0, prefix.length) !== prefix;
     });
 
@@ -60,26 +60,26 @@ var unsetValue = function(key) {
         }
     }
 };
-var setReadOnlyValue = function(key, value) {
+var setReadOnlyValue = function (key, value) {
     'use strict';
     setValue(readOnlyPrefix + key, value);
 };
-var setDefaultValue = function(key, value) {
+var setDefaultValue = function (key, value) {
     'use strict';
     setValue(defaultPrefix + key, value);
 };
-var getKeys = function() {
+var getKeys = function () {
     'use strict';
     return Object.keys(storage);
 };
 
 var configurator = {
-    setStorage: function(storeObject) {
+    setStorage: function (storeObject) {
         'use strict';
         storage = storeObject;
     },
 
-    getString: function(key) {
+    getString: function (key) {
         'use strict';
         var value = getValue(key);
         if (value === undefined) {
@@ -88,7 +88,7 @@ var configurator = {
 
         return value;
     },
-    getInt: function(key) {
+    getInt: function (key) {
         'use strict';
         var value = getValue(key);
         if (value === undefined) {
@@ -103,7 +103,7 @@ var configurator = {
 
         return value;
     },
-    getBool: function(key) {
+    getBool: function (key) {
         'use strict';
         var value = getValue(key);
         if (value === undefined) {
@@ -112,11 +112,11 @@ var configurator = {
 
         return value.toLowerCase() !== 'false' && value !== '0';
     },
-    setValue: function(key, value) {
+    setValue: function (key, value) {
         'use strict';
         setValue(key, value);
     },
-    loadConfig: function(config) {
+    loadConfig: function (config) {
         'use strict';
 
         if (storage === undefined) {
@@ -133,11 +133,11 @@ var configurator = {
             }
         }
     },
-    unsetValue: function(key, value) {
+    unsetValue: function (key, value) {
         'use strict';
         unsetValue(key, value);
     },
-    purgeValues: function() {
+    purgeValues: function () {
         'use strict';
         var keys = getKeys();
         for (var i = 0; i < keys.length; i++) {

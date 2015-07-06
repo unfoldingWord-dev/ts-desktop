@@ -48,15 +48,14 @@ var unsetValue = function(key) {
 
     // Don't allow unsetting of read-only or default values
     var unsetOk = true;
-    [defaultPrefix,readOnlyPrefix].forEach(function(prefix) {
-        unsetOk = unsetOk && key.substr(0,prefix.length) !== prefix;
+    [defaultPrefix, readOnlyPrefix].forEach(function(prefix) {
+        unsetOk = unsetOk && key.substr(0, prefix.length) !== prefix;
     });
 
     if (unsetOk) {
         if (typeof storage.removeItem === 'function') {
             storage.removeItem(key);
-        }
-        else {
+        } else {
             storage[key] = undefined;
         }
     }
@@ -128,8 +127,7 @@ var configurator = {
             if (config[i].default !== undefined) {
                 if (config[i].readonly) {
                     setReadOnlyValue(config[i].name, config[i].default);
-                }
-                else {
+                } else {
                     setDefaultValue(config[i].name, config[i].default);
                 }
             }
@@ -142,7 +140,7 @@ var configurator = {
     purgeValues: function() {
         'use strict';
         var keys = getKeys();
-        for(var i = 0; i < keys.length; i++){
+        for (var i = 0; i < keys.length; i++) {
             unsetValue(keys[i]);
         }
     }

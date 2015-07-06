@@ -6,12 +6,12 @@ var fs = require('fs');
 var resources = null;
 
 var translator = {
-    setResources: function (inResource) {
+    setResources: function(inResource) {
         'use strict';
         resources = inResource;
     },
 
-    getResourcePath: function (path) {
+    getResourcePath: function(path) {
         'use strict';
 
         try {
@@ -23,13 +23,13 @@ var translator = {
 
     },
 
-    readResourceFileContent: function (path) {
+    readResourceFileContent: function(path) {
         'use strict';
         var data = fs.readFileSync(path, 'utf8');
         return JSON.parse(data);
     },
 
-    readProject: function (project) {
+    readProject: function(project) {
         'use strict';
         var path = project + '.lang_catalog';
         return this.readResourceFileContent(this.getResourcePath(path,
@@ -37,7 +37,7 @@ var translator = {
 
     },
 
-    open: function (project, language, source, chapter, frame) {
+    open: function(project, language, source, chapter, frame) {
         'use strict';
         var path;
         var index = resources.tsIndex;

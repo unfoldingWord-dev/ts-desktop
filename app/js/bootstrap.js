@@ -15,8 +15,8 @@ this.App = (function() {
      * see: https://github.com/nwjs/nw.js/issues/2903#issuecomment-77099590
      */
     function shadowFix(win) {
-       win.minimize();
-       win.restore();
+        win.minimize();
+        win.restore();
     }
 
     /**
@@ -74,33 +74,33 @@ this.App = (function() {
         },
 
         registerEvents: function() {
-            let me = this;
-            let win = me.window;
+            let _this = this;
+            let win = _this.window;
 
-            Object.keys(me.events).forEach(function(event) {
-                win.on(event, me.events[event]);
+            Object.keys(_this.events).forEach(function(event) {
+                win.on(event, _this.events[event]);
             });
         },
 
         registerShortcuts: function() {
-            let me = this;
+            let _this = this;
 
-            Object.keys(me.shortcuts).forEach(function(shortcutName) {
-                let s = me.shortcuts[shortcutName];
+            Object.keys(_this.shortcuts).forEach(function(shortcutName) {
+                let s = _this.shortcuts[shortcutName];
 
-                let option = { key: s.key };
+                let option = {key: s.key};
 
                 ['active', 'failed'].filter(function(prop) {
                     return typeof s[prop] === 'function';
                 }).forEach(function(prop) {
                     // bind "this" to "me" and pass in the shortcut as the first param
-                    option[prop] = s[prop].bind(me, s);
+                    option[prop] = s[prop].bind(_this, s);
                 });
 
-                var shortcut = new me.gui.Shortcut(option);
+                var shortcut = new _this.gui.Shortcut(option);
 
                 // Register global desktop shortcut, which can work without focus.
-                me.gui.App.registerGlobalHotKey(shortcut);
+                _this.gui.App.registerGlobalHotKey(shortcut);
             });
         },
 
@@ -109,13 +109,13 @@ this.App = (function() {
          * Loads read-only and default configuration settings
          */
         initializeConfig: function() {
-            let me = this;
+            let _this = this;
 
-            me.configurator.setStorage(window.localStorage);
+            _this.configurator.setStorage(window.localStorage);
 
             var config = require('../config/ts-config');
 
-            me.configurator.loadConfig(config);
+            _this.configurator.loadConfig(config);
         },
 
         /**
@@ -131,7 +131,7 @@ this.App = (function() {
          */
         platformInit: {
             darwin: function() {
-                let mb = new this.gui.Menu({ type: 'menubar' });
+                let mb = new this.gui.Menu({type: 'menubar'});
                 mb.createMacBuiltin(this.appName);
                 this.window.menu = mb;
             },
@@ -141,16 +141,16 @@ this.App = (function() {
         },
 
         init: function() {
-            let me = this;
+            let _this = this;
 
-            me.registerEvents();
-            me.registerShortcuts();
-            me.initializeConfig();
+            _this.registerEvents();
+            _this.registerShortcuts();
+            _this.initializeConfig();
 
-            let platformInit = me.platformInit[process.platform];
-            platformInit && platformInit.call(me);
+            let platformInit = _this.platformInit[process.platform];
+            platformInit && platformInit.call(_this);
 
-            me.display();
+            _this.display();
         }
 
     };

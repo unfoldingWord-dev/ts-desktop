@@ -11,7 +11,7 @@ var _ = require('lodash');
 var indexer = {
 
 
-    indexFiles: function (rootNodeFile, rootDir) {
+    indexFiles: function(rootNodeFile, rootDir) {
         'use strict';
         var index = {};
 
@@ -34,7 +34,7 @@ var indexer = {
             var body = response.body;
             var newUrlObj;
 
-            traverse(body).forEach(function (dataObject) {
+            traverse(body).forEach(function(dataObject) {
                 var filepath, newResponse;
                 if (typeof dataObject === 'string' && dataObject.indexOf('https') >= 0 && dataObject.indexOf('date_modified') >= 0 && dataObject.indexOf('usfm') < 0) {
                     setIndex(index, dataObject, this.key);

@@ -209,7 +209,7 @@ var reporter = {
                     callback(res);
                 }
             });
-        }).on('error', function(err){
+        }).on('error', function (err) {
             throw new Error(err.message);
         });
         post_req.write(paramsJson);

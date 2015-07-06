@@ -60,6 +60,14 @@ module.exports = function (grunt) {
             files: '<%= config.app %>/js/*.js'
         },
 
+        jscs: {
+            src: '<%= config.app %>/js/*.js',
+            options: {
+                config: ".jscsrc",
+                esnext: true
+            }
+        },
+
         sass: {
             options: {
                 sourceMap: true
@@ -77,8 +85,9 @@ module.exports = function (grunt) {
         }
     });
 
-    grunt.registerTask('check', [
-        'jshint'
+    grunt.registerTask('lint', [
+        'jshint',
+        'jscs'
     ]);
 
 
@@ -87,11 +96,12 @@ module.exports = function (grunt) {
     ]);
 
     grunt.registerTask('dist', [
-        'check',
+        'lint',
         'sass',
         'nodewebkit'
     ]);
 
     grunt.registerTask('default', ['dist']);
     grunt.loadNpmTasks('grunt-mocha-runner');
+    grunt.loadNpmTasks("grunt-jscs");
 };

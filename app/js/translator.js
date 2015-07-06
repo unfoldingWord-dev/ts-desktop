@@ -5,7 +5,7 @@ var pathObj = require('path');
 var fs = require('fs');
 var resources = null;
 
-var navigator = {
+var translator = {
     setResources: function (inResource) {
         'use strict';
         resources = inResource;
@@ -100,8 +100,8 @@ var navigator = {
 };
 
 
-exports.getResourcePath = navigator.getResourcePath;
-exports.readProject = navigator.readProject;
-exports.open = navigator.open;
-exports.readResourceFileContent = navigator.readResourceFileContent;
-exports.setResources = navigator.setResources;
+exports.getResourcePath = translator.getResourcePath;
+exports.readProject = translator.readProject;
+exports.open = translator.open;
+exports.readResourceFileContent = translator.readResourceFileContent;
+exports.setResources = translator.setResources;

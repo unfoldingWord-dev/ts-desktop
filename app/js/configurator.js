@@ -35,7 +35,7 @@ var setValue = function(key, value) {
         return;
     }
     key = key.toLowerCase();
-    value = value.toString()
+    value = value.toString();
 
     storage[key] = value;
 };

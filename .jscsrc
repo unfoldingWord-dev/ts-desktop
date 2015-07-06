@@ -60,9 +60,6 @@
         "catch",
         "typeof"
     ],
-    "requirePaddingNewLinesBeforeLineComments": {
-        "allExcept": "firstAfterCurly"
-    },
     "requireSemicolons": true,
     "safeContextKeyword": "_this",
     "validateLineBreaks": "LF",

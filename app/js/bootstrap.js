@@ -1,4 +1,3 @@
-
 /**
  * Defines the application context.
  * This context will be available throughout the application

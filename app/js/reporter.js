@@ -5,7 +5,7 @@
  * TODO: Hook to configurator once it is done
  * */
 var logPath = './log.txt';
-var oauth_token = '';
+var oauthToken = '';
 var repoOwner = 'unfoldingWord-dev';
 var repo = 'ts-desktop';
 var maxLogFileKbs = 200;
@@ -221,7 +221,7 @@ var reporter = {
         var paramsJson = JSON.stringify(params);
 
         var urlPath = '/repos/' + issue.user + '/' + issue.repo + '/issues';
-        var post_options = {
+        var postOptions = {
             host: 'api.github.com',
             port: 443,
             path: urlPath,
@@ -230,11 +230,11 @@ var reporter = {
                 'User-Agent': 'ts-desktop',
                 'Content-Type': 'application/json',
                 'Content-Length': paramsJson.length,
-                'Authorization': 'token ' + oauth_token
+                'Authorization': 'token ' + oauthToken
             }
         };
 
-        var post_req = https.request(post_options, function(res){
+        var postReq = https.request(postOptions, function(res){
             res.setEncoding('utf8');
             var completeData = '';
             res.on('data', function(partialData) {
@@ -247,8 +247,8 @@ var reporter = {
         }).on('error', function(err){
             throw new Error(err.message);
         });
-        post_req.write(paramsJson);
-        post_req.end();
+        postReq.write(paramsJson);
+        postReq.end();
     }
 };
 

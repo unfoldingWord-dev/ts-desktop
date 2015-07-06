@@ -24,7 +24,7 @@ describe('@Reporter', function() {
                         var date = new Date();
                         date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
                         //reporter.js:<line>:<column> this will need to be changed if the code changes
-                        textExpected = date + ' I/reporter.js:24:3: ' + key + '\r\n';
+                        textExpected = date + ' I/reporter.js:23:3: ' + key + '\r\n';
 
                         reporter.stringFromLogFile(function(logResults){
                             logFileResults = logResults;
@@ -56,7 +56,7 @@ describe('@Reporter', function() {
                         var date = new Date();
                         date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
                         //reporter.js:<line>:<column> this will need to be changed if the code changes
-                        textExpected = date + ' W/reporter.js:56:3: ' + key + '\r\n';
+                        textExpected = date + ' W/reporter.js:55:3: ' + key + '\r\n';
 
                         reporter.stringFromLogFile(function(logResults){
                             logFileResults = logResults;
@@ -88,7 +88,7 @@ describe('@Reporter', function() {
                         var date = new Date();
                         date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
                         //reporter.js:<line>:<column> this will need to be changed if the code changes
-                        textExpected = date + ' E/reporter.js:88:3: ' + key + '\r\n';
+                        textExpected = date + ' E/reporter.js:87:3: ' + key + '\r\n';
 
                         reporter.stringFromLogFile(function(logResults){
                             logFileResults = logResults;

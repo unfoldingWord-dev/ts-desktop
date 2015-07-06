@@ -4,9 +4,8 @@
 /* settings
  * TODO: Hook to configurator once it is done
  * */
-var logPath = './';
-var logName = 'log.txt';
-var oauth_token = '';
+var logPath = './log.txt';
+var oauthToken = '';
 var repoOwner = 'unfoldingWord-dev';
 var repo = 'ts-desktop';
 var maxLogFileKbs = 200;
@@ -17,28 +16,40 @@ var os = require('os');
 var https = require('https');
 
 var reporter = {
-    logNotice: function(string) {
+    logNotice: function(string, callback) {
         'use strict';
         if(!string){
             throw new Error('reporter.logNotice requires a message.');
         }
-        reporter.toLogFile('I', string);
+        reporter.toLogFile('I', string, function(){
+            if (typeof(callback) === 'function'){
+                callback();
+            }
+        });
     },
 
-    logWarning: function(string) {
+    logWarning: function(string, callback) {
         'use strict';
         if(!string){
             throw new Error('reporter.logWarning requires a message.');
         }
-        reporter.toLogFile('W', string);
+        reporter.toLogFile('W', string, function(){
+            if (typeof(callback) === 'function'){
+                callback();
+            }
+        });
     },
 
-    logError: function(string) {
+    logError: function(string, callback) {
         'use strict';
         if(!string){
             throw new Error('reporter.logError requires a message.');
         }
-        reporter.toLogFile('E', string);
+        reporter.toLogFile('E', string, function(){
+            if (typeof(callback) === 'function'){
+                callback();
+            }
+        });
     },
 
     reportBug: function(string, callback) {
@@ -47,7 +58,7 @@ var reporter = {
             throw new Error('reporter.reportBug requires a message.');
         }
         reporter.formGithubIssue('Bug Report', string, function(res){
-            if(callback){
+            if (typeof(callback) === 'function'){
                 callback(res);
             }
         });
@@ -56,7 +67,7 @@ var reporter = {
     reportCrash: function(string, callback) {
         'use strict';
         reporter.formGithubIssue('Crash Report', string, function(res){
-            if(callback){
+            if (typeof(callback) === 'function'){
                 callback(res);
             }
         });
@@ -68,7 +79,22 @@ var reporter = {
         return err.stack;
     },
 
-    toLogFile: function(level, string){
+    getLogPath: function(){
+        'use strict';
+        return logPath;
+    },
+
+    setLogPath: function(string){
+        'use strict';
+        if(string){
+            logPath = string;
+        }
+        else{
+            throw new Error('reporter.setLogPath() requires a string!');
+        }
+    },
+
+    toLogFile: function(level, string, callback){
         'use strict';
         /* We make 3 calls before processing who called the original
          *  log command; therefore, the 4th call will be the original caller.
@@ -85,33 +111,42 @@ var reporter = {
         var date = new Date();
         date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
         var message = date + ' ' + level + '/' + location + ': ' + string + '\r\n';
-        fs.appendFile(logPath+logName, message, function(err) {
+        fs.appendFile(logPath, message, function(err) {
             if(err){throw new Error(err.message);}
+            if (typeof(callback) === 'function') {
+                callback();
+            }
         });
         reporter.truncateLogFile();
     },
 
     stringFromLogFile: function(callback){
         'use strict';
-        fs.exists(logPath+logName, function(exists){
+        fs.exists(logPath, function(exists){
             if(exists) {
-                fs.readFile(logPath + logName, {encoding: 'utf8'}, function (err, data) {
+                fs.readFile(logPath, {encoding: 'utf8'}, function (err, data) {
                     if (err){
-                        callback('Could read log file. ERRNO: ' + err.number);
+                        if (typeof(callback) === 'function') {
+                            callback('Could read log file. ERRNO: ' + err.number);
+                        }
                         throw new Error(err.message);
                     }
-                    callback(data);
+                    if (typeof(callback) === 'function') {
+                        callback(data);
+                    }
                 });
             }
             else{
-                callback('No log file.');
+                if (typeof(callback) === 'function') {
+                    callback('No log file.');
+                }
             }
         });
     },
 
     truncateLogFile: function(){
         'use strict';
-        fs.stat(logPath+logName, function(err, stats){
+        fs.stat(logPath, function(err, stats){
             if(stats){
                 var kb = stats.size/1024;
                 if(kb >= maxLogFileKbs){
@@ -119,8 +154,8 @@ var reporter = {
                         res = res.split('\n');
                         res = res.slice(res.length/2, res.length-1);
                         res = res.join('\n');
-                        fs.unlink(logPath+logName, function(){
-                            fs.appendFile(logPath+logName, res, function(err){
+                        fs.unlink(logPath, function(){
+                            fs.appendFile(logPath, res, function(err){
                                 if(err){throw new Error(err.message);}
                             });
                         });
@@ -170,7 +205,7 @@ var reporter = {
             bodyBuilder.push(results);
             issueObject.body = bodyBuilder.join('\n');
             reporter.sendIssueToGithub(issueObject, function(res){
-                if(callback){
+                if (typeof(callback) === 'function'){
                     callback(res);
                 }
             });
@@ -186,7 +221,7 @@ var reporter = {
         var paramsJson = JSON.stringify(params);
 
         var urlPath = '/repos/' + issue.user + '/' + issue.repo + '/issues';
-        var post_options = {
+        var postOptions = {
             host: 'api.github.com',
             port: 443,
             path: urlPath,
@@ -195,25 +230,25 @@ var reporter = {
                 'User-Agent': 'ts-desktop',
                 'Content-Type': 'application/json',
                 'Content-Length': paramsJson.length,
-                'Authorization': 'token ' + oauth_token
+                'Authorization': 'token ' + oauthToken
             }
         };
 
-        var post_req = https.request(post_options, function(res){
+        var postReq = https.request(postOptions, function(res){
             res.setEncoding('utf8');
             var completeData = '';
             res.on('data', function(partialData) {
                 completeData += partialData;
             }).on('end', function(){
-                if(callback){
+                if (typeof(callback) === 'function'){
                     callback(res);
                 }
             });
         }).on('error', function (err) {
             throw new Error(err.message);
         });
-        post_req.write(paramsJson);
-        post_req.end();
+        postReq.write(paramsJson);
+        postReq.end();
     }
 };
 
@@ -222,4 +257,6 @@ exports.logWarning = reporter.logWarning;
 exports.logError = reporter.logError;
 exports.reportBug = reporter.reportBug;
 exports.reportCrash = reporter.reportCrash;
+exports.getLogPath = reporter.getLogPath;
+exports.setLogPath = reporter.setLogPath;
 exports.stringFromLogFile = reporter.stringFromLogFile;

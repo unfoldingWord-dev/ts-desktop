@@ -8,8 +8,7 @@ var version = require('../../package.json').version;
 var grunt = require('grunt');
 var reportToGithub = false; //this can be enabled but there must be an OAUTH Token that can be pulled in reporter.js
 /* TODO: log from configurator later */
-var logPath = './';
-var logName = 'log.txt';
+var logPath = './log.txt';
 
 describe('@Reporter', function() {
     //careful when editing this file as the expected strings are hardcoded with line numbers
@@ -19,26 +18,26 @@ describe('@Reporter', function() {
         var textExpected = '';
 
         before(function(done){
-            fs.exists(logPath+logName, function(exists){
-                fs.unlink(logPath+logName, function(err) {
-                    reporter.logNotice(key);
+            fs.exists(logPath, function(exists){
+                fs.unlink(logPath, function(err) {
+                    reporter.logNotice(key, function(){
+                        var date = new Date();
+                        date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+                        //reporter.js:<line>:<column> this will need to be changed if the code changes
+                        textExpected = date + ' I/reporter.js:24:3: ' + key + '\r\n';
 
-                    var date = new Date();
-                    date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-                    //reporter.js:<line>:<column> this will need to be changed if the code changes
-                    textExpected = date + ' I/reporter.js:24:3: ' + key + '\r\n';
-
-                    reporter.stringFromLogFile(function(logResults){
-                        logFileResults = logResults;
-                        done()
+                        reporter.stringFromLogFile(function(logResults){
+                            logFileResults = logResults;
+                            done();
+                        });
                     });
                 });
             });
         });
         it('should create a log file notice', function(done) {
             assert.equal(logFileResults, textExpected);
-            fs.exists(logPath+logName, function(exists){
-                fs.unlink(logPath+logName, function(err) {
+            fs.exists(logPath, function(exists){
+                fs.unlink(logPath, function(err) {
                     done();
                 });
             });
@@ -51,26 +50,26 @@ describe('@Reporter', function() {
         var textExpected = '';
 
         before(function(done){
-            fs.exists(logPath+logName, function(exists){
-                fs.unlink(logPath+logName, function(err) {
-                    reporter.logWarning(key);
+            fs.exists(logPath, function(exists){
+                fs.unlink(logPath, function(err) {
+                    reporter.logWarning(key, function () {
+                        var date = new Date();
+                        date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+                        //reporter.js:<line>:<column> this will need to be changed if the code changes
+                        textExpected = date + ' W/reporter.js:56:3: ' + key + '\r\n';
 
-                    var date = new Date();
-                    date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-                    //reporter.js:<line>:<column> this will need to be changed if the code changes
-                    textExpected = date + ' W/reporter.js:56:3: ' + key + '\r\n';
-
-                    reporter.stringFromLogFile(function(logResults){
-                        logFileResults = logResults;
-                        done()
+                        reporter.stringFromLogFile(function(logResults){
+                            logFileResults = logResults;
+                            done();
+                        });
                     });
                 });
             });
         });
         it('should create a log file warning', function(done) {
             assert.equal(logFileResults, textExpected);
-            fs.exists(logPath+logName, function(exists){
-                fs.unlink(logPath+logName, function(err) {
+            fs.exists(logPath, function(exists){
+                fs.unlink(logPath, function(err) {
                     done();
                 });
             });
@@ -83,26 +82,26 @@ describe('@Reporter', function() {
         var textExpected = '';
 
         before(function(done){
-            fs.exists(logPath+logName, function(exists){
-                fs.unlink(logPath+logName, function(err) {
-                    reporter.logError(key);
+            fs.exists(logPath, function(exists){
+                fs.unlink(logPath, function(err) {
+                    reporter.logError(key, function(){
+                        var date = new Date();
+                        date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+                        //reporter.js:<line>:<column> this will need to be changed if the code changes
+                        textExpected = date + ' E/reporter.js:88:3: ' + key + '\r\n';
 
-                    var date = new Date();
-                    date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-                    //reporter.js:<line>:<column> this will need to be changed if the code changes
-                    textExpected = date + ' E/reporter.js:88:3: ' + key + '\r\n';
-
-                    reporter.stringFromLogFile(function(logResults){
-                        logFileResults = logResults;
-                        done()
+                        reporter.stringFromLogFile(function(logResults){
+                            logFileResults = logResults;
+                            done();
+                        });
                     });
                 });
             });
         });
         it('should create a log file error', function(done) {
             assert.equal(logFileResults, textExpected);
-            fs.exists(logPath+logName, function(exists){
-                fs.unlink(logPath+logName, function(err) {
+            fs.exists(logPath, function(exists){
+                fs.unlink(logPath, function(err) {
                     done();
                 });
             });
@@ -139,9 +138,9 @@ describe('@Reporter', function() {
                 });
             });
             describe('@reportBugTitle', function(){
-               it('should compare the title of the issue', function(){
-                  assert.equal(githubResponse.title, title)
-               });
+                it('should compare the title of the issue', function(){
+                    assert.equal(githubResponse.title, title)
+                });
             });
         }
     });

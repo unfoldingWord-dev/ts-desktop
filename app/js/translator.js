@@ -3,20 +3,22 @@ var utils = require('./lib/utils');
 var setPath = utils.setPath;
 var pathObj = require('path');
 var fs = require('fs');
-var resources = null;
+var rootDir;
+var tsIndex;
 
 var navigator = {
-    setResources: function (inResource) {
+    setResources: function (inRootDir, inIndex) {
         'use strict';
-        resources = inResource;
+        tsIndex = inIndex;
+        rootDir = inRootDir;
     },
 
     getResourcePath: function (path) {
         'use strict';
 
         try {
-            return setPath(_.get(resources.tsIndex, path),
-                resources.rootDir + pathObj.sep + 'tsFiles');
+            return setPath(_.get(tsIndex, path),
+                rootDir );
         } catch (e) {
             return null;
         }
@@ -25,23 +27,27 @@ var navigator = {
 
     readResourceFileContent: function (path) {
         'use strict';
-        var data = fs.readFileSync(path, 'utf8');
-        return JSON.parse(data);
+        if (fs.existsSync(path)) {
+            var data = fs.readFileSync(path, 'utf8');
+            if (data) {
+                return JSON.parse(data);
+            }
+        }
+        return null;
     },
 
     readProject: function (project) {
         'use strict';
         var path = project + '.lang_catalog';
         return this.readResourceFileContent(this.getResourcePath(path,
-            resources.tsIndex, resources.rootDir));
+            tsIndex, rootDir));
 
     },
 
     open: function (project, language, source, chapter, frame) {
         'use strict';
         var path;
-        var index = resources.tsIndex;
-        var rootDir = resources.rootDir;
+        var index = tsIndex;
         var workingArgs = [];
         var content;
         var pos = 0;
@@ -82,7 +88,7 @@ var navigator = {
 
         resPath = this.getResourcePath(path, index, rootDir);
         if (resPath) {
-            content = this.readResourceFileContent(this.getResourcePath(path, index, rootDir));
+            content = this.readResourceFileContent(resPath);
             if (arguments.length < 4) {
                 return content;
             }

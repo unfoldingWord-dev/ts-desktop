@@ -7,7 +7,7 @@ var path = require('path');
  * based pathname (usually derived for the API url)
  * and a baseDir that is the the resource directory
  *
- * @param {String} pathname 
+ * @param {String} pathname
  * @param {string} baseDir
  * @return {string} absolutePathname
  */

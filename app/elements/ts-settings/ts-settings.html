@@ -91,10 +91,10 @@ var _ = require('lodash');
                 this.settings = require('../config/ts-config.json');
             },
             setting1Handler: function() {
-                alert("you clicked setting 1!");
+                alert(App.configurator.getInt('Setting 1'));
             },
             setting2Handler: function() {
-                alert("you clicked setting 2!");
+                alert(App.configurator.getString('Setting 2'));
             },
             buttonClick: function (event) {
                 var classes = event.currentTarget.className;
@@ -111,19 +111,24 @@ var _ = require('lodash');
                     this.func3();
                 }else  if (classes.indexOf('func4') >= 0) {
                     this.func4();
+                }else  if (classes.indexOf('func5') >= 0) {
+                    this.func5();
                 }
             },
             func1: function () {
-                alert('function 1');
+                alert(App.configurator.getString('User'));
             },
             func2: function () {
-                alert('function 2');
+                alert(App.configurator.getString('Language'));
             },
             func3: function () {
-                alert('function 3');
+                alert(App.configurator.getString('Country'));
             },
             func4: function () {
-                alert('function 4');
+                alert(App.configurator.getString('Font'));
+            },
+            func5: function () {
+                alert(App.configurator.getBool('Likes tS'));
             }
         });
 

@@ -15,7 +15,7 @@ var indexer = {
         'use strict';
         var index = {};
 
-        function setIndex(index, dataObject, resource) {
+        function setIndex (index, dataObject, resource) {
 
             var newUrlObj = url.parse(dataObject);
             var pathname = newUrlObj.pathname;
@@ -30,7 +30,7 @@ var indexer = {
         }
 
 
-        function getTsResources(response) {
+        function getTsResources (response) {
             var body = response.body;
             var newUrlObj;
 

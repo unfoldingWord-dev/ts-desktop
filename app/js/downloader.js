@@ -16,7 +16,7 @@ var options;
 var filter;
 
 function Resources(initResUrl, dataDir) {
-
+    'use strict';
     var self = this;
 
     self.downloadCounter = 0;
@@ -24,31 +24,21 @@ function Resources(initResUrl, dataDir) {
 
     this.index = null;
 
+
     /*jshint validthis:true */
-    'use strict';
     self.rootResourceUrl = initResUrl;
     self.rootDir = dataDir;
 
     self.setOptions = function (newOptions) {
         options = _.clone(newOptions);
-        self.rootDir = rootDir;
     };
-
-    function fsCB(err) {
-        if (err) {
-            //todo: error handler
-        }
-    }
-
-    function getTSFiles(urlPath, successCB) {
-        successCB(urlPath, true);
-    }
 
     function mkdir(pathname, successCB) {
 
         mkdirp(setPath(pathname, self.rootDir), function (err) {
             if (err) {
-
+                // TODO: error handler
+                // jscs:disable disallowEmptyBlocks
             } else {
                 if (successCB) {
                     successCB();
@@ -59,7 +49,6 @@ function Resources(initResUrl, dataDir) {
 
 
     function getTsResource(urlString, fileUpdate, topLevel) {
-
         var update = fileUpdate || true;
 
         var urlObj = url.parse(urlString);
@@ -70,9 +59,11 @@ function Resources(initResUrl, dataDir) {
                     response = {body: body, urlString: urlString};
                     getTsResources(response, update, topLevel);
                 } else if (!err) {
-                    //todo: handle non statusCode equal 200
-                } else {
 
+                    //TODO: handle non statusCode equal 200
+                    // jscs:disable disallowEmptyBlocks
+
+                } else {
                     if (err.code === 'ETIMEDOUT') {
 
                         getTsResource(urlString, update);
@@ -105,7 +96,7 @@ function Resources(initResUrl, dataDir) {
     }
 
     function notFiltered(key, dataObject) {
-        if (filter.length == 0) {
+        if (filter.length === 0) {
             return true;
         }
         if (key === 'lang_catalog' && filter.length > 0) {
@@ -127,7 +118,6 @@ function Resources(initResUrl, dataDir) {
     }
 
     function getTsResources(response, update, topLevel) {
-
         var urlString = response.urlString;
         var body = response.body;
         var urlObj = url.parse(urlString);
@@ -136,54 +126,53 @@ function Resources(initResUrl, dataDir) {
         var filesTraversed = 0;
         mkdir(path.dirname(urlObj.pathname), function () {
 
-            if (update) {
-                fs.writeFileSync(setPath(urlObj.pathname, self.rootDir), JSON.stringify(body));
-            }
-            if (!topLevel) {
+                if (update) {
+                    fs.writeFileSync(setPath(urlObj.pathname, self.rootDir), JSON.stringify(body));
+                }
 
+                if (!topLevel) {
+                    traverse(body).forEach(function (dataObject) {
 
-                traverse(body).forEach(function (dataObject) {
-
-                    if (typeof dataObject === 'string' &&
-                        dataObject.indexOf('https') >= 0 &&
-                        dataObject.indexOf('date_modified') >= 0 &&
-                        dataObject.indexOf('usfm') < 0 &&
-                        notFiltered(this.key, dataObject)) {
-                        filesTraversed += 1;
-                        self.downloadCounter += 1;
-                        if (dataObject.indexOf('date_modified') >= 0 && canUpdateFile(dataObject)) {
-                            getTsResource(dataObject, true);
-                        } else {
-                            var newResponse;
-                            newUrlObj = url.parse(dataObject);
-                            filePath = setPath(newUrlObj.pathname, self.rootDir);
-                            if (fs.existsSync(filePath)) {
-                                fs.readFile(filePath, 'utf8', function (err, data) {
-                                    if (!err) {
-                                        if (data.length > 0) {
-                                            newResponse = {body: JSON.parse(data), urlString: dataObject};
-                                            getTsResources(newResponse, false);
-                                        }
-                                    }
-                                });
+                        if (typeof dataObject === 'string' &&
+                            dataObject.indexOf('https') >= 0 &&
+                            dataObject.indexOf('date_modified') >= 0 &&
+                            dataObject.indexOf('usfm') < 0 &&
+                            notFiltered(this.key, dataObject)) {
+                            filesTraversed += 1;
+                            self.downloadCounter += 1;
+                            if (dataObject.indexOf('date_modified') >= 0 && canUpdateFile(dataObject)) {
+                                getTsResource(dataObject, true);
                             } else {
-                                getTsResource(dataObject, false);
+                                var newResponse;
+                                newUrlObj = url.parse(dataObject);
+                                filePath = setPath(newUrlObj.pathname, self.rootDir);
+                                if (fs.existsSync(filePath)) {
+                                    fs.readFile(filePath, 'utf8', function (err, data) {
+                                        if (!err) {
+                                            if (data.length > 0) {
+                                                newResponse = {body: JSON.parse(data), urlString: dataObject};
+                                                getTsResources(newResponse, false);
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    getTsResource(dataObject, false);
+                                }
                             }
                         }
-                    }
-                });
-            }
-
-            console.log('filesTraversed = ' + filesTraversed + ' ; downloadCounter =' + self.downloadCounter)
-            if (filesTraversed <= 0 && self.downloadCounter <= 0) {
-                if (self.finishedCB) {
-                    self.index = null;
-                    self.finishedCB(self);
+                    });
                 }
-            }
-            self.downloadCounter -= 1;
-        });
 
+                console.log('filesTraversed = ' + filesTraversed + ' ; downloadCounter =' + self.downloadCounter);
+                if (filesTraversed <= 0 && self.downloadCounter <= 0) {
+                    if (self.finishedCB) {
+                        self.index = null;
+                        self.finishedCB(self);
+                    }
+                }
+                self.downloadCounter -= 1;
+            }
+        );
     }
 
 
@@ -204,7 +193,7 @@ function Resources(initResUrl, dataDir) {
             filter = filter.split('.');
         }
 
-        getTsResource(self.rootResourceUrl, true, topLevel);
+        self.getTsResource(self.rootResourceUrl, true, topLevel);
     };
 
 
@@ -216,7 +205,7 @@ function Resources(initResUrl, dataDir) {
                 var data = fs.readFileSync(filePath, 'utf8');
 
                 if (data.length > 0) {
-                   cb ( JSON.parse(data));
+                    cb(JSON.parse(data));
                 } else {
                     cb(null);
                 }
@@ -231,7 +220,7 @@ function Resources(initResUrl, dataDir) {
 
             self.index = indexer.indexFiles('ts/txt/2/catalog.json', self.rootDir);
 
-            translator.setResources(self.rootDir, self.index)
+            translator.setResources(self.rootDir, self.index);
             var resource = translator.open(proj);
             if (resource) {
 
@@ -249,27 +238,28 @@ function Resources(initResUrl, dataDir) {
     };
 
     self.downloadLanguage = function (proj, lang, callback) {
-        if (self.index == null) {
+        //TODO: This function is not complete. There are some design issues
+        if (self.index === null) {
             self.index = indexer.indexFiles('ts/txt/2/catalog.json', self.rootDir);
         }
-        translator.setResources(self.rootDir, self.index)
+        translator.setResources(self.rootDir, self.index);
         var resource = translator.open(proj, lang);
         if (resource) {
-            return resource;
+            callback(resource);
         }
         else {
-            return null;
+            callback(null);
         }
 
     };
 
     self.downloadProject = function (proj, callback) {
         self.getTsResourcesFromCatalog(proj, callback);
-    }
+    };
 
     self.downloadProjects = function (callback) {
         self.getTsResourcesFromCatalog('projects', callback);
-    }
+    };
 
 
     return self;

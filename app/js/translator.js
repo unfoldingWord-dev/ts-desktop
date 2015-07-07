@@ -6,7 +6,8 @@ var fs = require('fs');
 var rootDir;
 var tsIndex;
 
-var navigator = {
+
+var translator = {
     setResources: function (inRootDir, inIndex) {
         'use strict';
         tsIndex = inIndex;
@@ -17,8 +18,9 @@ var navigator = {
         'use strict';
 
         try {
-            return setPath(_.get(tsIndex, path),
+            return setPath(_.get(tsIndex, path).replace(/\//gm, pathObj.sep),
                 rootDir );
+
         } catch (e) {
             return null;
         }
@@ -106,8 +108,8 @@ var navigator = {
 };
 
 
-exports.getResourcePath = navigator.getResourcePath;
-exports.readProject = navigator.readProject;
-exports.open = navigator.open;
-exports.readResourceFileContent = navigator.readResourceFileContent;
-exports.setResources = navigator.setResources;
+exports.getResourcePath = translator.getResourcePath;
+exports.readProject = translator.readProject;
+exports.open = translator.open;
+exports.readResourceFileContent = translator.readResourceFileContent;
+exports.setResources = translator.setResources;

@@ -15,27 +15,27 @@ var options;
 
 var filter;
 
-function Resources(initResUrl, dataDir) {
+function Resources (initResUrl, dataDir) {
     'use strict';
-    var self = this;
+    var _this = this;
 
-    self.downloadCounter = 0;
-    self.finishedCB = null;
+    _this.downloadCounter = 0;
+    _this.finishedCB = null;
 
     this.index = null;
 
 
     /*jshint validthis:true */
-    self.rootResourceUrl = initResUrl;
-    self.rootDir = dataDir;
+    _this.rootResourceUrl = initResUrl;
+    _this.rootDir = dataDir;
 
-    self.setOptions = function (newOptions) {
+    _this.setOptions = function (newOptions) {
         options = _.clone(newOptions);
     };
 
-    function mkdir(pathname, successCB) {
+    function mkdir (pathname, successCB) {
 
-        mkdirp(setPath(pathname, self.rootDir), function (err) {
+        mkdirp(setPath(pathname, _this.rootDir), function (err) {
             if (err) {
                 // TODO: error handler
                 // jscs:disable disallowEmptyBlocks
@@ -48,7 +48,7 @@ function Resources(initResUrl, dataDir) {
     }
 
 
-    function getTsResource(urlString, fileUpdate, topLevel) {
+    function getTsResource (urlString, fileUpdate, topLevel) {
         var update = fileUpdate || true;
 
         var urlObj = url.parse(urlString);
@@ -74,10 +74,10 @@ function Resources(initResUrl, dataDir) {
 
     }
 
-    function canUpdateFile(urlString) {
+    function canUpdateFile (urlString) {
 
         var urlObj = url.parse(urlString);
-        var filePath = setPath(urlObj.pathname, self.rootDir);
+        var filePath = setPath(urlObj.pathname, _this.rootDir);
         var dateString = urlObj.query.slice(-8, -4) + '-' + urlObj.query.slice(-4, -2) + '-' + urlObj.query.slice(-2);
         if (fs.existsSync(filePath)) {
             var fileStat = fs.statSync(filePath);
@@ -95,7 +95,7 @@ function Resources(initResUrl, dataDir) {
         return true;
     }
 
-    function notFiltered(key, dataObject) {
+    function notFiltered (key, dataObject) {
         if (filter.length === 0) {
             return true;
         }
@@ -117,17 +117,17 @@ function Resources(initResUrl, dataDir) {
 
     }
 
-    function getTsResources(response, update, topLevel) {
+    function getTsResources (response, update, topLevel) {
         var urlString = response.urlString;
         var body = response.body;
         var urlObj = url.parse(urlString);
         var newUrlObj;
         var filePath;
         var filesTraversed = 0;
-        mkdir(path.dirname(urlObj.pathname), function () {
-
+        mkdir(path.dirname(urlObj.pathname),
+            function () {
                 if (update) {
-                    fs.writeFileSync(setPath(urlObj.pathname, self.rootDir), JSON.stringify(body));
+                    fs.writeFileSync(setPath(urlObj.pathname, _this.rootDir), JSON.stringify(body));
                 }
 
                 if (!topLevel) {
@@ -139,13 +139,13 @@ function Resources(initResUrl, dataDir) {
                             dataObject.indexOf('usfm') < 0 &&
                             notFiltered(this.key, dataObject)) {
                             filesTraversed += 1;
-                            self.downloadCounter += 1;
+                            _this.downloadCounter += 1;
                             if (dataObject.indexOf('date_modified') >= 0 && canUpdateFile(dataObject)) {
                                 getTsResource(dataObject, true);
                             } else {
                                 var newResponse;
                                 newUrlObj = url.parse(dataObject);
-                                filePath = setPath(newUrlObj.pathname, self.rootDir);
+                                filePath = setPath(newUrlObj.pathname, _this.rootDir);
                                 if (fs.existsSync(filePath)) {
                                     fs.readFile(filePath, 'utf8', function (err, data) {
                                         if (!err) {
@@ -163,22 +163,22 @@ function Resources(initResUrl, dataDir) {
                     });
                 }
 
-                console.log('filesTraversed = ' + filesTraversed + ' ; downloadCounter =' + self.downloadCounter);
-                if (filesTraversed <= 0 && self.downloadCounter <= 0) {
-                    if (self.finishedCB) {
-                        self.index = null;
-                        self.finishedCB(self);
+                console.log('filesTraversed = ' + filesTraversed + ' ; downloadCounter =' + _this.downloadCounter);
+                if (filesTraversed <= 0 && _this.downloadCounter <= 0) {
+                    if (_this.finishedCB) {
+                        _this.index = null;
+                        _this.finishedCB(_this);
                     }
                 }
-                self.downloadCounter -= 1;
+                _this.downloadCounter -= 1;
             }
         );
     }
 
 
-    self.getTsResourcesFromCatalog = function (search, finishedCallBack) {
+    _this.getTsResourcesFromCatalog = function (search, finishedCallBack) {
 
-        self.finishedCB = finishedCallBack;
+        _this.finishedCB = finishedCallBack;
         var topLevel = false;
 
         if (search === 'projects') {
@@ -193,14 +193,14 @@ function Resources(initResUrl, dataDir) {
             filter = filter.split('.');
         }
 
-        self.getTsResource(self.rootResourceUrl, true, topLevel);
+        _this.getTsResource(_this.rootResourceUrl, true, topLevel);
     };
 
 
-    self.downloadProjectList = function (cb) {
-        var urlObj = url.parse(self.rootResourceUrl);
-        var filePath = setPath(urlObj.pathname, self.rootDir);
-        self.downloadProjects(function () {
+    _this.downloadProjectList = function (cb) {
+        var urlObj = url.parse(_this.rootResourceUrl);
+        var filePath = setPath(urlObj.pathname, _this.rootDir);
+        _this.downloadProjects(function () {
             if (fs.existsSync(filePath)) {
                 var data = fs.readFileSync(filePath, 'utf8');
 
@@ -213,14 +213,14 @@ function Resources(initResUrl, dataDir) {
         });
     };
 
-    self.downloadLanguageList = function (proj, successCB) {
+    _this.downloadLanguageList = function (proj, successCB) {
 
         var langList = [];
-        self.getTsResourcesFromCatalog(proj, function () {
+        _this.getTsResourcesFromCatalog(proj, function () {
 
-            self.index = indexer.indexFiles('ts/txt/2/catalog.json', self.rootDir);
+            _this.index = indexer.indexFiles('ts/txt/2/catalog.json', _this.rootDir);
 
-            translator.setResources(self.rootDir, self.index);
+            translator.setResources(_this.rootDir, _this.index);
             var resource = translator.open(proj);
             if (resource) {
 
@@ -230,39 +230,37 @@ function Resources(initResUrl, dataDir) {
                     }
                 });
                 successCB(langList);
-            }
-            else {
+            } else {
                 successCB(null);
             }
         });
     };
 
-    self.downloadLanguage = function (proj, lang, callback) {
+    _this.downloadLanguage = function (proj, lang, callback) {
         //TODO: This function is not complete. There are some design issues
-        if (self.index === null) {
-            self.index = indexer.indexFiles('ts/txt/2/catalog.json', self.rootDir);
+        if (_this.index === null) {
+            _this.index = indexer.indexFiles('ts/txt/2/catalog.json', _this.rootDir);
         }
-        translator.setResources(self.rootDir, self.index);
+        translator.setResources(_this.rootDir, _this.index);
         var resource = translator.open(proj, lang);
         if (resource) {
             callback(resource);
-        }
-        else {
+        } else {
             callback(null);
         }
 
     };
 
-    self.downloadProject = function (proj, callback) {
-        self.getTsResourcesFromCatalog(proj, callback);
+    _this.downloadProject = function (proj, callback) {
+        _this.getTsResourcesFromCatalog(proj, callback);
     };
 
-    self.downloadProjects = function (callback) {
-        self.getTsResourcesFromCatalog('projects', callback);
+    _this.downloadProjects = function (callback) {
+        _this.getTsResourcesFromCatalog('projects', callback);
     };
 
 
-    return self;
+    return _this;
 }
 
 exports.Resources = Resources;

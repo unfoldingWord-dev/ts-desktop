@@ -19,7 +19,7 @@ var translator = {
 
         try {
             return setPath(_.get(tsIndex, path).replace(/\//gm, pathObj.sep),
-                rootDir );
+                rootDir);
 
         } catch (e) {
             return null;

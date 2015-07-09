@@ -22,88 +22,58 @@ describe('@Translator', function () {
 
     describe('@getResourcePathProject ', function () {
         it('should retrieve a 1ch project lang_catalog path', function () {
-
             var text =  dataDir + '/ts/txt/2/1ch/languages.json'.replace(/\//gm, path.sep);
             assert.equal(translator.getResourcePath('1ch.lang_catalog', index, dataDir), text);
         })
     })
 
-    describe('@getResourcePathArabicSource ', function () {
+    describe('@GetResourcePathArabicSource', function () {
         it('should retrieve a 1ch ar udb source path', function () {
             var text = dataDir + '/ts/txt/2/1co/ar/avd/source.json'.replace(/\//gm, path.sep);
             assert.equal(translator.getResourcePath('1co.ar.avd.source',index, dataDir), text);
         })
     })
 
-    describe('@readProject ', function () {
+    describe('@ReadProject', function () {
         it('should retrieve the 1ch project', function () {
             assert.equal(JSON.stringify(translator.readProject('1ch', {index:index, rootDir:dataDir})).replace(/ /g, ''), JSON.stringify(projectResource).replace(/ /g, ''));
         })
     })
 
-
-    describe('@ReadLangurage ', function () {
-        it('should retrieve the 1ch project', function () {
-            assert.equal(JSON.stringify(translator.open('1ch','en' )).replace(/ /g, ''), JSON.stringify(languageResource).replace(/ /g, ''));
+    describe('@GetProject', function () {
+        it('should retrieve the source: 1ch en ulb', function () {
+            assert.equal(JSON.stringify(translator.getProject('1ch','en','ulb')).replace(/ /g, ''), JSON.stringify(bookSource).replace(/ /g, ''));
         })
     })
 
-
-    describe('@ReadSource ', function () {
-        it('should retrieve the 1ch project', function () {
-            assert.equal(JSON.stringify(translator.open('1ch','en','ulb')).replace(/ /g, ''), JSON.stringify(bookSource).replace(/ /g, ''));
+    describe('@GetBadProject', function () {
+        it('should not retrieve the non-existant source: 2ch en ulb', function () {
+            assert.equal(translator.getProject('2ch','en','ulb'), null);
         })
     })
 
-    describe('@ReadSourceChapter ', function () {
-        it('should retrieve the 1co chapter', function () {
-            assert.equal(JSON.stringify(translator.open('1co','en','udb','13')).replace(/ /g, ''), JSON.stringify(firstCo13).replace(/ /g, ''));
+    describe('@GetLastProject', function () {
+        it('should retrieve the last valid source: 1ch en ulb', function () {
+            assert.equal(JSON.stringify(translator.getLastProject()).replace(/ /g, ''), JSON.stringify(bookSource).replace(/ /g, ''));
+        })
+    })
+/** / // still working out spec for these
+    describe('@SetTargetLanguage', function () {
+        it('should set the target language: fr', function () {
+            assert.equal(translator.setTargetLanguage('fr'), 'fr');
         })
     })
 
-    describe('@ReadSourceChapterFrame ', function () {
-        it('should retrieve the 1co frame', function () {
-            assert.equal(JSON.stringify(translator.open('1co','en','udb','13','3')).replace(/ /g, ''), JSON.stringify(firstCo13Frame).replace(/ /g, ''));
+    describe('@GetTargetLanguage', function () {
+        it('should retrieve the target language: fr', function () {
+            assert.equal(translator.getTargetLanguage(), 'fr');
         })
     })
 
-
-    describe('@ReadBadProject ', function () {
-        it('should not retrieve the 1co frame', function () {
-            assert.equal(translator.open('1coc','en','udb','13','3'), null);
+    describe('@GetLastTargetLanguage', function () {
+        it('should retrieve the last target language: fr', function () {
+            assert.equal(translator.getLastTargetLanguage(), 'fr');
         })
     })
-
-
-    describe('@ReadSourceChapterBadFrame ', function () {
-        it('should not retrieve the 1co Bad frame', function () {
-            assert.equal(translator.open('1co','en','udb','13','30'), null);
-        })
-    })
-
-    describe('@ReadSourceChapterToManyArgs ', function () {
-        it('should not retrieve the 1co To many args', function () {
-            assert.equal(translator.open('1co','en','udb','13','30','40'), null);
-        })
-    })
-
-
-    describe('@ReadSourceNoArgs ', function () {
-        it('should not retrieve no args', function () {
-            assert.equal(translator.open(), null);
-        })
-    })
-
-    describe('@ReadSourceChapterBadResource ', function () {
-        it('should not retrieve the 1co Bad Resource', function () {
-            assert.equal(translator.open('1co','en','ddd','13','30'), null);
-        })
-    })
-
-
-    describe('@ReadProject ', function () {
-        it('should retrieve the 1ch source', function () {
-            assert.equal(JSON.stringify(translator.open('1ch' )).replace(/ /g, ''), JSON.stringify(projectResource).replace(/ /g, ''));
-        })
-    })
+/**/
 })

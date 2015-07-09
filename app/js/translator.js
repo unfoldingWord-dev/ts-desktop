@@ -3,6 +3,7 @@ var utils = require('./lib/utils');
 var setPath = utils.setPath;
 var pathObj = require('path');
 var fs = require('fs');
+var conf = require('./configurator');
 var resources = null;
 
 var translator = {
@@ -37,71 +38,48 @@ var translator = {
 
     },
 
-    open: function (project, language, source, chapter, frame) {
+    getProject: function (projectId, languageId, resourceId) {
         'use strict';
-        var path;
+        var path = projectId+'.'+languageId+'.'+resourceId+'.source';
         var index = resources.tsIndex;
         var rootDir = resources.rootDir;
-        var workingArgs = [];
-        var content;
-        var pos = 0;
-        var resPath;
-
-        //arguments are not a true array. So making a shadow arguments array
-        while (pos < arguments.length) {
-            workingArgs[pos] = arguments[pos];
-            pos++;
-        }
-
-        path = workingArgs.toString().replace(/,/g, '.');
-
-        if (arguments.length > 5) {
-            return null;
-        }
-        if (arguments.length === 1) {
-            //project resource
-            path = path + '.lang_catalog';
-        }
-        if (arguments.length === 2) {
-            //language resource
-            path = path + '.res_catalog';
-        }
-        if (arguments.length === 3) {
-            //source file
-            path = path + '.source';
-        }
-        if (arguments.length >= 5) {
-            //frame numbers in chapter
-            frame = workingArgs.pop();
-        }
-        if (arguments.length >= 4) {
-            //chapter
-            chapter = workingArgs.pop();
-            path = workingArgs.toString().replace(/,/g, '.') + '.source';
-        }
-
-        resPath = this.getResourcePath(path, index, rootDir);
+        var resPath = this.getResourcePath(path, index, rootDir);
         if (resPath) {
-            content = this.readResourceFileContent(this.getResourcePath(path, index, rootDir));
-            if (arguments.length < 4) {
-                return content;
-            }
-
-            if (arguments.length === 4) {
-                return content.chapters[chapter - 1];
-            }
-
-            if (arguments.length === 5) {
-                return content.chapters[chapter - 1].frames[frame - 1];
-            }
+            conf.setValue('last_project_id', projectId);
+            conf.setValue(projectId+'_source_language_id', languageId);
+            conf.setValue(projectId+'_resource_id', resourceId);
+            return this.readResourceFileContent(resPath);
         }
         return null;
+    },
+
+    getTargetLanguage: function (projectId) {
+        'use strict';
+        if (arguments.length < 1 || projectId == null) return null;
+        return conf.getString(projectId+'_target_language_id');
+
+    },
+
+    getLastProject: function () {
+        'use strict';
+        var projectId = conf.getString('last_project_id');
+        var languageId = conf.getString(projectId+'_source_language_id');
+        var resourceId = conf.getString(projectId+'_resource_id');
+        return this.getProject(projectId, languageId, resourceId);
+    },
+
+    getLastTargetLanguage: function () {
+        'use strict';
+        return conf.getString(conf.getString('last_project_id')+'_target_language_id');
+
     }
 };
 
-
-exports.getResourcePath = translator.getResourcePath;
-exports.readProject = translator.readProject;
-exports.open = translator.open;
-exports.readResourceFileContent = translator.readResourceFileContent;
 exports.setResources = translator.setResources;
+exports.getResourcePath = translator.getResourcePath;
+exports.readResourceFileContent = translator.readResourceFileContent;
+exports.readProject = translator.readProject;
+exports.getProject = translator.getProject;
+exports.getTargetLanguage = translator.getTargetLanguage;
+exports.getLastProject = translator.getLastProject;
+exports.getLastTargetLanguage = translator.getLastTargetLanguage;

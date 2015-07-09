@@ -53,7 +53,7 @@ describe('@Indexer', function () {
 
     })
 
-
+/** / // legacy
     describe('@TranslatorIndex', function () {
         beforeEach(function (done) {
             var index = indexer.indexFiles( 'catalog.json', dataDir + path.sep + 'tsFiles');
@@ -139,5 +139,5 @@ describe('@Indexer', function () {
             })
         })
     })
-
+/**/
 })

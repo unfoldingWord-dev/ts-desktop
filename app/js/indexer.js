@@ -36,11 +36,14 @@ var indexer = {
 
             traverse(body).forEach(function (dataObject) {
                 var filepath, newResponse;
-                if (typeof dataObject === 'string' && dataObject.indexOf('https') >= 0 && dataObject.indexOf('date_modified') >= 0 && dataObject.indexOf('usfm') < 0) {
-                    setIndex(index, dataObject, this.key);
+                if (typeof dataObject === 'string' &&
+                    dataObject.indexOf('https') >= 0 &&
+                    dataObject.indexOf('date_modified') >= 0 &&
+                    dataObject.indexOf('usfm') < 0) {
                     newUrlObj = url.parse(dataObject);
                     filepath = setPath(newUrlObj.pathname, rootDir);
                     if (filepath && fs.existsSync(filepath)) {
+                        setIndex(index, dataObject, this.key);
                         var data = fs.readFileSync(filepath, 'utf8');
                         if (data.length > 0) {
                             newResponse = {body: JSON.parse(data)};

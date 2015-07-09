@@ -4,20 +4,23 @@ var setPath = utils.setPath;
 var pathObj = require('path');
 var fs = require('fs');
 var conf = require('./configurator');
-var resources = null;
+var rootDir;
+var tsIndex;
 
 var translator = {
-    setResources: function (inResource) {
+    setResources: function (inRootDir, inIndex) {
         'use strict';
-        resources = inResource;
+        tsIndex = inIndex;
+        rootDir = inRootDir;
     },
 
     getResourcePath: function (path) {
         'use strict';
 
         try {
-            return setPath(_.get(resources.tsIndex, path).replace(/\//gm, pathObj.sep),
-                resources.rootDir + pathObj.sep + 'tsFiles');
+            return setPath(_.get(tsIndex, path).replace(/\//gm, pathObj.sep),
+                rootDir);
+
         } catch (e) {
             return null;
         }
@@ -26,15 +29,20 @@ var translator = {
 
     readResourceFileContent: function (path) {
         'use strict';
-        var data = fs.readFileSync(path, 'utf8');
-        return JSON.parse(data);
+        if (fs.existsSync(path)) {
+            var data = fs.readFileSync(path, 'utf8');
+            if (data) {
+                return JSON.parse(data);
+            }
+        }
+        return null;
     },
 
     readProject: function (project) {
         'use strict';
         var path = project + '.lang_catalog';
         return this.readResourceFileContent(this.getResourcePath(path,
-            resources.tsIndex, resources.rootDir));
+            tsIndex, rootDir));
 
     },
 

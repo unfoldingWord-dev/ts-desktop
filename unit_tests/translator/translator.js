@@ -5,43 +5,31 @@ var assert = require('assert');
 var translator = require('../../app/js/translator');
 var index = require('./data/resources');
 var path = require('path');
-var resources = require('../../app/js/downloader');
-var dataDir = __dirname + path.sep + 'data';
+var dataDir = __dirname + path.sep + 'data' + path.sep + 'tsFiles';
 var bookSource = require('./data/1ch.en.ulb.source.json');
 var languageResource = require('./data/languageResource.json');
 var projectResource = require('./data/projectResource.json');
 var firstCo = require('./data/1co.json');
 var firstCo13 = firstCo.chapters[12];
 var firstCo13Frame = firstCo.chapters[12].frames[2];
-var pr = new resources.resources(dataDir);
 
 
 describe('@Translator', function () {
     beforeEach(function(done) {
-        pr.setOptions ({index:index, rootDir:dataDir});
-        translator.setResources(pr);
+        translator.setResources(dataDir, index);
         done();
     });
 
-    describe('@CheckIndexing', function () {
-        it('should set and get index', function () {
-            var pr = new resources.resources(dataDir);
-            var newIndex = {a: { b: {c: 'c'}}};
-            pr.setTsIndex(newIndex);
-            assert.equal(JSON.stringify( pr.tsIndex()).replace(/ /g, ''),JSON.stringify(newIndex).replace(/ /g, '') );
-        })
-    })
-
-    describe('@GetResourcePathProject', function () {
+    describe('@getResourcePathProject ', function () {
         it('should retrieve a 1ch project lang_catalog path', function () {
-            var text = dataDir + '/tsFiles/ts/txt/2/1ch/languages.json'.replace(/\//gm, path.sep);
+            var text =  dataDir + '/ts/txt/2/1ch/languages.json'.replace(/\//gm, path.sep);
             assert.equal(translator.getResourcePath('1ch.lang_catalog', index, dataDir), text);
         })
     })
 
     describe('@GetResourcePathArabicSource', function () {
         it('should retrieve a 1ch ar udb source path', function () {
-            var text = dataDir + '/tsFiles/ts/txt/2/1co/ar/avd/source.json'.replace(/\//gm, path.sep);
+            var text = dataDir + '/ts/txt/2/1co/ar/avd/source.json'.replace(/\//gm, path.sep);
             assert.equal(translator.getResourcePath('1co.ar.avd.source',index, dataDir), text);
         })
     })

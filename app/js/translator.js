@@ -49,9 +49,7 @@ var translator = {
     getProject: function (projectId, languageId, resourceId) {
         'use strict';
         var path = projectId+'.'+languageId+'.'+resourceId+'.source';
-        var index = resources.tsIndex;
-        var rootDir = resources.rootDir;
-        var resPath = this.getResourcePath(path, index, rootDir);
+        var resPath = this.getResourcePath(path, tsIndex, rootDir);
         if (resPath) {
             conf.setValue('last_project_id', projectId);
             conf.setValue(projectId+'_source_language_id', languageId);

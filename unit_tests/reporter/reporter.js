@@ -26,7 +26,7 @@ describe('@Reporter', function() {
                         //reporter.js:<line>:<column> this will need to be changed if the code changes
                         textExpected = date + ' I/reporter.js:23:3: ' + key + '\r\n';
 
-                        reporter.stringFromLogFile(function(logResults){
+                        reporter.stringFromLogFile(null, function(logResults){
                             logFileResults = logResults;
                             done();
                         });
@@ -58,7 +58,7 @@ describe('@Reporter', function() {
                         //reporter.js:<line>:<column> this will need to be changed if the code changes
                         textExpected = date + ' W/reporter.js:55:3: ' + key + '\r\n';
 
-                        reporter.stringFromLogFile(function(logResults){
+                        reporter.stringFromLogFile(null, function(logResults){
                             logFileResults = logResults;
                             done();
                         });
@@ -90,7 +90,7 @@ describe('@Reporter', function() {
                         //reporter.js:<line>:<column> this will need to be changed if the code changes
                         textExpected = date + ' E/reporter.js:87:3: ' + key + '\r\n';
 
-                        reporter.stringFromLogFile(function(logResults){
+                        reporter.stringFromLogFile(null, function(logResults){
                             logFileResults = logResults;
                             done();
                         });
@@ -152,7 +152,7 @@ describe('@Reporter', function() {
             labels.sort(function(a, b){return a > b});
             var githubResponse = '';
             before(function (done) {
-                reporter.reportCrash(title, function (res) {
+                reporter.reportCrash(title, null, function (res) {
                     githubResponse = JSON.parse(res);
                     if (githubResponse.message) {
                         assert.fail(false, true, githubResponse.message, '=');

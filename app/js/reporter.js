@@ -4,7 +4,7 @@
 /* settings
  * TODO: Hook to configurator once it is done
  * */
-var logPath = './log.txt';
+var logPath = 'logs\\log.txt';
 var oauthToken = '';
 var repoOwner = 'unfoldingWord-dev';
 var repo = 'ts-desktop';
@@ -14,6 +14,7 @@ var version = require('../../package.json').version;
 var fs = require('fs');
 var os = require('os');
 var https = require('https');
+var mkdirp = require('mkdirp');
 
 var reporter = {
     logNotice: function (string, callback) {
@@ -109,14 +110,28 @@ var reporter = {
         var date = new Date();
         date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
         var message = date + ' ' + level + '/' + location + ': ' + string + '\r\n';
-        fs.appendFile(logPath, message, function (err) {
-            if (err) {
-                throw new Error(err.message);
+        var dir = logPath.split(/\\|\//);
+        dir.pop();
+        dir = dir.join('\\');
+        if(dir === ''){
+            dir = '.';
+        }
+        mkdirp(dir, function(e){
+            if(e){
+                throw new Error(e);
             }
-            if (typeof callback === 'function') {
-                callback();
+            else{
+                fs.appendFile(logPath, message, function (err) {
+                    if (err) {
+                        throw new Error(err.message);
+                    }
+                    if (typeof callback === 'function') {
+                        callback();
+                    }
+                });
             }
         });
+
         reporter.truncateLogFile();
     },
 

@@ -4,7 +4,7 @@
 /* settings
  * TODO: Hook to configurator once it is done
  * */
-var logPath = 'logs\\log.txt';
+var logPath = './log.txt';
 var oauthToken = '';
 var repoOwner = 'unfoldingWord-dev';
 var repo = 'ts-desktop';

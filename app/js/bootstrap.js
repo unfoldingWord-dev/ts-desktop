@@ -140,19 +140,41 @@ this.App = (function () {
             }
         },
 
+        /**
+         * A hook for global error catching
+         */
+        registerErrorReporter: function(){
+            let _this = this;
+            process.on('uncaughtException', function(err){
+                var date = new Date();
+                date = date.getFullYear() + '_' + date.getMonth() + "_" + date.getDay();
+                _this.reporter.setLogPath('logs\\crash\\' + date + '.crash');
+                _this.reporter.logError(err.message + '\n' + err.stack, function(){
+                    _this.reporter.setLogPath('logs\\log.txt');
+                    /**
+                     * TODO: Hook in a UI
+                     * Currently the code quits quietly without notifying the user
+                     * This should probably be the time when the user chooses to submit what happened or not
+                     * then we restart the application
+                     */
+                    gui.App.quit();
+                });
+            });
+        },
+
         init: function () {
             let _this = this;
 
             _this.registerEvents();
             _this.registerShortcuts();
             _this.initializeConfig();
+            _this.registerErrorReporter();
 
             let platformInit = _this.platformInit[process.platform];
             platformInit && platformInit.call(_this);
 
             _this.display();
         }
-
     };
 
     App.init();

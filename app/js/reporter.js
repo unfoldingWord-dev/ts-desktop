@@ -113,14 +113,13 @@ var reporter = {
         var dir = logPath.split(/\\|\//);
         dir.pop();
         dir = dir.join('\\');
-        if(dir === ''){
+        if (dir === '') {
             dir = '.';
         }
-        mkdirp(dir, function(e){
-            if(e){
+        mkdirp(dir, function (e) {
+            if (e) {
                 throw new Error(e);
-            }
-            else{
+            } else {
                 fs.appendFile(logPath, message, function (err) {
                     if (err) {
                         throw new Error(err.message);
@@ -138,7 +137,7 @@ var reporter = {
     stringFromLogFile: function (filePath, callback) {
         'use strict';
         var readPath = logPath;
-        if(filePath){
+        if (filePath) {
             readPath = filePath;
         }
         fs.exists(readPath, function (exists) {
@@ -225,8 +224,8 @@ var reporter = {
         bodyBuilder.push('\nLog History\n======');
         bodyBuilder.push('```javascript');
         reporter.stringFromLogFile(null, function (results) {
-            if(filePath){
-                reporter.stringFromLogFile(filePath, function(crashFileResults){
+            if (filePath) {
+                reporter.stringFromLogFile(filePath, function (crashFileResults) {
                     bodyBuilder.push(results);
                     bodyBuilder.push('```');
                     bodyBuilder.push('\nCrash File\n======');
@@ -240,8 +239,7 @@ var reporter = {
                         }
                     });
                 });
-            }
-            else{
+            } else {
                 bodyBuilder.push(results);
                 bodyBuilder.push('```');
                 issueObject.body = bodyBuilder.join('\n');

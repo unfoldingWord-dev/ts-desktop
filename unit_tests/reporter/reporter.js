@@ -2,13 +2,22 @@
  * Created by Emmitt on 7/2/2015.
  */
 var assert = require('assert');
-var reporter = require('../../app/js/reporter');
 var fs = require('fs');
-var version = require('../../package.json').version;
 var grunt = require('grunt');
-var reportToGithub = false; //this can be enabled but there must be an OAUTH Token that can be pulled in reporter.js
+
+var Reporter = require('../../app/js/reporter');
+var version = require('../../package.json').version;
 /* TODO: log from configurator later */
 var logPath = './log.txt';
+
+var reporter = new Reporter.generate({
+    logPath: logPath,
+    oauthToken: '',
+    repoOwner: 'unfoldingWord-dev',
+    repo: 'ts-desktop',
+    maxLogFileKb: 200,
+    appVersion: version
+});
 
 describe('@Reporter', function() {
     //careful when editing this file as the expected strings are hardcoded with line numbers
@@ -24,7 +33,7 @@ describe('@Reporter', function() {
                         var date = new Date();
                         date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
                         //reporter.js:<line>:<column> this will need to be changed if the code changes
-                        textExpected = date + ' I/reporter.js:23:3: ' + key + '\r\n';
+                        textExpected = date + ' I/reporter.js:32:3: ' + key + '\r\n';
 
                         reporter.stringFromLogFile(null, function(logResults){
                             logFileResults = logResults;
@@ -56,7 +65,7 @@ describe('@Reporter', function() {
                         var date = new Date();
                         date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
                         //reporter.js:<line>:<column> this will need to be changed if the code changes
-                        textExpected = date + ' W/reporter.js:55:3: ' + key + '\r\n';
+                        textExpected = date + ' W/reporter.js:64:3: ' + key + '\r\n';
 
                         reporter.stringFromLogFile(null, function(logResults){
                             logFileResults = logResults;
@@ -88,7 +97,7 @@ describe('@Reporter', function() {
                         var date = new Date();
                         date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
                         //reporter.js:<line>:<column> this will need to be changed if the code changes
-                        textExpected = date + ' E/reporter.js:87:3: ' + key + '\r\n';
+                        textExpected = date + ' E/reporter.js:96:3: ' + key + '\r\n';
 
                         reporter.stringFromLogFile(null, function(logResults){
                             logFileResults = logResults;
@@ -114,7 +123,7 @@ describe('@Reporter', function() {
      * active internet connection
      * */
     describe('@reportBug', function(){
-        if(reportToGithub) {
+        if(reporter.canReportToGithub()) {
             var title = '[Automated] Bug Report';
             var labels = [version, 'Bug Report'];
             labels.sort(function(a, b){return a > b});
@@ -146,7 +155,7 @@ describe('@Reporter', function() {
     });
 
     describe('@reportCrash', function(){
-        if(reportToGithub) {
+        if(reporter.canReportToGithub()) {
             var title = '[Automated] Crash Report';
             var labels = [version, 'Crash Report'];
             labels.sort(function(a, b){return a > b});

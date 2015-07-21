@@ -12,3 +12,4 @@ resources
 results.txt
 unit_tests/report.txt
 acceptance_tests/report.txt
+app/config/private.json

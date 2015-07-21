@@ -7,15 +7,23 @@ var grunt = require('grunt');
 
 var Reporter = require('../../app/js/reporter');
 var version = require('../../package.json').version;
-/* TODO: log from configurator later */
-var logPath = './log.txt';
+
+var configurator = require('../../app/js/configurator');
+var defaultconfig = require('../../app/config/defaults');
+var privateconfig = require('../../app/config/private');
+
+configurator.setStorage(window.localStorage);
+configurator.loadConfig(defaultconfig);
+configurator.loadConfig(privateconfig);
+
+var logPath = configurator.getString('logPath');
 
 var reporter = new Reporter.generate({
     logPath: logPath,
-    oauthToken: '',
-    repoOwner: 'unfoldingWord-dev',
-    repo: 'ts-desktop',
-    maxLogFileKb: 200,
+    oauthToken: configurator.getString('oauthToken'),
+    repoOwner: configurator.getString('repoOwner'),
+    repo: configurator.getString('repo'),
+    maxLogFileKb: configurator.getInt('maxLogFileKb'),
     appVersion: version
 });
 

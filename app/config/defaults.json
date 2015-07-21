@@ -1,0 +1,26 @@
+[
+    {
+        "name": "logPath",
+        "default": "./log.txt",
+        "readonly": true,
+        "type": "string"
+    },
+    {
+        "name": "repoOwner",
+        "default": "unfoldingWord-dev",
+        "readonly": true,
+        "type": "string"
+    },
+    {
+        "name": "repo",
+        "default": "ts-desktop",
+        "readonly": true,
+        "type": "string"
+    },
+    {
+        "name": "maxLogFileKb",
+        "default": 200,
+        "readonly": true,
+        "type": "int"
+    }
+]

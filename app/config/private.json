@@ -1,0 +1,8 @@
+[
+    {
+        "name": "oauthToken",
+        "default": "",
+        "readonly": true,
+        "type": "string"
+    }
+]

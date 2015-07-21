@@ -8,7 +8,7 @@ var https = require('https');
 var mkdirp = require('mkdirp');
 
 function Reporter (args) {
-    "use strict";
+    'use strict';
 
     var _this = this;
     var logPath = args.logPath || './log.txt';
@@ -18,7 +18,7 @@ function Reporter (args) {
     var maxLogFileKb = args.maxLogFileKb || 200;
     var appVersion = args.appVersion || '0.0.0';
 
-   _this.logNotice = function (string, callback) {
+    _this.logNotice = function (string, callback) {
         if (!string) {
             throw new Error('reporter.logNotice requires a message.');
         }
@@ -202,8 +202,8 @@ function Reporter (args) {
         bodyBuilder.push('```javascript');
 
         _this.stringFromLogFile(null, function (results) {
-            if(filePath){
-                _this.stringFromLogFile(filePath, function(crashFileResults){
+            if (filePath) {
+                _this.stringFromLogFile(filePath, function (crashFileResults) {
                     bodyBuilder.push(results);
                     bodyBuilder.push('```');
                     bodyBuilder.push('\nCrash File\n======');
@@ -268,7 +268,7 @@ function Reporter (args) {
         postReq.end();
     };
 
-    _this.canReportToGithub = function() {
+    _this.canReportToGithub = function () {
         return repo !== '' && repoOwner !== '' && oauthToken !== '';
     };
 }

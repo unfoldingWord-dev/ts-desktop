@@ -7,7 +7,7 @@
 const readOnlyPrefix = 'locked|';
 const defaultPrefix = 'default|';
 
-var storage = window.localStorage;
+var storage = {};
 
 var getValue = function (key) {
     'use strict';

@@ -12,7 +12,7 @@ var configurator = require('../../app/js/configurator');
 var defaultconfig = require('../../app/config/defaults');
 var privateconfig = require('../../app/config/private');
 
-configurator.setStorage(window.localStorage);
+configurator.setStorage({});
 configurator.loadConfig(defaultconfig);
 configurator.loadConfig(privateconfig);
 

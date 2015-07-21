@@ -8,22 +8,22 @@ var grunt = require('grunt');
 var Reporter = require('../../app/js/reporter');
 var version = require('../../package.json').version;
 
-var configurator = require('../../app/js/configurator');
-var defaultconfig = require('../../app/config/defaults');
-var privateconfig = require('../../app/config/private');
+var reporterConfigurator = require('../../app/js/configurator');
+var reporterDefaultConfig = require('../../app/config/defaults');
+var reporterPrivateConfig = require('../../app/config/private');
 
-configurator.setStorage({});
-configurator.loadConfig(defaultconfig);
-configurator.loadConfig(privateconfig);
+reporterConfigurator.setStorage({});
+reporterConfigurator.loadConfig(reporterDefaultConfig);
+reporterConfigurator.loadConfig(reporterPrivateConfig);
 
-var logPath = configurator.getString('logPath');
+var logPath = reporterConfigurator.getString('logPath');
 
 var reporter = new Reporter.instance({
     logPath: logPath,
-    oauthToken: configurator.getString('oauthToken'),
-    repoOwner: configurator.getString('repoOwner'),
-    repo: configurator.getString('repo'),
-    maxLogFileKb: configurator.getInt('maxLogFileKb'),
+    oauthToken: reporterConfigurator.getString('oauthToken'),
+    repoOwner: reporterConfigurator.getString('repoOwner'),
+    repo: reporterConfigurator.getString('repo'),
+    maxLogFileKb: reporterConfigurator.getInt('maxLogFileKb'),
     appVersion: version
 });
 

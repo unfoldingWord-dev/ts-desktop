@@ -10,7 +10,7 @@ var version = require('../../package.json').version;
 /* TODO: log from configurator later */
 var logPath = './log.txt';
 
-var reporter = new Reporter.generate({
+var reporter = new Reporter.instance({
     logPath: logPath,
     oauthToken: '',
     repoOwner: 'unfoldingWord-dev',

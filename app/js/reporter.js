@@ -1,105 +1,85 @@
 /**
  * Created by Emmitt on 6/26/2015.
  */
-/* settings
- * TODO: Hook to configurator once it is done
- * */
-var logPath = './log.txt';
-var oauthToken = '';
-var repoOwner = 'unfoldingWord-dev';
-var repo = 'ts-desktop';
-var maxLogFileKbs = 200;
 
-var version = require('../../package.json').version;
 var fs = require('fs');
 var os = require('os');
 var https = require('https');
 var mkdirp = require('mkdirp');
 
-var reporter = {
-    logNotice: function (string, callback) {
-        'use strict';
+function Reporter (args) {
+    "use strict";
+
+    var _this = this;
+    var logPath = args.logPath || './log.txt';
+    var oauthToken = args.oauthToken || '';
+    var repoOwner = args.repoOwner || '';
+    var repo = args.repo || '';
+    var maxLogFileKb = args.maxLogFileKb || 200;
+    var appVersion = args.appVersion || '0.0.0';
+
+   _this.logNotice = function (string, callback) {
         if (!string) {
             throw new Error('reporter.logNotice requires a message.');
         }
-        reporter.toLogFile('I', string, function () {
+        _this.toLogFile('I', string, function () {
             if (typeof callback === 'function') {
                 callback();
             }
         });
-    },
+    };
 
-    logWarning: function (string, callback) {
-        'use strict';
+    _this.logWarning = function (string, callback) {
         if (!string) {
             throw new Error('reporter.logWarning requires a message.');
         }
-        reporter.toLogFile('W', string, function () {
+        _this.toLogFile('W', string, function () {
             if (typeof callback === 'function') {
                 callback();
             }
         });
-    },
+    };
 
-    logError: function (string, callback) {
-        'use strict';
+    _this.logError = function (string, callback) {
         if (!string) {
             throw new Error('reporter.logError requires a message.');
         }
-        reporter.toLogFile('E', string, function () {
+        this.toLogFile('E', string, function () {
             if (typeof callback === 'function') {
                 callback();
             }
         });
-    },
+    };
 
-    reportBug: function (string, callback) {
-        'use strict';
+    _this.reportBug = function (string, callback) {
         if (!string) {
             throw new Error('reporter.reportBug requires a message.');
         }
-        reporter.formGithubIssue('Bug Report', string, null, function (res) {
+        _this.formGithubIssue('bug report', string, null, function (res) {
             if (typeof callback === 'function') {
                 callback(res);
             }
         });
-    },
+    };
 
-    reportCrash: function (string, crashFilePath, callback) {
-        'use strict';
-        reporter.formGithubIssue('Crash Report', string, crashFilePath, function (res) {
+    _this.reportCrash = function (string, crashFilePath, callback) {
+        _this.formGithubIssue('crash report', string, crashFilePath, function (res) {
             if (typeof callback === 'function') {
                 callback(res);
             }
         });
-    },
+    };
 
-    stackTrace: function () {
-        'use strict';
+    _this.stackTrace = function () {
         var err = new Error();
         return err.stack;
-    },
+    };
 
-    getLogPath: function () {
-        'use strict';
-        return logPath;
-    },
-
-    setLogPath: function (string) {
-        'use strict';
-        if (string) {
-            logPath = string;
-        } else {
-            throw new Error('reporter.setLogPath() requires a string!');
-        }
-    },
-
-    toLogFile: function (level, string, callback) {
-        'use strict';
+    _this.toLogFile = function (level, string, callback) {
         /* We make 3 calls before processing who called the original
          *  log command; therefore, the 4th call will be the original caller.
          * */
-        var location = reporter.stackTrace().split('\n')[4];
+        var location = _this.stackTrace().split('\n')[4];
         try {
             location = location.split(/(\\|\/)/);
             location = location[location.length - 1];
@@ -131,11 +111,10 @@ var reporter = {
             }
         });
 
-        reporter.truncateLogFile();
-    },
+        _this.truncateLogFile();
+    };
 
-    stringFromLogFile: function (filePath, callback) {
-        'use strict';
+    _this.stringFromLogFile = function (filePath, callback) {
         var readPath = logPath;
         if (filePath) {
             readPath = filePath;
@@ -159,15 +138,14 @@ var reporter = {
                 }
             }
         });
-    },
+    };
 
-    truncateLogFile: function () {
-        'use strict';
+    _this.truncateLogFile = function () {
         fs.stat(logPath, function (err, stats) {
             if (stats) {
                 var kb = stats.size / 1024;
-                if (kb >= maxLogFileKbs) {
-                    reporter.stringFromLogFile(null, function (res) {
+                if (kb >= maxLogFileKb) {
+                    _this.stringFromLogFile(null, function (res) {
                         res = res.split('\n');
                         res = res.slice(res.length / 2, res.length - 1);
                         res = res.join('\n');
@@ -182,14 +160,13 @@ var reporter = {
                 }
             }
         });
-    },
+    };
 
-    formGithubIssue: function (type, string, filePath, callback) {
-        'use strict';
+    _this.formGithubIssue = function (type, string, filePath, callback) {
         var issueObject = {};
         issueObject.user = repoOwner;
         issueObject.repo = repo;
-        issueObject.labels = [type, version];
+        issueObject.labels = [type, appVersion];
         if (string) {
             if (string.length > 30) {
                 issueObject.title = string.substr(0, 29) + '...';
@@ -210,22 +187,23 @@ var reporter = {
         bodyBuilder.push('\nEnvironment\n======');
         bodyBuilder.push('Environment Key | Value');
         bodyBuilder.push(':--: | :--:');
-        bodyBuilder.push('Version |' + version);
-        bodyBuilder.push('Operation System | ' + os.type());
+        bodyBuilder.push('Version |' + appVersion);
+        bodyBuilder.push('Operating System | ' + os.type());
         bodyBuilder.push('Platform | ' + os.platform());
         bodyBuilder.push('Release | ' + os.release());
         bodyBuilder.push('Architecture | ' + os.arch());
-        if (type === 'Crash Report') {
+        if (type === 'crash report') {
             bodyBuilder.push('\nStack Trace\n======');
             bodyBuilder.push('```javascript');
-            bodyBuilder.push(reporter.stackTrace());
+            bodyBuilder.push(_this.stackTrace());
             bodyBuilder.push('```');
         }
         bodyBuilder.push('\nLog History\n======');
         bodyBuilder.push('```javascript');
-        reporter.stringFromLogFile(null, function (results) {
-            if (filePath) {
-                reporter.stringFromLogFile(filePath, function (crashFileResults) {
+
+        _this.stringFromLogFile(null, function (results) {
+            if(filePath){
+                _this.stringFromLogFile(filePath, function(crashFileResults){
                     bodyBuilder.push(results);
                     bodyBuilder.push('```');
                     bodyBuilder.push('\nCrash File\n======');
@@ -233,7 +211,7 @@ var reporter = {
                     bodyBuilder.push(crashFileResults);
                     bodyBuilder.push('```');
                     issueObject.body = bodyBuilder.join('\n');
-                    reporter.sendIssueToGithub(issueObject, function (res) {
+                    _this.sendIssueToGithub(issueObject, function (res) {
                         if (typeof callback === 'function') {
                             callback(res);
                         }
@@ -243,17 +221,16 @@ var reporter = {
                 bodyBuilder.push(results);
                 bodyBuilder.push('```');
                 issueObject.body = bodyBuilder.join('\n');
-                reporter.sendIssueToGithub(issueObject, function (res) {
+                _this.sendIssueToGithub(issueObject, function (res) {
                     if (typeof callback === 'function') {
                         callback(res);
                     }
                 });
             }
         });
-    },
+    };
 
-    sendIssueToGithub: function (issue, callback) {
-        'use strict';
+    _this.sendIssueToGithub = function (issue, callback) {
         var params = {};
         params.title = issue.title;
         params.body = issue.body;
@@ -289,14 +266,11 @@ var reporter = {
         });
         postReq.write(paramsJson);
         postReq.end();
-    }
-};
+    };
 
-exports.logNotice = reporter.logNotice;
-exports.logWarning = reporter.logWarning;
-exports.logError = reporter.logError;
-exports.reportBug = reporter.reportBug;
-exports.reportCrash = reporter.reportCrash;
-exports.getLogPath = reporter.getLogPath;
-exports.setLogPath = reporter.setLogPath;
-exports.stringFromLogFile = reporter.stringFromLogFile;
+    _this.canReportToGithub = function() {
+        return repo !== '' && repoOwner !== '' && oauthToken !== '';
+    };
+}
+
+exports.generate = Reporter;

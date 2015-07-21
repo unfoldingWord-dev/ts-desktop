@@ -1,11 +1,13 @@
 /**
- * Created by joel on 6/23/2015.
+ * ts.Configurator
+ * settings manager that uses local storage by default, but can be overridden to use any storage provider.
+ * Configurations are stored as complex key values (includes type, mutability, etc)
  */
 
 const readOnlyPrefix = 'locked|';
 const defaultPrefix = 'default|';
 
-var storage;
+var storage = {};
 
 var getValue = function (key) {
     'use strict';
@@ -120,7 +122,7 @@ var configurator = {
         'use strict';
 
         if (storage === undefined) {
-            throw 'You must call setStorage with a valid storage object first';
+            throw 'Storage is undefined. Please call setStorage with a valid storage object';
         }
 
         for (var i = 0; i < config.length; i++) {

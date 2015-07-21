@@ -273,4 +273,4 @@ function Reporter (args) {
     };
 }
 
-exports.generate = Reporter;
+exports.instance = Reporter;

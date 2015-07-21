@@ -18,7 +18,7 @@ configurator.loadConfig(privateconfig);
 
 var logPath = configurator.getString('logPath');
 
-var reporter = new Reporter.generate({
+var reporter = new Reporter.instance({
     logPath: logPath,
     oauthToken: configurator.getString('oauthToken'),
     repoOwner: configurator.getString('repoOwner'),

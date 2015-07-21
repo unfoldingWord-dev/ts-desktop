@@ -64,8 +64,7 @@ var translator = {
         if (arguments.length < 1 || projectId === null) {
             return null;
         }
-        return conf.getString(projectId + '_target_language_id');
-
+        return conf.getString(projectId+'_target_language_id');
     },
 
     getLastProject: function () {

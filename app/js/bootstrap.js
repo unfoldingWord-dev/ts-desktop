@@ -148,8 +148,8 @@ this.App = (function () {
                 var date = new Date();
                 date = date.getFullYear() + '_' + date.getMonth() + '_' + date.getDay();
                 var path = 'logs\\crash\\' + date + '.crash';
-                var errorReporter = new reporter({logPath: path});
-                errorReporter.logError(err.message + '\n' + err.stack, function () {
+                var crashReporter = new reporter.instance({logPath: path});
+                crashReporter.logError(err.message + '\n' + err.stack, function () {
                     /**
                      * TODO: Hook in a UI
                      * Currently the code quits quietly without notifying the user

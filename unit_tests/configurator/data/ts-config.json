@@ -1,31 +1,42 @@
 [
     {
         "name": "string",
-        "default": "test string",
-        "type": "string"
+        "value": "test string",
+        "meta": {
+            "mutable": true,
+            "type": "string"
+        }
     },
     {
         "name": "int",
-        "default": 111,
-        "type": "int"
+        "value": 111,
+        "meta": {
+            "mutable": true,
+            "type": "int"
+        }
     },
     {
         "name": "bool",
-        "default": true,
-        "type": "bool"
+        "value": true,
+        "meta": {
+            "mutable": true,
+            "type": "bool"
+        }
     },
     {
         "name": "readonly",
-        "default": "I am immutable",
-        "type": "string",
-        "readonly": true
+        "value": "I am immutable",
+        "meta": {
+            "mutable": false,
+            "type": "string"
+        }
     },
     {
         "name": "willpurge",
-        "default": "this is the default",
-        "type": "string",
-        "readonly": true
+        "value": "this is the default",
+        "meta": {
+            "mutable": false,
+            "type": "string"
+        }
     }
-
-
 ]

@@ -1,50 +1,59 @@
 [
     {
         "name": "Setting 1",
-        "default": 1,
-        "choices" : [
-            "1",
-            "22",
-            "434"
-        ],
-        "type": "int",
-        "binding": "setting1Handler"
+        "value": 1,
+        "meta": {
+            "mutable": true,
+            "type": "int"
+        }
     },
     {
         "name": "Setting 2",
-        "default": "I am immutable",
-        "readonly": true,
-        "type": "string",
-        "binding": "setting2Handler"
+        "value": "I am immutable",
+        "meta": {
+            "mutable": false,
+            "type": "string"
+        }
     },
     {
         "name": "User",
-        "default": "SomeGuy",
-        "type": "string",
-        "binding": "func1"
+        "value": "SomeGuy",
+        "meta": {
+            "mutable": true,
+            "type": "string"
+        }
     },
     {
         "name": "Language",
-        "default": "Greek",
-        "type": "string",
-        "binding": "func2"
+        "value": "Greek",
+        "meta": {
+            "mutable": true,
+            "type": "string"
+        }
     },
     {
         "name": "Country",
-        "default": "Greece",
-        "type": "string",
-        "binding": "func3"
+        "value": "Greece",
+        "meta": {
+            "mutable": true,
+            "type": "string"
+        }
     },
     {
         "name": "Font",
-        "default": "Tahoma",
-        "type": "string",
-        "binding": "func4"
+        "value": "Tahoma",
+        "meta": {
+            "mutable": true,
+            "type": "string"
+        }
     },
     {
         "name": "Likes tS",
-        "default": "true",
-        "type": "bool",
-        "binding": "func5"
+        "value": "true",
+        "meta": {
+            "mutable": true,
+            "type": "bool"
+        }
     }
 ]
+

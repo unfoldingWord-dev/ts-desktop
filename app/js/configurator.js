@@ -126,11 +126,11 @@ var configurator = {
         }
 
         for (var i = 0; i < config.length; i++) {
-            if (config[i].default !== undefined) {
-                if (config[i].readonly) {
-                    setReadOnlyValue(config[i].name, config[i].default);
+            if (config[i].value !== undefined) {
+                if (config[i].meta.mutable) {
+                    setDefaultValue(config[i].name, config[i].value);
                 } else {
-                    setDefaultValue(config[i].name, config[i].default);
+                    setReadOnlyValue(config[i].name, config[i].value);
                 }
             }
         }

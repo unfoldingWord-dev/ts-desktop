@@ -1,26 +1,34 @@
 [
     {
         "name": "logPath",
-        "default": "./log.txt",
-        "readonly": true,
-        "type": "string"
+        "value": "./log.txt",
+        "meta": {
+            "mutable": false,
+            "type": "string"
+        }
     },
     {
         "name": "repoOwner",
-        "default": "unfoldingWord-dev",
-        "readonly": true,
-        "type": "string"
+        "value": "unfoldingWord-dev",
+        "meta": {
+            "mutable": false,
+            "type": "string"
+        }
     },
     {
         "name": "repo",
-        "default": "ts-desktop",
-        "readonly": true,
-        "type": "string"
+        "value": "ts-desktop",
+        "meta": {
+            "mutable": false,
+            "type": "string"
+        }
     },
     {
         "name": "maxLogFileKb",
-        "default": 200,
-        "readonly": true,
-        "type": "int"
+        "value": 200,
+        "meta": {
+            "mutable": false,
+            "type": "int"
+        }
     }
 ]

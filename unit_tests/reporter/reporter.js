@@ -10,11 +10,18 @@ var version = require('../../package.json').version;
 
 var reporterConfigurator = require('../../app/js/configurator');
 var reporterDefaultConfig = require('../../app/config/defaults');
-var reporterPrivateConfig = require('../../app/config/private');
 
 reporterConfigurator.setStorage({});
 reporterConfigurator.loadConfig(reporterDefaultConfig);
-reporterConfigurator.loadConfig(reporterPrivateConfig);
+try {
+    stats = fs.lstatSync('../../app/config/private');
+    if(stats.isFile()) {
+        var reporterPrivateConfig = require('../../app/config/private');
+        reporterConfigurator.loadConfig(reporterPrivateConfig);
+    }
+} catch (e) {
+
+}
 
 var logPath = reporterConfigurator.getString('logPath');
 
@@ -41,7 +48,7 @@ describe('@Reporter', function() {
                         var date = new Date();
                         date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
                         //reporter.js:<line>:<column> this will need to be changed if the code changes
-                        textExpected = date + ' I/reporter.js:40:3: ' + key + '\r\n';
+                        textExpected = date + ' I/reporter.js:47:3: ' + key + '\r\n';
 
                         reporter.stringFromLogFile(null, function(logResults){
                             logFileResults = logResults;
@@ -73,7 +80,7 @@ describe('@Reporter', function() {
                         var date = new Date();
                         date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
                         //reporter.js:<line>:<column> this will need to be changed if the code changes
-                        textExpected = date + ' W/reporter.js:72:3: ' + key + '\r\n';
+                        textExpected = date + ' W/reporter.js:79:3: ' + key + '\r\n';
 
                         reporter.stringFromLogFile(null, function(logResults){
                             logFileResults = logResults;
@@ -105,7 +112,7 @@ describe('@Reporter', function() {
                         var date = new Date();
                         date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
                         //reporter.js:<line>:<column> this will need to be changed if the code changes
-                        textExpected = date + ' E/reporter.js:104:3: ' + key + '\r\n';
+                        textExpected = date + ' E/reporter.js:111:3: ' + key + '\r\n';
 
                         reporter.stringFromLogFile(null, function(logResults){
                             logFileResults = logResults;

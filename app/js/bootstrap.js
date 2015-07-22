@@ -144,13 +144,12 @@ this.App = (function () {
          * A hook for global error catching
          */
         registerErrorReporter: function () {
-            let _this = this;
             process.on('uncaughtException', function (err) {
                 var date = new Date();
                 date = date.getFullYear() + '_' + date.getMonth() + '_' + date.getDay();
-                _this.reporter.setLogPath('logs\\crash\\' + date + '.crash');
-                _this.reporter.logError(err.message + '\n' + err.stack, function () {
-                    _this.reporter.setLogPath('logs\\log.txt');
+                var path = 'logs\\crash\\' + date + '.crash';
+                var errorReporter = new reporter({logPath: path});
+                errorReporter.logError(err.message + '\n' + err.stack, function () {
                     /**
                      * TODO: Hook in a UI
                      * Currently the code quits quietly without notifying the user

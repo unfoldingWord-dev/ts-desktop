@@ -22,7 +22,7 @@ module.exports = function (grunt) {
 
         config: config,
 
-        nodewebkit: {
+        nwjs: {
             options: {
                 platforms: ['win', 'osx'],
                 buildDir: '<%= config.dist %>' // Where the build version of my node-webkit app is saved
@@ -98,10 +98,11 @@ module.exports = function (grunt) {
     grunt.registerTask('dist', [
         'lint',
         'sass',
-        'nodewebkit'
+        'nwjs'
     ]);
 
     grunt.registerTask('default', ['dist']);
     grunt.loadNpmTasks('grunt-mocha-runner');
     grunt.loadNpmTasks("grunt-jscs");
+    grunt.loadNpmTasks('grunt-nw-builder');
 };

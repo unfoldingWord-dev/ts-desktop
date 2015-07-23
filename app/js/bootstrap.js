@@ -31,7 +31,9 @@ this.App = (function () {
 
         window: mainWindow,
 
-        reporter: reporter,
+        reporter: new reporter.instance({
+            logPath:configurator.getString('logPath')
+        }),
 
         isMaximized: false,
 
@@ -147,7 +149,7 @@ this.App = (function () {
             process.on('uncaughtException', function (err) {
                 var date = new Date();
                 date = date.getFullYear() + '_' + date.getMonth() + '_' + date.getDay();
-                var path = 'logs\\crash\\' + date + '.crash';
+                var path = configurator.getString('crashDir') + '/' +  date + '.crash';
                 var crashReporter = new reporter.instance({logPath: path});
                 crashReporter.logError(err.message + '\n' + err.stack, function () {
                     /**

@@ -1,7 +1,15 @@
 [
     {
         "name": "logPath",
-        "value": "./log.txt",
+        "value": "logs/log.txt",
+        "meta": {
+            "mutable": false,
+            "type": "string"
+        }
+    },
+    {
+        "name": "crashDir",
+        "value": "logs/crash",
         "meta": {
             "mutable": false,
             "type": "string"

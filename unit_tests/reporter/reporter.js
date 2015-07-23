@@ -23,7 +23,7 @@ try {
 
 }
 
-var logPath = reporterConfigurator.getString('logPath');
+var logPath = 'unit_tests/reporter/log.txt';
 
 var reporter = new Reporter.instance({
     logPath: logPath,

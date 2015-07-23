@@ -32,7 +32,11 @@ this.App = (function () {
         window: mainWindow,
 
         reporter: new reporter.instance({
-            logPath:configurator.getString('logPath')
+            logPath:configurator.getString('logPath'),
+            repoOwner: configurator.getString('repoOwner'),
+            repo: configurator.getString('repo'),
+            maxLogFileKb: configurator.getInt('maxLogFileKb'),
+            appVersion: require('../package.json').version
         }),
 
         isMaximized: false,

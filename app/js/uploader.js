@@ -2,7 +2,6 @@
  * Created by Emmitt on 7/23/2015.
  */
 var net = require('net');
-var os = require('os');
 
 var authServer = '';
 var authServerPort = '';
@@ -12,45 +11,47 @@ var udid = 'udid';
 var username = 'emmitt';
 
 var uploader = {
-    connect: function(){
-        var client = net.createConnection({port: authServerPort, host: authServer}, function(){
+    connect: function () {
+        'use strict';
+        var client = net.createConnection({port: authServerPort, host: authServer}, function () {
             var connectionJson = {'key': key, 'udid': udid, 'username': username};
-            var ok = client.write(JSON.stringify(connectionJson));
+            client.write(JSON.stringify(connectionJson));
         });
-        client.on('data', function(data) {
+        client.on('data', function (data) {
             console.log(data.toString());
             //client.end();
         });
-        client.on('end', function() {
+        client.on('end', function () {
             console.log('Disconnected from ' + authServer + ':' + authServerPort);
         });
     },
-    getServerInfo: function(){
+    getServerInfo: function () {
+        'use strict';
         return {'host': authServer, 'port': authServerPort};
     },
-    setServerInfo: function(args){
-        if(args.host && args.port){
+    setServerInfo: function (args) {
+        'use strict';
+        if (args.host && args.port) {
             uploader.setHost(args.host);
             uploader.setPort(args.port);
-        }
-        else{
-            throw new Error('uploader.setServerInfo(args) requires a host and port')
+        } else {
+            throw new Error('uploader.setServerInfo(args) requires a host and port');
         }
     },
-    setHost: function(host){
-        if(host){
+    setHost: function (host) {
+        'use strict';
+        if (host) {
             authServer = host;
-        }
-        else{
-            throw new Error('uplodaer.setHost(host) requires a host server');
+        } else {
+            throw new Error('uploader.setHost(host) requires a host server');
         }
     },
     setPort: function (port) {
-        if(port){
+        'use strict';
+        if (port) {
             authServerPort = port;
-        }
-        else{
-            throw new Error('uplodaer.setPort(port) requires a port number');
+        } else {
+            throw new Error('uploader.setPort(port) requires a port number');
         }
     }
 };

@@ -8,17 +8,19 @@ var authServerPort = '';
 
 var key = 'ssh-rsa key email@server.com';
 var udid = 'udid';
-var username = 'emmitt';
+var username = '';
 
 var uploader = {
-    connect: function () {
+    connect: function (callback) {
         'use strict';
         var client = net.createConnection({port: authServerPort, host: authServer}, function () {
             var connectionJson = {'key': key, 'udid': udid, 'username': username};
             client.write(JSON.stringify(connectionJson));
         });
         client.on('data', function (data) {
-            console.log(data.toString());
+            if(typeof (callback) === 'function') {
+                callback(data.toString());
+            }
             //client.end();
         });
         client.on('end', function () {

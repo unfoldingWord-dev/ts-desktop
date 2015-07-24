@@ -3,50 +3,84 @@
  */
 
 var fs = require('fs');
-var os = require('os');
-var https = require('https');
 var mkdirp = require('mkdirp');
 
 function User (args) {
     'use strict';
 
     var _this = this;
-    var profilesDirectory = args.profilesDirectory;
-    var username = args.username;
+    var profilesDirectory = args.profilesDirectory;  //Users local file location ex: C:\Users\Chris\
+    var username = args.username; //add validation to make sure there is a username
     var password = args.password;
-
-    //code goes here to create and load initial user profile
-
-    _this.setEmail = function (string) {
-
+    var hash = md5(username); //this function does not work without loading a module for it
+    var targetDirectory = profilesDirectory + "translationStudio/profiles/" + hash;
+    var targetFile = targetDirectory + "/profile.json";
+    var storage = {
+        "username": username,
+        "password": password,
+        "email": "",
+        "name": "",
+        "phone": ""
     };
 
-    _this.setName = function (string) {
+    try {
+        var stats = fs.lstatSync(targetFile);
+        if(stats.isFile()) {
+            fs.readFile(targetFile, function read(err, data) {
+                if (err) {
+                    throw err;
+                }
+                storage = data;
+            });
+        } else {
+            mkdirp(targetDirectory, function (e) {
+                if (e) {
+                    throw new Error(e);
+                }
+            });
+            fs.writeFile(targetFile, storage, function(err) {
+                if(err) {
+                    throw new Error(err.message);
+                }
+            });
+        }
+    } catch (e) {
 
+    }
+
+    _this.setEmail = function (email) {
+        storage.email = email;
     };
 
-    _this.setPhone = function (string) {
+    _this.setName = function (name) {
+        storage.name = name;
+    };
 
+    _this.setPhone = function (phone) {
+        storage.phone = phone;
     };
 
     _this.getEmail = function () {
-
-        return string;
+        return storage.email;
     };
 
     _this.getName = function () {
-
-        return string;
+        return storage.name;
     };
 
     _this.getPhone = function () {
-
-        return string;
+        return storage.phone;
     };
 
     _this.commit = function () {
-
-        return bool;
+        var success = true;
+        fs.writeFile(targetFile, storage, function(err) {
+            if(err) {
+                success = false;
+                throw new Error(err.message);
+            }
+        });
+        return success;
     };
 
 }

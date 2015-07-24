@@ -18,7 +18,7 @@ var uploader = {
             client.write(JSON.stringify(connectionJson));
         });
         client.on('data', function (data) {
-            if(typeof (callback) === 'function') {
+            if (typeof callback === 'function') {
                 callback(data.toString());
             }
             //client.end();

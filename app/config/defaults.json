@@ -38,5 +38,21 @@
             "mutable": false,
             "type": "int"
         }
+    },
+    {
+        "name": "authServer",
+        "value": "ts.door43.org",
+        "meta":{
+            "mutable": false,
+            "type": "string"
+        }
+    },
+    {
+        "name": "authServerPort",
+        "value": "9095",
+        "meta":{
+            "mutable": false,
+            "type": "string"
+        }
     }
 ]

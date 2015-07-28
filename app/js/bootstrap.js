@@ -9,6 +9,7 @@ this.App = (function () {
     let gui = require('nw.gui');
     let mainWindow = gui.Window.get();
     let reporter = require('../js/reporter.js');
+    let uploader = require('../js/uploader.js');
 
     /**
      * FIX - This provides a fix to the native chrome shadow missing
@@ -38,6 +39,8 @@ this.App = (function () {
             maxLogFileKb: configurator.getInt('maxLogFileKb'),
             appVersion: require('../package.json').version
         }),
+
+        uploader: uploader,
 
         isMaximized: false,
 
@@ -120,8 +123,10 @@ this.App = (function () {
             _this.configurator.setStorage(window.localStorage);
 
             var config = require('../config/ts-config');
+            var defaults = require('../config/defaults');
 
             _this.configurator.loadConfig(config);
+            _this.configurator.loadConfig(defaults);
         },
 
         /**
@@ -167,6 +172,13 @@ this.App = (function () {
             });
         },
 
+        initializeUploader: function () {
+            uploader.setServerInfo({
+                'host': configurator.getString('authServer'),
+                'port': configurator.getString('authServerPort')
+            });
+        },
+
         init: function () {
             let _this = this;
 
@@ -174,6 +186,7 @@ this.App = (function () {
             _this.registerShortcuts();
             _this.initializeConfig();
             _this.registerErrorReporter();
+            _this.initializeUploader();
 
             let platformInit = _this.platformInit[process.platform];
             platformInit && platformInit.call(_this);

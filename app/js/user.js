@@ -2,7 +2,6 @@
  * Created by Chris on 7/23/2015.
  */
 
-//var fs = require('fs');
 var mkdirp = require('mkdirp');
 var utils = require('./lib/utils');
 var setPath = utils.setPath;
@@ -34,15 +33,16 @@ function User (args) {
     };
 
     jsonfile.readFile(targetFile, function (err, obj) {
-        if (err) {
-            mkdirp(setPath(targetDirectory, profilesDirectory));
-            jsonfile.writeFile(targetFile, storage, function (err) {
-                if (err) {
-                    throw new Error(err.message);
-                }
-            });
-        } else {
+        if (err === null) {
             storage = obj;
+        } else {
+            mkdirp(setPath(targetDirectory, profilesDirectory), function () {
+                jsonfile.writeFile(targetFile, storage, function (err) {
+                    if (err) {
+                        throw new Error(err.message);
+                    }
+                });
+            });
         }
     });
 

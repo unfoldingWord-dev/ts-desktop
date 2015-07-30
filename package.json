@@ -39,7 +39,9 @@
     "grunt-mocha-test": "^0.12.7",
     "grunt-nw-builder": "^2.0.0",
     "grunt-sass": "^0.18.1",
+    "jsonfile": "^2.2.1",
     "load-grunt-tasks": "^0.6.0",
+    "md5": "^2.0.0",
     "mocha": "^2.2.5",
     "time-grunt": "^0.4.0"
   },

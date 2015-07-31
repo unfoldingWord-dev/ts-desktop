@@ -43,11 +43,12 @@ function User (args) {
     });
 
     _this.saveData = function () {
-        jsonfile.writeFile(targetFile, storage, function (err) {
-            if (err) {
-                throw new Error('Could not write to file');
-            }
-        });
+        try {
+            jsonfile.writeFileSync(targetFile, storage);
+        } catch (e) {
+            throw new Error('Could not write to file');
+        }
+        return true;
     };
 
     _this.setEmail = function (email) {
@@ -75,12 +76,7 @@ function User (args) {
     };
 
     _this.commit = function () {
-        try {
-            _this.saveData();
-        } catch (e) {
-            return false;
-        }
-        return true;
+        return _this.saveData();
     };
 
 }

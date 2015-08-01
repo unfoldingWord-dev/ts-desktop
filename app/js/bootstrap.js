@@ -8,6 +8,7 @@ this.App = (function () {
     let gui = require('nw.gui');
     let mainWindow = gui.Window.get();
     let reporter = require('../js/reporter.js');
+    let uploader = require('../js/uploader.js');
 
     /**
      * FIX - This provides a fix to the native chrome shadow missing
@@ -30,7 +31,15 @@ this.App = (function () {
 
         window: mainWindow,
 
-        reporter: reporter,
+        reporter: new reporter.instance({
+            logPath:configurator.getString('logPath'),
+            repoOwner: configurator.getString('repoOwner'),
+            repo: configurator.getString('repo'),
+            maxLogFileKb: configurator.getInt('maxLogFileKb'),
+            appVersion: require('../package.json').version
+        }),
+
+        uploader: uploader,
 
         isMaximized: false,
 
@@ -113,8 +122,10 @@ this.App = (function () {
             _this.configurator.setStorage(window.localStorage);
 
             var config = require('../config/ts-config');
+            var defaults = require('../config/defaults');
 
             _this.configurator.loadConfig(config);
+            _this.configurator.loadConfig(defaults);
         },
 
         /**
@@ -142,14 +153,13 @@ this.App = (function () {
         /**
          * A hook for global error catching
          */
-        registerErrorReporter: function(){
-            let _this = this;
-            process.on('uncaughtException', function(err){
+        registerErrorReporter: function () {
+            process.on('uncaughtException', function (err) {
                 var date = new Date();
-                date = date.getFullYear() + '_' + date.getMonth() + "_" + date.getDay();
-                _this.reporter.setLogPath('logs\\crash\\' + date + '.crash');
-                _this.reporter.logError(err.message + '\n' + err.stack, function(){
-                    _this.reporter.setLogPath('logs\\log.txt');
+                date = date.getFullYear() + '_' + date.getMonth() + '_' + date.getDay();
+                var path = configurator.getString('crashDir') + '/' +  date + '.crash';
+                var crashReporter = new reporter.instance({logPath: path});
+                crashReporter.logError(err.message + '\n' + err.stack, function () {
                     /**
                      * TODO: Hook in a UI
                      * Currently the code quits quietly without notifying the user
@@ -161,6 +171,13 @@ this.App = (function () {
             });
         },
 
+        initializeUploader: function () {
+            uploader.setServerInfo({
+                'host': configurator.getString('authServer'),
+                'port': configurator.getString('authServerPort')
+            });
+        },
+
         init: function () {
             let _this = this;
 
@@ -168,6 +185,7 @@ this.App = (function () {
             _this.registerShortcuts();
             _this.initializeConfig();
             _this.registerErrorReporter();
+            _this.initializeUploader();
 
             let platformInit = _this.platformInit[process.platform];
             platformInit && platformInit.call(_this);

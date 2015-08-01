@@ -183,12 +183,16 @@
         if (!menuName) {
           console.warn('no menu name provided');
         } else {
-          console.log('opening menu: ' + menuName);
           var menu = me.querySelector('[label="' + menuName + '"]');
-          Polymer.dom(menu).classList.add(me.selectedClass);
+          
+          if (menu) {
+            Polymer.dom(menu).classList.add(me.selectedClass);
       
-          me.$.container.classList.add('menu-open');
-          me.open = true;
+            me.$.container.classList.add('menu-open');
+            me.open = true;
+          } else {
+            console.warn('menu "' + menuName + '" not found...');
+          }
         }
       });
     },
@@ -198,8 +202,6 @@
       if (typeof cb !== 'function') {
         cb = function() {};
       }
-
-      console.log('closing menu');
       
       me.$.container.classList.remove('menu-open');
       me.open = false;

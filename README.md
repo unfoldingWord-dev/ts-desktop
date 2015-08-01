@@ -6,7 +6,7 @@ A tool to translate Bible stories into your own language  https://distantshores.
 ##Dependencies
 * [npm](http://nodejs.org/) (bundled with Node.js)
 * [Bower](http://bower.io/)
-* [Grunt](http://gruntjs.com/)
+* [Gulp](http://gulpjs.com/)
 
 ##Setup
 
@@ -18,10 +18,9 @@ That's it!
 
 ##Tasks
 
-`grunt` will produce a distribution
-`grunt check` will check your JS files
-`grunt sass` will compile your Sass into CSS
+`gulp` will produce a distribution
 `npm start` will open up the project with NW.js
+`DEBUG_MODE=1 npm start` will start it up in debug mode with live reloading (it's a bit unstable, hence "debug mode")
 
 ##Dev Inspector
 

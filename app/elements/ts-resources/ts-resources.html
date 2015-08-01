@@ -1,55 +1,61 @@
 <!--
 Resources drawer.
 -->
-<link rel="import" href="../../components/polymer/polymer.html">
-<link rel="import" href="../../components/core-icon/core-icon.html">
 
-<polymer-element name="ts-resources">
+<dom-module id="ts-resources">
 
-    <template>
-        <style>
-            :host {
-                display: block;
-                width: 100%;
-                height: 100%;
-                background: #48a770;
-            }
-            ul {
-                margin: 0;
-                padding: 0;
-                list-style: none;
-            }
+  <style>
+  
+  :host {
+    display: block;
+    width: 50vw;
+    height: 100%;
+  }
+  
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
 
-            h2 {
-                margin: 0;
-                padding: 1em;
-                color: rgba(0,0,0,0.4);
-                text-shadow: 0 0 1px rgba(0,0,0,0.1);
-                font-weight: 300;
-                font-size: 2em;
-            }
+  h2 {
+    margin: 0;
+    padding: 0.5em;
+    font-weight: 300;
+  }
+  
+  .page {
+    padding: 1em;
+  }
+  
+  .bar {
+    @apply(--header-bar);
+  }
 
-            h2 core-icon {
-                padding-right: 20px;
-            }
-            
-            .page {
-                padding: 1em;
-            }
+  </style>
 
-        </style>
-        
-        <h2 horizontal layout center><core-icon icon="description"></core-icon> Resources</h2>
-        
-        <div class="page">
-            <p>Welcome to resources.</p>
-            <p>Enjoy your stay.</p>
-        </div>
-    </template>
-    <script>
+  <template>
+    <header class="bar">
+      <h2>Resources</h2>
+    </header>
+    
+    <div class="page">
+      <p>Welcome to resources.</p>
+      <p>Enjoy your stay.</p>
+    </div>
+  </template>
+    
+</dom-module>
 
-        Polymer({});
+<script>
 
-    </script>
+  Polymer({
+    is: 'ts-resources',
+    
+    ready: function() {
+      
+    }
+  });
 
-</polymer-element>
+</script>
+

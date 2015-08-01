@@ -1,0 +1,50 @@
+[
+    {
+        "name": "Setting 1",
+        "default": 1,
+        "choices" : [
+            "1",
+            "22",
+            "434"
+        ],
+        "type": "int",
+        "binding": "setting1Handler"
+    },
+    {
+        "name": "Setting 2",
+        "default": "I am immutable",
+        "readonly": true,
+        "type": "string",
+        "binding": "setting2Handler"
+    },
+    {
+        "name": "User",
+        "default": "SomeGuy",
+        "type": "string",
+        "binding": "func1"
+    },
+    {
+        "name": "Language",
+        "default": "Greek",
+        "type": "string",
+        "binding": "func2"
+    },
+    {
+        "name": "Country",
+        "default": "Greece",
+        "type": "string",
+        "binding": "func3"
+    },
+    {
+        "name": "Font",
+        "default": "Tahoma",
+        "type": "string",
+        "binding": "func4"
+    },
+    {
+        "name": "Likes tS",
+        "default": "true",
+        "type": "bool",
+        "binding": "func5"
+    }
+]

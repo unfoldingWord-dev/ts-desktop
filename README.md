@@ -1,28 +1,38 @@
 translationStudio Desktop
-========================
+--
 
-A tool to translate Bible stories into your own language  https://distantshores.org/translationStudio
+A tool to translate the Bible and [Open Bible Stories](http://distantshores.org/openbiblestories) into your own language. You can read more about the purpose of this project at [unfoldingWord](https://unfoldingword.org/apps/#tS).
 
-##Dependencies
+##Requirements
+The official development requirements are available at
+* [tS Requirements](https://github.com/unfoldingWord-dev/ts-requirements)
+
+Additional documentation specific to the desktop platforms is available in the [wiki](https://github.com/unfoldingWord-dev/ts-desktop/wiki).
+
+##Contributing
+If you would like to contribute to this project please read the [Contributing](https://github.com/unfoldingWord-dev/ts-desktop/wiki/Contributing) article in the wiki.
+
+##Quick Start
+First make sure you have all the dependencies installed
+
 * [npm](http://nodejs.org/) (bundled with Node.js)
 * [Bower](http://bower.io/)
 * [Grunt](http://gruntjs.com/)
 
-##Setup
+Then fork this repository and clone your fork.
+After the repository has been cloned to your computer run the following command in the new directory to set up your environment
 
-Clone the repo. In the directory:
+    $ npm install && bower install
 
-`npm install && bower install`
+For more information please read the [wiki](https://github.com/unfoldingWord-dev/ts-desktop/wiki).
 
-That's it!
+###Commands
+The following commands can be ran from within the project directory
 
-##Tasks
+* `$ grunt` builds a distribution package
+* `$ grunt lint` checks js files for errors
+* `$ grunt sass` compile Sass files into CSS
+* `$ grunt test` run all Mocha unit tests
+* `$ npm start` build and run the application
 
-`grunt` will produce a distribution
-`grunt check` will check your JS files
-`grunt sass` will compile your Sass into CSS
-`npm start` will open up the project with NW.js
-
-##Dev Inspector
-
-When running the app, `Ctrl-Alt-I` will open the Dev Inspector.
+> Note: You can open the chrome developer tools while the app is running by pressing `Ctrl+Alt+I`

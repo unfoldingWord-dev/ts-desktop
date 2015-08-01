@@ -1,10 +1,10 @@
 {
-  "name": "translationstudio",
-  "version": "0.0.0",
+  "name": "translationStudio",
+  "version": "0.1.0",
   "description": "",
   "keywords": [],
-  "homepage": "https://github.com/neutrinog/translationstudio",
-  "bugs": "https://github.com/neutrinog/translationstudio/issues",
+  "homepage": "https://github.com/unfoldingWord-dev/ts-desktop",
+  "bugs": "https://github.com/unfoldingWord-dev/ts-desktop/issues",
   "author": {
     "name": "Joel Lonbeck",
     "email": "",
@@ -12,19 +12,45 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/neutrinog/translationstudio.git"
+    "url": "git@github.com:unfoldingWord-dev/ts-desktop.git"
   },
   "dependencies": {
-    "nw": "^0.12.2"
+    "fs-readfile-promise": "^2.0.0",
+    "lodash": "^3.9.3",
+    "mkdirp": "^0.5.1",
+    "moment": "^2.10.3",
+    "node-dir": "^0.1.8",
+    "nw": "^0.12.2",
+    "request": "^2.58.0",
+    "traverse": "^0.6.6"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "nw-builder": "^2.0.2",
+    "concat-files": "~0.1.0",
+    "grunt": "~0.4.5",
+    "grunt-contrib-clean": "~0.6.0",
+    "grunt-contrib-compress": "^0.10.0",
+    "grunt-contrib-concat": "~0.5.0",
+    "grunt-contrib-copy": "~0.5.0",
+    "grunt-contrib-jshint": "~0.10.0",
+    "grunt-contrib-rename": "0.0.3",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-jscs": "^1.8.0",
+    "grunt-mocha-runner": "^0.2.0",
+    "grunt-mocha-test": "^0.12.7",
+    "grunt-nw-builder": "^2.0.0",
+    "grunt-sass": "^0.18.1",
+    "jsonfile": "^2.2.1",
+    "load-grunt-tasks": "^0.6.0",
+    "md5": "^2.0.0",
+    "mocha": "^2.2.5",
+    "time-grunt": "^0.4.0"
   },
   "engines": {
     "node": ">=0.12.0"
   },
   "scripts": {
     "start": "nw app"
-  },
-  "devDependencies": {
-    "gulp": "^3.9.0",
-    "nw-builder": "^2.0.2"
   }
 }

@@ -1,0 +1,59 @@
+[
+    {
+        "name": "Setting 1",
+        "value": 1,
+        "meta": {
+            "mutable": true,
+            "type": "int"
+        }
+    },
+    {
+        "name": "Setting 2",
+        "value": "I am immutable",
+        "meta": {
+            "mutable": false,
+            "type": "string"
+        }
+    },
+    {
+        "name": "User",
+        "value": "SomeGuy",
+        "meta": {
+            "mutable": true,
+            "type": "string"
+        }
+    },
+    {
+        "name": "Language",
+        "value": "Greek",
+        "meta": {
+            "mutable": true,
+            "type": "string"
+        }
+    },
+    {
+        "name": "Country",
+        "value": "Greece",
+        "meta": {
+            "mutable": true,
+            "type": "string"
+        }
+    },
+    {
+        "name": "Font",
+        "value": "Tahoma",
+        "meta": {
+            "mutable": true,
+            "type": "string"
+        }
+    },
+    {
+        "name": "Likes tS",
+        "value": "true",
+        "meta": {
+            "mutable": true,
+            "type": "bool"
+        }
+    }
+]
+

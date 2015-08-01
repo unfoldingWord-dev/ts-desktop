@@ -1,0 +1,42 @@
+[
+    {
+        "name": "string",
+        "value": "test string",
+        "meta": {
+            "mutable": true,
+            "type": "string"
+        }
+    },
+    {
+        "name": "int",
+        "value": 111,
+        "meta": {
+            "mutable": true,
+            "type": "int"
+        }
+    },
+    {
+        "name": "bool",
+        "value": true,
+        "meta": {
+            "mutable": true,
+            "type": "bool"
+        }
+    },
+    {
+        "name": "readonly",
+        "value": "I am immutable",
+        "meta": {
+            "mutable": false,
+            "type": "string"
+        }
+    },
+    {
+        "name": "willpurge",
+        "value": "this is the default",
+        "meta": {
+            "mutable": false,
+            "type": "string"
+        }
+    }
+]

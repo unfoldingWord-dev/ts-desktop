@@ -1,27 +1,37 @@
 translationStudio Desktop
-========================
+--
 
-A tool to translate Bible stories into your own language  https://distantshores.org/translationStudio
+A tool to translate the Bible and [Open Bible Stories](http://distantshores.org/openbiblestories) into your own language. You can read more about the purpose of this project at [unfoldingWord](https://unfoldingword.org/apps/#tS).
 
-##Dependencies
+##Requirements
+The official development requirements are available at
+* [tS Requirements](https://github.com/unfoldingWord-dev/ts-requirements)
+
+Additional documentation specific to the desktop platforms is available in the [wiki](https://github.com/unfoldingWord-dev/ts-desktop/wiki).
+
+##Contributing
+If you would like to contribute to this project please read the [Contributing](https://github.com/unfoldingWord-dev/ts-desktop/wiki/Contributing) article in the wiki.
+
+##Quick Start
+First make sure you have all the dependencies installed
+
 * [npm](http://nodejs.org/) (bundled with Node.js)
 * [Bower](http://bower.io/)
 * [Gulp](http://gulpjs.com/)
 
-##Setup
+Then fork this repository and clone your fork.
+After the repository has been cloned to your computer run the following command in the new directory to set up your environment
 
-Clone the repo. In the directory:
+    $ npm install && bower install
 
-`npm install && bower install`
+For more information please read the [wiki](https://github.com/unfoldingWord-dev/ts-desktop/wiki).
 
-That's it!
+###Commands
+The following commands are available from within the project directory:
 
-##Tasks
+* `$ gulp` builds a distribution package
+* `$ gulp test` runs all Mocha unit tests
+* `$ npm start` runs the application (without building it)
+* `$ DEBUG_MODE=1 npm start` same as above, but has live reloading (which is a bit unstable, hence "debug mode")
 
-`gulp` will produce a distribution
-`npm start` will open up the project with NW.js
-`DEBUG_MODE=1 npm start` will start it up in debug mode with live reloading (it's a bit unstable, hence "debug mode")
-
-##Dev Inspector
-
-When running the app, `Ctrl-Alt-I` will open the Dev Inspector.
+> Note: You can open the Chrome Developer Tools while the app is running by pressing `Ctrl+Alt+I`

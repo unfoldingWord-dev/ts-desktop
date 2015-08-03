@@ -15,12 +15,12 @@ function User (args) {
     var profilesDirectory = args.profilesDirectory;
     var username = args.username;
     var password = args.password;
-    var hash = md5(username);
 
     if (username === '' || username === null) {
-        throw 'Must supply a username';
+        throw new Error('Must supply a valid username');
     }
 
+    var hash = md5(username);
     var targetDirectory = 'translationStudio/profiles/' + hash + '/';
     var targetFile = profilesDirectory + targetDirectory + 'profile.json';
     var storage = {
@@ -37,14 +37,19 @@ function User (args) {
             storage = obj;
         } else {
             mkdirp(setPath(targetDirectory, profilesDirectory), function () {
-                jsonfile.writeFile(targetFile, storage, function (err) {
-                    if (err) {
-                        throw new Error(err.message);
-                    }
-                });
+                _this.saveData();
             });
         }
     });
+
+    _this.saveData = function () {
+        try {
+            jsonfile.writeFileSync(targetFile, storage);
+        } catch (e) {
+            throw new Error('Could not write to file');
+        }
+        return true;
+    };
 
     _this.setEmail = function (email) {
         storage.email = email;
@@ -71,14 +76,7 @@ function User (args) {
     };
 
     _this.commit = function () {
-        var success = true;
-        jsonfile.writeFile(targetFile, storage, function (err) {
-            if (err) {
-                success = false;
-                throw new Error(err.message);
-            }
-        });
-        return success;
+        return _this.saveData();
     };
 
 }

@@ -9,6 +9,7 @@ var jsonfile = require('jsonfile');
 var md5 = require('md5');
 
 var profilesDirectory = 'unit_tests/user/data/';
+var username0 = '';
 var username1 = 'testuser1';
 var username2 = 'testuser2';
 var password = 'testpass';
@@ -18,6 +19,7 @@ var targetDirectory1 = 'translationStudio/profiles/' + hash1 + '/';
 var targetDirectory2 = 'translationStudio/profiles/' + hash2 + '/';
 var targetFile1 = profilesDirectory + targetDirectory1 + 'profile.json';
 var targetFile2 = profilesDirectory + targetDirectory2 + 'profile.json';
+var user0;
 var user1;
 var user2;
 
@@ -41,7 +43,7 @@ describe('@User', function() {
                     done();
                 });
             });
-            it('Confirm profile does not exist for new user1', function () {
+            it('should confirm profile does not exist for new user1', function () {
                 var expected = "NoFile";
                 assert.equal(fileTest, expected);
             });
@@ -59,10 +61,30 @@ describe('@User', function() {
                     done();
                 });
             });
-            it('Confirm profile does exist for existing user2', function () {
+            it('should confirm profile does exist for existing user2', function () {
                 var expected = "File";
                 assert.equal(fileTest, expected);
             });
+        });
+    });
+
+    describe('@BlankUser', function() {
+        var emessage = "No error";
+        before(function (done) {
+            try {
+                user0 = new User.instance({
+                    profilesDirectory: profilesDirectory,
+                    username: username0,
+                    password: password
+                });
+            } catch (e) {
+                emessage = e.message;
+            }
+            done();
+        });
+        it('should create an error for a blank username', function () {
+            var expected = "Must supply a valid username";
+            assert.equal(emessage, expected);
         });
     });
 
@@ -79,7 +101,7 @@ describe('@User', function() {
         });
 
         describe('@CreateFile', function () {
-            it('Create profile for new user1', function () {
+            it('should create profile for new user1', function () {
                 var expected = "Created";
                 assert.equal(create, expected);
             });
@@ -154,7 +176,7 @@ describe('@User', function() {
         });
 
         describe('@UpdateFile', function () {
-            it('Update profile for existing user2', function () {
+            it('should update profile for existing user2', function () {
                 var expected = "Updated";
                 assert.equal(update, expected);
             });

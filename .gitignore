@@ -4,6 +4,7 @@ app/components/
 dist/
 cache/
 tmp/
+build/
 .brackets.json
 .idea
 test.html

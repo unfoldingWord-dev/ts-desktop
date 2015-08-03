@@ -1,137 +1,86 @@
 <!--
 This element handles all of the application settings.
 -->
-<link rel="import" href="../../components/polymer/polymer.html">
-<link rel="import" href="../../components/core-icon/core-icon.html">
-<link rel="import" href="../ts-dashboard/ts-dashboard.html">
-var _ = require('lodash');
 
-<polymer-element name="ts-settings">
+<dom-module id="ts-settings">
 
-    <template>
-        <style>
-            :host {
-                display: block;
-                width: 100%;
-                height: 100%;
-                background: #48a770;
-            }
-            ul {
-                margin: 0;
-                padding: 0;
-                list-style: none;
-            }
+  <style>
+    :host {
+      display: block;
+      width: 50vw;
+      height: 100%;
+    }
+    
+    .bar {
+      @apply(--header-bar);
+    }
+    
+    ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
 
-            h2 {
-                margin: 0;
-                padding: 1em;
-                color: rgba(0,0,0,0.4);
-                text-shadow: 0 0 1px rgba(0,0,0,0.1);
-                font-weight: 300;
-                font-size: 2em;
-            }
+    h2 {
+      margin: 0;
+      padding: 0.5em;
+      font-weight: 300;
+    }
 
-            ul li a {
-                display: block;
-                padding: 1em 1em 1em 1.2em;
-                outline: none;
-                box-shadow: inset 0 -1px rgba(0,0,0,0.2);
-                color: #f3efe0;
-                text-transform: uppercase;
-                text-shadow: 0 0 1px rgba(255,255,255,0.1);
-                letter-spacing: 1px;
-                font-weight: 400;
-                -webkit-transition: background 0.3s, box-shadow 0.3s;
-                transition: background 0.3s, box-shadow 0.3s;
-                cursor: pointer;
-            }
+    ul li {
+      display: block;
+      padding: 1em 1em 1em 1.2em;
+      outline: none;
+      box-shadow: inset 0 -1px rgba(0,0,0,0.2);
+      text-transform: uppercase;
+      text-shadow: 0 0 1px rgba(255,255,255,0.1);
+      letter-spacing: 1px;
+      font-weight: 400;
+      -webkit-transition: background 0.3s, box-shadow 0.3s;
+      transition: background 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+    }
+    
+    ul li:hover {
+        background: rgba(0,0,0,0.2);
+        box-shadow: inset 0 -1px rgba(0,0,0,0);
+        color: #fff;
+    }
 
-            ul li:first-child a {
-                box-shadow: inset 0 -1px rgba(0,0,0,0.2), inset 0 1px rgba(0,0,0,0.2);
-            }
+    ul li:first-child a {
+      box-shadow: inset 0 -1px rgba(0,0,0,0.2), inset 0 1px rgba(0,0,0,0.2);
+    }
 
-            ul li a:hover {
-                background: rgba(0,0,0,0.2);
-                box-shadow: inset 0 -1px rgba(0,0,0,0);
-                color: #fff;
-            }
-            h2 core-icon {
-                padding-right: 20px;
-            }
+  </style>
 
-            .style1 {
-                font-size: .5rem;
-                color: red;
-            }
-
-            .style2 {
-                font-size: 2rem;
-                color: white;
-            }
-
-
-            .style3 {
-                font-size: 3rem;
-                color: blue;
-            }
-        </style>
-        <p horizontal layout center><core-icon icon="settings"></core-icon> Settings</p>
+  <template>
+        <header class="bar">
+            <h2>Settings</h2>
+        </header>
         <ul>
-            <template repeat="{{ setting in settings}}">
-                <li>
-                    <a on-tap={{buttonClick}} class="{{setting.binding}} {{setting.style}}"> {{setting.name}}
-                    </a>
+            <template is="dom-repeat" items="[[settings]]" as="setting">
+                <li class="setting" on-tap="displaySetting">
+                    <span>[[setting.name]]</span>
                 </li>
             </template>
         </ul>
-    </template>
-    <script>
-        Polymer({
-            ready: function() {
-                this.settings = require('../config/ts-config.json');
-            },
-            setting1Handler: function() {
-                alert(App.configurator.getInt('Setting 1'));
-            },
-            setting2Handler: function() {
-                alert(App.configurator.getString('Setting 2'));
-            },
-            buttonClick: function (event) {
-                var classes = event.currentTarget.className;
+  </template>
+</dom-module>
 
-                if (classes.indexOf('setting1Handler') >= 0) {
-                    this.setting1Handler();
-                } else  if (classes.indexOf('setting2Handler') >= 0) {
-                    this.setting2Handler();
-                } else  if (classes.indexOf('func1') >= 0) {
-                   this.func1();
-                } else  if (classes.indexOf('func2') >= 0) {
-                    this.func2();
-                }else  if (classes.indexOf('func3') >= 0) {
-                    this.func3();
-                }else  if (classes.indexOf('func4') >= 0) {
-                    this.func4();
-                }else  if (classes.indexOf('func5') >= 0) {
-                    this.func5();
-                }
-            },
-            func1: function () {
-                alert(App.configurator.getString('User'));
-            },
-            func2: function () {
-                alert(App.configurator.getString('Language'));
-            },
-            func3: function () {
-                alert(App.configurator.getString('Country'));
-            },
-            func4: function () {
-                alert(App.configurator.getString('Font'));
-            },
-            func5: function () {
-                alert(App.configurator.getBool('Likes tS'));
-            }
-        });
+<script>
+    Polymer({
+        is: 'ts-settings',
 
-    </script>
+        ready: function() {
+            // TODO: remove require(...)
+            // NOTE: should not have any require(...) statements in the front-end if possible
+            this.settings = require('../config/ts-config.json');
+        },
+        
+        displaySetting: function (event) {
+            var setting = event.model.setting;
+            alert('[' + setting.name + ',' + setting.value + ']');
+        }
+    });
 
-</polymer-element>
+</script>

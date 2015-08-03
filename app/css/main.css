@@ -1,8 +1,13 @@
+/* Global styles */
+
+@import 'fonts/fonts.css';
+
 html, body {
   height: 100%;
   margin: 0;
   background-color: #E5E5E5;
-  font-family: 'RobotoDraft', sans-serif;
-  overflow: hidden; }
-
-/*# sourceMappingURL=main.css.map */
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+  overflow: hidden;
+  font-size: 100%;
+}

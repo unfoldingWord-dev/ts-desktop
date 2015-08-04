@@ -1,0 +1,58 @@
+[
+    {
+        "name": "logPath",
+        "value": "logs/log.txt",
+        "meta": {
+            "mutable": false,
+            "type": "string"
+        }
+    },
+    {
+        "name": "crashDir",
+        "value": "logs/crash",
+        "meta": {
+            "mutable": false,
+            "type": "string"
+        }
+    },
+    {
+        "name": "repoOwner",
+        "value": "unfoldingWord-dev",
+        "meta": {
+            "mutable": false,
+            "type": "string"
+        }
+    },
+    {
+        "name": "repo",
+        "value": "ts-desktop",
+        "meta": {
+            "mutable": false,
+            "type": "string"
+        }
+    },
+    {
+        "name": "maxLogFileKb",
+        "value": 200,
+        "meta": {
+            "mutable": false,
+            "type": "int"
+        }
+    },
+    {
+        "name": "authServer",
+        "value": "ts.door43.org",
+        "meta":{
+            "mutable": false,
+            "type": "string"
+        }
+    },
+    {
+        "name": "authServerPort",
+        "value": "9095",
+        "meta":{
+            "mutable": false,
+            "type": "string"
+        }
+    }
+]

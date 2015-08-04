@@ -8,7 +8,7 @@ var https = require('https');
 var mkdirp = require('mkdirp');
 
 function Reporter (args) {
-    "use strict";
+    'use strict';
 
     var _this = this;
     var logPath = args.logPath || './log.txt';
@@ -18,7 +18,7 @@ function Reporter (args) {
     var maxLogFileKb = args.maxLogFileKb || 200;
     var appVersion = args.appVersion || '0.0.0';
 
-   _this.logNotice = function (string, callback) {
+    _this.logNotice = function (string, callback) {
         if (!string) {
             throw new Error('reporter.logNotice requires a message.');
         }
@@ -93,14 +93,13 @@ function Reporter (args) {
         var dir = logPath.split(/\\|\//);
         dir.pop();
         dir = dir.join('\\');
-        if(dir === ''){
+        if (dir === '') {
             dir = '.';
         }
-        mkdirp(dir, function(e){
-            if(e){
+        mkdirp(dir, function (e) {
+            if (e) {
                 throw new Error(e);
-            }
-            else{
+            } else {
                 fs.appendFile(logPath, message, function (err) {
                     if (err) {
                         throw new Error(err.message);
@@ -117,7 +116,7 @@ function Reporter (args) {
 
     _this.stringFromLogFile = function (filePath, callback) {
         var readPath = logPath;
-        if(filePath){
+        if (filePath) {
             readPath = filePath;
         }
         fs.exists(readPath, function (exists) {
@@ -201,9 +200,10 @@ function Reporter (args) {
         }
         bodyBuilder.push('\nLog History\n======');
         bodyBuilder.push('```javascript');
+
         _this.stringFromLogFile(null, function (results) {
-            if(filePath){
-                _this.stringFromLogFile(filePath, function(crashFileResults){
+            if (filePath) {
+                _this.stringFromLogFile(filePath, function (crashFileResults) {
                     bodyBuilder.push(results);
                     bodyBuilder.push('```');
                     bodyBuilder.push('\nCrash File\n======');
@@ -217,8 +217,7 @@ function Reporter (args) {
                         }
                     });
                 });
-            }
-            else{
+            } else {
                 bodyBuilder.push(results);
                 bodyBuilder.push('```');
                 issueObject.body = bodyBuilder.join('\n');
@@ -269,7 +268,7 @@ function Reporter (args) {
         postReq.end();
     };
 
-    _this.canReportToGithub = function() {
+    _this.canReportToGithub = function () {
         return repo !== '' && repoOwner !== '' && oauthToken !== '';
     };
 }

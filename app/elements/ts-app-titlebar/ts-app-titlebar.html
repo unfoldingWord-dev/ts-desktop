@@ -1,66 +1,98 @@
 <!--
 This is the tool bar to the application window
 -->
-<link rel="import" href="../../components/core-icon-button/core-icon-button.html">
-<link rel="import" href="../../components/core-toolbar/core-toolbar.html">
-<link rel="import" href="../../components/core-icons/image-icons.html">
-<link rel="import" href="../../components/core-icons/hardware-icons.html">
 
-<polymer-element name="ts-app-titlebar">
+<link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="ts-app-titlebar-icons.html">
 
-    <template>
-        <style>
-            :host {
-                width:100%;
-                display:block;
-                color:#ffffff;
-                -webkit-app-region: drag;
-            }
-            core-toolbar {
-                background:#0086b8;
-            }
-            core-toolbar, core-toolbar::shadow .toolbar-tools {
-                height:30px;
-                padding: 0;
-            }
-            div.tools {
-                margin: 0;
-            }
-            core-icon-button::shadow core-icon {
-                height:18px;
-            }
-            core-icon-button {
-                -webkit-app-region: no-drag;
-            }
-        </style>
+<dom-module id="ts-app-titlebar">
+  <style>
+    :host {
+      width: 100%;
+      display: block;
+      color: var(--text-color);
+      -webkit-app-region: drag;
+      -webkit-user-select: none;
+      user-select: none;
+      margin: 0;
+      padding: 0;
+    }
+    
+    header {
+      font-size: 120%;
+      height: 2em;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--primary-color-dark);
+    }
+    
+    .title {
+      display: inline-block;
+      padding-left: 0.5em;
+      font-weight: 300;
+      letter-spacing: 1px;
+    }
 
-        <core-toolbar>
-            <div tool>
-                translationStudio
-            </div>
-            <span tool flex></span>
-            <div class="tools" tool horizontal layout center>
-                <core-icon-button icon="hardware:keyboard-control" on-tap={{minimizeTapped}}></core-icon-button>
-                <core-icon-button icon="image:filter-none" on-tap={{expandTapped}}></core-icon-button>
-                <core-icon-button icon="close" on-tap={{closeTapped}}></core-icon-button>
-            </div>
-        </core-toolbar>
+    .window-buttons {
+      -webkit-app-region: no-drag;
+      margin-right: 0.25em;
+    }
+    
+    .window-buttons button {
+      border: none;
+      outline: none;
+      padding: 0;
+      margin: 0;
+      background: transparent;
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+    }
+    
+    iron-icon {
+      --iron-icon-width: 16px;
+      --iron-icon-height: 16px;
+      color: var(--text-color);
+    }
+    
+  </style>
 
-    </template>
-    <script>
+  <template>
 
-        Polymer({
-            minimizeTapped: function() {
-                App.window.minimize();
-            },
-            expandTapped: function() {
-                App.toggleMaximize();
-            },
-            closeTapped: function() {
-                App.close();
-            }
-        });
+    <header>
+      <span class="title">translationStudio</span>
+      <div class="window-buttons">
+        <button on-tap="minimizeWindow">
+          <iron-icon icon="titlebar:minimize"></iron-icon>
+        </button>
+        <button on-tap="resizeWindow">
+          <iron-icon id="resizeicon" icon="titlebar:maximize"></iron-icon>
+        </button>
+        <button on-tap="closeWindow">
+          <iron-icon icon="titlebar:close"></iron-icon>
+        </button>
+      </div>
+    </header>
 
-    </script>
+  </template>
 
-</polymer-element>
+</dom-module>
+
+<script>
+
+  Polymer({
+    is: 'ts-app-titlebar',
+    
+    minimizeWindow: function() {
+      App.window.minimize();
+    },
+    resizeWindow: function() {
+      this.$.resizeicon.icon = !App.toggleMaximize() ? "titlebar:maximize" : "titlebar:restore";
+    },
+    closeWindow: function() {
+      App.close();
+    }
+  });
+
+</script>

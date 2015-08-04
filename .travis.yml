@@ -8,5 +8,5 @@ sudo: false
 node_js:
   - "0.12"
 before_script:
-  - npm install grunt-cli -g
-script: grunt test
+  - npm install gulp -g
+script: gulp test; gulp lint

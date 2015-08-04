@@ -5,16 +5,23 @@
  */
 
 var gulp = require('gulp'),
-    NwBuilder = require('nw-builder'),
+    mocha = require('gulp-mocha');
     jshint = require('gulp-jshint'),
     stylish = require('jshint-stylish'),
-    jscs = require('gulp-jscs');
+    jscs = require('gulp-jscs'),
+    NwBuilder = require('nw-builder');
 
 var APP_NAME = 'translationStudio',
-    JS_FILES = './app/js/**/*.js';
+    JS_FILES = './app/js/**/*.js',
+    UNIT_TEST_FILES = './unit_tests/**/*.js';
+    
+gulp.task('test', function () {
+    return gulp.src(UNIT_TEST_FILES, { read: false })
+        .pipe(mocha({reporter: 'spec'}));
+});
     
 gulp.task('jscs', function () {
-    return gulp.src(JS_FILES)
+    return gulp.src([JS_FILES, UNIT_TEST_FILES])
         .pipe(jscs({
             fix: true,
             esnext: true,
@@ -23,10 +30,10 @@ gulp.task('jscs', function () {
         .pipe(gulp.dest(function (data) {
             return data.base;
         }));
-})
+});
 
 gulp.task('jshint', function () {
-    return gulp.src(JS_FILES)
+    return gulp.src([JS_FILES, UNIT_TEST_FILES])
         .pipe(jshint())
         .pipe(jshint.reporter(stylish))
         .pipe(jshint.reporter('fail'));
@@ -37,7 +44,7 @@ gulp.task('lint', [
     'jshint'
 ]);
 
-gulp.task('build', ['lint'], function () {
+gulp.task('build', ['lint', 'test'], function () {
   
     var nw = new NwBuilder({
         files: './app/**/**', // use the glob format
@@ -45,7 +52,7 @@ gulp.task('build', ['lint'], function () {
         appName: APP_NAME
     });
 
-    nw.build().then(function() {
+    nw.build().then(function () {
         console.log('all done! everything is in ./build');
     }).catch(console.error.bind(console, 'there was an error building...'));
 });

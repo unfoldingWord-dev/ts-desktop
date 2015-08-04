@@ -5,7 +5,7 @@
 
 ;(function (root) {
     'use strict';
-    
+
     let configurator = require('../js/configurator');
     let gui = require('nw.gui');
     let mainWindow = gui.Window.get();
@@ -20,7 +20,7 @@
         win.minimize();
         win.restore();
     }
-    
+
     /**
      * The App is the global application context object.
      */
@@ -63,11 +63,11 @@
             maximize: function () {
                 this.isMaximized = true;
             },
-   
+
             unmaximize: function () {
                 this.isMaximized = false;
             },
-            
+
             minimize: function () {
                 this.isMaximized = false;
             }
@@ -141,7 +141,7 @@
         toggleMaximize: function () {
             let win = this.window,
                 isMax = this.isMaximized;
-            
+
             return isMax ? win.unmaximize() : win.maximize(), !isMax;
         },
 
@@ -204,9 +204,9 @@
     };
 
     App.init();
-    
+
     root.App = App;
-})(self);
+})(this);
 
 /*
  * For development purposes, reload on changes.
@@ -214,37 +214,39 @@
  * From: https://github.com/nwjs/nw.js/wiki/Livereload-nw.js-on-changes
  */
 
-;(function(root) {
+;(function () {
     'use strict';
-    
+
     if (process.env.DEBUG_MODE) {
         let gulp;
 
         try {
             gulp = require('gulp');
-        } catch(e) {
+        } catch (e) {
             console.log('Gulp not found.', e);
         }
 
         if (gulp) {
             console.log('Initiating auto reload...');
-    
+
             gulp.task('html', function () {
-                if (location) location.reload();
+                if (location) {
+                    location.reload();
+                }
             });
 
             gulp.task('css', function () {
-              let styles = document.querySelectorAll('link[rel=stylesheet]');
+                let styles = document.querySelectorAll('link[rel=stylesheet]');
 
-              for (let i = 0; i < styles.length; i++) {
-                  // reload styles
-                  let restyled = styles[i].getAttribute('href') + '?v='+Math.random(0,10000);
-                  styles[i].setAttribute('href', restyled);
-              };
+                for (let i = 0; i < styles.length; i++) {
+                    // reload styles
+                    let restyled = styles[i].getAttribute('href') + '?v=' + Math.random(0, 10000);
+                    styles[i].setAttribute('href', restyled);
+                }
             });
 
             gulp.watch(['**/*.css'], ['css']);
             gulp.watch(['**/*.html'], ['html']);
         }
     }
-})(self);
+})();

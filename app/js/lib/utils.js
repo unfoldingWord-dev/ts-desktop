@@ -1,4 +1,3 @@
-var fs = require('fs');
 var path = require('path');
 
 /**
@@ -12,18 +11,19 @@ var path = require('path');
  * @return {string} absolutePathname
  */
 
-function setPath(pathname, baseDir) {
+function setPath (pathname, baseDir) {
+    'use strict';
 
     if (pathname === undefined || pathname === '') {
-       return null;
-    } else if (pathname.indexOf(path.sep) != 0){
-       pathname = path.sep + pathname;
+        return null;
+    } else if (pathname.indexOf(path.sep) !== 0) {
+        pathname = path.sep + pathname;
     }
 
     baseDir = baseDir || __dirname;
 
 
-    return  baseDir +  pathname;
+    return baseDir +  pathname;
 }
 
 exports.setPath = setPath;

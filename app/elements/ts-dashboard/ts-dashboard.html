@@ -1,84 +1,55 @@
-<!--
-This elements displays the main dashboard for the application.
--->
-<link rel="import" href="../../components/core-header-panel/core-header-panel.html">
-<link rel="import" href="../../components/core-toolbar/core-toolbar.html">
-<link rel="import" href="../../components/paper-ripple/paper-ripple.html">
+<!-- ts-menubar -->
 
-<polymer-element name="ts-dashboard" attributes="action menu">
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+
+<dom-module id="ts-dashboard">
+
+  <style>
+  
+  :host {
+    display: block;
+    width: 100%;
+  }
+
+  .bar {
+    @apply(--header-bar);
+    display: flex;
+    align-items: center;
+  }
+  
+  .titles {
+    flex: auto;
+  }
+  
+  [icon="menu"] {
+    margin-right: 0.275em;
+  }
+  
+  </style>
 
   <template>
-    <style>
-      :host {
-
-      }
-      core-header-panel {
-        height: 100%;
-        overflow: auto;
-        -webkit-overflow-scrolling: touch;
-      }
-      core-toolbar {
-        background: #03a9f4;
-        color: white;
-      }
-    </style>
-
-    <core-header-panel>
-        <core-toolbar>
-            <span tool flex></span>
-            <div tool>
-                <core-icon-button icon="book" id="library" on-tap={{openMenu}}></core-icon-button>
-                <core-icon-button icon="description" id="resources" on-tap={{openMenu}}></core-icon-button>
-                <core-icon-button icon="language" id="project-settings"></core-icon-button>
-                <core-icon-button icon="autorenew" id="update"></core-icon-button>
-                <core-icon-button icon="cloud-download" id="download"></core-icon-button>
-                <core-icon-button icon="bug-report" id="bug-report"></core-icon-button>
-                <core-icon-button icon="file-upload" id="upload"></core-icon-button>
-                <core-icon-button icon="account-circle" id="account"></core-icon-button>
-                <core-icon-button icon="settings" id="settings" on-tap={{openMenu}}></core-icon-button>
-            </div>
-        </core-toolbar>
-        <div class="container" fit>
-            <!-- This is where all the content goes! -->
-            <p horizontal layout center-justified>Welcome to translationStudio!</p>
-            <paper-ripple fit></paper-ripple>
-        </div>
-    </core-header-panel>
+    <div class="bar">
+      <div class="titles"></div>
+      <paper-icon-button icon="menu" on-tap="openMenu"></paper-icon-button>
+    </div>
   </template>
 
-  <script>
+</dom-module>
 
-    Polymer({
-        ready: function() {
-            // TODO: perform any startup operations here
-        },
-        resourcesTapped: function() {
-            // TODO: implement
-        },
-        projectSettingsTapped: function() {
-            // TODO: implement
-        },
-        updateTapped: function() {
-            // TODO: implement
-        },
-        downloadTapped: function() {
-            // TODO: implement
-        },
-        bugReportTapped: function() {
-            // TODO: implement
-        },
-        uploadTapped: function() {
-            // TODO: implement
-        },
-        accountTapped: function() {
-            // TODO: implement
-        },
-        openMenu: function(event, detail, sender) {
-            event.stopPropagation();
-            this.menu = sender.id;
-        }
-    });
+<script>
 
-  </script>
+  Polymer({
+    is: 'ts-dashboard',
+    
+    openMenu: function(event) {
+      event.preventDefault();
+      
+      this.fire('iron-signal', { name: 'open-menu', data: 'overflow' });
+    },
+    
+    ready: function() {
+      
+    }
+  });
 
-</polymer-element>
+</script>

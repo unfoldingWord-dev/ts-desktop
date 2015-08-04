@@ -5,8 +5,8 @@
   "single-instance": true,
   "window": {
     "title": "translationStudio",
-    "width": 650,
-    "height": 400,
+    "width": 980,
+    "height": 580,
     "min_width": 650,
     "min_height": 400,
     "toolbar": false,

@@ -3,12 +3,14 @@
  * This context will be available throughout the application
  */
 
-this.App = (function () {
+;(function (root) {
     'use strict';
+
     let configurator = require('../js/configurator');
     let gui = require('nw.gui');
     let mainWindow = gui.Window.get();
     let reporter = require('../js/reporter.js');
+    let uploader = require('../js/uploader.js');
 
     /**
      * FIX - This provides a fix to the native chrome shadow missing
@@ -31,14 +33,23 @@ this.App = (function () {
 
         window: mainWindow,
 
-        reporter: reporter,
+        reporter: new reporter.instance({
+            logPath:configurator.getString('logPath'),
+            repoOwner: configurator.getString('repoOwner'),
+            repo: configurator.getString('repo'),
+            maxLogFileKb: configurator.getInt('maxLogFileKb'),
+            appVersion: require('../package.json').version
+        }),
+
+        uploader: uploader,
 
         isMaximized: false,
 
         display: function () {
             let win = this.window;
             win.show();
-            win.focus();
+            // NOTE: needs to be in a setTimeout, otherwise doesn't work properly
+            setTimeout(win.focus.bind(win), 1);
         },
 
         /**
@@ -51,6 +62,10 @@ this.App = (function () {
         events: {
             maximize: function () {
                 this.isMaximized = true;
+            },
+
+            unmaximize: function () {
+                this.isMaximized = false;
             },
 
             minimize: function () {
@@ -78,7 +93,7 @@ this.App = (function () {
             let win = _this.window;
 
             Object.keys(_this.events).forEach(function (event) {
-                win.on(event, _this.events[event]);
+                win.on(event, _this.events[event].bind(_this));
             });
         },
 
@@ -114,16 +129,20 @@ this.App = (function () {
             _this.configurator.setStorage(window.localStorage);
 
             var config = require('../config/ts-config');
+            var defaults = require('../config/defaults');
 
             _this.configurator.loadConfig(config);
+            _this.configurator.loadConfig(defaults);
         },
 
         /**
          * Toggles the application maximize state
          */
         toggleMaximize: function () {
-            let win = this.window;
-            this.isMaximized ? win.unmaximize() : win.maximize();
+            let win = this.window,
+                isMax = this.isMaximized;
+
+            return isMax ? win.unmaximize() : win.maximize(), !isMax;
         },
 
         /**
@@ -140,22 +159,94 @@ this.App = (function () {
             }
         },
 
+        /**
+         * A hook for global error catching
+         */
+        registerErrorReporter: function () {
+            process.on('uncaughtException', function (err) {
+                var date = new Date();
+                date = date.getFullYear() + '_' + date.getMonth() + '_' + date.getDay();
+                var path = configurator.getString('crashDir') + '/' +  date + '.crash';
+                var crashReporter = new reporter.instance({logPath: path});
+                crashReporter.logError(err.message + '\n' + err.stack, function () {
+                    /**
+                     * TODO: Hook in a UI
+                     * Currently the code quits quietly without notifying the user
+                     * This should probably be the time when the user chooses to submit what happened or not
+                     * then we restart the application
+                     */
+                    gui.App.quit();
+                });
+            });
+        },
+
+        initializeUploader: function () {
+            uploader.setServerInfo({
+                'host': configurator.getString('authServer'),
+                'port': configurator.getString('authServerPort')
+            });
+        },
+
         init: function () {
             let _this = this;
 
             _this.registerEvents();
             _this.registerShortcuts();
             _this.initializeConfig();
+            _this.registerErrorReporter();
+            _this.initializeUploader();
 
             let platformInit = _this.platformInit[process.platform];
             platformInit && platformInit.call(_this);
 
             _this.display();
         }
-
     };
 
     App.init();
 
-    return App;
+    root.App = App;
+})(this);
+
+/*
+ * For development purposes, reload on changes.
+ *
+ * From: https://github.com/nwjs/nw.js/wiki/Livereload-nw.js-on-changes
+ */
+
+;(function () {
+    'use strict';
+
+    if (process.env.DEBUG_MODE) {
+        let gulp;
+
+        try {
+            gulp = require('gulp');
+        } catch (e) {
+            console.log('Gulp not found.', e);
+        }
+
+        if (gulp) {
+            console.log('Initiating auto reload...');
+
+            gulp.task('html', function () {
+                if (location) {
+                    location.reload();
+                }
+            });
+
+            gulp.task('css', function () {
+                let styles = document.querySelectorAll('link[rel=stylesheet]');
+
+                for (let i = 0; i < styles.length; i++) {
+                    // reload styles
+                    let restyled = styles[i].getAttribute('href') + '?v=' + Math.random(0, 10000);
+                    styles[i].setAttribute('href', restyled);
+                }
+            });
+
+            gulp.watch(['**/*.css'], ['css']);
+            gulp.watch(['**/*.html'], ['html']);
+        }
+    }
 })();

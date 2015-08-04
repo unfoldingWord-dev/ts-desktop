@@ -9,6 +9,14 @@
     "regexp": true,
     "undef": true,
     "unused": true,
+    "globals": {
+      "describe": false,
+      "it": false,
+      "before": false,
+      "beforeEach": false,
+      "after": false,
+      "afterEach": false
+    },
     "strict": true,
     "trailing": true,
     "smarttabs": true,

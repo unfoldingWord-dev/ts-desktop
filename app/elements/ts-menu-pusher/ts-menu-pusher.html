@@ -1,80 +1,234 @@
-<!--
-Provides a fancy menu animation.
-You can open and close the menu by setting the "mode" attribute or by one of the openMenu() or closeMenu() methods.
+<!-- ts-menu-pusher -->
 
-Inspired by http://tympanus.net/codrops/2013/08/28/transitions-for-off-canvas-navigations/
--->
-<link rel="import" href="../../components/polymer/polymer.html">
+<link rel="import" href="../../components/iron-signals/iron-signals.html">
 
-<polymer-element name="ts-menu-pusher" attributes="menu">
+<dom-module id="ts-menu-pusher">
 
-    <template>
-        <link rel="stylesheet" href="ts-menu-pusher.css">
+  <style>
+  
+  :host {
+    width: 100%;
+    height: 100%;
+    display: block;
+    background-color: #444;
+    --timing: 0.22s;
+  }
 
-        <div id="container" class="container effect-scale-push menu-{{mode}}">
-            <div class="menu effect-scale-push">
-                <content select="[menus]"></content>
-            </div>
+  *,
+  *:after,
+  *::before {
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+  }
 
-            <div class="pusher" on-tap="{{closeMenu}}">
-                <div class="content">
-                    <div class="content-inner">
-                        <content></content>
-                    </div>
-                </div>
-            </div>
+  html,
+  body,
+  .container,
+  .pusher,
+  .content {
+    height: 100%;
+  }
+
+  .content {
+    background: #e8e8e8;
+  }
+
+  .content,
+  .content-inner,
+  ::content [main],
+  ::content [menus] {
+    position: relative;
+    height: 100%;
+    width: 100%;
+  }
+
+  .container {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .menu {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    visibility: hidden;
+    height: 100%;
+    background: #ffffff;
+    -webkit-transition: all var(--timing);
+    transition: all var(--timing);
+  }
+
+  .menu::after {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    content: '';
+    opacity: 1;
+    -webkit-transition: opacity var(--timing);
+    transition: opacity var(--timing);
+  }
+
+  .menu-open .menu::after {
+    width: 0;
+    height: 0;
+    opacity: 0;
+    -webkit-transition: opacity var(--timing), width var(--timing), height var(--timing);
+    transition: opacity var(--timing), width var(--timing), height var(--timing);
+  }
+  
+  .menu-container {
+    width: 100vw;
+  }
+  
+  .outside {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: black;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--timing);
+  }
+
+  /* effect styles */
+
+  .effect-slide-left .menu {
+    opacity: 1;
+    -webkit-transform: translate3d(-100%, 0, 0);
+    transform: translate3d(-100%, 0, 0);
+    box-shadow: 4px 0 30px rgba(22, 22, 22, 0.3);
+  }
+  
+  .effect-slide-right .menu {
+    opacity: 1;
+    right: 0;
+    left: auto;
+    -webkit-transform: translate3d(100%, 0, 0);
+    transform: translate3d(100%, 0, 0);
+    box-shadow: -4px 0 30px rgba(22, 22, 22, 0.3);
+  }
+
+  .menu-open .menu {
+    visibility: visible;
+    -webkit-transition: -webkit-transform $timing;
+    transition: transform $timing;
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+  
+  .menu-open .outside {
+    visibility: visible;
+    opacity: 0.19;
+  }
+
+  .menu::after {
+    display: none;
+  }
+
+  ::content [menus] > * {
+    display: none;
+  }
+
+  ::content .ts-menu-selected {
+    display: block;
+  }
+  
+  </style>
+
+  <template>
+    
+    <iron-signals on-iron-signal-open-menu="openMenu"></iron-signals>
+    
+    <div id="container" class="container effect-slide-right">
+      
+      <div class="content">
+        <content select="[main]"></content>
+      </div>
+      
+      <div id="menu" class="menu-container">
+        <div class="outside" on-tap="closeMenu"></div>
+        <div class="menu">
+          <content select="[menus]"></content>
         </div>
-    </template>
+      </div>
+    </div>
+    
+  </template>
+    
+</dom-module>
 
-    <script>
+<script>
 
-        Polymer({
-            publish: {
-                mode: {
-                    value: 'close',
-                    reflect: true
-                }
-            },
-            
-            selectedClass: 'ts-menu-selected',
-            
-            openMenu: function(menuName) {
-                var me = this;
-                
-                me.closeMenu();
-                
-                console.log('opening menu: ' + menuName);
-                var menu = me.querySelector('[label="' + menuName + '"]');
-                menu.classList.add(me.selectedClass);
+  Polymer({
+    is: 'ts-menu-pusher',
+    
+    properties: {
+      open: {
+        type: Boolean,
+        value: false
+      }
+    },
+    
+    openMenu: function(event) {
+      var me = this,
+          menuName = event.detail;
+      
+      me.closeMenu(function() {
+        if (!menuName) {
+          console.warn('no menu name provided');
+        } else {
+          var menu = me.querySelector('[label="' + menuName + '"]');
+          
+          if (menu) {
+            Polymer.dom(menu).classList.add(me.selectedClass);
+      
+            me.$.container.classList.add('menu-open');
+            me.open = true;
+          } else {
+            console.warn('menu "' + menuName + '" not found...');
+          }
+        }
+      });
+    },
+    closeMenu: function(cb) {
+      var me = this;
+      
+      if (typeof cb !== 'function') {
+        cb = function() {};
+      }
+      
+      me.$.container.classList.remove('menu-open');
+      me.open = false;
+      
+      var opened = me.getCurrentMenu();
+      
+      if (opened) {
+        var m = me.$.menu;
+        m.addEventListener('transitionend', function onend() {
+          m.removeEventListener('transitionend', onend);
+          Polymer.dom(opened).classList.remove(me.selectedClass);
+          cb();
+        }, false);
+      } else {
+        cb();
+      }
+    },
+    getCurrentMenu: function() {
+      var me = this,
+          selected = '.' + me.selectedClass,
+          opened = me.querySelector(selected);
+      return opened;
+    },
+    
+    ready: function() {
+      this.selectedClass = 'ts-menu-selected';
+    }
+  });
 
-                me.mode = 'open';
-            },
-            closeMenu: function() {
-                var me = this;
-                
-                var selected = '.' + me.selectedClass; 
-                var opened = me.querySelector(selected);
-                
-                if (opened) {
-                    setTimeout(function() {
-                        opened.classList.remove(me.selectedClass);
-                    }, 500);
-                }
-                
-                me.mode = 'close';
-                me.menu = null;
-            },
-            menuChanged: function(oldVal, newVal) {
-                var me = this;
-                
-                var menuName = newVal;
-                
-                if (menuName) {
-                    me.openMenu(menuName);
-                }
-            }
-        });
-
-    </script>
-
-</polymer-element>
+</script>

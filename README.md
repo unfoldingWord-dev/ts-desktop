@@ -1,5 +1,3 @@
-[![Crowdin](https://d322cqt584bo4o.cloudfront.net/translation-studio/localized.png)](https://crowdin.com/project/translation-studio) [![Travis](https://travis-ci.org/unfoldingWord-dev/ts-desktop.svg)](https://travis-ci.org/unfoldingWord-dev/ts-desktop)
-
 translationStudio Desktop
 --
 
@@ -16,9 +14,10 @@ If you would like to contribute to this project please read the [Contributing](h
 
 ##Quick Start
 First make sure you have all the dependencies installed
+
 * [npm](http://nodejs.org/) (bundled with Node.js)
 * [Bower](http://bower.io/)
-* [Grunt](http://gruntjs.com/)
+* [Gulp](http://gulpjs.com/)
 
 Then fork this repository and clone your fork.
 After the repository has been cloned to your computer run the following command in the new directory to set up your environment
@@ -28,12 +27,13 @@ After the repository has been cloned to your computer run the following command 
 For more information please read the [wiki](https://github.com/unfoldingWord-dev/ts-desktop/wiki).
 
 ###Commands
-The following commands can be ran from within the project directory
+The following commands are available from within the project directory:
 
-* `$ grunt` builds a distribution package
-* `$ grunt lint` checks js files for errors
-* `$ grunt sass` compile Sass files into CSS
-* `$ grunt test` run all Mocha unit tests
-* `$ npm start` build and run the application
+* `$ gulp` builds a distribution package
+* `$ gulp lint` runs the linter and the JS style checker
+* `$ gulp lint --fix` same as above, but attempts to fix the JS styles for you
+* `$ gulp test` runs all Mocha unit tests
+* `$ npm start` runs the application (without building it)
+* `$ DEBUG_MODE=1 npm start` same as above, but has live reloading (which is a bit unstable, hence "debug mode")
 
-> Note: You can open the chrome developer tools while the app is running by pressing `Ctrl+Alt+I`
+> Note: You can open the Chrome Developer Tools while the app is running by pressing `Ctrl+Alt+I`

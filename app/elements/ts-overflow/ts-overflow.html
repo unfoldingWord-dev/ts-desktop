@@ -1,0 +1,79 @@
+<!--
+Overflow menu.
+-->
+
+<dom-module id="ts-overflow">
+
+  <style>
+  
+  :host {
+    display: block;
+    width: 20em;
+    height: 100vh;
+    background: white;
+  }
+  
+  .bar {
+    @apply(--header-bar);
+  }
+  
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    font-family: 'Roboto';
+    font-style: bold;
+    font-size: 110%;
+  }
+  
+  ul + ul {
+    border-top: 1px solid #bbb;
+  }
+  
+  li {
+    margin: 1.5em 0.5em;
+  }
+  
+  </style>
+
+  <template>
+    <header class="bar"></header>
+    <nav on-tap="openMenu">
+      <ul>
+        <li id="library">Library</li>
+        <li id="resources">Resources</li>
+      </ul>
+      <ul>
+        <li>Project Languages</li>
+        <li>Share</li>
+        <li>Backup &amp; Publish</li>
+      </ul>
+      <ul>
+        <li>Update</li>
+        <li id="settings">Settings</li>
+        <li>Feedback</li>
+      </ul>
+    </nav>
+  </template>
+    
+</dom-module>
+
+<script>
+
+  Polymer({
+    is: 'ts-overflow',
+    
+    openMenu: function(event) {
+      var menu = event.target.id;
+      if (menu) {
+        this.fire('iron-signal', { name: 'open-menu', data: menu });
+      }
+    },
+    
+    ready: function() {
+      
+    }
+  });
+
+</script>
+

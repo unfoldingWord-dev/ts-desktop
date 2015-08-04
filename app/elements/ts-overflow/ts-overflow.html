@@ -2,21 +2,23 @@
 Overflow menu.
 -->
 
+<link rel="import" href="ts-overflow-icons.html">
+
 <dom-module id="ts-overflow">
 
   <style>
-  
+
   :host {
     display: block;
     width: 20em;
     height: 100vh;
     background: white;
   }
-  
+
   .bar {
     @apply(--header-bar);
   }
-  
+
   ul {
     margin: 0;
     padding: 0;
@@ -25,53 +27,53 @@ Overflow menu.
     font-style: bold;
     font-size: 110%;
   }
-  
+
   ul + ul {
     border-top: 1px solid #bbb;
   }
-  
+
   li {
     margin: 1.5em 0.5em;
   }
-  
+
   </style>
 
   <template>
     <header class="bar"></header>
     <nav on-tap="openMenu">
       <ul>
-        <li id="library">Library</li>
-        <li id="resources">Resources</li>
+        <li id="library"><iron-icon icon="overflow:library"></iron-icon> Library</li>
+        <li id="resources"><iron-icon icon="overflow:resources"></iron-icon> Resources</li>
       </ul>
       <ul>
-        <li>Project Languages</li>
-        <li>Share</li>
-        <li>Backup &amp; Publish</li>
+        <li><iron-icon icon="overflow:language"></iron-icon> Project Languages</li>
+        <li><iron-icon icon="overflow:share"></iron-icon> Share</li>
+        <li><iron-icon icon="overflow:backup"></iron-icon> Backup &amp; Publish</li>
       </ul>
       <ul>
-        <li>Update</li>
-        <li id="settings">Settings</li>
-        <li>Feedback</li>
+        <li><iron-icon icon="overflow:update"></iron-icon> Update</li>
+        <li id="settings"><iron-icon icon="overflow:settings"></iron-icon> Settings</li>
+        <li><iron-icon icon="overflow:feedback"></iron-icon> Feedback</li>
       </ul>
     </nav>
   </template>
-    
+
 </dom-module>
 
 <script>
 
   Polymer({
     is: 'ts-overflow',
-    
+
     openMenu: function(event) {
       var menu = event.target.id;
       if (menu) {
         this.fire('iron-signal', { name: 'open-menu', data: menu });
       }
     },
-    
+
     ready: function() {
-      
+
     }
   });
 

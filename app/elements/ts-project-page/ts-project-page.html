@@ -1,0 +1,33 @@
+<dom-module id="ts-project-page">
+
+  <template>
+    
+    <h3>Project</h3>
+    <div>project</div>
+    
+    <ul>
+      <template is="dom-repeat" items="[[projects]]" as="project">
+        <li>Project: <span>[[project]]</span></li>
+      </template>
+    </ul>
+    
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+    is: 'ts-project-page',
+    
+    ready: function() {
+      var me = this;
+      me.projects = [
+        'project 1',
+        'project 2',
+        'project 3'
+      ];
+    }
+  });
+
+</script>

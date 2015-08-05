@@ -21,7 +21,8 @@ var downloader = {
     downloadSourceLanguageList: function (projectId) {
         'use strict';
         var project = downloaderIndex.getProject(projectId);
-        var url = project['lang_catalog'];
+        var urlProp = 'lang_catalog';
+        var url = project[urlProp];
         //TODO: retrieve catalogJson
         //TEMP: this will be replaced by an AJAX request <<<
         url = url;
@@ -33,7 +34,8 @@ var downloader = {
     downloadResourceList: function (projectId, sourceLanguageId) {
         'use strict';
         var sourceLanguage = downloaderIndex.getSourceLanguage(projectId, sourceLanguageId);
-        var url = sourceLanguage['res_catalog'];
+        var urlProp = 'res_catalog';
+        var url = sourceLanguage[urlProp];
         //TODO: retrieve catalogJson
         //TEMP: this will be replaced by an AJAX request <<<
         url = url;
@@ -45,7 +47,8 @@ var downloader = {
     downloadSource: function (projectId, sourceLanguageId, resourceId) {
         'use strict';
         var resource = downloaderIndex.getResource(projectId, sourceLanguageId, resourceId);
-        var url = resource['source'];
+        var urlProp = 'source';
+        var url = resource[urlProp];
         //TODO: retrieve catalogJson
         //TEMP: this will be replaced by an AJAX request <<<
         url = url;
@@ -57,7 +60,8 @@ var downloader = {
     downloadTerms: function (projectId, sourceLanguageId, resourceId) {
         'use strict';
         var resource = downloaderIndex.getResource(projectId, sourceLanguageId, resourceId);
-        var url = resource['terms'];
+        var urlProp = 'terms';
+        var url = resource[urlProp];
         //TODO: retrieve catalogJson
         //TEMP: this will be replaced by an AJAX request <<<
         url = url;
@@ -69,7 +73,8 @@ var downloader = {
     downloadNotes: function (projectId, sourceLanguageId, resourceId) {
         'use strict';
         var resource = downloaderIndex.getResource(projectId, sourceLanguageId, resourceId);
-        var url = resource['notes'];
+        var urlProp = 'notes';
+        var url = resource[urlProp];
         //TODO: retrieve catalogJson
         //TEMP: this will be replaced by an AJAX request <<<
         url = url;
@@ -81,7 +86,8 @@ var downloader = {
     downloadCheckingQuestions: function (projectId, sourceLanguageId, resourceId) {
         'use strict';
         var resource = downloaderIndex.getResource(projectId, sourceLanguageId, resourceId);
-        var url = resource['checking_questions'];
+        var urlProp = 'checking_questions';
+        var url = resource[urlProp];
         //TODO: retrieve catalogJson
         //TEMP: this will be replaced by an AJAX request <<<
         url = url;

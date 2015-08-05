@@ -9,4 +9,4 @@ node_js:
   - "0.12"
 before_script:
   - npm install gulp -g
-script: gulp test; gulp lint
+script: gulp test && gulp lint

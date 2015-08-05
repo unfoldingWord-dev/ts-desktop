@@ -15,6 +15,7 @@
     "url": "git@github.com:unfoldingWord-dev/ts-desktop.git"
   },
   "dependencies": {
+    "md5": "^2.0.0",
     "fs-readfile-promise": "^2.0.0",
     "lodash": "^3.9.3",
     "mkdirp": "^0.5.1",
@@ -25,6 +26,7 @@
     "traverse": "^0.6.6"
   },
   "devDependencies": {
+    "bower": "^1.4.1",
     "gulp": "^3.9.0",
     "gulp-jscs": "^2.0.0",
     "gulp-jshint": "^1.11.2",

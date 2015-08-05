@@ -5,6 +5,7 @@ Library drawer.
 <link rel="import" href="../../components/polymer/polymer.html">
 <link rel="import" href="../../components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../../components/iron-pages/iron-pages.html">
+<link rel="import" href="../../elements/ts-project-page/ts-project-page.html">
 
 <dom-module id="ts-library">
   
@@ -71,9 +72,8 @@ Library drawer.
 
     <iron-pages selected="[[selected]]">
       <section class="page page-1">
-        <div clas="page-1">
-          <h3>Project</h3>
-          <div>project</div>
+        <div class="page-1">
+          <ts-project-page></ts-project-page>
         </div>
       </section>
       <section class="page page-2">

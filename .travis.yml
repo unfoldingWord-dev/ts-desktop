@@ -1,7 +1,10 @@
 language: node_js
 
 # Turn off caching to avoid any caching problems
-cache: false
+cache:
+    directories:
+    - $HOME/build/unfoldingWord-dev/ts-desktop/node_modules
+
 # Use the Travis Container-Based Infrastructure
 sudo: false
 
@@ -9,4 +12,4 @@ node_js:
   - "0.12"
 before_script:
   - npm install gulp -g
-script: gulp test; gulp lint
+script: gulp test && gulp lint

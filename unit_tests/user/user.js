@@ -34,12 +34,6 @@ var user2;
                 });
             });
 
-            describe('@FaileMe', function () {
-                it('should fail', function () {
-                    assert.equal(true, false);
-                });
-            });
-
             describe('@NoFile', function () {
                 var fileTest = null;
                 before(function (done) {

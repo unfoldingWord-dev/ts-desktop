@@ -22,8 +22,7 @@ function setPath (pathname, baseDir) {
 
     baseDir = baseDir || __dirname;
 
-
-    return baseDir +  pathname;
+    return baseDir + pathname;
 }
 
 exports.setPath = setPath;

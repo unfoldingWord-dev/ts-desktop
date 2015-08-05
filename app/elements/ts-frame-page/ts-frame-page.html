@@ -1,7 +1,5 @@
 
-<link rel="import" href="ts-project-page-icons.html">
-
-<dom-module id="ts-project-page">
+<dom-module id="ts-frame-page">
 
     <style>
 
@@ -18,6 +16,7 @@
             display: block;
             margin: 0;
             padding: 1em;
+            border-bottom: 1px solid #bbb;
         }
 
         ul li:hover {
@@ -35,8 +34,8 @@
   <template>
 
     <ul>
-      <template is="dom-repeat" items="[[projects]]" as="project">
-        <li><iron-icon icon="project-page:project"></iron-icon><span>[[project]]</span></li>
+      <template is="dom-repeat" items="[[frames]]" as="frame">
+        <li><span>[[frame]]</span></li>
       </template>
     </ul>
 
@@ -47,13 +46,15 @@
 <script>
 
   Polymer({
-    is: 'ts-project-page',
+    is: 'ts-frame-page',
 
     ready: function() {
-      this.projects = [
-        'Project 1',
-        'Project 2',
-        'Project 3'
+      this.frames = [
+          'Frame 1',
+          'Frame 2',
+          'Frame 3',
+          'Frame 4',
+          'Frame 5'
       ];
     }
   });

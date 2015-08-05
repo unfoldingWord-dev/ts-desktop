@@ -16,13 +16,9 @@ function setPath (pathname, baseDir) {
 
     if (pathname === undefined || pathname === '') {
         return null;
-    } else if (pathname.indexOf(path.sep) !== 0) {
-        pathname = path.sep + pathname;
     }
-
     baseDir = baseDir || __dirname;
-
-    return baseDir + pathname;
+    return baseDir.replace(/[\\\/ ]*$/, path.sep).replace(/\//gm, path.sep) + pathname.replace(/\//gm, path.sep).replace(/^[\\\/ ]*/, '');
 }
 
 exports.setPath = setPath;

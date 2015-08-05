@@ -74,7 +74,7 @@ var Indexer = function(indexType) {
                 var fileContent = JSON.stringify(item);
                 saveFile(filePath, fileContent);
             }
-        });
+        }
     }
 
     //public functions

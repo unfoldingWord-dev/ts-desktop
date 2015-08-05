@@ -88,7 +88,7 @@ function User (args) {
         if (fs.existsSync(targetFile)) {
             fs.unlinkSync(targetFile);
         }
-        if(fs.existsSync(dir)) {
+        if (fs.existsSync(dir)) {
             fs.rmdirSync(dir);
         }
     };

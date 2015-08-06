@@ -10,16 +10,57 @@ View Button
 
   <style>
 
-  paper-tab {
-    text-transform: uppercase;
-    font-weight: 300;
-    font-size: 110%;
-  }
+      paper-fab {
+          background: var(--accent-color-light);
+          color: white;
+      }
+
+      #expand paper-fab {
+          background: white;
+          color: black;
+      }
+
+      #expand {
+          opacity: 0;
+      }
+
+      #fullcontain {
+          height: 100vh;
+          width: 100vw;
+      }
+
+      #button {
+          position: fixed;
+          left: 0;
+          bottom: 0;
+          margin-bottom: 50px;
+          margin-left: 20px;
+      }
+
+      @-webkit-keyframes expand {
+          0% {opacity: 0;}
+          100% {opacity: 1;}
+      }
+
+
   </style>
 
   <template>
 
-    <paper-fab id="view-button" icon="view-button:view"></paper-fab>
+    <div id="fullcontain">
+        <div id="button">
+            <div id="expand">
+                <p><paper-fab id="read-button" mini icon="view-button:read" on-tap="ReadTapHandler"></paper-fab></p>
+                <p><paper-fab id="preview-button" mini icon="view-button:preview" on-tap="PreviewTapHandler"></paper-fab></p>
+                <p><paper-fab id="fullscreen-button" mini icon="view-button:fullscreen" on-tap="FullscreenTapHandler"></paper-fab></p>
+            </div>
+            <div>
+                <paper-fab id="view-button" mini icon="view-button:view" on-tap="ViewTapHandler"></paper-fab>
+            </div>
+
+        </div>
+    </div>
+
 
   </template>
 </dom-module>
@@ -28,6 +69,32 @@ View Button
 
 Polymer({
   is: 'ts-view-button',
+
+    ViewTapHandler: function(event) {
+        this.$.expand.style.webkitAnimationName = "expand";
+        this.$.expand.style.webkitAnimationDuration = "1s";
+        this.$.expand.style.webkitAnimationFillMode = "both";
+    },
+
+    FullcontainTapHandler: function(event) {
+
+
+    },
+
+    FullscreenTapHandler: function(event) {
+        alert('you clicked the full screen button');
+
+    },
+
+    PreviewTapHandler: function(event) {
+        alert('you clicked the preview button');
+
+    },
+
+    ReadTapHandler: function(event) {
+        alert('you clicked the read button');
+
+    },
 
   ready: function() {
     // oh boy!

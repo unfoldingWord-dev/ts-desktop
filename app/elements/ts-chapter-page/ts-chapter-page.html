@@ -23,11 +23,15 @@
             font-size: 110%;
         }
 
+        .container {
+            margin: 0 auto;
+        }
+
     </style>
 
   <template>
 
-    <div>
+    <div class="container">
       <template is="dom-repeat" items="[[chapters]]" as="chapter">
         <span>[[chapter]]</span>
       </template>

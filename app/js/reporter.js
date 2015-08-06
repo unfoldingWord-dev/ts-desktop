@@ -6,12 +6,13 @@ var fs = require('fs');
 var os = require('os');
 var https = require('https');
 var mkdirp = require('mkdirp');
+var path = require('path');
 
 function Reporter (args) {
     'use strict';
 
     var _this = this;
-    var logPath = args.logPath || './log.txt';
+    var logPath = path.normalize(args.logPath || './log.txt');
     var oauthToken = args.oauthToken || '';
     var repoOwner = args.repoOwner || '';
     var repo = args.repo || '';
@@ -89,13 +90,11 @@ function Reporter (args) {
         }
         var date = new Date();
         date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-        var message = date + ' ' + level + '/' + location + ': ' + string + '\r\n';
-        var dir = logPath.split(/\\|\//);
-        dir.pop();
-        dir = dir.join('\\');
-        if (dir === '') {
-            dir = '.';
-        }
+
+        var message = date + ' ' + level + '/' + location + ': ' + string + '\n';
+
+        var dir = path.dirname(logPath);
+
         mkdirp(dir, function (e) {
             if (e) {
                 throw new Error(e);

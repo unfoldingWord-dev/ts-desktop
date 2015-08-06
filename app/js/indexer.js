@@ -1,6 +1,4 @@
 var fs = require('fs');
-//var url = require('url');
-//var _ = require('lodash');
 var configurator = require('./configurator');
 var utils = require('./lib/utils');
 var setPath = utils.setPath;

@@ -33,23 +33,28 @@
 
         window: mainWindow,
 
-        reporter: new reporter.instance({
-            logPath:configurator.getString('logPath'),
-            repoOwner: configurator.getString('repoOwner'),
-            repo: configurator.getString('repo'),
-            maxLogFileKb: configurator.getInt('maxLogFileKb'),
-            appVersion: require('../package.json').version
-        }),
-
         uploader: uploader,
 
         isMaximized: false,
 
         display: function () {
             let win = this.window;
-            win.show();
-            // NOTE: needs to be in a setTimeout, otherwise doesn't work properly
-            setTimeout(win.focus.bind(win), 1);
+
+            if (!win.shown) {
+                win.show();
+                win.shown = true;
+                // NOTE: needs to be in a setTimeout, otherwise doesn't work properly
+                setTimeout(win.focus.bind(win), 1);
+            }
+        },
+
+        reload: function () {
+            this.window.removeAllListeners();
+            this.window.reload();
+        },
+
+        showDevTools: function () {
+            this.window.showDevTools('', true);
         },
 
         /**
@@ -83,7 +88,14 @@
                 key: 'Ctrl+Alt+I',
 
                 active: function () {
-                    this.window.showDevTools('', true);
+                    App.showDevTools();
+                }
+            },
+            reload: {
+                key: 'Ctrl+R',
+
+                active: function () {
+                    App.reload();
                 }
             }
         },
@@ -159,10 +171,25 @@
             }
         },
 
+        initializeReporter: function () {
+            var _this = this;
+
+            _this.reporter = new reporter.instance({
+                logPath:configurator.getString('logPath'),
+                repoOwner: configurator.getString('repoOwner'),
+                repo: configurator.getString('repo'),
+                maxLogFileKb: configurator.getInt('maxLogFileKb'),
+                appVersion: require('../package.json').version
+            });
+
+            return _this.reporter;
+        },
+
         /**
          * A hook for global error catching
          */
         registerErrorReporter: function () {
+            process.removeAllListeners('uncaughtException');
             process.on('uncaughtException', function (err) {
                 var date = new Date();
                 date = date.getFullYear() + '_' + date.getMonth() + '_' + date.getDay();
@@ -193,6 +220,7 @@
             _this.registerEvents();
             _this.registerShortcuts();
             _this.initializeConfig();
+            _this.initializeReporter();
             _this.registerErrorReporter();
             _this.initializeUploader();
 
@@ -214,7 +242,7 @@
  * From: https://github.com/nwjs/nw.js/wiki/Livereload-nw.js-on-changes
  */
 
-;(function () {
+;(function (root) {
     'use strict';
 
     if (process.env.DEBUG_MODE) {
@@ -230,9 +258,7 @@
             console.log('Initiating auto reload...');
 
             gulp.task('html', function () {
-                if (location) {
-                    location.reload();
-                }
+                root.App.reload();
             });
 
             gulp.task('css', function () {
@@ -249,4 +275,4 @@
             gulp.watch(['**/*.html'], ['html']);
         }
     }
-})();
+})(this);

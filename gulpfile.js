@@ -71,4 +71,4 @@ gulp.task('build', ['lint', 'test'], function () {
     }).catch(console.error.bind(console, 'there was an error building...'));
 });
 
-gulp.task('default', ['build']);
+gulp.task('default', ['lint', 'test']);

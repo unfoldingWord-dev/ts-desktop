@@ -54,5 +54,21 @@
             "mutable": false,
             "type": "string"
         }
+    },
+    {
+        "name": "authServerPort",
+        "value": "9095",
+        "meta":{
+            "mutable": false,
+            "type": "string"
+        }
+    },
+    {
+        "name": "apiUrl",
+        "value": "https://api.unfoldingword.org/ts/txt/2/catalog.json",
+        "meta":{
+            "mutable": false,
+            "type": "string"
+        }
     }
 ]

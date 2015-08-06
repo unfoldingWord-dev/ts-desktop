@@ -2,6 +2,7 @@
 //var moment = require('moment');
 //var utils = require('./lib/utils');
 //var setPath = utils.setPath;
+var configurator = require('./configurator');
 var Indexer = require('./indexer');
 var downloaderIndex = new Indexer('download');
 
@@ -9,7 +10,7 @@ var downloader = {
 
     downloadProjectList: function () {
         'use strict';
-        var url = 'https://api.unfoldingword.org/ts/txt/2/catalog.json';
+        var url = configurator.getString('apiUrl');
         //TODO: retrieve catalogJson
         //TEMP: this will be replaced by an AJAX request <<<
         url = url;

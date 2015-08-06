@@ -4,7 +4,6 @@ var utils = require('./lib/utils');
 var setPath = utils.setPath;
 var md5 = require('md5');
 
-var apiUrl = 'https://api.unfoldingword.org/ts/txt/2/';
 var dataDirPath = 'data';
 var linksJsonPath = setPath('links.json', dataDirPath);
 var sourceDirPath = 'source';
@@ -14,7 +13,7 @@ var Indexer = function (indexType) {
 
     //reassign this to indexer, set path
     var _this = this;
-    _this.rootPath = setPath(indexType, configurator.getString('index_root_path')); //TODO: maybe make this not public?
+    _this.rootPath = setPath(indexType, configurator.getString('indexRootPath')); //TODO: maybe make this not public?
 
 
     //internal functions
@@ -185,7 +184,7 @@ var Indexer = function (indexType) {
     //public json retrieval functions
     _this.getCatalog = function () {
         var catalogJson = {
-            'proj_catalog': apiUrl + 'catalog.json'
+            'proj_catalog': configurator.getString('apiUrl')
         };
         return catalogJson;
     };

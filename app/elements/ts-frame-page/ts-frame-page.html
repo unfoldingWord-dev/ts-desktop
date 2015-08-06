@@ -1,0 +1,62 @@
+
+<dom-module id="ts-frame-page">
+
+    <style>
+
+        ul {
+            margin: 0;
+            padding: 0;
+            list-style-type: none;
+            font-family: 'Roboto';
+            font-style: bold;
+            font-size: 110%;
+        }
+
+        ul li {
+            display: block;
+            margin: 0;
+            padding: 1em;
+            border-bottom: 1px solid #bbb;
+        }
+
+        ul li:hover {
+            background: var(--accent-color-dark);
+            box-shadow: inset 0 -1px rgba(0,0,0,0);
+            color: #fff;
+        }
+
+        iron-icon {
+            padding-right: 2em;
+        }
+
+    </style>
+
+  <template>
+
+    <ul>
+      <template is="dom-repeat" items="[[frames]]" as="frame">
+        <li><span>[[frame]]</span></li>
+      </template>
+    </ul>
+
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+    is: 'ts-frame-page',
+
+    ready: function() {
+      this.frames = [
+          'Frame 1',
+          'Frame 2',
+          'Frame 3',
+          'Frame 4',
+          'Frame 5'
+      ];
+    }
+  });
+
+</script>

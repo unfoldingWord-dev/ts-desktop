@@ -92,21 +92,20 @@ var user2;
         });
 
         describe('@NewUser', function () {
-            var create = null;
-            before(function (done) {
-                user1 = new User.instance({
-                    profilesDirectory: profilesDirectory,
-                    username: username1,
-                    password: password
-                });
-                create = 'Created';
-                done();
+            user1 = new User.instance({
+                profilesDirectory: profilesDirectory,
+                username: username1,
+                password: password
+            });
+
+            after(function () {
+                user1.destroy();
             });
 
             describe('@CreateFile', function () {
                 it('should create profile for new user1', function () {
-                    var expected = 'Created';
-                    assert.equal(create, expected);
+                    user1.commit();
+                    assert.equal(true, fs.existsSync(user1.getProfilePath()));
                 });
             });
 

@@ -7,6 +7,7 @@ var utils = require('./lib/utils');
 var setPath = utils.setPath;
 var jsonfile = require('jsonfile');
 var md5 = require('md5');
+var fs = require('fs');
 
 function User (args) {
     'use strict';
@@ -79,6 +80,22 @@ function User (args) {
         return _this.saveData();
     };
 
+    /**
+     * Delets the user profile from the disk
+     */
+    _this.destroy = function () {
+        var dir = setPath(targetDirectory, profilesDirectory);
+        if (fs.existsSync(targetFile)) {
+            fs.unlinkSync(targetFile);
+        }
+        if (fs.existsSync(dir)) {
+            fs.rmdirSync(dir);
+        }
+    };
+
+    _this.getProfilePath = function () {
+        return targetFile;
+    };
 }
 
 exports.instance = User;

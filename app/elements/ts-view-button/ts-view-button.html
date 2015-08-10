@@ -1,0 +1,159 @@
+<!--
+View Button
+-->
+
+<link rel="import" href="../../components/polymer/polymer.html">
+<link rel="import" href="../../components/paper-fab/paper-fab.html">
+<link rel="import" href="ts-view-button-icons.html">
+
+<dom-module id="ts-view-button">
+
+  <style>
+
+      paper-fab {
+          border-radius: 49.9999%;
+      }
+
+      paper-fab.fixed {
+          background: var(--accent-color-light);
+          color: white;
+      }
+
+      paper-fab.animate {
+          background: white;
+          color: black;
+      }
+
+      .fixed {
+          position: absolute;
+          left: 40px;
+          bottom: 40px;
+      }
+
+      .animate {
+          opacity: 1;
+          position: relative;
+          left: 48px;
+          bottom: 148px;
+      }
+
+      #fullcontain {
+          height: 100vh;
+          width: 100vw;
+      }
+
+      #buttonbox {
+          position: fixed;
+          left: 0;
+          bottom: 0;
+          height: 400px;
+          width: 150px;
+      }
+
+      @-webkit-keyframes open {
+          0% {opacity: 0;
+              transform: scaleY(0) scaleX(0);
+              bottom: 148px;
+
+
+
+
+          }
+          100% {opacity: 1;
+              transform: scaleY(1) scaleX(1);
+              bottom: 248px;
+
+
+
+          }
+      }
+
+      @-webkit-keyframes close {
+          0% {opacity: 1;}
+          100% {opacity: 0;}
+      }
+
+
+  </style>
+
+  <template>
+
+    <div class="clickable" id="fullcontain" on-tap="MainTapHandler">
+        <div id="buttonbox">
+
+                <p id="button1"><paper-fab class="clickable button animate" id="readbutton" mini icon="view-button:read"></paper-fab></p>
+                <paper-fab class="clickable button" id="preview-button" mini icon="view-button:preview"></paper-fab>
+                <paper-fab class="clickable button" id="fullscreen-button" mini icon="view-button:fullscreen"></paper-fab>
+
+                <paper-fab class="clickable button fixed" id="viewbutton" icon="view-button:view"></paper-fab>
+
+
+        </div>
+    </div>
+
+
+  </template>
+</dom-module>
+
+<script>
+
+Polymer({
+  is: 'ts-view-button',
+
+    ViewTapHandler: function(event) {
+
+    },
+
+    MainTapHandler: function(event) {
+
+        var etarget = event.target;
+
+        while (!etarget.classList.contains("clickable")) {
+            etarget = etarget.parentNode;
+        }
+
+        if (etarget.id === "viewbutton") {
+            this.$.button1.style.webkitAnimationName = "open";
+            this.$.button1.style.webkitAnimationDuration = "5s";
+            //this.$.expand.style.webkitAnimationFillMode = "both";
+            this.$.viewbutton.icon = "view-button:close";
+            //this.$.viewbutton.id = "closebutton";
+        } else if (etarget.id === "fullscreen-button") {
+            alert('you clicked the full screen button');
+        } else if (etarget.id === "preview-button") {
+            alert('you clicked the preview button');
+        } else if (etarget.id === "read-button") {
+            alert('you clicked the read button');
+        } else {
+            this.$.button1.style.webkitAnimationName = "close";
+            this.$.button1.style.webkitAnimationDuration = "1s";
+            //this.$.expand.style.webkitAnimationFillMode = "both";
+            this.$.viewbutton.icon = "view-button:view";
+            //this.$.closebutton.id = "viewbutton";
+        }
+
+
+    },
+
+    FullscreenTapHandler: function(event) {
+
+    },
+
+    PreviewTapHandler: function(event) {
+
+
+    },
+
+    ReadTapHandler: function(event) {
+
+
+    },
+
+  ready: function() {
+
+
+    // oh boy!
+  }
+});
+
+</script>

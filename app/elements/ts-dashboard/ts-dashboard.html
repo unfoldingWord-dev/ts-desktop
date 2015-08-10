@@ -1,11 +1,12 @@
 <!-- ts-menubar -->
 
 <link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../ts-view-button/ts-view-button.html">
 
 <dom-module id="ts-dashboard">
 
   <style>
-  
+
   :host {
     display: block;
     width: 100%;
@@ -16,15 +17,15 @@
     display: flex;
     align-items: center;
   }
-  
+
   .titles {
     flex: auto;
   }
-  
+
   [icon="menu"] {
     margin-right: 0.275em;
   }
-  
+
   </style>
 
   <template>
@@ -32,6 +33,10 @@
       <div class="titles"></div>
       <paper-icon-button icon="menu" on-tap="openMenu"></paper-icon-button>
     </div>
+      <div>
+          <ts-view-button></ts-view-button>
+      </div>
+
   </template>
 
 </dom-module>
@@ -40,15 +45,15 @@
 
   Polymer({
     is: 'ts-dashboard',
-    
+
     openMenu: function(event) {
       event.preventDefault();
-      
+
       this.fire('iron-signal', { name: 'open-menu', data: 'overflow' });
     },
-    
+
     ready: function() {
-      
+
     }
   });
 

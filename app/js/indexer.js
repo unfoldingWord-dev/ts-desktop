@@ -36,7 +36,9 @@ function Indexer (indexType) {
 
     function openJson (filePath) {
         var fileContents = openFile(filePath);
-        if (fileContents === null) return null;
+        if (fileContents === null) {
+            return null;
+        }
         return JSON.parse(fileContents);
     }
 
@@ -66,7 +68,9 @@ function Indexer (indexType) {
 
     function incrementLink (md5Hash) {
         var links = openJson(linksJsonPath);
-        if (links === null) links = {};
+        if (links === null) {
+            links = {};
+        }
         if (!(md5Hash in links)) {
             links[md5Hash] = 0;
         }

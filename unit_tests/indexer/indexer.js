@@ -1,10 +1,11 @@
 var assert = require('assert');
 var Indexer = require('../../app/js/indexer').Indexer;
 var testIndexer = new Indexer('test');
+
 var projectsCatalogJson = require('./data/ts/txt/2/catalog.json');
-    projectsCatalogJson = JSON.stringify(projectsCatalogJson);
+projectsCatalogJson = JSON.stringify(projectsCatalogJson);
 var sourceLanguagesCatalogJson = require('./data/ts/txt/2/1ch/languages.json');
-    sourceLanguagesCatalogJson = JSON.stringify(sourceLanguagesCatalogJson);
+sourceLanguagesCatalogJson = JSON.stringify(sourceLanguagesCatalogJson);
 
 ;(function () {
     'use strict';

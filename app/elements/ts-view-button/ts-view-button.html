@@ -32,7 +32,7 @@ View Button
 
       .animate {
           opacity: 1;
-          position: relative;
+          position: absolute;
           left: 48px;
           bottom: 148px;
       }
@@ -40,6 +40,9 @@ View Button
       #fullcontain {
           height: 100vh;
           width: 100vw;
+          position: fixed;
+          top: 0;
+          left: 0;
       }
 
       #buttonbox {
@@ -50,27 +53,33 @@ View Button
           width: 150px;
       }
 
+      .open {
+        -webkit-animation: open 0.75s ease-in forwards;
+      }
+
+      .close {
+        -webkit-animation: close 0.33s ease-in forwards;
+      }
+
       @-webkit-keyframes open {
-          0% {opacity: 0;
-              transform: scaleY(0) scaleX(0);
-              bottom: 148px;
-
-
-
+          0% {
+              opacity: 0;
+              transform: scale3d(0,0,1) translate3d(0,0,0);
 
           }
-          100% {opacity: 1;
-              transform: scaleY(1) scaleX(1);
-              bottom: 248px;
-
-
-
+          100% {
+              opacity: 1;
+              transform: scale3d(1,1,1) translate3d(0,-100px,0);
           }
       }
 
       @-webkit-keyframes close {
-          0% {opacity: 1;}
-          100% {opacity: 0;}
+          0% {
+            opacity: 1;
+          }
+          100% {
+            opacity: 0;
+          }
       }
 
 
@@ -81,11 +90,11 @@ View Button
     <div class="clickable" id="fullcontain" on-tap="MainTapHandler">
         <div id="buttonbox">
 
-                <p id="button1"><paper-fab class="clickable button animate" id="readbutton" mini icon="view-button:read"></paper-fab></p>
-                <paper-fab class="clickable button" id="preview-button" mini icon="view-button:preview"></paper-fab>
-                <paper-fab class="clickable button" id="fullscreen-button" mini icon="view-button:fullscreen"></paper-fab>
+                <paper-fab class="clickable animate" id="readbutton" mini icon="view-button:read"></paper-fab>
+                <paper-fab class="clickable" id="preview-button" mini icon="view-button:preview"></paper-fab>
+                <paper-fab class="clickable" id="fullscreen-button" mini icon="view-button:fullscreen"></paper-fab>
 
-                <paper-fab class="clickable button fixed" id="viewbutton" icon="view-button:view"></paper-fab>
+                <paper-fab class="clickable fixed" id="viewbutton" icon="[[icon]]"></paper-fab>
 
 
         </div>
@@ -105,19 +114,17 @@ Polymer({
     },
 
     MainTapHandler: function(event) {
-
-        var etarget = event.target;
+        var etarget = event.target,
+            readbutton = this.$.readbutton;
 
         while (!etarget.classList.contains("clickable")) {
             etarget = etarget.parentNode;
         }
 
         if (etarget.id === "viewbutton") {
-            this.$.button1.style.webkitAnimationName = "open";
-            this.$.button1.style.webkitAnimationDuration = "5s";
-            //this.$.expand.style.webkitAnimationFillMode = "both";
-            this.$.viewbutton.icon = "view-button:close";
-            //this.$.viewbutton.id = "closebutton";
+            readbutton.classList.add('open');
+            readbutton.classList.remove('close');
+            this.icon = "view-button:close"
         } else if (etarget.id === "fullscreen-button") {
             alert('you clicked the full screen button');
         } else if (etarget.id === "preview-button") {
@@ -125,11 +132,9 @@ Polymer({
         } else if (etarget.id === "read-button") {
             alert('you clicked the read button');
         } else {
-            this.$.button1.style.webkitAnimationName = "close";
-            this.$.button1.style.webkitAnimationDuration = "1s";
-            //this.$.expand.style.webkitAnimationFillMode = "both";
-            this.$.viewbutton.icon = "view-button:view";
-            //this.$.closebutton.id = "viewbutton";
+            readbutton.classList.add('close');
+            readbutton.classList.remove('open');
+            this.icon = "view-button:view";
         }
 
 
@@ -150,8 +155,7 @@ Polymer({
     },
 
   ready: function() {
-
-
+    this.icon = "view-button:view";
     // oh boy!
   }
 });

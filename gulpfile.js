@@ -19,7 +19,7 @@ var APP_NAME = 'translationStudio',
     
 gulp.task('test', function () {
     return gulp.src(UNIT_TEST_FILES, { read: false })
-        .pipe(mocha({reporter: 'spec'}));
+        .pipe(mocha({reporter: 'spec', grep: (argv.grep || argv.g)}));
 });
     
 gulp.task('jscs', function () {

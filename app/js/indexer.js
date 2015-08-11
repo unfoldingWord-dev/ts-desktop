@@ -1,50 +1,78 @@
 var fs = require('fs');
+var path = require('path');
+var mkdirp = require('mkdirp');
 var configurator = require('./configurator');
+var md5 = require('md5');
 var utils = require('./lib/utils');
 var setPath = utils.setPath;
-var md5 = require('md5');
+var getUrlFromObj = utils.getUrlFromObj;
 
 var dataDirPath = 'data';
 var linksJsonPath = setPath('links.json', dataDirPath);
 var sourceDirPath = 'source';
 
-var Indexer = function (indexType) {
+function Indexer (indexType) {
     'use strict';
 
-    //reassign this to indexer, set path
+    //reassign this to _this, set path
     var _this = this;
-    _this.rootPath = setPath(indexType, configurator.getString('indexRootPath')); //TODO: maybe make this not public?
-
+    _this.rootPath = setPath(indexType, configurator.getString('indexRootPath'));
 
     //internal functions
     function openFile (filePath) {
         var fullPath = setPath(filePath, _this.rootPath);
+        var fileContents = null;
         if (fs.existsSync(fullPath)) {
-            return fs.readFileSync(fullPath, 'utf8');
+            try {
+                fileContents = fs.readFileSync(fullPath, 'utf8');
+            }
+            catch (err) {
+                console.log(err);
+                fileContents = null;
+            }
         }
-        return null;
+        return fileContents;
     }
 
     function openJson (filePath) {
         var fileContents = openFile(filePath);
+        if (fileContents === null) {
+            return null;
+        }
         return JSON.parse(fileContents);
     }
 
     function saveFile (filePath, fileContents) {
         var fullPath = setPath(filePath, _this.rootPath);
-        fs.writeFileSync(fullPath, fileContents);
+        var fullDirPath = path.dirname(fullPath);
+        try {
+            mkdirp.sync(fullDirPath, '0755');
+        }
+        catch (err) {
+            console.log(err);
+            return false;
+        }
+        try {
+            fs.writeFileSync(fullPath, fileContents);
+        }
+        catch (err) {
+            console.log(err);
+            return false;
+        }
         return true;
     }
 
     function saveJson (filePath, fileContents) {
-        saveFile(filePath, JSON.stringify(fileContents));
-        return true;
+        return saveFile(filePath, JSON.stringify(fileContents));
     }
 
     function incrementLink (md5Hash) {
         var links = openJson(linksJsonPath);
+        if (links === null) {
+            links = {};
+        }
         if (!(md5Hash in links)) {
-            links.md5Hash = 0;
+            links[md5Hash] = 0;
         }
         links[md5Hash]++;
         saveJson(linksJsonPath, links);
@@ -64,30 +92,43 @@ var Indexer = function (indexType) {
     }
     /**/
 
-    function indexItems (md5Hash, catalogLinkFile, catalogJson) {
+    function indexItems (md5Hash, catalogLinkFile, catalogJson, metaObj) {
         var items = JSON.parse(catalogJson);
         var md5Path = setPath(md5Hash, dataDirPath);
+
+        //save link file
         saveFile(catalogLinkFile, md5Hash);
         incrementLink(md5Hash);
+
+        //save meta file
+        if (typeof metaObj !== 'undefined') {
+            var metaFilePath = setPath('meta.json', md5Path);
+            var metaFileContent = typeof metaStr === 'object' ? JSON.stringify(metaObj) : metaObj;
+            saveFile(metaFilePath, metaFileContent);
+        }
+
+        //save individual json files
         for (var x in items) {
             if (items.hasOwnProperty(x)) {
                 var item = items[x];
                 var fileName = item.slug || null;
                 if (fileName !== null) {
-                    var filePath = md5Path + fileName + '.json';
+                    var filePath = setPath(fileName + '.json', md5Path);
                     var fileContent = JSON.stringify(item);
                     saveFile(filePath, fileContent);
                 }
             }
         }
-    }
 
-    function getItemURL (itemObj, urlProp) {
-        return itemObj[urlProp].split('?')[0];
+        return true;
     }
 
     function getItemsArray (itemObj, urlProp) {
-        var catalogApiUrl = itemObj[urlProp].split('?')[0];
+        var catalogApiUrl = getUrlFromObj(
+            itemObj,
+            urlProp,
+            true
+        );
         var md5Hash = md5(catalogApiUrl);
         var md5Path = setPath(md5Hash, dataDirPath);
         if (arguments.length > 2) {
@@ -112,73 +153,80 @@ var Indexer = function (indexType) {
 
     //public indexing functions
     _this.indexProjects = function (catalogJson) {
-        var catalogApiUrl = getItemURL(
+        var catalogApiUrl = getUrlFromObj(
             _this.getCatalog(),
-            'proj_catalog'
+            'proj_catalog',
+            true
         );
         var md5Hash = md5(catalogApiUrl);
         var catalogLinkFile = setPath('projects_catalog.link', sourceDirPath);
-        indexItems(md5Hash, catalogLinkFile, catalogJson);
+        return indexItems(md5Hash, catalogLinkFile, catalogJson);
     };
 
-    _this.indexSourceLanguages = function (projectId, catalogJson) {
-        var catalogApiUrl = getItemURL(
+    _this.indexSourceLanguages = function (projectId, catalogJson, metaObj) {
+        var catalogApiUrl = getUrlFromObj(
             _this.getProject(projectId),
-            'lang_catalog'
+            'lang_catalog',
+            true
         );
         var md5Hash = md5(catalogApiUrl);
         var catalogLinkFile = setPath('languages_catalog.link', setPath(projectId, sourceDirPath));
-        indexItems(md5Hash, catalogLinkFile, catalogJson);
+        return indexItems(md5Hash, catalogLinkFile, catalogJson, metaObj);
     };
 
-    _this.indexResources = function (projectId, sourceLanguageId, catalogJson) {
-        var catalogApiUrl = getItemURL(
+    _this.indexResources = function (projectId, sourceLanguageId, catalogJson, metaObj) {
+        var catalogApiUrl = getUrlFromObj(
             _this.getSourceLanguage(projectId, sourceLanguageId),
-            'res_catalog'
+            'res_catalog',
+            true
         );
         var md5Hash = md5(catalogApiUrl);
         var catalogLinkFile = setPath('resources_catalog.link', setPath(sourceLanguageId, setPath(projectId, sourceDirPath)));
-        indexItems(md5Hash, catalogLinkFile, catalogJson);
+        return indexItems(md5Hash, catalogLinkFile, catalogJson, metaObj);
     };
 
-    _this.indexSource = function (projectId, sourceLanguageId, resourceId, catalogJson) {
-        var catalogApiUrl = getItemURL(
+    _this.indexSource = function (projectId, sourceLanguageId, resourceId, catalogJson, metaObj) {
+        var catalogApiUrl = getUrlFromObj(
             _this.getResource(projectId, sourceLanguageId, resourceId),
-            'source'
+            'source',
+            true
         );
         var md5Hash = md5(catalogApiUrl);
         var catalogLinkFile = setPath('source.link', setPath(resourceId, setPath(sourceLanguageId, setPath(projectId, sourceDirPath))));
-        indexItems(md5Hash, catalogLinkFile, catalogJson);
+        return indexItems(md5Hash, catalogLinkFile, catalogJson, metaObj);
     };
 
-    _this.indexNotes = function (projectId, sourceLanguageId, resourceId, catalogJson) {
-        var catalogApiUrl = getItemURL(
+    _this.indexNotes = function (projectId, sourceLanguageId, resourceId, catalogJson, metaObj) {
+        var catalogApiUrl = getUrlFromObj(
             _this.getResource(projectId, sourceLanguageId, resourceId),
-            'notes'
+            'notes',
+            true
         );
         var md5Hash = md5(catalogApiUrl);
         var catalogLinkFile = setPath('notes.link', setPath(resourceId, setPath(sourceLanguageId, setPath(projectId, sourceDirPath))));
-        indexItems(md5Hash, catalogLinkFile, catalogJson);
+        return indexItems(md5Hash, catalogLinkFile, catalogJson, metaObj);
     };
 
-    _this.indexTerms = function (projectId, sourceLanguageId, resourceId, catalogJson) {
-        var catalogApiUrl = getItemURL(
+    _this.indexTerms = function (projectId, sourceLanguageId, resourceId, catalogJson, metaObj) {
+        var catalogApiUrl = getUrlFromObj(
             _this.getResource(projectId, sourceLanguageId, resourceId),
-            'terms'
+            'terms',
+            true
         );
         var md5Hash = md5(catalogApiUrl);
         var catalogLinkFile = setPath('terms.link', setPath(resourceId, setPath(sourceLanguageId, setPath(projectId, sourceDirPath))));
-        indexItems(md5Hash, catalogLinkFile, catalogJson);
+        return indexItems(md5Hash, catalogLinkFile, catalogJson, metaObj);
     };
 
-    _this.indexQuestions = function (projectId, sourceLanguageId, resourceId, catalogJson) {
-        var catalogApiUrl = getItemURL(
+    _this.indexQuestions = function (projectId, sourceLanguageId, resourceId, catalogJson, metaObj) {
+        var catalogApiUrl = getUrlFromObj(
             _this.getResource(projectId, sourceLanguageId, resourceId),
-            'checking_questions'
+            'checking_questions',
+            true
         );
         var md5Hash = md5(catalogApiUrl);
         var catalogLinkFile = setPath('checking_questions.link', setPath(resourceId, setPath(sourceLanguageId, setPath(projectId, sourceDirPath))));
-        indexItems(md5Hash, catalogLinkFile, catalogJson);
+        return indexItems(md5Hash, catalogLinkFile, catalogJson, metaObj);
     };
 
     //public json retrieval functions
@@ -192,6 +240,12 @@ var Indexer = function (indexType) {
     _this.getProject = function (projectId) {
         var md5Hash = openFile(setPath('projects_catalog.link', sourceDirPath));
         var catalogJson = openJson(setPath(projectId + '.json', setPath(md5Hash, dataDirPath)));
+        return catalogJson;
+    };
+
+    _this.getProjectMeta = function (projectId) {
+        var md5Hash = openFile(setPath('languages_catalog.link', setPath(projectId, sourceDirPath)));
+        var catalogJson = openJson(setPath('meta.json', setPath(md5Hash, dataDirPath)));
         return catalogJson;
     };
 
@@ -280,6 +334,8 @@ var Indexer = function (indexType) {
         return catalogArray;
     };
 
-};
+    return _this;
+
+}
 
 exports.Indexer = Indexer;

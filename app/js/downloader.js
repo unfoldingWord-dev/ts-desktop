@@ -10,7 +10,7 @@ var downloader = {
 
     downloadProjectList: function () {
         'use strict';
-        var catalogApiUrl = configurator.getString('apiUrl');
+        var catalogApiUrl = configurator.getValue('apiUrl');
         request(catalogApiUrl, function (error, response, catalogJson) {
             if (!error && response.statusCode === 200) {
                 return downloaderIndex.indexProjects(catalogJson);

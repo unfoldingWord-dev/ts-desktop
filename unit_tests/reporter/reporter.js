@@ -30,10 +30,10 @@ var reporterDefaultConfig = require('../../app/config/defaults');
 
     var reporter = new Reporter.instance({
         logPath: logPath,
-        oauthToken: reporterConfigurator.getString('oauthToken'),
-        repoOwner: reporterConfigurator.getString('repoOwner'),
-        repo: reporterConfigurator.getString('repo'),
-        maxLogFileKb: reporterConfigurator.getInt('maxLogFileKb'),
+        oauthToken: reporterConfigurator.getValue('oauthToken'),
+        repoOwner: reporterConfigurator.getValue('repoOwner'),
+        repo: reporterConfigurator.getValue('repo'),
+        maxLogFileKb: reporterConfigurator.getValue('maxLogFileKb'),
         appVersion: version
     });
 

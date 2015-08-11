@@ -20,7 +20,7 @@ var assert = require('assert');
                 var key = 'string',
                     expected = 'test string';
                 var configurator = getConfigurator();
-                assert.equal(configurator.getString(key), expected);
+                assert.equal(configurator.getValue(key), expected);
             });
         });
 
@@ -29,7 +29,7 @@ var assert = require('assert');
                 var key = 'int',
                     expected = 111;
                 var configurator = getConfigurator();
-                assert.equal(configurator.getString(key), expected);
+                assert.equal(configurator.getValue(key), expected);
             });
         });
 
@@ -38,7 +38,7 @@ var assert = require('assert');
                 var key = 'bool',
                     expected = true;
                 var configurator = getConfigurator();
-                assert.equal(configurator.getBool(key), expected);
+                assert.equal(configurator.getValue(key), expected);
             });
         });
 
@@ -48,7 +48,7 @@ var assert = require('assert');
                     expected = 'test this';
                 var configurator = getConfigurator();
                 configurator.setValue(key, expected);
-                assert.equal(configurator.getString(key), expected);
+                assert.equal(configurator.getValue(key), expected);
             });
         });
 
@@ -58,7 +58,7 @@ var assert = require('assert');
                     expected = 222;
                 var configurator = getConfigurator();
                 configurator.setValue(key, expected);
-                assert.equal(configurator.getString(key), expected);
+                assert.equal(configurator.getValue(key), expected);
             });
         });
 
@@ -68,7 +68,7 @@ var assert = require('assert');
                     expected = false;
                 var configurator = getConfigurator();
                 configurator.setValue(key, expected);
-                assert.equal(configurator.getBool(key), expected);
+                assert.equal(configurator.getValue(key), expected);
             });
         });
 
@@ -80,7 +80,7 @@ var assert = require('assert');
                 var configurator = getConfigurator();
                 configurator.setValue(key, initial);
                 configurator.unsetValue(key);
-                assert.equal(configurator.getString(key), expected);
+                assert.equal(configurator.getValue(key), expected);
             });
         });
 
@@ -91,7 +91,7 @@ var assert = require('assert');
                     expected = 'I am immutable';
                 var configurator = getConfigurator();
                 configurator.setValue(key, newValue);
-                assert.equal(configurator.getString(key), expected);
+                assert.equal(configurator.getValue(key), expected);
             });
         });
 
@@ -101,8 +101,8 @@ var assert = require('assert');
                 configurator.setValue('willpurge', 'user set');
                 configurator.setValue('new setting', 'test this');
                 configurator.purgeValues();
-                assert.equal(configurator.getString('willpurge'), 'this is the default');
-                assert.equal(configurator.getString('new setting'), '');
+                assert.equal(configurator.getValue('willpurge'), 'this is the default');
+                assert.equal(configurator.getValue('new setting'), '');
             });
         });
     });

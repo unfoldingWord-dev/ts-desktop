@@ -145,6 +145,7 @@
 
             _this.configurator.loadConfig(config);
             _this.configurator.loadConfig(defaults);
+            _this.configurator.setValue('rootDir', gui.App.dataPath, {'mutable':false});
         },
 
         /**

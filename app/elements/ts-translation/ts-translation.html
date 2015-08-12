@@ -6,19 +6,65 @@
 
       :host {
          display: block;
-         height: 100%;
+         height: calc(100% - 4em - 60px);
       }
 
-      .first-element {
+      .container {
          width: 100%;
          height: 100%;
-         background-color: #000087;
+         position: relative;
+         padding-left: 20px;
+         padding-right: 20px;
+      }
+
+      .container:after {
+         content: '';
+         display: block;
+         width: 100%;
+         position: absolute;
+         top: 0;
+         left: 0;
+         @apply(--header-bar);
+      }
+
+      .translation-source,
+      .translation {
+         display: inline-block;
+         float: left;
+         width: calc(50% - 20px - 10px);
+         height: 100%;
+         position: relative;
+         z-index: 10;
+         background-color: white;
+         -webkit-box-shadow: 0 2px 6px 0 rgba(0,0,0,0.5);
+         -moz-box-shadow: 0 2px 6px 0 rgba(0,0,0,0.5);
+         box-shadow: 0 2px 6px 0 rgba(0,0,0,0.5);
+         border-radius: 2px;
+      }
+
+      .translation-source {
+         margin-right: 10px;
+      }
+      .translation {
+         margin-left: 10px;
+      }
+
+      .panel-header {
+         height: calc(4em - 1px);
+         border-bottom: 1px solid rgba(0,0,0,0.25);
       }
 
    </style>
 
    <template>
-      <div class="first-element"></div>
+      <div class="container">
+         <div class="translation-source">
+            <div class="panel-header"></div>
+         </div>
+         <div class="translation">
+            <div class="panel-header"></div>
+         </div>
+      </div>
    </template>
 
 </dom-module>

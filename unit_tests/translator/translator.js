@@ -89,8 +89,7 @@ var sortKeyStr = project.sort;
         describe('@GetImage', function () {
             it('feature not fully designed', function () {
                 var project = translator.getLastProject();
-                //assert.equal(project.getImage(), imageStr);
-                assert.equal(true, true);
+                assert.equal(project.getImage(), imageStr);
             });
         });
 
@@ -101,14 +100,14 @@ var sortKeyStr = project.sort;
             });
         });
 
-/** /
+        /** /
         describe('@GetChapters', function () {
             it('should retrieve an array of the 1ch ar avd chapter objects', function () {
                 var project = translator.getLastProject();
                 assert.equal(project.getChapters(), 2);
             });
         });
-/**/
+        /**/
 
     });
 })();

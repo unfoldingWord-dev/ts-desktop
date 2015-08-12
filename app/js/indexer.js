@@ -16,6 +16,7 @@ function Indexer (indexType) {
 
     //reassign this to _this, set path
     var _this = this;
+    _this.indexId = indexType;
     _this.rootPath = setPath(indexType, setPath('index', configurator.getValue('indexRootPath')));
 
     //internal functions
@@ -171,7 +172,6 @@ function Indexer (indexType) {
         var items = [];
         for (var x in files) {
             if (files.hasOwnProperty(x)) {
-                var excludeFile = '';
                 if (files[x] !== '.DS_Store' && files[x] !== 'meta.json' && files[x] !== 'chapter.json') {
                     items.push(files[x].replace('.json', ''));
                 }
@@ -179,6 +179,11 @@ function Indexer (indexType) {
         }
         return items;
     }
+
+    //public utility functions
+    _this.getIndexId = function () {
+        return _this.indexId;
+    };
 
     //public indexing functions
     _this.indexProjects = function (catalogJson) {
@@ -340,54 +345,81 @@ function Indexer (indexType) {
 
     _this.getProject = function (projectId) {
         var md5Hash = openFile(setPath('projects_catalog.link', sourceDirPath));
+        if (md5Hash === null) {
+            return null;
+        }
         var catalogJson = openJson(setPath(projectId + '.json', setPath(md5Hash, dataDirPath)));
         return catalogJson;
     };
 
     _this.getProjectMeta = function (projectId) {
         var md5Hash = openFile(setPath('languages_catalog.link', setPath(projectId, sourceDirPath)));
+        if (md5Hash === null) {
+            return null;
+        }
         var catalogJson = openJson(setPath('meta.json', setPath(md5Hash, dataDirPath)));
         return catalogJson;
     };
 
     _this.getSourceLanguage = function (projectId, sourceLanguageId) {
         var md5Hash = openFile(setPath('languages_catalog.link', setPath(projectId, sourceDirPath)));
+        if (md5Hash === null) {
+            return null;
+        }
         var catalogJson = openJson(setPath(sourceLanguageId + '.json', setPath(md5Hash, dataDirPath)));
         return catalogJson;
     };
 
     _this.getResource = function (projectId, sourceLanguageId, resourceId) {
         var md5Hash = openFile(setPath('resources_catalog.link', setPath(sourceLanguageId, setPath(projectId, sourceDirPath))));
+        if (md5Hash === null) {
+            return null;
+        }
         var catalogJson = openJson(setPath(resourceId + '.json', setPath(md5Hash, dataDirPath)));
         return catalogJson;
     };
 
     _this.getChapter = function (projectId, sourceLanguageId, resourceId, chapterId) {
         var md5Hash = openFile(setPath('source.link', setPath(resourceId, setPath(sourceLanguageId, setPath(projectId, sourceDirPath)))));
+        if (md5Hash === null) {
+            return null;
+        }
         var catalogJson = openJson(setPath('chapter.json', setPath(chapterId, setPath(md5Hash, dataDirPath))));
         return catalogJson;
     };
 
     _this.getFrame = function (projectId, sourceLanguageId, resourceId, chapterId, frameId) {
         var md5Hash = openFile(setPath('source.link', setPath(resourceId, setPath(sourceLanguageId, setPath(projectId, sourceDirPath)))));
+        if (md5Hash === null) {
+            return null;
+        }
         var catalogJson = openJson(setPath(frameId + '.json', setPath(chapterId, setPath(md5Hash, dataDirPath))));
         return catalogJson;
     };
 
     _this.getNotes = function (projectId, sourceLanguageId, resourceId, chapterId, frameId) {
         var md5Hash = openFile(setPath('notes.link', setPath(resourceId, setPath(sourceLanguageId, setPath(projectId, sourceDirPath)))));
+        if (md5Hash === null) {
+            return null;
+        }
         var catalogJson = openJson(setPath(frameId + '.json', setPath(chapterId, setPath(md5Hash, dataDirPath))));
         return catalogJson;
     };
 
     _this.getTerms = function (projectId, sourceLanguageId, resourceId) {
         var md5Hash = openFile(setPath('terms.link', setPath(resourceId, setPath(sourceLanguageId, setPath(projectId, sourceDirPath)))));
+        if (md5Hash === null) {
+            return null;
+        }
         var catalogJson = openJson(setPath('term.json', setPath(md5Hash, dataDirPath)));
         return catalogJson;
     };
 
     _this.getQuestions = function (projectId, sourceLanguageId, resourceId, chapterId, frameId) {
         var md5Hash = openFile(setPath('checking_questions.link', setPath(resourceId, setPath(sourceLanguageId, setPath(projectId, sourceDirPath)))));
+        if (md5Hash === null) {
+            return null;
+        }
         var catalogJson = openJson(setPath(frameId + '.json', setPath(chapterId, setPath(md5Hash, dataDirPath))));
         return catalogJson;
     };

@@ -23,8 +23,18 @@ var frameCatalogJson = JSON.stringify(require('./data/01.json'));
 
     describe('@Indexer', function () {
 
-        before(function() {
+        before(function () {
             configurator.setValue('rootDir', './');
+            //TODO: clear out index/test directory so tests run in clean environment
+        });
+
+        describe('@GetIndexId', function () {
+            it('should get correct index id', function () {
+                assert.equal(
+                    testIndexer.getIndexId(),
+                    'test'
+                );
+            });
         });
 
         describe('@IndexProjects', function () {

@@ -1,82 +1,114 @@
-/**
- * Created by delmarhager on 5/25/15.
- */
 var assert = require('assert');
 var translator = require('../../app/js/translator');
-var index = require('./data/resources');
-var path = require('path');
-var dataDir = __dirname + path.sep + 'data' + path.sep + 'tsFiles';
-var bookSource = require('./data/1ch.en.ulb.source.json');
-//var languageResource = require('./data/languageResource.json');
-var projectResource = require('./data/projectResource.json');
-//var firstCo = require('./data/1co.json');
-//var firstCo13 = firstCo.chapters[12];
-//var firstCo13Frame = firstCo.chapters[12].frames[2];
+var Indexer = require('../../app/js/indexer').Indexer;
+var testIndexer = new Indexer('test');
+
+var projectsCatalogJson = JSON.stringify(require('../indexer/data/ts/txt/2/catalog.json'));
+var sourceLanguagesCatalogJson = JSON.stringify(require('../indexer/data/ts/txt/2/1ch/languages.json'));
+var resourcesCatalogJson = JSON.stringify(require('../indexer/data/ts/txt/2/1ch/ar/resources.json'));
+var sourceCatalogJson = JSON.stringify(require('../indexer/data/ts/txt/2/1ch/ar/avd/source.json'));
+var project = JSON.parse(sourceLanguagesCatalogJson)[1].project;
+var titleStr = project.name;
+var descriptionStr = project.desc;
+var imageStr = '';//TODO: where do we get this???
+var sortKeyStr = project.sort;
 
 ;(function () {
     'use strict';
 
     describe('@Translator', function () {
-        beforeEach(function (done) {
-            translator.setResources(dataDir, index);
-            done();
+
+        before(function () {
+            //TODO: clear out index/test directory so tests run in clean environment
+            testIndexer.indexProjects(projectsCatalogJson);
+            testIndexer.indexSourceLanguages(
+                '1ch',
+                sourceLanguagesCatalogJson,
+                {'date_modified':'20150801'}
+            );
+            testIndexer.indexResources(
+                '1ch',
+                'ar',
+                resourcesCatalogJson,
+                {'date_modified':'20150801'}
+            );
+            testIndexer.indexSource(
+                '1ch',
+                'ar',
+                'avd',
+                sourceCatalogJson,
+                {'date_modified':'20150801'}
+            );
         });
 
-        describe('@getResourcePathProject ', function () {
-            it('should retrieve a 1ch project lang_catalog path', function () {
-                var text =  dataDir + '/ts/txt/2/1ch/languages.json'.replace(/\//gm, path.sep);
-                assert.equal(translator.getResourcePath('1ch.lang_catalog', index, dataDir), text);
-            });
-        });
-
-        describe('@GetResourcePathArabicSource', function () {
-            it('should retrieve a 1ch ar udb source path', function () {
-                var text = dataDir + '/ts/txt/2/1co/ar/avd/source.json'.replace(/\//gm, path.sep);
-                assert.equal(translator.getResourcePath('1co.ar.avd.source', index, dataDir), text);
-            });
-        });
-
-        describe('@ReadProject', function () {
-            it('should retrieve the 1ch project', function () {
-                assert.equal(JSON.stringify(translator.readProject('1ch', {index:index, rootDir:dataDir})).replace(/ /g, ''), JSON.stringify(projectResource).replace(/ /g, ''));
+        describe('@CheckIndex', function () {
+            it('should be using the correct index', function () {
+                translator.useIndex('test');
+                assert.equal(translator.getIndexId(), 'test');
             });
         });
 
         describe('@GetProject', function () {
-            it('should retrieve the source: 1ch en ulb', function () {
-                assert.equal(JSON.stringify(translator.getProject('1ch', 'en', 'ulb')).replace(/ /g, ''), JSON.stringify(bookSource).replace(/ /g, ''));
+            it('should retrieve the 1ch ar avd project object', function () {
+                var project = translator.getProject('1ch', 'ar', 'avd');
+                assert.equal(project.getProjectId(), '1ch');
+                assert.equal(project.getSourceLanguageId(), 'ar');
+                assert.equal(project.getResourceId(), 'avd');
             });
         });
 
         describe('@GetBadProject', function () {
-            it('should not retrieve the non-existant source: 2ch en ulb', function () {
-                assert.equal(translator.getProject('2ch', 'en', 'ulb'), null);
+            it('should not retrieve the nonexistent 7ch en ulb source', function () {
+                assert.equal(translator.getProject('7ch', 'en', 'ulb'), null);
             });
         });
 
         describe('@GetLastProject', function () {
-            it('should retrieve the last valid source: 1ch en ulb', function () {
-                assert.equal(JSON.stringify(translator.getLastProject()).replace(/ /g, ''), JSON.stringify(bookSource).replace(/ /g, ''));
+            it('should retrieve the 1ch ar avd (last used & valid) project object', function () {
+                var project = translator.getLastProject();
+                assert.equal(project.getProjectId(), '1ch');
+                assert.equal(project.getSourceLanguageId(), 'ar');
+                assert.equal(project.getResourceId(), 'avd');
             });
         });
-        /** / // still working out spec for these
-            describe('@SetTargetLanguage', function () {
-                it('should set the target language: fr', function () {
-                    assert.equal(translator.setTargetLanguage('fr'), 'fr');
-                })
-            })
 
-            describe('@GetTargetLanguage', function () {
-                it('should retrieve the target language: fr', function () {
-                    assert.equal(translator.getTargetLanguage(), 'fr');
-                })
-            })
+        describe('@GetTitle', function () {
+            it('should retrieve the 1ch ar avd title', function () {
+                var project = translator.getLastProject();
+                assert.equal(project.getTitle(), titleStr);
+            });
+        });
 
-            describe('@GetLastTargetLanguage', function () {
-                it('should retrieve the last target language: fr', function () {
-                    assert.equal(translator.getLastTargetLanguage(), 'fr');
-                })
-            })
-        /**/
+        describe('@GetDescription', function () {
+            it('should retrieve the 1ch ar avd description', function () {
+                var project = translator.getLastProject();
+                assert.equal(project.getDescription(), descriptionStr);
+            });
+        });
+
+        describe('@GetImage', function () {
+            it('feature not fully designed', function () {
+                var project = translator.getLastProject();
+                //assert.equal(project.getImage(), imageStr);
+                assert.equal(true, true);
+            });
+        });
+
+        describe('@GetSortKey', function () {
+            it('should retrieve the 1ch ar avd sort key', function () {
+                var project = translator.getLastProject();
+                assert.equal(project.getSortKey(), sortKeyStr);
+            });
+        });
+
+/** /
+        describe('@GetChapters', function () {
+            it('should retrieve an array of the 1ch ar avd chapter objects', function () {
+                var project = translator.getLastProject();
+                assert.equal(project.getChapters(), 2);
+            });
+        });
+/**/
+
     });
 })();

@@ -1,7 +1,7 @@
 var request = require('request');
 //var moment = require('moment');
 var configurator = require('./configurator');
-var Indexer = require('./indexer');
+var Indexer = require('./indexer').Indexer;
 var downloaderIndex = new Indexer('download');
 var utils = require('./lib/utils');
 var getUrlFromObj = utils.getUrlFromObj;

@@ -3,29 +3,28 @@
     'use strict';
 
     var assert = require('assert');
-    var fs = require('fs');
     var config = require('../../app/js/configurator');
     var defaults = require('../../app/config/defaults');
-    var i18n = require('../../app/js/i18n');
+    var Intl = require('../../app/js/i18n');
 
     config.setStorage({});
     config.loadConfig(defaults);
 
     describe('@i18n', function () {
         describe('@Defaults', function () {
-            let i18nInstance = i18n.instance('');
+            let i18n = Intl.getInstance('');
 
             it('should return a code tag', function () {
-                assert.equal(i18nInstance._('test'), '[i18n: test]');
+                assert.equal(i18n._('test'), '[i18n: test]');
             });
 
             it('should default to english', function () {
-                assert.equal(i18nInstance.getLocale(), 'en');
+                assert.equal(i18n.getLocale(), 'en');
             });
         });
 
         describe('@LibraryLoaded', function () {
-            let i18nInstance = i18n.instance('./unit_tests/i18n/data/');
+            let i18nInstance = Intl.getInstance('./unit_tests/i18n/data/');
 
             it('should return localization', function () {
                 assert.equal(i18nInstance._('test'), 'This is a test!');
@@ -33,7 +32,7 @@
         });
 
         describe('@LocalChanged', function () {
-            let i18nInstance = i18n.instance('./unit_tests/i18n/data/', 'en');
+            let i18nInstance = Intl.getInstance('./unit_tests/i18n/data/', 'en');
             i18nInstance.setLocale("de");
 
             it('should change the localization', function () {

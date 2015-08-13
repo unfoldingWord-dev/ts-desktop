@@ -1,6 +1,3 @@
-/**
- * Created by joel on 8/13/2015.
- */
 
 var fs = require('fs');
 var path = require('path');
@@ -16,14 +13,14 @@ var jsonfile = require('jsonfile');
      */
     function mergeObjects(obj1, obj2) {
         var obj3 = {};
-        for (var prop in obj1) {
-            if(obj1.hasOwnProperty(prop)) {
-                obj3[prop] = obj1[prop];
+        for (var prop1 in obj1) {
+            if(obj1.hasOwnProperty(prop1)) {
+                obj3[prop1] = obj1[prop1];
             }
         }
-        for (var prop in obj2) {
-            if(obj2.hasOwnProperty(prop)) {
-                obj3[prop] = obj2[prop];
+        for (var prop2 in obj2) {
+            if(obj2.hasOwnProperty(prop2)) {
+                obj3[prop2] = obj2[prop2];
             }
         }
         return obj3;
@@ -36,7 +33,7 @@ var jsonfile = require('jsonfile');
      * @returns {*}
      */
     function loadLocale(dir, locale, defaultLocale) {
-        if (dir != '' && locale != '') {
+        if (dir !== '' && locale !== '') {
             var dictionaryPath = path.join(dir, locale + '.json');
             var defaultDictionaryPath = path.join(dir, defaultLocale + '.json');
             var defaultDict = {};
@@ -60,6 +57,12 @@ var jsonfile = require('jsonfile');
         dictionary = loadLocale(libraryDir, locale, defaultLocale);
 
         let i18n = {
+            /**
+             * Returns the localized value
+             * @param key
+             * @returns {*}
+             * @private
+             */
             _: function (key) {
                 if (Object.keys(dictionary).length > 0) {
                     if (dictionary.hasOwnProperty(key)) {
@@ -68,6 +71,10 @@ var jsonfile = require('jsonfile');
                 }
                 return '[i18n: ' + key + ']';
             },
+            /**
+             * Changes the active locale
+             * @param code
+             */
             setLocale: function (code) {
                 locale = code;
                 dictionary = loadLocale(libraryDir, locale, defaultLocale);
@@ -79,10 +86,10 @@ var jsonfile = require('jsonfile');
             getLocale: function () {
                 return locale;
             }
-        }
+        };
 
         return i18n;
     }
 
-    exports.instance = getInstance;
+    exports.getInstance = getInstance;
 }());

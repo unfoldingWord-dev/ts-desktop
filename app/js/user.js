@@ -1,15 +1,9 @@
-/**
- * Created by Chris on 7/23/2015.
- */
 
 var mkdirp = require('mkdirp');
 var jsonfile = require('jsonfile');
 var path = require('path');
 var md5 = require('md5');
 var fs = require('fs');
-
-var Log = require('log');
-var log = new Log('info');
 
 function User (args) {
     'use strict';

@@ -109,44 +109,34 @@ function Indexer (indexType) {
         }
 
         //save individual json files
-        var x;
         var filePath;
         var fileContent;
         var fileName;
         if (catalogType === 'simple') {
-            for (x in items) {
-                if (items.hasOwnProperty(x)) {
-                    var item = items[x];
-                    fileName = item.slug || null;
-                    if (fileName !== null) {
-                        filePath = setPath(fileName + '.json', md5Path);
-                        fileContent = JSON.stringify(item);
-                        saveFile(filePath, fileContent);
-                    }
+            for (let item of items) {
+                fileName = item.slug || null;
+                if (fileName !== null) {
+                    filePath = setPath(fileName + '.json', md5Path);
+                    fileContent = JSON.stringify(item);
+                    saveFile(filePath, fileContent);
                 }
             }
         }
         if (catalogType === 'source') {
-            for (x in items) {
-                if (items.hasOwnProperty(x)) {
-                    var chapter = items[x];
-                    var folderName = chapter.number || null;
-                    if (folderName !== null) {
-                        var frames = chapter.frames;
-                        delete chapter.frames;
-                        filePath = setPath('chapter.json', setPath(folderName, md5Path));
-                        fileContent = JSON.stringify(chapter);
-                        saveFile(filePath, fileContent);
-                        for (var y in frames) {
-                            if (frames.hasOwnProperty(y)) {
-                                var frame = frames[y];
-                                fileName = frame.id.replace(/[0-9]+\-/g, '') || null;
-                                if (fileName !== null) {
-                                    filePath = setPath(fileName + '.json', setPath(folderName, md5Path));
-                                    fileContent = JSON.stringify(frame);
-                                    saveFile(filePath, fileContent);
-                                }
-                            }
+            for (let chapter of items) {
+                var folderName = chapter.number || null;
+                if (folderName !== null) {
+                    var frames = chapter.frames;
+                    delete chapter.frames;
+                    filePath = setPath('chapter.json', setPath(folderName, md5Path));
+                    fileContent = JSON.stringify(chapter);
+                    saveFile(filePath, fileContent);
+                    for (let frame of frames) {
+                        fileName = frame.id.replace(/[0-9]+\-/g, '') || null;
+                        if (fileName !== null) {
+                            filePath = setPath(fileName + '.json', setPath(folderName, md5Path));
+                            fileContent = JSON.stringify(frame);
+                            saveFile(filePath, fileContent);
                         }
                     }
                 }
@@ -201,17 +191,14 @@ function Indexer (indexType) {
     _this.indexSourceLanguages = function (projectId, catalogJson, metaObj) {
         //KLUDGE: modify v2 sourceLanguages catalogJson to match expected catalogJson format
         var items = JSON.parse(catalogJson);
-        for (var x in items) {
-            if (items.hasOwnProperty(x)) {
-                var item = items[x];
-                var language = item.language;
-                for (var childProp in language) {
-                    if (language.hasOwnProperty(childProp)) {
-                        items[x][childProp] = language[childProp];
-                    }
+        for (let item of items) {
+            var language = item.language;
+            for (var childProp in language) {
+                if (language.hasOwnProperty(childProp)) {
+                    item[childProp] = language[childProp];
                 }
-                delete item.language;
             }
+            delete item.language;
         }
         catalogJson = JSON.stringify(items);
         //KLUDGE: end modify v2

@@ -9,8 +9,8 @@
     let configurator = require('../js/configurator');
     let gui = require('nw.gui');
     let mainWindow = gui.Window.get();
-    let reporter = require('../js/reporter.js');
-    let uploader = require('../js/uploader.js');
+    let reporter = require('../js/reporter');
+    let uploader = require('../js/uploader');
 
     /**
      * FIX - This provides a fix to the native chrome shadow missing
@@ -176,10 +176,10 @@
             var _this = this;
 
             _this.reporter = new reporter.instance({
-                logPath:configurator.getString('logPath'),
-                repoOwner: configurator.getString('repoOwner'),
-                repo: configurator.getString('repo'),
-                maxLogFileKb: configurator.getInt('maxLogFileKb'),
+                logPath: configurator.getValue('logPath'),
+                repoOwner: configurator.getValue('repoOwner'),
+                repo: configurator.getValue('repo'),
+                maxLogFileKb: configurator.getValue('maxLogFileKb'),
                 appVersion: require('../package.json').version
             });
 
@@ -194,7 +194,7 @@
             process.on('uncaughtException', function (err) {
                 var date = new Date();
                 date = date.getFullYear() + '_' + date.getMonth() + '_' + date.getDay();
-                var path = configurator.getString('crashDir') + '/' +  date + '.crash';
+                var path = configurator.getValue('crashDir') + '/' +  date + '.crash';
                 var crashReporter = new reporter.instance({logPath: path});
                 crashReporter.logError(err.message + '\n' + err.stack, function () {
                     /**
@@ -210,8 +210,8 @@
 
         initializeUploader: function () {
             uploader.setServerInfo({
-                'host': configurator.getString('authServer'),
-                'port': configurator.getString('authServerPort')
+                'host': configurator.getValue('authServer'),
+                'port': configurator.getValue('authServerPort')
             });
         },
 

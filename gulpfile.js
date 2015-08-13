@@ -12,16 +12,17 @@ var gulp = require('gulp'),
     map = require('map-stream'),
     argv = require('yargs').argv,
     NwBuilder = require('nw-builder');
+require('harmonize')();
 
 var APP_NAME = 'translationStudio',
     JS_FILES = './app/js/**/*.js',
     UNIT_TEST_FILES = './unit_tests/**/*.js';
-    
+
 gulp.task('test', function () {
     return gulp.src(UNIT_TEST_FILES, { read: false })
         .pipe(mocha({reporter: 'spec', grep: (argv.grep || argv.g)}));
 });
-    
+
 gulp.task('jscs', function () {
     return gulp.src([JS_FILES, UNIT_TEST_FILES])
         .pipe(jscs({
@@ -59,7 +60,7 @@ gulp.task('lint', [
 ]);
 
 gulp.task('build', ['lint', 'test'], function () {
-  
+
     var nw = new NwBuilder({
         files: './app/**/**', // use the glob format
         platforms: ['osx64', 'win64'],

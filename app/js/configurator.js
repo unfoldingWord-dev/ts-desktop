@@ -95,28 +95,6 @@
         }
     };
 
-    /** /
-    var setMetaValue = function (key, metaKey, metaValue) {
-        if (key === undefined) {
-            return key;
-        }
-        key = key.toLowerCase();
-
-        // Don't allow overwriting of read-only meta
-        var currentMeta = getMetaValue(key);
-        if (currentMeta.mutable === false) {
-            return;
-        }
-
-        var valueObj = JSON.parse(storage[key]);
-        valueObj.meta = valueObj.meta || {};
-
-        valueObj.meta[metaKey] = metaValue;
-
-        storage[key] = JSON.stringify(valueObj);
-    };
-    /**/
-
     var setReadOnlyValue = function (key, value) {
         setValue(key, value, {'mutable':false});
     };

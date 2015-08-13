@@ -1,92 +1,187 @@
-var _ = require('lodash');
-var utils = require('./lib/utils');
-var setPath = utils.setPath;
-var pathObj = require('path');
-var fs = require('fs');
-var conf = require('./configurator');
-var rootDir;
-var tsIndex;
+var configurator = require('./configurator');
+var Indexer = require('./indexer').Indexer;
+var appIndex = new Indexer('app');
+
+function getFrame (projectId, sourceLanguageId, resourceId, chapterId, frameId) {
+    'use strict';
+
+    //build return object
+    var returnObj = {
+        getSource: function () {
+            return appIndex.getFrame(projectId, sourceLanguageId, resourceId, chapterId, frameId);
+        }
+    };
+
+    //return object
+    return returnObj;
+}
+function getFrames (projectId, sourceLanguageId, resourceId, chapterId) {
+    'use strict';
+
+    //get data
+    var frames = appIndex.getFrames(projectId, sourceLanguageId, resourceId, chapterId);
+
+    //build return object
+    var returnObj = {};
+    //for (let frameId of frames) {
+    for (var frame in frames) {
+        if (frames.hasOwnProperty(frame)) {
+            var frameId = frames[frame];
+            returnObj[frameId] = getFrame(projectId, sourceLanguageId, resourceId, chapterId, frameId);
+        }
+    }
+
+    //return object
+    return returnObj;
+}
+
+function getChapter (projectId, sourceLanguageId, resourceId, chapterId) {
+    'use strict';
+
+    //build return object
+    var returnObj = {
+        getFrames: function () {
+            return getFrames(projectId, sourceLanguageId, resourceId, chapterId);
+        },
+        getFrame: function (frameId) {
+            return getFrame(projectId, sourceLanguageId, resourceId, chapterId, frameId);
+        }
+    };
+
+    //return object
+    return returnObj;
+}
+function getChapters (projectId, sourceLanguageId, resourceId) {
+    'use strict';
+
+    //get data
+    var chapters = appIndex.getChapters(projectId, sourceLanguageId, resourceId);
+
+    //build return object
+    var returnObj = {};
+    //for (let chapterId of chapters) {
+    for (var chapter in chapters) {
+        if (chapters.hasOwnProperty(chapter)) {
+            var chapterId = chapters[chapter];
+            returnObj[chapterId] = getChapter(projectId, sourceLanguageId, resourceId, chapterId);
+        }
+    }
+
+    //return object
+    return returnObj;
+}
 
 var translator = {
-    setResources: function (inRootDir, inIndex) {
+    useIndex: function (indexId) {
         'use strict';
-        tsIndex = inIndex;
-        rootDir = inRootDir;
+        appIndex = new Indexer(indexId);
     },
 
-    getResourcePath: function (path) {
+    getIndexId: function () {
+        'use strict';
+        return appIndex.getIndexId();
+    },
+
+    getProject: function (projectId, sourceLanguageId, resourceId) {
         'use strict';
 
-        try {
-            return setPath(_.get(tsIndex, path).replace(/\//gm, pathObj.sep),
-                rootDir);
-
-        } catch (e) {
+        //verify vars
+        if (projectId === null || sourceLanguageId === null || resourceId === null) {
             return null;
         }
 
-    },
+        //get data
+        var projectData = appIndex.getProject(projectId);
+        var sourceLanguageData = appIndex.getSourceLanguage(projectId, sourceLanguageId);
+        var resourceData = appIndex.getResource(projectId, sourceLanguageId, resourceId);
 
-    readResourceFileContent: function (path) {
-        'use strict';
-        if (fs.existsSync(path)) {
-            var data = fs.readFileSync(path, 'utf8');
-            if (data) {
-                return JSON.parse(data);
+        //verify data
+        if (projectData === null || sourceLanguageData === null || resourceData === null) {
+            return null;
+        }
+
+        //build return object
+        var returnObj = {
+            getProjectId: function () {
+                return projectId;
+            },
+            getSourceLanguageId: function () {
+                return sourceLanguageId;
+            },
+            getResourceId: function () {
+                return resourceId;
+            },
+            getTitle: function () {
+                return sourceLanguageData.project.name;
+            },
+            getDescription: function () {
+                return sourceLanguageData.project.desc;
+            },
+            getImage: function () {
+                return '';//TODO: where do we get this???
+            },
+            getSortKey: function () {
+                return projectData.sort;
+            },
+            getChapters: function () {
+                return getChapters(projectId, sourceLanguageId, resourceId);
+            },
+            getChapter: function (chapterId) {
+                return getChapter(projectId, sourceLanguageId, resourceId, chapterId);
+            },
+            getFrames: function (chapterId) {
+                return getFrames(projectId, sourceLanguageId, resourceId, chapterId);
+            },
+            getFrame: function (chapterId, frameId) {
+                return getFrame(projectId, sourceLanguageId, resourceId, chapterId, frameId);
             }
-        }
-        return null;
-    },
+        };
 
-    readProject: function (project) {
-        'use strict';
-        var path = project + '.lang_catalog';
-        return this.readResourceFileContent(this.getResourcePath(path,
-            tsIndex, rootDir));
+        //save last used values
+        configurator.setValue('lastProjectId', projectId);
+        configurator.setValue(projectId + 'SourceLanguageId', sourceLanguageId);
+        configurator.setValue(projectId + 'ResourceId', resourceId);
 
-    },
-
-    getProject: function (projectId, languageId, resourceId) {
-        'use strict';
-        var path = projectId + '.' + languageId + '.' + resourceId + '.source';
-        var resPath = this.getResourcePath(path, tsIndex, rootDir);
-        if (resPath) {
-            conf.setValue('last_project_id', projectId);
-            conf.setValue(projectId + '_source_language_id', languageId);
-            conf.setValue(projectId + '_resource_id', resourceId);
-            return this.readResourceFileContent(resPath);
-        }
-        return null;
-    },
-
-    getTargetLanguage: function (projectId) {
-        'use strict';
-        if (arguments.length < 1 || projectId === null) {
-            return null;
-        }
-        return conf.getString(projectId + '_target_language_id');
+        //return object
+        return returnObj;
     },
 
     getLastProject: function () {
         'use strict';
-        var projectId = conf.getString('last_project_id');
-        var languageId = conf.getString(projectId + '_source_language_id');
-        var resourceId = conf.getString(projectId + '_resource_id');
-        return this.getProject(projectId, languageId, resourceId);
+
+        //get last used values
+        var projectId = configurator.getValue('lastProjectId');
+        var sourceLanguageId = configurator.getValue(projectId + 'SourceLanguageId');
+        var resourceId = configurator.getValue(projectId + 'ResourceId');
+
+        //return object
+        return this.getProject(projectId, sourceLanguageId, resourceId);
+    },
+
+    getTargetLanguage: function (projectId) {
+        'use strict';
+
+        //verify data
+        if (projectId === null) {
+            return null;
+        }
+
+        //return string
+        return configurator.getString(projectId + 'TargetLanguageId');
     },
 
     getLastTargetLanguage: function () {
         'use strict';
-        return conf.getString(conf.getString('last_project_id') + '_target_language_id');
+
+        //return string
+        return configurator.getString(configurator.getString('lastProjectId') + 'TargetLanguageId');
 
     }
 };
 
-exports.setResources = translator.setResources;
-exports.getResourcePath = translator.getResourcePath;
-exports.readResourceFileContent = translator.readResourceFileContent;
-exports.readProject = translator.readProject;
+exports.useIndex = translator.useIndex;
+exports.getIndexId = translator.getIndexId;
 exports.getProject = translator.getProject;
-exports.getTargetLanguage = translator.getTargetLanguage;
 exports.getLastProject = translator.getLastProject;
+exports.getTargetLanguage = translator.getTargetLanguage;
 exports.getLastTargetLanguage = translator.getLastTargetLanguage;

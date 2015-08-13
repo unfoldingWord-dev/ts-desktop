@@ -1,7 +1,7 @@
 var request = require('request');
 //var moment = require('moment');
 var configurator = require('./configurator');
-var Indexer = require('./indexer');
+var Indexer = require('./indexer').Indexer;
 var downloaderIndex = new Indexer('download');
 var utils = require('./lib/utils');
 var getUrlFromObj = utils.getUrlFromObj;
@@ -10,7 +10,7 @@ var downloader = {
 
     downloadProjectList: function () {
         'use strict';
-        var catalogApiUrl = configurator.getString('apiUrl');
+        var catalogApiUrl = configurator.getValue('apiUrl');
         request(catalogApiUrl, function (error, response, catalogJson) {
             if (!error && response.statusCode === 200) {
                 return downloaderIndex.indexProjects(catalogJson);

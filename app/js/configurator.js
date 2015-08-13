@@ -1,14 +1,11 @@
 /**
  * ts.Configurator
  * settings manager that uses local storage by default, but can be overridden to use any storage provider.
- * Configurations are stored as complex key values (includes type, mutability, etc)
+ * Configurations are stored by key as stringified JSON (meta includes type, mutability, etc)
  */
 
  ;(function () {
     'use strict';
-
-    var readOnlyPrefix = 'locked|';
-    var defaultPrefix = 'default|';
 
     var storage = {};
 
@@ -18,56 +15,94 @@
         }
         key = key.toLowerCase();
 
-        // first check for a readonly setting
-        var value = storage[readOnlyPrefix + key];
+        var valueObjStr = storage[key] || '{}';
+        var valueObj = JSON.parse(valueObjStr);
+        var metaObj = valueObj.meta || {'default':''};
 
-        if (value === undefined) {
-            // then a regular setting
-            value = storage[key];
-        }
-        if (value === undefined) {
-            // lastly use a default (if present)
-            value = storage[defaultPrefix + key];
+        //load value
+        var value = valueObj.value;
+
+        //otherwise use default (if present)
+        if (value === undefined && metaObj.default) {
+            value = metaObj.default;
         }
 
         return value;
     };
 
-    var setValue = function (key, value) {
+    var getMetaValue = function (key, metaKey) {
+        if (key === undefined) {
+            return key;
+        }
+        key = key.toLowerCase();
+
+        var valueObjStr = storage[key] || '{}';
+        var valueObj = JSON.parse(valueObjStr);
+
+        return valueObj.meta ? valueObj.meta[metaKey] : '';
+    };
+
+    var setValue = function (key, value, meta) {
         if (key === undefined || value === undefined) {
             return;
         }
         key = key.toLowerCase();
-        value = value.toString();
+        value = typeof value === 'boolean' || typeof value === 'number' ? value : value.toString();
 
-        storage[key] = value;
+        //return if read-only
+        var mutable = getMetaValue(key, 'mutable');
+        if (mutable !== undefined && mutable === false) {
+            return;
+        }
+
+        //load value object or create new empty value object
+        var emptyStorageObj = {'value':value, 'meta':{'mutable':true, 'type':typeof value, 'default':''}};
+        var valueObj = storage[key] !== undefined ? JSON.parse(storage[key]) : emptyStorageObj;
+
+        //update value
+        valueObj.value = value;
+
+        //update meta
+        if (typeof meta === 'object') {
+            for (var x in meta) {
+                if (meta.hasOwnProperty(x)) {
+                    valueObj.meta[x] = meta[x];
+                }
+            }
+        }
+
+        //update value in storage
+        storage[key] = JSON.stringify(valueObj);
     };
+
     var unsetValue = function (key) {
         if (key === undefined) {
             return;
         }
         key = key.toLowerCase();
 
-        // Don't allow unsetting of read-only or default values
-        var unsetOk = true;
-        [defaultPrefix, readOnlyPrefix].forEach(function (prefix) {
-            unsetOk = unsetOk && key.substr(0, prefix.length) !== prefix;
-        });
+        //return if read-only
+        var mutable = getMetaValue(key, 'mutable');
+        if (mutable === false) {
+            return;
+        }
 
-        if (unsetOk) {
-            if (typeof storage.removeItem === 'function') {
-                storage.removeItem(key);
-            } else {
-                storage[key] = undefined;
-            }
+        //remove value from storage
+        if (typeof storage.removeItem === 'function') {
+            storage.removeItem(key);
+        } else {
+            storage[key] = undefined;
         }
     };
+
     var setReadOnlyValue = function (key, value) {
-        setValue(readOnlyPrefix + key, value);
+        setValue(key, value, {'mutable':false});
     };
+
     var setDefaultValue = function (key, value) {
-        setValue(defaultPrefix + key, value);
+        setValue(key, value, {'default':value});
     };
+
     var getKeys = function () {
         return Object.keys(storage);
     };
@@ -76,8 +111,7 @@
         setStorage: function (storeObject) {
             storage = storeObject;
         },
-
-        getString: function (key) {
+        getValue: function (key) {
             var value = getValue(key);
             if (value === undefined) {
                 return '';
@@ -85,30 +119,8 @@
 
             return value;
         },
-        getInt: function (key) {
-            var value = getValue(key);
-            if (value === undefined) {
-                return 0;
-            }
-
-            value = parseInt(value, 10);
-            if (isNaN(value)) {
-                return 0;
-            }
-
-
-            return value;
-        },
-        getBool: function (key) {
-            var value = getValue(key);
-            if (value === undefined) {
-                return false;
-            }
-
-            return value.toLowerCase() !== 'false' && value !== '0';
-        },
-        setValue: function (key, value) {
-            setValue(key, value);
+        setValue: function (key, value, meta) {
+            setValue(key, value, meta);
         },
         loadConfig: function (config) {
             if (storage === undefined) {
@@ -137,9 +149,7 @@
     };
 
     exports.setStorage = configurator.setStorage;
-    exports.getString = configurator.getString;
-    exports.getInt = configurator.getInt;
-    exports.getBool = configurator.getBool;
+    exports.getValue = configurator.getValue;
     exports.setValue = configurator.setValue;
     exports.unsetValue = configurator.unsetValue;
     exports.loadConfig = configurator.loadConfig;

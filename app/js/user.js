@@ -3,11 +3,13 @@
  */
 
 var mkdirp = require('mkdirp');
-var utils = require('./lib/utils');
-var setPath = utils.setPath;
 var jsonfile = require('jsonfile');
+var path = require('path');
 var md5 = require('md5');
 var fs = require('fs');
+
+var Log = require('log');
+var log = new Log('info');
 
 function User (args) {
     'use strict';
@@ -23,7 +25,7 @@ function User (args) {
 
     var hash = md5(username);
     var targetDirectory = 'translationStudio/profiles/' + hash + '/';
-    var targetFile = profilesDirectory + targetDirectory + 'profile.json';
+    var targetFile = path.join(profilesDirectory, targetDirectory, 'profile.json');
     var storage = {
         'username': username,
         'password': password,
@@ -37,7 +39,7 @@ function User (args) {
         if (err === null) {
             storage = obj;
         } else {
-            mkdirp(setPath(targetDirectory, profilesDirectory), function () {
+            mkdirp(path.join(profilesDirectory, targetDirectory), function () {
                 _this.saveData();
             });
         }
@@ -84,7 +86,7 @@ function User (args) {
      * Delets the user profile from the disk
      */
     _this.destroy = function () {
-        var dir = setPath(targetDirectory, profilesDirectory);
+        var dir = path.join(profilesDirectory, targetDirectory);
         if (fs.existsSync(targetFile)) {
             fs.unlinkSync(targetFile);
         }

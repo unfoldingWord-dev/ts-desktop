@@ -1,6 +1,5 @@
 var assert = require('assert');
 var rimraf = require('rimraf');
-var path = require('path');
 var Indexer = require('../../app/js/indexer').Indexer;
 var configurator = require('../../app/js/configurator');
 var config = require('../../app/config/defaults');

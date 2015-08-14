@@ -25,6 +25,10 @@ var Indexer = require('./indexer').Indexer;
                     apiUrl: App.configurator.getValue('apiUrl')
                 }, downloadIndex, appIndex);
 
+                downloader.downloadProjectList();
+                //downloader.downloadSourceLanguageList(pid);
+                //downloader.downloadResourceList(pid, slid);
+
                 if(typeof callback === 'function') {
                     callback(downloadIndex);
                 }

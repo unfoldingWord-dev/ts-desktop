@@ -11,15 +11,15 @@ var jsonfile = require('jsonfile');
      * @param obj1
      * @param obj2
      */
-    function mergeObjects(obj1, obj2) {
+    function mergeObjects (obj1, obj2) {
         var obj3 = {};
         for (var prop1 in obj1) {
-            if(obj1.hasOwnProperty(prop1)) {
+            if (obj1.hasOwnProperty(prop1)) {
                 obj3[prop1] = obj1[prop1];
             }
         }
         for (var prop2 in obj2) {
-            if(obj2.hasOwnProperty(prop2)) {
+            if (obj2.hasOwnProperty(prop2)) {
                 obj3[prop2] = obj2[prop2];
             }
         }
@@ -32,7 +32,7 @@ var jsonfile = require('jsonfile');
      * @param locale
      * @returns {*}
      */
-    function loadLocale(dir, locale, defaultLocale) {
+    function loadLocale (dir, locale, defaultLocale) {
         if (dir !== '' && locale !== '') {
             var dictionaryPath = path.join(dir, locale + '.json');
             var defaultDictionaryPath = path.join(dir, defaultLocale + '.json');
@@ -49,7 +49,7 @@ var jsonfile = require('jsonfile');
         return {};
     }
 
-    function Locale(dir, defaultLocaleCode) {
+    function Locale (dir, defaultLocaleCode) {
         let dictionary = {};
         let defaultLocale = defaultLocaleCode || 'en';
         let locale = defaultLocale;

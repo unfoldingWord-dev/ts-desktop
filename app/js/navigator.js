@@ -4,13 +4,13 @@
 ;(function () {
     'use strict';
 
-    function Navigator() {
+    function Navigator () {
 
         let navigator = {
             /**
              * Returns an index of the server library
              */
-            getServerLibraryIndex: function(callback) {
+            getServerLibraryIndex: function (callback) {
                 callback = callback;
                 //let indexDir = App.configurator.getValue('indexDir');
                 //let downloadIndex = new Indexer(indexDir, 'download_index');

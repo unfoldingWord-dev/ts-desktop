@@ -26,14 +26,39 @@ var Indexer = require('./indexer').Indexer;
                 }, downloadIndex, appIndex);
 
                 downloader.downloadProjectList();
+                // TODO: download the rest
                 //downloader.downloadSourceLanguageList(pid);
                 //downloader.downloadResourceList(pid, slid);
 
                 if(typeof callback === 'function') {
                     callback(downloadIndex);
                 }
-                // TODO: downloadProjectList, downloadSourceLanguageList, downloadResourceList
-                // TODO: send download index to the callback
+            },
+
+            /**
+             * Returns a list of data to populate the list of projects the user can choose from
+             */
+            getProjectListData: function(callback) {
+                // TODO: load data and return to callback
+                callback();
+            },
+
+            /**
+             * Returns a list of data to populate the list of chapters the user can choose from
+             * @param callback
+             */
+            getChapterListData: function(callback) {
+                // TODO: load data and return to callback
+                callback();
+            },
+
+            /**
+             * Returns a list of data to populate the list of frames the user can choose from
+             * @param callback
+             */
+            getFrameListData: function(callback) {
+                // TODO: load data and return to callback
+                callback();
             }
         };
         return navigator;

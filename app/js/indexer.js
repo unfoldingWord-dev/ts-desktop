@@ -4,8 +4,6 @@ var mkdirp = require('mkdirp');
 var configurator = require('./configurator');
 var md5 = require('md5');
 var path = require('path');
-var utils = require('./lib/utils');
-var getUrlFromObj = utils.getUrlFromObj;
 
 var dataDirPath = 'data';
 var linksJsonPath = path.join(dataDirPath, 'links.json');

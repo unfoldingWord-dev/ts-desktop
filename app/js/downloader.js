@@ -1,115 +1,112 @@
 var request = require('request');
 //var moment = require('moment');
 var configurator = require('./configurator');
-var Indexer = require('./indexer').Indexer;
-var downloaderIndex = new Indexer('download');
-var utils = require('./lib/utils');
-var getUrlFromObj = utils.getUrlFromObj;
 
-var downloader = {
+function Downloader (configJson, downloadIndex, appIndex) {
+    'use strict';
 
-    downloadProjectList: function () {
-        'use strict';
+    //reassign this to _this, set path
+    var _this = this;
+
+    //PLACEHOLDER: remove after appIndex is used somewhere
+    appIndex = appIndex;
+
+    //internal functions
+    function getUrlFromObj (itemObj, urlProp) {
+        return itemObj[urlProp];
+    }
+
+    _this.downloadProjectList = function () {
         var catalogApiUrl = configurator.getValue('apiUrl');
         request(catalogApiUrl, function (error, response, catalogJson) {
             if (!error && response.statusCode === 200) {
-                return downloaderIndex.indexProjects(catalogJson);
+                return downloadIndex.indexProjects(catalogJson);
             }
             return null;
         });
-    },
+    };
 
-    downloadSourceLanguageList: function (projectId) {
-        'use strict';
+    _this.downloadSourceLanguageList = function (projectId) {
         var catalogApiUrl = getUrlFromObj(
-            downloaderIndex.getProject(projectId),
+            downloadIndex.getProject(projectId),
             'lang_catalog'
         );
-        downloaderIndex.getProject(projectId);
+        downloadIndex.getProject(projectId);
         request(catalogApiUrl, function (error, response, catalogJson) {
             if (!error && response.statusCode === 200) {
-                return downloaderIndex.indexSourceLanguages(projectId, catalogJson);
+                return downloadIndex.indexSourceLanguages(projectId, catalogJson);
             }
             return null;
         });
-    },
+    };
 
-    downloadResourceList: function (projectId, sourceLanguageId) {
-        'use strict';
+    _this.downloadResourceList = function (projectId, sourceLanguageId) {
         var catalogApiUrl = getUrlFromObj(
-            downloaderIndex.getProjectgetSourceLanguage(projectId, sourceLanguageId),
+            downloadIndex.getProjectgetSourceLanguage(projectId, sourceLanguageId),
             'res_catalog'
         );
         request(catalogApiUrl, function (error, response, catalogJson) {
             if (!error && response.statusCode === 200) {
-                return downloaderIndex.indexResources(projectId, sourceLanguageId, catalogJson);
+                return downloadIndex.indexResources(projectId, sourceLanguageId, catalogJson);
             }
             return null;
         });
     },
 
-    downloadSource: function (projectId, sourceLanguageId, resourceId) {
-        'use strict';
+    _this.downloadSource = function (projectId, sourceLanguageId, resourceId) {
         var catalogApiUrl = getUrlFromObj(
-            downloaderIndex.getResource(projectId, sourceLanguageId, resourceId),
+            downloadIndex.getResource(projectId, sourceLanguageId, resourceId),
             'source'
         );
         request(catalogApiUrl, function (error, response, catalogJson) {
             if (!error && response.statusCode === 200) {
-                return downloaderIndex.indexSource(projectId, sourceLanguageId, resourceId, catalogJson);
+                return downloadIndex.indexSource(projectId, sourceLanguageId, resourceId, catalogJson);
             }
             return null;
         });
-    },
+    };
 
-    downloadTerms: function (projectId, sourceLanguageId, resourceId) {
-        'use strict';
+    _this.downloadTerms = function (projectId, sourceLanguageId, resourceId) {
         var catalogApiUrl = getUrlFromObj(
-            downloaderIndex.getResource(projectId, sourceLanguageId, resourceId),
+            downloadIndex.getResource(projectId, sourceLanguageId, resourceId),
             'terms'
         );
         request(catalogApiUrl, function (error, response, catalogJson) {
             if (!error && response.statusCode === 200) {
-                return downloaderIndex.indexTerms(projectId, sourceLanguageId, resourceId, catalogJson);
+                return downloadIndex.indexTerms(projectId, sourceLanguageId, resourceId, catalogJson);
             }
             return null;
         });
-    },
+    };
 
-    downloadNotes: function (projectId, sourceLanguageId, resourceId) {
-        'use strict';
+    _this.downloadNotes = function (projectId, sourceLanguageId, resourceId) {
         var catalogApiUrl = getUrlFromObj(
-            downloaderIndex.getResource(projectId, sourceLanguageId, resourceId),
+            downloadIndex.getResource(projectId, sourceLanguageId, resourceId),
             'notes'
         );
         request(catalogApiUrl, function (error, response, catalogJson) {
             if (!error && response.statusCode === 200) {
-                return downloaderIndex.indexNotes(projectId, sourceLanguageId, resourceId, catalogJson);
+                return downloadIndex.indexNotes(projectId, sourceLanguageId, resourceId, catalogJson);
             }
             return null;
         });
-    },
+    };
 
-    downloadCheckingQuestions: function (projectId, sourceLanguageId, resourceId) {
-        'use strict';
+    _this.downloadCheckingQuestions = function (projectId, sourceLanguageId, resourceId) {
         var catalogApiUrl = getUrlFromObj(
-            downloaderIndex.getResource(projectId, sourceLanguageId, resourceId),
+            downloadIndex.getResource(projectId, sourceLanguageId, resourceId),
             'checking_questions'
         );
         request(catalogApiUrl, function (error, response, catalogJson) {
             if (!error && response.statusCode === 200) {
-                return downloaderIndex.indexCheckingQuestions(projectId, sourceLanguageId, resourceId, catalogJson);
+                return downloadIndex.indexCheckingQuestions(projectId, sourceLanguageId, resourceId, catalogJson);
             }
             return null;
         });
-    }
+    };
 
-};
+    return _this;
 
-exports.downloadProjectList = downloader.downloadProjectList;
-exports.downloadSourceLanguageList = downloader.downloadSourceLanguageList;
-exports.downloadResourceList = downloader.downloadResourceList;
-exports.downloadSource = downloader.downloadSource;
-exports.downloadTerms = downloader.downloadTerms;
-exports.downloadNotes = downloader.downloadNotes;
-exports.downloadCheckingQuestions = downloader.downloadCheckingQuestions;
+}
+
+exports.Downloader = Downloader;

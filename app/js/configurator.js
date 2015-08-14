@@ -154,5 +154,4 @@
     exports.unsetValue = configurator.unsetValue;
     exports.loadConfig = configurator.loadConfig;
     exports.purgeValues = configurator.purgeValues;
-
 })();

@@ -1,6 +1,3 @@
-/**
- * Created by Emmitt on 7/23/2015.
- */
 var net = require('net');
 
 ;(function () {

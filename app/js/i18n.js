@@ -4,7 +4,7 @@ var path = require('path');
 var jsonfile = require('jsonfile');
 
 ;(function () {
-    "use strict";
+    'use strict';
 
     /**
      * Merges the properties of obj1 and obj2 properties in obj2 will overide duplicate properties in obj1

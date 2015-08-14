@@ -2,7 +2,7 @@
 
 <dom-module id="ts-translation">
 
-   <style>
+   <style is="custom-style">
 
       :host {
          display: block;
@@ -40,6 +40,7 @@
          -moz-box-shadow: 0 2px 6px 0 rgba(0,0,0,0.5);
          box-shadow: 0 2px 6px 0 rgba(0,0,0,0.5);
          border-radius: 2px;
+         font-family:
       }
 
       .translation-source {
@@ -54,12 +55,48 @@
          border-bottom: 1px solid rgba(0,0,0,0.25);
       }
 
+      .panel-body {
+         height: calc(100% - 4em - 1px);
+      }
+
+      paper-tabs, iron-pages, .translation-tab, .source-page {
+         height: 100%;
+      }
+
+      paper-icon-button::shadow paper-icon{
+         width: 12px;
+      }
+
+      paper-tab {
+         text-transform: uppercase;
+         font-size: 110%;
+         color: var(--greyed-out-primary);
+      }
+
+      paper-tab.iron-selected {
+         color: var(--highlight-primary);
+      }
+
+
    </style>
 
    <template>
       <div class="container">
          <div class="translation-source">
-            <div class="panel-header"></div>
+            <div class="panel-header">
+               <paper-tabs select="{{ selected }}" selected="0" scrollable="true" noink="true" hideScrollButtons="false">
+                  <paper-tab class="translation-tab">Translation 1</paper-tab>
+                  <paper-tab class="translation-tab">Translation 2</paper-tab>
+                  <paper-tab class="translation-tab">Translation 3</paper-tab>
+               </paper-tabs>
+            </div>
+            <div class="panel-body">
+               <iron-pages select="{{ selected }}">
+                  <div class="source-page">Page 1</div>
+                  <div class="source-page">Page 2</div>
+                  <div class="source-page">Page 3</div>
+               </iron-pages>
+            </div>
          </div>
          <div class="translation">
             <div class="panel-header"></div>

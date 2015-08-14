@@ -1,29 +1,24 @@
-/**
- * Created by Emmitt on 7/2/2015.
- */
 var assert = require('assert');
 var fs = require('fs');
-
 var Reporter = require('../../app/js/reporter').Reporter;
 var version = require('../../package.json').version;
-
 var reporterConfigurator = require('../../app/js/configurator');
 var reporterDefaultConfig = require('../../app/config/defaults');
+var rimraf = require('rimraf');
+var jsonfile = require('jsonfile');
 
 ;(function () {
     'use strict';
 
     reporterConfigurator.setStorage({});
     reporterConfigurator.loadConfig(reporterDefaultConfig);
-    try {
-        var stats = fs.lstatSync('../../app/config/private');
-
+    let privateConfPath = './app/config/private.json';
+    if(fs.existsSync(privateConfPath)) {
+        var stats = fs.lstatSync(privateConfPath);
         if (stats.isFile()) {
-            var reporterPrivateConfig = require('../../app/config/private');
+            var reporterPrivateConfig = jsonfile.readFileSync(privateConfPath);
             reporterConfigurator.loadConfig(reporterPrivateConfig);
         }
-    } catch (e) {
-
     }
 
     var logPath = 'unit_tests/reporter/log.txt';
@@ -38,6 +33,18 @@ var reporterDefaultConfig = require('../../app/config/defaults');
     });
 
     describe('@Reporter', function () {
+        beforeEach(function (done) {
+            rimraf(logPath, function () {
+                done();
+            });
+        });
+
+        after(function (done) {
+            rimraf(logPath, function () {
+                done();
+            });
+        });
+
         //careful when editing this file as the expected strings are hardcoded with line numbers
         describe('@logNotice', function () {
             var key = 'This is a test';
@@ -45,29 +52,21 @@ var reporterDefaultConfig = require('../../app/config/defaults');
             var textExpected = '';
 
             before(function (done) {
-                fs.exists(logPath, function () {
-                    fs.unlink(logPath, function () {
-                        reporter.logNotice(key, function () {
-                            var date = new Date();
-                            date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-                            //reporter.js:<line>:<column> this will need to be changed if the code changes
-                            textExpected = date + ' I/reporter.js:50:3: ' + key + '\n';
+                reporter.logNotice(key, function () {
+                    var date = new Date();
+                    date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+                    //reporter.js:<line>:<column> this will need to be changed if the code changes
+                    textExpected = date + ' I/reporter.js:55:26: ' + key + '\n';
 
-                            reporter.stringFromLogFile(null, function (logResults) {
-                                logFileResults = logResults;
-                                done();
-                            });
-                        });
+                    reporter.stringFromLogFile(null, function (logResults) {
+                        logFileResults = logResults;
+                        done();
                     });
                 });
             });
             it('should create a log file notice', function (done) {
                 assert.equal(logFileResults, textExpected);
-                fs.exists(logPath, function () {
-                    fs.unlink(logPath, function () {
-                        done();
-                    });
-                });
+                done();
             });
         });
 
@@ -77,29 +76,21 @@ var reporterDefaultConfig = require('../../app/config/defaults');
             var textExpected = '';
 
             before(function (done) {
-                fs.exists(logPath, function () {
-                    fs.unlink(logPath, function () {
-                        reporter.logWarning(key, function () {
-                            var date = new Date();
-                            date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-                            //reporter.js:<line>:<column> this will need to be changed if the code changes
-                            textExpected = date + ' W/reporter.js:82:3: ' + key + '\n';
+                reporter.logWarning(key, function () {
+                    var date = new Date();
+                    date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+                    //reporter.js:<line>:<column> this will need to be changed if the code changes
+                    textExpected = date + ' W/reporter.js:79:26: ' + key + '\n';
 
-                            reporter.stringFromLogFile(null, function (logResults) {
-                                logFileResults = logResults;
-                                done();
-                            });
-                        });
+                    reporter.stringFromLogFile(null, function (logResults) {
+                        logFileResults = logResults;
+                        done();
                     });
                 });
             });
             it('should create a log file warning', function (done) {
                 assert.equal(logFileResults, textExpected);
-                fs.exists(logPath, function () {
-                    fs.unlink(logPath, function () {
-                        done();
-                    });
-                });
+                done();
             });
         });
 
@@ -109,29 +100,21 @@ var reporterDefaultConfig = require('../../app/config/defaults');
             var textExpected = '';
 
             before(function (done) {
-                fs.exists(logPath, function () {
-                    fs.unlink(logPath, function () {
-                        reporter.logError(key, function () {
-                            var date = new Date();
-                            date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-                            //reporter.js:<line>:<column> this will need to be changed if the code changes
-                            textExpected = date + ' E/reporter.js:114:3: ' + key + '\n';
+                reporter.logError(key, function () {
+                    var date = new Date();
+                    date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+                    //reporter.js:<line>:<column> this will need to be changed if the code changes
+                    textExpected = date + ' E/reporter.js:103:26: ' + key + '\n';
 
-                            reporter.stringFromLogFile(null, function (logResults) {
-                                logFileResults = logResults;
-                                done();
-                            });
-                        });
+                    reporter.stringFromLogFile(null, function (logResults) {
+                        logFileResults = logResults;
+                        done();
                     });
                 });
             });
             it('should create a log file error', function (done) {
                 assert.equal(logFileResults, textExpected);
-                fs.exists(logPath, function () {
-                    fs.unlink(logPath, function () {
-                        done();
-                    });
-                });
+                done();
             });
         });
 
@@ -143,7 +126,7 @@ var reporterDefaultConfig = require('../../app/config/defaults');
         describe('@reportBug', function () {
             if (reporter.canReportToGithub()) {
                 var title = '[Automated] Bug Report';
-                var labels = [version, 'Bug Report'];
+                var labels = [version, 'bug report'];
                 labels.sort(function (a, b) {
                     return a > b;
                 });
@@ -185,7 +168,7 @@ var reporterDefaultConfig = require('../../app/config/defaults');
         describe('@reportCrash', function () {
             if (reporter.canReportToGithub()) {
                 var title = '[Automated] Crash Report';
-                var labels = [version, 'Crash Report'];
+                var labels = [version, 'crash report'];
                 labels.sort(function (a, b) {
                     return a > b;
                 });

@@ -1,6 +1,3 @@
-/**
- * Created by delmarhager on 5/25/15.
- */
 var assert = require('assert');
 var render = require('../../app/js/renderer');
 var sourceText = require('./data/source');

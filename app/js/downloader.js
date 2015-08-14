@@ -1,13 +1,25 @@
 var request = require('request');
+var unionObjects = require('./lib/util').unionObjects;
 
 ;(function () {
     'use strict';
 
+    /**
+     *
+     * @param configJson
+     * @param downloadIndex
+     * @param appIndex
+     * @returns {Downloader}
+     * @constructor
+     */
     function Downloader (configJson, downloadIndex, appIndex) {
+        if(typeof configJson === 'undefined') {
+            throw new Error('missing the indexer configuration parameter');
+        }
 
         //reassign this to _this, set path
         let _this = this;
-        let config = configJson;
+        _this.config = unionObjects({ apiUrl: ''}, configJson);
 
         //PLACEHOLDER: remove after appIndex is used somewhere
         appIndex = appIndex;
@@ -18,7 +30,7 @@ var request = require('request');
         }
 
         _this.downloadProjectList = function () {
-            var catalogApiUrl = config['apiUrl'];
+            var catalogApiUrl = _this.config.apiUrl;
             request(catalogApiUrl, function (error, response, catalogJson) {
                 if (!error && response.statusCode === 200) {
                     return downloadIndex.indexProjects(catalogJson);
@@ -43,7 +55,7 @@ var request = require('request');
 
         _this.downloadResourceList = function (projectId, sourceLanguageId) {
             var catalogApiUrl = getUrlFromObj(
-                downloadIndex.getProjectgetSourceLanguage(projectId, sourceLanguageId),
+                downloadIndex.getSourceLanguage(projectId, sourceLanguageId),
                 'res_catalog'
             );
             request(catalogApiUrl, function (error, response, catalogJson) {
@@ -100,7 +112,7 @@ var request = require('request');
             );
             request(catalogApiUrl, function (error, response, catalogJson) {
                 if (!error && response.statusCode === 200) {
-                    return downloadIndex.indexCheckingQuestions(projectId, sourceLanguageId, resourceId, catalogJson);
+                    return downloadIndex.indexQuestions(projectId, sourceLanguageId, resourceId, catalogJson);
                 }
                 return null;
             });

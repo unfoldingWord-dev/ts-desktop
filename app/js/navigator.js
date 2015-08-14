@@ -12,10 +12,15 @@ var Indexer = require('./indexer').Indexer;
              * Returns an index of the server library
              */
             getServerLibraryIndex: function (callback) {
-                callback = callback;
-                let indexDir = App.configurator.getValue('indexDir');
-                let downloadIndex = new Indexer('downloads');
-                let appIndex = new Indexer('app');
+                // create indexes
+                let indexConfig = {
+                    apiUrl: App.configurator.getValue('apiUrl'),
+                    indexDir: App.configurator.getValue('indexDir')
+                };
+                let downloadIndex = new Indexer('downloads', indexConfig);
+                let appIndex = new Indexer('app', indexConfig);
+
+                // create downloader
                 let downloader = new Downloader({
                     apiUrl: App.configurator.getValue('apiUrl')
                 }, downloadIndex, appIndex);

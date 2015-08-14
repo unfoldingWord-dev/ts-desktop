@@ -9,14 +9,64 @@ Overflow menu.
   <style>
 
   :host {
-    display: block;
-    width: 20em;
+    display: inline-block;
     height: 100vh;
-    background: white;
   }
 
-  .bar {
-    @apply(--header-bar);
+  #contains {
+      position: relative;
+  }
+
+  #fullmenu {
+      background: white;
+      color: black;
+      width: 12em;
+      height: 100vh;
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform: translateX(-100%);
+  }
+
+  #minimenu {
+      background: var(--primary-color-dark);
+      color: white;
+      width: 4em;
+      height: 100vh;
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform: translateX(0);
+  }
+
+  .displayed {
+      -webkit-animation: show .2s linear both .2s;
+  }
+
+  .hidden {
+      -webkit-animation: hide .2s linear forwards;
+  }
+
+  @-webkit-keyframes hide {
+      0% {
+          transform: translateX(0);
+          display: inline;
+      }
+      100% {
+          transform: translateX(-100%);
+          display: none;
+      }
+  }
+
+  @-webkit-keyframes show {
+      0% {
+          transform: translateX(-100%);
+          display: none;
+      }
+      100% {
+          transform: translateX(0);
+          display: inline;
+      }
   }
 
   ul {
@@ -36,7 +86,6 @@ Overflow menu.
 
   ul li:hover {
       background: var(--accent-color-dark);
-      box-shadow: inset 0 -1px rgba(0,0,0,0);
       color: #fff;
   }
 
@@ -44,8 +93,10 @@ Overflow menu.
       padding-right: 2em;
   }
 
-  ul + ul {
-    border-top: 1px solid #bbb;
+  .bottomlist {
+      position: absolute;
+      width: 100%;
+      bottom: 100px;
   }
 
   li {
@@ -55,22 +106,39 @@ Overflow menu.
   </style>
 
   <template>
-    <header class="bar"></header>
+      <iron-signals on-iron-signal-toggle-menu="toggleMenu"></iron-signals>
+
     <nav on-tap="openMenu">
-      <ul>
-        <li id="library"><iron-icon icon="overflow:library"></iron-icon>Library</li>
-        <li id="resources"><iron-icon icon="overflow:resources"></iron-icon>Resources</li>
-      </ul>
-      <ul>
-        <li><iron-icon icon="overflow:language"></iron-icon>Project Languages</li>
-        <li><iron-icon icon="overflow:share"></iron-icon>Share</li>
-        <li><iron-icon icon="overflow:backup"></iron-icon>Backup &amp; Publish</li>
-      </ul>
-      <ul>
-        <li><iron-icon icon="overflow:update"></iron-icon>Update</li>
-        <li id="settings"><iron-icon icon="overflow:settings"></iron-icon>Settings</li>
-        <li><iron-icon icon="overflow:feedback"></iron-icon>Feedback</li>
-      </ul>
+        <div id="contains">
+        <div id="minimenu">
+            <div class="toplist">
+              <ul>
+                <li id="library"><iron-icon icon="overflow:library"></iron-icon></li>
+                <li id="resources"><iron-icon icon="overflow:resources"></iron-icon></li>
+              </ul>
+            </div>
+            <div class="bottomlist">
+              <ul>
+                <li id="settings"><iron-icon icon="overflow:settings"></iron-icon></li>
+                <li><iron-icon icon="overflow:feedback"></iron-icon></li>
+              </ul>
+            </div>
+        </div>
+        <div id="fullmenu">
+            <div class="toplist">
+                <ul>
+                    <li id="library"><iron-icon icon="overflow:library"></iron-icon>Library</li>
+                    <li id="resources"><iron-icon icon="overflow:resources"></iron-icon>Resources</li>
+                </ul>
+            </div>
+            <div class="bottomlist">
+                <ul>
+                    <li id="settings"><iron-icon icon="overflow:settings"></iron-icon>Settings</li>
+                    <li><iron-icon icon="overflow:feedback"></iron-icon>Feedback</li>
+                </ul>
+            </div>
+        </div>
+        </div>
     </nav>
   </template>
 
@@ -87,6 +155,23 @@ Overflow menu.
         this.fire('iron-signal', { name: 'open-menu', data: menu });
       }
     },
+
+      toggleMenu: function(event) {
+          var mini = this.$.minimenu;
+          var full = this.$.fullmenu;
+
+          if (mini.classList.contains("hidden")) {
+              mini.classList.remove("hidden");
+              mini.classList.add("displayed");
+              full.classList.add("hidden");
+              full.classList.remove("displayed");
+          } else {
+              mini.classList.add("hidden");
+              mini.classList.remove("displayed");
+              full.classList.remove("hidden");
+              full.classList.add("displayed");
+          }
+      },
 
     ready: function() {
 

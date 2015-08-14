@@ -48,7 +48,7 @@ var frameCatalogJson = JSON.stringify(require('./data/01.json'));
             }
         });
 
-        describe('@IndexerUtils', function () {
+        describe('@Utils', function () {
 
             describe('@GetIndexId', function () {
                 it('should get correct index id', function () {
@@ -61,7 +61,7 @@ var frameCatalogJson = JSON.stringify(require('./data/01.json'));
 
         });
 
-        describe('@IndexerIndexingTools', function () {
+        describe('@IndexingTools', function () {
 
             describe('@IndexProjects', function () {
                 it('should index projects catalog', function () {
@@ -143,7 +143,7 @@ var frameCatalogJson = JSON.stringify(require('./data/01.json'));
 
         });
 
-        describe('@IndexerListRetrievalTools', function () {
+        describe('@ListRetrievalTools', function () {
 
             describe('@GetProjects', function () {
                 it('should get projects slug array', function () {
@@ -216,7 +216,7 @@ var frameCatalogJson = JSON.stringify(require('./data/01.json'));
 
         });
 
-        describe('@IndexerItemRetrievalTools', function () {
+        describe('@ItemRetrievalTools', function () {
 
             describe('@GetProject', function () {
                 it('should get 1ch project', function () {

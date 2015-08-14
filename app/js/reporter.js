@@ -272,4 +272,4 @@ function Reporter (args) {
     };
 }
 
-exports.instance = Reporter;
+exports.Reporter = Reporter;

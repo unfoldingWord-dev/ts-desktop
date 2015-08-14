@@ -4,7 +4,7 @@
 var assert = require('assert');
 var fs = require('fs');
 
-var Reporter = require('../../app/js/reporter');
+var Reporter = require('../../app/js/reporter').Reporter;
 var version = require('../../package.json').version;
 
 var reporterConfigurator = require('../../app/js/configurator');
@@ -28,7 +28,7 @@ var reporterDefaultConfig = require('../../app/config/defaults');
 
     var logPath = 'unit_tests/reporter/log.txt';
 
-    var reporter = new Reporter.instance({
+    var reporter = new Reporter({
         logPath: logPath,
         oauthToken: reporterConfigurator.getValue('oauthToken'),
         repoOwner: reporterConfigurator.getValue('repoOwner'),

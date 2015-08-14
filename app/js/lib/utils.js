@@ -5,12 +5,12 @@ var path = require('path');
  * where a resource can be found on a filesystem
  * based pathname (usually derived for the API url)
  * and a baseDir that is the the resource directory
+ * @deprecated please use the `path` module instead e.g. `path.join()`
  *
  * @param {String} pathname
  * @param {string} baseDir
  * @return {string} absolutePathname
  */
-
 function setPath (pathname, baseDir) {
     'use strict';
 

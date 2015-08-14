@@ -35,6 +35,7 @@ The following commands are available from within the project directory:
 * `$ gulp lint` runs the linter and the JS style checker
 * `$ gulp lint --fix` same as above, but attempts to fix the JS styles for you
 * `$ gulp test` runs all Mocha unit tests
+* `$ gulp test --grep [string]` runs the Mocha unit tests that match the string
 * `$ gulp` runs the `lint` and `test` tasks
 * `$ npm start` runs the application (without building it)
 * `$ DEBUG_MODE=1 npm start` same as above, but has live reloading (which is a bit unstable, hence "debug mode")

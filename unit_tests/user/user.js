@@ -4,7 +4,7 @@
 
 var assert = require('assert');
 var fs = require('fs');
-var User = require('../../app/js/user');
+var User = require('../../app/js/user').User;
 var jsonfile = require('jsonfile');
 var md5 = require('md5');
 
@@ -75,7 +75,7 @@ var user2;
             var emessage = 'No error';
             before(function (done) {
                 try {
-                    user0 = new User.instance({
+                    user0 = new User({
                         profilesDirectory: profilesDirectory,
                         username: username0,
                         password: password
@@ -92,7 +92,7 @@ var user2;
         });
 
         describe('@NewUser', function () {
-            user1 = new User.instance({
+            user1 = new User({
                 profilesDirectory: profilesDirectory,
                 username: username1,
                 password: password
@@ -168,7 +168,7 @@ var user2;
         describe('@ExistingUser', function () {
             var update = null;
             before(function (done) {
-                user2 = new User.instance({
+                user2 = new User({
                     profilesDirectory: profilesDirectory,
                     username: username2,
                     password: password

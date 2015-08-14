@@ -6,7 +6,7 @@ var configurator = require('./configurator');
     function Translator (appIndex) {
 
         //reassign this to _this, set indexId and rootPath
-        var _this = this;
+        //var _this = this;
 
         function getFrame (sourceTranslation, chapterId, frameId) {
 

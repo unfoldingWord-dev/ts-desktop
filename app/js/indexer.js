@@ -3,12 +3,12 @@ var path = require('path');
 var mkdirp = require('mkdirp');
 var configurator = require('./configurator');
 var md5 = require('md5');
+var path = require('path');
 var utils = require('./lib/utils');
-var setPath = utils.setPath;
 var getUrlFromObj = utils.getUrlFromObj;
 
 var dataDirPath = 'data';
-var linksJsonPath = setPath('links.json', dataDirPath);
+var linksJsonPath = path.join(dataDirPath, 'links.json');
 var sourceDirPath = 'source';
 
 function Indexer (indexType) {
@@ -17,11 +17,11 @@ function Indexer (indexType) {
     //reassign this to _this, set path
     var _this = this;
     _this.indexId = indexType;
-    _this.rootPath = setPath(indexType, setPath('index', configurator.getValue('indexRootPath')));
+    _this.rootPath = path.join(configurator.getValue('indexRootPath'), 'index', indexType);
 
     //internal functions
     function openFile (filePath) {
-        var fullPath = setPath(filePath, _this.rootPath);
+        var fullPath = path.join(_this.rootPath, filePath);
         var fileContents = null;
         if (fs.existsSync(fullPath)) {
             try {
@@ -44,7 +44,7 @@ function Indexer (indexType) {
     }
 
     function saveFile (filePath, fileContents) {
-        var fullPath = setPath(filePath, _this.rootPath);
+        var fullPath = path.join(_this.rootPath, filePath);
         var fullDirPath = path.dirname(fullPath);
         try {
             mkdirp.sync(fullDirPath, '0755');
@@ -95,7 +95,7 @@ function Indexer (indexType) {
 
     function indexItems (md5Hash, catalogLinkFile, catalogType, catalogJson, metaObj) {
         var items = JSON.parse(catalogJson);
-        var md5Path = setPath(md5Hash, dataDirPath);
+        var md5Path = path.join(dataDirPath, md5Hash);
 
         //save link file
         saveFile(catalogLinkFile, md5Hash);
@@ -103,7 +103,7 @@ function Indexer (indexType) {
 
         //save meta file
         if (typeof metaObj !== 'undefined') {
-            var metaFilePath = setPath('meta.json', md5Path);
+            var metaFilePath = path.join(md5Path, 'meta.json');
             var metaFileContent = typeof metaObj === 'object' ? JSON.stringify(metaObj) : metaObj;
             saveFile(metaFilePath, metaFileContent);
         }
@@ -116,7 +116,7 @@ function Indexer (indexType) {
             for (let item of items) {
                 fileName = item.slug || null;
                 if (fileName !== null) {
-                    filePath = setPath(fileName + '.json', md5Path);
+                    filePath = path.join(md5Path, fileName + '.json');
                     fileContent = JSON.stringify(item);
                     saveFile(filePath, fileContent);
                 }
@@ -128,13 +128,13 @@ function Indexer (indexType) {
                 if (folderName !== null) {
                     var frames = chapter.frames;
                     delete chapter.frames;
-                    filePath = setPath('chapter.json', setPath(folderName, md5Path));
+                    filePath = path.join(md5Path, folderName, 'chapter.json');
                     fileContent = JSON.stringify(chapter);
                     saveFile(filePath, fileContent);
                     for (let frame of frames) {
                         fileName = frame.id.replace(/[0-9]+\-/g, '') || null;
                         if (fileName !== null) {
-                            filePath = setPath(fileName + '.json', setPath(folderName, md5Path));
+                            filePath = path.join(md5Path, folderName, fileName + '.json');
                             fileContent = JSON.stringify(frame);
                             saveFile(filePath, fileContent);
                         }
@@ -149,15 +149,14 @@ function Indexer (indexType) {
     function getItemsArray (itemObj, urlProp, subFolder) {
         var catalogApiUrl = getUrlFromObj(
             itemObj,
-            urlProp,
-            true
+            urlProp
         );
         var md5Hash = md5(catalogApiUrl);
-        var md5Path = setPath(md5Hash, dataDirPath);
+        var md5Path = path.join(dataDirPath, md5Hash);
         if (subFolder !== undefined) {
-            md5Path = setPath(subFolder, md5Path);
+            md5Path = path.join(md5Path, subFolder);
         }
-        var fullPath = setPath(md5Path, _this.rootPath);
+        var fullPath = path.join(_this.rootPath, md5Path);
         var files = fs.readdirSync(fullPath);
         var items = [];
         for (var x in files) {
@@ -170,20 +169,26 @@ function Indexer (indexType) {
         return items;
     }
 
+    function getUrlFromObj (itemObj, urlProp) {
+        return itemObj[urlProp].split('?')[0];
+    }
+
     //public utility functions
     _this.getIndexId = function () {
         return _this.indexId;
+    };
+    _this.getIndexPath = function () {
+        return _this.rootPath;
     };
 
     //public indexing functions
     _this.indexProjects = function (catalogJson) {
         var catalogApiUrl = getUrlFromObj(
             _this.getCatalog(),
-            'proj_catalog',
-            true
+            'proj_catalog'
         );
         var md5Hash = md5(catalogApiUrl);
-        var catalogLinkFile = setPath('projects_catalog.link', sourceDirPath);
+        var catalogLinkFile = path.join(sourceDirPath, 'projects_catalog.link');
         var catalogType = 'simple';
         return indexItems(md5Hash, catalogLinkFile, catalogType, catalogJson);
     };
@@ -205,11 +210,10 @@ function Indexer (indexType) {
 
         var catalogApiUrl = getUrlFromObj(
             _this.getProject(projectId),
-            'lang_catalog',
-            true
+            'lang_catalog'
         );
         var md5Hash = md5(catalogApiUrl);
-        var catalogLinkFile = setPath('languages_catalog.link', setPath(projectId, sourceDirPath));
+        var catalogLinkFile = path.join(sourceDirPath, projectId, 'languages_catalog.link');
         var catalogType = 'simple';
         return indexItems(md5Hash, catalogLinkFile, catalogType, catalogJson, metaObj);
     };
@@ -217,11 +221,10 @@ function Indexer (indexType) {
     _this.indexResources = function (projectId, sourceLanguageId, catalogJson, metaObj) {
         var catalogApiUrl = getUrlFromObj(
             _this.getSourceLanguage(projectId, sourceLanguageId),
-            'res_catalog',
-            true
+            'res_catalog'
         );
         var md5Hash = md5(catalogApiUrl);
-        var catalogLinkFile = setPath('resources_catalog.link', setPath(sourceLanguageId, setPath(projectId, sourceDirPath)));
+        var catalogLinkFile = path.join(sourceDirPath, projectId, sourceLanguageId, 'resources_catalog.link');
         var catalogType = 'simple';
         return indexItems(md5Hash, catalogLinkFile, catalogType, catalogJson, metaObj);
     };
@@ -235,11 +238,10 @@ function Indexer (indexType) {
 
         var catalogApiUrl = getUrlFromObj(
             _this.getResource(projectId, sourceLanguageId, resourceId),
-            'source',
-            true
+            'source'
         );
         var md5Hash = md5(catalogApiUrl);
-        var catalogLinkFile = setPath('source.link', setPath(resourceId, setPath(sourceLanguageId, setPath(projectId, sourceDirPath))));
+        var catalogLinkFile = path.join(sourceDirPath, projectId, sourceLanguageId, resourceId, 'source.link');
         var catalogType = 'source';
         return indexItems(md5Hash, catalogLinkFile, catalogType, catalogJson, metaObj);
     };
@@ -247,11 +249,10 @@ function Indexer (indexType) {
     _this.indexNotes = function (projectId, sourceLanguageId, resourceId, catalogJson, metaObj) {
         var catalogApiUrl = getUrlFromObj(
             _this.getResource(projectId, sourceLanguageId, resourceId),
-            'notes',
-            true
+            'notes'
         );
         var md5Hash = md5(catalogApiUrl);
-        var catalogLinkFile = setPath('notes.link', setPath(resourceId, setPath(sourceLanguageId, setPath(projectId, sourceDirPath))));
+        var catalogLinkFile = path.join(sourceDirPath, projectId, sourceLanguageId, resourceId, 'notes.link');
         var catalogType = 'advanced';
         return indexItems(md5Hash, catalogLinkFile, catalogType, catalogJson, metaObj);
     };
@@ -259,11 +260,10 @@ function Indexer (indexType) {
     _this.indexTerms = function (projectId, sourceLanguageId, resourceId, catalogJson, metaObj) {
         var catalogApiUrl = getUrlFromObj(
             _this.getResource(projectId, sourceLanguageId, resourceId),
-            'terms',
-            true
+            'terms'
         );
         var md5Hash = md5(catalogApiUrl);
-        var catalogLinkFile = setPath('terms.link', setPath(resourceId, setPath(sourceLanguageId, setPath(projectId, sourceDirPath))));
+        var catalogLinkFile = path.join(sourceDirPath, projectId, sourceLanguageId, resourceId, 'terms.link');
         var catalogType = 'advanced';
         return indexItems(md5Hash, catalogLinkFile, catalogType, catalogJson, metaObj);
     };
@@ -271,11 +271,10 @@ function Indexer (indexType) {
     _this.indexQuestions = function (projectId, sourceLanguageId, resourceId, catalogJson, metaObj) {
         var catalogApiUrl = getUrlFromObj(
             _this.getResource(projectId, sourceLanguageId, resourceId),
-            'checking_questions',
-            true
+            'checking_questions'
         );
         var md5Hash = md5(catalogApiUrl);
-        var catalogLinkFile = setPath('checking_questions.link', setPath(resourceId, setPath(sourceLanguageId, setPath(projectId, sourceDirPath))));
+        var catalogLinkFile = path.join(sourceDirPath, projectId, sourceLanguageId, resourceId, 'checking_questions.link');
         var catalogType = 'advanced';
         return indexItems(md5Hash, catalogLinkFile, catalogType, catalogJson, metaObj);
     };
@@ -331,83 +330,83 @@ function Indexer (indexType) {
     };
 
     _this.getProject = function (projectId) {
-        var md5Hash = openFile(setPath('projects_catalog.link', sourceDirPath));
+        var md5Hash = openFile(path.join(sourceDirPath, 'projects_catalog.link'));
         if (md5Hash === null) {
             return null;
         }
-        var catalogJson = openJson(setPath(projectId + '.json', setPath(md5Hash, dataDirPath)));
+        var catalogJson = openJson(path.join(dataDirPath, md5Hash, projectId + '.json'));
         return catalogJson;
     };
 
     _this.getProjectMeta = function (projectId) {
-        var md5Hash = openFile(setPath('languages_catalog.link', setPath(projectId, sourceDirPath)));
+        var md5Hash = openFile(path.join(sourceDirPath, projectId, 'languages_catalog.link'));
         if (md5Hash === null) {
             return null;
         }
-        var catalogJson = openJson(setPath('meta.json', setPath(md5Hash, dataDirPath)));
+        var catalogJson = openJson(path.join(dataDirPath, md5Hash, 'meta.json'));
         return catalogJson;
     };
 
     _this.getSourceLanguage = function (projectId, sourceLanguageId) {
-        var md5Hash = openFile(setPath('languages_catalog.link', setPath(projectId, sourceDirPath)));
+        var md5Hash = openFile(path.join(sourceDirPath, projectId, 'languages_catalog.link'));
         if (md5Hash === null) {
             return null;
         }
-        var catalogJson = openJson(setPath(sourceLanguageId + '.json', setPath(md5Hash, dataDirPath)));
+        var catalogJson = openJson(path.join(dataDirPath, md5Hash, sourceLanguageId + '.json'));
         return catalogJson;
     };
 
     _this.getResource = function (projectId, sourceLanguageId, resourceId) {
-        var md5Hash = openFile(setPath('resources_catalog.link', setPath(sourceLanguageId, setPath(projectId, sourceDirPath))));
+        var md5Hash = openFile(path.join(sourceDirPath, projectId, sourceLanguageId, 'resources_catalog.link'));
         if (md5Hash === null) {
             return null;
         }
-        var catalogJson = openJson(setPath(resourceId + '.json', setPath(md5Hash, dataDirPath)));
+        var catalogJson = openJson(path.join(dataDirPath, md5Hash, resourceId + '.json'));
         return catalogJson;
     };
 
     _this.getChapter = function (projectId, sourceLanguageId, resourceId, chapterId) {
-        var md5Hash = openFile(setPath('source.link', setPath(resourceId, setPath(sourceLanguageId, setPath(projectId, sourceDirPath)))));
+        var md5Hash = openFile(path.join(sourceDirPath, projectId, sourceLanguageId, resourceId, 'source.link'));
         if (md5Hash === null) {
             return null;
         }
-        var catalogJson = openJson(setPath('chapter.json', setPath(chapterId, setPath(md5Hash, dataDirPath))));
+        var catalogJson = openJson(path.join(dataDirPath, md5Hash, chapterId, 'chapter.json'));
         return catalogJson;
     };
 
     _this.getFrame = function (projectId, sourceLanguageId, resourceId, chapterId, frameId) {
-        var md5Hash = openFile(setPath('source.link', setPath(resourceId, setPath(sourceLanguageId, setPath(projectId, sourceDirPath)))));
+        var md5Hash = openFile(path.join(sourceDirPath, projectId, sourceLanguageId, resourceId, 'source.link'));
         if (md5Hash === null) {
             return null;
         }
-        var catalogJson = openJson(setPath(frameId + '.json', setPath(chapterId, setPath(md5Hash, dataDirPath))));
+        var catalogJson = openJson(path.join(dataDirPath, md5Hash, chapterId, frameId + '.json'));
         return catalogJson;
     };
 
     _this.getNotes = function (projectId, sourceLanguageId, resourceId, chapterId, frameId) {
-        var md5Hash = openFile(setPath('notes.link', setPath(resourceId, setPath(sourceLanguageId, setPath(projectId, sourceDirPath)))));
+        var md5Hash = openFile(path.join(sourceDirPath, projectId, sourceLanguageId, resourceId, 'notes.link'));
         if (md5Hash === null) {
             return null;
         }
-        var catalogJson = openJson(setPath(frameId + '.json', setPath(chapterId, setPath(md5Hash, dataDirPath))));
+        var catalogJson = openJson(path.join(dataDirPath, md5Hash, chapterId, frameId + '.json'));
         return catalogJson;
     };
 
     _this.getTerms = function (projectId, sourceLanguageId, resourceId) {
-        var md5Hash = openFile(setPath('terms.link', setPath(resourceId, setPath(sourceLanguageId, setPath(projectId, sourceDirPath)))));
+        var md5Hash = openFile(path.join(sourceDirPath, projectId, sourceLanguageId, resourceId, 'terms.link'));
         if (md5Hash === null) {
             return null;
         }
-        var catalogJson = openJson(setPath('term.json', setPath(md5Hash, dataDirPath)));
+        var catalogJson = openJson(path.join(dataDirPath, md5Hash, 'term.json'));
         return catalogJson;
     };
 
     _this.getQuestions = function (projectId, sourceLanguageId, resourceId, chapterId, frameId) {
-        var md5Hash = openFile(setPath('checking_questions.link', setPath(resourceId, setPath(sourceLanguageId, setPath(projectId, sourceDirPath)))));
+        var md5Hash = openFile(path.join(sourceDirPath, projectId, sourceLanguageId, resourceId, 'checking_questions.link'));
         if (md5Hash === null) {
             return null;
         }
-        var catalogJson = openJson(setPath(frameId + '.json', setPath(chapterId, setPath(md5Hash, dataDirPath))));
+        var catalogJson = openJson(path.join(dataDirPath, md5Hash, chapterId, frameId + '.json'));
         return catalogJson;
     };
 

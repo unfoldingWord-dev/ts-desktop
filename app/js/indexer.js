@@ -14,7 +14,7 @@ var sourceDirPath = 'source';
 
     function Indexer (indexType) {
 
-        //reassign this to _this, set path
+        //reassign this to _this, set indexId and rootPath
         var _this = this;
         _this.indexId = indexType;
         _this.rootPath = path.join(configurator.getValue('indexDir'), indexType);

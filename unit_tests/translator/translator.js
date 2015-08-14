@@ -1,9 +1,10 @@
 var assert = require('assert');
 var rimraf = require('rimraf');
 var path = require('path');
-var translator = require('../../app/js/translator');
 var Indexer = require('../../app/js/indexer').Indexer;
 var testIndexer = new Indexer('test');
+var Translator = require('../../app/js/translator').Translator;
+var translator = new Translator(testIndexer);
 
 var projectsCatalogJson = JSON.stringify(require('../indexer/data/ts/txt/2/catalog.json'));
 var sourceLanguagesCatalogJson = JSON.stringify(require('../indexer/data/ts/txt/2/1ch/languages.json'));
@@ -67,7 +68,6 @@ var sortKeyStr = project.sort;
 
         describe('@CheckIndex', function () {
             it('should be using the correct index', function () {
-                translator.useIndex('test');
                 assert.equal(translator.getIndexId(), 'test');
             });
         });
@@ -96,7 +96,7 @@ var sortKeyStr = project.sort;
             });
         });
 
-        describe('@TranslatorProject', function () {
+        describe('@Project', function () {
 
             describe('@GetTitle', function () {
                 it('should retrieve the 1ch ar avd title', function () {
@@ -162,7 +162,7 @@ var sortKeyStr = project.sort;
 
         });
 
-        describe('@TranslatorChapter', function () {
+        describe('@Chapter', function () {
 
             describe('@GetFrames', function () {
                 it('should retrieve an array of the 1ch ar avd chapter 01 frame objects from the chapter object', function () {

@@ -2,69 +2,73 @@ var configurator = require('./configurator');
 var Indexer = require('./indexer').Indexer;
 var appIndex = new Indexer('app');
 
-function getFrame (projectId, sourceLanguageId, resourceId, chapterId, frameId) {
+function getFrame (sourceTranslation, chapterId, frameId) {
     'use strict';
 
     //build return object
     var returnObj = {
         getSource: function () {
-            return appIndex.getFrame(projectId, sourceLanguageId, resourceId, chapterId, frameId);
+            return appIndex.getFrame(sourceTranslation.projectId, sourceTranslation.sourceLanguageId, sourceTranslation.resourceId, chapterId, frameId);
         }
     };
 
     //return object
     return returnObj;
 }
-function getFrames (projectId, sourceLanguageId, resourceId, chapterId) {
+function getFrames (sourceTranslation, chapterId) {
     'use strict';
 
     //get data
-    var frames = appIndex.getFrames(projectId, sourceLanguageId, resourceId, chapterId);
+    var frames = appIndex.getFrames(sourceTranslation.projectId, sourceTranslation.sourceLanguageId, sourceTranslation.resourceId, chapterId);
 
     //build return object
     var returnObj = {};
-    //for (let frameId of frames) {
-    for (var frame in frames) {
-        if (frames.hasOwnProperty(frame)) {
-            var frameId = frames[frame];
-            returnObj[frameId] = getFrame(projectId, sourceLanguageId, resourceId, chapterId, frameId);
-        }
+    for (let frameId of frames) {
+        returnObj[frameId] = getFrame(sourceTranslation, chapterId, frameId);
     }
 
     //return object
     return returnObj;
 }
 
-function getChapter (projectId, sourceLanguageId, resourceId, chapterId) {
+function getChapter (sourceTranslation, chapterId) {
     'use strict';
+
+    //get data
+    var chapterData = appIndex.getChapter(sourceTranslation.projectId, sourceTranslation.sourceLanguageId, sourceTranslation.resourceId, chapterId);
 
     //build return object
     var returnObj = {
+        getNumber: function () {
+            return chapterData.number;
+        },
+        getReference: function () {
+            return chapterData.ref;
+        },
+        getTitle: function () {
+            return chapterData.title;
+        },
         getFrames: function () {
-            return getFrames(projectId, sourceLanguageId, resourceId, chapterId);
+            return getFrames(sourceTranslation, chapterId);
         },
         getFrame: function (frameId) {
-            return getFrame(projectId, sourceLanguageId, resourceId, chapterId, frameId);
+            return getFrame(sourceTranslation, chapterId, frameId);
         }
     };
 
     //return object
     return returnObj;
 }
-function getChapters (projectId, sourceLanguageId, resourceId) {
+function getChapters (sourceTranslation) {
     'use strict';
 
     //get data
-    var chapters = appIndex.getChapters(projectId, sourceLanguageId, resourceId);
+    var chapters = appIndex.getChapters(sourceTranslation.projectId, sourceTranslation.sourceLanguageId, sourceTranslation.resourceId);
 
     //build return object
     var returnObj = {};
-    //for (let chapterId of chapters) {
-    for (var chapter in chapters) {
-        if (chapters.hasOwnProperty(chapter)) {
-            var chapterId = chapters[chapter];
-            returnObj[chapterId] = getChapter(projectId, sourceLanguageId, resourceId, chapterId);
-        }
+    for (let chapterId of chapters) {
+        returnObj[chapterId] = getChapter(sourceTranslation, chapterId);
     }
 
     //return object
@@ -100,6 +104,14 @@ var translator = {
             return null;
         }
 
+        //build sourceTranslation object
+        //TODO: eventually this will be what is passed into this method
+        var sourceTranslation = {
+            projectId: projectId,
+            sourceLanguageId: sourceLanguageId,
+            resourceId: resourceId
+        };
+
         //build return object
         var returnObj = {
             getProjectId: function () {
@@ -124,16 +136,16 @@ var translator = {
                 return projectData.sort;
             },
             getChapters: function () {
-                return getChapters(projectId, sourceLanguageId, resourceId);
+                return getChapters(sourceTranslation);
             },
             getChapter: function (chapterId) {
-                return getChapter(projectId, sourceLanguageId, resourceId, chapterId);
+                return getChapter(sourceTranslation, chapterId);
             },
             getFrames: function (chapterId) {
-                return getFrames(projectId, sourceLanguageId, resourceId, chapterId);
+                return getFrames(sourceTranslation, chapterId);
             },
             getFrame: function (chapterId, frameId) {
-                return getFrame(projectId, sourceLanguageId, resourceId, chapterId, frameId);
+                return getFrame(sourceTranslation, chapterId, frameId);
             }
         };
 

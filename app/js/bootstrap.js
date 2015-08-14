@@ -9,7 +9,7 @@
     let configurator = require('../js/configurator');
     let gui = require('nw.gui');
     let mainWindow = gui.Window.get();
-    let reporter = require('../js/reporter');
+    let Reporter = require('../js/reporter').Reporter;
     let uploader = require('../js/uploader');
 
     /**
@@ -175,7 +175,7 @@
         initializeReporter: function () {
             var _this = this;
 
-            _this.reporter = new reporter.instance({
+            _this.reporter = new Reporter({
                 logPath: configurator.getValue('logPath'),
                 repoOwner: configurator.getValue('repoOwner'),
                 repo: configurator.getValue('repo'),
@@ -195,7 +195,7 @@
                 var date = new Date();
                 date = date.getFullYear() + '_' + date.getMonth() + '_' + date.getDay();
                 var path = configurator.getValue('crashDir') + '/' +  date + '.crash';
-                var crashReporter = new reporter.instance({logPath: path});
+                var crashReporter = new Reporter({logPath: path});
                 crashReporter.logError(err.message + '\n' + err.stack, function () {
                     /**
                      * TODO: Hook in a UI

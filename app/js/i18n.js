@@ -49,7 +49,7 @@ var jsonfile = require('jsonfile');
         return {};
     }
 
-    function getInstance(dir, defaultLocaleCode) {
+    function Locale(dir, defaultLocaleCode) {
         let dictionary = {};
         let defaultLocale = defaultLocaleCode || 'en';
         let locale = defaultLocale;
@@ -91,5 +91,5 @@ var jsonfile = require('jsonfile');
         return i18n;
     }
 
-    exports.getInstance = getInstance;
+    exports.Locale = Locale;
 }());

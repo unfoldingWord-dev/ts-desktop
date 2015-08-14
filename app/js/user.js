@@ -1,11 +1,10 @@
-
 var mkdirp = require('mkdirp');
 var jsonfile = require('jsonfile');
 var path = require('path');
 var md5 = require('md5');
 var fs = require('fs');
 
-;(function() {
+;(function () {
     'use strict';
 
     function User(args) {
@@ -36,7 +35,7 @@ var fs = require('fs');
                 throw new Error('Could not write to file');
             }
             return true;
-        };
+        }
 
         jsonfile.readFile(targetFile, function (err, obj) {
             if (err === null) {

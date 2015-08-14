@@ -1,4 +1,6 @@
 var assert = require('assert');
+var rimraf = require('rimraf');
+var path = require('path');
 var translator = require('../../app/js/translator');
 var Indexer = require('../../app/js/indexer').Indexer;
 var testIndexer = new Indexer('test');
@@ -18,27 +20,49 @@ var sortKeyStr = project.sort;
 
     describe('@Translator', function () {
 
-        before(function () {
-            //TODO: clear out index/test directory so tests run in clean environment
-            testIndexer.indexProjects(projectsCatalogJson);
-            testIndexer.indexSourceLanguages(
-                '1ch',
-                sourceLanguagesCatalogJson,
-                {'date_modified':'20150801'}
-            );
-            testIndexer.indexResources(
-                '1ch',
-                'ar',
-                resourcesCatalogJson,
-                {'date_modified':'20150801'}
-            );
-            testIndexer.indexSource(
-                '1ch',
-                'ar',
-                'avd',
-                sourceCatalogJson,
-                {'date_modified':'20150801'}
-            );
+        before(function (done) {
+            var setupIndex = function () {
+                testIndexer.indexProjects(projectsCatalogJson);
+                testIndexer.indexSourceLanguages(
+                    '1ch',
+                    sourceLanguagesCatalogJson,
+                    {'date_modified':'20150801'}
+                );
+                testIndexer.indexResources(
+                    '1ch',
+                    'ar',
+                    resourcesCatalogJson,
+                    {'date_modified':'20150801'}
+                );
+                testIndexer.indexSource(
+                    '1ch',
+                    'ar',
+                    'avd',
+                    sourceCatalogJson,
+                    {'date_modified':'20150801'}
+                );
+            };
+            var testPath = testIndexer.getIndexPath();
+            if (testPath.indexOf(path.join('index', 'test')) !== -1) {
+                rimraf(testPath, function () {
+                    setupIndex();
+                    done();
+                });
+            } else {
+                setupIndex();
+                done();
+            }
+        });
+
+        after(function (done) {
+            var testPath = testIndexer.getIndexPath();
+            if (testPath.indexOf(path.join('index', 'test')) !== -1) {
+                rimraf(testPath, function () {
+                    done();
+                });
+            } else {
+                done();
+            }
         });
 
         describe('@CheckIndex', function () {
@@ -57,7 +81,7 @@ var sortKeyStr = project.sort;
             });
         });
 
-        describe('@GetBadProject', function () {
+        describe('@DoNotGetBadProject', function () {
             it('should not retrieve the nonexistent 7ch en ulb source', function () {
                 assert.equal(translator.getProject('7ch', 'en', 'ulb'), null);
             });
@@ -72,42 +96,93 @@ var sortKeyStr = project.sort;
             });
         });
 
-        describe('@GetTitle', function () {
-            it('should retrieve the 1ch ar avd title', function () {
-                var project = translator.getLastProject();
-                assert.equal(project.getTitle(), titleStr);
+        describe('@TranslatorProject', function () {
+
+            describe('@GetTitle', function () {
+                it('should retrieve the 1ch ar avd title', function () {
+                    var project = translator.getLastProject();
+                    assert.equal(project.getTitle(), titleStr);
+                });
             });
+
+            describe('@GetDescription', function () {
+                it('should retrieve the 1ch ar avd description', function () {
+                    var project = translator.getLastProject();
+                    assert.equal(project.getDescription(), descriptionStr);
+                });
+            });
+
+            describe('@GetImage', function () {
+                it('feature not fully designed', function () {
+                    var project = translator.getLastProject();
+                    assert.equal(project.getImage(), imageStr);
+                });
+            });
+
+            describe('@GetSortKey', function () {
+                it('should retrieve the 1ch ar avd sort key', function () {
+                    var project = translator.getLastProject();
+                    assert.equal(project.getSortKey(), sortKeyStr);
+                });
+            });
+
+            describe('@GetChapters', function () {
+                it('should retrieve an array of the 1ch ar avd chapter objects', function () {
+                    var project = translator.getLastProject();
+                    var chapters = project.getChapters();
+                    assert.equal(Object.keys(chapters).length, 29);
+                });
+            });
+
+            describe('@GetChapter', function () {
+                it('should retrieve the 1ch ar avd chapter 01 object', function () {
+                    var project = translator.getLastProject();
+                    var chapter = project.getChapter('01');
+                    assert.equal(chapter.getNumber(), '01');
+                    assert.equal(chapter.getReference(), '');
+                    assert.equal(chapter.getTitle(), '');
+                });
+            });
+
+            describe('@GetFrames', function () {
+                it('should retrieve an array of the 1ch ar avd chapter 01 frame objects from the project object', function () {
+                    var project = translator.getLastProject();
+                    var frames = project.getFrames('01');
+                    assert.equal(Object.keys(frames).length, 17);
+                });
+            });
+
+            describe('@GetFrame', function () {
+                it('should retrieve an array of the 1ch ar avd chapter 01 frame 01 object from the project object', function () {
+                    var project = translator.getLastProject();
+                    var frame = project.getFrame('01', '01');
+                    assert.equal(frame.hasOwnProperty('getSource'), true);
+                });
+            });
+
         });
 
-        describe('@GetDescription', function () {
-            it('should retrieve the 1ch ar avd description', function () {
-                var project = translator.getLastProject();
-                assert.equal(project.getDescription(), descriptionStr);
-            });
-        });
+        describe('@TranslatorChapter', function () {
 
-        describe('@GetImage', function () {
-            it('feature not fully designed', function () {
-                var project = translator.getLastProject();
-                assert.equal(project.getImage(), imageStr);
+            describe('@GetFrames', function () {
+                it('should retrieve an array of the 1ch ar avd chapter 01 frame objects from the chapter object', function () {
+                    var project = translator.getLastProject();
+                    var chapter = project.getChapter('01');
+                    var frames = chapter.getFrames();
+                    assert.equal(Object.keys(frames).length, 17);
+                });
             });
-        });
 
-        describe('@GetSortKey', function () {
-            it('should retrieve the 1ch ar avd sort key', function () {
-                var project = translator.getLastProject();
-                assert.equal(project.getSortKey(), sortKeyStr);
+            describe('@GetFrame', function () {
+                it('should retrieve an array of the 1ch ar avd chapter 01 frame 01 object from the chapter object', function () {
+                    var project = translator.getLastProject();
+                    var chapter = project.getChapter('01');
+                    var frame = chapter.getFrame('01');
+                    assert.equal(frame.hasOwnProperty('getSource'), true);
+                });
             });
-        });
 
-        /** /
-        describe('@GetChapters', function () {
-            it('should retrieve an array of the 1ch ar avd chapter objects', function () {
-                var project = translator.getLastProject();
-                assert.equal(project.getChapters(), 2);
-            });
         });
-        /**/
 
     });
 })();

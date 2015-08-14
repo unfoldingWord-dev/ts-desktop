@@ -3,6 +3,8 @@
  * This context will be available throughout the application
  */
 
+var path = require('path');
+
 ;(function (root) {
     'use strict';
 
@@ -146,6 +148,7 @@
             _this.configurator.loadConfig(config);
             _this.configurator.loadConfig(defaults);
             _this.configurator.setValue('rootDir', gui.App.dataPath, {'mutable':false});
+            _this.configurator.setValue('indexDir', path.join(gui.App.dataPath, 'index'), {'mutable':false});
         },
 
         /**

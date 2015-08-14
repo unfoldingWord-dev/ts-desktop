@@ -17,7 +17,7 @@ var sourceDirPath = 'source';
         //reassign this to _this, set path
         var _this = this;
         _this.indexId = indexType;
-        _this.rootPath = path.join(configurator.getValue('indexRootPath'), 'index', indexType);
+        _this.rootPath = path.join(configurator.getValue('indexDir'), indexType);
 
         //internal functions
         function openFile (filePath) {

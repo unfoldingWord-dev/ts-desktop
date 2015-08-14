@@ -1,6 +1,4 @@
 var request = require('request');
-//var moment = require('moment');
-var configurator = require('./configurator');
 
 ;(function () {
     'use strict';
@@ -8,7 +6,8 @@ var configurator = require('./configurator');
     function Downloader (configJson, downloadIndex, appIndex) {
 
         //reassign this to _this, set path
-        var _this = this;
+        let _this = this;
+        let config = configJson;
 
         //PLACEHOLDER: remove after appIndex is used somewhere
         appIndex = appIndex;
@@ -19,7 +18,7 @@ var configurator = require('./configurator');
         }
 
         _this.downloadProjectList = function () {
-            var catalogApiUrl = configurator.getValue('apiUrl');
+            var catalogApiUrl = config['apiUrl'];
             request(catalogApiUrl, function (error, response, catalogJson) {
                 if (!error && response.statusCode === 200) {
                     return downloadIndex.indexProjects(catalogJson);

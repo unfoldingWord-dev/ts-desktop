@@ -1,5 +1,6 @@
-//var Downloader = require('./downloader').Downloader;
-//var Indexer = require('./indexer').Indexer;
+
+var Downloader = require('./downloader').Downloader;
+var Indexer = require('./indexer').Indexer;
 
 ;(function () {
     'use strict';
@@ -12,10 +13,16 @@
              */
             getServerLibraryIndex: function (callback) {
                 callback = callback;
-                //let indexDir = App.configurator.getValue('indexDir');
-                //let downloadIndex = new Indexer(indexDir, 'download_index');
-                //let appIndex = new Indexer(indexDir, 'app_index');
-                //let downloader = new Downloader(App.configurator.getValue('apiUrl'), downloadIndex, appIndex);
+                let indexDir = App.configurator.getValue('indexDir');
+                let downloadIndex = new Indexer('downloads');
+                let appIndex = new Indexer('app');
+                let downloader = new Downloader({
+                    apiUrl: App.configurator.getValue('apiUrl')
+                }, downloadIndex, appIndex);
+
+                if(typeof callback === 'function') {
+                    callback(downloadIndex);
+                }
                 // TODO: downloadProjectList, downloadSourceLanguageList, downloadResourceList
                 // TODO: send download index to the callback
             }

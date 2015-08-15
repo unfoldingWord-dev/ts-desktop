@@ -8,7 +8,8 @@ var path = require('path');
 ;(function (root) {
     'use strict';
 
-    let configurator = require('../js/configurator');
+    let Configurator = require('../js/configurator').Configurator;
+    let configurator = new Configurator();
     let gui = require('nw.gui');
     let mainWindow = gui.Window.get();
     let Reporter = require('../js/reporter').Reporter;

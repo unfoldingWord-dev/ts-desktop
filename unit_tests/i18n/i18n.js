@@ -2,10 +2,11 @@
 ;(function () {
     'use strict';
 
-    var assert = require('assert');
-    var config = require('../../app/js/configurator');
-    var defaults = require('../../app/config/defaults');
-    var Locale = require('../../app/js/i18n').Locale;
+    let assert = require('assert');
+    let Configurator = require('../../app/js/configurator').Configurator;
+    let config = new Configurator();
+    let defaults = require('../../app/config/defaults');
+    let Locale = require('../../app/js/i18n').Locale;
 
     config.setStorage({});
     config.loadConfig(defaults);

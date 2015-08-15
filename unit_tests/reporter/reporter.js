@@ -2,7 +2,8 @@ var assert = require('assert');
 var fs = require('fs');
 var Reporter = require('../../app/js/reporter').Reporter;
 var version = require('../../package.json').version;
-var reporterConfigurator = require('../../app/js/configurator');
+var Configurator = require('../../app/js/configurator').Configurator;
+var reporterConfigurator = new Configurator();
 var reporterDefaultConfig = require('../../app/config/defaults');
 var rimraf = require('rimraf');
 var jsonfile = require('jsonfile');
@@ -56,7 +57,7 @@ var jsonfile = require('jsonfile');
                     var date = new Date();
                     date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
                     //reporter.js:<line>:<column> this will need to be changed if the code changes
-                    textExpected = date + ' I/reporter.js:55:26: ' + key + '\n';
+                    textExpected = date + ' I/reporter.js:56:26: ' + key + '\n';
 
                     reporter.stringFromLogFile(null, function (logResults) {
                         logFileResults = logResults;
@@ -80,7 +81,7 @@ var jsonfile = require('jsonfile');
                     var date = new Date();
                     date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
                     //reporter.js:<line>:<column> this will need to be changed if the code changes
-                    textExpected = date + ' W/reporter.js:79:26: ' + key + '\n';
+                    textExpected = date + ' W/reporter.js:80:26: ' + key + '\n';
 
                     reporter.stringFromLogFile(null, function (logResults) {
                         logFileResults = logResults;
@@ -104,7 +105,7 @@ var jsonfile = require('jsonfile');
                     var date = new Date();
                     date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
                     //reporter.js:<line>:<column> this will need to be changed if the code changes
-                    textExpected = date + ' E/reporter.js:103:26: ' + key + '\n';
+                    textExpected = date + ' E/reporter.js:104:26: ' + key + '\n';
 
                     reporter.stringFromLogFile(null, function (logResults) {
                         logFileResults = logResults;

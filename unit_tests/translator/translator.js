@@ -1,7 +1,8 @@
 var assert = require('assert');
 var rimraf = require('rimraf');
 var Indexer = require('../../app/js/indexer').Indexer;
-var configurator = require('../../app/js/configurator');
+var Configurator = require('../../app/js/configurator').Configurator;
+var configurator = new Configurator();
 var config = require('../../app/config/defaults');
 configurator.setStorage({});
 configurator.loadConfig(config);

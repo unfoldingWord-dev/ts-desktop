@@ -1,7 +1,8 @@
 var assert = require('assert');
 var rimraf = require('rimraf');
 var Indexer = require('../../app/js/indexer').Indexer;
-var configurator = require('../../app/js/configurator');
+var Configurator = require('../../app/js/configurator').Configurator;
+var configurator = new Configurator();
 var projectsCatalogJson = JSON.stringify(require('./data/ts/txt/2/catalog.json'));
 var sourceLanguagesCatalogJson = JSON.stringify(require('./data/ts/txt/2/1ch/languages.json'));
 var resourcesCatalogJson = JSON.stringify(require('./data/ts/txt/2/1ch/ar/resources.json'));

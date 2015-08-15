@@ -9,7 +9,7 @@ var Indexer = require('./indexer').Indexer;
         // used to maintain state while performing async operations
         let asyncState = {
             availableUpdates:{},
-            sourceLanguageDownloads: 0,
+            //sourceLanguageDownloads: 0,
             resourceDownloads: 0
         };
 
@@ -51,21 +51,22 @@ var Indexer = require('./indexer').Indexer;
         };
 
         let downloadSourceLanguageList = function (projectId, done) {
-
-            let completionHandler = function() {
-                asyncState.resourceDownloads --;
-                if(asyncState.resourceDownloads <= 0) {
-                    done();
-                }
-            };
-
             downloader.downloadSourceLanguageList(projectId, function(success) {
+                let numDownloads = 0;
+                let completionHandler = function() {
+                    asyncState.resourceDownloads --;
+                    if(asyncState.resourceDownloads <= 0) {
+                        done();
+                    }
+                };
+
                 if(success) {
                     for (let sourceLanguageId of downloadIndex.getSourceLanguages(projectId)) {
                         let serverSourceLanguage = downloadIndex.getSourceLanguage(projectId, sourceLanguageId);
                         let localSourceLanguage = appIndex.getSourceLanguage(projectId, sourceLanguageId);
                         if (localSourceLanguage === null || parseInt(localSourceLanguage.date_modified) < parseInt(serverSourceLanguage.date_modified)) {
                             // download resources for new or updated source languages
+                            numDownloads ++;
                             asyncState.resourceDownloads ++;
                             downloadResourceList(projectId, sourceLanguageId, completionHandler);
                         }
@@ -73,31 +74,39 @@ var Indexer = require('./indexer').Indexer;
                 } else {
                     App.reporter.logWarning('The source language list could not be downloaded');
                 }
+                // continue if nothing was donwloaded
+                if(numDownloads === 0) {
+                    done();
+                }
             });
         };
 
         let downloadProjectList = function (done) {
-
-            let completionHandler = function() {
-                asyncState.sourceLanguageDownloads --;
-                if(asyncState.sourceLanguageDownloads <= 0) {
-                    done();
-                }
-            };
-
             downloader.downloadProjectList(function(success) {
+                let numDownloads = 0;
+                //let completionHandler = function() {
+                //    asyncState.sourceLanguageDownloads --;
+                //    if(asyncState.sourceLanguageDownloads <= 0) {
+                //        done();
+                //    }
+                //};
                 if(success) {
                     for (let projectId of downloadIndex.getProjects()) {
                         let serverProject = downloadIndex.getProject(projectId);
                         let localProject = appIndex.getProject(projectId);
                         if (localProject === null || parseInt(localProject.date_modified) < parseInt(serverProject.date_modified)) {
                             // download languages of new or updated projects
+                            numDownloads ++;
                             asyncState.sourceLanguageDownloads ++;
-                            downloadSourceLanguageList(projectId, completionHandler);
+                            downloadSourceLanguageList(projectId, done);
                         }
                     }
                 } else {
                     App.reporter.logWarning('The project list could not be downloaded');
+                }
+                // continue if nothing was donwloaded
+                if(numDownloads === 0) {
+                    done();
                 }
             });
         };
@@ -109,7 +118,7 @@ var Indexer = require('./indexer').Indexer;
             getServerLibraryIndex: function (callback) {
                 // reset state
                 asyncState.availableUpdates = {};
-                asyncState.sourceLanguageDownloads = 0;
+                //asyncState.sourceLanguageDownloads = 0;
                 asyncState.resourceDownloads = 0;
 
                 downloadProjectList(function() {

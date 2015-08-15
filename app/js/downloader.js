@@ -38,8 +38,9 @@ var unionObjects = require('./lib/util').unionObjects;
             request(catalogApiUrl, function (error, response, catalogJson) {
                 if (!error && response.statusCode === 200) {
                     callback(downloadIndex.indexProjects(catalogJson));
+                } else {
+                    callback(false);
                 }
-                callback(false);
             });
         };
 
@@ -57,8 +58,9 @@ var unionObjects = require('./lib/util').unionObjects;
             request(catalogApiUrl, function (error, response, catalogJson) {
                 if (!error && response.statusCode === 200) {
                     callback(downloadIndex.indexSourceLanguages(projectId, catalogJson));
+                } else {
+                    callback(false);
                 }
-                callback(false);
             });
         };
 
@@ -76,8 +78,9 @@ var unionObjects = require('./lib/util').unionObjects;
             request(catalogApiUrl, function (error, response, catalogJson) {
                 if (!error && response.statusCode === 200) {
                     callback(downloadIndex.indexResources(projectId, sourceLanguageId, catalogJson));
+                } else {
+                    callback(false);
                 }
-                callback(false);
             });
         },
 

@@ -27,35 +27,53 @@ var Indexer = require('./indexer').Indexer;
 
                 let availableUpdates = {};
 
-                downloader.downloadProjectList();
-                for(let serverProject of downloadIndex.getProjects()) {
-                    let localProject = appIndex.getProject(serverProject.slug);
-                    if(localProject === null || parseInt(localProject.date_modified) < parseInt(serverProject.date_modified)) {
-                        // download languages of new or updated projects
-                        downloader.downloadSourceLanguageList(serverProject.slug);
-                        for(let serverSourceLanguage of downloadIndex.getSourceLanguages(serverProject.slug)) {
-                            let localSourceLanguage = appIndex.getSourceLanguage(serverProject.slug, serverSourceLanguage.slug);
-                            if(localSourceLanguage === null || parseInt(localSourceLanguage.date_modified) < parseInt(serverSourceLanguage.date_modified)) {
-                                // download resources for new or updated source languages
-                                downloader.downloadResourceList(serverProject.slug, serverSourceLanguage.slug);
-                                for(let serverResource of downloadIndex.getResources(serverProject.slug, serverSourceLanguage.slug)) {
-                                    let localResource  = appIndex.getResource(serverProject.slug, serverSourceLanguage.slug, serverResource.slug);
-                                    if(localResource === null || parseInt(localResource.date_modified) < parseInt(serverResource.date_modified)) {
-                                        // build update list
-                                        availableUpdates[serverProject.slug][serverSourceLanguage.slug].push(serverResource.slug);
+                downloader.downloadProjectList(function(success) {
+                    if(success) {
+                        for (let projectId of downloadIndex.getProjects()) {
+                            let serverProject = downloadIndex.getProject(projectId);
+                            let localProject = appIndex.getProject(projectId);
+                            if (localProject === null || parseInt(localProject.date_modified) < parseInt(serverProject.date_modified)) {
+                                // download languages of new or updated projects
+                                downloader.downloadSourceLanguageList(projectId, function(success) {
+                                    if(success) {
+                                        for (let sourceLanguageId of downloadIndex.getSourceLanguages(projectId)) {
+                                            let serverSourceLanguage = downloadIndex.getSourceLanguage(projectId, sourceLanguageId);
+                                            let localSourceLanguage = appIndex.getSourceLanguage(projectId, sourceLanguageId);
+                                            if (localSourceLanguage === null || parseInt(localSourceLanguage.date_modified) < parseInt(serverSourceLanguage.date_modified)) {
+                                                // download resources for new or updated source languages
+                                                downloader.downloadResourceList(projectId, sourceLanguageId, function(success) {
+                                                    if(success) {
+                                                        for (let resourceId of downloadIndex.getResources(projectId, sourceLanguageId)) {
+                                                            let serverResource = downloadIndex.getResource(projectId, sourceLanguageId, resourceId);
+                                                            let localResource = appIndex.getResource(projectId, sourceLanguageId, resourceId);
+                                                            if (localResource === null || parseInt(localResource.date_modified) < parseInt(serverResource.date_modified)) {
+                                                                // build update list
+                                                                availableUpdates[projectId][sourceLanguageId].push(resourceId);
+                                                            }
+                                                        }
+                                                    } else {
+                                                        App.reporter.logWarning('The resource list could not be downloaded');
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    } else {
+                                        App.reporter.logWarning('The source language list could not be downloaded');
                                     }
-                                }
+                                });
                             }
                         }
-                    }
-                }
-                // TODO: download the rest
-                //downloader.downloadSourceLanguageList(pid);
-                //downloader.downloadResourceList(pid, slid);
+                        // TODO: download the rest
+                        //downloader.downloadSourceLanguageList(pid);
+                        //downloader.downloadResourceList(pid, slid);
 
-                if(typeof callback === 'function') {
-                    callback(downloadIndex, availableUpdates);
-                }
+                        if (typeof callback === 'function') {
+                            callback(downloadIndex, availableUpdates);
+                        }
+                    } else {
+                        App.reporter.logWarning('The project list could not be downloaded');
+                    }
+                });
             },
 
             /**

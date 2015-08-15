@@ -29,17 +29,26 @@ var unionObjects = require('./lib/util').unionObjects;
             return itemObj[urlProp];
         }
 
-        _this.downloadProjectList = function () {
+        /**
+         * Downloads the list of available projects from the server
+         * @param callback called when the download is complete. Receives a boolean argument indicating success.
+         */
+        _this.downloadProjectList = function (callback) {
             var catalogApiUrl = _this.config.apiUrl;
             request(catalogApiUrl, function (error, response, catalogJson) {
                 if (!error && response.statusCode === 200) {
-                    return downloadIndex.indexProjects(catalogJson);
+                    callback(downloadIndex.indexProjects(catalogJson));
                 }
-                return null;
+                callback(false);
             });
         };
 
-        _this.downloadSourceLanguageList = function (projectId) {
+        /**
+         * Downloads the list of available source languages from the server
+         * @param projectId The id of the project who's source languages will be downloaded
+         * @param callback called when the download is complete. Receives a boolean argument indicating success.
+         */
+        _this.downloadSourceLanguageList = function (projectId, callback) {
             var catalogApiUrl = getUrlFromObj(
                 downloadIndex.getProject(projectId),
                 'lang_catalog'
@@ -47,22 +56,28 @@ var unionObjects = require('./lib/util').unionObjects;
             downloadIndex.getProject(projectId);
             request(catalogApiUrl, function (error, response, catalogJson) {
                 if (!error && response.statusCode === 200) {
-                    return downloadIndex.indexSourceLanguages(projectId, catalogJson);
+                    callback(downloadIndex.indexSourceLanguages(projectId, catalogJson));
                 }
-                return null;
+                callback(false);
             });
         };
 
-        _this.downloadResourceList = function (projectId, sourceLanguageId) {
+        /**
+         * Downloads the list of available resources from the server
+         * @param projectId The id of the project who's source languages will be downloaded
+         * @param sourceLanguageId The id of the source language who's resources will be downloaded
+         * @param callback called when the download is complete. Receives a boolean argument indicating success.
+         */
+        _this.downloadResourceList = function (projectId, sourceLanguageId, callback) {
             var catalogApiUrl = getUrlFromObj(
                 downloadIndex.getSourceLanguage(projectId, sourceLanguageId),
                 'res_catalog'
             );
             request(catalogApiUrl, function (error, response, catalogJson) {
                 if (!error && response.statusCode === 200) {
-                    return downloadIndex.indexResources(projectId, sourceLanguageId, catalogJson);
+                    callback(downloadIndex.indexResources(projectId, sourceLanguageId, catalogJson));
                 }
-                return null;
+                callback(false);
             });
         },
 

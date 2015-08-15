@@ -42,6 +42,7 @@ GLOBAL.App = {
         });
 
         describe('@GetServerLibraryIndex', function () {
+            this.timeout(60000); // 1 min
             let index = {};
             let updates = {};
             before(function (done) {

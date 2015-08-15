@@ -58,6 +58,23 @@
         return obj3;
     }
 
+    /**
+     * Raises an exception along with some context to provide better debugging
+     * @param e the exception to be raised
+     * @param args arguments to be added to the exception message
+     */
+    function raiseWithContext(e, args) {
+        e.message += '\nException Context:';
+        for(let prop in args) {
+            if(args.hasOwnProperty(prop)) {
+                e.message += '\n\t' + prop + '=' + args[prop];
+            }
+        }
+        e.message += '\n';
+        throw e;
+    }
+
+    exports.raiseWithContext = raiseWithContext;
     exports.unionObjects = unionObjects;
     exports.setPath = setPath;
     exports.getUrlFromObj = getUrlFromObj;

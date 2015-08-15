@@ -4,6 +4,7 @@ var mkdirp = require('mkdirp');
 var md5 = require('md5');
 var path = require('path');
 var unionObjects = require('./lib/util').unionObjects;
+var raiseWithContext = require('./lib/util').raiseWithContext;
 var dataDirPath = 'data';
 var linksJsonPath = path.join(dataDirPath, 'links.json');
 var sourceDirPath = 'source';
@@ -233,10 +234,20 @@ var sourceDirPath = 'source';
         };
 
         _this.indexResources = function (projectId, sourceLanguageId, catalogJson, metaObj) {
-            var catalogApiUrl = getUrlFromObj(
-                _this.getSourceLanguage(projectId, sourceLanguageId),
-                'res_catalog'
-            );
+            var catalogApiUrl = '';
+
+            try {
+                catalogApiUrl = getUrlFromObj(
+                    _this.getSourceLanguage(projectId, sourceLanguageId),
+                    'res_catalog'
+                );
+            } catch (e) {
+                raiseWithContext(e, {
+                    projectId:projectId,
+                    sourceLanguageId:sourceLanguageId
+                });
+            }
+
             var md5Hash = md5(catalogApiUrl);
             var catalogLinkFile = path.join(sourceDirPath, projectId, sourceLanguageId, 'resources_catalog.link');
             var catalogType = 'simple';

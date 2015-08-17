@@ -1,4 +1,5 @@
-var configurator = require('./configurator');
+var Configurator = require('./configurator').Configurator;
+var configurator = new Configurator();
 
 ;(function () {
     'use strict';

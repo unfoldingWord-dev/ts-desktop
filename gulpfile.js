@@ -12,7 +12,6 @@ var gulp = require('gulp'),
     map = require('map-stream'),
     argv = require('yargs').argv,
     NwBuilder = require('nw-builder');
-require('harmonize')();
 
 var APP_NAME = 'translationStudio',
     JS_FILES = './app/js/**/*.js',

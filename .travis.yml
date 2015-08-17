@@ -9,7 +9,7 @@ cache:
 sudo: false
 
 node_js:
-  - iojs-v2.13.3
+  - iojs
 before_script:
   - npm install
   - npm install gulp -g

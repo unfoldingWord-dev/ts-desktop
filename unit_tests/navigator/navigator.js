@@ -30,11 +30,11 @@ var enableTests = false;
     describe('@Navigator', function () {
         this.timeout(600000); // 10 min
 
-        before(function (done) {
-            rimraf(configurator.getValue('indexDir'), function () {
-                done();
-            });
-        });
+        //before(function (done) {
+        //    rimraf(configurator.getValue('indexDir'), function () {
+        //        done();
+        //    });
+        //});
 
         // TODO: we're still testing this. Part of this reason for this unit test is to provide a way to download the content to use for the default app index.
         //after(function (done) {
@@ -50,7 +50,7 @@ var enableTests = false;
                 let updates = null;
                 before(function (done) {
                     let promise = navigator.getServerLibraryIndex();
-                    promise.next(function (serverIndex, availableUpdates) {
+                    promise.then(function (serverIndex, availableUpdates) {
                         index = serverIndex;
                         updates = availableUpdates;
                         done();

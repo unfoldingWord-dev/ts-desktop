@@ -347,6 +347,8 @@ var sourceDirPath = 'source';
         };
 
         //public json retrieval functions
+        // TODO: the indexer should not know anything about the api root.
+        // It would be better to place this in the downloader module.
         _this.getCatalog = function () {
             var catalogJson = {
                 'proj_catalog': _this.config.apiUrl

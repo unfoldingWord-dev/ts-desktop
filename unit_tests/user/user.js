@@ -1,30 +1,28 @@
-/**
- * Created by Chris on 7/27/2015.
- */
-
-var assert = require('assert');
-var fs = require('fs');
-var User = require('../../app/js/user').User;
-var jsonfile = require('jsonfile');
-var md5 = require('md5');
-
-var profilesDirectory = 'unit_tests/user/data/';
-var username0 = '';
-var username1 = 'testuser1';
-var username2 = 'testuser2';
-var password = 'testpass';
-var hash1 = md5(username1);
-var hash2 = md5(username2);
-var targetDirectory1 = 'translationStudio/profiles/' + hash1 + '/';
-var targetDirectory2 = 'translationStudio/profiles/' + hash2 + '/';
-var targetFile1 = profilesDirectory + targetDirectory1 + 'profile.json';
-var targetFile2 = profilesDirectory + targetDirectory2 + 'profile.json';
-var user0;
-var user1;
-var user2;
+'use strict';
 
 ;(function () {
-    'use strict';
+
+    let assert = require('assert');
+    let fs = require('fs');
+    let User = require('../../app/js/user').User;
+    let jsonfile = require('jsonfile');
+    let md5 = require('md5');
+
+    //import comparison data
+    let profilesDirectory = 'unit_tests/user/data/';
+    let username0 = '';
+    let username1 = 'testuser1';
+    let username2 = 'testuser2';
+    let password = 'testpass';
+    let hash1 = md5(username1);
+    let hash2 = md5(username2);
+    let targetDirectory1 = 'translationStudio/profiles/' + hash1 + '/';
+    let targetDirectory2 = 'translationStudio/profiles/' + hash2 + '/';
+    let targetFile1 = profilesDirectory + targetDirectory1 + 'profile.json';
+    let targetFile2 = profilesDirectory + targetDirectory2 + 'profile.json';
+    let user0;
+    let user1;
+    let user2;
 
     describe('@User', function () {
         describe('@CheckFiles', function () {
@@ -35,7 +33,7 @@ var user2;
             });
 
             describe('@NoFile', function () {
-                var fileTest = null;
+                let fileTest = null;
                 before(function (done) {
                     jsonfile.readFile(targetFile1, function (err) {
                         if (err === null) {
@@ -47,13 +45,13 @@ var user2;
                     });
                 });
                 it('should confirm profile does not exist for new user1', function () {
-                    var expected = 'NoFile';
+                    let expected = 'NoFile';
                     assert.equal(fileTest, expected);
                 });
             });
 
             describe('@File', function () {
-                var fileTest = null;
+                let fileTest = null;
                 before(function (done) {
                     jsonfile.readFile(targetFile2, function (err) {
                         if (err === null) {
@@ -65,14 +63,14 @@ var user2;
                     });
                 });
                 it('should confirm profile does exist for existing user2', function () {
-                    var expected = 'File';
+                    let expected = 'File';
                     assert.equal(fileTest, expected);
                 });
             });
         });
 
         describe('@BlankUser', function () {
-            var emessage = 'No error';
+            let emessage = 'No error';
             before(function (done) {
                 try {
                     user0 = new User({
@@ -86,7 +84,7 @@ var user2;
                 done();
             });
             it('should create an error for a blank username', function () {
-                var expected = 'Must supply a valid username';
+                let expected = 'Must supply a valid username';
                 assert.equal(emessage, expected);
             });
         });
@@ -111,28 +109,28 @@ var user2;
 
             describe('@GetName', function () {
                 it('should retrieve blank name', function () {
-                    var expected = '';
+                    let expected = '';
                     assert.equal(user1.getName(), expected);
                 });
             });
 
             describe('@GetEmail', function () {
                 it('should retrieve blank email', function () {
-                    var expected = '';
+                    let expected = '';
                     assert.equal(user1.getEmail(), expected);
                 });
             });
 
             describe('@GetPhone', function () {
                 it('should retrieve blank phone', function () {
-                    var expected = '';
+                    let expected = '';
                     assert.equal(user1.getPhone(), expected);
                 });
             });
 
             describe('@SetName', function () {
                 it('should set name', function () {
-                    var name = 'New User',
+                    let name = 'New User',
                         expected = 'New User';
                     user1.setName(name);
                     assert.equal(user1.getName(), expected);
@@ -141,7 +139,7 @@ var user2;
 
             describe('@SetEmail', function () {
                 it('should set email', function () {
-                    var email = 'user1@example.com',
+                    let email = 'user1@example.com',
                         expected = 'user1@example.com';
                     user1.setEmail(email);
                     assert.equal(user1.getEmail(), expected);
@@ -150,7 +148,7 @@ var user2;
 
             describe('@SetPhone', function () {
                 it('should set phone', function () {
-                    var phone = '503-555-1111',
+                    let phone = '503-555-1111',
                         expected = '503-555-1111';
                     user1.setPhone(phone);
                     assert.equal(user1.getPhone(), expected);
@@ -159,14 +157,14 @@ var user2;
 
             describe('@Commit', function () {
                 it('should save storage into file', function () {
-                    var expected = true;
+                    let expected = true;
                     assert.equal(user1.commit(), expected);
                 });
             });
         });
 
         describe('@ExistingUser', function () {
-            var update = null;
+            let update = null;
             before(function (done) {
                 user2 = new User({
                     profilesDirectory: profilesDirectory,
@@ -179,28 +177,28 @@ var user2;
 
             describe('@UpdateFile', function () {
                 it('should update profile for existing user2', function () {
-                    var expected = 'Updated';
+                    let expected = 'Updated';
                     assert.equal(update, expected);
                 });
             });
 
             describe('@GetName', function () {
                 it('should retrieve stored name', function () {
-                    var expected = 'Existing User';
+                    let expected = 'Existing User';
                     assert.equal(user2.getName(), expected);
                 });
             });
 
             describe('@GetEmail', function () {
                 it('should retrieve stored email', function () {
-                    var expected = 'user2@example.com';
+                    let expected = 'user2@example.com';
                     assert.equal(user2.getEmail(), expected);
                 });
             });
 
             describe('@GetPhone', function () {
                 it('should retrieve stored phone', function () {
-                    var expected = '503-555-2222';
+                    let expected = '503-555-2222';
                     assert.equal(user2.getPhone(), expected);
                 });
             });

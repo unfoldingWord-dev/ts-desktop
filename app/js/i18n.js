@@ -1,10 +1,11 @@
-var fs = require('fs');
-var path = require('path');
-var jsonfile = require('jsonfile');
-var _ = require('lodash');
+'use strict';
 
-(function () {
-    'use strict';
+;(function () {
+
+    let fs = require('fs');
+    let path = require('path');
+    let jsonfile = require('jsonfile');
+    let _ = require('lodash');
 
     /**
      * Loads the i18n dictionary from the library.
@@ -14,10 +15,10 @@ var _ = require('lodash');
      */
     function loadLocale (dir, locale, defaultLocale) {
         if (dir !== '' && locale !== '') {
-            var dictionaryPath = path.join(dir, locale + '.json');
-            var defaultDictionaryPath = path.join(dir, defaultLocale + '.json');
-            var defaultDict = {};
-            var dict = {};
+            let dictionaryPath = path.join(dir, locale + '.json');
+            let defaultDictionaryPath = path.join(dir, defaultLocale + '.json');
+            let defaultDict = {};
+            let dict = {};
             if (fs.existsSync(defaultDictionaryPath)) {
                 defaultDict = jsonfile.readFileSync(defaultDictionaryPath);
             }

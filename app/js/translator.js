@@ -1,18 +1,19 @@
-var Configurator = require('./configurator').Configurator;
-var configurator = new Configurator();
+'use strict';
 
-(function () {
-    'use strict';
+;(function () {
+
+    let Configurator = require('./configurator').Configurator;
+    let configurator = new Configurator();
 
     function Translator (appIndex) {
 
         //reassign this to _this, set indexId and rootPath
-        //var _this = this;
+        //let _this = this;
 
         function getFrame (sourceTranslation, chapterId, frameId) {
 
             //build return object
-            var returnObj = {
+            let returnObj = {
                 getSource: function () {
                     return appIndex.getFrame(sourceTranslation.projectId, sourceTranslation.sourceLanguageId, sourceTranslation.resourceId, chapterId, frameId);
                 }
@@ -25,10 +26,10 @@ var configurator = new Configurator();
         function getFrames (sourceTranslation, chapterId) {
 
             //get data
-            var frames = appIndex.getFrames(sourceTranslation.projectId, sourceTranslation.sourceLanguageId, sourceTranslation.resourceId, chapterId);
+            let frames = appIndex.getFrames(sourceTranslation.projectId, sourceTranslation.sourceLanguageId, sourceTranslation.resourceId, chapterId);
 
             //build return object
-            var returnObj = {};
+            let returnObj = {};
             for (let frameId of frames) {
                 returnObj[frameId] = getFrame(sourceTranslation, chapterId, frameId);
             }
@@ -40,10 +41,10 @@ var configurator = new Configurator();
         function getChapter (sourceTranslation, chapterId) {
 
             //get data
-            var chapterData = appIndex.getChapter(sourceTranslation.projectId, sourceTranslation.sourceLanguageId, sourceTranslation.resourceId, chapterId);
+            let chapterData = appIndex.getChapter(sourceTranslation.projectId, sourceTranslation.sourceLanguageId, sourceTranslation.resourceId, chapterId);
 
             //build return object
-            var returnObj = {
+            let returnObj = {
                 getNumber: function () {
                     return chapterData.number;
                 },
@@ -68,10 +69,10 @@ var configurator = new Configurator();
         function getChapters (sourceTranslation) {
 
             //get data
-            var chapters = appIndex.getChapters(sourceTranslation.projectId, sourceTranslation.sourceLanguageId, sourceTranslation.resourceId);
+            let chapters = appIndex.getChapters(sourceTranslation.projectId, sourceTranslation.sourceLanguageId, sourceTranslation.resourceId);
 
             //build return object
-            var returnObj = {};
+            let returnObj = {};
             for (let chapterId of chapters) {
                 returnObj[chapterId] = getChapter(sourceTranslation, chapterId);
             }
@@ -80,22 +81,22 @@ var configurator = new Configurator();
             return returnObj;
         }
 
-        var translator = {
+        let translator = {
             getIndexId: function () {
                 return appIndex.getIndexId();
             },
 
             getProject: function (projectId, sourceLanguageId, resourceId) {
 
-                //verify vars
+                //verify lets
                 if (projectId === null || sourceLanguageId === null || resourceId === null) {
                     return null;
                 }
 
                 //get data
-                var projectData = appIndex.getProject(projectId);
-                var sourceLanguageData = appIndex.getSourceLanguage(projectId, sourceLanguageId);
-                var resourceData = appIndex.getResource(projectId, sourceLanguageId, resourceId);
+                let projectData = appIndex.getProject(projectId);
+                let sourceLanguageData = appIndex.getSourceLanguage(projectId, sourceLanguageId);
+                let resourceData = appIndex.getResource(projectId, sourceLanguageId, resourceId);
 
                 //verify data
                 if (projectData === null || sourceLanguageData === null || resourceData === null) {
@@ -104,14 +105,14 @@ var configurator = new Configurator();
 
                 //build sourceTranslation object
                 //TODO: eventually this will be what is passed into this method
-                var sourceTranslation = {
+                let sourceTranslation = {
                     projectId: projectId,
                     sourceLanguageId: sourceLanguageId,
                     resourceId: resourceId
                 };
 
                 //build return object
-                var returnObj = {
+                let returnObj = {
                     getProjectId: function () {
                         return projectId;
                     },
@@ -159,9 +160,9 @@ var configurator = new Configurator();
             getLastProject: function () {
 
                 //get last used values
-                var projectId = configurator.getValue('lastProjectId');
-                var sourceLanguageId = configurator.getValue(projectId + 'SourceLanguageId');
-                var resourceId = configurator.getValue(projectId + 'ResourceId');
+                let projectId = configurator.getValue('lastProjectId');
+                let sourceLanguageId = configurator.getValue(projectId + 'SourceLanguageId');
+                let resourceId = configurator.getValue(projectId + 'ResourceId');
 
                 //return object
                 return this.getProject(projectId, sourceLanguageId, resourceId);

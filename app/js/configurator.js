@@ -3,26 +3,27 @@
  * settings manager that uses local storage by default, but can be overridden to use any storage provider.
  * Configurations are stored by key as stringified JSON (meta includes type, mutability, etc)
  */
-var _ = require('lodash');
+'use strict';
 
-(function () {
-    'use strict';
+;(function () {
+
+    let _ = require('lodash');
 
     function Configurator () {
-        var storage = {};
+        let storage = {};
 
-        var getValue = function (key) {
+        let getValue = function (key) {
             if (key === undefined) {
                 return key;
             }
             key = key.toLowerCase();
 
-            var valueObjStr = storage[key] || '{}';
-            var valueObj = JSON.parse(valueObjStr);
-            var metaObj = valueObj.meta || {'default': ''};
+            let valueObjStr = storage[key] || '{}';
+            let valueObj = JSON.parse(valueObjStr);
+            let metaObj = valueObj.meta || {'default': ''};
 
             //load value
-            var value = valueObj.value;
+            let value = valueObj.value;
 
             //otherwise use default (if present)
             if (value === undefined && metaObj.default) {
@@ -32,19 +33,19 @@ var _ = require('lodash');
             return value;
         };
 
-        var getMetaValue = function (key, metaKey) {
+        let getMetaValue = function (key, metaKey) {
             if (key === undefined) {
                 return key;
             }
             key = key.toLowerCase();
 
-            var valueObjStr = storage[key] || '{}';
-            var valueObj = JSON.parse(valueObjStr);
+            let valueObjStr = storage[key] || '{}';
+            let valueObj = JSON.parse(valueObjStr);
 
             return valueObj.meta ? valueObj.meta[metaKey] : '';
         };
 
-        var setValue = function (key, value, meta) {
+        let setValue = function (key, value, meta) {
             if (key === undefined || value === undefined) {
                 return;
             }
@@ -52,14 +53,14 @@ var _ = require('lodash');
             value = typeof value === 'boolean' || typeof value === 'number' ? value : value.toString();
 
             //return if read-only
-            var mutable = getMetaValue(key, 'mutable');
+            let mutable = getMetaValue(key, 'mutable');
             if (mutable !== undefined && mutable === false) {
                 return;
             }
 
             //load value object or create new empty value object
-            var emptyStorageObj = {'value': value, 'meta': {'mutable': true, 'type': typeof value, 'default': ''}};
-            var valueObj = storage[key] !== undefined ? JSON.parse(storage[key]) : emptyStorageObj;
+            let emptyStorageObj = {'value': value, 'meta': {'mutable': true, 'type': typeof value, 'default': ''}};
+            let valueObj = storage[key] !== undefined ? JSON.parse(storage[key]) : emptyStorageObj;
 
             //update value
             valueObj.value = value;
@@ -71,14 +72,14 @@ var _ = require('lodash');
             storage[key] = JSON.stringify(valueObj);
         };
 
-        var unsetValue = function (key) {
+        let unsetValue = function (key) {
             if (key === undefined) {
                 return;
             }
             key = key.toLowerCase();
 
             //return if read-only
-            var mutable = getMetaValue(key, 'mutable');
+            let mutable = getMetaValue(key, 'mutable');
             if (mutable === false) {
                 return;
             }
@@ -91,19 +92,19 @@ var _ = require('lodash');
             }
         };
 
-        var setReadOnlyValue = function (key, value) {
+        let setReadOnlyValue = function (key, value) {
             setValue(key, value, {'mutable': false});
         };
 
-        var setDefaultValue = function (key, value) {
+        let setDefaultValue = function (key, value) {
             setValue(key, value, {'default': value});
         };
 
-        var getKeys = function () {
+        let getKeys = function () {
             return Object.keys(storage);
         };
 
-        var configurator = {
+        let configurator = {
             setStorage: function (storeObject) {
                 storage = storeObject;
             },
@@ -114,7 +115,7 @@ var _ = require('lodash');
              * @returns {object}
              */
             getValue: function (key) {
-                var value = getValue(key);
+                let value = getValue(key);
                 if (value === undefined) {
                     return '';
                 }
@@ -141,7 +142,7 @@ var _ = require('lodash');
                     throw 'Storage is undefined. Please call setStorage with a valid storage object';
                 }
 
-                for (var i = 0; i < config.length; i++) {
+                for (let i = 0; i < config.length; i++) {
                     if (config[i].value !== undefined) {
                         if (config[i].meta.mutable) {
                             setDefaultValue(config[i].name, config[i].value);
@@ -164,8 +165,8 @@ var _ = require('lodash');
              * Clears all values in the configurator
              */
             purgeValues: function () {
-                var keys = getKeys();
-                for (var i = 0; i < keys.length; i++) {
+                let keys = getKeys();
+                for (let i = 0; i < keys.length; i++) {
                     unsetValue(keys[i]);
                 }
             }
@@ -174,12 +175,5 @@ var _ = require('lodash');
         return configurator;
     }
 
-    //exports.setStorage = configurator.setStorage;
-    //exports.getValue = configurator.getValue;
-    //exports.setValue = configurator.setValue;
-    //exports.unsetValue = configurator.unsetValue;
-    //exports.loadConfig = configurator.loadConfig;
-    //exports.purgeValues = configurator.purgeValues;
-    //
     exports.Configurator = Configurator;
 })();

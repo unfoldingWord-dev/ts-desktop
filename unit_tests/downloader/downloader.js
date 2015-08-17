@@ -1,28 +1,29 @@
 'use strict';
 
-let assert = require('assert');
-let Indexer = require('../../app/js/indexer').Indexer;
-let Downloader = require('../../app/js/downloader').Downloader;
-let rimraf = require('rimraf');
-let Configurator = require('../../app/js/configurator').Configurator;
-let config = require('../../app/config/defaults');
+;(function () {
 
-let configurator = new Configurator();
-configurator.setStorage({});
-configurator.loadConfig(config);
-let indexConfig = {
-    indexDir: './unit_tests/downloader/index/',
-    apiUrl: configurator.getValue('apiUrl')
-};
-let appIndex = new Indexer('app', indexConfig);
-let downloadIndex = new Indexer('download', indexConfig);
-let downloader = new Downloader({
-    apiUrl: indexConfig.apiUrl
-}, downloadIndex, appIndex);
+    let assert = require('assert');
+    let Indexer = require('../../app/js/indexer').Indexer;
+    let Downloader = require('../../app/js/downloader').Downloader;
+    let rimraf = require('rimraf');
+    let Configurator = require('../../app/js/configurator').Configurator;
+    let config = require('../../app/config/defaults');
 
-(function () {
+    let configurator = new Configurator();
+    configurator.setStorage({});
+    configurator.loadConfig(config);
+    let indexConfig = {
+        indexDir: './unit_tests/downloader/index/',
+        apiUrl: configurator.getValue('apiUrl')
+    };
+    let appIndex = new Indexer('app', indexConfig);
+    let downloadIndex = new Indexer('download', indexConfig);
+    let downloader = new Downloader({
+        apiUrl: indexConfig.apiUrl
+    }, downloadIndex, appIndex);
 
     describe('@Downloader', function () {
+
         this.timeout(60000); // 1 min
 
         before(function (done) {

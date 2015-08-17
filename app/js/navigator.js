@@ -1,9 +1,10 @@
-var Downloader = require('./downloader').Downloader;
-var Indexer = require('./indexer').Indexer;
-var async = require('async');
+'use strict';
 
-(function () {
-    'use strict';
+;(function () {
+
+    let Downloader = require('./downloader').Downloader;
+    let Indexer = require('./indexer').Indexer;
+    let async = require('async');
 
     function Navigator () {
         // used to maintain state while performing async operations
@@ -32,9 +33,9 @@ var async = require('async');
             let promise = downloader.downloadResourceList(projectId, sourceLanguageId);
             promise.then(function () {
                 for (let resourceId of downloadIndex.getResources(projectId, sourceLanguageId)) {
-                    let serverResource = downloadIndex.getResource(projectId, sourceLanguageId, resourceId);
-                    let localResource = appIndex.getResource(projectId, sourceLanguageId, resourceId);
-                    if (localResource === null || parseInt(localResource.date_modified) < parseInt(serverResource.date_modified)) {
+                    let serverResourceModified = downloadIndex.getResourceMeta(projectId, sourceLanguageId, resourceId, 'date_modified');
+                    let localResourceModified = appIndex.getResourceMeta(projectId, sourceLanguageId, resourceId, 'date_modified');
+                    if (localResourceModified === null || parseInt(localResourceModified) < parseInt(serverResourceModified)) {
                         // build update list
                         if (typeof asyncState.availableUpdates[projectId] === 'undefined') {
                             asyncState.availableUpdates[projectId] = [];
@@ -64,9 +65,9 @@ var async = require('async');
                     done();
                 };
                 for (let sourceLanguageId of downloadIndex.getSourceLanguages(projectId)) {
-                    let serverSourceLanguage = downloadIndex.getSourceLanguage(projectId, sourceLanguageId);
-                    let localSourceLanguage = appIndex.getSourceLanguage(projectId, sourceLanguageId);
-                    if (localSourceLanguage === null || parseInt(localSourceLanguage.date_modified) < parseInt(serverSourceLanguage.date_modified)) {
+                    let serverSourceLanguageModified = downloadIndex.getSourceLanguageMeta(projectId, sourceLanguageId, 'date_modified');
+                    let localSourceLanguageModified = appIndex.getSourceLanguageMeta(projectId, sourceLanguageId, 'date_modified');
+                    if (localSourceLanguageModified === null || parseInt(localSourceLanguageModified) < parseInt(serverSourceLanguageModified)) {
                         queue.push({
                             projectId: projectId,
                             sourceLanguageId: sourceLanguageId
@@ -96,9 +97,9 @@ var async = require('async');
                             resolve(downloadIndex, asyncState.availableUpdates);
                         };
                         for (let projectId of downloadIndex.getProjects()) {
-                            let serverProject = downloadIndex.getProject(projectId);
-                            let localProject = appIndex.getProject(projectId);
-                            if (localProject === null || parseInt(localProject.date_modified) < parseInt(serverProject.date_modified)) {
+                            let serverProjectModified = downloadIndex.getProjectMeta(projectId, 'date_modified');
+                            let localProjectModified = appIndex.getProjectMeta(projectId, 'date_modified');
+                            if (localProjectModified === null || parseInt(localProjectModified) < parseInt(serverProjectModified)) {
                                 queue.push({projectId: projectId});
                             }
                         }

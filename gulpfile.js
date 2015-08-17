@@ -5,7 +5,7 @@
  */
 
 var gulp = require('gulp'),
-    mocha = require('gulp-mocha');
+    mocha = require('gulp-mocha'),
     jshint = require('gulp-jshint'),
     stylish = require('jshint-stylish'),
     jscs = require('gulp-jscs'),

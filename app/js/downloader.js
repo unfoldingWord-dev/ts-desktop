@@ -1,8 +1,9 @@
-var request = require('request');
-var _ = require('lodash');
+'use strict';
 
-(function () {
-    'use strict';
+;(function () {
+
+    let request = require('request');
+    let _ = require('lodash');
 
     /**
      *

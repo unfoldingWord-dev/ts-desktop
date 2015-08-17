@@ -1,14 +1,15 @@
-var _ = require('lodash'),
-    paraRegExp = /<\/para>\s*/g;
+'use strict';
 
-(function () {
-    'use strict';
+;(function () {
+
+    let _ = require('lodash');
+    let paraRegExp = /<\/para>\s*/g;
 
     function paraPattern (paraType) {
         return new RegExp('<para\\s*style="' + paraType + '"\\s*>\\s*');
     }
 
-    var renderer = {
+    let renderer = {
         renderWhiteSpace: function (text) {
             return text.replace(/\s+/g, ' ');
         },
@@ -25,9 +26,9 @@ var _ = require('lodash'),
             return text.replace(/<verse\s+number=\"(\d+(-\d+)?)\"\s+style=\"v\"\s*\/>/g, '');
         },
         renderVerseHTML: function (text) {
-            var replacePre = '<span class="verse">',
+            let replacePre = '<span class="verse">',
                 replacePost = '</span>';
-            var output = text.replace(/<verse\s+number=\"(\d+(-\d+)?)\"\s+style=\"v\"\s*\/>/g,
+            let output = text.replace(/<verse\s+number=\"(\d+(-\d+)?)\"\s+style=\"v\"\s*\/>/g,
                 function (match) {
                     return replacePre + _.parseInt(match.slice(match.search('"') + 1), 10) +
                         replacePost;
@@ -35,12 +36,12 @@ var _ = require('lodash'),
             return output;
         },
         renderParagraph: function (text) {
-            var paraType = 'p',
+            let paraType = 'p',
                 replacePara = paraPattern(paraType);
             return text.replace(replacePara, '').replace(paraRegExp, '');
         },
         renderParagraphHTML: function (text) {
-            var paraType = 'p',
+            let paraType = 'p',
                 replacePara = paraPattern(paraType);
             return text.replace(replacePara, '<p>').replace(paraRegExp, '</p>');
         },

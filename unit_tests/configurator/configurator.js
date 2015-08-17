@@ -1,10 +1,8 @@
-/**
- * Created by joel on 6/23/2015.
- */
-var assert = require('assert');
+'use strict';
 
-(function () {
-    'use strict';
+;(function () {
+
+    let assert = require('assert');
 
     function getConfigurator () {
         let Configurator = require('../../app/js/configurator').Configurator;

@@ -7,7 +7,7 @@
 
 ;(function () {
 
-    let unionObjects = require('./lib/util').unionObjects;
+    let _ = require('lodash');
 
     function Configurator () {
         let storage = {};

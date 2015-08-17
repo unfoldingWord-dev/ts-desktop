@@ -2,7 +2,7 @@
 var fs = require('fs');
 var path = require('path');
 var jsonfile = require('jsonfile');
-var unionObjects = require('./lib/util').unionObjects;
+var _ = require('lodash');
 
 ;(function () {
     'use strict';
@@ -25,7 +25,7 @@ var unionObjects = require('./lib/util').unionObjects;
             if (fs.existsSync(dictionaryPath)) {
                 dict = jsonfile.readFileSync(dictionaryPath);
             }
-            return unionObjects(defaultDict, dict);
+            return _.merge(defaultDict, dict);
         }
         return {};
     }

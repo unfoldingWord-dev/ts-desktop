@@ -3,7 +3,7 @@ var path = require('path');
 var mkdirp = require('mkdirp');
 var md5 = require('md5');
 var path = require('path');
-var unionObjects = require('./lib/util').unionObjects;
+var _ = require('lodash');
 var raiseWithContext = require('./lib/util').raiseWithContext;
 var dataDirPath = 'data';
 var linksJsonPath = path.join(dataDirPath, 'links.json');
@@ -27,7 +27,7 @@ var sourceDirPath = 'source';
 
         //reassign this to _this, set indexId and rootPath
         let _this = this;
-        _this.config = unionObjects({ indexDir: '', apiUrl: ''}, configJson);
+        _this.config = _.merge({ indexDir: '', apiUrl: ''}, configJson);
         _this.indexId = indexName;
         _this.rootPath = path.join(_this.config.indexDir, indexName);
 

@@ -1,5 +1,5 @@
 var request = require('request');
-var unionObjects = require('./lib/util').unionObjects;
+var _ = require('lodash');
 
 ;(function () {
     'use strict';
@@ -19,7 +19,7 @@ var unionObjects = require('./lib/util').unionObjects;
 
         //reassign this to _this, set path
         let _this = this;
-        _this.config = unionObjects({ apiUrl: ''}, configJson);
+        _this.config = _.merge({ apiUrl: ''}, configJson);
 
         //PLACEHOLDER: remove after appIndex is used somewhere
         appIndex = appIndex;

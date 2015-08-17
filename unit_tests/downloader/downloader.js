@@ -25,70 +25,70 @@ let downloader = new Downloader({
     describe('@Downloader', function () {
         this.timeout(60000); // 1 min
 
-        before(function(done) {
-            rimraf(indexConfig.indexDir, function () {
-                done();
-            });
-        });
-
-        after(function(done) {
-            rimraf(indexConfig.indexDir, function () {
-                done();
-            });
-        });
-
-        describe('@DownloadProjectList', function () {
-            let downloadSucceded = false;
-            before(function(done) {
-                downloader.downloadProjectList(function(success) {
-                    downloadSucceded = success;
-                    done();
-                });
-            });
-
-            it('should download the latest projects from the server', function () {
-                assert.equal(downloadSucceded, true);
-                var projects = downloadIndex.getProjects();
-                assert.equal(projects.length>0, true);
-            });
-        });
-
-        describe('@DownloadSourceLanguageList', function () {
-            let downloadSucceded = false;
-            let projectId = -1;
-            before(function(done) {
-                projectId = downloadIndex.getProjects()[0];
-                downloader.downloadSourceLanguageList(projectId, function(success) {
-                    downloadSucceded = success;
-                    done();
-                });
-            });
-
-            it('should download the latest source languages from the server', function () {
-                assert.equal(downloadSucceded, true);
-                var sourceLanguages = downloadIndex.getSourceLanguages(projectId);
-                assert.equal(sourceLanguages.length>0, true);
-            });
-        });
-
-        describe('@DownloadResourceList', function () {
-            let downloadSucceded = false;
-            let projectId = -1;
-            let sourceLanguageId = -1;
-            before(function(done) {
-                projectId = downloadIndex.getProjects()[0];
-                sourceLanguageId = downloadIndex.getSourceLanguages(projectId)[0];
-                downloader.downloadResourceList(projectId, sourceLanguageId, function(success) {
-                    downloadSucceded = success;
-                    done();
-                });
-            });
-
-            it('should download the latest resources from the server', function () {
-                assert.equal(downloadSucceded, true);
-                var resources = downloadIndex.getResources(projectId, sourceLanguageId);
-                assert.equal(resources.length>0, true);
-            });
-        });
+        //before(function(done) {
+        //    rimraf(indexConfig.indexDir, function () {
+        //        done();
+        //    });
+        //});
+        //
+        //after(function(done) {
+        //    rimraf(indexConfig.indexDir, function () {
+        //        done();
+        //    });
+        //});
+        //
+        //describe('@DownloadProjectList', function () {
+        //    let downloadSucceded = false;
+        //    before(function(done) {
+        //        downloader.downloadProjectList(function(success) {
+        //            downloadSucceded = success;
+        //            done();
+        //        });
+        //    });
+        //
+        //    it('should download the latest projects from the server', function () {
+        //        assert.equal(downloadSucceded, true);
+        //        var projects = downloadIndex.getProjects();
+        //        assert.equal(projects.length>0, true);
+        //    });
+        //});
+        //
+        //describe('@DownloadSourceLanguageList', function () {
+        //    let downloadSucceded = false;
+        //    let projectId = -1;
+        //    before(function(done) {
+        //        projectId = downloadIndex.getProjects()[0];
+        //        downloader.downloadSourceLanguageList(projectId, function(success) {
+        //            downloadSucceded = success;
+        //            done();
+        //        });
+        //    });
+        //
+        //    it('should download the latest source languages from the server', function () {
+        //        assert.equal(downloadSucceded, true);
+        //        var sourceLanguages = downloadIndex.getSourceLanguages(projectId);
+        //        assert.equal(sourceLanguages.length>0, true);
+        //    });
+        //});
+        //
+        //describe('@DownloadResourceList', function () {
+        //    let downloadSucceded = false;
+        //    let projectId = -1;
+        //    let sourceLanguageId = -1;
+        //    before(function(done) {
+        //        projectId = downloadIndex.getProjects()[0];
+        //        sourceLanguageId = downloadIndex.getSourceLanguages(projectId)[0];
+        //        downloader.downloadResourceList(projectId, sourceLanguageId, function(success) {
+        //            downloadSucceded = success;
+        //            done();
+        //        });
+        //    });
+        //
+        //    it('should download the latest resources from the server', function () {
+        //        assert.equal(downloadSucceded, true);
+        //        var resources = downloadIndex.getResources(projectId, sourceLanguageId);
+        //        assert.equal(resources.length>0, true);
+        //    });
+        //});
     });
 })();

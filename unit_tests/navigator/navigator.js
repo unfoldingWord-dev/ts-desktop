@@ -20,6 +20,7 @@ GLOBAL.App = {
     configurator: configurator,
     reporter: reporter
 };
+var enableTests = false;
 
 ;(function () {
     'use strict';
@@ -27,7 +28,7 @@ GLOBAL.App = {
     let navigator = new Navigator();
 
     describe('@Navigator', function () {
-        this.timeout(60000); // 1 min
+        this.timeout(600000); // 10 min
 
         before(function (done) {
             rimraf(configurator.getValue('indexDir'), function () {
@@ -42,23 +43,28 @@ GLOBAL.App = {
         //    });
         //});
 
-        describe('@GetServerLibraryIndex', function () {
-            navigator = navigator; // TODO: remove this after we use it
-            let index = {};
-            let updates = {};
-            before(function (done) {
-                navigator.getServerLibraryIndex(function(serverIndex, availableUpdates) {
-                    index = serverIndex;
-                    updates = availableUpdates;
-                   done();
+        if(enableTests) {
+            describe('@GetServerLibraryIndex', function () {
+                navigator = navigator; // TODO: remove this after we use it
+                let index = null;
+                let updates = null;
+                before(function (done) {
+                    let promise = navigator.getServerLibraryIndex();
+                    promise.next(function (serverIndex, availableUpdates) {
+                        index = serverIndex;
+                        updates = availableUpdates;
+                        done();
+                    });
+                    promise.catch(function () {
+                        done();
+                    });
+                });
+                it('should download and return the server library index', function () {
+                    // TODO: finish setting up these asserts
+                    assert.notEqual(index, null);
+                    assert.notEqual(updates, null);
                 });
             });
-            it('should download and return the server library index', function () {
-                // TODO: finish setting up these asserts
-                assert.equal(true, true);
-                //assert.equal(index, 'test');
-                //assert.equal(updates, 'test');
-            });
-        });
+        }
     });
 })();

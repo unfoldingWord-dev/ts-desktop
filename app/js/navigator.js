@@ -1,6 +1,7 @@
 
 var Downloader = require('./downloader').Downloader;
 var Indexer = require('./indexer').Indexer;
+var async = require('async');
 
 ;(function () {
     'use strict';
@@ -8,9 +9,11 @@ var Indexer = require('./indexer').Indexer;
     function Navigator () {
         // used to maintain state while performing async operations
         let asyncState = {
-            availableUpdates:{},
-            //sourceLanguageDownloads: 0,
-            resourceDownloads: 0
+            availableUpdates:{}
+        };
+
+        let config = {
+            asyncLimit: App.configurator.getValue('asyncLimit')
         };
 
         // create indexes
@@ -27,87 +30,54 @@ var Indexer = require('./indexer').Indexer;
         }, downloadIndex, appIndex);
 
         let downloadResourceList = function(projectId, sourceLanguageId, done) {
-            downloader.downloadResourceList(projectId, sourceLanguageId, function(success) {
-                if(success) {
-                    for (let resourceId of downloadIndex.getResources(projectId, sourceLanguageId)) {
-                        let serverResource = downloadIndex.getResource(projectId, sourceLanguageId, resourceId);
-                        let localResource = appIndex.getResource(projectId, sourceLanguageId, resourceId);
-                        if (localResource === null || parseInt(localResource.date_modified) < parseInt(serverResource.date_modified)) {
-                            // build update list
-                            if(typeof asyncState.availableUpdates[projectId] === 'undefined') {
-                                asyncState.availableUpdates[projectId] = [];
-                            }
-                            if(typeof asyncState.availableUpdates[projectId][sourceLanguageId] === 'undefined') {
-                                asyncState.availableUpdates[projectId][sourceLanguageId] = [];
-                            }
-                            asyncState.availableUpdates[projectId][sourceLanguageId].push(resourceId);
+            let promise = downloader.downloadResourceList(projectId, sourceLanguageId);
+            promise.then(function() {
+                for (let resourceId of downloadIndex.getResources(projectId, sourceLanguageId)) {
+                    let serverResource = downloadIndex.getResource(projectId, sourceLanguageId, resourceId);
+                    let localResource = appIndex.getResource(projectId, sourceLanguageId, resourceId);
+                    if (localResource === null || parseInt(localResource.date_modified) < parseInt(serverResource.date_modified)) {
+                        // build update list
+                        if(typeof asyncState.availableUpdates[projectId] === 'undefined') {
+                            asyncState.availableUpdates[projectId] = [];
                         }
+                        if(typeof asyncState.availableUpdates[projectId][sourceLanguageId] === 'undefined') {
+                            asyncState.availableUpdates[projectId][sourceLanguageId] = [];
+                        }
+                        asyncState.availableUpdates[projectId][sourceLanguageId].push(resourceId);
                     }
-                } else {
-                    App.reporter.logWarning('The resource list could not be downloaded');
                 }
+                done();
+            });
+            promise.catch(function() {
+                App.reporter.logWarning('Could not download the resource list for ' + projectId + ":" + sourceLanguageId);
                 done();
             });
         };
 
         let downloadSourceLanguageList = function (projectId, done) {
-            downloader.downloadSourceLanguageList(projectId, function(success) {
-                let numDownloads = 0;
-                let completionHandler = function() {
-                    asyncState.resourceDownloads --;
-                    if(asyncState.resourceDownloads <= 0) {
-                        done();
-                    }
-                };
-
-                if(success) {
-                    for (let sourceLanguageId of downloadIndex.getSourceLanguages(projectId)) {
-                        let serverSourceLanguage = downloadIndex.getSourceLanguage(projectId, sourceLanguageId);
-                        let localSourceLanguage = appIndex.getSourceLanguage(projectId, sourceLanguageId);
-                        if (localSourceLanguage === null || parseInt(localSourceLanguage.date_modified) < parseInt(serverSourceLanguage.date_modified)) {
-                            // download resources for new or updated source languages
-                            numDownloads ++;
-                            asyncState.resourceDownloads ++;
-                            downloadResourceList(projectId, sourceLanguageId, completionHandler);
-                        }
-                    }
-                } else {
-                    App.reporter.logWarning('The source language list could not be downloaded');
-                }
-                // continue if nothing was donwloaded
-                if(numDownloads === 0) {
+            let promise = downloader.downloadSourceLanguageList(projectId);
+            promise.then(function() {
+                // queue resource downloads
+                let queue = async.queue(function(task, callback) {
+                    downloadResourceList(task.projectId, task.sourceLanguageId, callback);
+                }, config.asyncLimit);
+                queue.drain = function() {
                     done();
+                };
+                for(let sourceLanguageId of downloadIndex.getSourceLanguages(projectId)) {
+                    let serverSourceLanguage = downloadIndex.getSourceLanguage(projectId, sourceLanguageId);
+                    let localSourceLanguage = appIndex.getSourceLanguage(projectId, sourceLanguageId);
+                    if (localSourceLanguage === null || parseInt(localSourceLanguage.date_modified) < parseInt(serverSourceLanguage.date_modified)) {
+                        queue.push({
+                            projectId:projectId,
+                            sourceLanguageId:sourceLanguageId
+                        });
+                    }
                 }
             });
-        };
-
-        let downloadProjectList = function (done) {
-            downloader.downloadProjectList(function(success) {
-                let numDownloads = 0;
-                //let completionHandler = function() {
-                //    asyncState.sourceLanguageDownloads --;
-                //    if(asyncState.sourceLanguageDownloads <= 0) {
-                //        done();
-                //    }
-                //};
-                if(success) {
-                    for (let projectId of downloadIndex.getProjects()) {
-                        let serverProject = downloadIndex.getProject(projectId);
-                        let localProject = appIndex.getProject(projectId);
-                        if (localProject === null || parseInt(localProject.date_modified) < parseInt(serverProject.date_modified)) {
-                            // download languages of new or updated projects
-                            numDownloads ++;
-                            asyncState.sourceLanguageDownloads ++;
-                            downloadSourceLanguageList(projectId, done);
-                        }
-                    }
-                } else {
-                    App.reporter.logWarning('The project list could not be downloaded');
-                }
-                // continue if nothing was donwloaded
-                if(numDownloads === 0) {
-                    done();
-                }
+            promise.catch(function() {
+                App.reporter.logWarning('Could not download the source language list for ' + projectId);
+                done();
             });
         };
 
@@ -115,14 +85,29 @@ var Indexer = require('./indexer').Indexer;
             /**
              * Returns an index of the server library
              */
-            getServerLibraryIndex: function (callback) {
-                // reset state
-                asyncState.availableUpdates = {};
-                //asyncState.sourceLanguageDownloads = 0;
-                asyncState.resourceDownloads = 0;
-
-                downloadProjectList(function() {
-                    callback(downloadIndex, asyncState.availableUpdates);
+            getServerLibraryIndex: function () {
+                return new Promise(function(resolve, reject) {
+                    let promise = downloader.downloadProjectList();
+                    promise.then(function() {
+                        // queue source language downloads
+                        let queue = async.queue(function(task, callback) {
+                            downloadSourceLanguageList(task.projectId, callback);
+                        }, config.asyncLimit);
+                        queue.drain = function() {
+                            resolve(downloadIndex, asyncState.availableUpdates);
+                        };
+                        for(let projectId of downloadIndex.getProjects()) {
+                            let serverProject = downloadIndex.getProject(projectId);
+                            let localProject = appIndex.getProject(projectId);
+                            if (localProject === null || parseInt(localProject.date_modified) < parseInt(serverProject.date_modified)) {
+                                queue.push({projectId: projectId});
+                            }
+                        }
+                    });
+                    promise.catch(function() {
+                        App.reporter.logWarning('Could not download project list');
+                        reject();
+                    });
                 });
             },
 

@@ -27,5 +27,6 @@
     "freeze": true,
     "nonew": true,
     "singleGroups": true,
-    "node": true
+    "node": true,
+    "predef": ["App"]
 }

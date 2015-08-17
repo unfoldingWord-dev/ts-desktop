@@ -1,10 +1,10 @@
 var fs = require('fs');
 var path = require('path');
 var mkdirp = require('mkdirp');
-var configurator = require('./configurator');
 var md5 = require('md5');
 var path = require('path');
-
+var unionObjects = require('./lib/util').unionObjects;
+var raiseWithContext = require('./lib/util').raiseWithContext;
 var dataDirPath = 'data';
 var linksJsonPath = path.join(dataDirPath, 'links.json');
 var sourceDirPath = 'source';
@@ -12,12 +12,24 @@ var sourceDirPath = 'source';
 ;(function () {
     'use strict';
 
-    function Indexer (indexType) {
+    /**
+     *
+     * @param indexName the name of of the index. This will become a directory
+     * @param configJson the index configuration. Requires an indexDir and apiUrl.
+     * @returns {Indexer}
+     * @constructor
+     */
+    function Indexer (indexName, configJson) {
+        if(typeof configJson === 'undefined') {
+            throw new Error('missing the indexer configuration parameter');
+        }
+
 
         //reassign this to _this, set indexId and rootPath
         let _this = this;
-        _this.indexId = indexType;
-        _this.rootPath = path.join(configurator.getValue('indexRootPath'), 'index', indexType);
+        _this.config = unionObjects({ indexDir: '', apiUrl: ''}, configJson);
+        _this.indexId = indexName;
+        _this.rootPath = path.join(_this.config.indexDir, indexName);
 
         //internal functions
         function openFile (filePath) {
@@ -46,6 +58,9 @@ var sourceDirPath = 'source';
         function saveFile (filePath, fileContents) {
             let fullPath = path.join(_this.rootPath, filePath);
             let fullDirPath = path.dirname(fullPath);
+            if (fullDirPath.indexOf('test') === 0) {
+                return false;
+            }
             try {
                 mkdirp.sync(fullDirPath, '0755');
             }
@@ -219,10 +234,20 @@ var sourceDirPath = 'source';
         };
 
         _this.indexResources = function (projectId, sourceLanguageId, catalogJson, metaObj) {
-            let catalogApiUrl = getUrlFromObj(
-                _this.getSourceLanguage(projectId, sourceLanguageId),
-                'res_catalog'
-            );
+            let catalogApiUrl = '';
+
+            try {
+                catalogApiUrl = getUrlFromObj(
+                    _this.getSourceLanguage(projectId, sourceLanguageId),
+                    'res_catalog'
+                );
+            } catch (e) {
+                raiseWithContext(e, {
+                    projectId:projectId,
+                    sourceLanguageId:sourceLanguageId
+                });
+            }
+
             let md5Hash = md5(catalogApiUrl);
             let catalogLinkFile = path.join(sourceDirPath, projectId, sourceLanguageId, 'resources_catalog.link');
             let catalogType = 'simple';
@@ -322,9 +347,11 @@ var sourceDirPath = 'source';
         };
 
         //public json retrieval functions
+        // TODO: the indexer should not know anything about the api root.
+        // It would be better to place this in the downloader module.
         _this.getCatalog = function () {
             let catalogJson = {
-                'proj_catalog': configurator.getValue('apiUrl')
+                'proj_catalog': _this.config.apiUrl
             };
             return catalogJson;
         };

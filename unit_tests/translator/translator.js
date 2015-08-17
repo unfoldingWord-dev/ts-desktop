@@ -1,8 +1,16 @@
 var assert = require('assert');
 var rimraf = require('rimraf');
-var path = require('path');
 var Indexer = require('../../app/js/indexer').Indexer;
-var testIndexer = new Indexer('test');
+var Configurator = require('../../app/js/configurator').Configurator;
+var configurator = new Configurator();
+var config = require('../../app/config/defaults');
+configurator.setStorage({});
+configurator.loadConfig(config);
+var indexConfig = {
+    apiUrl: configurator.getValue('apiUrl'),
+    indexDir: './unit_tests/translator/index/'
+};
+var testIndexer = new Indexer('test', indexConfig);
 var Translator = require('../../app/js/translator').Translator;
 var translator = new Translator(testIndexer);
 
@@ -43,27 +51,16 @@ var sortKeyStr = project.sort;
                     {'date_modified':'20150801'}
                 );
             };
-            var testPath = testIndexer.getIndexPath();
-            if (testPath.indexOf(path.join('index', 'test')) !== -1) {
-                rimraf(testPath, function () {
-                    setupIndex();
-                    done();
-                });
-            } else {
+            rimraf(indexConfig.indexDir, function () {
                 setupIndex();
                 done();
-            }
+            });
         });
 
         after(function (done) {
-            var testPath = testIndexer.getIndexPath();
-            if (testPath.indexOf(path.join('index', 'test')) !== -1) {
-                rimraf(testPath, function () {
-                    done();
-                });
-            } else {
+            rimraf(indexConfig.indexDir, function () {
                 done();
-            }
+            });
         });
 
         describe('@CheckIndex', function () {

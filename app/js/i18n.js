@@ -1,29 +1,10 @@
 var fs = require('fs');
 var path = require('path');
 var jsonfile = require('jsonfile');
+var unionObjects = require('./lib/util').unionObjects;
 
 ;(function () {
     'use strict';
-
-    /**
-     * Merges the properties of obj1 and obj2 properties in obj2 will overide duplicate properties in obj1
-     * @param obj1
-     * @param obj2
-     */
-    function mergeObjects (obj1, obj2) {
-        let obj3 = {};
-        for (let prop1 in obj1) {
-            if (obj1.hasOwnProperty(prop1)) {
-                obj3[prop1] = obj1[prop1];
-            }
-        }
-        for (let prop2 in obj2) {
-            if (obj2.hasOwnProperty(prop2)) {
-                obj3[prop2] = obj2[prop2];
-            }
-        }
-        return obj3;
-    }
 
     /**
      * Loads the i18n dictionary from the library.
@@ -43,7 +24,7 @@ var jsonfile = require('jsonfile');
             if (fs.existsSync(dictionaryPath)) {
                 dict = jsonfile.readFileSync(dictionaryPath);
             }
-            return mergeObjects(defaultDict, dict);
+            return unionObjects(defaultDict, dict);
         }
         return {};
     }

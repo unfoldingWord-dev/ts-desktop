@@ -7,8 +7,9 @@ var assert = require('assert');
     'use strict';
 
     function getConfigurator () {
-        var configurator = require('../../app/js/configurator');
-        var config = require('./data/ts-config');
+        let Configurator = require('../../app/js/configurator').Configurator;
+        let configurator = new Configurator();
+        let config = require('./data/ts-config');
         configurator.setStorage({});
         configurator.loadConfig(config);
         return configurator;

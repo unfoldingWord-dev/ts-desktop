@@ -1,13 +1,25 @@
 var request = require('request');
-//let moment = require('moment');
+var unionObjects = require('./lib/util').unionObjects;
 
 ;(function () {
     'use strict';
 
+    /**
+     *
+     * @param configJson
+     * @param downloadIndex
+     * @param appIndex
+     * @returns {Downloader}
+     * @constructor
+     */
     function Downloader (configJson, downloadIndex, appIndex) {
+        if(typeof configJson === 'undefined') {
+            throw new Error('missing the indexer configuration parameter');
+        }
 
-        //reassign this to _this, set config values
+        //reassign this to _this, set path
         let _this = this;
+        _this.config = unionObjects({ apiUrl: ''}, configJson);
 
         //PLACEHOLDER: remove after appIndex is used somewhere
         appIndex = appIndex;
@@ -22,7 +34,7 @@ var request = require('request');
          * @param callback called when the download is complete. Receives a boolean argument indicating success.
          */
         _this.downloadProjectList = function (callback) {
-            let catalogApiUrl = _this.config.apiUrl;
+            var catalogApiUrl = _this.config.apiUrl;
             request(catalogApiUrl, function (error, response, catalogJson) {
                 if (!error && response.statusCode === 200) {
                     callback(downloadIndex.indexProjects(catalogJson));
@@ -32,30 +44,43 @@ var request = require('request');
             });
         };
 
-        _this.downloadSourceLanguageList = function (projectId) {
-            let catalogApiUrl = getUrlFromObj(
+        /**
+         * Downloads the list of available source languages from the server
+         * @param projectId The id of the project who's source languages will be downloaded
+         * @param callback called when the download is complete. Receives a boolean argument indicating success.
+         */
+        _this.downloadSourceLanguageList = function (projectId, callback) {
+            var catalogApiUrl = getUrlFromObj(
                 downloadIndex.getProject(projectId),
                 'lang_catalog'
             );
             downloadIndex.getProject(projectId);
             request(catalogApiUrl, function (error, response, catalogJson) {
                 if (!error && response.statusCode === 200) {
-                    return downloadIndex.indexSourceLanguages(projectId, catalogJson);
+                    callback(downloadIndex.indexSourceLanguages(projectId, catalogJson));
+                } else {
+                    callback(false);
                 }
-                return null;
             });
         };
 
-        _this.downloadResourceList = function (projectId, sourceLanguageId) {
-            let catalogApiUrl = getUrlFromObj(
-                downloadIndex.getProjectgetSourceLanguage(projectId, sourceLanguageId),
+        /**
+         * Downloads the list of available resources from the server
+         * @param projectId The id of the project who's source languages will be downloaded
+         * @param sourceLanguageId The id of the source language who's resources will be downloaded
+         * @param callback called when the download is complete. Receives a boolean argument indicating success.
+         */
+        _this.downloadResourceList = function (projectId, sourceLanguageId, callback) {
+            var catalogApiUrl = getUrlFromObj(
+                downloadIndex.getSourceLanguage(projectId, sourceLanguageId),
                 'res_catalog'
             );
             request(catalogApiUrl, function (error, response, catalogJson) {
                 if (!error && response.statusCode === 200) {
-                    return downloadIndex.indexResources(projectId, sourceLanguageId, catalogJson);
+                    callback(downloadIndex.indexResources(projectId, sourceLanguageId, catalogJson));
+                } else {
+                    callback(false);
                 }
-                return null;
             });
         },
 
@@ -105,7 +130,7 @@ var request = require('request');
             );
             request(catalogApiUrl, function (error, response, catalogJson) {
                 if (!error && response.statusCode === 200) {
-                    return downloadIndex.indexCheckingQuestions(projectId, sourceLanguageId, resourceId, catalogJson);
+                    return downloadIndex.indexQuestions(projectId, sourceLanguageId, resourceId, catalogJson);
                 }
                 return null;
             });

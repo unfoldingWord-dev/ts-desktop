@@ -1,8 +1,9 @@
-var request = require('request');
-var unionObjects = require('./lib/util').unionObjects;
+'use strict';
 
 ;(function () {
-    'use strict';
+
+    let request = require('request');
+    let unionObjects = require('./lib/util').unionObjects;
 
     /**
      *
@@ -13,7 +14,7 @@ var unionObjects = require('./lib/util').unionObjects;
      * @constructor
      */
     function Downloader (configJson, downloadIndex, appIndex) {
-        if(typeof configJson === 'undefined') {
+        if (typeof configJson === 'undefined') {
             throw new Error('missing the indexer configuration parameter');
         }
 

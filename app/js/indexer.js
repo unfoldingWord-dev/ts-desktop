@@ -1,16 +1,16 @@
-var fs = require('fs');
-var path = require('path');
-var mkdirp = require('mkdirp');
-var md5 = require('md5');
-var path = require('path');
-var unionObjects = require('./lib/util').unionObjects;
-var raiseWithContext = require('./lib/util').raiseWithContext;
-var dataDirPath = 'data';
-var linksJsonPath = path.join(dataDirPath, 'links.json');
-var sourceDirPath = 'source';
+'use strict';
 
 ;(function () {
-    'use strict';
+
+    let fs = require('fs');
+    let path = require('path');
+    let mkdirp = require('mkdirp');
+    let md5 = require('md5');
+    let unionObjects = require('./lib/util').unionObjects;
+    let raiseWithContext = require('./lib/util').raiseWithContext;
+    let dataDirPath = 'data';
+    let linksJsonPath = path.join(dataDirPath, 'links.json');
+    let sourceDirPath = 'source';
 
     /**
      *
@@ -20,7 +20,7 @@ var sourceDirPath = 'source';
      * @constructor
      */
     function Indexer (indexName, configJson) {
-        if(typeof configJson === 'undefined') {
+        if (typeof configJson === 'undefined') {
             throw new Error('missing the indexer configuration parameter');
         }
 
@@ -365,12 +365,15 @@ var sourceDirPath = 'source';
             return catalogJson;
         };
 
-        _this.getProjectMeta = function (projectId) {
+        _this.getProjectMeta = function (projectId, metaProp) {
             let md5Hash = openFile(path.join(sourceDirPath, projectId, 'languages_catalog.link'));
             if (md5Hash === null) {
                 return null;
             }
             let catalogJson = openJson(path.join(dataDirPath, md5Hash, 'meta.json'));
+            if (typeof metaProp !== 'undefined') {
+                return catalogJson[metaProp];
+            }
             return catalogJson;
         };
 
@@ -383,12 +386,36 @@ var sourceDirPath = 'source';
             return catalogJson;
         };
 
+        _this.getSourceLanguageMeta = function (projectId, sourceLanguageId, metaProp) {
+            let md5Hash = openFile(path.join(sourceDirPath, projectId, sourceLanguageId, 'resources_catalog.link'));
+            if (md5Hash === null) {
+                return null;
+            }
+            let catalogJson = openJson(path.join(dataDirPath, md5Hash, 'meta.json'));
+            if (typeof metaProp !== 'undefined') {
+                return catalogJson[metaProp];
+            }
+            return catalogJson;
+        };
+
         _this.getResource = function (projectId, sourceLanguageId, resourceId) {
             let md5Hash = openFile(path.join(sourceDirPath, projectId, sourceLanguageId, 'resources_catalog.link'));
             if (md5Hash === null) {
                 return null;
             }
             let catalogJson = openJson(path.join(dataDirPath, md5Hash, resourceId + '.json'));
+            return catalogJson;
+        };
+
+        _this.getResourceMeta = function (projectId, sourceLanguageId, resourceId, metaProp) {
+            let md5Hash = openFile(path.join(sourceDirPath, projectId, sourceLanguageId, resourceId, 'source.link'));
+            if (md5Hash === null) {
+                return null;
+            }
+            let catalogJson = openJson(path.join(dataDirPath, md5Hash, 'meta.json'));
+            if (typeof metaProp !== 'undefined') {
+                return catalogJson[metaProp];
+            }
             return catalogJson;
         };
 

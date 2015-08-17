@@ -1,28 +1,29 @@
-var assert = require('assert');
-var rimraf = require('rimraf');
-var Configurator = require('../../app/js/configurator').Configurator;
-var Navigator = require('../../app/js/navigator').Navigator;
-var Reporter = require('../../app/js/reporter').Reporter;
-var config = require('../../app/config/defaults');
-
-var configurator = new Configurator();
-configurator.setStorage({});
-configurator.loadConfig(config);
-configurator.setValue('indexDir', './unit_tests/navigator/index/', {
-    mutable: false
-});
-
-var reporter = new Reporter({
-    logPath: 'unit_tests/navigator/index/log.txt',
-});
-
-GLOBAL.App = {
-    configurator: configurator,
-    reporter: reporter
-};
+'use strict';
 
 ;(function () {
-    'use strict';
+
+    let assert = require('assert');
+    let rimraf = require('rimraf');
+    let Configurator = require('../../app/js/configurator').Configurator;
+    let Navigator = require('../../app/js/navigator').Navigator;
+    let Reporter = require('../../app/js/reporter').Reporter;
+    let config = require('../../app/config/defaults');
+
+    let configurator = new Configurator();
+    configurator.setStorage({});
+    configurator.loadConfig(config);
+    configurator.setValue('indexDir', './unit_tests/navigator/index/', {
+        mutable: false
+    });
+
+    let reporter = new Reporter({
+        logPath: 'unit_tests/navigator/index/log.txt',
+    });
+
+    GLOBAL.App = {
+        configurator: configurator,
+        reporter: reporter
+    };
 
     let navigator = new Navigator();
 

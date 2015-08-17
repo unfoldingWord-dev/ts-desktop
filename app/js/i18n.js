@@ -1,10 +1,11 @@
-var fs = require('fs');
-var path = require('path');
-var jsonfile = require('jsonfile');
-var unionObjects = require('./lib/util').unionObjects;
+'use strict';
 
 ;(function () {
-    'use strict';
+
+    let fs = require('fs');
+    let path = require('path');
+    let jsonfile = require('jsonfile');
+    let unionObjects = require('./lib/util').unionObjects;
 
     /**
      * Loads the i18n dictionary from the library.

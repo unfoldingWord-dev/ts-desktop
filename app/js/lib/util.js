@@ -1,6 +1,6 @@
-;(function() {
-    "use strict";
+'use strict';
 
+;(function () {
 
     /**
      * pathName() returns an absolutePathname
@@ -23,9 +23,9 @@
      * @param obj1
      * @param obj2
      */
-    function unionObjects(obj1, obj2) {
+    function unionObjects (obj1, obj2) {
         var obj3 = {};
-        if(typeof obj1 === 'object' && typeof obj2 === 'object') {
+        if (typeof obj1 === 'object' && typeof obj2 === 'object') {
             for (var prop1 in obj1) {
                 if (obj1.hasOwnProperty(prop1)) {
                     obj3[prop1] = obj1[prop1];
@@ -36,9 +36,9 @@
                     obj3[prop2] = obj2[prop2];
                 }
             }
-        } else if(typeof obj1 === 'object') {
+        } else if (typeof obj1 === 'object') {
             obj3 = obj1;
-        } else if(typeof obj2 === 'object') {
+        } else if (typeof obj2 === 'object') {
             obj3 = obj2;
         }
         return obj3;
@@ -49,10 +49,10 @@
      * @param e the exception to be raised
      * @param args arguments to be added to the exception message
      */
-    function raiseWithContext(e, args) {
+    function raiseWithContext (e, args) {
         e.message += '\nException Context:';
-        for(let prop in args) {
-            if(args.hasOwnProperty(prop)) {
+        for (let prop in args) {
+            if (args.hasOwnProperty(prop)) {
                 e.message += '\n\t' + prop + '=' + args[prop];
             }
         }

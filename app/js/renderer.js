@@ -1,8 +1,9 @@
-var _ = require('lodash'),
-    paraRegExp = /<\/para>\s*/g;
+'use strict';
 
 ;(function () {
-    'use strict';
+
+    let _ = require('lodash');
+    let paraRegExp = /<\/para>\s*/g;
 
     function paraPattern (paraType) {
         return new RegExp('<para\\s*style="' + paraType + '"\\s*>\\s*');

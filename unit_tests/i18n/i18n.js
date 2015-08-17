@@ -1,6 +1,6 @@
+'use strict';
 
 ;(function () {
-    'use strict';
 
     let assert = require('assert');
     let Configurator = require('../../app/js/configurator').Configurator;

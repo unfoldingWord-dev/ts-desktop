@@ -3,11 +3,11 @@
  * settings manager that uses local storage by default, but can be overridden to use any storage provider.
  * Configurations are stored by key as stringified JSON (meta includes type, mutability, etc)
  */
+'use strict';
 
-var unionObjects = require('./lib/util').unionObjects;
+;(function () {
 
- ;(function () {
-    'use strict';
+    let unionObjects = require('./lib/util').unionObjects;
 
     function Configurator () {
         let storage = {};

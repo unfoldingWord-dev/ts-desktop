@@ -3,11 +3,10 @@
  * This context will be available throughout the application
  */
 
-var path = require('path');
-
 ;(function (root) {
     'use strict';
 
+    let path = require('path');
     let Configurator = require('../js/configurator').Configurator;
     let configurator = new Configurator();
     let gui = require('nw.gui');

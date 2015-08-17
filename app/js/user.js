@@ -1,11 +1,12 @@
-var mkdirp = require('mkdirp');
-var jsonfile = require('jsonfile');
-var path = require('path');
-var md5 = require('md5');
-var fs = require('fs');
+'use strict';
 
 ;(function () {
-    'use strict';
+
+    let mkdirp = require('mkdirp');
+    let jsonfile = require('jsonfile');
+    let path = require('path');
+    let md5 = require('md5');
+    let fs = require('fs');
 
     function User (args) {
         let profilesDirectory = args.profilesDirectory;

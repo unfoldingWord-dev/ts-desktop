@@ -1,7 +1,8 @@
-var net = require('net');
+'use strict';
 
 ;(function () {
-    'use strict';
+
+    let net = require('net');
 
     let authServer = '';
     let authServerPort = '';

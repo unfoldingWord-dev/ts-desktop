@@ -1,11 +1,12 @@
-var fs = require('fs');
-var os = require('os');
-var https = require('https');
-var mkdirp = require('mkdirp');
-var path = require('path');
+'use strict';
 
 ;(function () {
-    'use strict';
+
+    let fs = require('fs');
+    let os = require('os');
+    let https = require('https');
+    let mkdirp = require('mkdirp');
+    let path = require('path');
 
     function Reporter (args) {
 

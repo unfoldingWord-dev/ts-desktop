@@ -1,8 +1,9 @@
-var Configurator = require('./configurator').Configurator;
-var configurator = new Configurator();
+'use strict';
 
 ;(function () {
-    'use strict';
+
+    let Configurator = require('./configurator').Configurator;
+    let configurator = new Configurator();
 
     function Translator (appIndex) {
 

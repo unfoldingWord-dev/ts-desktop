@@ -1,9 +1,9 @@
-
-var Downloader = require('./downloader').Downloader;
-var Indexer = require('./indexer').Indexer;
+'use strict';
 
 ;(function () {
-    'use strict';
+
+    let Downloader = require('./downloader').Downloader;
+    let Indexer = require('./indexer').Indexer;
 
     function Navigator () {
         // used to maintain state while performing async operations
@@ -26,18 +26,18 @@ var Indexer = require('./indexer').Indexer;
             apiUrl: App.configurator.getValue('apiUrl')
         }, downloadIndex, appIndex);
 
-        let downloadResourceList = function(projectId, sourceLanguageId, done) {
-            downloader.downloadResourceList(projectId, sourceLanguageId, function(success) {
-                if(success) {
+        let downloadResourceList = function (projectId, sourceLanguageId, done) {
+            downloader.downloadResourceList(projectId, sourceLanguageId, function (success) {
+                if (success) {
                     for (let resourceId of downloadIndex.getResources(projectId, sourceLanguageId)) {
-                        let serverResource = downloadIndex.getResource(projectId, sourceLanguageId, resourceId);
-                        let localResource = appIndex.getResource(projectId, sourceLanguageId, resourceId);
-                        if (localResource === null || parseInt(localResource.date_modified) < parseInt(serverResource.date_modified)) {
+                        let serverResourceModified = downloadIndex.getResourceMeta(projectId, sourceLanguageId, resourceId, 'date_modified');
+                        let localResourceModified = appIndex.getResourceMeta(projectId, sourceLanguageId, resourceId, 'date_modified');
+                        if (localResourceModified === null || parseInt(localResourceModified) < parseInt(serverResourceModified)) {
                             // build update list
-                            if(typeof asyncState.availableUpdates[projectId] === 'undefined') {
+                            if (typeof asyncState.availableUpdates[projectId] === 'undefined') {
                                 asyncState.availableUpdates[projectId] = [];
                             }
-                            if(typeof asyncState.availableUpdates[projectId][sourceLanguageId] === 'undefined') {
+                            if (typeof asyncState.availableUpdates[projectId][sourceLanguageId] === 'undefined') {
                                 asyncState.availableUpdates[projectId][sourceLanguageId] = [];
                             }
                             asyncState.availableUpdates[projectId][sourceLanguageId].push(resourceId);
@@ -51,23 +51,23 @@ var Indexer = require('./indexer').Indexer;
         };
 
         let downloadSourceLanguageList = function (projectId, done) {
-            downloader.downloadSourceLanguageList(projectId, function(success) {
+            downloader.downloadSourceLanguageList(projectId, function (success) {
                 let numDownloads = 0;
-                let completionHandler = function() {
-                    asyncState.resourceDownloads --;
-                    if(asyncState.resourceDownloads <= 0) {
+                let completionHandler = function () {
+                    asyncState.resourceDownloads--;
+                    if (asyncState.resourceDownloads <= 0) {
                         done();
                     }
                 };
 
-                if(success) {
+                if (success) {
                     for (let sourceLanguageId of downloadIndex.getSourceLanguages(projectId)) {
-                        let serverSourceLanguage = downloadIndex.getSourceLanguage(projectId, sourceLanguageId);
-                        let localSourceLanguage = appIndex.getSourceLanguage(projectId, sourceLanguageId);
-                        if (localSourceLanguage === null || parseInt(localSourceLanguage.date_modified) < parseInt(serverSourceLanguage.date_modified)) {
+                        let serverSourceLanguageModified = downloadIndex.getSourceLanguageMeta(projectId, sourceLanguageId, 'date_modified');
+                        let localSourceLanguageModified = appIndex.getSourceLanguageMeta(projectId, sourceLanguageId, 'date_modified');
+                        if (localSourceLanguageModified === null || parseInt(localSourceLanguageModified) < parseInt(serverSourceLanguageModified)) {
                             // download resources for new or updated source languages
-                            numDownloads ++;
-                            asyncState.resourceDownloads ++;
+                            numDownloads++;
+                            asyncState.resourceDownloads++;
                             downloadResourceList(projectId, sourceLanguageId, completionHandler);
                         }
                     }
@@ -75,29 +75,29 @@ var Indexer = require('./indexer').Indexer;
                     App.reporter.logWarning('The source language list could not be downloaded');
                 }
                 // continue if nothing was donwloaded
-                if(numDownloads === 0) {
+                if (numDownloads === 0) {
                     done();
                 }
             });
         };
 
         let downloadProjectList = function (done) {
-            downloader.downloadProjectList(function(success) {
+            downloader.downloadProjectList(function (success) {
                 let numDownloads = 0;
-                //let completionHandler = function() {
-                //    asyncState.sourceLanguageDownloads --;
-                //    if(asyncState.sourceLanguageDownloads <= 0) {
+                //let completionHandler = function () {
+                //    asyncState.sourceLanguageDownloads--;
+                //    if (asyncState.sourceLanguageDownloads <= 0) {
                 //        done();
                 //    }
                 //};
-                if(success) {
+                if (success) {
                     for (let projectId of downloadIndex.getProjects()) {
-                        let serverProject = downloadIndex.getProject(projectId);
-                        let localProject = appIndex.getProject(projectId);
-                        if (localProject === null || parseInt(localProject.date_modified) < parseInt(serverProject.date_modified)) {
+                        let serverProjectModified = downloadIndex.getProjectMeta(projectId, 'date_modified');
+                        let localProjectModified = appIndex.getProjectMeta(projectId, 'date_modified');
+                        if (localProjectModified === null || parseInt(localProjectModified) < parseInt(serverProjectModified)) {
                             // download languages of new or updated projects
-                            numDownloads ++;
-                            asyncState.sourceLanguageDownloads ++;
+                            numDownloads++;
+                            asyncState.sourceLanguageDownloads++;
                             downloadSourceLanguageList(projectId, done);
                         }
                     }
@@ -105,7 +105,7 @@ var Indexer = require('./indexer').Indexer;
                     App.reporter.logWarning('The project list could not be downloaded');
                 }
                 // continue if nothing was donwloaded
-                if(numDownloads === 0) {
+                if (numDownloads === 0) {
                     done();
                 }
             });
@@ -121,7 +121,7 @@ var Indexer = require('./indexer').Indexer;
                 //asyncState.sourceLanguageDownloads = 0;
                 asyncState.resourceDownloads = 0;
 
-                downloadProjectList(function() {
+                downloadProjectList(function () {
                     callback(downloadIndex, asyncState.availableUpdates);
                 });
             },
@@ -129,7 +129,7 @@ var Indexer = require('./indexer').Indexer;
             /**
              * Returns a list of data to populate the list of projects the user can choose from
              */
-            getProjectListData: function(callback) {
+            getProjectListData: function (callback) {
                 // TODO: load data and return to callback
                 callback();
             },
@@ -138,7 +138,7 @@ var Indexer = require('./indexer').Indexer;
              * Returns a list of data to populate the list of chapters the user can choose from
              * @param callback
              */
-            getChapterListData: function(callback) {
+            getChapterListData: function (callback) {
                 // TODO: load data and return to callback
                 callback();
             },
@@ -147,7 +147,7 @@ var Indexer = require('./indexer').Indexer;
              * Returns a list of data to populate the list of frames the user can choose from
              * @param callback
              */
-            getFrameListData: function(callback) {
+            getFrameListData: function (callback) {
                 // TODO: load data and return to callback
                 callback();
             }

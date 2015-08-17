@@ -1,25 +1,26 @@
-var mkdirp = require('mkdirp');
-var jsonfile = require('jsonfile');
-var path = require('path');
-var md5 = require('md5');
-var fs = require('fs');
+'use strict';
 
-(function () {
-    'use strict';
+;(function () {
+
+    let mkdirp = require('mkdirp');
+    let jsonfile = require('jsonfile');
+    let path = require('path');
+    let md5 = require('md5');
+    let fs = require('fs');
 
     function User (args) {
-        var profilesDirectory = args.profilesDirectory;
-        var username = args.username;
-        var password = args.password;
+        let profilesDirectory = args.profilesDirectory;
+        let username = args.username;
+        let password = args.password;
 
         if (username === '' || username === null) {
             throw new Error('Must supply a valid username');
         }
 
-        var hash = md5(username);
-        var targetDirectory = 'translationStudio/profiles/' + hash + '/';
-        var targetFile = path.join(profilesDirectory, targetDirectory, 'profile.json');
-        var storage = {
+        let hash = md5(username);
+        let targetDirectory = 'translationStudio/profiles/' + hash + '/';
+        let targetFile = path.join(profilesDirectory, targetDirectory, 'profile.json');
+        let storage = {
             'username': username,
             'password': password,
             'profile': profilesDirectory,
@@ -71,7 +72,7 @@ var fs = require('fs');
                 return saveData();
             },
             destroy: function () {
-                var dir = path.join(profilesDirectory, targetDirectory);
+                let dir = path.join(profilesDirectory, targetDirectory);
                 if (fs.existsSync(targetFile)) {
                     fs.unlinkSync(targetFile);
                 }

@@ -3,11 +3,10 @@
  * This context will be available throughout the application
  */
 
-var path = require('path');
-
 ;(function (root) {
     'use strict';
 
+    let path = require('path');
     let Configurator = require('../js/configurator').Configurator;
     let configurator = new Configurator();
     let gui = require('nw.gui');
@@ -127,7 +126,7 @@ var path = require('path');
                     option[prop] = s[prop].bind(_this, s);
                 });
 
-                var shortcut = new _this.gui.Shortcut(option);
+                let shortcut = new _this.gui.Shortcut(option);
 
                 // Register global desktop shortcut, which can work without focus.
                 _this.gui.App.registerGlobalHotKey(shortcut);
@@ -143,8 +142,8 @@ var path = require('path');
 
             _this.configurator.setStorage(window.localStorage);
 
-            var config = require('../config/ts-config');
-            var defaults = require('../config/defaults');
+            let config = require('../config/ts-config');
+            let defaults = require('../config/defaults');
 
             _this.configurator.loadConfig(config);
             _this.configurator.loadConfig(defaults);
@@ -177,7 +176,7 @@ var path = require('path');
         },
 
         initializeReporter: function () {
-            var _this = this;
+            let _this = this;
 
             _this.reporter = new Reporter({
                 logPath: configurator.getValue('logPath'),
@@ -196,10 +195,10 @@ var path = require('path');
         registerErrorReporter: function () {
             process.removeAllListeners('uncaughtException');
             process.on('uncaughtException', function (err) {
-                var date = new Date();
+                let date = new Date();
                 date = date.getFullYear() + '_' + date.getMonth() + '_' + date.getDay();
-                var path = configurator.getValue('crashDir') + '/' +  date + '.crash';
-                var crashReporter = new Reporter({logPath: path});
+                let path = configurator.getValue('crashDir') + '/' +  date + '.crash';
+                let crashReporter = new Reporter({logPath: path});
                 crashReporter.logError(err.message + '\n' + err.stack, function () {
                     /**
                      * TODO: Hook in a UI

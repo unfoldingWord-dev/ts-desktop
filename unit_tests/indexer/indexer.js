@@ -1,27 +1,31 @@
-var assert = require('assert');
-var rimraf = require('rimraf');
-var Indexer = require('../../app/js/indexer').Indexer;
-var Configurator = require('../../app/js/configurator').Configurator;
-var configurator = new Configurator();
-var projectsCatalogJson = JSON.stringify(require('./data/ts/txt/2/catalog.json'));
-var sourceLanguagesCatalogJson = JSON.stringify(require('./data/ts/txt/2/1ch/languages.json'));
-var resourcesCatalogJson = JSON.stringify(require('./data/ts/txt/2/1ch/ar/resources.json'));
-var sourceCatalogJson = JSON.stringify(require('./data/ts/txt/2/1ch/ar/avd/source.json'));
-var projectsSlugArray = JSON.stringify(require('./data/projects.json'));
-var sourceLanguagesSlugArray = JSON.stringify(require('./data/languages.json'));
-var resourcesSlugArray = JSON.stringify(require('./data/resources.json'));
-var chaptersSlugArray = JSON.stringify(require('./data/chapters.json'));
-var framesSlugArray = JSON.stringify(require('./data/frames.json'));
-var projectCatalogJson = JSON.stringify(require('./data/1ch.json'));
-var sourceLanguageCatalogJson = JSON.stringify(require('./data/ar.json'));
-var resourceCatalogJson = JSON.stringify(require('./data/avd.json'));
-var chapterCatalogJson = JSON.stringify(require('./data/chapter.json'));
-var frameCatalogJson = JSON.stringify(require('./data/01.json'));
+'use strict';
 
 ;(function () {
-    'use strict';
 
-    var config = require('../../app/config/defaults');
+    let assert = require('assert');
+    let rimraf = require('rimraf');
+    let Indexer = require('../../app/js/indexer').Indexer;
+    let Configurator = require('../../app/js/configurator').Configurator;
+    let configurator = new Configurator();
+
+    //import comparison data
+    let projectsCatalogJson = JSON.stringify(require('./data/ts/txt/2/catalog.json'));
+    let sourceLanguagesCatalogJson = JSON.stringify(require('./data/ts/txt/2/1ch/languages.json'));
+    let resourcesCatalogJson = JSON.stringify(require('./data/ts/txt/2/1ch/ar/resources.json'));
+    let sourceCatalogJson = JSON.stringify(require('./data/ts/txt/2/1ch/ar/avd/source.json'));
+    let projectsSlugArray = JSON.stringify(require('./data/projects.json'));
+    let sourceLanguagesSlugArray = JSON.stringify(require('./data/languages.json'));
+    let resourcesSlugArray = JSON.stringify(require('./data/resources.json'));
+    let chaptersSlugArray = JSON.stringify(require('./data/chapters.json'));
+    let framesSlugArray = JSON.stringify(require('./data/frames.json'));
+    let projectCatalogJson = JSON.stringify(require('./data/1ch.json'));
+    let sourceLanguageCatalogJson = JSON.stringify(require('./data/ar.json'));
+    let resourceCatalogJson = JSON.stringify(require('./data/avd.json'));
+    let chapterCatalogJson = JSON.stringify(require('./data/chapter.json'));
+    let frameCatalogJson = JSON.stringify(require('./data/01.json'));
+    let projectMetaJson = JSON.stringify(require('./data/1ch-meta.json'));
+
+    let config = require('../../app/config/defaults');
     configurator.setStorage({});
     configurator.loadConfig(config);
 
@@ -313,6 +317,62 @@ var frameCatalogJson = JSON.stringify(require('./data/01.json'));
                     assert.equal(
                         true,
                         true
+                    );
+                });
+            });
+
+        });
+
+        describe('@MetaRetrievalTools', function () {
+
+            describe('@GetProjectMeta', function () {
+                it('should get 1ch project meta', function () {
+                    assert.equal(
+                        JSON.stringify(
+                            testIndexer.getProjectMeta(
+                                '1ch'
+                            )
+                        ),
+                        projectMetaJson
+                    );
+                });
+            });
+
+            describe('@GetProjectMetaDateModified', function () {
+                it('should get 1ch project meta', function () {
+                    assert.equal(
+                        testIndexer.getProjectMeta(
+                            '1ch',
+                            'date_modified'
+                        ),
+                        '20150801'
+                    );
+                });
+            });
+
+            describe('@GetSourceLanguageModified', function () {
+                it('should get 1ch project meta', function () {
+                    assert.equal(
+                        testIndexer.getSourceLanguageMeta(
+                            '1ch',
+                            'ar',
+                            'date_modified'
+                        ),
+                        '20150801'
+                    );
+                });
+            });
+
+            describe('@GetResourceModified', function () {
+                it('should get 1ch project meta', function () {
+                    assert.equal(
+                        testIndexer.getResourceMeta(
+                            '1ch',
+                            'ar',
+                            'avd',
+                            'date_modified'
+                        ),
+                        '20150801'
                     );
                 });
             });

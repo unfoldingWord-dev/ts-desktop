@@ -1,6 +1,6 @@
-(function () {
-    'use strict';
+'use strict';
 
+;(function () {
 
     /**
      * pathName() returns an absolutePathname
@@ -15,20 +15,6 @@
      */
     function setPath () {
         throw new Error('setPath is deprecated. Please use the path module instead. e.g. path.join()');
-    }
-
-    /**
-     * Retrieves a url property from an object
-     * @param itemObj the object that contains the url
-     * @param urlProp the name of the property in the object that contains the url
-     * @param dropQuery if true the query string will be removed
-     * @returns {*}
-     */
-    function getUrlFromObj (itemObj, urlProp) {
-        if (arguments.length > 2 && arguments[2] === true) {
-            return itemObj[urlProp].split('?')[0];
-        }
-        return itemObj[urlProp];
     }
 
     /**
@@ -49,6 +35,5 @@
 
     exports.raiseWithContext = raiseWithContext;
     exports.setPath = setPath;
-    exports.getUrlFromObj = getUrlFromObj;
 
 }());

@@ -9,13 +9,13 @@ var path = require('path');
 
     function Reporter (args) {
 
-        var _this = this;
-        var logPath = path.normalize(args.logPath || './log.txt');
-        var oauthToken = args.oauthToken || '';
-        var repoOwner = args.repoOwner || '';
-        var repo = args.repo || '';
-        var maxLogFileKb = args.maxLogFileKb || 200;
-        var appVersion = args.appVersion || '0.0.0';
+        let _this = this;
+        let logPath = path.normalize(args.logPath || './log.txt');
+        let oauthToken = args.oauthToken || '';
+        let repoOwner = args.repoOwner || '';
+        let repo = args.repo || '';
+        let maxLogFileKb = args.maxLogFileKb || 200;
+        let appVersion = args.appVersion || '0.0.0';
 
         _this.logNotice = function (string, callback) {
             if (!string) {
@@ -70,7 +70,7 @@ var path = require('path');
         };
 
         _this.stackTrace = function () {
-            var err = new Error();
+            let err = new Error();
             return err.stack;
         };
 
@@ -78,7 +78,7 @@ var path = require('path');
             /* We make 3 calls before processing who called the original
              *  log command; therefore, the 4th call will be the original caller.
              * */
-            var location = _this.stackTrace().split('\n')[4];
+            let location = _this.stackTrace().split('\n')[4];
             try {
                 location = location.split(/(\\|\/)/);
                 location = location[location.length - 1];
@@ -86,12 +86,12 @@ var path = require('path');
             } catch (e) {
                 throw new Error(e.message);
             }
-            var date = new Date();
+            let date = new Date();
             date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
 
-            var message = date + ' ' + level + '/' + location + ': ' + string + '\n';
+            let message = date + ' ' + level + '/' + location + ': ' + string + '\n';
 
-            var dir = path.dirname(logPath);
+            let dir = path.dirname(logPath);
 
             mkdirp(dir, function (e) {
                 if (e) {
@@ -112,7 +112,7 @@ var path = require('path');
         };
 
         _this.stringFromLogFile = function (filePath, callback) {
-            var readPath = logPath;
+            let readPath = logPath;
             if (filePath) {
                 readPath = filePath;
             }
@@ -140,7 +140,7 @@ var path = require('path');
         _this.truncateLogFile = function () {
             fs.stat(logPath, function (err, stats) {
                 if (stats) {
-                    var kb = stats.size / 1024;
+                    let kb = stats.size / 1024;
                     if (kb >= maxLogFileKb) {
                         _this.stringFromLogFile(null, function (res) {
                             res = res.split('\n');
@@ -160,7 +160,7 @@ var path = require('path');
         };
 
         _this.formGithubIssue = function (type, string, filePath, callback) {
-            var issueObject = {};
+            let issueObject = {};
             issueObject.user = repoOwner;
             issueObject.repo = repo;
             issueObject.labels = [type, appVersion];
@@ -174,7 +174,7 @@ var path = require('path');
                 issueObject.title = type;
             }
 
-            var bodyBuilder = [];
+            let bodyBuilder = [];
             /* user notes */
             if (string) {
                 bodyBuilder.push('Notes\n======');
@@ -228,14 +228,14 @@ var path = require('path');
         };
 
         _this.sendIssueToGithub = function (issue, callback) {
-            var params = {};
+            let params = {};
             params.title = issue.title;
             params.body = issue.body;
             params.labels = issue.labels;
-            var paramsJson = JSON.stringify(params);
+            let paramsJson = JSON.stringify(params);
 
-            var urlPath = '/repos/' + issue.user + '/' + issue.repo + '/issues';
-            var postOptions = {
+            let urlPath = '/repos/' + issue.user + '/' + issue.repo + '/issues';
+            let postOptions = {
                 host: 'api.github.com',
                 port: 443,
                 path: urlPath,
@@ -248,9 +248,9 @@ var path = require('path');
                 }
             };
 
-            var postReq = https.request(postOptions, function (res) {
+            let postReq = https.request(postOptions, function (res) {
                 res.setEncoding('utf8');
-                var completeData = '';
+                let completeData = '';
                 res.on('data', function (partialData) {
                     completeData += partialData;
                 }).on('end', function () {

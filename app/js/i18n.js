@@ -1,4 +1,3 @@
-
 var fs = require('fs');
 var path = require('path');
 var jsonfile = require('jsonfile');
@@ -12,13 +11,13 @@ var jsonfile = require('jsonfile');
      * @param obj2
      */
     function mergeObjects (obj1, obj2) {
-        var obj3 = {};
-        for (var prop1 in obj1) {
+        let obj3 = {};
+        for (let prop1 in obj1) {
             if (obj1.hasOwnProperty(prop1)) {
                 obj3[prop1] = obj1[prop1];
             }
         }
-        for (var prop2 in obj2) {
+        for (let prop2 in obj2) {
             if (obj2.hasOwnProperty(prop2)) {
                 obj3[prop2] = obj2[prop2];
             }
@@ -34,10 +33,10 @@ var jsonfile = require('jsonfile');
      */
     function loadLocale (dir, locale, defaultLocale) {
         if (dir !== '' && locale !== '') {
-            var dictionaryPath = path.join(dir, locale + '.json');
-            var defaultDictionaryPath = path.join(dir, defaultLocale + '.json');
-            var defaultDict = {};
-            var dict = {};
+            let dictionaryPath = path.join(dir, locale + '.json');
+            let defaultDictionaryPath = path.join(dir, defaultLocale + '.json');
+            let defaultDict = {};
+            let dict = {};
             if (fs.existsSync(defaultDictionaryPath)) {
                 defaultDict = jsonfile.readFileSync(defaultDictionaryPath);
             }

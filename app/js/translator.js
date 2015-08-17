@@ -22,6 +22,7 @@
             //return object
             return returnObj;
         }
+
         function getFrames (sourceTranslation, chapterId) {
 
             //get data
@@ -64,6 +65,7 @@
             //return object
             return returnObj;
         }
+
         function getChapters (sourceTranslation) {
 
             //get data

@@ -6,7 +6,7 @@
     let path = require('path');
     let mkdirp = require('mkdirp');
     let md5 = require('md5');
-    let unionObjects = require('./lib/util').unionObjects;
+    let _ = require('lodash');
     let raiseWithContext = require('./lib/util').raiseWithContext;
     let dataDirPath = 'data';
     let linksJsonPath = path.join(dataDirPath, 'links.json');
@@ -27,7 +27,7 @@
 
         //reassign this to _this, set indexId and rootPath
         let _this = this;
-        _this.config = unionObjects({ indexDir: '', apiUrl: ''}, configJson);
+        _this.config = _.merge({indexDir: '', apiUrl: ''}, configJson);
         _this.indexId = indexName;
         _this.rootPath = path.join(_this.config.indexDir, indexName);
 
@@ -106,7 +106,7 @@
             }
             saveFile(linksJsonPath, JSON.stringify(links));
         }
-        /**/
+         /**/
 
         function indexItems (md5Hash, catalogLinkFile, catalogType, catalogJson, metaObj) {
             let items = JSON.parse(catalogJson);
@@ -243,8 +243,8 @@
                 );
             } catch (e) {
                 raiseWithContext(e, {
-                    projectId:projectId,
-                    sourceLanguageId:sourceLanguageId
+                    projectId: projectId,
+                    sourceLanguageId: sourceLanguageId
                 });
             }
 

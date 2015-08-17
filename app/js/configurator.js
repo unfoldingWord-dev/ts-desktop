@@ -66,7 +66,7 @@
             valueObj.value = value;
 
             //update meta
-            valueObj.meta = unionObjects(valueObj.meta, meta);
+            valueObj.meta = _.merge(valueObj.meta, meta);
 
             //update value in storage
             storage[key] = JSON.stringify(valueObj);

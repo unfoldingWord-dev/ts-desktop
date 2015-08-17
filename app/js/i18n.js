@@ -5,7 +5,7 @@
     let fs = require('fs');
     let path = require('path');
     let jsonfile = require('jsonfile');
-    let unionObjects = require('./lib/util').unionObjects;
+    let _ = require('lodash');
 
     /**
      * Loads the i18n dictionary from the library.
@@ -25,7 +25,7 @@
             if (fs.existsSync(dictionaryPath)) {
                 dict = jsonfile.readFileSync(dictionaryPath);
             }
-            return unionObjects(defaultDict, dict);
+            return _.merge(defaultDict, dict);
         }
         return {};
     }

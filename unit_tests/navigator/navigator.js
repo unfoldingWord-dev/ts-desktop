@@ -19,6 +19,7 @@
     let reporter = new Reporter({
         logPath: 'unit_tests/navigator/index/log.txt',
     });
+    let enableTests = false;
 
     GLOBAL.App = {
         configurator: configurator,
@@ -28,6 +29,7 @@
     let navigator = new Navigator();
 
     describe('@Navigator', function () {
+        this.timeout(600000); // 10 min
 
         before(function (done) {
             rimraf(configurator.getValue('indexDir'), function () {
@@ -36,31 +38,34 @@
         });
 
         // TODO: we're still testing this. Part of this reason for this unit test is to provide a way to download the content to use for the default app index.
-        after(function (done) {
-            rimraf(configurator.getValue('indexDir'), function () {
-                done();
-            });
-        });
+        //after(function (done) {
+        //    rimraf(configurator.getValue('indexDir'), function () {
+        //        done();
+        //    });
+        //});
 
-        describe('@GetServerLibraryIndex', function () {
-            this.timeout(600000); // 10 min
-            navigator = navigator; // TODO: remove this after we use it
-            //let index = {};
-            //let updates = {};
-            before(function (done) {
-                //navigator.getServerLibraryIndex(function(serverIndex, availableUpdates) {
-                //    index = serverIndex;
-                //    updates = availableUpdates;
-                //   done();
-                //});
-                done();
+        if (enableTests) {
+            describe('@GetServerLibraryIndex', function () {
+                navigator = navigator; // TODO: remove this after we use it
+                let index = null;
+                let updates = null;
+                before(function (done) {
+                    let promise = navigator.getServerLibraryIndex();
+                    promise.next(function (serverIndex, availableUpdates) {
+                        index = serverIndex;
+                        updates = availableUpdates;
+                        done();
+                    });
+                    promise.catch(function () {
+                        done();
+                    });
+                });
+                it('should download and return the server library index', function () {
+                    // TODO: finish setting up these asserts
+                    assert.notEqual(index, null);
+                    assert.notEqual(updates, null);
+                });
             });
-            it('should download and return the server library index', function () {
-                // TODO: finish setting up these asserts
-                assert.equal(true, true);
-                //assert.equal(index, 'test');
-                //assert.equal(updates, 'test');
-            });
-        });
+        }
     });
 })();

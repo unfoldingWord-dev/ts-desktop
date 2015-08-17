@@ -70,5 +70,13 @@
             "mutable": false,
             "type": "string"
         }
+    },
+    {
+        "name": "asyncLimit",
+        "value": 10,
+        "meta": {
+            "mutable": false,
+            "type": "number"
+        }
     }
 ]

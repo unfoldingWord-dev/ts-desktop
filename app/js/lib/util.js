@@ -1,5 +1,5 @@
-;(function() {
-    "use strict";
+(function () {
+    'use strict';
 
 
     /**
@@ -36,10 +36,10 @@
      * @param e the exception to be raised
      * @param args arguments to be added to the exception message
      */
-    function raiseWithContext(e, args) {
+    function raiseWithContext (e, args) {
         e.message += '\nException Context:';
-        for(let prop in args) {
-            if(args.hasOwnProperty(prop)) {
+        for (let prop in args) {
+            if (args.hasOwnProperty(prop)) {
                 e.message += '\n\t' + prop + '=' + args[prop];
             }
         }

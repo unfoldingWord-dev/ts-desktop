@@ -4,7 +4,7 @@ var https = require('https');
 var mkdirp = require('mkdirp');
 var path = require('path');
 
-;(function () {
+(function () {
     'use strict';
 
     function Reporter (args) {

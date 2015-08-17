@@ -9,7 +9,7 @@ var dataDirPath = 'data';
 var linksJsonPath = path.join(dataDirPath, 'links.json');
 var sourceDirPath = 'source';
 
-;(function () {
+(function () {
     'use strict';
 
     /**
@@ -20,14 +20,14 @@ var sourceDirPath = 'source';
      * @constructor
      */
     function Indexer (indexName, configJson) {
-        if(typeof configJson === 'undefined') {
+        if (typeof configJson === 'undefined') {
             throw new Error('missing the indexer configuration parameter');
         }
 
 
         //reassign this to _this, set indexId and rootPath
         let _this = this;
-        _this.config = _.merge({ indexDir: '', apiUrl: ''}, configJson);
+        _this.config = _.merge({indexDir: '', apiUrl: ''}, configJson);
         _this.indexId = indexName;
         _this.rootPath = path.join(_this.config.indexDir, indexName);
 
@@ -58,7 +58,7 @@ var sourceDirPath = 'source';
         function saveFile (filePath, fileContents) {
             var fullPath = path.join(_this.rootPath, filePath);
             var fullDirPath = path.dirname(fullPath);
-            if(fullDirPath.indexOf('test') === 0) {
+            if (fullDirPath.indexOf('test') === 0) {
                 return false;
             }
             try {
@@ -96,7 +96,7 @@ var sourceDirPath = 'source';
 
         //TODO: activate later when we have a functions that uses this
         /** /
-        function decrementLink(md5Hash) {
+         function decrementLink(md5Hash) {
             var links = openJson(linksJsonPath);
             if (md5Hash in links) {
                 links[md5Hash]--;
@@ -106,7 +106,7 @@ var sourceDirPath = 'source';
             }
             saveFile(linksJsonPath, JSON.stringify(links));
         }
-        /**/
+         /**/
 
         function indexItems (md5Hash, catalogLinkFile, catalogType, catalogJson, metaObj) {
             var items = JSON.parse(catalogJson);
@@ -243,8 +243,8 @@ var sourceDirPath = 'source';
                 );
             } catch (e) {
                 raiseWithContext(e, {
-                    projectId:projectId,
-                    sourceLanguageId:sourceLanguageId
+                    projectId: projectId,
+                    sourceLanguageId: sourceLanguageId
                 });
             }
 
@@ -322,7 +322,7 @@ var sourceDirPath = 'source';
         };
 
         _this.getResources = function (projectId, sourceLanguageId) {
-            var catalogArray =  getItemsArray(
+            var catalogArray = getItemsArray(
                 _this.getSourceLanguage(projectId, sourceLanguageId),
                 'res_catalog'
             );
@@ -330,7 +330,7 @@ var sourceDirPath = 'source';
         };
 
         _this.getChapters = function (projectId, sourceLanguageId, resourceId) {
-            var catalogArray =  getItemsArray(
+            var catalogArray = getItemsArray(
                 _this.getResource(projectId, sourceLanguageId, resourceId),
                 'source'
             );
@@ -338,7 +338,7 @@ var sourceDirPath = 'source';
         };
 
         _this.getFrames = function (projectId, sourceLanguageId, resourceId, chapterId) {
-            var catalogArray =  getItemsArray(
+            var catalogArray = getItemsArray(
                 _this.getResource(projectId, sourceLanguageId, resourceId),
                 'source',
                 chapterId

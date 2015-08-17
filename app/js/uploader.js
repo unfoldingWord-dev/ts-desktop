@@ -1,6 +1,6 @@
 var net = require('net');
 
-;(function () {
+(function () {
     'use strict';
 
     var authServer = '';

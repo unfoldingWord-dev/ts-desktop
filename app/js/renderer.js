@@ -1,7 +1,7 @@
 var _ = require('lodash'),
     paraRegExp = /<\/para>\s*/g;
 
-;(function () {
+(function () {
     'use strict';
 
     function paraPattern (paraType) {

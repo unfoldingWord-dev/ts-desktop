@@ -22,7 +22,7 @@ GLOBAL.App = {
 };
 var enableTests = false;
 
-;(function () {
+(function () {
     'use strict';
 
     let navigator = new Navigator();
@@ -43,7 +43,7 @@ var enableTests = false;
         //    });
         //});
 
-        if(enableTests) {
+        if (enableTests) {
             describe('@GetServerLibraryIndex', function () {
                 navigator = navigator; // TODO: remove this after we use it
                 let index = null;

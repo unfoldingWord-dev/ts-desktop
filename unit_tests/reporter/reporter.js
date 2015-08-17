@@ -8,13 +8,13 @@ var reporterDefaultConfig = require('../../app/config/defaults');
 var rimraf = require('rimraf');
 var jsonfile = require('jsonfile');
 
-;(function () {
+(function () {
     'use strict';
 
     reporterConfigurator.setStorage({});
     reporterConfigurator.loadConfig(reporterDefaultConfig);
     let privateConfPath = './app/config/private.json';
-    if(fs.existsSync(privateConfPath)) {
+    if (fs.existsSync(privateConfPath)) {
         var stats = fs.lstatSync(privateConfPath);
         if (stats.isFile()) {
             var reporterPrivateConfig = jsonfile.readFileSync(privateConfPath);

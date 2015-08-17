@@ -5,7 +5,7 @@
  */
 var _ = require('lodash');
 
- ;(function () {
+(function () {
     'use strict';
 
     function Configurator () {

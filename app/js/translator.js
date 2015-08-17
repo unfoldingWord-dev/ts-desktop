@@ -1,7 +1,7 @@
 var Configurator = require('./configurator').Configurator;
 var configurator = new Configurator();
 
-;(function () {
+(function () {
     'use strict';
 
     function Translator (appIndex) {
@@ -21,6 +21,7 @@ var configurator = new Configurator();
             //return object
             return returnObj;
         }
+
         function getFrames (sourceTranslation, chapterId) {
 
             //get data
@@ -63,6 +64,7 @@ var configurator = new Configurator();
             //return object
             return returnObj;
         }
+
         function getChapters (sourceTranslation) {
 
             //get data

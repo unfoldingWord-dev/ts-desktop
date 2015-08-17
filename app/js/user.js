@@ -4,10 +4,10 @@ var path = require('path');
 var md5 = require('md5');
 var fs = require('fs');
 
-;(function () {
+(function () {
     'use strict';
 
-    function User(args) {
+    function User (args) {
         var profilesDirectory = args.profilesDirectory;
         var username = args.username;
         var password = args.password;
@@ -28,7 +28,7 @@ var fs = require('fs');
             'phone': ''
         };
 
-        function saveData() {
+        function saveData () {
             try {
                 jsonfile.writeFileSync(targetFile, storage);
             } catch (e) {

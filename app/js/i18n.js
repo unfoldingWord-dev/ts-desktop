@@ -1,10 +1,9 @@
-
 var fs = require('fs');
 var path = require('path');
 var jsonfile = require('jsonfile');
 var _ = require('lodash');
 
-;(function () {
+(function () {
     'use strict';
 
     /**

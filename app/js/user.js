@@ -7,7 +7,7 @@ var fs = require('fs');
 ;(function () {
     'use strict';
 
-    function User(args) {
+    function User (args) {
         let profilesDirectory = args.profilesDirectory;
         let username = args.username;
         let password = args.password;
@@ -28,7 +28,7 @@ var fs = require('fs');
             'phone': ''
         };
 
-        function saveData() {
+        function saveData () {
             try {
                 jsonfile.writeFileSync(targetFile, storage);
             } catch (e) {

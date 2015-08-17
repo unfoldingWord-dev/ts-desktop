@@ -1,6 +1,5 @@
 var request = require('request');
 //let moment = require('moment');
-var configurator = require('./configurator');
 
 ;(function () {
     'use strict';

@@ -14,7 +14,7 @@ var downloader = new Downloader({}, testIndexer);
                 let result = downloader.downloadProjectList();
                 let projects = testIndexer.getProjects();
                 assert.equal(result, true);
-                assert.equal(projects.length>0, true);
+                assert.equal(projects.length > 0, true);
             });
         });
 

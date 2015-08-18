@@ -26,6 +26,7 @@ Overflow menu.
       top: 0;
       left: 0;
       transform: translateX(-100%);
+      box-shadow: -4px 0 30px rgba(22, 22, 22, 0.3);
   }
 
   #minimenu {
@@ -37,14 +38,15 @@ Overflow menu.
       top: 0;
       left: 0;
       transform: translateX(0);
+      box-shadow: -4px 0 30px rgba(22, 22, 22, 0.3);
   }
 
   .displayed {
-      -webkit-animation: show .2s linear both .2s;
+      -webkit-animation: show .15s linear both .15s;
   }
 
   .hidden {
-      -webkit-animation: hide .2s linear forwards;
+      -webkit-animation: hide .15s linear forwards;
   }
 
   @-webkit-keyframes hide {
@@ -113,14 +115,14 @@ Overflow menu.
         <div id="minimenu">
             <div class="toplist">
               <ul>
-                <li id="library"><iron-icon icon="overflow:library"></iron-icon></li>
-                <li id="resources"><iron-icon icon="overflow:resources"></iron-icon></li>
+                <li id="library" title="Library"><iron-icon icon="overflow:library"></iron-icon></li>
+                <li id="resources" title="Resources"><iron-icon icon="overflow:resources"></iron-icon></li>
               </ul>
             </div>
             <div class="bottomlist">
               <ul>
-                <li id="settings"><iron-icon icon="overflow:settings"></iron-icon></li>
-                <li><iron-icon icon="overflow:feedback"></iron-icon></li>
+                <li id="settings" title="Settings"><iron-icon icon="overflow:settings"></iron-icon></li>
+                <li title="Feedback"><iron-icon icon="overflow:feedback"></iron-icon></li>
               </ul>
             </div>
         </div>
@@ -150,7 +152,12 @@ Overflow menu.
     is: 'ts-overflow',
 
     openMenu: function(event) {
-      var menu = event.target.id;
+        var etarget = event.target;
+        while (etarget.nodeName != "LI" && etarget.nodeName != "NAV") {
+            etarget = etarget.parentNode;
+        }
+
+        var menu = etarget.id;
       if (menu) {
         this.fire('iron-signal', { name: 'open-menu', data: menu });
       }

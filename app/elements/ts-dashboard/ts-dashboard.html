@@ -31,7 +31,7 @@
 
   <template>
     <div class="bar">
-        <paper-icon-button icon="menu" on-tap="openMenu"></paper-icon-button>
+        <paper-icon-button icon="menu" on-tap="toggleMenu"></paper-icon-button>
         <div class="titles">translationStudio</div>
     </div>
       <ts-overflow label="overflow"></ts-overflow>
@@ -46,7 +46,7 @@
   Polymer({
     is: 'ts-dashboard',
 
-    openMenu: function(event) {
+    toggleMenu: function(event) {
       event.preventDefault();
 
       this.fire('iron-signal', { name: 'toggle-menu' });

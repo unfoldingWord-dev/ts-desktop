@@ -269,6 +269,8 @@
         _this.canReportToGithub = function () {
             return repo !== '' && repoOwner !== '' && oauthToken !== '';
         };
+
+        return _this;
     }
 
     exports.Reporter = Reporter;

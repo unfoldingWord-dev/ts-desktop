@@ -516,16 +516,12 @@
 
         _this.getResource = function (projectId, sourceLanguageId, resourceId) {
             let linkPath = path.join(sourceDirPath, projectId, sourceLanguageId, 'resources_catalog.link');
-            if(fs.existsSync(linkPath)) {
-                let md5Hash = openFile(linkPath);
-                if (md5Hash === null) {
-                    return null;
-                }
-                let catalogJson = openJson(path.join(dataDirPath, md5Hash, resourceId + '.json'));
-                return catalogJson;
-            } else {
+            let md5Hash = openFile(linkPath);
+            if (md5Hash === null) {
                 return null;
             }
+            let catalogJson = openJson(path.join(dataDirPath, md5Hash, resourceId + '.json'));
+            return catalogJson;
         };
 
         _this.getResourceMeta = function (projectId, sourceLanguageId, resourceId, metaProp) {

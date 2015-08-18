@@ -16,11 +16,10 @@
         indexDir: './unit_tests/downloader/index/',
         apiUrl: configurator.getValue('apiUrl')
     };
-    let appIndex = new Indexer('app', indexConfig);
     let downloadIndex = new Indexer('download', indexConfig);
-    let downloader = new Downloader({
+    let downloader = new Downloader(downloadIndex, {
         apiUrl: indexConfig.apiUrl
-    }, downloadIndex, appIndex);
+    });
 
     describe('@Downloader', function () {
 

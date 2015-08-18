@@ -1,137 +1,122 @@
-/**
- * Created by Emmitt on 7/2/2015.
- */
-var assert = require('assert');
-var fs = require('fs');
-
-var Reporter = require('../../app/js/reporter');
-var version = require('../../package.json').version;
-
-var reporterConfigurator = require('../../app/js/configurator');
-var reporterDefaultConfig = require('../../app/config/defaults');
+'use strict';
 
 ;(function () {
-    'use strict';
+
+    let assert = require('assert');
+    let fs = require('fs');
+    let Reporter = require('../../app/js/reporter').Reporter;
+    let version = require('../../package.json').version;
+    let Configurator = require('../../app/js/configurator').Configurator;
+    let reporterConfigurator = new Configurator();
+    let reporterDefaultConfig = require('../../app/config/defaults');
+    let rimraf = require('rimraf');
+    let jsonfile = require('jsonfile');
 
     reporterConfigurator.setStorage({});
     reporterConfigurator.loadConfig(reporterDefaultConfig);
-    try {
-        var stats = fs.lstatSync('../../app/config/private');
-
+    let privateConfPath = './app/config/private.json';
+    if (fs.existsSync(privateConfPath)) {
+        let stats = fs.lstatSync(privateConfPath);
         if (stats.isFile()) {
-            var reporterPrivateConfig = require('../../app/config/private');
+            let reporterPrivateConfig = jsonfile.readFileSync(privateConfPath);
             reporterConfigurator.loadConfig(reporterPrivateConfig);
         }
-    } catch (e) {
-
     }
 
-    var logPath = 'unit_tests/reporter/log.txt';
+    let logPath = 'unit_tests/reporter/log.txt';
 
-    var reporter = new Reporter.instance({
+    let reporter = new Reporter({
         logPath: logPath,
-        oauthToken: reporterConfigurator.getString('oauthToken'),
-        repoOwner: reporterConfigurator.getString('repoOwner'),
-        repo: reporterConfigurator.getString('repo'),
-        maxLogFileKb: reporterConfigurator.getInt('maxLogFileKb'),
+        oauthToken: reporterConfigurator.getValue('oauthToken'),
+        repoOwner: reporterConfigurator.getValue('repoOwner'),
+        repo: reporterConfigurator.getValue('repo'),
+        maxLogFileKb: reporterConfigurator.getValue('maxLogFileKb'),
         appVersion: version
     });
 
     describe('@Reporter', function () {
+        beforeEach(function (done) {
+            rimraf(logPath, function () {
+                done();
+            });
+        });
+
+        after(function (done) {
+            rimraf(logPath, function () {
+                done();
+            });
+        });
+
         //careful when editing this file as the expected strings are hardcoded with line numbers
         describe('@logNotice', function () {
-            var key = 'This is a test';
-            var logFileResults = '';
-            var textExpected = '';
+            let key = 'This is a test';
+            let logFileResults = '';
+            let textExpected = '';
 
             before(function (done) {
-                fs.exists(logPath, function () {
-                    fs.unlink(logPath, function () {
-                        reporter.logNotice(key, function () {
-                            var date = new Date();
-                            date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-                            //reporter.js:<line>:<column> this will need to be changed if the code changes
-                            textExpected = date + ' I/reporter.js:50:3: ' + key + '\n';
+                reporter.logNotice(key, function () {
+                    let date = new Date();
+                    date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+                    //reporter.js:<line>:<column> this will need to be changed if the code changes
+                    textExpected = date + ' I/reporter.js:56:26: ' + key + '\n';
 
-                            reporter.stringFromLogFile(null, function (logResults) {
-                                logFileResults = logResults;
-                                done();
-                            });
-                        });
+                    reporter.stringFromLogFile(null, function (logResults) {
+                        logFileResults = logResults;
+                        done();
                     });
                 });
             });
             it('should create a log file notice', function (done) {
                 assert.equal(logFileResults, textExpected);
-                fs.exists(logPath, function () {
-                    fs.unlink(logPath, function () {
-                        done();
-                    });
-                });
+                done();
             });
         });
 
         describe('@logWarning', function () {
-            var key = 'This is a test';
-            var logFileResults = '';
-            var textExpected = '';
+            let key = 'This is a test';
+            let logFileResults = '';
+            let textExpected = '';
 
             before(function (done) {
-                fs.exists(logPath, function () {
-                    fs.unlink(logPath, function () {
-                        reporter.logWarning(key, function () {
-                            var date = new Date();
-                            date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-                            //reporter.js:<line>:<column> this will need to be changed if the code changes
-                            textExpected = date + ' W/reporter.js:82:3: ' + key + '\n';
+                reporter.logWarning(key, function () {
+                    let date = new Date();
+                    date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+                    //reporter.js:<line>:<column> this will need to be changed if the code changes
+                    textExpected = date + ' W/reporter.js:80:26: ' + key + '\n';
 
-                            reporter.stringFromLogFile(null, function (logResults) {
-                                logFileResults = logResults;
-                                done();
-                            });
-                        });
+                    reporter.stringFromLogFile(null, function (logResults) {
+                        logFileResults = logResults;
+                        done();
                     });
                 });
             });
             it('should create a log file warning', function (done) {
                 assert.equal(logFileResults, textExpected);
-                fs.exists(logPath, function () {
-                    fs.unlink(logPath, function () {
-                        done();
-                    });
-                });
+                done();
             });
         });
 
         describe('@logError', function () {
-            var key = 'This is a test';
-            var logFileResults = '';
-            var textExpected = '';
+            let key = 'This is a test';
+            let logFileResults = '';
+            let textExpected = '';
 
             before(function (done) {
-                fs.exists(logPath, function () {
-                    fs.unlink(logPath, function () {
-                        reporter.logError(key, function () {
-                            var date = new Date();
-                            date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-                            //reporter.js:<line>:<column> this will need to be changed if the code changes
-                            textExpected = date + ' E/reporter.js:114:3: ' + key + '\n';
+                reporter.logError(key, function () {
+                    let date = new Date();
+                    date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+                    //reporter.js:<line>:<column> this will need to be changed if the code changes
+                    textExpected = date + ' E/reporter.js:104:26: ' + key + '\n';
 
-                            reporter.stringFromLogFile(null, function (logResults) {
-                                logFileResults = logResults;
-                                done();
-                            });
-                        });
+                    reporter.stringFromLogFile(null, function (logResults) {
+                        logFileResults = logResults;
+                        done();
                     });
                 });
             });
             it('should create a log file error', function (done) {
                 assert.equal(logFileResults, textExpected);
-                fs.exists(logPath, function () {
-                    fs.unlink(logPath, function () {
-                        done();
-                    });
-                });
+                done();
             });
         });
 
@@ -142,13 +127,13 @@ var reporterDefaultConfig = require('../../app/config/defaults');
          * */
         describe('@reportBug', function () {
             if (reporter.canReportToGithub()) {
-                var title = '[Automated] Bug Report';
-                var labels = [version, 'Bug Report'];
+                let title = '[Automated] Bug Report';
+                let labels = [version, 'bug report'];
                 labels.sort(function (a, b) {
                     return a > b;
                 });
 
-                var githubResponse = '';
+                let githubResponse = '';
 
                 before(function (done) {
                     reporter.reportBug(title, function (res) {
@@ -168,7 +153,7 @@ var reporterDefaultConfig = require('../../app/config/defaults');
                             return a.name > b.name;
                         });
 
-                        for (var i = 0; i < githubResponse.labels.length; i++) {
+                        for (let i = 0; i < githubResponse.labels.length; i++) {
                             assert.equal(githubResponse.labels[i].name, labels[i]);
                         }
                     });
@@ -184,13 +169,13 @@ var reporterDefaultConfig = require('../../app/config/defaults');
 
         describe('@reportCrash', function () {
             if (reporter.canReportToGithub()) {
-                var title = '[Automated] Crash Report';
-                var labels = [version, 'Crash Report'];
+                let title = '[Automated] Crash Report';
+                let labels = [version, 'crash report'];
                 labels.sort(function (a, b) {
                     return a > b;
                 });
 
-                var githubResponse = '';
+                let githubResponse = '';
 
                 before(function (done) {
                     reporter.reportCrash(title, null, function (res) {
@@ -210,7 +195,7 @@ var reporterDefaultConfig = require('../../app/config/defaults');
                             return a.name > b.name;
                         });
 
-                        for (var i = 0; i < githubResponse.labels.length; i++) {
+                        for (let i = 0; i < githubResponse.labels.length; i++) {
                             assert.equal(githubResponse.labels[i].name, labels[i]);
                         }
                     });

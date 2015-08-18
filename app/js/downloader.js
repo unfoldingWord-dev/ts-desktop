@@ -64,9 +64,9 @@
                 let metaObj = {
                     'date_modified': url.parse(catalogApiUrl, true).query
                 };
-                request(catalogApiUrl, function (error, response, catalogJson, metaObj) {
+                request(catalogApiUrl, function (error, response, catalogJson) {
                     if (!error && response.statusCode === 200) {
-                        if (downloadIndex.indexSourceLanguages(projectId, catalogJson)) {
+                        if (downloadIndex.indexSourceLanguages(projectId, catalogJson, metaObj)) {
                             resolve();
                         } else {
                             reject();

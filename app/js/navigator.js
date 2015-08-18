@@ -22,20 +22,22 @@
             indexDir: App.configurator.getValue('indexDir')
         };
         let downloadIndex = new Indexer('downloads', indexConfig);
+        let serverIndex = new Indexer('server', indexConfig);
         let appIndex = new Indexer('app', indexConfig);
 
         // create downloader
         let downloader = new Downloader({
             apiUrl: App.configurator.getValue('apiUrl')
-        }, downloadIndex, appIndex);
+        }, downloadIndex);
 
         let downloadResourceList = function (projectId, sourceLanguageId, done) {
             let promise = downloader.downloadResourceList(projectId, sourceLanguageId);
             promise.then(function () {
                 for (let resourceId of downloadIndex.getResources(projectId, sourceLanguageId)) {
-                    let serverResourceModified = downloadIndex.getResourceMeta(projectId, sourceLanguageId, resourceId, 'date_modified');
+                    let latestResourceModified = downloadIndex.getResourceMeta(projectId, sourceLanguageId, resourceId, 'date_modified');
+                    // TRICKY: we must use the app index to check for updates
                     let localResourceModified = appIndex.getResourceMeta(projectId, sourceLanguageId, resourceId, 'date_modified');
-                    if (localResourceModified === null || parseInt(localResourceModified) < parseInt(serverResourceModified)) {
+                    if (localResourceModified === null || parseInt(localResourceModified) < parseInt(latestResourceModified)) {
                         // build update list
                         if (typeof asyncState.availableUpdates[projectId] === 'undefined') {
                             asyncState.availableUpdates[projectId] = [];
@@ -55,6 +57,7 @@
         };
 
         let downloadSourceLanguageList = function (projectId, done) {
+
             let promise = downloader.downloadSourceLanguageList(projectId);
             promise.then(function () {
                 // queue resource downloads
@@ -65,9 +68,9 @@
                     done();
                 };
                 for (let sourceLanguageId of downloadIndex.getSourceLanguages(projectId)) {
-                    let serverSourceLanguageModified = downloadIndex.getSourceLanguageMeta(projectId, sourceLanguageId, 'date_modified');
-                    let localSourceLanguageModified = appIndex.getSourceLanguageMeta(projectId, sourceLanguageId, 'date_modified');
-                    if (localSourceLanguageModified === null || parseInt(localSourceLanguageModified) < parseInt(serverSourceLanguageModified)) {
+                    let latestSourceLanguageModified = downloadIndex.getSourceLanguageMeta(projectId, sourceLanguageId, 'date_modified');
+                    let lastSourceLanguageModified = serverIndex.getSourceLanguageMeta(projectId, sourceLanguageId, 'date_modified');
+                    if (lastSourceLanguageModified === null || parseInt(lastSourceLanguageModified) < parseInt(latestSourceLanguageModified)) {
                         queue.push({
                             projectId: projectId,
                             sourceLanguageId: sourceLanguageId
@@ -94,12 +97,14 @@
                             downloadSourceLanguageList(task.projectId, callback);
                         }, config.asyncLimit);
                         queue.drain = function () {
-                            resolve(downloadIndex, asyncState.availableUpdates);
+                            
+
+                            resolve(serverIndex, asyncState.availableUpdates);
                         };
                         for (let projectId of downloadIndex.getProjects()) {
-                            let serverProjectModified = downloadIndex.getProjectMeta(projectId, 'date_modified');
-                            let localProjectModified = appIndex.getProjectMeta(projectId, 'date_modified');
-                            if (localProjectModified === null || parseInt(localProjectModified) < parseInt(serverProjectModified)) {
+                            let latestProjectModified = downloadIndex.getProjectMeta(projectId, 'date_modified');
+                            let lastProjectModified = serverIndex.getProjectMeta(projectId, 'date_modified');
+                            if (lastProjectModified === null || parseInt(lastProjectModified) < parseInt(latestProjectModified)) {
                                 queue.push({projectId: projectId});
                             }
                         }

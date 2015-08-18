@@ -3,9 +3,9 @@
 ;(function () {
 
     let assert = require('assert');
+    let rimraf = require('rimraf');
     let Indexer = require('../../app/js/indexer').Indexer;
     let Downloader = require('../../app/js/downloader').Downloader;
-    let rimraf = require('rimraf');
     let Configurator = require('../../app/js/configurator').Configurator;
     let config = require('../../app/config/defaults');
 

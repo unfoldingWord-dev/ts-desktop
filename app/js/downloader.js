@@ -18,7 +18,7 @@
             throw new Error('missing the indexer configuration parameter');
         }
 
-        //reassign this to _this, set path
+        //reassign this to _this, set config
         let _this = this;
         _this.config = _.merge({apiUrl: ''}, configJson);
 
@@ -52,7 +52,7 @@
 
         /**
          * Downloads the list of available source languages from the server
-         * @param projectId The id of the project who's source languages will be downloaded
+         * @param projectId The id of the project whose source languages will be downloaded
          */
         _this.downloadSourceLanguageList = function (projectId) {
             return new Promise(function (resolve, reject) {
@@ -76,7 +76,7 @@
 
         /**
          * Downloads the list of available resources from the server
-         * @param projectId The id of the project who's source languages will be downloaded
+         * @param projectId The id of the project whose source languages will be downloaded
          * @param sourceLanguageId The id of the source language who's resources will be downloaded
          */
         _this.downloadResourceList = function (projectId, sourceLanguageId) {

@@ -3,7 +3,7 @@
 ;(function () {
 
     let assert = require('assert');
-    let rimraf = require('rimraf');
+    //let rimraf = require('rimraf');
     let Configurator = require('../../app/js/configurator').Configurator;
     let Navigator = require('../../app/js/navigator').Navigator;
     let Reporter = require('../../app/js/reporter').Reporter;

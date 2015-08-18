@@ -4,57 +4,42 @@
 
 var assert = require('assert');
 var uploader = require('../../app/js/uploader');
+var User = require('../../app/js/user');
 
 ;(function () {
     'use strict';
 
     describe('@Uploader', function () {
-
-        after(function () {
+        after(function (done) {
             uploader.disconnect();
+            done();
         });
-
-        describe('@setPort', function () {
-            it('should set the host of the uploader', function () {
-                var key =  'ts.door43.org';
-                uploader.setHost(key);
-                var results = uploader.getServerInfo().host;
-                assert.equal(results, key);
-            });
-        });
-
-        describe('@setPort', function () {
-            it('should set the port of the uploader', function () {
-                var key =  '9095';
-                uploader.setPort(key);
-                var results = uploader.getServerInfo().port;
-                assert.equal(results, key);
-            });
-        });
-
-        describe('@connect', function () {
-            it('should attempt to connect to the server', function () {
+        describe('@register', function () {
+            it('should register with the server', function (done) {
                 var key =  'done';
-                uploader.connect(function (data) {
+                uploader.register('ts.door43.org', 9095, 'Random', function (data) {
                     if (data.error) {
                         assert.fail(true, false, data.error);
+                        done();
                     } else {
                         assert.equal(data.ok, key);
+                        done();
                     }
                 });
             });
         });
-
-        describe('@setServerInfo', function () {
-            it('should set the port and host at the same time', function () {
-                var host =  'hello';
-                var port =  '101';
-                uploader.setServerInfo({'host': host, 'port': port});
-                var results = uploader.getServerInfo();
-                assert.equal(results.port, port);
-                assert.equal(results.host, host);
+        describe('@verifyProfile', function () {
+            it('should make sure a profile has a name and email', function () {
+                var user = new User.instance({
+                    profilesDirectory: 'unit_tests/user/data/',
+                    username: 'username',
+                    password: 'password'
+                });
+                user.setEmail('test@example.com');
+                user.setName('Tester');
+                var returned = uploader.verifyProfile(user);
+                assert.equal(returned, true);
             });
         });
     });
-
 })();

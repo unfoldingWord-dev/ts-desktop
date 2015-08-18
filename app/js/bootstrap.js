@@ -209,10 +209,7 @@
         },
 
         initializeUploader: function () {
-            uploader.setServerInfo({
-                'host': configurator.getString('authServer'),
-                'port': configurator.getString('authServerPort')
-            });
+
         },
 
         init: function () {

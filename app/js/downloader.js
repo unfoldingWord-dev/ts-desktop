@@ -4,6 +4,7 @@
 
     let request = require('request');
     let _ = require('lodash');
+    let url = require('url');
 
     /**
      *
@@ -35,7 +36,7 @@
          */
         _this.downloadProjectList = function () {
             return new Promise(function (resolve, reject) {
-                var catalogApiUrl = _this.config.apiUrl;
+                let catalogApiUrl = _this.config.apiUrl;
                 request(catalogApiUrl, function (error, response, catalogJson) {
                     if (!error && response.statusCode === 200) {
                         if (downloadIndex.indexProjects(catalogJson)) {
@@ -56,11 +57,14 @@
          */
         _this.downloadSourceLanguageList = function (projectId) {
             return new Promise(function (resolve, reject) {
-                var catalogApiUrl = getUrlFromObj(
+                let catalogApiUrl = getUrlFromObj(
                     downloadIndex.getProject(projectId),
                     'lang_catalog'
                 );
-                request(catalogApiUrl, function (error, response, catalogJson) {
+                let metaObj = {
+                    'date_modified': url.parse(catalogApiUrl, true).query
+                };
+                request(catalogApiUrl, function (error, response, catalogJson, metaObj) {
                     if (!error && response.statusCode === 200) {
                         if (downloadIndex.indexSourceLanguages(projectId, catalogJson)) {
                             resolve();
@@ -81,13 +85,16 @@
          */
         _this.downloadResourceList = function (projectId, sourceLanguageId) {
             return new Promise(function (resolve, reject) {
-                var catalogApiUrl = getUrlFromObj(
+                let catalogApiUrl = getUrlFromObj(
                     downloadIndex.getSourceLanguage(projectId, sourceLanguageId),
                     'res_catalog'
                 );
+                let metaObj = {
+                    'date_modified': url.parse(catalogApiUrl, true).query
+                };
                 request(catalogApiUrl, function (error, response, catalogJson) {
                     if (!error && response.statusCode === 200) {
-                        if (downloadIndex.indexResources(projectId, sourceLanguageId, catalogJson)) {
+                        if (downloadIndex.indexResources(projectId, sourceLanguageId, catalogJson, metaObj)) {
                             resolve();
                         } else {
                             reject();
@@ -107,7 +114,7 @@
          */
         _this.downloadSource = function (projectId, sourceLanguageId, resourceId) {
             return new Promise(function (resolve, reject) {
-                var catalogApiUrl = getUrlFromObj(
+                let catalogApiUrl = getUrlFromObj(
                     downloadIndex.getResource(projectId, sourceLanguageId, resourceId),
                     'source'
                 );
@@ -133,7 +140,7 @@
          */
         _this.downloadTerms = function (projectId, sourceLanguageId, resourceId) {
             return new Promise(function (resolve, reject) {
-                var catalogApiUrl = getUrlFromObj(
+                let catalogApiUrl = getUrlFromObj(
                     downloadIndex.getResource(projectId, sourceLanguageId, resourceId),
                     'terms'
                 );
@@ -159,7 +166,7 @@
          */
         _this.downloadNotes = function (projectId, sourceLanguageId, resourceId) {
             return new Promise(function (resolve, reject) {
-                var catalogApiUrl = getUrlFromObj(
+                let catalogApiUrl = getUrlFromObj(
                     downloadIndex.getResource(projectId, sourceLanguageId, resourceId),
                     'notes'
                 );
@@ -185,7 +192,7 @@
          */
         _this.downloadCheckingQuestions = function (projectId, sourceLanguageId, resourceId) {
             return new Promise(function (resolve, reject) {
-                var catalogApiUrl = getUrlFromObj(
+                let catalogApiUrl = getUrlFromObj(
                     downloadIndex.getResource(projectId, sourceLanguageId, resourceId),
                     'checking_questions'
                 );

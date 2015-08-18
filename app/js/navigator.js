@@ -100,7 +100,7 @@
                             downloadSourceLanguageList(task.projectId, callback);
                         }, config.asyncLimit);
                         queue.drain = function () {
-                            //serverIndex.mergeIndex(downloadIndex);
+                            serverIndex.mergeIndex(downloadIndex);
                             resolve(serverIndex, asyncState.availableUpdates);
                         };
                         for (let projectId of downloadIndex.getProjects()) {

@@ -186,12 +186,14 @@
                 md5Path = path.join(md5Path, subFolder);
             }
             let fullPath = path.join(_this.rootPath, md5Path);
-            let files = fs.readdirSync(fullPath);
             let items = [];
-            for (let x in files) {
-                if (files.hasOwnProperty(x)) {
-                    if (files[x] !== '.DS_Store' && files[x] !== 'meta.json' && files[x] !== 'chapter.json') {
-                        items.push(files[x].replace('.json', ''));
+            if(fs.existsSync(fullPath)) {
+                let files = fs.readdirSync(fullPath);
+                for (let x in files) {
+                    if (files.hasOwnProperty(x)) {
+                        if (files[x] !== '.DS_Store' && files[x] !== 'meta.json' && files[x] !== 'chapter.json') {
+                            items.push(files[x].replace('.json', ''));
+                        }
                     }
                 }
             }
@@ -293,14 +295,36 @@
                     _this.deleteProject(projectId);
                 }
                 // insert project
-                // TODO: update project catalog meta
-                // TODO: reconstruct the project
-                let projectsCatalogPath = path.join(sourceDirPath, 'projects_catalog.link');
-                let md5Hash = openFile(projectsCatalogPath);
-                let dateModified = newProject['date_modified'] > _this.getProjectMeta(projectId, 'date_modified') ? newProject['date_modified'] : _this.getProjectMeta(projectId, 'date_modified');
-                indexItems(md5Hash, projectsCatalogPath, 'simple', JSON.stringify([newProject]), {
-                    'date_modified': dateModified
-                });
+                // TODO: update the project meta
+                _this.indexProjects(JSON.stringify([newProject]));
+                for(let sourceLanguageId of index.getSourceLanguages(projectId)) {
+                    // TODO: update the source language meta
+                    // insert source language
+                    let sourceLanguageJson = JSON.stringify([index.getSourceLanguage(projectId, sourceLanguageId)]);
+                    _this.indexSourceLanguages(projectId, sourceLanguageJson);
+                    for(let resourceId of index.getResources(projectId, sourceLanguageId)) {
+                        // TODO: update the resource meta
+                        let resourceJson = JSON.stringify([index.getResource(projectId, sourceLanguageId, resourceId)]);
+                        _this.indexResources(projectId, sourceLanguageId, resourceJson);
+
+                        let questions = index.getQuestions(projectId, sourceLanguageId, resourceId);
+                        if (questions !== null) {
+                            throw new Error('merging questions has not been implemented yet');
+                        }
+                        let notes =index.getNotes(projectId, sourceLanguageId, resourceId);
+                        if (notes !== null) {
+                            throw new Error('merging notes has not been implemented yet');
+                        }
+                        let terms =index.getTerms(projectId, sourceLanguageId, resourceId);
+                        if (terms !== null) {
+                            throw new Error('merging terms has not been implemented yet');
+                        }
+                        for(let chapterId of index.getChapters(projectId, sourceLanguageId, resourceId)) {
+                            chapterId = chapterId;
+                            throw  new Error('merging chapters has not been implemented yet');
+                        }
+                    }
+                }
             }
         };
 

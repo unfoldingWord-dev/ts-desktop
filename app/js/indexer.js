@@ -5,6 +5,7 @@
     let fs = require('fs');
     let path = require('path');
     let mkdirp = require('mkdirp');
+    let rimraf = require('rimraf');
     let md5 = require('md5');
     let _ = require('lodash');
     let raiseWithContext = require('./lib/util').raiseWithContext;
@@ -45,6 +46,18 @@
                 }
             }
             return fileContents;
+        }
+
+        function deleteFile(filePath) {
+            let fullPath = path.join(_this.rootPath, filePath);
+            if(fs.existsSync(fullPath)) {
+                let stats = fs.lstatSync(fullPath);
+                if(stats.isDirectory()) {
+                    rimraf(fullPath);
+                } else {
+                    fs.unlinkSync(fullPath);
+                }
+            }
         }
 
         function openJson (filePath) {
@@ -94,19 +107,17 @@
             saveJson(linksJsonPath, links);
         }
 
-        //TODO: activate later when we have a functions that uses this
-        /** /
         function decrementLink(md5Hash) {
             let links = openJson(linksJsonPath);
             if (md5Hash in links) {
                 links[md5Hash]--;
             }
             if (links.md5Hash<1) {
-                // TODO: delete linked folder
+                let md5Path = path.join(dataDirPath, md5Hash);
+                rimraf(md5Path);
             }
             saveFile(linksJsonPath, JSON.stringify(links));
         }
-         /**/
 
         function indexItems (md5Hash, catalogLinkFile, catalogType, catalogJson, metaObj) {
             let items = JSON.parse(catalogJson);
@@ -162,6 +173,9 @@
         }
 
         function getItemsArray (itemObj, urlProp, subFolder) {
+            if(itemObj === null) {
+                return [];
+            }
             let catalogApiUrl = getUrlFromObj(
                 itemObj,
                 urlProp
@@ -187,6 +201,108 @@
         function getUrlFromObj (itemObj, urlProp) {
             return itemObj[urlProp].split('?')[0];
         }
+
+        function deleteResource(projectId, sourceLanguageId, resourceId) {
+            let questions = _this.getQuestions(projectId, sourceLanguageId, resourceId);
+            if (questions !== null) {
+                throw new Error('deleting questions has not been implemented yet');
+            }
+            let notes =_this.getNotes(projectId, sourceLanguageId, resourceId);
+            if (notes !== null) {
+                throw new Error('deleting notes has not been implemented yet');
+            }
+            let terms =_this.getTerms(projectId, sourceLanguageId, resourceId);
+            if (terms !== null) {
+                throw new Error('deleting terms has not been implemented yet');
+            }
+            for(let chapterId of _this.getChapters(projectId, sourceLanguageId, resourceId)) {
+                chapterId = chapterId;
+                throw  new Error('deleting chapters has not been implemented yet');
+            }
+
+            // delete resource
+            let resourceCatalogPath = path.join(sourceDirPath, projectId, sourceLanguageId, 'resources_catalog.link');
+            let md5Hash = openFile(resourceCatalogPath);
+            if (md5Hash !== null) {
+                let hashPath = path.join(dataDirPath, md5Hash);
+                let resourcePath = path.join(hashPath, resourceId + '.json');
+                deleteFile(resourcePath);
+
+                // delete empty resource catalog
+                let files = fs.readdirSync(path.join(_this.rootPath, hashPath));
+                if (_.size(files) <= 0 || _.size(files) === 1 && files[0] === 'meta.json') {
+                    decrementLink(md5Hash);
+                    deleteFile(resourceCatalogPath);
+                }
+            }
+        }
+
+        _this.deleteSourceLanguage = function(projectId, sourceLanguageId) {
+            for (let resourceId of _this.getResources(projectId, sourceLanguageId)) {
+                deleteResource(projectId, sourceLanguageId, resourceId);
+            }
+            // delete source language
+            let languagesCatalogPath = path.join(sourceDirPath, projectId, 'languages_catalog.link');
+            let md5Hash = openFile(languagesCatalogPath);
+            if (md5Hash !== null) {
+                let hashPath = path.join(dataDirPath, md5Hash);
+                let sourceLanguagePath = path.join(hashPath, sourceLanguageId + '.json');
+                deleteFile(sourceLanguagePath);
+
+                // delete empty language catalog
+                let files = fs.readdirSync(path.join(_this.rootPath, hashPath));
+                if (_.size(files) <= 0 || _.size(files) === 1 && files[0] === 'meta.json') {
+                    decrementLink(md5Hash);
+                    deleteFile(languagesCatalogPath);
+                }
+            }
+        };
+
+        _this.deleteProject = function(projectId) {
+            for (let sourceLanguageId of _this.getSourceLanguages(projectId)) {
+                _this.deleteSourceLanguage(projectId, sourceLanguageId);
+            }
+            // delete project
+            let md5Hash = openFile(path.join(sourceDirPath, 'projects_catalog.link'));
+            if (md5Hash !== null) {
+                let projectPath = path.join(dataDirPath, md5Hash, projectId + '.json');
+                deleteFile(projectPath);
+            }
+        };
+
+        /**
+         * Merges another index into this index
+         * @param index
+         */
+        _this.mergeIndex = function (index) {
+            for (let projectId of index.getProjects()) {
+                _this.mergeProject(index, projectId);
+            }
+        };
+
+        /**
+         * Merges a project from another index into this index
+         * @param index
+         * @param projectId
+         */
+        _this.mergeProject = function (index, projectId) {
+            let newProject = index.getProject(projectId);
+            if (newProject !== null) {
+                let existingProject = _this.getProject(projectId);
+                if (existingProject !== null) {
+                    _this.deleteProject(projectId);
+                }
+                // insert project
+                // TODO: update project catalog meta
+                // TODO: reconstruct the project
+                let projectsCatalogPath = path.join(sourceDirPath, 'projects_catalog.link');
+                let md5Hash = openFile(projectsCatalogPath);
+                let dateModified = newProject['date_modified'] > _this.getProjectMeta(projectId, 'date_modified') ? newProject['date_modified'] : _this.getProjectMeta(projectId, 'date_modified');
+                indexItems(md5Hash, projectsCatalogPath, 'simple', JSON.stringify([newProject]), {
+                    'date_modified': dateModified
+                });
+            }
+        };
 
         //public utility functions
         _this.getIndexId = function () {
@@ -399,12 +515,17 @@
         };
 
         _this.getResource = function (projectId, sourceLanguageId, resourceId) {
-            let md5Hash = openFile(path.join(sourceDirPath, projectId, sourceLanguageId, 'resources_catalog.link'));
-            if (md5Hash === null) {
+            let linkPath = path.join(sourceDirPath, projectId, sourceLanguageId, 'resources_catalog.link');
+            if(fs.existsSync(linkPath)) {
+                let md5Hash = openFile(linkPath);
+                if (md5Hash === null) {
+                    return null;
+                }
+                let catalogJson = openJson(path.join(dataDirPath, md5Hash, resourceId + '.json'));
+                return catalogJson;
+            } else {
                 return null;
             }
-            let catalogJson = openJson(path.join(dataDirPath, md5Hash, resourceId + '.json'));
-            return catalogJson;
         };
 
         _this.getResourceMeta = function (projectId, sourceLanguageId, resourceId, metaProp) {

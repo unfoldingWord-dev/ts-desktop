@@ -26,9 +26,9 @@
         let appIndex = new Indexer('app', indexConfig);
 
         // create downloader
-        let downloader = new Downloader({
+        let downloader = new Downloader(downloadIndex, {
             apiUrl: App.configurator.getValue('apiUrl')
-        }, downloadIndex);
+        });
 
         let downloadResourceList = function (projectId, sourceLanguageId, done) {
             let promise = downloader.downloadResourceList(projectId, sourceLanguageId);
@@ -77,6 +77,9 @@
                         });
                     }
                 }
+                if(queue.length() === 0) {
+                    done();
+                }
             });
             promise.catch(function () {
                 App.reporter.logWarning('Could not download the source language list for ' + projectId);
@@ -97,8 +100,7 @@
                             downloadSourceLanguageList(task.projectId, callback);
                         }, config.asyncLimit);
                         queue.drain = function () {
-                            
-
+                            //serverIndex.mergeIndex(downloadIndex);
                             resolve(serverIndex, asyncState.availableUpdates);
                         };
                         for (let projectId of downloadIndex.getProjects()) {
@@ -107,6 +109,9 @@
                             if (lastProjectModified === null || parseInt(lastProjectModified) < parseInt(latestProjectModified)) {
                                 queue.push({projectId: projectId});
                             }
+                        }
+                        if(queue.length() === 0) {
+                            resolve(serverIndex, asyncState.availableUpdates);
                         }
                     });
                     promise.catch(function () {

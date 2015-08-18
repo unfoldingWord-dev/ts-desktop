@@ -1,13 +1,13 @@
 /**
  * Created by Emmitt on 7/24/2015.
  */
-
-var assert = require('assert');
-var uploader = require('../../app/js/uploader');
-var User = require('../../app/js/user');
+'use strict';
 
 ;(function () {
-    'use strict';
+
+    let assert = require('assert');
+    let uploader = require('../../app/js/uploader');
+	let User = require('../../app/js/user')
 
     describe('@Uploader', function () {
         after(function (done) {

@@ -1,26 +1,25 @@
 /**
  * Created by Emmitt on 7/23/2015.
  */
-var net = require('net');
-var keypair = require('keypair');
-var jsonfile = require('jsonfile');
-var mkdirp = require('mkdirp');
-var getmac = require('getmac');
-var sshClient = require('ssh2').Client;
-var Git = require('nodegit');
-
+ 'use strict';
 ;(function () {
-    'use strict';
-    var key = 'ssh-rsa';
-    var defaultHost = 'ts.door43.org';
-    var defaultPort = 9095;
-    var targetDir = 'ssh/';
-    var targetFile = targetDir + 'pair.json';
-    var username = 'EmmittTest';
+	let net = require('net');
+	let keypair = require('keypair');
+	let jsonfile = require('jsonfile');
+	let mkdirp = require('mkdirp');
+	let getmac = require('getmac');
+	let sshClient = require('ssh2').Client;
+	let Git = require('nodegit');
 
-    var client;
-
-    var uploader = {
+    let key = 'ssh-rsa';
+    let defaultHost = 'ts.door43.org';
+    let defaultPort = 9095;
+    let targetDir = 'ssh/';
+    let targetFile = targetDir + 'pair.json';
+    let username = 'EmmittTest';
+	let client;
+	
+    let uploader = {
         register: function (host, port, deviceId, callback) {
             defaultHost = host;
             defaultPort = port;

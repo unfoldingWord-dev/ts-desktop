@@ -5,14 +5,13 @@
  */
 
 var gulp = require('gulp'),
-    mocha = require('gulp-mocha');
+    mocha = require('gulp-mocha'),
     jshint = require('gulp-jshint'),
     stylish = require('jshint-stylish'),
     jscs = require('gulp-jscs'),
     map = require('map-stream'),
     argv = require('yargs').argv,
     NwBuilder = require('nw-builder');
-require('harmonize')();
 
 var APP_NAME = 'translationStudio',
     JS_FILES = './app/js/**/*.js',

@@ -16,3 +16,4 @@ acceptance_tests/report.txt
 app/config/private.json
 app/logs/
 app/js/lib/index/
+index/

@@ -1,14 +1,13 @@
-/**
- * Created by joel on 6/23/2015.
- */
-var assert = require('assert');
+'use strict';
 
-(function () {
-    'use strict';
+;(function () {
+
+    let assert = require('assert');
 
     function getConfigurator () {
-        var configurator = require('../../app/js/configurator');
-        var config = require('./data/ts-config');
+        let Configurator = require('../../app/js/configurator').Configurator;
+        let configurator = new Configurator();
+        let config = require('./data/ts-config');
         configurator.setStorage({});
         configurator.loadConfig(config);
         return configurator;

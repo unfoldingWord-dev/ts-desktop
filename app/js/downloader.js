@@ -14,7 +14,7 @@
      * @returns {Downloader}
      * @constructor
      */
-    function Downloader (configJson, downloadIndex, appIndex) {
+    function Downloader (downloadIndex, configJson) {
         if (typeof configJson === 'undefined') {
             throw new Error('missing the indexer configuration parameter');
         }
@@ -22,9 +22,6 @@
         //reassign this to _this, set config
         let _this = this;
         _this.config = _.merge({apiUrl: ''}, configJson);
-
-        //PLACEHOLDER: remove after appIndex is used somewhere
-        appIndex = appIndex;
 
         //internal functions
         function getUrlFromObj (itemObj, urlProp) {

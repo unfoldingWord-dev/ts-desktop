@@ -62,5 +62,21 @@
             "mutable": false,
             "type": "string"
         }
+    },
+    {
+        "name": "i18nLibrary",
+        "value": "app/i18n/",
+        "meta": {
+            "mutable": false,
+            "type": "string"
+        }
+    },
+    {
+        "name": "asyncLimit",
+        "value": 10,
+        "meta": {
+            "mutable": false,
+            "type": "number"
+        }
     }
 ]

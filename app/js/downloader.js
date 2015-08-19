@@ -89,11 +89,7 @@
                 let metaObj = {
                     'date_modified': url.parse(catalogApiUrl, true).query
                 };
-                request({
-                    method: 'GET',
-                    uri: catalogApiUrl,
-                    timeout: 10000
-                }, function (error, response, catalogJson) {
+                request(catalogApiUrl, function (error, response, catalogJson) {
                     if (!error && response.statusCode === 200) {
                         if (downloadIndex.indexResources(projectId, sourceLanguageId, catalogJson, metaObj)) {
                             resolve();

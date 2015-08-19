@@ -34,12 +34,12 @@
             let promise = downloader.downloadResourceList(projectId, sourceLanguageId);
             promise.then(function () {
                 for (let resourceId of downloadIndex.getResources(projectId, sourceLanguageId)) {
-                    let latestResourceModified = downloadIndex.getResource(projectId, sourceLanguageId, resourceId)['date_modified'];
+                    let latestResourceModified = downloadIndex.getResource(projectId, sourceLanguageId, resourceId).date_modified;
                     // TRICKY: we must use the app index to check for updates
                     let localResource = appIndex.getResource(projectId, sourceLanguageId, resourceId);
                     let localResourceModified = null;
-                    if(localResource !== null) {
-                        localResourceModified = localResource['date_modified'];
+                    if (localResource !== null) {
+                        localResourceModified = localResource.date_modified;
                     }
                     if (localResourceModified === null || parseInt(localResourceModified) < parseInt(latestResourceModified)) {
                         // build update list
@@ -72,11 +72,11 @@
                     done();
                 };
                 for (let sourceLanguageId of downloadIndex.getSourceLanguages(projectId)) {
-                    let latestSourceLanguageModified = downloadIndex.getSourceLanguage(projectId, sourceLanguageId)['date_modified'];
+                    let latestSourceLanguageModified = downloadIndex.getSourceLanguage(projectId, sourceLanguageId).date_modified;
                     let lastSourceLanguage = serverIndex.getSourceLanguage(projectId, sourceLanguageId);
                     let lastSourceLanguageModified = null;
-                    if(lastSourceLanguage !== null) {
-                        lastSourceLanguageModified = lastSourceLanguage['date_modified'];
+                    if (lastSourceLanguage !== null) {
+                        lastSourceLanguageModified = lastSourceLanguage.date_modified;
                     }
                     if (lastSourceLanguageModified === null || parseInt(lastSourceLanguageModified) < parseInt(latestSourceLanguageModified)) {
                         queue.push({
@@ -85,7 +85,7 @@
                         });
                     }
                 }
-                if(queue.length() === 0) {
+                if (queue.length() === 0) {
                     done();
                 }
             });
@@ -112,17 +112,17 @@
                             resolve(serverIndex, asyncState.availableUpdates);
                         };
                         for (let projectId of downloadIndex.getProjects()) {
-                            let latestProjectModified = downloadIndex.getProject(projectId)['date_modified'];
+                            let latestProjectModified = downloadIndex.getProject(projectId).date_modified;
                             let lastProject = serverIndex.getProject(projectId);
                             let lastProjectModified = null;
-                            if(lastProject !== null) {
-                                lastProjectModified = lastProject['date_modified'];
+                            if (lastProject !== null) {
+                                lastProjectModified = lastProject.date_modified;
                             }
                             if (lastProjectModified === null || parseInt(lastProjectModified) < parseInt(latestProjectModified)) {
                                 queue.push({projectId: projectId});
                             }
                         }
-                        if(queue.length() === 0) {
+                        if (queue.length() === 0) {
                             resolve(serverIndex, asyncState.availableUpdates);
                         }
                     });

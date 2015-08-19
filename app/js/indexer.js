@@ -48,11 +48,11 @@
             return fileContents;
         }
 
-        function deleteFile(filePath) {
+        function deleteFile (filePath) {
             let fullPath = path.join(_this.rootPath, filePath);
-            if(fs.existsSync(fullPath)) {
+            if (fs.existsSync(fullPath)) {
                 let stats = fs.lstatSync(fullPath);
-                if(stats.isDirectory()) {
+                if (stats.isDirectory()) {
                     rimraf(fullPath);
                 } else {
                     fs.unlinkSync(fullPath);
@@ -107,12 +107,12 @@
             saveJson(linksJsonPath, links);
         }
 
-        function decrementLink(md5Hash) {
+        function decrementLink (md5Hash) {
             let links = openJson(linksJsonPath);
             if (md5Hash in links) {
                 links[md5Hash]--;
             }
-            if (links.md5Hash<1) {
+            if (links.md5Hash < 1) {
                 let md5Path = path.join(dataDirPath, md5Hash);
                 rimraf(md5Path);
             }
@@ -173,7 +173,7 @@
         }
 
         function getItemsArray (itemObj, urlProp, subFolder) {
-            if(itemObj === null) {
+            if (itemObj === null) {
                 return [];
             }
             let catalogApiUrl = getUrlFromObj(
@@ -187,7 +187,7 @@
             }
             let fullPath = path.join(_this.rootPath, md5Path);
             let items = [];
-            if(fs.existsSync(fullPath)) {
+            if (fs.existsSync(fullPath)) {
                 let files = fs.readdirSync(fullPath);
                 for (let x in files) {
                     if (files.hasOwnProperty(x)) {
@@ -204,20 +204,20 @@
             return itemObj[urlProp].split('?')[0];
         }
 
-        function deleteResource(projectId, sourceLanguageId, resourceId) {
+        function deleteResource (projectId, sourceLanguageId, resourceId) {
             let questions = _this.getQuestions(projectId, sourceLanguageId, resourceId);
             if (questions !== null) {
                 throw new Error('deleting questions has not been implemented yet');
             }
-            let notes =_this.getNotes(projectId, sourceLanguageId, resourceId);
+            let notes = _this.getNotes(projectId, sourceLanguageId, resourceId);
             if (notes !== null) {
                 throw new Error('deleting notes has not been implemented yet');
             }
-            let terms =_this.getTerms(projectId, sourceLanguageId, resourceId);
+            let terms = _this.getTerms(projectId, sourceLanguageId, resourceId);
             if (terms !== null) {
                 throw new Error('deleting terms has not been implemented yet');
             }
-            for(let chapterId of _this.getChapters(projectId, sourceLanguageId, resourceId)) {
+            for (let chapterId of _this.getChapters(projectId, sourceLanguageId, resourceId)) {
                 chapterId = chapterId;
                 throw  new Error('deleting chapters has not been implemented yet');
             }
@@ -239,7 +239,7 @@
             }
         }
 
-        _this.deleteSourceLanguage = function(projectId, sourceLanguageId) {
+        _this.deleteSourceLanguage = function (projectId, sourceLanguageId) {
             for (let resourceId of _this.getResources(projectId, sourceLanguageId)) {
                 deleteResource(projectId, sourceLanguageId, resourceId);
             }
@@ -260,7 +260,7 @@
             }
         };
 
-        _this.deleteProject = function(projectId) {
+        _this.deleteProject = function (projectId) {
             for (let sourceLanguageId of _this.getSourceLanguages(projectId)) {
                 _this.deleteSourceLanguage(projectId, sourceLanguageId);
             }
@@ -297,12 +297,12 @@
                 // insert project
                 // TODO: update the project meta
                 _this.indexProjects(JSON.stringify([newProject]));
-                for(let sourceLanguageId of index.getSourceLanguages(projectId)) {
+                for (let sourceLanguageId of index.getSourceLanguages(projectId)) {
                     // TODO: update the source language meta
                     // insert source language
                     let sourceLanguageJson = JSON.stringify([index.getSourceLanguage(projectId, sourceLanguageId)]);
                     _this.indexSourceLanguages(projectId, sourceLanguageJson);
-                    for(let resourceId of index.getResources(projectId, sourceLanguageId)) {
+                    for (let resourceId of index.getResources(projectId, sourceLanguageId)) {
                         // TODO: update the resource meta
                         let resourceJson = JSON.stringify([index.getResource(projectId, sourceLanguageId, resourceId)]);
                         _this.indexResources(projectId, sourceLanguageId, resourceJson);
@@ -311,15 +311,15 @@
                         if (questions !== null) {
                             throw new Error('merging questions has not been implemented yet');
                         }
-                        let notes =index.getNotes(projectId, sourceLanguageId, resourceId);
+                        let notes = index.getNotes(projectId, sourceLanguageId, resourceId);
                         if (notes !== null) {
                             throw new Error('merging notes has not been implemented yet');
                         }
-                        let terms =index.getTerms(projectId, sourceLanguageId, resourceId);
+                        let terms = index.getTerms(projectId, sourceLanguageId, resourceId);
                         if (terms !== null) {
                             throw new Error('merging terms has not been implemented yet');
                         }
-                        for(let chapterId of index.getChapters(projectId, sourceLanguageId, resourceId)) {
+                        for (let chapterId of index.getChapters(projectId, sourceLanguageId, resourceId)) {
                             chapterId = chapterId;
                             throw  new Error('merging chapters has not been implemented yet');
                         }

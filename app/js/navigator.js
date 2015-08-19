@@ -36,7 +36,11 @@
                 for (let resourceId of downloadIndex.getResources(projectId, sourceLanguageId)) {
                     let latestResourceModified = downloadIndex.getResource(projectId, sourceLanguageId, resourceId)['date_modified'];
                     // TRICKY: we must use the app index to check for updates
-                    let localResourceModified = appIndex.getResource(projectId, sourceLanguageId, resourceId)['date_modified'];
+                    let localResource = appIndex.getResource(projectId, sourceLanguageId, resourceId);
+                    let localResourceModified = null;
+                    if(localResource !== null) {
+                        localResourceModified = localResource['date_modified'];
+                    }
                     if (localResourceModified === null || parseInt(localResourceModified) < parseInt(latestResourceModified)) {
                         // build update list
                         if (typeof asyncState.availableUpdates[projectId] === 'undefined') {
@@ -69,7 +73,11 @@
                 };
                 for (let sourceLanguageId of downloadIndex.getSourceLanguages(projectId)) {
                     let latestSourceLanguageModified = downloadIndex.getSourceLanguage(projectId, sourceLanguageId)['date_modified'];
-                    let lastSourceLanguageModified = serverIndex.getSourceLanguage(projectId, sourceLanguageId)['date_modified'];
+                    let lastSourceLanguage = serverIndex.getSourceLanguage(projectId, sourceLanguageId);
+                    let lastSourceLanguageModified = null;
+                    if(lastSourceLanguage !== null) {
+                        lastSourceLanguageModified = lastSourceLanguage['date_modified'];
+                    }
                     if (lastSourceLanguageModified === null || parseInt(lastSourceLanguageModified) < parseInt(latestSourceLanguageModified)) {
                         queue.push({
                             projectId: projectId,
@@ -105,7 +113,11 @@
                         };
                         for (let projectId of downloadIndex.getProjects()) {
                             let latestProjectModified = downloadIndex.getProject(projectId)['date_modified'];
-                            let lastProjectModified = serverIndex.getProject(projectId)['date_modified'];
+                            let lastProject = serverIndex.getProject(projectId);
+                            let lastProjectModified = null;
+                            if(lastProject !== null) {
+                                lastProjectModified = lastProject['date_modified'];
+                            }
                             if (lastProjectModified === null || parseInt(lastProjectModified) < parseInt(latestProjectModified)) {
                                 queue.push({projectId: projectId});
                             }

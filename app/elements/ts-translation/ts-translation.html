@@ -1,5 +1,10 @@
 <!-- ts-translation -->
 
+<!-- <link rel="import" href="../../components/polymer/polymer.html"> -->
+<!-- <link rel="import" href="../../components/paper-tabs/paper-tabs.html"> -->
+<!-- <link rel="import" href="../../components/iron-pages/iron-pages.html"> -->
+<link rel="import" href="../../components/iron-icons/av-icons.html">
+
 <dom-module id="ts-translation">
 
    <style is="custom-style">
@@ -13,6 +18,7 @@
          width: 100%;
          height: 100%;
          position: relative;
+         z-index: 0;
          padding-left: 20px;
          padding-right: 20px;
       }
@@ -40,12 +46,12 @@
          -moz-box-shadow: 0 2px 6px 0 rgba(0,0,0,0.5);
          box-shadow: 0 2px 6px 0 rgba(0,0,0,0.5);
          border-radius: 2px;
-         font-family:
       }
 
       .translation-source {
          margin-right: 10px;
       }
+
       .translation {
          margin-left: 10px;
       }
@@ -55,16 +61,44 @@
          border-bottom: 1px solid rgba(0,0,0,0.25);
       }
 
+      .icon-container {
+         width: 64px;
+         height: 100%;
+         display: inline-block;
+         float: left;
+      }
+
+      .icon-container iron-icon {
+         position: relative;
+         top: 50%;
+         left: 50%;
+         -webkit-transform: translate(-50%, -50%);
+         -moz-transform: translate(-50%, -50%);
+         transform: translate(-50%, -50%);
+         cursor: pointer;
+         color: var(--greyed-out-primary);
+      }
+
+      .icon-container iron-icon:hover {
+         color: var(--highlight-primary);
+      }
+
+      paper-tabs {
+         width: calc(100% - 64px);
+         display: inline-block;
+         float: left;
+      }
+
       .panel-body {
          height: calc(100% - 4em - 1px);
       }
 
-      paper-tabs, iron-pages, .translation-tab, .source-page {
+      paper-tabs, iron-pages {
          height: 100%;
       }
 
-      paper-icon-button::shadow paper-icon{
-         width: 12px;
+      iron-pages {
+         overflow: auto;
       }
 
       paper-tab {
@@ -77,31 +111,65 @@
          color: var(--highlight-primary);
       }
 
+      .source-page {
+         padding: 1rem 0.75rem;
+      }
+
+      .verse {
+         padding: 0;
+         margin: 0;
+         display: inline;
+         line-height: 1.75;
+      }
+
+      .verse-number {
+         color: var(--greyed-out-primary);
+         font-size: small;
+         vertical-align: top;
+      }
+
+      .icon32 {
+         --iron-icon-height: 32px;
+         --iron-icon-width: 32px;
+      }
+
 
    </style>
 
    <template>
+
       <div class="container">
+
          <div class="translation-source">
             <div class="panel-header">
-               <paper-tabs select="{{ selected }}" selected="0" scrollable="true" noink="true" hideScrollButtons="false">
+               <paper-tabs id="translation-tabs" selected="{{ selected }}" noink="true" hideScrollButtons="true">
                   <paper-tab class="translation-tab">Translation 1</paper-tab>
-                  <paper-tab class="translation-tab">Translation 2</paper-tab>
-                  <paper-tab class="translation-tab">Translation 3</paper-tab>
+                  <!-- <paper-tab class="translation-tab">Translation 2</paper-tab>
+                  <paper-tab class="translation-tab">Translation 3</paper-tab> -->
                </paper-tabs>
+               <div class="icon-container">
+                  <iron-icon icon="av:library-add" class="icon32"></iron-icon>
+               </div>
             </div>
             <div class="panel-body">
-               <iron-pages select="{{ selected }}">
-                  <div class="source-page">Page 1</div>
-                  <div class="source-page">Page 2</div>
-                  <div class="source-page">Page 3</div>
+               <iron-pages id="source-pages" selected="[[ selected ]]">
+                  <div class="source-page">
+                     <p class="verse"><span class="verse-number">1</span>The former book I wrote, O Theophilus, told all that Jesus began to do and to teach,</p>
+                     <p class="verse"><span class="verse-number">2</span>until the day that he was received up. This was after he had given a command through the Holy Spirit to his chosen apostles,</p>
+                     <p class="verse"><span class="verse-number">3</span>the ones to whom he appeared alive after his suffering. For forty days he kept appearing to them, saying things about the kingdom of God</p>
+                  </div>
+                  <!-- <div class="source-page">Page 2</div>
+                  <div class="source-page">Page 3</div> -->
                </iron-pages>
             </div>
          </div>
+
          <div class="translation">
             <div class="panel-header"></div>
          </div>
+
       </div>
+
    </template>
 
 </dom-module>
@@ -109,6 +177,14 @@
 <script>
    Polymer({
       is: 'ts-translation',
+
+      properties: {
+         selected: {
+            type: Number,
+            value: 0
+         }
+      },
+
       ready: function() {
 
       }

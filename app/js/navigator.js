@@ -54,8 +54,8 @@
                 }
                 done();
             });
-            promise.catch(function () {
-                App.reporter.logWarning('Could not download the resource list for ' + projectId + ':' + sourceLanguageId);
+            promise.catch(function (err) {
+                App.reporter.logWarning(err.message + ': Could not download the resource list for ' + projectId + ':' + sourceLanguageId);
                 done();
             });
         };
@@ -89,8 +89,8 @@
                     done();
                 }
             });
-            promise.catch(function () {
-                App.reporter.logWarning('Could not download the source language list for ' + projectId);
+            promise.catch(function (err) {
+                App.reporter.logWarning(err.message + ': Could not download the source language list for ' + projectId);
                 done();
             });
         };
@@ -126,8 +126,8 @@
                             resolve(serverIndex, asyncState.availableUpdates);
                         }
                     });
-                    promise.catch(function () {
-                        App.reporter.logWarning('Could not download project list');
+                    promise.catch(function (err) {
+                        App.reporter.logWarning(err.message + ': Could not download project list');
                         reject();
                     });
                 });

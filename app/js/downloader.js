@@ -39,10 +39,10 @@
                         if (downloadIndex.indexProjects(catalogJson)) {
                             resolve();
                         } else {
-                            reject();
+                            reject(new Error('could not index the projects'));
                         }
                     } else {
-                        reject();
+                        reject(error, response);
                     }
                 });
             });
@@ -66,10 +66,10 @@
                         if (downloadIndex.indexSourceLanguages(projectId, catalogJson, metaObj)) {
                             resolve();
                         } else {
-                            reject();
+                            reject(new Error('could not index the source languages'));
                         }
                     } else {
-                        reject();
+                        reject(error, response);
                     }
                 });
             });
@@ -89,15 +89,19 @@
                 let metaObj = {
                     'date_modified': url.parse(catalogApiUrl, true).query
                 };
-                request(catalogApiUrl, function (error, response, catalogJson) {
+                request({
+                    method: 'GET',
+                    uri: catalogApiUrl,
+                    timeout: 10000
+                }, function (error, response, catalogJson) {
                     if (!error && response.statusCode === 200) {
                         if (downloadIndex.indexResources(projectId, sourceLanguageId, catalogJson, metaObj)) {
                             resolve();
                         } else {
-                            reject();
+                            reject(new Error('could not index the resources'));
                         }
                     } else {
-                        reject();
+                        reject(error, response);
                     }
                 });
             });
@@ -120,10 +124,10 @@
                         if (downloadIndex.indexSource(projectId, sourceLanguageId, resourceId, catalogJson)) {
                             resolve();
                         } else {
-                            reject();
+                            reject(new Error('could not index the source'));
                         }
                     } else {
-                        reject();
+                        reject(error, response);
                     }
                 });
             });
@@ -146,10 +150,10 @@
                         if (downloadIndex.indexTerms(projectId, sourceLanguageId, resourceId, catalogJson)) {
                             resolve();
                         } else {
-                            reject();
+                            reject(new Error('could not index the terms'));
                         }
                     } else {
-                        reject();
+                        reject(error, response);
                     }
                 });
             });
@@ -172,10 +176,10 @@
                         if (downloadIndex.indexNotes(projectId, sourceLanguageId, resourceId, catalogJson)) {
                             resolve();
                         } else {
-                            reject();
+                            reject(new Error('could not index the notes'));
                         }
                     } else {
-                        reject();
+                        reject(error, response);
                     }
                 });
             });
@@ -198,10 +202,10 @@
                         if (downloadIndex.indexQuestions(projectId, sourceLanguageId, resourceId, catalogJson)) {
                             resolve();
                         } else {
-                            reject();
+                            reject(new Error('could not index the questions'));
                         }
                     } else {
-                        reject();
+                        reject(error, response);
                     }
                 });
             });

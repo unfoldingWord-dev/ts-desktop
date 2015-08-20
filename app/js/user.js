@@ -1,101 +1,91 @@
-/**
- * Created by Chris on 7/23/2015.
- */
+'use strict';
 
-var mkdirp = require('mkdirp');
-var utils = require('./lib/utils');
-var setPath = utils.setPath;
-var jsonfile = require('jsonfile');
-var md5 = require('md5');
-var fs = require('fs');
+;(function () {
 
-function User (args) {
-    'use strict';
+    let mkdirp = require('mkdirp');
+    let jsonfile = require('jsonfile');
+    let path = require('path');
+    let md5 = require('md5');
+    let fs = require('fs');
 
-    var _this = this;
-    var profilesDirectory = args.profilesDirectory;
-    var username = args.username;
-    var password = args.password;
+    function User (args) {
+        let profilesDirectory = args.profilesDirectory;
+        let username = args.username;
+        let password = args.password;
 
-    if (username === '' || username === null) {
-        throw new Error('Must supply a valid username');
+        if (username === '' || username === null) {
+            throw new Error('Must supply a valid username');
+        }
+
+        let hash = md5(username);
+        let targetDirectory = 'translationStudio/profiles/' + hash + '/';
+        let targetFile = path.join(profilesDirectory, targetDirectory, 'profile.json');
+        let storage = {
+            'username': username,
+            'password': password,
+            'profile': profilesDirectory,
+            'email': '',
+            'name': '',
+            'phone': ''
+        };
+
+        function saveData () {
+            try {
+                jsonfile.writeFileSync(targetFile, storage);
+            } catch (e) {
+                throw new Error('Could not write to file');
+            }
+            return true;
+        }
+
+        jsonfile.readFile(targetFile, function (err, obj) {
+            if (err === null) {
+                storage = obj;
+            } else {
+                mkdirp(path.join(profilesDirectory, targetDirectory), function () {
+                    saveData();
+                });
+            }
+        });
+
+
+        let user = {
+            setEmail: function (email) {
+                storage.email = email;
+            },
+            setName: function (name) {
+                storage.name = name;
+            },
+            setPhone: function (phone) {
+                storage.phone = phone;
+            },
+            getEmail: function () {
+                return storage.email;
+            },
+            getName: function () {
+                return storage.name;
+            },
+            getPhone: function () {
+                return storage.phone;
+            },
+            commit: function () {
+                return saveData();
+            },
+            destroy: function () {
+                let dir = path.join(profilesDirectory, targetDirectory);
+                if (fs.existsSync(targetFile)) {
+                    fs.unlinkSync(targetFile);
+                }
+                if (fs.existsSync(dir)) {
+                    fs.rmdirSync(dir);
+                }
+            },
+            getProfilePath: function () {
+                return targetFile;
+            }
+        };
+        return user;
     }
 
-    var hash = md5(username);
-    var targetDirectory = 'translationStudio/profiles/' + hash + '/';
-    var targetFile = profilesDirectory + targetDirectory + 'profile.json';
-    var storage = {
-        'username': username,
-        'password': password,
-        'profile': profilesDirectory,
-        'email': '',
-        'name': '',
-        'phone': ''
-    };
-
-    jsonfile.readFile(targetFile, function (err, obj) {
-        if (err === null) {
-            storage = obj;
-        } else {
-            mkdirp(setPath(targetDirectory, profilesDirectory), function () {
-                _this.saveData();
-            });
-        }
-    });
-
-    _this.saveData = function () {
-        try {
-            jsonfile.writeFileSync(targetFile, storage);
-        } catch (e) {
-            throw new Error('Could not write to file');
-        }
-        return true;
-    };
-
-    _this.setEmail = function (email) {
-        storage.email = email;
-    };
-
-    _this.setName = function (name) {
-        storage.name = name;
-    };
-
-    _this.setPhone = function (phone) {
-        storage.phone = phone;
-    };
-
-    _this.getEmail = function () {
-        return storage.email;
-    };
-
-    _this.getName = function () {
-        return storage.name;
-    };
-
-    _this.getPhone = function () {
-        return storage.phone;
-    };
-
-    _this.commit = function () {
-        return _this.saveData();
-    };
-
-    /**
-     * Delets the user profile from the disk
-     */
-    _this.destroy = function () {
-        var dir = setPath(targetDirectory, profilesDirectory);
-        if (fs.existsSync(targetFile)) {
-            fs.unlinkSync(targetFile);
-        }
-        if (fs.existsSync(dir)) {
-            fs.rmdirSync(dir);
-        }
-    };
-
-    _this.getProfilePath = function () {
-        return targetFile;
-    };
-}
-
-exports.instance = User;
+    exports.User = User;
+}());

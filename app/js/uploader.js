@@ -1,24 +1,22 @@
-/**
- * Created by Emmitt on 7/23/2015.
- */
-var net = require('net');
+'use strict';
 
 ;(function () {
-    'use strict';
 
-    var authServer = '';
-    var authServerPort = '';
+    let net = require('net');
 
-    var key = 'ssh-rsa key email@server.com';
-    var udid = 'udid';
-    var username = '';
+    let authServer = '';
+    let authServerPort = '';
 
-    var client;
+    let key = 'ssh-rsa key email@server.com';
+    let udid = 'udid';
+    let username = '';
 
-    var uploader = {
+    let client;
+
+    let uploader = {
         connect: function (callback) {
             client = net.createConnection({port: authServerPort, host: authServer}, function () {
-                var connectionJson = {'key': key, 'udid': udid, 'username': username};
+                let connectionJson = {'key': key, 'udid': udid, 'username': username};
                 client.write(JSON.stringify(connectionJson));
             });
             client.on('data', function (data) {

@@ -29,7 +29,9 @@
     "requireCamelCaseOrUpperCaseIdentifiers": true,
     "requireLineFeedAtFileEnd": true,
     "requireCapitalizedConstructors": true,
-    "requireDotNotation": true,
+    "requireDotNotation": {
+        "allExcept": [ "snake_case" ]
+    },
     "requireSpacesInForStatement": true,
     "requireSpaceBetweenArguments": true,
     "requireSpacesInFunctionExpression": {

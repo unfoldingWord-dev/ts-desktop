@@ -144,22 +144,22 @@
             <div class="panel-header">
                <paper-tabs id="translation-tabs" selected="{{ selected }}" noink="true" hideScrollButtons="true">
                   <paper-tab class="translation-tab">Translation 1</paper-tab>
-                  <!-- <paper-tab class="translation-tab">Translation 2</paper-tab>
-                  <paper-tab class="translation-tab">Translation 3</paper-tab> -->
+                  <!-- <paper-tab class="translation-tab">Translation 2</paper-tab> -->
+                  <!-- <paper-tab class="translation-tab">Translation 3</paper-tab> -->
                </paper-tabs>
                <div class="icon-container">
-                  <iron-icon icon="av:library-add" class="icon32"></iron-icon>
+                  <iron-icon icon="av:library-add" class="icon32" on-click="addSourceTab"></iron-icon>
                </div>
             </div>
             <div class="panel-body">
-               <iron-pages id="source-pages" selected="[[ selected ]]">
+               <iron-pages id="source-pages" selected="{{ selected }}">
                   <div class="source-page">
-                     <p class="verse"><span class="verse-number">1</span>The former book I wrote, O Theophilus, told all that Jesus began to do and to teach,</p>
-                     <p class="verse"><span class="verse-number">2</span>until the day that he was received up. This was after he had given a command through the Holy Spirit to his chosen apostles,</p>
-                     <p class="verse"><span class="verse-number">3</span>the ones to whom he appeared alive after his suffering. For forty days he kept appearing to them, saying things about the kingdom of God</p>
+                     <p class="verse"><span class="verse-number">1</span>{{ verse1 }}</p>
+                     <p class="verse"><span class="verse-number">2</span>{{ verse2 }}</p>
+                     <p class="verse"><span class="verse-number">3</span>{{ verse3 }}</p>
                   </div>
-                  <!-- <div class="source-page">Page 2</div>
-                  <div class="source-page">Page 3</div> -->
+                  <div class="source-page">Page 2</div>
+                  <!-- <div class="source-page">Page 3</div> -->
                </iron-pages>
             </div>
          </div>
@@ -182,7 +182,27 @@
          selected: {
             type: Number,
             value: 0
+         },
+         verse1: {
+            type: String,
+            value: "The former book I wrote, O Theophilus, told all that Jesus began to do and to teach,"
+         },
+         verse2: {
+            type: String,
+            value: "until the day that he was received up. This was after he had given a command through the Holy Spirit to his chosen apostles,"
+         },
+         verse3: {
+            type: String,
+            value: "the ones to whom he appeared alive after his suffering. For forty days he kept appearing to them, saying things about the kingdom of God"
          }
+      },
+
+      addSourceTab: function() {
+         // console.log(this.root);
+         var newTab = document.createElement('paper-tab');
+         // newTab.class = "translation-tab";
+         // newTab.innerHTML("Translation 2");
+         this.$.translation-tabs.appendChild(newTab);
       },
 
       ready: function() {

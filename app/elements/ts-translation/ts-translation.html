@@ -153,7 +153,6 @@
                   <template is="dom-repeat" items="{{ tabs }}" as="tab">
                      <div class="source-page">
                         <template is="dom-repeat" items="{{ tab.content }}" as="content">
-                           <!-- I want to do {{ index + 1 }}, but that doesn't work -->
                            <p class="verse"><span class="verse-number">{{ content.verse }}</span>{{ content.text }}</p>
                         </template>
                      </div>
@@ -181,6 +180,7 @@
             type: Array,
             value: [
                {
+                  // Title and content will be dynamic(?)
                   title: 'translation 1',
                   content: [
                      {
@@ -219,7 +219,9 @@
 
       addNewTab: function() {
          var newNumber = (this.tabs.length + 1).toString();
+         // This title will be dynamic(?)
          var title = 'translation ' + newNumber;
+         // This content will be dynamic
          var content = [
             {
                verse: 1,

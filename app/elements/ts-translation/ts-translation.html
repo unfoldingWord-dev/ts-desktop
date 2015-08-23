@@ -142,24 +142,24 @@
 
          <div class="translation-source">
             <div class="panel-header">
-               <paper-tabs id="translation-tabs" selected="{{ selected }}" noink="true" hideScrollButtons="true">
-                  <paper-tab class="translation-tab">Translation 1</paper-tab>
-                  <!-- <paper-tab class="translation-tab">Translation 2</paper-tab> -->
-                  <!-- <paper-tab class="translation-tab">Translation 3</paper-tab> -->
+               <!-- selected attribute below doesn't work because the elements are created afterwards -->
+               <paper-tabs id="translation-tabs" selected="{{ tabs.selected }}" noink>
+                  <template is="dom-repeat" items="{{ tabs.list }}" as="tab">
+                     <paper-tab class="translation-tab">{{ tab.title }}</paper-tab>
+                  </template>
                </paper-tabs>
                <div class="icon-container">
+                  <!-- can I directly call tabs.addOne()? I tried but didn't work -->
                   <iron-icon icon="av:library-add" class="icon32" on-click="addSourceTab"></iron-icon>
                </div>
             </div>
             <div class="panel-body">
-               <iron-pages id="source-pages" selected="{{ selected }}">
+               <iron-pages id="source-pages" selected="[[ tabs.selected ]]">
                   <div class="source-page">
                      <p class="verse"><span class="verse-number">1</span>{{ verse1 }}</p>
-                     <p class="verse"><span class="verse-number">2</span>{{ verse2 }}</p>
-                     <p class="verse"><span class="verse-number">3</span>{{ verse3 }}</p>
                   </div>
                   <div class="source-page">Page 2</div>
-                  <!-- <div class="source-page">Page 3</div> -->
+                  <div class="source-page">Page 3</div>
                </iron-pages>
             </div>
          </div>
@@ -179,9 +179,21 @@
       is: 'ts-translation',
 
       properties: {
-         selected: {
-            type: Number,
-            value: 0
+         tabs: {
+            type: Object,
+            value: {
+               list: [
+                  {'title': 'translation 1'},
+                  {'title': 'translation 2'}
+               ],
+               selected: 0,
+               // The function works, but the view needs to be refreshed somehow.
+               addOne: function () {
+                  var title = 'translation ' + (this.list.length+1);
+                  this.list.push({'title': title});
+                  console.log(this.list);
+               }
+            }
          },
          verse1: {
             type: String,
@@ -198,11 +210,7 @@
       },
 
       addSourceTab: function() {
-         // console.log(this.root);
-         var newTab = document.createElement('paper-tab');
-         // newTab.class = "translation-tab";
-         // newTab.innerHTML("Translation 2");
-         this.$.translation-tabs.appendChild(newTab);
+         this.properties.tabs.value.addOne();
       },
 
       ready: function() {

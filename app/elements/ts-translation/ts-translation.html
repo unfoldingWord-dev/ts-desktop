@@ -1,8 +1,5 @@
 <!-- ts-translation -->
 
-<!-- <link rel="import" href="../../components/polymer/polymer.html"> -->
-<!-- <link rel="import" href="../../components/paper-tabs/paper-tabs.html"> -->
-<!-- <link rel="import" href="../../components/iron-pages/iron-pages.html"> -->
 <link rel="import" href="../../components/iron-icons/av-icons.html">
 
 <dom-module id="ts-translation">
@@ -142,24 +139,25 @@
 
          <div class="translation-source">
             <div class="panel-header">
-               <!-- selected attribute below doesn't work because the elements are created afterwards -->
-               <paper-tabs id="translation-tabs" selected="{{ tabs.selected }}" noink>
-                  <template is="dom-repeat" items="{{ tabs.list }}" as="tab">
-                     <paper-tab class="translation-tab">{{ tab.title }}</paper-tab>
+               <paper-tabs id="translation-tabs" selected="{{ selected }}" noink>
+                  <template is="dom-repeat" items="{{ tabs }}" as="tab">
+                     <paper-tab class="translation-tab" on-click="closeTab">{{ tab.title }}</paper-tab>
                   </template>
                </paper-tabs>
                <div class="icon-container">
-                  <!-- can I directly call tabs.addOne()? I tried but didn't work -->
-                  <iron-icon icon="av:library-add" class="icon32" on-click="addSourceTab"></iron-icon>
+                  <iron-icon icon="av:library-add" class="icon32" on-click="addNewTab"></iron-icon>
                </div>
             </div>
             <div class="panel-body">
-               <iron-pages id="source-pages" selected="[[ tabs.selected ]]">
-                  <div class="source-page">
-                     <p class="verse"><span class="verse-number">1</span>{{ verse1 }}</p>
-                  </div>
-                  <div class="source-page">Page 2</div>
-                  <div class="source-page">Page 3</div>
+               <iron-pages id="source-pages" selected="[[ selected ]]">
+                  <template is="dom-repeat" items="{{ tabs }}" as="tab">
+                     <div class="source-page">
+                        <template is="dom-repeat" items="{{ tab.content }}" as="content">
+                           <!-- I want to do {{ index + 1 }}, but that doesn't work -->
+                           <p class="verse"><span class="verse-number">{{ content.verse }}</span>{{ content.text }}</p>
+                        </template>
+                     </div>
+                  </template>
                </iron-pages>
             </div>
          </div>
@@ -180,20 +178,30 @@
 
       properties: {
          tabs: {
-            type: Object,
-            value: {
-               list: [
-                  {'title': 'translation 1'},
-                  {'title': 'translation 2'}
-               ],
-               selected: 0,
-               // The function works, but the view needs to be refreshed somehow.
-               addOne: function () {
-                  var title = 'translation ' + (this.list.length+1);
-                  this.list.push({'title': title});
-                  console.log(this.list);
+            type: Array,
+            value: [
+               {
+                  title: 'translation 1',
+                  content: [
+                     {
+                        verse: 1,
+                        text: 'The former book I wrote, O Theophilus, told all that Jesus began to do and to teach,',
+                     },
+                     {
+                        verse: 2,
+                        text: 'until the day that he was received up. This was after he had given a command through the Holy Spirit to his chosen apostles,',
+                     },
+                     {
+                        verse: 3,
+                        text: 'the ones to whom he appeared alive after his suffering. For forty days he kept appearing to them, saying things about the kingdom of God'
+                     }
+                  ]
                }
-            }
+            ]
+         },
+         selected: {
+            type: String,
+            value: 0
          },
          verse1: {
             type: String,
@@ -209,12 +217,32 @@
          }
       },
 
-      addSourceTab: function() {
-         this.properties.tabs.value.addOne();
+      addNewTab: function() {
+         var newNumber = (this.tabs.length + 1).toString();
+         var title = 'translation ' + newNumber;
+         var content = [
+            {
+               verse: 1,
+               text: 'This is page ' + newNumber
+            },
+            {
+               verse: 2,
+               text: 'for ' + title
+            }
+         ];
+         this.push('tabs', {'title': title, 'content': content});
+         this.$['translation-tabs'].selected = this.tabs.length - 1;
       },
 
-      ready: function() {
+      closeTab: function(e) {
+         // Activate for close tab UI
+         // var index = Polymer.dom(event).event.model.__data__.index;
+         // var selected = this.$['translation-tabs'].selected;
+         // this.splice('tabs', index, 1);
+      },
 
+      attached: function() {
+         this.$['translation-tabs'].selected = "0";
       }
    });
 </script>

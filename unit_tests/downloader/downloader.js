@@ -3,9 +3,9 @@
 ;(function () {
 
     let assert = require('assert');
+    let rimraf = require('rimraf');
     let Indexer = require('../../app/js/indexer').Indexer;
     let Downloader = require('../../app/js/downloader').Downloader;
-    let rimraf = require('rimraf');
     let Configurator = require('../../app/js/configurator').Configurator;
     let config = require('../../app/config/defaults');
 
@@ -16,11 +16,10 @@
         indexDir: './unit_tests/downloader/index/',
         apiUrl: configurator.getValue('apiUrl')
     };
-    let appIndex = new Indexer('app', indexConfig);
     let downloadIndex = new Indexer('download', indexConfig);
-    let downloader = new Downloader({
+    let downloader = new Downloader(downloadIndex, {
         apiUrl: indexConfig.apiUrl
-    }, downloadIndex, appIndex);
+    });
 
     describe('@Downloader', function () {
 

@@ -58,7 +58,7 @@
                     let date = new Date();
                     date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
                     //reporter.js:<line>:<column> this will need to be changed if the code changes
-                    textExpected = date + ' I/reporter.js:56:26: ' + key + '\n';
+                    textExpected = date + ' I/reporter.js:57:26: ' + key + '\n';
 
                     reporter.stringFromLogFile(null, function (logResults) {
                         logFileResults = logResults;
@@ -82,7 +82,7 @@
                     let date = new Date();
                     date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
                     //reporter.js:<line>:<column> this will need to be changed if the code changes
-                    textExpected = date + ' W/reporter.js:80:26: ' + key + '\n';
+                    textExpected = date + ' W/reporter.js:81:26: ' + key + '\n';
 
                     reporter.stringFromLogFile(null, function (logResults) {
                         logFileResults = logResults;
@@ -106,7 +106,7 @@
                     let date = new Date();
                     date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
                     //reporter.js:<line>:<column> this will need to be changed if the code changes
-                    textExpected = date + ' E/reporter.js:104:26: ' + key + '\n';
+                    textExpected = date + ' E/reporter.js:105:26: ' + key + '\n';
 
                     reporter.stringFromLogFile(null, function (logResults) {
                         logFileResults = logResults;

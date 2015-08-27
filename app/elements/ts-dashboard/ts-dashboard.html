@@ -2,58 +2,41 @@
 
 <link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../../elements/ts-view-button/ts-view-button.html">
+<link rel="import" href="../../elements/ts-overflow/ts-overflow.html">
+<link rel="import" href="../../elements/ts-home-menu/ts-home-menu.html">
+<link rel="import" href="../../elements/ts-language-menu/ts-language-menu.html">
+<link rel="import" href="../../elements/ts-project-menu/ts-project-menu.html">
+<link rel="import" href="../../elements/ts-book-menu/ts-book-menu.html">
+<link rel="import" href="../../elements/ts-chapter-menu/ts-chapter-menu.html">
 
 <dom-module id="ts-dashboard">
 
   <style>
-  
+
   :host {
     display: block;
     width: 100%;
-    position: relative;
+    height: 100vh;
   }
 
-  .bar {
-    @apply(--header-bar);
-    display: flex;
-    align-items: center;
-    position: relative;
-  }
-  
-  .titles {
-    flex: auto;
-  }
-  
   [icon="menu"] {
-    margin-right: 0.275em;
+    margin: 0 1em;
   }
 
-  .dropdown-content paper-item {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    color: black;
-    padding: 1.25em;
-    margin-right: 2em;
-    min-width: 60px;
-  }
-  
+
   </style>
 
   <template>
-    <div class="bar">
-      <div class="titles"></div>
-      <paper-icon-button icon="menu" on-tap="openMenu"></paper-icon-button>
 
-      <paper-menu-button horizontal-align="right" vertical-align="top" vertical-offset="0">
-        <paper-icon-button icon="more-vert" class="dropdown-trigger"></paper-icon-button>
-        <paper-menu class="dropdown-content">
-          <paper-item>Share</paper-item>
-          <paper-item>Settings</paper-item>
-          <paper-item>Help</paper-item>
-        </paper-menu>
-      </paper-menu-button>
-    </div>
+      <iron-pages on-tap="nextMenu" selected="[[selected]]">
+          <ts-home-menu></ts-home-menu>
+          <ts-language-menu></ts-language-menu>
+          <ts-project-menu></ts-project-menu>
+          <ts-book-menu></ts-book-menu>
+          <ts-chapter-menu></ts-chapter-menu>
+      </iron-pages>
+
   </template>
 
 </dom-module>
@@ -62,15 +45,26 @@
 
   Polymer({
     is: 'ts-dashboard',
-    
-    openMenu: function(event) {
+
+      properties: {
+          selected: {
+              type: Number,
+              value: 0
+          }
+      },
+
+      nextMenu: function(event) {
+          this.selected = this.selected + 1;
+      },
+
+    toggleMenu: function(event) {
       event.preventDefault();
-      
-      this.fire('iron-signal', { name: 'open-menu', data: 'overflow' });
+
+      this.fire('iron-signal', { name: 'toggle-menu' });
     },
-    
+
     ready: function() {
-      
+
     }
   });
 

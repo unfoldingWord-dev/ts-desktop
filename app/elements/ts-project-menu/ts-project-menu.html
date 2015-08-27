@@ -1,0 +1,112 @@
+
+<link rel="import" href="ts-project-menu-icons.html">
+
+<dom-module id="ts-project-menu">
+
+    <style>
+
+        .contain {
+            display: inline-block;
+            position: absolute;
+            top: 41px;
+            left: 300px;
+            background: white;
+            width: 450px;
+        }
+
+        .bar {
+            @apply(--header-bar);
+            height: 100px;
+        }
+
+        .titles {
+            flex: auto;
+            font-size: 125%;
+            display: inline-block;
+            height: 40px;
+        }
+
+        [icon="arrow-back"] {
+            margin: 0 .2em;
+        }
+
+        [icon="autorenew"] {
+            padding: 0;
+        }
+
+        .header {
+            color: #888;
+            font-style: italic;
+        }
+
+        ul {
+            margin: 0;
+            padding: 0;
+            list-style-type: none;
+            font-family: 'Roboto';
+            font-style: bold;
+            font-size: 110%;
+        }
+
+        ul li {
+            display: block;
+            margin: 0;
+            padding: 1em;
+            border-bottom: 1px solid #bbb;
+        }
+
+        ul li:hover {
+            background: var(--accent-color-dark);
+            box-shadow: inset 0 -1px rgba(0,0,0,0);
+            color: #fff;
+        }
+
+        .right {
+            float: right;
+        }
+
+        iron-icon {
+            padding-right: 1em;
+        }
+
+
+
+    </style>
+
+  <template>
+
+      <div class="bar">
+
+          <paper-icon-button icon="arrow-back" on-tap="toggleMenu"></paper-icon-button>
+          <div class="titles">New Project</div>
+
+      </div>
+
+    <div class="contain">
+      <ul>
+          <li class="header">Choose a project<paper-icon-button class="right" icon="autorenew" on-tap="toggleMenu"></paper-icon-button></li>
+          <template is="dom-repeat" items="[[projects]]" as="project">
+            <li><iron-icon icon="project-menu:project"></iron-icon><span>[[project]]</span></li>
+          </template>
+      </ul>
+    </div>
+
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+    is: 'ts-project-menu',
+
+    ready: function() {
+      this.projects = [
+        'Open Bible Stories',
+        'Old Testament',
+        'New Testament'
+      ];
+    }
+  });
+
+</script>

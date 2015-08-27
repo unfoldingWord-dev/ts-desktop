@@ -1,7 +1,15 @@
 <!-- ts-menubar -->
 
 <link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../ts-view-button/ts-view-button.html">
+<link rel="import" href="../../elements/ts-view-button/ts-view-button.html">
+<link rel="import" href="../../elements/ts-overflow/ts-overflow.html">
+
+
+<link rel="import" href="../../elements/ts-home-menu/ts-home-menu.html">
+<link rel="import" href="../../elements/ts-language-menu/ts-language-menu.html">
+<link rel="import" href="../../elements/ts-project-menu/ts-project-menu.html">
+<link rel="import" href="../../elements/ts-book-menu/ts-book-menu.html">
+<link rel="import" href="../../elements/ts-chapter-menu/ts-chapter-menu.html">
 
 <dom-module id="ts-dashboard">
 
@@ -10,18 +18,9 @@
   :host {
     display: block;
     width: 100%;
+      height: 100vh;
   }
 
-  .bar {
-    @apply(--header-bar);
-    display: flex;
-    align-items: center;
-  }
-
-  .titles {
-    flex: auto;
-      font-size: 125%;
-  }
 
   [icon="menu"] {
     margin: 0 1em;
@@ -30,12 +29,14 @@
   </style>
 
   <template>
-    <div class="bar">
-        <paper-icon-button icon="menu" on-tap="toggleMenu"></paper-icon-button>
-        <div class="titles">translationStudio</div>
-    </div>
-      <ts-overflow label="overflow"></ts-overflow>
 
+      <iron-pages on-tap="nextMenu" selected="[[selected]]">
+          <ts-home-menu></ts-home-menu>
+          <ts-language-menu></ts-language-menu>
+          <ts-project-menu></ts-project-menu>
+          <ts-book-menu></ts-book-menu>
+          <ts-chapter-menu></ts-chapter-menu>
+      </iron-pages>
 
   </template>
 
@@ -45,6 +46,17 @@
 
   Polymer({
     is: 'ts-dashboard',
+
+      properties: {
+          selected: {
+              type: Number,
+              value: 0
+          }
+      },
+
+      nextMenu: function(event) {
+          this.selected = this.selected + 1;
+      },
 
     toggleMenu: function(event) {
       event.preventDefault();

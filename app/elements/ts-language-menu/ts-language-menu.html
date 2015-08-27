@@ -1,6 +1,4 @@
 
-
-
 <dom-module id="ts-language-menu">
 
     <style>
@@ -9,7 +7,10 @@
             display: inline-block;
             position: absolute;
             top: 41px;
-            left: 300px;
+            left: 0;
+            right: 0;
+            margin-left: auto;
+            margin-right: auto;
             background: white;
             width: 450px;
         }
@@ -55,7 +56,7 @@
             border-bottom: 1px solid #bbb;
         }
 
-        ul li:hover {
+        ul li.clickable:hover {
             background: var(--accent-color-dark);
             box-shadow: inset 0 -1px rgba(0,0,0,0);
             color: #fff;
@@ -65,24 +66,20 @@
             float: right;
         }
 
-
-
     </style>
 
   <template>
 
       <div class="bar">
-
-            <paper-icon-button icon="arrow-back" on-tap="toggleMenu"></paper-icon-button>
+            <paper-icon-button class="clickable" id="back" icon="arrow-back"></paper-icon-button>
             <div class="titles">New Project</div>
-
       </div>
 
     <div class="contain">
       <ul>
-          <li class="header">Choose target language<paper-icon-button class="right" icon="search" on-tap="toggleMenu"></paper-icon-button></li>
+          <li class="header">Choose target language<paper-icon-button class="right" icon="search"></paper-icon-button></li>
           <template is="dom-repeat" items="[[languages]]" as="language">
-            <li><span>[[language]]</span></li>
+            <li class="clickable"><span>[[language]]</span></li>
           </template>
       </ul>
     </div>

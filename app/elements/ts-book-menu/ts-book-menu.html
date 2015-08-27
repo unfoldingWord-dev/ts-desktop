@@ -1,6 +1,5 @@
 
 
-
 <dom-module id="ts-book-menu">
 
     <style>
@@ -9,7 +8,10 @@
             display: inline-block;
             position: absolute;
             top: 41px;
-            left: 300px;
+            left: 0;
+            right: 0;
+            margin-left: auto;
+            margin-right: auto;
             background: white;
             width: 450px;
         }
@@ -51,7 +53,7 @@
             border-bottom: 1px solid #bbb;
         }
 
-        ul li:hover {
+        ul li.clickable:hover {
             background: var(--accent-color-dark);
             box-shadow: inset 0 -1px rgba(0,0,0,0);
             color: #fff;
@@ -62,17 +64,15 @@
   <template>
 
       <div class="bar">
-
-          <paper-icon-button icon="arrow-back" on-tap="toggleMenu"></paper-icon-button>
+          <paper-icon-button class="clickable" id="back" icon="arrow-back"></paper-icon-button>
           <div class="titles">New Project</div>
-
       </div>
 
     <div class="contain">
       <ul>
           <li class="header">Choose a book</li>
           <template is="dom-repeat" items="[[books]]" as="book">
-            <li><span>[[book]]</span></li>
+            <li class="clickable"><span>[[book]]</span></li>
           </template>
       </ul>
     </div>

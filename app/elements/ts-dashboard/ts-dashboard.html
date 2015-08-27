@@ -1,10 +1,5 @@
-<!-- ts-menubar -->
 
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../elements/ts-view-button/ts-view-button.html">
-<link rel="import" href="../../elements/ts-overflow/ts-overflow.html">
-
-
+<link rel="import" href="../../elements/ts-home-blank/ts-home-blank.html">
 <link rel="import" href="../../elements/ts-home-menu/ts-home-menu.html">
 <link rel="import" href="../../elements/ts-language-menu/ts-language-menu.html">
 <link rel="import" href="../../elements/ts-project-menu/ts-project-menu.html">
@@ -16,21 +11,18 @@
   <style>
 
   :host {
-    display: block;
-    width: 100%;
+      display: block;
+      width: 100%;
       height: 100vh;
-  }
-
-
-  [icon="menu"] {
-    margin: 0 1em;
+      position: relative;
   }
 
   </style>
 
   <template>
 
-      <iron-pages on-tap="nextMenu" selected="[[selected]]">
+      <iron-pages class="clickable" on-tap="TapHandler" selected="[[selected]]">
+          <ts-home-blank></ts-home-blank>
           <ts-home-menu></ts-home-menu>
           <ts-language-menu></ts-language-menu>
           <ts-project-menu></ts-project-menu>
@@ -54,15 +46,21 @@
           }
       },
 
-      nextMenu: function(event) {
-          this.selected = this.selected + 1;
+      TapHandler: function(event) {
+          var etarget = event.target;
+          while (!etarget.classList.contains("clickable")) {
+              etarget = etarget.parentNode;
+          }
+
+          if (etarget.id === "start" || etarget.id === "new") {
+              this.selected = 2;
+          } else if (etarget.nodeName === "LI") {
+              this.selected = this.selected + 1;
+          } else if (etarget.id === "back") {
+              this.selected = this.selected - 1;
+          }
+
       },
-
-    toggleMenu: function(event) {
-      event.preventDefault();
-
-      this.fire('iron-signal', { name: 'toggle-menu' });
-    },
 
     ready: function() {
 

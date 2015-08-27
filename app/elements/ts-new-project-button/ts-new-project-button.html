@@ -1,0 +1,58 @@
+<!--
+View Button
+-->
+
+<link rel="import" href="../../components/polymer/polymer.html">
+<link rel="import" href="../../components/paper-fab/paper-fab.html">
+
+
+<dom-module id="ts-new-project-button">
+
+  <style>
+
+      paper-fab {
+          border-radius: 49.9999%;
+      }
+
+      paper-fab.fixed {
+          background: var(--accent-color-light);
+          color: white;
+      }
+
+      .fixed {
+          position: absolute;
+          right: 12px;
+          top: 12px;
+      }
+
+      #buttonbox {
+          position: fixed;
+          right: 12px;
+          top: 48px;
+          height: 80px;
+          width: 80px;
+      }
+
+  </style>
+
+  <template>
+
+        <div id="buttonbox">
+            <paper-fab class="fixed clickable" id="new" icon="add" title="New Project"></paper-fab>
+        </div>
+
+  </template>
+</dom-module>
+
+<script>
+
+Polymer({
+  is: 'ts-new-project-button',
+
+  ready: function() {
+
+    // oh boy!
+  }
+});
+
+</script>

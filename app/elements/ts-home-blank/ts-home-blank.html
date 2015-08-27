@@ -3,7 +3,7 @@
 <link rel="import" href="../../elements/ts-new-project-button/ts-new-project-button.html">
 <link rel="import" href="../../elements/ts-overflow/ts-overflow.html">
 
-<dom-module id="ts-home-menu">
+<dom-module id="ts-home-blank">
 
     <style>
 
@@ -19,30 +19,24 @@
             width: 450px;
         }
 
-        ul {
-            margin: 0;
-            padding: 0;
-            list-style-type: none;
+        .start {
+            background: var(--primary-color);
+            color: white;
+            width: 200px;
+            display: inline-block;
+            position: absolute;
+            top: 330px;
+            left: 0;
+            right: 0;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        p {
             font-family: 'Roboto';
             font-style: bold;
             font-size: 110%;
-        }
-
-        ul li {
-            display: block;
-            margin: 0;
-            padding: 1em;
-            border-bottom: 1px solid #bbb;
-        }
-
-        ul li:hover {
-            background: var(--accent-color-dark);
-            box-shadow: inset 0 -1px rgba(0,0,0,0);
-            color: #fff;
-        }
-
-        iron-icon {
-            padding-right: 1em;
+            padding: 0 1.5em;
         }
 
         .bar {
@@ -76,12 +70,14 @@
       <ts-new-project-button></ts-new-project-button>
 
       <div class="contain">
-          <ul>
-              <template is="dom-repeat" items="[[projects]]" as="project">
-                <li class="clickable"><iron-icon icon="project-menu:project"></iron-icon><span>[[project]]</span></li>
-              </template>
-          </ul>
+              <p>Welcome!</p>
+              <p>This is your Home Screen. When you have translation projects on this device, they will appear here.</p>
+              <p>You can start a new project anytime by tapping the blue button in the top right.</p>
       </div>
+      <div class="start clickable" id="start">
+          <p>Start a new project</p>
+      </div>
+
 
   </template>
 
@@ -90,14 +86,10 @@
 <script>
 
   Polymer({
-    is: 'ts-home-menu',
+    is: 'ts-home-blank',
 
     ready: function() {
-      this.projects = [
-        'Genesis',
-        'John',
-        'Open Bible Stories'
-      ];
+
     }
   });
 

@@ -1,6 +1,7 @@
 <!-- ts-menubar -->
 
 <link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../components/paper-menu-button/paper-menu-button.html">
 
 <dom-module id="ts-dashboard">
 
@@ -9,12 +10,14 @@
   :host {
     display: block;
     width: 100%;
+    position: relative;
   }
 
   .bar {
     @apply(--header-bar);
     display: flex;
     align-items: center;
+    position: relative;
   }
   
   .titles {
@@ -24,6 +27,16 @@
   [icon="menu"] {
     margin-right: 0.275em;
   }
+
+  .dropdown-content paper-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    color: black;
+    padding: 1.25em;
+    margin-right: 2em;
+    min-width: 60px;
+  }
   
   </style>
 
@@ -31,6 +44,15 @@
     <div class="bar">
       <div class="titles"></div>
       <paper-icon-button icon="menu" on-tap="openMenu"></paper-icon-button>
+
+      <paper-menu-button horizontal-align="right" vertical-align="top" vertical-offset="0">
+        <paper-icon-button icon="more-vert" class="dropdown-trigger"></paper-icon-button>
+        <paper-menu class="dropdown-content">
+          <paper-item>Share</paper-item>
+          <paper-item>Settings</paper-item>
+          <paper-item>Help</paper-item>
+        </paper-menu>
+      </paper-menu-button>
     </div>
   </template>
 

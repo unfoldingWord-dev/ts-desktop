@@ -28,7 +28,7 @@
 
         //reassign this to _this, set indexId and rootPath
         let _this = this;
-        _this.config = _.merge({indexDir: '', apiUrl: ''}, configJson);
+        _this.config = _.merge({indexDir: ''}, configJson);
         _this.indexId = indexName;
         _this.rootPath = path.join(_this.config.indexDir, indexName);
 
@@ -109,6 +109,9 @@
 
         function decrementLink (md5Hash) {
             let links = openJson(linksJsonPath);
+            if(links === null) {
+                links = {};
+            }
             if (md5Hash in links) {
                 links[md5Hash]--;
             }
@@ -491,7 +494,7 @@
         // It would be better to place this in the downloader module.
         _this.getCatalog = function () {
             let catalogJson = {
-                'proj_catalog': _this.config.apiUrl
+                'proj_catalog': '_'
             };
             return catalogJson;
         };

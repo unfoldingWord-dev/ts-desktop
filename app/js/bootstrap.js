@@ -14,6 +14,14 @@
     let Reporter = require('../js/reporter').Reporter;
     let uploader = require('../js/uploader');
 
+    let Translator = require('../js/translator').Translator;
+    let Indexer = require('../js/indexer').Indexer;
+    let indexer = new Indexer('app', {
+        apiUrl: configurator.getValue('apiUrl'),
+        indexDir: './index/'
+    });
+    let translator = new Translator(indexer);
+
     /**
      * FIX - This provides a fix to the native chrome shadow missing
      * see: https://github.com/nwjs/nw.js/issues/2903#issuecomment-77099590
@@ -36,6 +44,10 @@
         window: mainWindow,
 
         uploader: uploader,
+
+        translator: translator,
+
+        indexer: indexer,
 
         isMaximized: false,
 

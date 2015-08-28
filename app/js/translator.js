@@ -2,187 +2,164 @@
 
 ;(function () {
 
-    let Configurator = require('./configurator').Configurator;
-    let configurator = new Configurator();
+    let Configurator = require('./configurator').Configurator,
+        configurator = new Configurator();
+
 
     function Translator (appIndex) {
 
-        //reassign this to _this, set indexId and rootPath
-        //let _this = this;
+        function fromIndex(type, sourceTranslation) {
+            let args = [].slice.call(arguments, fromIndex.length),
+                t = 'get' + type[0].toUpperCase() + type.slice(1),
+                s = sourceTranslation,
+                params = s ? [s.projectId, s.sourceLanguageId, s.resourceId].concat(args) : [];
+            return appIndex[t].apply(appIndex, params);
+        }
+
+        function fetch(arr, visit) {
+            return arr.reduce(function (o, id) {
+                o[k] = visit(k);
+                return o;
+            }, {});
+        }
 
         function getFrame (sourceTranslation, chapterId, frameId) {
-
-            //build return object
-            let returnObj = {
+            return {
                 getSource: function () {
-                    return appIndex.getFrame(sourceTranslation.projectId, sourceTranslation.sourceLanguageId, sourceTranslation.resourceId, chapterId, frameId);
+                    return fromIndex('frame', sourceTranslation, chapterId, frameId);
                 }
             };
-
-            //return object
-            return returnObj;
         }
 
         function getFrames (sourceTranslation, chapterId) {
+            let s = sourceTranslation,
+                frames = fromIndex('frames', s, chapterId),
+                fetchFrame = getFrame.bind(null, s, chapterId);
 
-            //get data
-            let frames = appIndex.getFrames(sourceTranslation.projectId, sourceTranslation.sourceLanguageId, sourceTranslation.resourceId, chapterId);
-
-            //build return object
-            let returnObj = {};
-            for (let frameId of frames) {
-                returnObj[frameId] = getFrame(sourceTranslation, chapterId, frameId);
-            }
-
-            //return object
-            return returnObj;
+            return fetch(frames, fetchFrame);
         }
 
         function getChapter (sourceTranslation, chapterId) {
+            let s = sourceTranslation,
+                chapterData = fromIndex('chapter', sourceTranslation, chapterId);
 
-            //get data
-            let chapterData = appIndex.getChapter(sourceTranslation.projectId, sourceTranslation.sourceLanguageId, sourceTranslation.resourceId, chapterId);
-
-            //build return object
-            let returnObj = {
-                getNumber: function () {
+            return {
+                get number () {
                     return chapterData.number;
                 },
-                getReference: function () {
+                get reference () {
                     return chapterData.ref;
                 },
-                getTitle: function () {
+                get title () {
                     return chapterData.title;
                 },
-                getFrames: function () {
-                    return getFrames(sourceTranslation, chapterId);
-                },
-                getFrame: function (frameId) {
-                    return getFrame(sourceTranslation, chapterId, frameId);
-                }
+                getFrames: getFrames.bind(null, sourceTranslation, chapterId),
+                getFrame: getFrame.bind(null, sourceTranslation, chapterId)
             };
-
-            //return object
-            return returnObj;
         }
 
         function getChapters (sourceTranslation) {
+            let chapters = fromIndex('chapters', sourceTranslation),
+                fetchChapter = getChapter.bind(null, sourceTranslation);
 
-            //get data
-            let chapters = appIndex.getChapters(sourceTranslation.projectId, sourceTranslation.sourceLanguageId, sourceTranslation.resourceId);
+            return fetch(chapters, fetchChapter);
+        }
 
-            //build return object
-            let returnObj = {};
-            for (let chapterId of chapters) {
-                returnObj[chapterId] = getChapter(sourceTranslation, chapterId);
+        function getProject (sourceTranslation) {
+            let s = sourceTranslation;
+
+            let projectData = appIndex.getProject(s.projectId);
+            let sourceLanguageData = appIndex.getSourceLanguage(s.projectId, s.sourceLanguageId);
+            let resourceData = appIndex.getResource(s.projectId, s.sourceLanguageId, s.resourceId);
+
+            //verify data
+            if (!projectData || !sourceLanguageData|| !resourceData) {
+                return null;
             }
 
-            //return object
-            return returnObj;
+            return {
+                get projectId () {
+                    return projectId;
+                },
+                get sourceLanguageId () {
+                    return sourceLanguageId;
+                },
+                get resourceId () {
+                    return resourceId;
+                },
+                get title () {
+                    return sourceLanguageData.project.name;
+                },
+                get description () {
+                    return sourceLanguageData.project.desc;
+                },
+                get image () {
+                    return '';//TODO: where do we get this???
+                },
+                get sortKey () {
+                    return projectData.sort;
+                },
+                get chapters () {
+                    return getChapters(sourceTranslation);
+                },
+                getChapter: function (chapterId) {
+                    return getChapter(sourceTranslation, chapterId);
+                }
+            };
+        }
+
+        function getProjects () {
+            let projects = fromIndex('projects'),
+                fetchProject = getProject.bind(null);
+
+            return fetch(projects, fetchProject);
+        }
+
+        function saveSourceTranslation (sourceTranslation) {
+            let s = sourceTranslation;
+
+            configurator.setValue('lastProjectId', s.projectId);
+            configurator.setValue(projectId + 'SourceLanguageId', s.sourceLanguageId);
+            configurator.setValue(projectId + 'ResourceId', s.resourceId);
+        }
+
+        function fetchSourceTranslation () {
+            let projectId = configurator.getValue('lastProjectId'),
+                sourceLanguageId = configurator.getValue(projectId + 'SourceLanguageId'),
+                resourceId = configurator.getValue(projectId + 'ResourceId');
+
+            return {
+                projectId,
+                sourceLanguageId,
+                resourceId
+            };
         }
 
         let translator = {
-            getIndexId: function () {
+            get indexId () {
                 return appIndex.getIndexId();
             },
 
-            getProject: function (projectId, sourceLanguageId, resourceId) {
+            getProject: function (sourceTranslation) {
+                let project = getProject(sourceTranslation);
+                saveSourceTranslation(sourceTranslation);
+                return project;
+            },
 
-                //verify lets
-                if (projectId === null || sourceLanguageId === null || resourceId === null) {
-                    return null;
-                }
-
-                //get data
-                let projectData = appIndex.getProject(projectId);
-                let sourceLanguageData = appIndex.getSourceLanguage(projectId, sourceLanguageId);
-                let resourceData = appIndex.getResource(projectId, sourceLanguageId, resourceId);
-
-                //verify data
-                if (projectData === null || sourceLanguageData === null || resourceData === null) {
-                    return null;
-                }
-
-                //build sourceTranslation object
-                //TODO: eventually this will be what is passed into this method
-                let sourceTranslation = {
-                    projectId: projectId,
-                    sourceLanguageId: sourceLanguageId,
-                    resourceId: resourceId
-                };
-
-                //build return object
-                let returnObj = {
-                    getProjectId: function () {
-                        return projectId;
-                    },
-                    getSourceLanguageId: function () {
-                        return sourceLanguageId;
-                    },
-                    getResourceId: function () {
-                        return resourceId;
-                    },
-                    getTitle: function () {
-                        return sourceLanguageData.project.name;
-                    },
-                    getDescription: function () {
-                        return sourceLanguageData.project.desc;
-                    },
-                    getImage: function () {
-                        return '';//TODO: where do we get this???
-                    },
-                    getSortKey: function () {
-                        return projectData.sort;
-                    },
-                    getChapters: function () {
-                        return getChapters(sourceTranslation);
-                    },
-                    getChapter: function (chapterId) {
-                        return getChapter(sourceTranslation, chapterId);
-                    },
-                    getFrames: function (chapterId) {
-                        return getFrames(sourceTranslation, chapterId);
-                    },
-                    getFrame: function (chapterId, frameId) {
-                        return getFrame(sourceTranslation, chapterId, frameId);
-                    }
-                };
-
-                //save last used values
-                configurator.setValue('lastProjectId', projectId);
-                configurator.setValue(projectId + 'SourceLanguageId', sourceLanguageId);
-                configurator.setValue(projectId + 'ResourceId', resourceId);
-
-                //return object
-                return returnObj;
+            getProjects: function () {
+                return getProjects();
             },
 
             getLastProject: function () {
-
-                //get last used values
-                let projectId = configurator.getValue('lastProjectId');
-                let sourceLanguageId = configurator.getValue(projectId + 'SourceLanguageId');
-                let resourceId = configurator.getValue(projectId + 'ResourceId');
-
-                //return object
-                return this.getProject(projectId, sourceLanguageId, resourceId);
+                return this.getProject(fetchSourceTranslation());
             },
 
             getTargetLanguage: function (projectId) {
-
-                //verify data
-                if (projectId === null) {
-                    return null;
-                }
-
-                //return string
                 return configurator.getString(projectId + 'TargetLanguageId');
             },
 
             getLastTargetLanguage: function () {
-
-                //return string
-                return configurator.getString(configurator.getString('lastProjectId') + 'TargetLanguageId');
+                return configurator.getValue(configurator.getValue('lastProjectId') + 'TargetLanguageId');
             }
         };
 

@@ -6,15 +6,15 @@
 
 <dom-module id="ts-read-mode">
 
-	<style is="custom_style">
+	<style is="custom-style">
 	
 		:host {
 			display: block;
 			/* The height of the title bar and the top green bar needs to be compensated */
 			height: calc(100% - 102px);
 			box-sizing: border-box;
-			
 		}
+
 		.container {
 			display: block;
 			width: 100%;
@@ -71,26 +71,22 @@
 			visibility: hidden;
 		}
 
-		.tabs-container {
-		}
-		.tabs-container p {
-			margin: 0;
-		}
 		.sticky {
 			position: fixed;
 			z-index: 100;
-			/*top: 0;*/
+			width: calc(100% - 20px);
 			background-color: #DDD;
 		}
-		.chapter-cards.tabs-div {
-			margin-bottom: 0;
-		}
-		paper-tabs, iron-pages, #source-tabs, #source-pages {
-			display: block;
-			width: 100%;
-			height: 100%;
+
+		paper-tabs {
+			--paper-tabs {
+				font-size: 5rem;
+			}
 		}
 
+	</style>
+
+	<style>
 	</style>
 
 	<template>
@@ -98,7 +94,7 @@
 		<div class="container" id="sticky-cue">
 			<div class="tabs-div" id="sticky-ele">
 				<paper-card class="tabs-container top-card">
-					<paper-tabs id="source-tabs" selected="{{ selected }}" noink>
+					<paper-tabs id="source-tabs" selected="{{ selected }}" noink scrollable hideScrollButton>
                   <template is="dom-repeat" items="{{ tabs }}" as="tab">
                      <paper-tab class="source-tab" on-click="">{{ tab.translation }}</paper-tab>
                   </template>
@@ -142,11 +138,6 @@
 			title: {
 				type: 'String',
 				value: 'John'
-			},
-
-			content: {
-				type: 'Array',
-				value: []
 			},
 
 			selected: {
@@ -219,7 +210,7 @@
 			// ----- sticky tabs -----
 
 			// ===== SELECT TAB =====
-			this.$['source-tabs'].selected = 0;
+			this.$['source-tabs'].selected = "0";
 			// ----- select tab -----
 		}
 	})

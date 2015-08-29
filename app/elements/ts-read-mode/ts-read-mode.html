@@ -16,13 +16,13 @@
 			
 		}
 		.container {
-			display:block;
+			display: block;
 			width: 100%;
 			height: 100%;
 			position: relative;
 			z-index: 0;
-			padding: 20px 20px 40px;
 			box-sizing: border-box;
+			padding: 20px 20px 40px;
 			overflow-y: auto;
 		}
 		.chapter-cards {
@@ -39,8 +39,8 @@
 		}
 		.bottom-card {
 			position: absolute;
-			right: 0;
 			top: 20px;
+			right: 0;
 			background-color: #EEE;
 			cursor: pointer;
 			transition: all 0.15s ease-out;
@@ -71,33 +71,56 @@
 			visibility: hidden;
 		}
 
+		.tabs-container {
+		}
+		.tabs-container p {
+			margin: 0;
+		}
+		.sticky {
+			position: fixed;
+			z-index: 100;
+		}
+		.chapter-cards.tabs-div {
+			margin-bottom: 0;
+		}
+
 	</style>
 
 	<template>
 
 		<div class="container">
-			<template is="dom-repeat" items="{{ content }}">
-				<div class="chapter-cards">
-					<paper-card class="top-card">
-						<div class="card-heading">
-							<h3><span>{{ title }}</span> <span>{{ item.chapter }}</span></h3>
-						</div>
-						<div class="card-content">
-							<p>{{ item.text }}</p>
-						</div>
-					</paper-card>
-					<paper-card class="bottom-card">
-						<div class="hidden">
+			<div class=" tabs-div" id="sticky-ele">
+				<paper-card class="tabs-container top-card">
+					<p>Test</p>
+				</paper-card>
+				<paper-card class="tabs-container bottom-card">
+					<div class="hidden"><p>Test</p></div>
+				</paper-card>
+			</div>
+			<div id="sticky-cue">
+				<template is="dom-repeat" items="{{ content }}">
+					<div class="chapter-cards">
+						<paper-card class="top-card">
 							<div class="card-heading">
 								<h3><span>{{ title }}</span> <span>{{ item.chapter }}</span></h3>
 							</div>
 							<div class="card-content">
 								<p>{{ item.text }}</p>
 							</div>
-						</div>
-					</paper-card>
-				</div>
-			</template>
+						</paper-card>
+						<paper-card class="bottom-card">
+							<div class="hidden">
+								<div class="card-heading">
+									<h3><span>{{ title }}</span> <span>{{ item.chapter }}</span></h3>
+								</div>
+								<div class="card-content">
+									<p>{{ item.text }}</p>
+								</div>
+							</div>
+						</paper-card>
+					</div>
+				</template>
+			</div>
 		</div>
 	
 	</template>
@@ -107,12 +130,16 @@
 <script>
 	
 	Polymer({
+
 		is: 'ts-read-mode',
+
 		properties: {
+
 			title: {
 				type: 'String',
 				value: 'John'
 			},
+
 			content: {
 				type: 'Array',
 				value: [
@@ -130,6 +157,29 @@
 					}
 				]
 			}
+		},
+
+		attached: function() {
+
+			var ele = document.getElementById('sticky-ele');
+			var cue = document.getElementById('sticky-cue');
+
+			function stickEle() {
+				var rect = cue.getClientRects();
+				var rectTop = rect[0].top;
+				console.log(rectTop);
+				if (rectTop < 122) {
+					if (ele.className.indexOf('sticky') === -1) {
+						ele.className += ' sticky';
+					}
+				} else {
+					ele.className = ele.className.replace(' sticky', '');
+				}
+			}
+
+			window.addEventListener('wheel', function() {
+				stickEle();
+			});
 		}
 	})
 

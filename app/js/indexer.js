@@ -145,7 +145,7 @@
                 for (let item of items) {
                     fileName = item.slug || null;
                     if (fileName !== null) {
-                        filePath = path.join(md5Path, fileName + '.json');
+                        filePath = path.join(md5Path, fileName);
                         fileContent = JSON.stringify(item);
                         saveFile(filePath, fileContent);
                     }
@@ -163,7 +163,7 @@
                         for (let frame of frames) {
                             fileName = frame.id.replace(/[0-9]+\-/g, '') || null;
                             if (fileName !== null) {
-                                filePath = path.join(md5Path, folderName, fileName + '.json');
+                                filePath = path.join(md5Path, folderName, fileName);
                                 fileContent = JSON.stringify(frame);
                                 saveFile(filePath, fileContent);
                             }
@@ -230,7 +230,7 @@
             let md5Hash = openFile(resourceCatalogPath);
             if (md5Hash !== null) {
                 let hashPath = path.join(dataDirPath, md5Hash);
-                let resourcePath = path.join(hashPath, resourceId + '.json');
+                let resourcePath = path.join(hashPath, resourceId);
                 deleteFile(resourcePath);
 
                 // delete empty resource catalog
@@ -251,7 +251,7 @@
             let md5Hash = openFile(languagesCatalogPath);
             if (md5Hash !== null) {
                 let hashPath = path.join(dataDirPath, md5Hash);
-                let sourceLanguagePath = path.join(hashPath, sourceLanguageId + '.json');
+                let sourceLanguagePath = path.join(hashPath, sourceLanguageId);
                 deleteFile(sourceLanguagePath);
 
                 // delete empty language catalog
@@ -270,7 +270,7 @@
             // delete project
             let md5Hash = openFile(path.join(sourceDirPath, 'projects_catalog.link'));
             if (md5Hash !== null) {
-                let projectPath = path.join(dataDirPath, md5Hash, projectId + '.json');
+                let projectPath = path.join(dataDirPath, md5Hash, projectId);
                 deleteFile(projectPath);
             }
         };
@@ -504,7 +504,7 @@
             if (md5Hash === null) {
                 return null;
             }
-            let catalogJson = openJson(path.join(dataDirPath, md5Hash, projectId + '.json'));
+            let catalogJson = openJson(path.join(dataDirPath, md5Hash, projectId));
             return catalogJson;
         };
 
@@ -525,7 +525,7 @@
             if (md5Hash === null) {
                 return null;
             }
-            let catalogJson = openJson(path.join(dataDirPath, md5Hash, sourceLanguageId + '.json'));
+            let catalogJson = openJson(path.join(dataDirPath, md5Hash, sourceLanguageId));
             return catalogJson;
         };
 
@@ -547,7 +547,7 @@
             if (md5Hash === null) {
                 return null;
             }
-            let catalogJson = openJson(path.join(dataDirPath, md5Hash, resourceId + '.json'));
+            let catalogJson = openJson(path.join(dataDirPath, md5Hash, resourceId));
             return catalogJson;
         };
 
@@ -577,7 +577,7 @@
             if (md5Hash === null) {
                 return null;
             }
-            let catalogJson = openJson(path.join(dataDirPath, md5Hash, chapterId, frameId + '.json'));
+            let catalogJson = openJson(path.join(dataDirPath, md5Hash, chapterId, frameId));
             return catalogJson;
         };
 
@@ -586,7 +586,7 @@
             if (md5Hash === null) {
                 return null;
             }
-            let catalogJson = openJson(path.join(dataDirPath, md5Hash, chapterId, frameId + '.json'));
+            let catalogJson = openJson(path.join(dataDirPath, md5Hash, chapterId, frameId));
             return catalogJson;
         };
 
@@ -604,7 +604,7 @@
             if (md5Hash === null) {
                 return null;
             }
-            let catalogJson = openJson(path.join(dataDirPath, md5Hash, chapterId, frameId + '.json'));
+            let catalogJson = openJson(path.join(dataDirPath, md5Hash, chapterId, frameId));
             return catalogJson;
         };
 

@@ -73,15 +73,21 @@
 
 		.sticky {
 			position: fixed;
-			z-index: 100;
-			width: calc(100% - 20px);
-			background-color: #DDD;
+			z-index: 2;
+			top: 102px;
+			left: 0px;
+			right: 37px;
+			padding: 0 20px;
 		}
 
 		paper-tabs {
 			--paper-tabs {
 				font-size: 5rem;
 			}
+		}
+
+		.tabs-div.chapter-cards {
+			margin-bottom: 0;
 		}
 
 	</style>
@@ -92,8 +98,8 @@
 	<template>
 
 		<div class="container" id="sticky-cue">
-			<div class="tabs-div" id="sticky-ele">
-				<paper-card class="tabs-container top-card">
+			<div class="tabs-div chapter-cards" id="sticky-ele">
+				<paper-card class="tabs-container top-card" elevation="0">
 					<paper-tabs id="source-tabs" selected="{{ selected }}" noink scrollable hideScrollButton>
                   <template is="dom-repeat" items="{{ tabs }}" as="tab">
                      <paper-tab class="source-tab" on-click="">{{ tab.translation }}</paper-tab>

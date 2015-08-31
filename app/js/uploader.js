@@ -9,7 +9,6 @@
 	let mkdirp = require('mkdirp');
 	let getmac = require('getmac');
 	let sshClient = require('ssh2').Client;
-	let Git = require('nodegit');
 
     let key = 'ssh-rsa';
     let defaultHost = 'ts.door43.org';
@@ -18,7 +17,7 @@
     let targetFile = targetDir + 'pair.json';
     let username = 'EmmittTest';
 	let client;
-	
+
     let uploader = {
         register: function (host, port, deviceId, callback) {
             defaultHost = host;
@@ -47,8 +46,7 @@
         },
         uploadProfile: function (profile) {
             console.log('UploaderProfile');
-            throw new Error('Stop');
-            /*if (uploader.verifyProfile(profile)) {
+            if (uploader.verifyProfile(profile)) {
                 uploader.needToRegister(function (register, keypair) {
                     if (register) {
                         uploader.getDeviceId(function (deviceId) {
@@ -62,7 +60,7 @@
                         uploader.uploadProfileHelper(profile, keypair);
                     }
                 });
-            }*/
+            }
         },
         uploadProfileHelper: function (profile, keypair) {
             uploader.getDeviceId(function (deviceId) {

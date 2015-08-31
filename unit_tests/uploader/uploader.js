@@ -8,6 +8,7 @@
     let uploader = require('../../app/js/uploader');
 	let User = require('../../app/js/user').User;
     let mkdirp = require('mkdirp');
+    let nodegit = require('nodegit');
 
     describe('@Uploader', function () {
         after(function (done) {

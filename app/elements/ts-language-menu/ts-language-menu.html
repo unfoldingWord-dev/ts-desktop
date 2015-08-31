@@ -15,6 +15,7 @@
             margin-right: auto;
             background: white;
             width: 450px;
+            box-shadow: -4px 0 30px rgba(22, 22, 22, 0.3);
         }
 
         .bar {
@@ -40,6 +41,14 @@
         .header {
             color: #888;
             font-style: italic;
+            font-family: 'Roboto';
+            font-size: 110%
+        }
+
+        .header span {
+            display: block;
+            padding: 1em;
+            border-bottom: 1px solid #bbb;
         }
 
         ul {
@@ -47,8 +56,10 @@
             padding: 0;
             list-style-type: none;
             font-family: 'Roboto';
-            font-style: bold;
             font-size: 110%;
+            overflow-y: auto;
+            height: 400px;
+
         }
 
         ul li {
@@ -78,8 +89,8 @@
       </div>
 
     <div class="contain">
-      <ul>
-          <li class="header">Choose target language<paper-icon-button class="right" icon="search"></paper-icon-button></li>
+        <div class="header"><span>Choose target language<paper-icon-button class="right" icon="search"></paper-icon-button></span></div>
+        <ul>
           <template is="dom-repeat" items="[[languages]]" as="language">
             <li class="clickable"><span>[[language]]</span></li>
           </template>
@@ -101,7 +112,12 @@
             'English',
             'French',
             'Spanish',
-            'German'
+            'German',
+            'Dutch',
+            'Australian',
+            'Chinese',
+            'Japanese',
+            'Korean'
         ];
     }
   });

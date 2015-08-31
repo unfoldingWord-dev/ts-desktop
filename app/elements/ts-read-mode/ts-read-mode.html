@@ -3,6 +3,8 @@
 <!-- Used in <ts-dashboard> -->
 
 <link rel="import" href="../../components/paper-card/paper-card.html"></link>
+<link rel="import" href="../../components/paper-tabs/paper-tabs.html"></link>
+<link rel="import" href="../../components/paper-tabs/paper-tab.html"></link>
 
 <dom-module id="ts-read-mode">
 
@@ -22,10 +24,10 @@
 			position: relative;
 			z-index: 0;
 			box-sizing: border-box;
-			padding: 20px 20px 40px;
+			padding: 20px 20px 0;
 			overflow-y: auto;
 		}
-		.chapter-cards {
+		.card-sets {
 			width: 100%;
 			position: relative;
 			margin-bottom: 40px;
@@ -76,49 +78,53 @@
 			z-index: 2;
 			top: 102px;
 			left: 0px;
-			right: 37px;
+			right: 17px;
 			padding: 0 20px;
 		}
 
 		paper-tabs {
-			--paper-tabs {
-				font-size: 5rem;
-			}
+			--paper-tabs-selection-bar-color: #AAA;
 		}
-
-		.tabs-div.chapter-cards {
+		.tabs-div.card-sets {
 			margin-bottom: 0;
 		}
+		#source-tabs {
+			text-align: center;
+		}
+		#source-tabs::shadow #tabsContent {
+			position: static;
+		}
 
-	</style>
-
-	<style>
 	</style>
 
 	<template>
 
-		<div class="container" id="sticky-cue">
-			<div class="tabs-div chapter-cards" id="sticky-ele">
-				<paper-card class="tabs-container top-card" elevation="0">
-					<paper-tabs id="source-tabs" selected="{{ selected }}" noink scrollable hideScrollButton>
+		<div class="container sticky-cue">
+			
+			<div class="tabs-div card-sets sticky-ele">		
+				<paper-card class="tabs-container top-card" elevation="2">
+					<paper-tabs id="source-tabs" selected="{{ selected }}" noink scrollable>
                   <template is="dom-repeat" items="{{ tabs }}" as="tab">
                      <paper-tab class="source-tab" on-click="">{{ tab.translation }}</paper-tab>
                   </template>
                </paper-tabs>
 				</paper-card>
 			</div>
+
 			<div>
 				<iron-pages id="source-pages" selected="[[selected]]">
 					<template is="dom-repeat" items="{{ tabs }}" as="tab">
 						<div class="source-page">
 							<template is="dom-repeat" items="{{ tab.content }}" as="chapter">
-								<div class="chapter-cards">
-									<paper-card class="top-card">
+								<div class="card-sets">
+									<paper-card class="top-card" elevation="2">
 										<div class="card-heading">
-											<h3><span>{{ tab.book_title }}</span> <span>{{ chapter.chapter }}</span></h3>
+											<h3>
+												<span>{{ tab.book_title }}</span> <span>{{ chapter.chapter }}</span>
+											</h3>
 										</div>
 										<div class="card-content">
-												<p>{{ chapter.text }}</p>
+											<p>{{ chapter.text }}</p>
 										</div>
 									</paper-card>
 								</div>
@@ -127,6 +133,7 @@
 					</template>
 				</iron-pages>
 			</div>
+
 		</div>
 	
 	</template>
@@ -197,8 +204,8 @@
 		attached: function() {
 
 			// ===== STICKY TABS =====
-			var ele = document.getElementById('sticky-ele');
-			var cue = document.getElementById('sticky-cue');
+			var ele = document.getElementsByClassName('sticky-ele')[0];
+			var cue = document.getElementsByClassName('sticky-cue')[0];
 
 			function stickEle() {
 				if (cue.scrollTop > 20) {
@@ -218,6 +225,8 @@
 			// ===== SELECT TAB =====
 			this.$['source-tabs'].selected = "0";
 			// ----- select tab -----
+
+			Polymer.updateStyles();
 		}
 	})
 

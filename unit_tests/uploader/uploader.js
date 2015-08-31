@@ -6,14 +6,18 @@
 
     let assert = require('assert');
     let uploader = require('../../app/js/uploader');
-	let User = require('../../app/js/user').User;
-    let mkdirp = require('mkdirp');
-    let nodegit = require('nodegit');
+    let User = require('../../app/js/user').User;
 
     describe('@Uploader', function () {
         after(function (done) {
             uploader.disconnect();
             done();
+        });
+        describe('@testingNodeGit', function () {
+            it('should pass', function () {
+                require('nodegit');
+                assert(true, true);
+            });
         });
         describe('@verifyProfile', function () {
             it('should make sure a profile has a name and email', function () {

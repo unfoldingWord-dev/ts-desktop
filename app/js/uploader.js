@@ -3,12 +3,12 @@
  */
  'use strict';
 ;(function () {
-	let net = require('net');
-	let keypair = require('keypair');
-	let jsonfile = require('jsonfile');
-	let mkdirp = require('mkdirp');
-	let getmac = require('getmac');
-	let sshClient = require('ssh2').Client;
+    let net = require('net');
+    let keypair = require('keypair');
+    let jsonfile = require('jsonfile');
+    let mkdirp = require('mkdirp');
+    let getmac = require('getmac');
+    //let sshClient = require('ssh2').Client;
 
     let key = 'ssh-rsa';
     let defaultHost = 'ts.door43.org';
@@ -16,7 +16,7 @@
     let targetDir = 'ssh/';
     let targetFile = targetDir + 'pair.json';
     let username = 'EmmittTest';
-	let client;
+    let client;
 
     let uploader = {
         register: function (host, port, deviceId, callback) {
@@ -64,7 +64,7 @@
         },
         uploadProfileHelper: function (profile, keypair) {
             uploader.getDeviceId(function (deviceId) {
-                console.log('UploaderProfileHelper');
+                console.log('UploaderProfileHelper' + profile + keypair + deviceId);
                 /*var gitRepo = "ssh://gitolite3@ts.door43.org:tS/"+deviceId+"/profile";
                 //var givenPrivateKey = keypair.private;
                 Git.Repository.init(gitRepo, false).then(function(repository){
@@ -119,8 +119,8 @@
                 }
             });
         },
-        getDeviceId: function(callback) {
-            getmac.getMac(function(err, mac){
+        getDeviceId: function (callback) {
+            getmac.getMac(function (err, mac) {
                 if (err) {
                     throw new Error('uploader.js could not get a mac address.');
                 }

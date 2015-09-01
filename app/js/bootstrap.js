@@ -160,6 +160,7 @@
             _this.configurator.loadConfig(config);
             _this.configurator.loadConfig(defaults);
             _this.configurator.setValue('rootDir', gui.App.dataPath, {'mutable':false});
+            _this.configurator.setValue('targetTranslationsDir', path.join(gui.App.dataPath, 'targetTranslations'), {'mutable':false});
             _this.configurator.setValue('indexDir', path.join(gui.App.dataPath, 'index'), {'mutable':false});
         },
 

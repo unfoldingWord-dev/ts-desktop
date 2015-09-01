@@ -3,8 +3,8 @@
 <!-- Used in <ts-dashboard> -->
 
 <link rel="import" href="../../components/paper-card/paper-card.html"></link>
-<link rel="import" href="../../components/paper-tabs/paper-tabs.html"></link>
-<link rel="import" href="../../components/paper-tabs/paper-tab.html"></link>
+<!-- <link rel="import" href="../../components/paper-tabs/paper-tabs.html"></link>
+<link rel="import" href="../../components/paper-tabs/paper-tab.html"></link> -->
 
 <dom-module id="ts-read-mode">
 
@@ -55,6 +55,12 @@
 			padding: 1rem 0;
 			text-align: center;
 		}
+		.tabs-hole {
+			display: block;
+			width: 100;
+			height: 50px;
+			/*background-color: #444;*/
+		}
 		.card-heading h3 {
 			margin: 0;
 			padding: 1rem 0;
@@ -73,26 +79,29 @@
 			visibility: hidden;
 		}
 
-		.sticky {
-			position: fixed;
-			z-index: 2;
-			top: 102px;
-			left: 0px;
-			right: 17px;
-			padding: 0 20px;
-		}
+		
 
 		paper-tabs {
 			--paper-tabs-selection-bar-color: #AAA;
 		}
-		.tabs-div.card-sets {
-			margin-bottom: 0;
+		.tabs-container {
+			position: absolute;
+			left: 20px;
+			width: calc(100% - 60px);
+			z-index: 100;
+			margin: 0;
+		}
+		.tabs-container.sticky {
+			position: fixed;
+			top: 102px;
+			width: calc(100% - 77px);
+			background-color: #DDD;
 		}
 		#source-tabs {
 			text-align: center;
 		}
 		#source-tabs::shadow #tabsContent {
-			position: static;
+			position: relative;
 		}
 
 	</style>
@@ -101,23 +110,24 @@
 
 		<div class="container sticky-cue">
 			
-			<div class="tabs-div card-sets sticky-ele">		
-				<paper-card class="tabs-container top-card" elevation="2">
+			<div class="tabs-container card-sets sticky-ele">		
+				<!-- <paper-card class="tabs-container top-card" elevation="2"> -->
 					<paper-tabs id="source-tabs" selected="{{ selected }}" noink scrollable>
                   <template is="dom-repeat" items="{{ tabs }}" as="tab">
                      <paper-tab class="source-tab" on-click="">{{ tab.translation }}</paper-tab>
                   </template>
                </paper-tabs>
-				</paper-card>
+				<!-- </paper-card> -->
 			</div>
 
 			<div>
-				<iron-pages id="source-pages" selected="[[selected]]">
+				<iron-pages id="source-pages" selected="[[ selected ]]">
 					<template is="dom-repeat" items="{{ tabs }}" as="tab">
 						<div class="source-page">
-							<template is="dom-repeat" items="{{ tab.content }}" as="chapter">
+							<template is="dom-repeat" items="{{ tab.content }}" as="chapter" indexAs="index">
 								<div class="card-sets">
-									<paper-card class="top-card" elevation="2">
+									<paper-card class="card top-card" elevation="2" >
+										<div class="tabs-hole"></div>
 										<div class="card-heading">
 											<h3>
 												<span>{{ tab.book_title }}</span> <span>{{ chapter.chapter }}</span>
@@ -204,11 +214,35 @@
 		attached: function() {
 
 			// ===== STICKY TABS =====
+			// Use another event name for firefox
+			var scrollEvent = (/Firefox/i.test(navigator.userAgent))? 'DOMMouseScroll' : 'mousewheel';
 			var ele = document.getElementsByClassName('sticky-ele')[0];
 			var cue = document.getElementsByClassName('sticky-cue')[0];
+			var card = document.getElementsByClassName('card-sets')[0];
+			var cardTop = findPos(card);
+
+			// If IE
+			if (document.attachEvent) {
+				cue.attachEvent('on'+scrollEvent, function(e) {
+					stickEle();
+				});
+				cue.addEventListener('onscroll', function(e) {
+					stickEle();
+				});
+			}
+			// If W3C browsers
+			else if (document.addEventListener) {
+				cue.addEventListener(scrollEvent, function(e) {
+					stickEle();
+				});
+				cue.addEventListener('scroll', function(e) {
+					stickEle();
+				});
+			}
 
 			function stickEle() {
-				if (cue.scrollTop > 20) {
+				console.log(cue.scrollTop, cardTop);
+				if (cue.scrollTop > (cardTop - 102)) {
 					if (ele.className.indexOf('sticky') === -1) {
 						ele.className += ' sticky';
 					}
@@ -216,17 +250,25 @@
 					ele.className = ele.className.replace(' sticky', '');
 				}
 			}
-
-			window.addEventListener('wheel', function() {
-				stickEle();
-			});
+			function findPos(obj) {
+				// var curleft = 0;
+				console.log(obj.offsetParent);
+				var curtop = 0;
+				if (obj.offsetParent) {
+					do {
+						console.log('adding');
+						// curleft += obj.offsetLeft;
+						curtop += obj.offsetTop;
+					} while (obj = obj.offsetParent);
+				}
+				console.log('returning', curtop);
+				return curtop;
+			}
 			// ----- sticky tabs -----
 
 			// ===== SELECT TAB =====
 			this.$['source-tabs'].selected = "0";
 			// ----- select tab -----
-
-			Polymer.updateStyles();
 		}
 	})
 

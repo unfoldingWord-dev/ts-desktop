@@ -52,24 +52,24 @@
 			top: 25px;
 		}
 		.card-heading {
-			padding: 1rem 0;
+			padding: 0.75rem 0;
 			text-align: center;
 		}
 		.tabs-hole {
 			display: block;
 			width: 100;
-			height: 50px;
+			height: 3rem;
 			/*background-color: #444;*/
 		}
 		.card-heading h3 {
 			margin: 0;
-			padding: 1rem 0;
+			padding: 0;
 			color: #888;
 		}
 		.card-content {
 			width: 60%;
 			margin: 0 auto;
-			padding-top: 0;
+			padding-top: 0.75rem;
 		}
 		.card-content p {
 			line-height: 1.8;
@@ -79,10 +79,20 @@
 			visibility: hidden;
 		}
 
-		
-
 		paper-tabs {
 			--paper-tabs-selection-bar-color: #AAA;
+			--paper-tabs: {
+				padding: 0.75rem 0;
+				height: 1.5rem;
+			}
+		}
+		paper-tab {
+			--paper-tab: {
+				padding: 0;
+				margin: 0 0.5rem;
+				color: #AAA;
+				font-weight: 300;
+			}
 		}
 		.tabs-container {
 			position: absolute;
@@ -91,17 +101,33 @@
 			z-index: 100;
 			margin: 0;
 		}
+		.icon-container {
+			height: 48px;
+			width: 48px;
+			display: inline-block;
+			float: right;
+		}
 		.tabs-container.sticky {
 			position: fixed;
 			top: 102px;
 			width: calc(100% - 77px);
-			background-color: #DDD;
+			background-color: #EEE;
 		}
 		#source-tabs {
 			text-align: center;
 		}
 		#source-tabs::shadow #tabsContent {
 			position: relative;
+		}
+		.icon {
+			position: relative;
+			top: 50%;
+			left: 50%;
+			-webkit-transform: translate(-50%, -50%);
+				-moz-transform: translate(-50%, -50%);
+			        transform: translate(-50%, -50%);
+			cursor: pointer;
+			color: #CCC;
 		}
 
 	</style>
@@ -110,14 +136,15 @@
 
 		<div class="container sticky-cue">
 			
-			<div class="tabs-container card-sets sticky-ele">		
-				<!-- <paper-card class="tabs-container top-card" elevation="2"> -->
-					<paper-tabs id="source-tabs" selected="{{ selected }}" noink scrollable>
-                  <template is="dom-repeat" items="{{ tabs }}" as="tab">
-                     <paper-tab class="source-tab" on-click="">{{ tab.translation }}</paper-tab>
-                  </template>
-               </paper-tabs>
-				<!-- </paper-card> -->
+			<div class="tabs-container card-sets sticky-ele">
+				<div class="icon-container">
+					<iron-icon icon="icons:tab" class="icon24 icon" on-click="addNewTab"></iron-icon>
+				</div>
+				<paper-tabs id="source-tabs" selected="{{ selected }}" noink scrollable hideScrollButtons>
+               <template is="dom-repeat" items="{{ tabs }}" as="tab">
+                  <paper-tab class="source-tab" on-click="" noBar="true" >{{ tab.translation }}</paper-tab>
+               </template>
+            </paper-tabs>
 			</div>
 
 			<div>
@@ -172,7 +199,7 @@
 				type: 'Array',
 				value: [
 					{
-						translation: 'ULB',
+						translation: 'English ULB',
 						book_title: 'John',
 						content: [
 							{
@@ -190,7 +217,7 @@
 						]
 					},
 					{
-						translation: 'UDB',
+						translation: 'English UDB',
 						book_title: 'Josh',
 						content: [
 							{
@@ -210,6 +237,31 @@
 				]
 			}
 		},
+
+		addNewTab: function() {
+         var newNumber = (this.tabs.length + 1).toString();
+         // This title will be dynamic(?)
+         var translation = 'translation ' + newNumber;
+         var bookTitle = 'James';
+         // This content will be dynamic
+			console.log(translation);
+         var content = [
+            {
+               chapter: 1,
+               text: 'This is page ' + newNumber
+            },
+            {
+               chapter: 2,
+               text: 'for ' + bookTitle
+            }
+         ];
+         this.push('tabs', {
+         	'translation': translation,
+         	'book_title': bookTitle,
+         	'content': content}
+         );
+         this.$['source-tabs'].selected = this.tabs.length - 1;
+      },
 
 		attached: function() {
 

@@ -95,7 +95,7 @@
         <div class="header"><span>Choose target language<paper-icon-button class="right" icon="search"></paper-icon-button></span></div>
         <ul>
           <template is="dom-repeat" items="[[languages]]" as="language">
-            <li class="clickable language"><span>[[language.ln]]</span><span class="right">[[language.lc]]</span></li>
+            <li class="clickable language" on-tap="store"><span>[[language.ln]]</span><span class="right">[[language.lc]]</span></li>
           </template>
       </ul>
     </div>
@@ -108,6 +108,16 @@
 
   Polymer({
     is: 'ts-language-menu',
+
+      store: function(e) {
+          //var Configurator = require('../../js/configurator').Configurator;
+          //var configurator = new Configurator();
+
+          App.configurator.setStorage({});
+
+          var language = e.model.language;
+          App.configurator.setValue("language", language);
+      },
 
     ready: function() {
 

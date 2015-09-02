@@ -79,7 +79,7 @@
       </div>
 
     <div class="contain">
-        <div class="header"><span>Choose a book</span></div>
+        <div class="header">Language: <span>[[language.ln]]</span><span>Choose a book</span></div>
         <ul>
           <template is="dom-repeat" items="[[books]]" as="book">
             <li class="clickable"><span>[[book]]</span></li>
@@ -107,6 +107,7 @@
           '1 Corinthians',
           '2 Corinthians'
       ];
+        this.language = App.configurator.getValue("language");
     }
   });
 

@@ -77,6 +77,9 @@
 
         .right {
             float: right;
+            color: #888;
+            font-style: italic;
+            font-size: 70%
         }
 
     </style>
@@ -92,7 +95,7 @@
         <div class="header"><span>Choose target language<paper-icon-button class="right" icon="search"></paper-icon-button></span></div>
         <ul>
           <template is="dom-repeat" items="[[languages]]" as="language">
-            <li class="clickable"><span>[[language]]</span></li>
+            <li class="clickable language"><span>[[language.ln]]</span><span class="right">[[language.lc]]</span></li>
           </template>
       </ul>
     </div>
@@ -108,17 +111,7 @@
 
     ready: function() {
 
-        this.languages = [
-            'English',
-            'French',
-            'Spanish',
-            'German',
-            'Dutch',
-            'Australian',
-            'Chinese',
-            'Japanese',
-            'Korean'
-        ];
+        this.languages = App.translator.targetLanguages;
     }
   });
 

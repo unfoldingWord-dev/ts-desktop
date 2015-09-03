@@ -1,6 +1,7 @@
-'use strict';
+// downloader module
 
 ;(function () {
+    'use strict';
 
     let request = require('request');
     let _ = require('lodash');

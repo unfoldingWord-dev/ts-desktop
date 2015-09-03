@@ -21,6 +21,8 @@
         indexDir: './index/'
     });
     let translator = new Translator(indexer);
+    let Library = require('../js/library').Library;
+    let library = Library(indexer);
 
     /**
      * FIX - This provides a fix to the native chrome shadow missing
@@ -46,6 +48,8 @@
         uploader: uploader,
 
         translator: translator,
+
+        library: library,
 
         indexer: indexer,
 

@@ -1,6 +1,7 @@
-'use strict';
+// uploader module
 
 ;(function () {
+    'use strict';
 
     let net = require('net');
 

@@ -1,6 +1,7 @@
-'use strict';
+// reporter module
 
 ;(function () {
+    'use strict';
 
     let fs = require('fs');
     let os = require('os');

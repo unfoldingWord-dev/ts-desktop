@@ -1,6 +1,7 @@
-'use strict';
+// translator module
 
 ;(function () {
+    'use strict';
 
     let Configurator = require('./configurator').Configurator,
         configurator = new Configurator(),
@@ -16,9 +17,6 @@
     function Translator (appIndex) {
 
         let translator = {
-            get projects () {
-                return [];
-            },
 
             get targetLanguages () {
                 return lang.list();
@@ -26,6 +24,10 @@
 
             createTargetTranslation: function () {
 
+            },
+
+            get targetTranslations () {
+                return [];
             }
         };
 

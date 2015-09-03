@@ -1,6 +1,7 @@
-'use strict';
+// indexer module
 
 ;(function () {
+    'use strict';
 
     let fs = require('fs');
     let path = require('path');

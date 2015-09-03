@@ -1,6 +1,7 @@
-'use strict';
+// navigator module
 
 ;(function () {
+    'use strict';
 
     let Downloader = require('./downloader').Downloader;
     let Indexer = require('./indexer').Indexer;

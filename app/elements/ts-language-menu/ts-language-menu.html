@@ -1,5 +1,6 @@
 
-
+<link rel="import" href="../../components/polymer/polymer.html">
+<link rel="import" href="../../components/iron-list/iron-list.html">
 
 <dom-module id="ts-language-menu">
 
@@ -57,7 +58,7 @@
             list-style-type: none;
             font-family: 'Roboto';
             font-size: 110%;
-            overflow-y: auto;
+
             height: 400px;
 
         }
@@ -82,6 +83,15 @@
             font-size: 70%
         }
 
+        .row {
+            height: 30px;
+        }
+
+        iron-list {
+            height: 210px;
+
+        }
+
     </style>
 
   <template>
@@ -92,12 +102,18 @@
       </div>
 
     <div class="contain">
-        <div class="header"><span>Choose target language<paper-icon-button class="right" icon="search"></paper-icon-button></span></div>
-        <ul>
-          <template is="dom-repeat" items="[[languages]]" as="language">
-            <li class="clickable language" on-tap="store"><span>[[language.ln]]</span><span class="right">[[language.lc]]</span></li>
-          </template>
-      </ul>
+        <div class="header">
+            <span>Choose target language<paper-icon-button class="right" icon="search"></paper-icon-button></span>
+        </div>
+        <div class="listcontain">
+            <iron-list items="[[languages]]" as="language">
+                  <template>
+                    <div class="row">
+                      <div class="clickable language" on-tap="store"><span>[[language.ln]]</span><span class="right">[[language.lc]]</span></div>
+                    </div>
+                  </template>
+            </iron-list>
+        </div>
     </div>
 
   </template>
@@ -122,6 +138,7 @@
     ready: function() {
 
         this.languages = App.translator.targetLanguages;
+
     }
   });
 

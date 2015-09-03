@@ -6,6 +6,11 @@
 
     <style>
 
+        :host {
+            display: flex;
+            flex: auto;
+        }
+
         .contain {
             display: inline-block;
             position: absolute;
@@ -17,11 +22,13 @@
             background: white;
             width: 450px;
             box-shadow: -4px 0 30px rgba(22, 22, 22, 0.3);
+            flex: auto;
         }
 
         .bar {
             @apply(--header-bar);
             height: 100px;
+            flex: auto;
         }
 
         .titles {
@@ -57,7 +64,7 @@
             padding: 0;
             font-family: 'Roboto';
             font-size: 110%;
-            height: 500px;
+            height: 70vh;
         }
 
         .row {

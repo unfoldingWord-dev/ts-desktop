@@ -1,4 +1,6 @@
 
+<link rel="import" href="../../components/polymer/polymer.html">
+<link rel="import" href="../../components/iron-list/iron-list.html">
 
 <dom-module id="ts-book-menu">
 
@@ -46,27 +48,29 @@
             border-bottom: 1px solid #bbb;
         }
 
-        ul {
+        iron-list {
             margin: 0;
             padding: 0;
-            list-style-type: none;
             font-family: 'Roboto';
             font-size: 110%;
-            overflow-y: auto;
-            height: 400px;
+            height: 500px;
         }
 
-        ul li {
+        .row {
             display: block;
             margin: 0;
             padding: 1em;
             border-bottom: 1px solid #bbb;
         }
 
-        ul li.clickable:hover {
+        .row:hover {
             background: var(--accent-color-dark);
             box-shadow: inset 0 -1px rgba(0,0,0,0);
             color: #fff;
+        }
+
+        ::-webkit-scrollbar {
+            display: none;
         }
 
     </style>
@@ -79,12 +83,16 @@
       </div>
 
     <div class="contain">
-        <div class="header">Language: <span>[[language.ln]]</span><span>Choose a book</span></div>
-        <ul>
-          <template is="dom-repeat" items="[[books]]" as="book">
-            <li class="clickable"><span>[[book]]</span></li>
-          </template>
-      </ul>
+        <div class="header">
+            <span>Choose a book</span>
+        </div>
+        <iron-list items="[[books]]" as="book">
+            <template>
+                <div class="row">
+                    <div class="clickable book"><span>[[book]]</span></div>
+                </div>
+            </template>
+        </iron-list>
     </div>
 
   </template>
@@ -105,7 +113,11 @@
           'Acts',
           'Romans',
           '1 Corinthians',
-          '2 Corinthians'
+          '2 Corinthians',
+          'Galatians',
+          'Ephesians',
+          'Phillipians',
+          'Colossians'
       ];
         this.language = App.configurator.getValue("language");
     }

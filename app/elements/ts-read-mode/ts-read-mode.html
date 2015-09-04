@@ -1,0 +1,327 @@
+<!-- ts-read-mode -->
+
+<!-- Used in <ts-dashboard> -->
+
+<link rel="import" href="../../components/paper-card/paper-card.html"></link>
+<!-- <link rel="import" href="../../components/paper-tabs/paper-tabs.html"></link>
+<link rel="import" href="../../components/paper-tabs/paper-tab.html"></link> -->
+
+<dom-module id="ts-read-mode">
+
+	<style is="custom-style">
+	
+		:host {
+			display: block;
+			/* The height of the title bar and the top green bar needs to be compensated */
+			height: calc(100% - 102px);
+			box-sizing: border-box;
+		}
+
+		.container {
+			display: block;
+			width: 100%;
+			height: 100%;
+			position: relative;
+			z-index: 0;
+			box-sizing: border-box;
+			padding: 20px 20px 0;
+			overflow-y: auto;
+		}
+		.card-sets {
+			width: 100%;
+			position: relative;
+			margin-bottom: 40px;
+		}
+		paper-card {
+			width: calc(100% - 20px);
+		}
+		.top-card {
+			position: relative;
+			z-index: 1;
+		}
+		.bottom-card {
+			position: absolute;
+			top: 20px;
+			right: 0;
+			background-color: #EEE;
+			cursor: pointer;
+			transition: all 0.15s ease-out;
+		}
+		.bottom-card:hover {
+			right: -3px;
+			top: 25px;
+		}
+		.card-heading {
+			padding: 0.75rem 0;
+			text-align: center;
+		}
+		.tabs-hole {
+			display: block;
+			width: 100;
+			height: 3rem;
+			/*background-color: #444;*/
+		}
+		.card-heading h3 {
+			margin: 0;
+			padding: 0;
+			color: #888;
+		}
+		.card-content {
+			width: 60%;
+			margin: 0 auto;
+			padding-top: 0.75rem;
+		}
+		.card-content p {
+			line-height: 1.8;
+			margin-top: 0;
+		}
+		.hidden {
+			visibility: hidden;
+		}
+
+		paper-tabs {
+			--paper-tabs-selection-bar-color: #AAA;
+			--paper-tabs: {
+				padding: 0.75rem 0;
+				height: 1.5rem;
+			}
+		}
+		paper-tab {
+			--paper-tab: {
+				padding: 0;
+				margin: 0 0.5rem;
+				color: #AAA;
+				font-weight: 300;
+			}
+		}
+		.tabs-container {
+			position: absolute;
+			left: 20px;
+			width: calc(100% - 60px);
+			z-index: 100;
+			margin: 0;
+		}
+		.icon-container {
+			height: 48px;
+			width: 48px;
+			display: inline-block;
+			float: right;
+		}
+		.tabs-container.sticky {
+			position: fixed;
+			top: 102px;
+			width: calc(100% - 77px);
+			background-color: #EEE;
+		}
+		#source-tabs {
+			text-align: center;
+		}
+		#source-tabs::shadow #tabsContent {
+			position: relative;
+		}
+		.icon {
+			position: relative;
+			top: 50%;
+			left: 50%;
+			-webkit-transform: translate(-50%, -50%);
+				-moz-transform: translate(-50%, -50%);
+			        transform: translate(-50%, -50%);
+			cursor: pointer;
+			color: #CCC;
+		}
+
+	</style>
+
+	<template>
+
+		<div class="container sticky-cue">
+			
+			<div class="tabs-container card-sets sticky-ele">
+				<div class="icon-container">
+					<iron-icon icon="icons:tab" class="icon24 icon" on-click="addNewTab"></iron-icon>
+				</div>
+				<paper-tabs id="source-tabs" selected="{{ selected }}" noink scrollable hideScrollButtons>
+               <template is="dom-repeat" items="{{ tabs }}" as="tab">
+                  <paper-tab class="source-tab" on-click="" noBar="true" >{{ tab.translation }}</paper-tab>
+               </template>
+            </paper-tabs>
+			</div>
+
+			<div>
+				<iron-pages id="source-pages" selected="[[ selected ]]">
+					<template is="dom-repeat" items="{{ tabs }}" as="tab">
+						<div class="source-page">
+							<template is="dom-repeat" items="{{ tab.content }}" as="chapter" indexAs="index">
+								<div class="card-sets">
+									<paper-card class="card top-card" elevation="2" >
+										<div class="tabs-hole"></div>
+										<div class="card-heading">
+											<h3>
+												<span>{{ tab.book_title }}</span> <span>{{ chapter.chapter }}</span>
+											</h3>
+										</div>
+										<div class="card-content">
+											<p>{{ chapter.text }}</p>
+										</div>
+									</paper-card>
+								</div>
+							</template>
+						</div>
+					</template>
+				</iron-pages>
+			</div>
+
+		</div>
+	
+	</template>
+
+</dom-module>
+
+<script>
+	
+	Polymer({
+
+		is: 'ts-read-mode',
+
+		properties: {
+
+			title: {
+				type: 'String',
+				value: 'John'
+			},
+
+			selected: {
+				type: 'Number',
+				value: 0
+			},
+
+			tabs: {
+				type: 'Array',
+				value: [
+					{
+						translation: 'English ULB',
+						book_title: 'John',
+						content: [
+							{
+								chapter: 1,
+								text: 'In the beginning was the Word, and the Word was with God, and the Word was God. The same was in the beginning with God. All things were made by him; and without him was not any thing made that was made.'
+							},
+							{
+								chapter: 2,
+								text: 'And the Word was made flesh, and dwelt among us, (and we beheld his glory, the glory as of the only begotten of the Father,) full of grace and truth. John bare witness of him, and cried, saying, This was he of whom I spake, He that cometh after me is preferred before me: for he was before me.'
+							},
+							{
+								chapter: 3,
+								text: 'They came and saw where he dwelt, and abode with him that day: for it was about the tenth hour.'
+							}
+						]
+					},
+					{
+						translation: 'English UDB',
+						book_title: 'Josh',
+						content: [
+							{
+								chapter: 1,
+								text: 'And the Word was made flesh, and dwelt among us, (and we beheld his glory, the glory as of the only begotten of the Father,) full of grace and truth. John bare witness of him, and cried, saying, This was he of whom I spake, He that cometh after me is preferred before me: for he was before me.'
+							},
+							{
+								chapter: 2,
+								text: 'In the beginning was the Word, and the Word was with God, and the Word was God. The same was in the beginning with God. All things were made by him; and without him was not any thing made that was made.'
+							},
+							{
+								chapter: 3,
+								text: 'They came and saw where he dwelt, and abode with him that day: for it was about the tenth hour.'
+							}
+						]
+					}
+				]
+			}
+		},
+
+		addNewTab: function() {
+         var newNumber = (this.tabs.length + 1).toString();
+         // This title will be dynamic(?)
+         var translation = 'translation ' + newNumber;
+         var bookTitle = 'James';
+         // This content will be dynamic
+			console.log(translation);
+         var content = [
+            {
+               chapter: 1,
+               text: 'This is page ' + newNumber
+            },
+            {
+               chapter: 2,
+               text: 'for ' + bookTitle
+            }
+         ];
+         this.push('tabs', {
+         	'translation': translation,
+         	'book_title': bookTitle,
+         	'content': content}
+         );
+         this.$['source-tabs'].selected = this.tabs.length - 1;
+      },
+
+		attached: function() {
+
+			// ===== STICKY TABS =====
+			// Use another event name for firefox
+			var scrollEvent = (/Firefox/i.test(navigator.userAgent))? 'DOMMouseScroll' : 'mousewheel';
+			var ele = document.getElementsByClassName('sticky-ele')[0];
+			var cue = document.getElementsByClassName('sticky-cue')[0];
+			var card = document.getElementsByClassName('card-sets')[0];
+			var cardTop = findPos(card);
+
+			// If IE
+			if (document.attachEvent) {
+				cue.attachEvent('on'+scrollEvent, function(e) {
+					stickEle();
+				});
+				cue.addEventListener('onscroll', function(e) {
+					stickEle();
+				});
+			}
+			// If W3C browsers
+			else if (document.addEventListener) {
+				cue.addEventListener(scrollEvent, function(e) {
+					stickEle();
+				});
+				cue.addEventListener('scroll', function(e) {
+					stickEle();
+				});
+			}
+
+			function stickEle() {
+				console.log(cue.scrollTop, cardTop);
+				if (cue.scrollTop > (cardTop - 102)) {
+					if (ele.className.indexOf('sticky') === -1) {
+						ele.className += ' sticky';
+					}
+				} else {
+					ele.className = ele.className.replace(' sticky', '');
+				}
+			}
+			function findPos(obj) {
+				// var curleft = 0;
+				console.log(obj.offsetParent);
+				var curtop = 0;
+				if (obj.offsetParent) {
+					do {
+						console.log('adding');
+						// curleft += obj.offsetLeft;
+						curtop += obj.offsetTop;
+					} while (obj = obj.offsetParent);
+				}
+				console.log('returning', curtop);
+				return curtop;
+			}
+			// ----- sticky tabs -----
+
+			// ===== SELECT TAB =====
+			this.$['source-tabs'].selected = "0";
+			// ----- select tab -----
+		}
+	})
+
+</script>

@@ -10,6 +10,7 @@
     "paper-tabs": "PolymerElements/paper-tabs#~1.0.1",
     "iron-pages": "PolymerElements/iron-pages#~1.0.3",
     "paper-menu-button": "PolymerElements/paper-menu-button#~1.0.2",
-    "paper-fab": "PolymerElements/paper-fab#~1.0.3"
+    "paper-fab": "PolymerElements/paper-fab#~1.0.3",
+    "paper-card": "PolymerElements/paper-card#~1.0.3"
   }
 }

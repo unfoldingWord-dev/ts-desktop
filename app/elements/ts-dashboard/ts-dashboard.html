@@ -1,4 +1,3 @@
-<!-- ts-menubar -->
 
 <link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../components/paper-menu-button/paper-menu-button.html">
@@ -9,6 +8,8 @@
 <link rel="import" href="../../elements/ts-project-menu/ts-project-menu.html">
 <link rel="import" href="../../elements/ts-book-menu/ts-book-menu.html">
 <link rel="import" href="../../elements/ts-chapter-menu/ts-chapter-menu.html">
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html" />
+<link rel="import" href="../ts-read-mode/ts-read-mode.html" />
 
 <dom-module id="ts-dashboard">
 
@@ -17,7 +18,7 @@
   :host {
     display: block;
     width: 100%;
-    height: 100vh;
+    height: 100%;
   }
 
   [icon="menu"] {
@@ -29,14 +30,20 @@
 
   <template>
 
-      <iron-pages on-tap="nextMenu" selected="[[selected]]">
-          <ts-home-menu></ts-home-menu>
-          <ts-language-menu></ts-language-menu>
-          <ts-project-menu></ts-project-menu>
-          <ts-book-menu></ts-book-menu>
-          <ts-chapter-menu></ts-chapter-menu>
-      </iron-pages>
+    <div class="bar">
+      <div class="titles"></div>
+      <paper-icon-button icon="menu" on-tap="openMenu"></paper-icon-button>
+    </div>
 
+    <iron-pages on-tap="nextMenu" selected="[[selected]]">
+        <ts-home-menu></ts-home-menu>
+        <ts-language-menu></ts-language-menu>
+        <ts-project-menu></ts-project-menu>
+        <ts-book-menu></ts-book-menu>
+        <ts-chapter-menu></ts-chapter-menu>
+    </iron-pages>
+
+    <ts-read-mode></ts-read-mode>
   </template>
 
 </dom-module>
@@ -46,16 +53,16 @@
   Polymer({
     is: 'ts-dashboard',
 
-      properties: {
-          selected: {
-              type: Number,
-              value: 0
-          }
-      },
+    properties: {
+        selected: {
+            type: Number,
+            value: 0
+        }
+    },
 
-      nextMenu: function(event) {
-          this.selected = this.selected + 1;
-      },
+    nextMenu: function(event) {
+        this.selected = this.selected + 1;
+    },
 
     toggleMenu: function(event) {
       event.preventDefault();

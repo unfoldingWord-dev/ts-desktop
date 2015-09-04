@@ -15,6 +15,7 @@
             margin-right: auto;
             background: white;
             width: 450px;
+            box-shadow: -4px 0 30px rgba(22, 22, 22, 0.3);
         }
 
         .bar {
@@ -40,6 +41,14 @@
         .header {
             color: #888;
             font-style: italic;
+            font-family: 'Roboto';
+            font-size: 110%
+        }
+
+        .header span {
+            display: block;
+            padding: 1em;
+            border-bottom: 1px solid #bbb;
         }
 
         ul {
@@ -82,8 +91,8 @@
       </div>
 
     <div class="contain">
-      <ul>
-          <li class="header">Choose a project<paper-icon-button class="right" icon="autorenew"></paper-icon-button></li>
+        <div class="header"><span>Choose a project<paper-icon-button class="right" icon="autorenew"></paper-icon-button></span></div>
+        <ul>
           <li class="clickable"><iron-icon icon="project-menu:project"></iron-icon>Open Bible Stories</li>
           <li class="clickable"><iron-icon icon="project-menu:project"></iron-icon>Old Testament<paper-icon-button class="right" icon="chevron-right"></paper-icon-button></li>
           <li class="clickable"><iron-icon icon="project-menu:project"></iron-icon>New Testament<paper-icon-button class="right" icon="chevron-right"></paper-icon-button></li>

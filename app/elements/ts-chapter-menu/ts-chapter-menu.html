@@ -14,6 +14,7 @@
             margin-right: auto;
             background: white;
             width: 450px;
+            box-shadow: -4px 0 30px rgba(22, 22, 22, 0.3);
         }
 
         .bar {
@@ -35,31 +36,23 @@
         .header {
             color: #888;
             font-style: italic;
-        }
-
-        ul {
-            margin: 0;
-            padding: 0;
-            list-style-type: none;
             font-family: 'Roboto';
-            font-style: bold;
-            font-size: 110%;
+            font-size: 110%
         }
 
-        ul li {
+        .header span {
             display: block;
-            margin: 0;
             padding: 1em;
             border-bottom: 1px solid #bbb;
         }
 
-        span:hover {
+        .block:hover {
             background: var(--accent-color-dark);
             box-shadow: inset 0 -1px rgba(0,0,0,0);
             color: #fff;
         }
 
-        span {
+        .block {
             border: 1px solid #bbb;
             width: 49px;
             margin-top: -1px;
@@ -83,13 +76,10 @@
       </div>
 
     <div class="contain">
-      <ul>
-          <li class="header">Choose a chapter</li>
-      </ul>
+          <div class="header"><span>Choose a chapter</span></div>
           <template is="dom-repeat" items="[[chapters]]" as="chapter">
-            <span>[[chapter]]</span>
+            <span class="block">[[chapter]]</span>
           </template>
-
     </div>
 
   </template>

@@ -14,6 +14,7 @@
             margin-right: auto;
             background: white;
             width: 450px;
+            box-shadow: -4px 0 30px rgba(22, 22, 22, 0.3);
         }
 
         .bar {
@@ -35,6 +36,14 @@
         .header {
             color: #888;
             font-style: italic;
+            font-family: 'Roboto';
+            font-size: 110%
+        }
+
+        .header span {
+            display: block;
+            padding: 1em;
+            border-bottom: 1px solid #bbb;
         }
 
         ul {
@@ -42,8 +51,9 @@
             padding: 0;
             list-style-type: none;
             font-family: 'Roboto';
-            font-style: bold;
             font-size: 110%;
+            overflow-y: auto;
+            height: 400px;
         }
 
         ul li {
@@ -69,8 +79,8 @@
       </div>
 
     <div class="contain">
-      <ul>
-          <li class="header">Choose a book</li>
+        <div class="header">Language: <span>[[language.ln]]</span><span>Choose a book</span></div>
+        <ul>
           <template is="dom-repeat" items="[[books]]" as="book">
             <li class="clickable"><span>[[book]]</span></li>
           </template>
@@ -91,8 +101,13 @@
         'Matthew',
         'Mark',
         'Luke',
-        'John'
+        'John',
+          'Acts',
+          'Romans',
+          '1 Corinthians',
+          '2 Corinthians'
       ];
+        this.language = App.configurator.getValue("language");
     }
   });
 

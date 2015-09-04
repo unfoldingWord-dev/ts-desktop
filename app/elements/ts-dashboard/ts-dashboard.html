@@ -1,14 +1,6 @@
-<<<<<<< HEAD
+
 
 <link rel="import" href="../../elements/ts-home-blank/ts-home-blank.html">
-=======
-<!-- ts-menubar -->
-
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../components/paper-menu-button/paper-menu-button.html">
-<link rel="import" href="../../elements/ts-view-button/ts-view-button.html">
-<link rel="import" href="../../elements/ts-overflow/ts-overflow.html">
->>>>>>> 1af17448a06e4c2e2eb8da4692706e47e97613e7
 <link rel="import" href="../../elements/ts-home-menu/ts-home-menu.html">
 <link rel="import" href="../../elements/ts-language-menu/ts-language-menu.html">
 <link rel="import" href="../../elements/ts-project-menu/ts-project-menu.html">
@@ -69,7 +61,13 @@
           if (etarget.id === "start" || etarget.id === "new") {
               this.selected = 2;
           } else if (etarget.nodeName === "LI") {
-              this.selected = this.selected + 1;
+              if (etarget.classList.contains("language")) {
+                  //var sellanguage = event.model.item.ln;
+                  this.selected = this.selected + 2;
+              } else {
+                  this.selected = this.selected + 1;
+              }
+
           } else if (etarget.id === "back") {
               this.selected = this.selected - 1;
           }

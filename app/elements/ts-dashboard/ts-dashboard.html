@@ -39,7 +39,7 @@
       <iron-pages class="clickable" on-tap="TapHandler" selected="[[selected]]">
           <ts-home-blank></ts-home-blank>
           <ts-home-menu></ts-home-menu>
-          <ts-language-menu></ts-language-menu>
+          <ts-language-menu language="{{language}}"></ts-language-menu>
           <ts-project-menu></ts-project-menu>
           <ts-book-menu></ts-book-menu>
           <ts-chapter-menu></ts-chapter-menu>
@@ -59,6 +59,7 @@
               type: Number,
               value: 0
           }
+
       },
 
       TapHandler: function(event) {

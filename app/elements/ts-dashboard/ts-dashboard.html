@@ -30,8 +30,8 @@
       <iron-pages class="clickable" on-tap="TapHandler" selected="[[selected]]">
           <ts-home-blank></ts-home-blank>
           <ts-home-menu></ts-home-menu>
-          <ts-language-menu></ts-language-menu>
-          <ts-project-menu></ts-project-menu>
+          <ts-language-menu language="{{targetLanguage}}" on-selected="onLanguageSelected"></ts-language-menu>
+          <ts-project-menu language="[[targetLanguage]]"></ts-project-menu>
           <ts-book-menu></ts-book-menu>
           <ts-chapter-menu></ts-chapter-menu>
       </iron-pages>
@@ -49,7 +49,15 @@
           selected: {
               type: Number,
               value: 0
+          },
+          targetLanguage: {
+              type: Object,
+              value: {}
           }
+      },
+
+      onLanguageSelected: function(event) {
+          
       },
 
       TapHandler: function(event) {

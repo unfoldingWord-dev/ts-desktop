@@ -97,10 +97,13 @@
         <div class="header">
             <span>Choose target language<paper-icon-button class="right" icon="search"></paper-icon-button></span>
         </div>
-        <iron-list items="[[languages]]" as="language">
+        <iron-list items="[[languages]]" as="l">
               <template>
                 <div class="row">
-                  <div class="clickable language" on-tap="store"><span>[[language.ln]]</span><span class="right">[[language.lc]]</span></div>
+                    <div class="clickable language" on-tap="store">
+                        <span>[[l.ln]]</span>
+                        <span class="right">[[l.lc]]</span>
+                    </div>
                 </div>
               </template>
         </iron-list>
@@ -115,18 +118,21 @@
   Polymer({
     is: 'ts-language-menu',
 
-      store: function(e) {
+    properties: {
+        language: {
+            type: Object,
+            value: {},
+            notify: true
+        }
+    },
 
-          App.configurator.setStorage({});
-
-          var language = e.model.language;
-          App.configurator.setValue("language", language);
-      },
+    store: function(e) {
+        this.language = e.model.l;
+        this.fire('selected');
+    },
 
     ready: function() {
-
         this.languages = App.translator.targetLanguages;
-
     }
   });
 

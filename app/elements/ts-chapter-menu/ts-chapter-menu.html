@@ -40,7 +40,7 @@
             font-size: 110%
         }
 
-        .header span {
+        .header div {
             display: block;
             padding: 1em;
             border-bottom: 1px solid #bbb;
@@ -76,7 +76,9 @@
       </div>
 
     <div class="contain">
-          <div class="header"><span>Choose a chapter</span></div>
+          <div class="header">
+              <div><span>[[group.name]]</span> > <span>[[book.name]]</span> > Choose a chapter</div>
+          </div>
           <template is="dom-repeat" items="[[chapters]]" as="chapter">
             <span class="block">[[chapter]]</span>
           </template>

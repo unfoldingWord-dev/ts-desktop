@@ -42,7 +42,7 @@
             font-size: 110%
         }
 
-        .header span {
+        .header div {
             display: block;
             padding: 1em;
             border-bottom: 1px solid #bbb;
@@ -84,12 +84,12 @@
 
     <div class="contain">
         <div class="header">
-            <span>Choose a book</span>
+            <div><span>[[language.ln]]</span> > <span>[[group.name]]</span> > Choose a book</div>
         </div>
-        <iron-list items="[[books]]" as="book">
+        <iron-list items="[[booklist]]" as="bk">
             <template>
                 <div class="row">
-                    <div class="clickable book"><span>[[book]]</span></div>
+                    <div class="clickable book" on-tap="store"><span>[[bk.name]]</span></div>
                 </div>
             </template>
         </iron-list>
@@ -104,22 +104,37 @@
   Polymer({
     is: 'ts-book-menu',
 
+      properties: {
+          book: {
+              type: Object,
+              value: {},
+              notify: true
+          }
+
+      },
+
+      store: function(e) {
+
+          this.book = e.model.bk;
+
+      },
+
     ready: function() {
-      this.books = [
-        'Matthew',
-        'Mark',
-        'Luke',
-        'John',
-          'Acts',
-          'Romans',
-          '1 Corinthians',
-          '2 Corinthians',
-          'Galatians',
-          'Ephesians',
-          'Phillipians',
-          'Colossians'
+      this.booklist = [
+          {"name": "Matthew"},
+          {"name": "Mark"},
+          {"name": "Luke"},
+          {"name": "John"},
+          {"name": "Acts"},
+          {"name": "Romans"},
+          {"name": "1 Corinthians"},
+          {"name": "2 Corinthians"},
+          {"name": "Galatians"},
+          {"name": "Ephesians"},
+          {"name": "Philippians"},
+          {"name": "Colossians"}
       ];
-        this.language = App.configurator.getValue("language");
+
     }
   });
 

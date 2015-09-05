@@ -35,7 +35,6 @@
 
         .header {
             color: #888;
-            font-style: italic;
             font-family: 'Roboto';
             font-size: 110%
         }
@@ -66,6 +65,10 @@
             font-size: 110%;
         }
 
+        .header paper-icon-button {
+            padding: 0;
+        }
+
     </style>
 
   <template>
@@ -77,7 +80,13 @@
 
     <div class="contain">
           <div class="header">
-              <div><span>[[group.name]]</span> > <span>[[book.name]]</span> > Choose a chapter</div>
+              <div>
+                  <span>[[group.name]]</span>
+                  <paper-icon-button icon="chevron-right"></paper-icon-button>
+                  <span>[[book.name]]</span>
+                  <paper-icon-button icon="chevron-right"></paper-icon-button>
+                  <em>Choose a chapter</em>
+              </div>
           </div>
           <template is="dom-repeat" items="[[chapters]]" as="chapter">
             <span class="block">[[chapter]]</span>

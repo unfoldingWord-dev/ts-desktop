@@ -40,7 +40,6 @@
 
         .header {
             color: #888;
-            font-style: italic;
             font-family: 'Roboto';
             font-size: 110%
         }
@@ -90,7 +89,10 @@
 
     <div class="contain">
         <div class="header">
-            <div><span>[[language.ln]]</span> > Choose a project<paper-icon-button class="right" icon="autorenew"></paper-icon-button></div>
+            <div>
+                <em>Choose a project</em>
+                <paper-icon-button class="right" icon="autorenew"></paper-icon-button>
+            </div>
         </div>
         <iron-list items="[[grouplist]]" as="grp">
             <template>
@@ -131,9 +133,47 @@
     ready: function() {
 
         this.grouplist = [
-            {"name": "Open Bible Stories", "lefticon": "project-menu:project", "righticon": "chevron-right"},
-            {"name": "Old Testament", "lefticon": "project-menu:project", "righticon": "chevron-right"},
-            {"name": "New Testament", "lefticon": "project-menu:project", "righticon": "chevron-right"}
+            {"name": "Open Bible Stories", "lefticon": "project-menu:project", "righticon": "", "list": [
+                {"name": "Adam and Eve"},
+                {"name": "Noah and the Flood"},
+                {"name": "Moses"},
+                {"name": "The Wall of Jericho"},
+                {"name": "Jonah and the Whale"},
+                {"name": "Jesus' Birth"},
+                {"name": "Feeding of the 5000"},
+                {"name": "Palm Sunday"},
+                {"name": "Jesus' Crucifixion"},
+                {"name": "Jesus' Resurrection"},
+                {"name": "Day of Pentecost"}
+            ]},
+            {"name": "Old Testament", "lefticon": "project-menu:project", "righticon": "chevron-right", "list": [
+                {"name": "Genesis"},
+                {"name": "Exodus"},
+                {"name": "Leviticus"},
+                {"name": "Numbers"},
+                {"name": "Deutoronomy"},
+                {"name": "Joshua"},
+                {"name": "Judges"},
+                {"name": "Ruth"},
+                {"name": "1 Samuel"},
+                {"name": "2 Samuel"},
+                {"name": "1 Kings"},
+                {"name": "2 Kings"}
+            ]},
+            {"name": "New Testament", "lefticon": "project-menu:project", "righticon": "chevron-right", "list": [
+                {"name": "Matthew"},
+                {"name": "Mark"},
+                {"name": "Luke"},
+                {"name": "John"},
+                {"name": "Acts"},
+                {"name": "Romans"},
+                {"name": "1 Corinthians"},
+                {"name": "2 Corinthians"},
+                {"name": "Galatians"},
+                {"name": "Ephesians"},
+                {"name": "Philippians"},
+                {"name": "Colossians"}
+            ]}
         ]
 
     }

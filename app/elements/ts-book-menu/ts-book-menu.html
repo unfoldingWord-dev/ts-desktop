@@ -37,7 +37,6 @@
 
         .header {
             color: #888;
-            font-style: italic;
             font-family: 'Roboto';
             font-size: 110%
         }
@@ -73,6 +72,10 @@
             display: none;
         }
 
+        .header paper-icon-button {
+            padding: 0;
+        }
+
     </style>
 
   <template>
@@ -84,12 +87,18 @@
 
     <div class="contain">
         <div class="header">
-            <div><span>[[language.ln]]</span> > <span>[[group.name]]</span> > Choose a book</div>
+            <div>
+                <span>[[group.name]]</span>
+                <paper-icon-button icon="chevron-right"></paper-icon-button>
+                <em>Choose a book</em>
+            </div>
         </div>
-        <iron-list items="[[booklist]]" as="bk">
+        <iron-list items="[[group.list]]" as="bk">
             <template>
                 <div class="row">
-                    <div class="clickable book" on-tap="store"><span>[[bk.name]]</span></div>
+                    <div class="clickable book" on-tap="store">
+                        <span>[[bk.name]]</span>
+                    </div>
                 </div>
             </template>
         </iron-list>
@@ -110,30 +119,13 @@
               value: {},
               notify: true
           }
-
       },
 
       store: function(e) {
-
           this.book = e.model.bk;
-
       },
 
     ready: function() {
-      this.booklist = [
-          {"name": "Matthew"},
-          {"name": "Mark"},
-          {"name": "Luke"},
-          {"name": "John"},
-          {"name": "Acts"},
-          {"name": "Romans"},
-          {"name": "1 Corinthians"},
-          {"name": "2 Corinthians"},
-          {"name": "Galatians"},
-          {"name": "Ephesians"},
-          {"name": "Philippians"},
-          {"name": "Colossians"}
-      ];
 
     }
   });

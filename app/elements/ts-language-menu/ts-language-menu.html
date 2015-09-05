@@ -48,12 +48,11 @@
 
         .header {
             color: #888;
-            font-style: italic;
             font-family: 'Roboto';
             font-size: 110%
         }
 
-        .header span {
+        .header div {
             display: block;
             padding: 1em;
             border-bottom: 1px solid #bbb;
@@ -87,10 +86,6 @@
             font-size: 70%
         }
 
-        ::-webkit-scrollbar {
-            display: none;
-        }
-
     </style>
 
   <template>
@@ -102,12 +97,18 @@
 
     <div class="contain">
         <div class="header">
-            <span>Choose target language<paper-icon-button class="right" icon="search"></paper-icon-button></span>
+            <div>
+                <em>Choose target language</em>
+                <paper-icon-button class="right" icon="search"></paper-icon-button>
+            </div>
         </div>
         <iron-list items="[[languagelist]]" as="lang">
               <template>
                 <div class="row">
-                  <div class="clickable language" on-tap="store"><span>[[lang.ln]]</span><span class="right">[[lang.lc]]</span></div>
+                  <div class="clickable language" on-tap="store">
+                      <span>[[lang.ln]]</span>
+                      <span class="right">[[lang.lc]]</span>
+                  </div>
                 </div>
               </template>
         </iron-list>
@@ -128,20 +129,16 @@
               value: {},
               notify: true
           }
-
       },
 
       store: function(e) {
-
           this.language = e.model.lang;
-
       },
 
-    ready: function() {
+      ready: function() {
+          this.languagelist = App.translator.targetLanguages;
+      }
 
-        this.languagelist = App.translator.targetLanguages;
-
-    }
   });
 
 </script>

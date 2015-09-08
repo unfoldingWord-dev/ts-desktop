@@ -88,8 +88,8 @@
                   <em>Choose a chapter</em>
               </div>
           </div>
-          <template is="dom-repeat" items="[[chapters]]" as="chapter">
-            <span class="block">[[chapter]]</span>
+          <template is="dom-repeat" items="[[chapters]]" as="chap">
+            <span class="block" on-tap="store">[[chap]]</span>
           </template>
     </div>
 
@@ -102,22 +102,23 @@
   Polymer({
     is: 'ts-chapter-menu',
 
+      properties: {
+          chapter: {
+              type: Number,
+              value: null,
+              notify: true
+          }
+      },
+
+      store: function(e) {
+
+          this.chapter = e.model.chap;
+
+      },
+
+
     ready: function() {
-      this.chapters = [
-        '1',
-        '2',
-        '3',
-        '4',
-          '5',
-          '6',
-          '7',
-          '8',
-          '9',
-          '10',
-          '11',
-          '12',
-          '13'
-      ];
+
     }
   });
 

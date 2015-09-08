@@ -41,8 +41,8 @@
           <ts-home-menu></ts-home-menu>
           <ts-language-menu language="{{targetlanguage}}"></ts-language-menu>
           <ts-project-menu language="[[targetlanguage]]" group="{{targetgroup}}"></ts-project-menu>
-          <ts-book-menu language="[[targetlanguage]]" group="[[targetgroup]]" book="{{targetbook}}"></ts-book-menu>
-          <ts-chapter-menu language="[[targetlanguage]]" group="[[targetgroup]]" book="[[targetbook]]"></ts-chapter-menu>
+          <ts-book-menu language="[[targetlanguage]]" group="[[targetgroup]]" book="{{targetbook}}" chapters="{{targetchapters}}"></ts-book-menu>
+          <ts-chapter-menu language="[[targetlanguage]]" group="[[targetgroup]]" book="[[targetbook]]" chapters="[[targetchapters]]" chapter="{{targetchapter}}"></ts-chapter-menu>
       </iron-pages>
 
   </template>
@@ -70,6 +70,14 @@
           targetbook: {
               type: Object,
               value: {}
+          },
+          targetchapters: {
+              type: Array,
+              value: []
+          },
+          targetchapter: {
+              type: Number,
+              value: null
           }
 
       },

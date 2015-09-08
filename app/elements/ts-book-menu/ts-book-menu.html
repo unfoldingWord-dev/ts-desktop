@@ -60,6 +60,7 @@
             margin: 0;
             padding: 1em;
             border-bottom: 1px solid #bbb;
+            transition: background .5s, color .5s;
         }
 
         .row:hover {
@@ -88,7 +89,7 @@
     <div class="contain">
         <div class="header">
             <div>
-                <span>[[group.name]]</span>
+                <span class="clickable togroup">[[group.name]]</span>
                 <paper-icon-button icon="chevron-right"></paper-icon-button>
                 <em>Choose a book</em>
             </div>
@@ -96,7 +97,7 @@
         <iron-list items="[[group.list]]" as="bk">
             <template>
                 <div class="row">
-                    <div class="clickable book" on-tap="store">
+                    <div class="clickable tochap" on-tap="store">
                         <span>[[bk.name]]</span>
                     </div>
                 </div>

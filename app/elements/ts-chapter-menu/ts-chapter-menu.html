@@ -63,6 +63,7 @@
             font-family: 'Roboto';
             font-style: bold;
             font-size: 110%;
+            transition: background .5s, color .5s;
         }
 
         .header paper-icon-button {
@@ -81,15 +82,15 @@
     <div class="contain">
           <div class="header">
               <div>
-                  <span>[[group.name]]</span>
+                  <span class="clickable togroup">[[group.name]]</span>
                   <paper-icon-button icon="chevron-right"></paper-icon-button>
-                  <span>[[book.name]]</span>
+                  <span class="clickable tobook">[[book.name]]</span>
                   <paper-icon-button icon="chevron-right"></paper-icon-button>
                   <em>Choose a chapter</em>
               </div>
           </div>
           <template is="dom-repeat" items="[[chapters]]" as="chap">
-            <span class="block" on-tap="store">[[chap]]</span>
+            <span class="clickable toread block" on-tap="store">[[chap]]</span>
           </template>
     </div>
 

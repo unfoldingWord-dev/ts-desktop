@@ -32,6 +32,7 @@
   }
 
 
+
   </style>
 
   <template>
@@ -89,16 +90,16 @@
               etarget = etarget.parentNode;
           }
 
-          if (etarget.id === "start" || etarget.id === "new") {
+          if (etarget.classList.contains("tolang")) {
               this.selected = 2;
-          } else if (etarget.classList.contains("language")) {
-              this.selected = this.selected + 1;
-          } else if (etarget.classList.contains("group")) {
-              this.selected = this.selected + 1;
-          } else if (etarget.classList.contains("book")) {
-              this.selected = this.selected + 1;
-          } else if (etarget.nodeName === "chapter") {
-              this.selected = this.selected;
+          } else if (etarget.classList.contains("togroup")) {
+              this.selected = 3;
+          } else if (etarget.classList.contains("tobook")) {
+              this.selected = 4;
+          } else if (etarget.classList.contains("tochap")) {
+              this.selected = 5;
+          } else if (etarget.classList.contains("toread")) {
+              this.selected = 5;
           } else if (etarget.id === "back") {
               this.selected = this.selected - 1;
           }

@@ -14,7 +14,7 @@
             done();
         });
         describe('@register', function () {
-            this.timeout(6000);
+            this.timeout(10000);
             it('should register with the server', function (done) {
                 var key =  'done';
                 var deviceID = 'uploaderUnitTest';

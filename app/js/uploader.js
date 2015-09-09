@@ -15,7 +15,7 @@
     let defaultPort = 9095;
     let targetDir = 'ssh/';
     let targetFile = targetDir + 'pair.json';
-    let username = 'EmmittTest';
+    let username = '';
     let client;
 
     let uploader = {
@@ -31,7 +31,6 @@
                 client.write(JSON.stringify(connectionJson));
             });
             client.on('data', function (data) {
-                console.log(JSON.parse(data.toString()));
                 if (typeof callback === 'function') {
                     callback(JSON.parse(data.toString()), pair);
                 }
@@ -43,53 +42,6 @@
         },
         verifyProfile: function (profile) {
             return profile.getName() !== '' && profile.getEmail() !== '';
-        },
-        uploadProfile: function (profile) {
-            console.log('UploaderProfile');
-            if (uploader.verifyProfile(profile)) {
-                uploader.needToRegister(function (register, keypair) {
-                    if (register) {
-                        uploader.getDeviceId(function (deviceId) {
-                            uploader.register(defaultHost, defaultPort, deviceId, function (data, pair) {
-                                if (data.ok) {
-                                    uploader.uploadProfileHelper(profile, pair);
-                                }
-                            });
-                        });
-                    } else {
-                        uploader.uploadProfileHelper(profile, keypair);
-                    }
-                });
-            }
-        },
-        uploadProfileHelper: function (profile, keypair) {
-            uploader.getDeviceId(function (deviceId) {
-                console.log('UploaderProfileHelper' + profile + keypair + deviceId);
-                /*var gitRepo = "ssh://gitolite3@ts.door43.org:tS/"+deviceId+"/profile";
-                //var givenPrivateKey = keypair.private;
-                Git.Repository.init(gitRepo, false).then(function(repository){
-                    throw new Error(repository);
-                });
-                var conn = new sshClient();
-                conn.connect({
-                    host: defaultHost,
-                    port: defaultPort,
-                    username: 'Emmitt',
-                    privateKey: givenPrivateKey
-                });*/
-            });
-        },
-        verifyProject: function () {
-            //TODO: Implement, returns Boolean
-        },
-        uploadProject: function () {
-            //TODO: Implement, returns void
-        },
-        getQuestions: function () {
-            //TODO: Implement, returns list of question
-        },
-        updateQuestions: function () {
-            //TODO: Implement, returns void
         },
         disconnect: function () {
             client && client.destroy(), client = null;

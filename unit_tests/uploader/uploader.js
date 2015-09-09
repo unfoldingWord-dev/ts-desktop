@@ -13,10 +13,26 @@
             uploader.disconnect();
             done();
         });
-        describe('@testingNodeGit', function () {
-            it('should pass', function () {
-                require('nodegit');
-                assert(true, true);
+        describe('@register', function () {
+            this.timeout(6000);
+            it('should register with the server', function (done) {
+                var key =  'done';
+                var deviceID = 'uploaderUnitTest';
+                uploader.register('ts.door43.org', 9095, deviceID, function (data) {
+                    if (data.error) {
+                        if (data.error == "duplicate username") {
+                            assert.ok(true, data.error);
+                            done()
+                        }
+                        else {
+                            assert.fail(true, false, data.error);
+                            done();
+                        }
+                    } else {
+                        assert.equal(data.ok, key);
+                        done();
+                    }
+                });
             });
         });
         describe('@verifyProfile', function () {

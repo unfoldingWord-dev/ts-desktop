@@ -3,8 +3,6 @@
 <!-- Used in <ts-dashboard> -->
 
 <link rel="import" href="../../components/paper-card/paper-card.html"></link>
-<!-- <link rel="import" href="../../components/paper-tabs/paper-tabs.html"></link>
-<link rel="import" href="../../components/paper-tabs/paper-tab.html"></link> -->
 
 <dom-module id="ts-read-mode">
 
@@ -93,20 +91,25 @@
 				font-weight: 300;
 			}
 		}
-		.tabs-container {
-			position: absolute;
-			left: 20px;
-			width: calc(100% - 60px);
-			z-index: 100;
-			margin: 0;
-		}
 		.icon-container {
 			height: 48px;
 			width: 48px;
 			display: inline-block;
 			float: right;
 		}
+		.tabs-container {
+			width: calc(100% - 60px);
+			position: absolute;
+			top: 20px;
+			left: 20px;
+			z-index: 100;
+			margin: 0;
+		}
+		.tabs-container.animate {
+			transition: all 0.15s ease;
+		}
 		.tabs-container.sticky {
+			width: calc(100% - 77px);
 			position: fixed;
 			top: 38px;
 			background-color: #EEE;
@@ -137,10 +140,10 @@
 					<iron-icon icon="icons:tab" class="icon24 icon" on-click="addNewTab"></iron-icon>
 				</div>
 				<paper-tabs id="source-tabs" selected="{{ selected }}" noink scrollable hideScrollButtons>
-	               <template is="dom-repeat" items="{{ tabs }}" as="tab">
-	                  <paper-tab class="source-tab" on-click="" noBar="true" >{{ tab.translation }}</paper-tab>
-	               </template>
-            	</paper-tabs>
+               <template is="dom-repeat" items="{{ tabs }}" as="tab">
+                  <paper-tab class="source-tab" on-click="calcCardPos">{{ tab.translation.title }}</paper-tab>
+               </template>
+         	</paper-tabs>
 			</div>
 
 			<div>
@@ -148,7 +151,7 @@
 					<template is="dom-repeat" items="{{ tabs }}" as="tab">
 						<div class="source-page">
 							<template is="dom-repeat" items="{{ tab.content }}" as="chapter" indexAs="index">
-								<div class="card-sets">
+								<div class$="{{ _computeClass('card-sets', tab.translation.code) }}">
 									<paper-card class="card top-card" elevation="2" >
 										<div class="tabs-hole"></div>
 										<div class="card-heading">
@@ -178,21 +181,60 @@
 (function() {
 
 	function findPos(obj) {
-		// var curleft = 0;
-		console.log(obj.offsetParent);
-
 		var curtop = 0;
 
 		if (obj.offsetParent) {
 			do {
-				console.log('adding');
-				// curleft += obj.offsetLeft;
 				curtop += obj.offsetTop;
 			} while (obj = obj.offsetParent);
 		}
 
-		console.log('returning', curtop);
 		return curtop;
+	}
+
+	function getCardPos(obj, selector) {
+		var cards = obj.querySelectorAll(selector);
+		var tops = [];
+		var heights = [];
+
+		for (i = 0; i < cards.length; i++) {
+			tops.push(cards[i].offsetTop);
+			heights.push(cards[i].offsetHeight);
+		}
+
+		return {'tops': tops, 'heights': heights};
+	}
+
+	function calcTriggers(tabsLoc, cardPos) {
+
+		var tops = cardPos.tops;
+		var heights = cardPos.heights;
+		var current = tabsLoc.current;
+		var stickyAt = tabsLoc.stickyAt;
+		var forwardTrigger = tabsLoc.forwardTrigger;
+		var forwardTo = tabsLoc.forwardTo;
+		var backwardTrigger = tabsLoc.backwardTrigger;
+		var backwardTo = tabsLoc.backwardTo;
+
+		stickyAt = tops[current];
+		forwardTrigger = heights[current]*0.6 + tops[current];
+		forwardTo = tops[current+1];
+		if (current === 0) {
+			backwardTrigger = -1;
+			backwardTo = -1;
+		} else if (current > 0 && current < tops.length) {
+			backwardTrigger = heights[current-1]*0.6 + tops[current-1];
+			backwardTo = tops[current-1];
+		}
+
+		return {
+			'current': current,
+			'stickyAt': stickyAt,
+			'forwardTrigger': forwardTrigger,
+			'forwardTo': forwardTo,
+			'backwardTrigger': backwardTrigger,
+			'backwardTo': backwardTo
+		}
 	}
 	
 	Polymer({
@@ -215,7 +257,10 @@
 				type: Array,
 				value: [
 					{
-						translation: 'English ULB',
+						translation: {
+							code: 'ulb',
+							title: 'English ULB'
+						},
 						book_title: 'John',
 						content: [
 							{
@@ -233,7 +278,10 @@
 						]
 					},
 					{
-						translation: 'English UDB',
+						translation: {
+							code: 'udb',
+							title: 'English UDB'
+						},
 						book_title: 'Josh',
 						content: [
 							{
@@ -251,19 +299,67 @@
 						]
 					}
 				]
+			},
+
+			tabsLoc: {
+				type: 'Object',
+				value: {
+					current: 0,
+					stickyAt: 0,
+					forwardTrigger: 0,
+					forwardTo: 0,
+					backwardTrigger: 0,
+					backwardTo: 0
+				}
+			},
+
+			cardPos: {
+				type: 'Object',
+				value: {
+					tops: [],
+					heights: []
+				}
 			}
+		},
+
+		_computeClass: function() {
+			var className = '';
+			for (var i = 0; i < arguments.length; i++) {
+				className += arguments[i] + ' ';
+			}
+			return className;
+		},
+
+		calcCardPos: function() {
+			this.cardPos = getCardPos(this, '.iron-selected > .card-sets');
+			this.tabsLoc = calcTriggers(this.tabsLoc, this.cardPos);
+			this.stickEle();
+			console.log(this.cardPos);
+		},
+
+		attributeChanged: function() {
+			this.cardPos = getCardPos(this, '.iron-selected > .card-sets');
+			this.tabsLoc = calcTriggers(this.tabsLoc, this.cardPos);
+			console.log(this.cardPos);
+		},
+
+		attached: function() {
+			var cue = this.$.cue,
+				stick = this.stickEle.bind(this);
+				scrollEvent = (/Firefox/i.test(navigator.userAgent))? 'DOMMouseScroll' : 'mousewheel',
+
+			['scroll', scrollEvent].forEach(function(e) {
+				cue.addEventListener(e, stick);
+			});
 		},
 
 		addNewTab: function() {
 			var newNumber = (this.tabs.length + 1).toString();
-
-			// This title will be dynamic(?)
-			var translation = 'translation ' + newNumber;
+			var translation = {
+				'code': 'AAA' + newNumber,
+				'title': 'translation ' + newNumber
+			}
 			var bookTitle = 'James';
-
-			// This content will be dynamic
-			console.log(translation);
-
 			var content = [
 				{
 				   chapter: 1,
@@ -283,31 +379,49 @@
 
 			this.$['source-tabs'].selected = this.tabs.length - 1;
 	  	},
-
+ 
 		stickEle: function(event) {
 			var cue = this.$.cue,
 				cardsets = this.$.cardsets,
-				cardTop = findPos(cardsets);
+				current = this.tabsLoc.current,
+				stickyAt = this.tabsLoc.stickyAt,
+				forwardTrigger = this.tabsLoc.forwardTrigger,
+				forwardTo = this.tabsLoc.forwardTo,
+				backwardTrigger = this.tabsLoc.backwardTrigger,
+				backwardTo = this.tabsLoc.backwardTo;
 
-			console.log(cue.scrollTop, cardTop);
+			if (cue.scrollTop > stickyAt) {
+				cardsets.style.top = '38px';
+				cardsets.classList.add('sticky');
+			} else if (cue.scrollTop <= stickyAt) {
+				cardsets.classList.remove('sticky');
+				cardsets.style.top = String(this.cardPos.tops[current]) + 'px';
+			}
 
-			cardsets.classList.add('sticky', cue.scrollTop > (cardTop - 102));
+			if (cue.scrollTop > forwardTrigger) {
+				cardsets.classList.remove('sticky');
+				cardsets.classList.add('animate');
+				cardsets.style.top = String(forwardTo) + 'px';
+				this.tabsLoc.current += 1;
+				this.tabsLoc = calcTriggers(this.tabsLoc, this.cardPos);
+				window.setTimeout(function() {cardsets.classList.remove('animate');}, 150);
+			} else if (cue.scrollTop <= backwardTrigger) {
+				cardsets.classList.add('animate');
+				cardsets.style.top = '38px';
+				cardsets.classList.add('sticky');
+				this.tabsLoc.current -= 1;
+				this.tabsLoc = calcTriggers(this.tabsLoc, this.cardPos);
+				window.setTimeout(function() {cardsets.classList.remove('animate');}, 150);
+			}
 		},
-
-		attached: function() {
-			var cue = this.$.cue,
-				scrollEvent = (/Firefox/i.test(navigator.userAgent))? 'DOMMouseScroll' : 'mousewheel',
-				stick = this.stickEle.bind(this);
-
-			['scroll', scrollEvent].forEach(function(e) {
-				cue.addEventListener(e, stick);
-			});
-		},
-
+     
 		ready: function() {
 			this.async(function() {
+				
 				this.selected = 0;
+
 			}, 1);
+
 		}
 	});
 

@@ -20,11 +20,10 @@
                 var deviceID = 'uploaderUnitTest';
                 uploader.register('ts.door43.org', 9095, deviceID, function (data) {
                     if (data.error) {
-                        if (data.error == "duplicate username") {
+                        if (data.error === 'duplicate username') {
                             assert.ok(true, data.error);
-                            done()
-                        }
-                        else {
+                            done();
+                        } else {
                             assert.fail(true, false, data.error);
                             done();
                         }

@@ -6,6 +6,7 @@
 <link rel="import" href="../../elements/ts-project-menu/ts-project-menu.html">
 <link rel="import" href="../../elements/ts-book-menu/ts-book-menu.html">
 <link rel="import" href="../../elements/ts-chapter-menu/ts-chapter-menu.html">
+<link rel="import" href="../../elements/ts-publish-book/ts-publish-book.html">
 
 <dom-module id="ts-dashboard">
 
@@ -44,6 +45,7 @@
           <ts-project-menu language="[[targetlanguage]]" group="{{targetgroup}}"></ts-project-menu>
           <ts-book-menu language="[[targetlanguage]]" group="[[targetgroup]]" book="{{targetbook}}" chapters="{{targetchapters}}"></ts-book-menu>
           <ts-chapter-menu language="[[targetlanguage]]" group="[[targetgroup]]" book="[[targetbook]]" chapters="[[targetchapters]]" chapter="{{targetchapter}}"></ts-chapter-menu>
+          <ts-publish-book language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-book>
       </iron-pages>
 
   </template>
@@ -99,7 +101,7 @@
           } else if (etarget.classList.contains("tochap")) {
               this.selected = 5;
           } else if (etarget.classList.contains("toread")) {
-              this.selected = 5;
+              this.selected = 6;
           } else if (etarget.id === "back") {
               this.selected = this.selected - 1;
           }

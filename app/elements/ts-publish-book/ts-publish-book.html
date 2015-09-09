@@ -1,0 +1,108 @@
+
+
+
+<dom-module id="ts-publish-book">
+
+    <style>
+
+        .contain {
+            display: inline-block;
+            position: absolute;
+            top: 100px;
+            left: 0;
+            right: 0;
+            margin-left: auto;
+            margin-right: auto;
+            background: white;
+            width: 450px;
+            box-shadow: -4px 0 30px rgba(22, 22, 22, 0.3);
+        }
+
+        .bar {
+            @apply(--header-bar);
+            height: 100px;
+        }
+
+        .titles {
+            flex: auto;
+            font-size: 125%;
+            display: inline-block;
+            height: 40px;
+        }
+
+        [icon="arrow-back"] {
+            margin: 0 .2em;
+        }
+
+        .next {
+            background: #1FC2FC;
+            color: white;
+            width: 110px;
+            height: 30px;
+            display: inline-block;
+            position: absolute;
+            top: 200px;
+            left: 0;
+            right: 0;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: -4px 0 30px rgba(22, 22, 22, 0.3);
+            text-align: center;
+        }
+
+        .steps {
+            text-align: center;
+            left: 0;
+            right: 0;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+
+
+    </style>
+
+  <template>
+
+      <div class="bar">
+          <paper-icon-button class="clickable" id="back" icon="arrow-back"></paper-icon-button>
+          <div class="titles">Publish Project</div>
+          <div class="steps">
+              <paper-icon-button class="" icon="radio-button-unchecked"></paper-icon-button>
+              <span>BOOK</span>
+              <paper-icon-button class="" icon="radio-button-unchecked"></paper-icon-button>
+              <span>PROFILE</span>
+              <paper-icon-button class="" icon="radio-button-unchecked" size="40"></paper-icon-button>
+              <span>REVIEW</span>
+              <paper-icon-button class="" icon="radio-button-unchecked"></paper-icon-button>
+              <span>PUBLISH</span>
+          </div>
+      </div>
+
+    <div class="contain">
+        <div class="clickable toprofile next">
+            <span>NEXT STEP</span>
+        </div>
+    </div>
+
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+    is: 'ts-publish-book',
+
+      properties: {
+
+      },
+
+
+
+    ready: function() {
+
+    }
+  });
+
+</script>

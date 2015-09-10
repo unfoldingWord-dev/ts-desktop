@@ -7,6 +7,9 @@
 <link rel="import" href="../../elements/ts-book-menu/ts-book-menu.html">
 <link rel="import" href="../../elements/ts-chapter-menu/ts-chapter-menu.html">
 <link rel="import" href="../../elements/ts-publish-book/ts-publish-book.html">
+<link rel="import" href="../../elements/ts-publish-profile/ts-publish-profile.html">
+<link rel="import" href="../../elements/ts-publish-review/ts-publish-review.html">
+<link rel="import" href="../../elements/ts-publish-publish/ts-publish-publish.html">
 
 <dom-module id="ts-dashboard">
 
@@ -46,6 +49,9 @@
           <ts-book-menu language="[[targetlanguage]]" group="[[targetgroup]]" book="{{targetbook}}" chapters="{{targetchapters}}"></ts-book-menu>
           <ts-chapter-menu language="[[targetlanguage]]" group="[[targetgroup]]" book="[[targetbook]]" chapters="[[targetchapters]]" chapter="{{targetchapter}}"></ts-chapter-menu>
           <ts-publish-book language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-book>
+          <ts-publish-profile language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-profile>
+          <ts-publish-review language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-review>
+          <ts-publish-publish language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-publish>
       </iron-pages>
 
   </template>
@@ -102,6 +108,12 @@
               this.selected = 5;
           } else if (etarget.classList.contains("toread")) {
               this.selected = 6;
+          } else if (etarget.classList.contains("toprofile")) {
+              this.selected = 7;
+          } else if (etarget.classList.contains("toreview")) {
+              this.selected = 8;
+          } else if (etarget.classList.contains("topublish")) {
+              this.selected = 9;
           } else if (etarget.id === "back") {
               this.selected = this.selected - 1;
           }

@@ -1,14 +1,14 @@
 
 
 
-<dom-module id="ts-publish-book">
+<dom-module id="ts-publish-review">
 
     <style>
 
         .contain {
             display: inline-block;
             position: absolute;
-            top: 100px;
+            top: 130px;
             left: 0;
             right: 0;
             margin-left: auto;
@@ -41,7 +41,7 @@
             height: 30px;
             display: inline-block;
             position: absolute;
-            top: 200px;
+            top: 300px;
             left: 0;
             right: 0;
             margin-left: auto;
@@ -63,6 +63,29 @@
             color: white;
         }
 
+        ul {
+            margin: 0;
+            padding: 0;
+            list-style-type: none;
+            font-family: 'Roboto';
+            font-style: bold;
+            font-size: 110%;
+        }
+
+        ul li {
+            display: block;
+            margin: 0;
+            padding: 1em;
+            border-bottom: 1px solid #bbb;
+            transition: background .5s, color .5s;
+        }
+
+        ul li:hover {
+            background: var(--accent-color-dark);
+            box-shadow: inset 0 -1px rgba(0,0,0,0);
+            color: #fff;
+        }
+
 
 
     </style>
@@ -75,17 +98,24 @@
           <div class="steps">
               <paper-icon-button class="current" icon="radio-button-unchecked"></paper-icon-button>
               <span class="current">BOOK</span>
-              <paper-icon-button class="" icon="radio-button-unchecked"></paper-icon-button>
-              <span>PROFILE</span>
-              <paper-icon-button class="" icon="radio-button-unchecked" size="40"></paper-icon-button>
-              <span>REVIEW</span>
+              <paper-icon-button class="current" icon="radio-button-unchecked"></paper-icon-button>
+              <span class="current">PROFILE</span>
+              <paper-icon-button class="current" icon="radio-button-unchecked" size="40"></paper-icon-button>
+              <span class="current">REVIEW</span>
               <paper-icon-button class="" icon="radio-button-unchecked"></paper-icon-button>
               <span>PUBLISH</span>
           </div>
       </div>
 
     <div class="contain">
-        <div class="clickable toprofile next">
+        <ul>
+            <li>Project: <span>[[book.name]]</span> - <span>[[language.ln]]</span></li>
+            <li>Profile</li>
+            <li>License Agreement</li>
+            <li>Translation Guidelines</li>
+            <li>Statement of Faith</li>
+        </ul>
+        <div class="clickable topublish next">
             <span>NEXT STEP</span>
         </div>
     </div>
@@ -97,7 +127,7 @@
 <script>
 
   Polymer({
-    is: 'ts-publish-book',
+    is: 'ts-publish-review',
 
       properties: {
 

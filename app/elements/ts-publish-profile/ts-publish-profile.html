@@ -1,14 +1,14 @@
 
 
 
-<dom-module id="ts-publish-book">
+<dom-module id="ts-publish-profile">
 
     <style>
 
         .contain {
             display: inline-block;
             position: absolute;
-            top: 100px;
+            top: 130px;
             left: 0;
             right: 0;
             margin-left: auto;
@@ -41,7 +41,7 @@
             height: 30px;
             display: inline-block;
             position: absolute;
-            top: 200px;
+            top: 300px;
             left: 0;
             right: 0;
             margin-left: auto;
@@ -63,6 +63,15 @@
             color: white;
         }
 
+        input {
+            width: 350px;
+            height: 40px;
+            font-size: 130%;
+            margin-left: 30px;
+            border: none;
+            border-bottom: 1px solid #bbb;
+        }
+
 
 
     </style>
@@ -75,8 +84,8 @@
           <div class="steps">
               <paper-icon-button class="current" icon="radio-button-unchecked"></paper-icon-button>
               <span class="current">BOOK</span>
-              <paper-icon-button class="" icon="radio-button-unchecked"></paper-icon-button>
-              <span>PROFILE</span>
+              <paper-icon-button class="current" icon="radio-button-unchecked"></paper-icon-button>
+              <span class="current">PROFILE</span>
               <paper-icon-button class="" icon="radio-button-unchecked" size="40"></paper-icon-button>
               <span>REVIEW</span>
               <paper-icon-button class="" icon="radio-button-unchecked"></paper-icon-button>
@@ -85,7 +94,14 @@
       </div>
 
     <div class="contain">
-        <div class="clickable toprofile next">
+        <div>
+            <form>
+                <p><input type="text" value="Your Name"></p>
+                <p><input type="text" value="Your Email Address"></p>
+                <p><input type="text" value="Your Phone Number"></p>
+            </form>
+        </div>
+        <div class="clickable toreview next">
             <span>NEXT STEP</span>
         </div>
     </div>
@@ -97,7 +113,7 @@
 <script>
 
   Polymer({
-    is: 'ts-publish-book',
+    is: 'ts-publish-profile',
 
       properties: {
 

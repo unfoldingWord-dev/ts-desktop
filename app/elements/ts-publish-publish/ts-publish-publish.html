@@ -1,7 +1,7 @@
 
 
 
-<dom-module id="ts-publish-book">
+<dom-module id="ts-publish-publish">
 
     <style>
 
@@ -75,17 +75,17 @@
           <div class="steps">
               <paper-icon-button class="current" icon="radio-button-unchecked"></paper-icon-button>
               <span class="current">BOOK</span>
-              <paper-icon-button class="" icon="radio-button-unchecked"></paper-icon-button>
-              <span>PROFILE</span>
-              <paper-icon-button class="" icon="radio-button-unchecked" size="40"></paper-icon-button>
-              <span>REVIEW</span>
-              <paper-icon-button class="" icon="radio-button-unchecked"></paper-icon-button>
-              <span>PUBLISH</span>
+              <paper-icon-button class="current" icon="radio-button-unchecked"></paper-icon-button>
+              <span class="current">PROFILE</span>
+              <paper-icon-button class="current" icon="radio-button-unchecked" size="40"></paper-icon-button>
+              <span class="current">REVIEW</span>
+              <paper-icon-button class="current" icon="radio-button-unchecked"></paper-icon-button>
+              <span class="current">PUBLISH</span>
           </div>
       </div>
 
     <div class="contain">
-        <div class="clickable toprofile next">
+        <div class="clickable next">
             <span>NEXT STEP</span>
         </div>
     </div>
@@ -97,7 +97,7 @@
 <script>
 
   Polymer({
-    is: 'ts-publish-book',
+    is: 'ts-publish-publish',
 
       properties: {
 

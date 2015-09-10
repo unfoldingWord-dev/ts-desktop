@@ -109,7 +109,7 @@
 
         function decrementLink (md5Hash) {
             let links = openJson(linksJsonPath);
-            if(links === null) {
+            if (links === null) {
                 links = {};
             }
             if (md5Hash in links) {

@@ -211,9 +211,6 @@
             });
         },
 
-        initializeUploader: function () {
-        },
-
         init: function () {
             let _this = this;
 
@@ -222,7 +219,6 @@
             _this.initializeConfig();
             _this.initializeReporter();
             _this.registerErrorReporter();
-            _this.initializeUploader();
 
             let platformInit = _this.platformInit[process.platform];
             platformInit && platformInit.call(_this);

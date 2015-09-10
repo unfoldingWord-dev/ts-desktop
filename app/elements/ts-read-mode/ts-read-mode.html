@@ -141,7 +141,7 @@
 				</div>
 				<paper-tabs id="source-tabs" selected="{{ selected }}" noink scrollable hideScrollButtons>
                <template is="dom-repeat" items="{{ tabs }}" as="tab">
-                  <paper-tab class="source-tab" on-click="calcCardPos">{{ tab.translation.title }}</paper-tab>
+                  <paper-tab class="source-tab">{{ tab.translation.title }}</paper-tab>
                </template>
          	</paper-tabs>
 			</div>
@@ -194,6 +194,7 @@
 
 	function getCardPos(obj, selector) {
 		var cards = obj.querySelectorAll(selector);
+		console.log('getCardPos called', cards);
 		var tops = [];
 		var heights = [];
 
@@ -201,12 +202,12 @@
 			tops.push(cards[i].offsetTop);
 			heights.push(cards[i].offsetHeight);
 		}
-
+		console.log('returning ', tops, heights);
 		return {'tops': tops, 'heights': heights};
 	}
 
 	function calcTriggers(tabsLoc, cardPos) {
-
+		console.log('calcTriggers called', tabsLoc);
 		var tops = cardPos.tops;
 		var heights = cardPos.heights;
 		var current = tabsLoc.current;
@@ -334,7 +335,7 @@
 			this.cardPos = getCardPos(this, '.iron-selected > .card-sets');
 			this.tabsLoc = calcTriggers(this.tabsLoc, this.cardPos);
 			this.stickEle();
-			console.log(this.cardPos);
+			console.log('calculating...', this.tabsLoc);
 		},
 
 		attributeChanged: function() {
@@ -345,12 +346,15 @@
 
 		attached: function() {
 			var cue = this.$.cue,
-				stick = this.stickEle.bind(this);
-				scrollEvent = (/Firefox/i.test(navigator.userAgent))? 'DOMMouseScroll' : 'mousewheel',
+				stick = this.stickEle.bind(this),
+				calc = this.calcCardPos.bind(this),
+				scrollEvent = (/Firefox/i.test(navigator.userAgent))? 'DOMMouseScroll' : 'mousewheel';
 
 			['scroll', scrollEvent].forEach(function(e) {
 				cue.addEventListener(e, stick);
 			});
+
+			this.$['source-tabs'].addEventListener('iron-select', calc);
 		},
 
 		addNewTab: function() {
@@ -403,6 +407,7 @@
 				cardsets.classList.add('animate');
 				cardsets.style.top = String(forwardTo) + 'px';
 				this.tabsLoc.current += 1;
+				console.log('aaa');
 				this.tabsLoc = calcTriggers(this.tabsLoc, this.cardPos);
 				window.setTimeout(function() {cardsets.classList.remove('animate');}, 150);
 			} else if (cue.scrollTop <= backwardTrigger) {
@@ -410,6 +415,7 @@
 				cardsets.style.top = '38px';
 				cardsets.classList.add('sticky');
 				this.tabsLoc.current -= 1;
+				console.log('bbb');
 				this.tabsLoc = calcTriggers(this.tabsLoc, this.cardPos);
 				window.setTimeout(function() {cardsets.classList.remove('animate');}, 150);
 			}

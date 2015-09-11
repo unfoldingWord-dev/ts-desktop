@@ -11,6 +11,7 @@
     "iron-pages": "PolymerElements/iron-pages#~1.0.3",
     "paper-menu-button": "PolymerElements/paper-menu-button#~1.0.2",
     "paper-fab": "PolymerElements/paper-fab#~1.0.3",
-    "iron-elements": "polymerelements/iron-elements#~1.0.3"
+    "iron-elements": "polymerelements/iron-elements#~1.0.3",
+    "async": "~1.4.2"
   }
 }

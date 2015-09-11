@@ -224,13 +224,6 @@
             });
         },
 
-        initializeUploader: function () {
-            uploader.setServerInfo({
-                'host': configurator.getValue('authServer'),
-                'port': configurator.getValue('authServerPort')
-            });
-        },
-
         init: function () {
             let _this = this;
 
@@ -239,7 +232,6 @@
             _this.initializeConfig();
             _this.initializeReporter();
             _this.registerErrorReporter();
-            _this.initializeUploader();
 
             let platformInit = _this.platformInit[process.platform];
             platformInit && platformInit.call(_this);

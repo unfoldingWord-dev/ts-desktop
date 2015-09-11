@@ -8,7 +8,7 @@
         .contain {
             display: inline-block;
             position: absolute;
-            top: 100px;
+            top: 130px;
             left: 0;
             right: 0;
             margin-left: auto;
@@ -41,13 +41,17 @@
             height: 30px;
             display: inline-block;
             position: absolute;
-            top: 200px;
+            top: 300px;
             left: 0;
             right: 0;
             margin-left: auto;
             margin-right: auto;
             box-shadow: -4px 0 30px rgba(22, 22, 22, 0.3);
             text-align: center;
+        }
+
+        .next span {
+            line-height: 30px;
         }
 
         .steps {
@@ -63,6 +67,49 @@
             color: white;
         }
 
+        .circle {
+            border-radius: 50%;
+            border: 1px solid;
+            width: 25px;
+            height: 25px;
+            text-align: center;
+            display: inline-block;
+            margin: 0 10px 0 20px;
+            line-height: 25px;
+        }
+
+        .circle.current {
+            background: #1FC2FC;
+        }
+
+        ul {
+            margin: 0;
+            padding: 0;
+            list-style-type: none;
+            font-family: 'Roboto';
+            font-style: bold;
+            font-size: 110%;
+        }
+
+        ul li {
+            display: block;
+            margin: 0;
+            padding: 1em;
+            border-bottom: 1px solid #bbb;
+            transition: background .5s, color .5s;
+        }
+
+        ul li:hover {
+            background: var(--accent-color-dark);
+            box-shadow: inset 0 -1px rgba(0,0,0,0);
+            color: #fff;
+        }
+
+        .right {
+            float: right;
+            color: forestgreen;
+        }
+
 
 
     </style>
@@ -73,18 +120,21 @@
           <paper-icon-button class="clickable" id="back" icon="arrow-back"></paper-icon-button>
           <div class="titles">Publish Project</div>
           <div class="steps">
-              <paper-icon-button class="current" icon="radio-button-unchecked"></paper-icon-button>
+              <div class="circle current">1</div>
               <span class="current">BOOK</span>
-              <paper-icon-button class="" icon="radio-button-unchecked"></paper-icon-button>
+              <div class="circle">2</div>
               <span>PROFILE</span>
-              <paper-icon-button class="" icon="radio-button-unchecked" size="40"></paper-icon-button>
+              <div class="circle">3</div>
               <span>REVIEW</span>
-              <paper-icon-button class="" icon="radio-button-unchecked"></paper-icon-button>
+              <div class="circle">4</div>
               <span>PUBLISH</span>
           </div>
       </div>
 
     <div class="contain">
+        <ul>
+            <li><span>[[book.name]]</span><iron-icon class="right" icon="done"></iron-icon></li>
+        </ul>
         <div class="clickable toprofile next">
             <span>NEXT STEP</span>
         </div>

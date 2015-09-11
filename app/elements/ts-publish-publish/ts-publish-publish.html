@@ -63,6 +63,30 @@
             color: white;
         }
 
+        .steps .past {
+            color: white;
+        }
+
+        .small {
+            --iron-icon-height: 17px;
+            --iron-icon-width: 17px;
+        }
+
+        .circle {
+            border-radius: 50%;
+            border: 1px solid;
+            width: 25px;
+            height: 25px;
+            text-align: center;
+            display: inline-block;
+            margin: 0 10px 0 20px;
+            line-height: 25px;
+        }
+
+        .circle.current {
+            background: #1FC2FC;
+        }
+
 
 
     </style>
@@ -73,13 +97,13 @@
           <paper-icon-button class="clickable" id="back" icon="arrow-back"></paper-icon-button>
           <div class="titles">Publish Project</div>
           <div class="steps">
-              <paper-icon-button class="current" icon="radio-button-unchecked"></paper-icon-button>
-              <span class="current">BOOK</span>
-              <paper-icon-button class="current" icon="radio-button-unchecked"></paper-icon-button>
-              <span class="current">PROFILE</span>
-              <paper-icon-button class="current" icon="radio-button-unchecked" size="40"></paper-icon-button>
-              <span class="current">REVIEW</span>
-              <paper-icon-button class="current" icon="radio-button-unchecked"></paper-icon-button>
+              <div class="circle past"><iron-icon icon="done" class="small"></iron-icon></div>
+              <span class="past">BOOK</span>
+              <div class="circle past"><iron-icon icon="done" class="small"></iron-icon></div>
+              <span class="past">PROFILE</span>
+              <div class="circle past"><iron-icon icon="done" class="small"></iron-icon></div>
+              <span class="past">REVIEW</span>
+              <div class="circle current">4</div>
               <span class="current">PUBLISH</span>
           </div>
       </div>

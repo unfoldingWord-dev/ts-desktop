@@ -50,6 +50,10 @@
             text-align: center;
         }
 
+        .next span {
+            line-height: 30px;
+        }
+
         .steps {
             text-align: center;
             left: 0;
@@ -61,6 +65,30 @@
 
         .steps .current {
             color: white;
+        }
+
+        .steps .past {
+            color: white;
+        }
+
+        .small {
+            --iron-icon-height: 17px;
+            --iron-icon-width: 17px;
+        }
+
+        .circle {
+            border-radius: 50%;
+            border: 1px solid;
+            width: 25px;
+            height: 25px;
+            text-align: center;
+            display: inline-block;
+            margin: 0 10px 0 20px;
+            line-height: 25px;
+        }
+
+        .circle.current {
+            background: #1FC2FC;
         }
 
         ul {
@@ -101,13 +129,13 @@
           <paper-icon-button class="clickable" id="back" icon="arrow-back"></paper-icon-button>
           <div class="titles">Publish Project</div>
           <div class="steps">
-              <iron-icon class="current" icon="radio-button-unchecked"></iron-icon>
-              <span class="current">BOOK</span>
-              <iron-icon class="current" icon="radio-button-unchecked"></iron-icon>
-              <span class="current">PROFILE</span>
-              <iron-icon class="current" icon="radio-button-unchecked"></iron-icon>
+              <div class="circle past"><iron-icon icon="done" class="small"></iron-icon></div>
+              <span class="past">BOOK</span>
+              <div class="circle past"><iron-icon icon="done" class="small"></iron-icon></div>
+              <span class="past">PROFILE</span>
+              <div class="circle current">3</div>
               <span class="current">REVIEW</span>
-              <iron-icon class="" icon="radio-button-unchecked"></iron-icon>
+              <div class="circle">4</div>
               <span>PUBLISH</span>
           </div>
       </div>

@@ -86,6 +86,11 @@
             color: #fff;
         }
 
+        .right {
+            float: right;
+            color: forestgreen;
+        }
+
 
 
     </style>
@@ -96,24 +101,24 @@
           <paper-icon-button class="clickable" id="back" icon="arrow-back"></paper-icon-button>
           <div class="titles">Publish Project</div>
           <div class="steps">
-              <paper-icon-button class="current" icon="radio-button-unchecked"></paper-icon-button>
+              <iron-icon class="current" icon="radio-button-unchecked"></iron-icon>
               <span class="current">BOOK</span>
-              <paper-icon-button class="current" icon="radio-button-unchecked"></paper-icon-button>
+              <iron-icon class="current" icon="radio-button-unchecked"></iron-icon>
               <span class="current">PROFILE</span>
-              <paper-icon-button class="current" icon="radio-button-unchecked" size="40"></paper-icon-button>
+              <iron-icon class="current" icon="radio-button-unchecked"></iron-icon>
               <span class="current">REVIEW</span>
-              <paper-icon-button class="" icon="radio-button-unchecked"></paper-icon-button>
+              <iron-icon class="" icon="radio-button-unchecked"></iron-icon>
               <span>PUBLISH</span>
           </div>
       </div>
 
     <div class="contain">
         <ul>
-            <li>Project: <span>[[book.name]]</span> - <span>[[language.ln]]</span></li>
-            <li>Profile</li>
-            <li>License Agreement</li>
-            <li>Translation Guidelines</li>
-            <li>Statement of Faith</li>
+            <li>Project: <span>[[book.name]]</span> - <span>[[language.ln]]</span><iron-icon class="right" icon="done"></iron-icon></li>
+            <li>Profile<iron-icon class="right" icon="done"></iron-icon></li>
+            <li>License Agreement<iron-icon class="right" icon="done"></iron-icon></li>
+            <li>Translation Guidelines<iron-icon class="right" icon="done"></iron-icon></li>
+            <li>Statement of Faith<iron-icon class="right" icon="done"></iron-icon></li>
         </ul>
         <div class="clickable topublish next">
             <span>NEXT STEP</span>

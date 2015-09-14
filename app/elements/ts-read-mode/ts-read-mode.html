@@ -3,6 +3,7 @@
 <!-- Used in <ts-dashboard> -->
 
 <link rel="import" href="../../components/paper-card/paper-card.html"></link>
+<link rel="import" href="ts-translation-sources.html"></link>
 
 <dom-module id="ts-read-mode">
 
@@ -91,6 +92,12 @@
 				font-weight: 300;
 			}
 		}
+		paper-tab:focus {
+			--paper-tab: {
+				color: red;
+				font-weight: 300;
+			}
+		}
 		.icon-container {
 			height: 48px;
 			width: 48px;
@@ -124,6 +131,8 @@
 			position: relative;
 			top: 50%;
 			left: 50%;
+			-webkit-transform: translate(-50%, -50%);
+			--moz-transform: translate(-50%, -50%);
 			transform: translate(-50%, -50%);
 			cursor: pointer;
 			color: #CCC;
@@ -133,11 +142,13 @@
 
 	<template>
 
+		<ts-translation-sources></ts-translation-sources>
+
 		<div id="cue" class="container sticky-cue">
 			
 			<div id="cardsets" class="tabs-container card-sets sticky-ele">
 				<div class="icon-container">
-					<iron-icon icon="icons:tab" class="icon24 icon" on-click="addNewTab"></iron-icon>
+					<iron-icon icon="icons:tab" class="icon24 icon" on-click="showSources"></iron-icon>
 				</div>
 				<paper-tabs id="source-tabs" selected="{{ selected }}" noink scrollable hideScrollButtons>
                <template is="dom-repeat" items="{{ tabs }}" as="tab">
@@ -338,6 +349,9 @@
 			});
 
 			this.$['source-tabs'].addEventListener('iron-select', calc);
+
+			var sourcesModal = document.querySelector('ts-translation-sources');
+			sourcesModal.display = 'none';
 		},
 
 		// Function that runs when ts-read-mode is displayed
@@ -352,34 +366,39 @@
 			this.stickEle();
 		},
 
+		showSources: function() {
+			var sourcesModal = document.querySelector('ts-translation-sources');
+			sourcesModal.style.display = 'block';
+		},
+
 		// Function that runs whenever the folder icon is clicked
 		// NOTE: This functionality will be changed to comply with the current design
-		addNewTab: function() {
-			var newNumber = (this.tabs.length + 1).toString();
-			var translation = {
-				'code': 'AAA' + newNumber,
-				'title': 'translation ' + newNumber
-			}
-			var bookTitle = 'James';
-			var content = [
-				{
-				   chapter: 1,
-				   text: 'This is page ' + newNumber
-				},
-				{
-				   chapter: 2,
-				   text: 'for ' + bookTitle
-				}
-			];
+		// addNewTab: function() {
+		// 	var newNumber = (this.tabs.length + 1).toString();
+		// 	var translation = {
+		// 		'code': 'AAA' + newNumber,
+		// 		'title': 'translation ' + newNumber
+		// 	}
+		// 	var bookTitle = 'James';
+		// 	var content = [
+		// 		{
+		// 		   chapter: 1,
+		// 		   text: 'This is page ' + newNumber
+		// 		},
+		// 		{
+		// 		   chapter: 2,
+		// 		   text: 'for ' + bookTitle
+		// 		}
+		// 	];
 
-			this.push('tabs', {
-				'translation': translation,
-				'book_title': bookTitle,
-				'content': content
-			});
+		// 	this.push('tabs', {
+		// 		'translation': translation,
+		// 		'book_title': bookTitle,
+		// 		'content': content
+		// 	});
 
-			this.$['source-tabs'].selected = this.tabs.length - 1;
-	  	},
+		// 	this.$['source-tabs'].selected = this.tabs.length - 1;
+	 //  	},
  
  		// Function that got called with every scroll move
 		stickEle: function(event) {

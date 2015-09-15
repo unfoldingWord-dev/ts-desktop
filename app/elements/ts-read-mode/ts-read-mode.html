@@ -369,6 +369,7 @@
 		showSources: function() {
 			var sourcesModal = document.querySelector('ts-translation-sources');
 			sourcesModal.style.display = 'block';
+			document.querySelector('iron-list').fire('resize');
 		},
 
 		// Function that runs whenever the folder icon is clicked

@@ -1,3 +1,4 @@
+<!-- ts-translation-sources -->
 
 <link rel="import" href="../../components/polymer/polymer.html">
 <link rel="import" href="../../components/iron-list/iron-list.html">
@@ -19,7 +20,6 @@
             background-color: rgba(0,0,0,0.5);
             box-sizing: border-box;
         }
-
         .container {
             display: block;
             position: absolute;
@@ -30,16 +30,9 @@
             margin-right: auto;
             background: white;
             width: 450px;
-            height: 200px;
+            height: 300px;
             box-shadow: -4px 0 30px rgba(22, 22, 22, 0.3);
         }
-        .titles {
-            flex: auto;
-            font-size: 125%;
-            display: inline-block;
-            height: 40px;
-        }
-
         [icon="arrow-back"] {
             margin: 0 .2em;
         }
@@ -47,28 +40,23 @@
         [icon="search"] {
             padding: 0;
         }
-
         .header {
             color: #888;
             font-style: italic;
             font-family: 'Roboto';
             font-size: 110%
         }
-
         .header span {
             display: block;
             padding: 1em;
-            /*border-bottom: 1px solid #bbb;*/
         }
-
         iron-list {
             margin: 0;
             padding: 0;
             font-family: 'Roboto';
             font-size: 110%;
-            height: 500px;
+            height: 300px;
         }
-
         .row {
             display: block;
             margin: 0;
@@ -93,50 +81,48 @@
         .right {
             float: right;
         }
-
-/*        ::-webkit-scrollbar {
-            display: none;
-        }*/
+        .clickable {
+            cursor: pointer;
+        }
 
     </style>
 
-  <template>
+    <template>
 
-    <div class="container">
-        <div class="header">
-            <span>Choose source translations<paper-icon-button class="right" icon="search"></paper-icon-button></span>
-        </div>
+        <div class="container">
+            <div class="header">
+                <span>Choose source translations<paper-icon-button class="right" icon="search"></paper-icon-button></span>
+            </div>
 
-        <div id="selected-sources-header" class="row-header" on-click="toggleSelected">
-            <span>Selected</span>
-        </div>
-        <iron-collapse id="collapse-selected" opened>
-            <div class="collapse-content">
-                <iron-list items="{{ translationSources }}">
-                    <template>
-                        <div class="row">
-                            <span>{{ item.name }}</span>
+            <div id="selected-sources-header" class="row-header" on-click="toggleSelected">
+                <span>Selected</span>
+            </div>
+
+<!--                 <template is="dom-repeat" items="[[ list ]]" as="l">
+                    <div class="row clickable">
+                        <div class="" on-tap="">
+                            <span>[[ l.title ]]</span>
                             <paper-checkbox class="right"></paper-checkbox>
                         </div>
-                    </template>
-                </iron-list>
-<!--                 <iron-list items="[[translationSources]]" as="l">
-                    <template>
-                        <div class="row">
-                            <div class="clickable language" on-tap="store">
-                                <span>[[l.name]]</span>
-                                <span class="right">[[l.code]]</span>
-                            </div>
-                        </div>
-                    </template>
-                </iron-list> -->
-            </div>
-        </iron-collapse>
+                    </div>
+                </template> -->
 
-        <div class="footer">
-            
+            <iron-list items="[[ list ]]" as="l">
+                <template>
+                    <div class="row clickable">
+                        <div class="" on-tap=""><span>[[ l.title ]]</span>
+                            <paper-checkbox class="right"></paper-checkbox>
+                        </div>
+                    </div>
+                </template>
+            </iron-list>
+
+            <iron-collapse id="collapse-selected" opened>
+                <div class="collapse-content">
+                </div>
+            </iron-collapse>
+
         </div>
-    </div>
 
   </template>
 
@@ -144,49 +130,26 @@
 
 <script>
 
-  Polymer({
-    is: 'ts-translation-sources',
+    Polymer({
+        is: 'ts-translation-sources',
 
-    properties: {
-        translationSources: {
-            type: 'Array',
-            value: []
-            // notify: true
+        properties: {
+            list: {
+                type: 'Array',
+                value: function() {
+                    return [{title: 'Thing 1'}, {title: 'Thing 2'}, {title: 'Thing 3'}];
+                }
+            }
+        },
+
+        toggleSelected: function() {
+            this.$['collapse-selected'].toggle();
+        },
+
+        ready: function() {
+            // this.list = [{title: 'Thing 1'}, {title: 'Thing 2'}, {title: 'Thing 3'}];
         }
-    },
 
-    toggleSelected: function() {
-        this.$['collapse-selected'].toggle();
-        // console.dir(this.$['collapse-selected']);
-    },
-
-    store: function(event) {
-        // this.translationSource = event.model.translationSource;
-        // this.fire('selected');
-    },
-
-    ready: function() {
-
-    },
-
-    attached: function() {
-        this.push('translationSources',  {
-            'name': 'English ULB',
-            'code': 'en-ulb',
-            'checked': false
-        });
-        this.push('translationSources',  {
-            'name': 'English UDB',
-            'code': 'en-udb',
-            'checked': false
-        });
-        this.push('translationSources',  {
-            'name': 'Arabic',
-            'code': 'ar',
-            'checked': false
-        });
-        console.log(this.translationSources);
-    }
-  });
+    });
 
 </script>

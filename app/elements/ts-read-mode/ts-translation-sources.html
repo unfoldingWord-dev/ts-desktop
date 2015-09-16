@@ -26,11 +26,13 @@
             top: 41px;
             left: 0;
             right: 0;
+            top: 50px;
+            /*height: 80%;*/
+            bottom: 88px;  /* 50px + 38px */
             margin-left: auto;
             margin-right: auto;
             background: white;
-            width: 450px;
-            height: 300px;
+            width: 60%;
             box-shadow: -4px 0 30px rgba(22, 22, 22, 0.3);
         }
         [icon="arrow-back"] {
@@ -50,12 +52,13 @@
             display: block;
             padding: 1em;
         }
-        iron-list {
-            margin: 0;
-            padding: 0;
+        .collapse-control {
+            height: 50%;
+            overflow-y: auto;
+        }
+        .selected-list {
             font-family: 'Roboto';
             font-size: 110%;
-            height: 300px;
         }
         .row {
             display: block;
@@ -84,6 +87,16 @@
         .clickable {
             cursor: pointer;
         }
+        .footer {
+            height: 10.3%;
+        }
+        paper-button {
+            margin-top: 0.75rem;
+            color: blue;
+        }
+        ::-webkit-scrollbar {
+            display: none;
+        }
 
     </style>
 
@@ -98,31 +111,49 @@
                 <span>Selected</span>
             </div>
 
-<!--                 <template is="dom-repeat" items="[[ list ]]" as="l">
-                    <div class="row clickable">
-                        <div class="" on-tap="">
-                            <span>[[ l.title ]]</span>
-                            <paper-checkbox class="right"></paper-checkbox>
+            <div id="selected-collapse-control" class="collapse-control" style="height: 37%;">
+                <iron-collapse id="collapse-selected" opened>
+                    <div class="collapse-content">
+                        <div class="selected-list">
+                            <template is="dom-repeat" items="[[ list ]]" as="l">
+                                <div class="row clickable">
+                                    <div class="" on-tap="">
+                                        <span>[[ l.title ]]</span>
+                                        <paper-checkbox class="right"></paper-checkbox>
+                                    </div>
+                                </div>
+                            </template>
                         </div>
                     </div>
-                </template> -->
+                </iron-collapse>
+            </div>
 
-            <iron-list items="[[ list ]]" as="l">
-                <template>
-                    <div class="row clickable">
-                        <div class="" on-tap=""><span>[[ l.title ]]</span>
-                            <paper-checkbox class="right"></paper-checkbox>
+            <div id="available-sources-header" class="row-header" on-click="toggleAvailable">
+                <span>Available</span>
+            </div>
+
+            <div id="available-collapse-control" class="collapse-control" style="height: 37%">
+                <iron-collapse id="collapse-available" opened>
+                    <div class="collapse-content">
+                        <div class="available-list">
+                            <iron-list items="[[ list ]]" as="l">
+                                <template>
+                                    <div class="row clickable">
+                                        <div class="" on-tap=""><span>[[ l.title ]]</span>
+                                            <paper-checkbox class="right"></paper-checkbox>
+                                        </div>
+                                    </div>
+                                </template>
+                            </iron-list>
                         </div>
                     </div>
-                </template>
-            </iron-list>
+                </iron-collapse>
+            </div>
 
-            <paper-button on-tap="_tapped">Add List</paper-button>
-
-            <iron-collapse id="collapse-selected" opened>
-                <div class="collapse-content">
-                </div>
-            </iron-collapse>
+            <div class="footer">
+                <paper-button class="right" on-tap="closeModal">Cancel</paper-button>
+                <paper-button class="right">Confirm</paper-button>
+            </div>
 
         </div>
 
@@ -131,6 +162,15 @@
 </dom-module>
 
 <script>
+
+    function toggleControlHeight(controller) {
+        var collapseControl = document.querySelector(controller);
+        if (collapseControl.style.height == '' || collapseControl.style.height === '0px') {
+            collapseControl.style.height = "37%";
+        } else {
+            collapseControl.style.height = "0px";
+        }
+    }
 
     Polymer({
         is: 'ts-translation-sources',
@@ -141,13 +181,20 @@
 
         toggleSelected: function() {
             this.$['collapse-selected'].toggle();
+            toggleControlHeight('#selected-collapse-control');
+        },
+
+        toggleAvailable: function() {
+            this.$['collapse-available'].toggle();
+            toggleControlHeight('#available-collapse-control');
+        },
+
+        closeModal: function() {
+            console.log(this);
         },
 
         attached: function () {
-            // this.async(function () {
-                this.list = [{ title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }];
-            // }, 1000);
-
+            this.list = [{ title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }];
         }
     });
 

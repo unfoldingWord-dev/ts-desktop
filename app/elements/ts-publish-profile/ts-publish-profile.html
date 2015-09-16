@@ -1,4 +1,5 @@
 
+<link rel="import" href="../../components/iron-input/iron-input.html">
 
 <dom-module id="ts-publish-profile">
 
@@ -51,11 +52,11 @@
             background: #1FC2FC;
             color: white;
             padding: 5px 15px;
+            margin-top: 20px;
             box-shadow: 0 2px 3px 2px #ccc;
             display: flex;
             justify-content: center;
             align-items: center;
-
         }
 
         .steps {
@@ -92,24 +93,22 @@
 
         input {
             width: 350px;
-            height: 40px;
+            height: 30px;
             font-size: 120%;
-            margin-left: 20px;
+            margin: 10px 0;
             border: none;
             border-bottom: 1px solid #bbb;
             color: #888;
         }
 
-        form p {
-            margin: 20px;
-            padding: 10px 0;
+        .input {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-top: 20px;
             background: white;
             width: 450px;
             box-shadow: 0 2px 3px 2px #ccc;
-        }
-
-        form iron-icon {
-            padding: 15px;
         }
 
         .right {
@@ -140,19 +139,22 @@
       </div>
 
       <div class="contain">
-          <div>
-              <form>
-                  <p><input type="text" value="Your Name"><iron-icon class="right clickable" icon="info" title="More Info"></iron-icon></p>
-                  <p><input type="text" value="Your Email Address"><iron-icon class="right clickable" icon="info" title="More Info"></iron-icon></p>
-                  <p><input type="text" value="Your Phone Number"><iron-icon class="right clickable" icon="info" title="More Info"></iron-icon></p>
-              </form>
+          <div class="input">
+              <input is="iron-input" bind-value="" placeholder="Your Name">
+              <iron-icon class="right clickable" icon="info" title="More Info"></iron-icon>
+          </div>
+          <div class="input">
+              <input is="iron-input" bind-value="" placeholder="Your Email Address">
+              <iron-icon class="right clickable" icon="info" title="More Info"></iron-icon>
+          </div>
+          <div class="input">
+              <input is="iron-input" bind-value="" placeholder="Your Phone Number">
+              <iron-icon class="right clickable" icon="info" title="More Info"></iron-icon>
           </div>
           <div class="clickable toreview next">
               <span>NEXT STEP</span>
           </div>
       </div>
-
-
 
   </template>
 

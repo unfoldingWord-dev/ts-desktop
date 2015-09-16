@@ -1,6 +1,7 @@
 
 <link rel="import" href="../../components/polymer/polymer.html">
 <link rel="import" href="../../components/iron-list/iron-list.html">
+<link rel="import" href="../../components/iron-input/iron-input.html">
 
 <dom-module id="ts-language-menu">
 
@@ -93,6 +94,12 @@
             font-size: 70%
         }
 
+        input {
+            border: none;
+            font-size: 120%;
+            font-style: italic;
+        }
+
 
     </style>
 
@@ -105,13 +112,13 @@
 
       <div class="header">
           <div>
-              <em>Choose target language</em>
+              <input is="iron-input" bind-value="{{query}}" placeholder="Choose target language">
               <paper-icon-button class="right" icon="search" title="Search Languages"></paper-icon-button>
           </div>
       </div>
 
       <div class="contain">
-          <iron-list items="[[languagelist]]" as="lang">
+          <iron-list items="{{searchfilter(query,languagelist)}}" as="lang">
               <template>
                   <div class="row clickable togroup" on-tap="store">
                       <div>
@@ -137,7 +144,22 @@
               type: Object,
               value: {},
               notify: true
+          },
+          query: {
+              type: String,
+              value: ""
+          },
+          languagelist: {
+              type: Array,
+              value: []
           }
+      },
+
+      searchfilter: function(query, languagelist) {
+          query = query.toLowerCase();
+          return languagelist.filter(function (item) {
+              return item.ln.toLowerCase().startsWith(query);
+          })
       },
 
       store: function(e) {

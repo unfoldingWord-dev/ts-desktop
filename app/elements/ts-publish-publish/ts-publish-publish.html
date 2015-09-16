@@ -8,7 +8,6 @@
         :host {
             display: flex;
             flex-direction: column;
-
         }
 
         .contain {
@@ -16,8 +15,6 @@
             justify-content: center;
             flex: auto;
 
-
-            background: red;
         }
 
         .contain>div {
@@ -26,7 +23,6 @@
         }
 
         .left {
-
             margin: 15px;
             flex: 2 2;
         }
@@ -34,6 +30,23 @@
         .right {
             flex: 1 1;
             margin: 15px 15px 15px 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .right>div {
+            flex: 1 1 auto;
+            display: flex;
+            justify-content: space-around;
+            flex-direction: column;
+        }
+
+        .right>div>* {
+            margin: 20px;
+        }
+
+        .lower {
+            border-top: 1px solid grey;
         }
 
         .bar {
@@ -139,8 +152,11 @@
                     <span>UPLOAD</span>
                 </div>
             </div>
-            <div>
+            <div class="lower">
                 <p>You may also share and distribute your project using these options.</p>
+                <p class="link">Send to SD card</p>
+                <p class="link">Send via Bluetooth</p>
+                <p class="link">Other Sharing</p>
             </div>
         </div>
 

@@ -1,15 +1,16 @@
 
+<link rel="import" href="../../components/iron-pages/iron-pages.html">
 
-<link rel="import" href="../../elements/ts-home-blank/ts-home-blank.html">
-<link rel="import" href="../../elements/ts-home-menu/ts-home-menu.html">
-<link rel="import" href="../../elements/ts-language-menu/ts-language-menu.html">
-<link rel="import" href="../../elements/ts-project-menu/ts-project-menu.html">
-<link rel="import" href="../../elements/ts-book-menu/ts-book-menu.html">
-<link rel="import" href="../../elements/ts-chapter-menu/ts-chapter-menu.html">
-<link rel="import" href="../../elements/ts-publish-book/ts-publish-book.html">
-<link rel="import" href="../../elements/ts-publish-profile/ts-publish-profile.html">
-<link rel="import" href="../../elements/ts-publish-review/ts-publish-review.html">
-<link rel="import" href="../../elements/ts-publish-publish/ts-publish-publish.html">
+<link rel="import" href="../ts-home-blank/ts-home-blank.html">
+<link rel="import" href="../ts-home-menu/ts-home-menu.html">
+<link rel="import" href="../ts-language-menu/ts-language-menu.html">
+<link rel="import" href="../ts-project-menu/ts-project-menu.html">
+<link rel="import" href="../ts-book-menu/ts-book-menu.html">
+<link rel="import" href="../ts-chapter-menu/ts-chapter-menu.html">
+<link rel="import" href="../ts-publish-book/ts-publish-book.html">
+<link rel="import" href="../ts-publish-profile/ts-publish-profile.html">
+<link rel="import" href="../ts-publish-review/ts-publish-review.html">
+<link rel="import" href="../ts-publish-publish/ts-publish-publish.html">
 
 <dom-module id="ts-dashboard">
 
@@ -18,8 +19,8 @@
   :host {
       display: flex;
       width: 100%;
-      height: 100vh;
       position: relative;
+      flex: auto;
   }
 
   iron-pages {
@@ -30,11 +31,6 @@
   iron-pages * {
       flex: auto;
   }
-
-  [icon="menu"] {
-    margin: 0 1em;
-  }
-
 
 
   </style>

@@ -1,65 +1,64 @@
 
 
-
 <dom-module id="ts-publish-profile">
 
     <style>
 
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
+
         .contain {
-            display: inline-block;
-            position: absolute;
-            top: 130px;
-            left: 0;
-            right: 0;
-            margin-left: auto;
-            margin-right: auto;
-
-            width: 450px;
-
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .bar {
-            @apply(--header-bar);
-            height: 100px;
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 45px;
         }
 
         .titles {
             flex: auto;
             font-size: 125%;
-            display: inline-block;
-            height: 40px;
         }
 
         [icon="arrow-back"] {
-            margin: 0 .2em;
+            margin: 0 1em 0 .2em;
+        }
+
+        .header {
+            background: var(--primary-color);
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 60px;
+        }
+
+        .clickable {
+            cursor: pointer;
         }
 
         .next {
             background: #1FC2FC;
             color: white;
-            width: 110px;
-            height: 30px;
-            display: inline-block;
-            position: absolute;
-            top: 300px;
-            left: 0;
-            right: 0;
-            margin-left: auto;
-            margin-right: auto;
-            box-shadow: -4px 0 30px rgba(22, 22, 22, 0.3);
-            text-align: center;
-        }
+            padding: 5px 15px;
+            box-shadow: 0 2px 3px 2px #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
 
-        .next span {
-            line-height: 30px;
         }
 
         .steps {
-            text-align: center;
-            left: 0;
-            right: 0;
-            margin-left: auto;
-            margin-right: auto;
             color: #B7E1DF;
         }
 
@@ -92,20 +91,21 @@
         }
 
         input {
-            width: 320px;
+            width: 350px;
             height: 40px;
             font-size: 120%;
             margin-left: 20px;
             border: none;
             border-bottom: 1px solid #bbb;
-            color: #bbb;
+            color: #888;
         }
 
         form p {
             margin: 20px;
             padding: 10px 0;
             background: white;
-            box-shadow: -4px 0 30px rgba(22, 22, 22, 0.3);
+            width: 450px;
+            box-shadow: 0 2px 3px 2px #ccc;
         }
 
         form iron-icon {
@@ -117,15 +117,16 @@
             color: #bbb;
         }
 
-
-
     </style>
 
   <template>
 
       <div class="bar">
-          <paper-icon-button class="clickable" id="back" icon="arrow-back"></paper-icon-button>
+          <paper-icon-button class="clickable" id="back" icon="arrow-back" title="Go Back"></paper-icon-button>
           <div class="titles">Publish Project</div>
+      </div>
+
+      <div class="header">
           <div class="steps">
               <div class="circle past"><iron-icon icon="done" class="small"></iron-icon></div>
               <span class="past">BOOK</span>
@@ -138,18 +139,20 @@
           </div>
       </div>
 
-    <div class="contain">
-        <div>
-            <form>
-                <p><input type="text" value="Your Name"><iron-icon class="right" icon="info"></iron-icon></p>
-                <p><input type="text" value="Your Email Address"><iron-icon class="right" icon="info"></iron-icon></p>
-                <p><input type="text" value="Your Phone Number"><iron-icon class="right" icon="info"></iron-icon></p>
-            </form>
-        </div>
-        <div class="clickable toreview next">
-            <span>NEXT STEP</span>
-        </div>
-    </div>
+      <div class="contain">
+          <div>
+              <form>
+                  <p><input type="text" value="Your Name"><iron-icon class="right clickable" icon="info" title="More Info"></iron-icon></p>
+                  <p><input type="text" value="Your Email Address"><iron-icon class="right clickable" icon="info" title="More Info"></iron-icon></p>
+                  <p><input type="text" value="Your Phone Number"><iron-icon class="right clickable" icon="info" title="More Info"></iron-icon></p>
+              </form>
+          </div>
+          <div class="clickable toreview next">
+              <span>NEXT STEP</span>
+          </div>
+      </div>
+
+
 
   </template>
 

@@ -160,9 +160,9 @@
 
       searchfilter: function (query, languagelist) {
           let search = App.util.startsWithBase.bind(null, query);
-          
+
           return languagelist.filter(function (lang) {
-              return search(lang.ln);
+              return search(lang.ln) || search(lang.lc);
           });
       },
 

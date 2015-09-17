@@ -1,0 +1,169 @@
+
+
+<dom-module id="ts-publish-book">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .contain {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .bar {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 45px;
+        }
+
+        .titles {
+            flex: auto;
+            font-size: 125%;
+        }
+
+        [icon="arrow-back"] {
+            margin: 0 1em 0 .2em;
+        }
+
+        .header {
+            background: var(--primary-color);
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 60px;
+        }
+
+        .clickable {
+            cursor: pointer;
+        }
+
+        .list {
+            background: white;
+            width: 450px;
+            box-shadow: 0 2px 3px 2px #ccc;
+            margin-top: 30px;
+        }
+
+        .next {
+            background: #1FC2FC;
+            color: white;
+            padding: 5px 15px;
+            box-shadow: 0 2px 3px 2px #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 30px;
+        }
+
+        .steps {
+            color: #B7E1DF;
+        }
+
+        .steps .current {
+            color: white;
+        }
+
+        .circle {
+            border-radius: 50%;
+            border: 1px solid;
+            width: 25px;
+            height: 25px;
+            text-align: center;
+            display: inline-block;
+            margin: 0 10px 0 20px;
+            line-height: 25px;
+        }
+
+        .circle.current {
+            background: #1FC2FC;
+        }
+
+        ul {
+            margin: 0;
+            padding: 0;
+            list-style-type: none;
+            font-size: 110%;
+        }
+
+        ul li {
+            display: block;
+            margin: 0;
+            padding: 1em;
+            border-bottom: 1px solid #eee;
+            transition: background .3s, color .3s;
+        }
+
+        ul li:hover {
+            background: var(--accent-color-dark);
+            color: #fff;
+        }
+
+        .right {
+            float: right;
+            color: forestgreen;
+        }
+
+    </style>
+
+  <template>
+
+      <div class="bar">
+          <paper-icon-button class="clickable" id="back" icon="arrow-back" title="Go Back"></paper-icon-button>
+          <div class="titles">Publish Project</div>
+      </div>
+
+      <div class="header">
+          <div class="steps">
+              <div class="circle current">1</div>
+              <span class="current">BOOK</span>
+              <div class="circle">2</div>
+              <span>PROFILE</span>
+              <div class="circle">3</div>
+              <span>REVIEW</span>
+              <div class="circle">4</div>
+              <span>PUBLISH</span>
+          </div>
+      </div>
+
+      <div class="contain">
+          <div class="list">
+              <ul>
+                  <li><span>[[book.name]]</span><iron-icon class="right" icon="done"></iron-icon></li>
+              </ul>
+          </div>
+          <div class="clickable toprofile next">
+              <span>NEXT STEP</span>
+          </div>
+      </div>
+
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+    is: 'ts-publish-book',
+
+      properties: {
+
+      },
+
+
+
+    ready: function() {
+
+    }
+  });
+
+</script>

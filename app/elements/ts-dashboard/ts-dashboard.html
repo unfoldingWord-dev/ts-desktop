@@ -1,26 +1,36 @@
-
-
-<link rel="import" href="../../elements/ts-home-blank/ts-home-blank.html">
-<link rel="import" href="../../elements/ts-home-menu/ts-home-menu.html">
-<link rel="import" href="../../elements/ts-language-menu/ts-language-menu.html">
-<link rel="import" href="../../elements/ts-project-menu/ts-project-menu.html">
-<link rel="import" href="../../elements/ts-book-menu/ts-book-menu.html">
-<link rel="import" href="../../elements/ts-chapter-menu/ts-chapter-menu.html">
+<link rel="import" href="../../components/iron-pages/iron-pages.html">
 <link rel="import" href="../../components/paper-icon-button/paper-icon-button.html" />
+
 <link rel="import" href="../ts-read-mode/ts-read-mode.html" />
+<link rel="import" href="../ts-home-blank/ts-home-blank.html">
+<link rel="import" href="../ts-home-menu/ts-home-menu.html">
+<link rel="import" href="../ts-language-menu/ts-language-menu.html">
+<link rel="import" href="../ts-project-menu/ts-project-menu.html">
+<link rel="import" href="../ts-book-menu/ts-book-menu.html">
+<link rel="import" href="../ts-chapter-menu/ts-chapter-menu.html">
+<link rel="import" href="../ts-publish-book/ts-publish-book.html">
+<link rel="import" href="../ts-publish-profile/ts-publish-profile.html">
+<link rel="import" href="../ts-publish-review/ts-publish-review.html">
+<link rel="import" href="../ts-publish-publish/ts-publish-publish.html">
 
 <dom-module id="ts-dashboard">
 
   <style>
 
   :host {
-    display: block;
-    width: 100%;
-    height: 100%;
+      display: flex;
+      width: 100%;
+      position: relative;
+      flex: auto;
   }
 
-  [icon="menu"] {
-    margin: 0 1em;
+  iron-pages {
+      flex: auto;
+      display: flex;
+  }
+
+  iron-pages * {
+      flex: auto;
   }
 
   #pages {
@@ -31,15 +41,19 @@
 
   <template>
 
-    <iron-pages id="pages" class="clickable" on-tap="TapHandler" selected="[[selected]]">
-        <ts-home-blank></ts-home-blank>
-        <ts-home-menu></ts-home-menu>
-        <ts-language-menu language="{{targetLanguage}}" on-selected="onLanguageSelected"></ts-language-menu>
-        <ts-project-menu language="[[targetLanguage]]"></ts-project-menu>
-        <ts-book-menu></ts-book-menu>
-        <ts-chapter-menu></ts-chapter-menu>
-        <ts-read-mode></ts-read-mode>
-    </iron-pages>
+      <iron-pages class="clickable" on-tap="onTap" selected="[[selected]]">
+          <ts-home-blank></ts-home-blank>
+          <ts-home-menu></ts-home-menu>
+          <ts-language-menu language="{{targetlanguage}}"></ts-language-menu>
+          <ts-project-menu language="[[targetlanguage]]" group="{{targetgroup}}"></ts-project-menu>
+          <ts-book-menu language="[[targetlanguage]]" group="[[targetgroup]]" book="{{targetbook}}" chapters="{{targetchapters}}"></ts-book-menu>
+          <ts-chapter-menu language="[[targetlanguage]]" group="[[targetgroup]]" book="[[targetbook]]" chapters="[[targetchapters]]" chapter="{{targetchapter}}"></ts-chapter-menu>
+          <ts-publish-book language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-book>
+          <ts-publish-profile language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-profile>
+          <ts-publish-review language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-review>
+          <ts-publish-publish language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-publish>
+          <ts-read-mode></ts-read-mode>
+      </iron-pages>
 
 </template>
 
@@ -48,48 +62,68 @@
 <script>
 
   Polymer({
-    is: 'ts-dashboard',
+      is: 'ts-dashboard',
 
-    properties: {
-        selected: {
-            type: Number,
-            value: 0
-        },
-        targetLanguage: {
-            type: Object,
-            value: {}
-        }
-    },
+      properties: {
+          selected: {
+              type: Number,
+              value: 0
+          },
+          targetlanguage: {
+              type: Object,
+              value: {}
+          },
+          targetgroup: {
+              type: Object,
+              value: {}
+          },
+          targetbook: {
+              type: Object,
+              value: {}
+          },
+          targetchapters: {
+              type: Array,
+              value: []
+          },
+          targetchapter: {
+              type: Number,
+              value: null
+          }
 
-    onLanguageSelected: function(event) {
-        
-    },
+      },
 
-    TapHandler: function(event) {
-        // var etarget = event.target;
-        // while (!etarget.classList.contains("clickable")) {
-        //     etarget = etarget.parentNode;
-        // }
+      onTap: function(event) {
+          var etarget = event.target;
 
-        this.selected = Math.min(this.selected + 1, this.$.pages.children.length - 1);
+          while (!etarget.classList.contains("clickable")) {
+              etarget = etarget.parentNode;
+          }
 
-        // if (etarget.id === "start" || etarget.id === "new") {
-        //     this.selected = 2;
-        // } else if (etarget.classList.contains("language")) {
-        //     this.selected = this.selected + 1;
-        // } else if (etarget.classList.contains("book")) {
-        //     this.selected = this.selected + 1;
-        // } else if (etarget.nodeName === "LI") {
-        //     this.selected = this.selected + 1;
-        // } else if (etarget.id === "back") {
-        //     this.selected = this.selected - 1;
-        // }
+          if (etarget.classList.contains("tolang")) {
+              this.selected = 2;
+          } else if (etarget.classList.contains("togroup")) {
+              this.selected = 3;
+          } else if (etarget.classList.contains("tobook")) {
+              this.selected = 4;
+          } else if (etarget.classList.contains("tochap")) {
+              this.selected = 5;
+          } else if (etarget.classList.contains("toread")) {
+              this.selected = 6;
+          } else if (etarget.classList.contains("toprofile")) {
+              this.selected = 7;
+          } else if (etarget.classList.contains("toreview")) {
+              this.selected = 8;
+          } else if (etarget.classList.contains("topublish")) {
+              this.selected = 9;
+          } else if (etarget.id === "back") {
+              this.selected = this.selected - 1;
+          }
 
-    },
+      },
 
-    ready: function() {
+      ready: function() {
 
-    }
+      }
   });
 
 </script>

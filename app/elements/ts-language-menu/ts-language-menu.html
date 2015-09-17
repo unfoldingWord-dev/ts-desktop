@@ -1,38 +1,40 @@
 
 <link rel="import" href="../../components/polymer/polymer.html">
 <link rel="import" href="../../components/iron-list/iron-list.html">
+<link rel="import" href="../../components/iron-input/iron-input.html">
 
 <dom-module id="ts-language-menu">
 
     <style>
 
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
+
         .contain {
-            display: inline-block;
-            position: absolute;
-            top: 41px;
-            left: 0;
-            right: 0;
-            margin-left: auto;
-            margin-right: auto;
-            background: white;
-            width: 450px;
-            box-shadow: -4px 0 30px rgba(22, 22, 22, 0.3);
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .bar {
-            @apply(--header-bar);
-            height: 100px;
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 45px;
         }
 
         .titles {
             flex: auto;
             font-size: 125%;
-            display: inline-block;
-            height: 40px;
         }
 
         [icon="arrow-back"] {
-            margin: 0 .2em;
+            margin: 0 1em 0 .2em;
         }
 
         [icon="search"] {
@@ -41,36 +43,48 @@
 
         .header {
             color: #888;
-            font-style: italic;
-            font-family: 'Roboto';
-            font-size: 110%
+            font-size: 110%;
+            background: var(--primary-color);
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            min-height: 60px;
         }
 
-        .header span {
-            display: block;
-            padding: 1em;
-            border-bottom: 1px solid #bbb;
+        .header div {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 1px solid #eee;
+            background: white;
+            width: 410px;
+            box-shadow: 0 -1px 2px 1px var(--primary-color-dark);
         }
 
         iron-list {
-            margin: 0;
-            padding: 0;
-            font-family: 'Roboto';
             font-size: 110%;
-            height: 500px;
+            max-height: 90vh;
+            width: 450px;
+            background: white;
+            box-shadow: 0 2px 3px 2px #ccc;
         }
 
         .row {
             display: block;
             margin: 0;
             padding: 1em;
-            border-bottom: 1px solid #bbb;
+            border-bottom: 1px solid #eee;
+            transition: background .3s, color .3s;
         }
 
         .row:hover {
             background: var(--accent-color-dark);
-            box-shadow: inset 0 -1px rgba(0,0,0,0);
             color: #fff;
+        }
+
+        .clickable {
+            cursor: pointer;
         }
 
         .right {
@@ -80,34 +94,41 @@
             font-size: 70%
         }
 
-        ::-webkit-scrollbar {
-            display: none;
+        input {
+            border: none;
+            font-size: 120%;
+            font-style: italic;
         }
+
 
     </style>
 
   <template>
 
       <div class="bar">
-            <paper-icon-button class="clickable" id="back" icon="arrow-back"></paper-icon-button>
+            <paper-icon-button class="clickable" id="back" icon="arrow-back" title="Go Back"></paper-icon-button>
             <div class="titles">New Project</div>
       </div>
 
-    <div class="contain">
-        <div class="header">
-            <span>Choose target language<paper-icon-button class="right" icon="search"></paper-icon-button></span>
-        </div>
-        <iron-list items="[[languages]]" as="l">
+      <div class="header">
+          <div>
+              <input is="iron-input" bind-value="{{query}}" placeholder="Choose target language">
+              <paper-icon-button class="right" icon="search" title="Search Languages"></paper-icon-button>
+          </div>
+      </div>
+
+      <div class="contain">
+          <iron-list items="{{searchfilter(query,languagelist)}}" as="lang">
               <template>
-                <div class="row">
-                    <div class="clickable language" on-tap="store">
-                        <span>[[l.ln]]</span>
-                        <span class="right">[[l.lc]]</span>
-                    </div>
-                </div>
+                  <div class="row clickable togroup" on-tap="store">
+                      <div>
+                          <span>[[lang.ln]]</span>
+                          <span class="right">[[lang.lc]]</span>
+                      </div>
+                  </div>
               </template>
-        </iron-list>
-    </div>
+          </iron-list>
+      </div>
 
   </template>
 
@@ -116,24 +137,38 @@
 <script>
 
   Polymer({
-    is: 'ts-language-menu',
+      is: 'ts-language-menu',
 
-    properties: {
-        language: {
-            type: Object,
-            value: {},
-            notify: true
-        }
-    },
+      properties: {
+          language: {
+              type: Object,
+              value: {},
+              notify: true
+          },
+          query: {
+              type: String,
+              value: ""
+          },
+          languagelist: {
+              type: Array,
+              value: []
+          }
+      },
 
-    store: function(e) {
-        this.language = e.model.l;
-        this.fire('selected');
-    },
+      searchfilter: function(query, languagelist) {
+          query = query.toLowerCase();
+          return languagelist.filter(function (item) {
+              return item.ln.toLowerCase().startsWith(query);
+          });
+      },
 
-    ready: function() {
-        this.languages = App.translator.targetLanguages;
-    }
+      store: function(e) {
+          this.language = e.model.lang;
+      },
+
+      ready: function() {
+          this.languagelist = App.translator.targetLanguages;
+      }
   });
 
 </script>

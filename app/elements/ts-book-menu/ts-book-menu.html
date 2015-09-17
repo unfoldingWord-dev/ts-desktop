@@ -6,66 +6,75 @@
 
     <style>
 
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
+
         .contain {
-            display: inline-block;
-            position: absolute;
-            top: 41px;
-            left: 0;
-            right: 0;
-            margin-left: auto;
-            margin-right: auto;
-            background: white;
-            width: 450px;
-            box-shadow: -4px 0 30px rgba(22, 22, 22, 0.3);
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .bar {
-            @apply(--header-bar);
-            height: 100px;
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 45px;
         }
 
         .titles {
             flex: auto;
             font-size: 125%;
-            display: inline-block;
-            height: 40px;
         }
 
         [icon="arrow-back"] {
-            margin: 0 .2em;
+            margin: 0 1em 0 .2em;
         }
 
         .header {
             color: #888;
-            font-style: italic;
-            font-family: 'Roboto';
-            font-size: 110%
+            font-size: 110%;
+            background: var(--primary-color);
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            min-height: 60px;
         }
 
-        .header span {
-            display: block;
-            padding: 1em;
-            border-bottom: 1px solid #bbb;
+        .header div {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            padding-left: 20px;
+            border-bottom: 1px solid #eee;
+            background: white;
+            width: 430px;
+            box-shadow: 0 -1px 2px 1px var(--primary-color-dark);
         }
 
         iron-list {
-            margin: 0;
-            padding: 0;
-            font-family: 'Roboto';
             font-size: 110%;
-            height: 500px;
+            max-height: 90vh;
+            width: 450px;
+            background: white;
+            box-shadow: 0 2px 3px 2px #ccc;
         }
 
         .row {
             display: block;
             margin: 0;
             padding: 1em;
-            border-bottom: 1px solid #bbb;
+            border-bottom: 1px solid #eee;
+            transition: background .3s, color .3s;
         }
 
         .row:hover {
             background: var(--accent-color-dark);
-            box-shadow: inset 0 -1px rgba(0,0,0,0);
             color: #fff;
         }
 
@@ -73,27 +82,42 @@
             display: none;
         }
 
+        .header iron-icon {
+            padding: 0 10px;
+        }
+
+        .clickable {
+            cursor: pointer;
+        }
+
     </style>
 
   <template>
 
       <div class="bar">
-          <paper-icon-button class="clickable" id="back" icon="arrow-back"></paper-icon-button>
+          <paper-icon-button class="clickable" id="back" icon="arrow-back" title="Go Back"></paper-icon-button>
           <div class="titles">New Project</div>
       </div>
 
-    <div class="contain">
-        <div class="header">
-            <span>Choose a book</span>
-        </div>
-        <iron-list items="[[books]]" as="book">
-            <template>
-                <div class="row">
-                    <div class="clickable book"><span>[[book]]</span></div>
-                </div>
-            </template>
-        </iron-list>
-    </div>
+      <div class="header">
+          <div>
+              <span class="clickable togroup">[[group.name]]</span>
+              <iron-icon icon="chevron-right"></iron-icon>
+              <em>Choose a book</em>
+          </div>
+      </div>
+
+      <div class="contain">
+          <iron-list items="[[group.list]]" as="bk">
+              <template>
+                  <div class="row clickable tochap" on-tap="store">
+                      <div>
+                          <span>[[bk.name]]</span>
+                      </div>
+                  </div>
+              </template>
+          </iron-list>
+      </div>
 
   </template>
 
@@ -104,22 +128,34 @@
   Polymer({
     is: 'ts-book-menu',
 
+      properties: {
+          book: {
+              type: Object,
+              value: {},
+              notify: true
+          },
+          chapters: {
+              type: Array,
+              value: [],
+              notify: true
+          }
+      },
+
+      store: function(e) {
+          this.book = e.model.bk;
+
+          var num = e.model.bk.chapters;
+
+          var chaparray = [];
+          for (var i=1; i<=num; i++) {
+              chaparray.push(i);
+          }
+          this.chapters = chaparray;
+
+      },
+
     ready: function() {
-      this.books = [
-        'Matthew',
-        'Mark',
-        'Luke',
-        'John',
-          'Acts',
-          'Romans',
-          '1 Corinthians',
-          '2 Corinthians',
-          'Galatians',
-          'Ephesians',
-          'Phillipians',
-          'Colossians'
-      ];
-        this.language = App.configurator.getValue("language");
+
     }
   });
 

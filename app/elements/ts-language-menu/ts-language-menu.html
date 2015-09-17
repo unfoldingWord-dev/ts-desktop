@@ -136,6 +136,9 @@
 
 <script>
 
+;(function (root) {
+  'use strict';
+
   Polymer({
       is: 'ts-language-menu',
 
@@ -155,20 +158,23 @@
           }
       },
 
-      searchfilter: function(query, languagelist) {
-          query = query.toLowerCase();
-          return languagelist.filter(function (item) {
-              return item.ln.toLowerCase().startsWith(query);
+      searchfilter: function (query, languagelist) {
+          let search = App.util.startsWithBase.bind(null, query);
+          
+          return languagelist.filter(function (lang) {
+              return search(lang.ln);
           });
       },
 
-      store: function(e) {
+      store: function (e) {
           this.language = e.model.lang;
       },
 
-      ready: function() {
+      ready: function () {
           this.languagelist = App.translator.targetLanguages;
       }
   });
+
+})(window);
 
 </script>

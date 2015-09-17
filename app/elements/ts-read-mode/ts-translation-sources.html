@@ -1,0 +1,201 @@
+<!-- ts-translation-sources -->
+
+<link rel="import" href="../../components/polymer/polymer.html">
+<link rel="import" href="../../components/iron-list/iron-list.html">
+<link rel="import" href="../../components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../../components/paper-checkbox/paper-checkbox.html">
+
+<dom-module id="ts-translation-sources">
+
+    <style>
+
+        :host {
+            display: none;
+            height: 100vh;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            background-color: rgba(0,0,0,0.5);
+            box-sizing: border-box;
+        }
+        .container {
+            display: block;
+            position: absolute;
+            top: 41px;
+            left: 0;
+            right: 0;
+            top: 50px;
+            /*height: 80%;*/
+            bottom: 88px;  /* 50px + 38px */
+            margin-left: auto;
+            margin-right: auto;
+            background: white;
+            width: 60%;
+            box-shadow: -4px 0 30px rgba(22, 22, 22, 0.3);
+        }
+        [icon="arrow-back"] {
+            margin: 0 .2em;
+        }
+
+        [icon="search"] {
+            padding: 0;
+        }
+        .header {
+            color: #888;
+            font-style: italic;
+            font-family: 'Roboto';
+            font-size: 110%
+        }
+        .header span {
+            display: block;
+            padding: 1em;
+        }
+        .collapse-control {
+            height: 50%;
+            overflow-y: auto;
+        }
+        .selected-list {
+            font-family: 'Roboto';
+            font-size: 110%;
+        }
+        .row {
+            display: block;
+            margin: 0;
+            padding: 1em;
+            border-bottom: 1px solid #bbb;
+        }
+        .row:hover {
+            background: var(--accent-color-dark);
+            box-shadow: inset 0 -1px rgba(0,0,0,0);
+            color: #fff;
+        }
+        .row-header {
+            display: block;
+            margin: 0;
+            padding: 0.25em 1em;
+            background-color: #EEE;
+            text-transform: uppercase;
+            font-size: 80%;
+            color: #888;
+            font-weight: 500;
+        }
+        .right {
+            float: right;
+        }
+        .clickable {
+            cursor: pointer;
+        }
+        .footer {
+            height: 10.3%;
+        }
+        paper-button {
+            margin-top: 0.75rem;
+            color: blue;
+        }
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+    </style>
+
+    <template>
+
+        <div class="container">
+            <div class="header">
+                <span>Choose source translations<paper-icon-button class="right" icon="search"></paper-icon-button></span>
+            </div>
+
+            <div id="selected-sources-header" class="row-header" on-click="toggleSelected">
+                <span>Selected</span>
+            </div>
+
+            <div id="selected-collapse-control" class="collapse-control" style="height: 37%;">
+                <iron-collapse id="collapse-selected" opened>
+                    <div class="collapse-content">
+                        <div class="selected-list">
+                            <template is="dom-repeat" items="[[ list ]]" as="l">
+                                <div class="row clickable">
+                                    <div class="" on-tap="">
+                                        <span>[[ l.title ]]</span>
+                                        <paper-checkbox class="right"></paper-checkbox>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </iron-collapse>
+            </div>
+
+            <div id="available-sources-header" class="row-header" on-click="toggleAvailable">
+                <span>Available</span>
+            </div>
+
+            <div id="available-collapse-control" class="collapse-control" style="height: 37%">
+                <iron-collapse id="collapse-available" opened>
+                    <div class="collapse-content">
+                        <div class="available-list">
+                            <iron-list items="[[ list ]]" as="l">
+                                <template>
+                                    <div class="row clickable">
+                                        <div class="" on-tap=""><span>[[ l.title ]]</span>
+                                            <paper-checkbox class="right"></paper-checkbox>
+                                        </div>
+                                    </div>
+                                </template>
+                            </iron-list>
+                        </div>
+                    </div>
+                </iron-collapse>
+            </div>
+
+            <div class="footer">
+                <paper-button class="right" on-tap="closeModal">Cancel</paper-button>
+                <paper-button class="right">Confirm</paper-button>
+            </div>
+
+        </div>
+
+  </template>
+
+</dom-module>
+
+<script>
+
+    function toggleControlHeight(controller) {
+        var collapseControl = document.querySelector(controller);
+        if (collapseControl.style.height == '' || collapseControl.style.height === '0px') {
+            collapseControl.style.height = "37%";
+        } else {
+            collapseControl.style.height = "0px";
+        }
+    }
+
+    Polymer({
+        is: 'ts-translation-sources',
+
+        properties: {
+
+        },
+
+        toggleSelected: function() {
+            this.$['collapse-selected'].toggle();
+            toggleControlHeight('#selected-collapse-control');
+        },
+
+        toggleAvailable: function() {
+            this.$['collapse-available'].toggle();
+            toggleControlHeight('#available-collapse-control');
+        },
+
+        closeModal: function() {
+            console.log(this);
+        },
+
+        attached: function () {
+            this.list = [{ title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }];
+        }
+    });
+
+</script>

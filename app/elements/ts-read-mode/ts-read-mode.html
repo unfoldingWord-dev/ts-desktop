@@ -2,8 +2,9 @@
 
 <!-- Used in <ts-dashboard> -->
 
-<link rel="import" href="../../components/paper-card/paper-card.html"></link>
-<link rel="import" href="ts-translation-sources.html"></link>
+<link rel="import" href="../../components/paper-card/paper-card.html">
+<link rel="import" href="../../components/paper-tabs/paper-tabs.html">
+<link rel="import" href="ts-translation-sources.html">
 
 <dom-module id="ts-read-mode">
 
@@ -15,7 +16,7 @@
 
         .main {
 			display: block;
-
+			overflow-y: auto;
 			box-sizing: border-box;
             flex: auto;
 		}
@@ -28,7 +29,6 @@
 			z-index: 0;
 			box-sizing: border-box;
 			padding: 20px 20px 0;
-			overflow-y: auto;
 		}
 		.card-sets {
 			width: 100%;

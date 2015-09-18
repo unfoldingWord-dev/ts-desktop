@@ -2,17 +2,10 @@
 <link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../components/more-routing/more-routing.html">
 
+<link rel="import" href="../ts-home/ts-home.html">
+<link rel="import" href="../ts-new-project-menus/ts-new-project-menus.html">
+<link rel="import" href="../ts-publish/ts-publish.html">
 <link rel="import" href="../ts-read-mode/ts-read-mode.html">
-<link rel="import" href="../ts-home-blank/ts-home-blank.html">
-<link rel="import" href="../ts-home-menu/ts-home-menu.html">
-<link rel="import" href="../ts-language-menu/ts-language-menu.html">
-<link rel="import" href="../ts-project-menu/ts-project-menu.html">
-<link rel="import" href="../ts-book-menu/ts-book-menu.html">
-<link rel="import" href="../ts-chapter-menu/ts-chapter-menu.html">
-<link rel="import" href="../ts-publish-book/ts-publish-book.html">
-<link rel="import" href="../ts-publish-profile/ts-publish-profile.html">
-<link rel="import" href="../ts-publish-review/ts-publish-review.html">
-<link rel="import" href="../ts-publish-publish/ts-publish-publish.html">
 
 <dom-module id="ts-dashboard">
 
@@ -48,12 +41,16 @@
       <more-route-selector>
           <iron-pages>
               <ts-home-blank route="/"></ts-home-blank>
+
               <ts-home-menu route="/home"></ts-home-menu>
+
               <ts-language-menu route="/language" language="{{targetlanguage}}"></ts-language-menu>
               <ts-project-menu route="/project" language="[[targetlanguage]]" group="{{targetgroup}}"></ts-project-menu>
               <ts-book-menu route="/book" language="[[targetlanguage]]" group="[[targetgroup]]" book="{{targetbook}}" chapters="{{targetchapters}}"></ts-book-menu>
               <ts-chapter-menu route="/chapter" language="[[targetlanguage]]" group="[[targetgroup]]" book="[[targetbook]]" chapters="[[targetchapters]]" chapter="{{targetchapter}}"></ts-chapter-menu>
+              
               <ts-read-mode route="/read"></ts-read-mode>
+
               <ts-publish-book route="/publish" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-book>
               <ts-publish-profile route="/profile" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-profile>
               <ts-publish-review route="/review" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-review>

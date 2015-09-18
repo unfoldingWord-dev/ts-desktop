@@ -1,9 +1,8 @@
 
 <link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../elements/ts-new-project-button/ts-new-project-button.html">
-<link rel="import" href="../../elements/ts-overflow/ts-overflow.html">
 
-<dom-module id="ts-home-menu">
+<dom-module id="ts-home-blank">
 
     <style>
 
@@ -48,34 +47,25 @@
             align-items: center;
         }
 
-        .projectlist {
+        .welcome {
             background: white;
-            width: 450px;
             box-shadow: 0 2px 3px 2px #ccc;
+            width: 450px;
+            margin-bottom: 30px;
         }
 
-        ul {
-            margin: 0;
-            padding: 0;
-            list-style-type: none;
+        .start {
+            background: var(--primary-color);
+            color: white;
+            padding: 10px;
             font-size: 110%;
+            box-shadow: 0 2px 3px 2px #ccc;
+            text-align: center;
         }
 
-        ul li {
-            display: block;
-            margin: 0;
-            padding: 1em;
-            border-bottom: 1px solid #eee;
-            transition: background .3s, color .3s;
-        }
-
-        ul li:hover {
-            background: var(--accent-color-dark);
-            color: #fff;
-        }
-
-        iron-icon {
-            padding-right: 1em;
+        p {
+            font-size: 110%;
+            padding: 0 1.5em;
         }
 
         .titles {
@@ -84,8 +74,12 @@
             padding-left: 20px;
         }
 
-        .clickable {
-            cursor: pointer;
+        paper-icon-button {
+            padding-bottom: 15px;
+        }
+
+        a {
+            text-decoration: none;
         }
 
     </style>
@@ -93,7 +87,7 @@
   <template>
 
       <div class="overflow">
-          <paper-icon-button icon="more-vert"></paper-icon-button>
+          <paper-icon-button icon="more-vert" title="more options"></paper-icon-button>
       </div>
 
       <div class="main">
@@ -101,13 +95,16 @@
               <div class="titles">Your Translation Projects</div>
           </div>
           <div class="contain">
-              <div class="projectlist">
-                  <ul>
-                      <template is="dom-repeat" items="[[projects]]" as="project">
-                          <li class="clickable"><iron-icon icon="project-menu:project"></iron-icon><span>[[project]]</span></li>
-                      </template>
-                  </ul>
+              <div class="welcome">
+                  <p>Welcome!</p>
+                  <p>This is your Home Screen. When you have translation projects on this device, they will appear here.</p>
+                  <p>You can start a new project anytime by tapping the blue button in the top right.</p>
               </div>
+              <a href="#!/language">
+                  <div class="start" title="New Project">
+                      <span>Start a new project</span>
+                  </div>
+              </a>
           </div>
       </div>
 
@@ -120,14 +117,10 @@
 <script>
 
   Polymer({
-    is: 'ts-home-menu',
+    is: 'ts-home-blank',
 
     ready: function() {
-      this.projects = [
-        'Genesis',
-        'John',
-        'Open Bible Stories'
-      ];
+
     }
   });
 

@@ -1,0 +1,189 @@
+
+
+<dom-module id="ts-publish-review">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .contain {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .bar {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 45px;
+        }
+
+        .titles {
+            flex: auto;
+            font-size: 125%;
+        }
+
+        [icon="arrow-back"] {
+            margin: 0 1em 0 .2em;
+        }
+
+        .header {
+            background: var(--primary-color);
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 60px;
+        }
+
+        .list {
+            background: white;
+            width: 450px;
+            box-shadow: 0 2px 3px 2px #ccc;
+            margin-top: 30px;
+        }
+
+        .next {
+            background: #1FC2FC;
+            color: white;
+            padding: 5px 15px;
+            box-shadow: 0 2px 3px 2px #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 30px;
+        }
+
+        .steps {
+            color: #B7E1DF;
+        }
+
+        .steps .current {
+            color: white;
+        }
+
+        .steps .past {
+            color: white;
+        }
+
+        .small {
+            --iron-icon-height: 17px;
+            --iron-icon-width: 17px;
+        }
+
+        .circle {
+            border-radius: 50%;
+            border: 1px solid;
+            width: 25px;
+            height: 25px;
+            text-align: center;
+            display: inline-block;
+            margin: 0 10px 0 20px;
+            line-height: 25px;
+        }
+
+        .circle.current {
+            background: #1FC2FC;
+        }
+
+        ul {
+            margin: 0;
+            padding: 0;
+            list-style-type: none;
+            font-size: 110%;
+        }
+
+        ul li {
+            display: block;
+            margin: 0;
+            padding: 1em;
+            color: #888;
+            border-bottom: 1px solid #eee;
+            transition: background .3s, color .3s;
+        }
+
+        ul li:hover {
+            background: var(--accent-color-dark);
+            color: #fff;
+        }
+
+        .right {
+            float: right;
+            color: forestgreen;
+        }
+
+        .bar a {
+            color: white;
+        }
+
+        .contain a {
+            text-decoration: none;
+        }
+
+    </style>
+
+  <template>
+
+      <div class="bar">
+          <a href="#!/profile"><paper-icon-button icon="arrow-back" title="Go Back"></paper-icon-button></a>
+          <div class="titles">Publish Project</div>
+      </div>
+
+      <div class="header">
+          <div class="steps">
+              <div class="circle past"><iron-icon icon="done" class="small"></iron-icon></div>
+              <span class="past">BOOK</span>
+              <div class="circle past"><iron-icon icon="done" class="small"></iron-icon></div>
+              <span class="past">PROFILE</span>
+              <div class="circle current">3</div>
+              <span class="current">REVIEW</span>
+              <div class="circle">4</div>
+              <span>PUBLISH</span>
+          </div>
+      </div>
+
+      <div class="contain">
+          <div class="list">
+              <ul>
+                  <li>Project: <span>[[book.name]]</span> - <span>[[language.ln]]</span><iron-icon class="right" icon="done"></iron-icon></li>
+                  <li>Profile<iron-icon class="right" icon="done"></iron-icon></li>
+                  <li>License Agreement<iron-icon class="right" icon="done"></iron-icon></li>
+                  <li>Translation Guidelines<iron-icon class="right" icon="done"></iron-icon></li>
+                  <li>Statement of Faith<iron-icon class="right" icon="done"></iron-icon></li>
+              </ul>
+          </div>
+          <a href="#!/upload">
+              <div class="next">
+                  <span>NEXT STEP</span>
+              </div>
+          </a>
+      </div>
+
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+    is: 'ts-publish-review',
+
+      properties: {
+
+      },
+
+
+
+    ready: function() {
+
+    }
+  });
+
+</script>

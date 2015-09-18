@@ -24,6 +24,8 @@
     let Library = require('../js/library').Library;
     let library = Library(indexer);
 
+    let util = require('../js/lib/util');
+
     /**
      * FIX - This provides a fix to the native chrome shadow missing
      * see: https://github.com/nwjs/nw.js/issues/2903#issuecomment-77099590
@@ -52,6 +54,8 @@
         library: library,
 
         indexer: indexer,
+
+        util: util,
 
         isMaximized: false,
 
@@ -228,13 +232,6 @@
             });
         },
 
-        initializeUploader: function () {
-            uploader.setServerInfo({
-                'host': configurator.getValue('authServer'),
-                'port': configurator.getValue('authServerPort')
-            });
-        },
-
         init: function () {
             let _this = this;
 
@@ -243,7 +240,6 @@
             _this.initializeConfig();
             _this.initializeReporter();
             _this.registerErrorReporter();
-            _this.initializeUploader();
 
             let platformInit = _this.platformInit[process.platform];
             platformInit && platformInit.call(_this);

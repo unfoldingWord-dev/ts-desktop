@@ -1,0 +1,174 @@
+
+<link rel="import" href="../../components/polymer/polymer.html">
+<link rel="import" href="../../components/iron-list/iron-list.html">
+
+<dom-module id="ts-book-menu">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .contain {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .bar {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 45px;
+        }
+
+        .titles {
+            flex: auto;
+            font-size: 125%;
+        }
+
+        [icon="arrow-back"] {
+            margin: 0 1em 0 .2em;
+        }
+
+        .header {
+            color: #888;
+            font-size: 110%;
+            background: var(--primary-color);
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            min-height: 60px;
+        }
+
+        .header div {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            padding-left: 20px;
+            border-bottom: 1px solid #eee;
+            background: white;
+            width: 430px;
+            box-shadow: 0 -1px 2px 1px var(--primary-color-dark);
+        }
+
+        iron-list {
+            font-size: 110%;
+            max-height: 90vh;
+            width: 450px;
+            background: white;
+            box-shadow: 0 2px 3px 2px #ccc;
+        }
+
+        .row {
+            display: block;
+            margin: 0;
+            padding: 1em;
+            border-bottom: 1px solid #eee;
+            transition: background .3s, color .3s;
+        }
+
+        .row:hover {
+            background: var(--accent-color-dark);
+            color: #fff;
+        }
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        .header iron-icon {
+            padding: 0 10px;
+        }
+
+        .bar a {
+            color: white;
+        }
+
+        .contain a {
+            text-decoration: none;
+            color: black;
+        }
+
+        .header a {
+            color: #888;
+            text-decoration: none;
+        }
+
+    </style>
+
+  <template>
+
+      <div class="bar">
+          <a href="#!/project"><paper-icon-button icon="arrow-back" title="Go Back"></paper-icon-button></a>
+          <div class="titles">New Project</div>
+      </div>
+
+      <div class="header">
+          <div>
+              <a href="#!/project"><span>[[group.name]]</span></a>
+              <iron-icon icon="chevron-right"></iron-icon>
+              <em>Choose a book</em>
+          </div>
+      </div>
+
+      <div class="contain">
+          <iron-list items="[[group.list]]" as="bk">
+              <template>
+                  <a href="#!/chapter">
+                      <div class="row" on-tap="store">
+                          <div>
+                              <span>[[bk.name]]</span>
+                          </div>
+                      </div>
+                  </a>
+              </template>
+          </iron-list>
+      </div>
+
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+    is: 'ts-book-menu',
+
+      properties: {
+          book: {
+              type: Object,
+              value: {},
+              notify: true
+          },
+          chapters: {
+              type: Array,
+              value: [],
+              notify: true
+          }
+      },
+
+      store: function(e) {
+          this.book = e.model.bk;
+
+          var num = e.model.bk.chapters;
+
+          var chaparray = [];
+          for (var i=1; i<=num; i++) {
+              chaparray.push(i);
+          }
+          this.chapters = chaparray;
+
+      },
+
+    ready: function() {
+
+    }
+  });
+
+</script>

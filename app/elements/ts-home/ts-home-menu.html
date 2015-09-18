@@ -1,0 +1,133 @@
+
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../elements/ts-new-project-button/ts-new-project-button.html">
+
+<dom-module id="ts-home-menu">
+
+    <style>
+
+        :host {
+            display: flex;
+        }
+
+        .overflow {
+            background: var(--primary-color-dark);
+            color: white;
+            width: 50px;
+            align-self: stretch;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .main {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .bar {
+            background: #ddd;
+            color: black;
+            width: 100%;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            box-shadow: 0 1px 2px 0 #ccc;
+        }
+
+        .contain {
+            width: 100%;
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .projectlist {
+            background: white;
+            width: 450px;
+            box-shadow: 0 2px 3px 2px #ccc;
+        }
+
+        ul {
+            margin: 0;
+            padding: 0;
+            list-style-type: none;
+            font-size: 110%;
+        }
+
+        ul li {
+            display: block;
+            margin: 0;
+            padding: 1em;
+            border-bottom: 1px solid #eee;
+            transition: background .3s, color .3s;
+        }
+
+        ul li:hover {
+            background: var(--accent-color-dark);
+            color: #fff;
+        }
+
+        iron-icon {
+            padding-right: 1em;
+        }
+
+        .titles {
+            flex: auto;
+            font-size: 125%;
+            padding-left: 20px;
+        }
+
+        .clickable {
+            cursor: pointer;
+        }
+
+    </style>
+
+  <template>
+
+      <div class="overflow">
+          <paper-icon-button icon="more-vert"></paper-icon-button>
+      </div>
+
+      <div class="main">
+          <div class="bar">
+              <div class="titles">Your Translation Projects</div>
+          </div>
+          <div class="contain">
+              <div class="projectlist">
+                  <ul>
+                      <template is="dom-repeat" items="[[projects]]" as="project">
+                          <li class="clickable"><iron-icon icon="project-menu:project"></iron-icon><span>[[project]]</span></li>
+                      </template>
+                  </ul>
+              </div>
+          </div>
+      </div>
+
+      <ts-new-project-button></ts-new-project-button>
+
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+    is: 'ts-home-menu',
+
+    ready: function() {
+      this.projects = [
+        'Genesis',
+        'John',
+        'Open Bible Stories'
+      ];
+    }
+  });
+
+</script>

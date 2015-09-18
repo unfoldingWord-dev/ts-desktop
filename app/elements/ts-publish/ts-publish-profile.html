@@ -1,0 +1,185 @@
+
+<link rel="import" href="../../components/iron-input/iron-input.html">
+
+<dom-module id="ts-publish-profile">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .contain {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .bar {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 45px;
+        }
+
+        .titles {
+            flex: auto;
+            font-size: 125%;
+        }
+
+        [icon="arrow-back"] {
+            margin: 0 1em 0 .2em;
+        }
+
+        .header {
+            background: var(--primary-color);
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 60px;
+        }
+
+        .next {
+            background: #1FC2FC;
+            color: white;
+            padding: 5px 15px;
+            margin-top: 20px;
+            box-shadow: 0 2px 3px 2px #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .steps {
+            color: #B7E1DF;
+        }
+
+        .steps .current {
+            color: white;
+        }
+
+        .steps .past {
+            color: white;
+        }
+
+        .small {
+            --iron-icon-height: 17px;
+            --iron-icon-width: 17px;
+        }
+
+        .circle {
+            border-radius: 50%;
+            border: 1px solid;
+            width: 25px;
+            height: 25px;
+            text-align: center;
+            display: inline-block;
+            margin: 0 10px 0 20px;
+            line-height: 25px;
+        }
+
+        .circle.current {
+            background: #1FC2FC;
+        }
+
+        input {
+            width: 350px;
+            height: 30px;
+            font-size: 120%;
+            margin: 10px 0;
+            border: none;
+            border-bottom: 1px solid #bbb;
+            color: #888;
+        }
+
+        .input {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-top: 20px;
+            background: white;
+            width: 450px;
+            box-shadow: 0 2px 3px 2px #ccc;
+        }
+
+        .right {
+            float: right;
+            color: #bbb;
+        }
+
+        .bar a {
+            color: white;
+        }
+
+        .contain a {
+            text-decoration: none;
+        }
+
+    </style>
+
+  <template>
+
+      <div class="bar">
+          <a href="#!/publish"><paper-icon-button icon="arrow-back" title="Go Back"></paper-icon-button></a>
+          <div class="titles">Publish Project</div>
+      </div>
+
+      <div class="header">
+          <div class="steps">
+              <div class="circle past"><iron-icon icon="done" class="small"></iron-icon></div>
+              <span class="past">BOOK</span>
+              <div class="circle current">2</div>
+              <span class="current">PROFILE</span>
+              <div class="circle">3</div>
+              <span>REVIEW</span>
+              <div class="circle">4</div>
+              <span>PUBLISH</span>
+          </div>
+      </div>
+
+      <div class="contain">
+          <div class="input">
+              <input is="iron-input" bind-value="" placeholder="Your Name">
+              <iron-icon class="right" icon="info" title="More Info"></iron-icon>
+          </div>
+          <div class="input">
+              <input is="iron-input" bind-value="" placeholder="Your Email Address">
+              <iron-icon class="right" icon="info" title="More Info"></iron-icon>
+          </div>
+          <div class="input">
+              <input is="iron-input" bind-value="" placeholder="Your Phone Number">
+              <iron-icon class="right" icon="info" title="More Info"></iron-icon>
+          </div>
+          <a href="#!/review">
+              <div class="next">
+                  <span>NEXT STEP</span>
+              </div>
+          </a>
+      </div>
+
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+    is: 'ts-publish-profile',
+
+      properties: {
+
+      },
+
+
+
+    ready: function() {
+
+    }
+  });
+
+</script>

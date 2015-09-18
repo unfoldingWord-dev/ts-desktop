@@ -2,17 +2,23 @@
 
 <!-- Used in <ts-dashboard> -->
 
-<link rel="import" href="../../components/paper-card/paper-card.html"></link>
-<link rel="import" href="ts-translation-sources.html"></link>
+<link rel="import" href="../../components/paper-card/paper-card.html">
+<link rel="import" href="../../components/paper-tabs/paper-tabs.html">
+<link rel="import" href="ts-translation-sources.html">
 
 <dom-module id="ts-read-mode">
 
 	<style is="custom-style">
-	
+
 		:host {
+            display: flex;
+        }
+
+        .main {
 			display: block;
-			height: 100%;
+			overflow-y: auto;
 			box-sizing: border-box;
+            flex: auto;
 		}
 
 		.container {
@@ -23,7 +29,6 @@
 			z-index: 0;
 			box-sizing: border-box;
 			padding: 20px 20px 0;
-			overflow-y: auto;
 		}
 		.card-sets {
 			width: 100%;
@@ -138,51 +143,76 @@
 			color: #CCC;
 		}
 
+        .overflow {
+            background: var(--primary-color-dark);
+            color: white;
+            min-width: 50px;
+            align-self: stretch;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .overflow paper-icon-button {
+            padding-bottom: 15px;
+        }
+
+        .overflow a {
+            color: white;
+        }
+
 	</style>
 
 	<template>
 
-		<ts-translation-sources></ts-translation-sources>
+        <div class="overflow">
+            <a href="#!/chapter"><paper-icon-button icon="arrow-back" title="Go Back"></paper-icon-button></a>
+            <a href="#!/publish"><paper-icon-button icon="more-vert" title="more options"></paper-icon-button></a>
+        </div>
 
-		<div id="cue" class="container sticky-cue">
-			
-			<div id="cardsets" class="tabs-container card-sets sticky-ele">
-				<div class="icon-container">
-					<iron-icon icon="icons:tab" class="icon24 icon" on-click="showSources"></iron-icon>
-				</div>
-				<paper-tabs id="source-tabs" selected="{{ selected }}" noink scrollable hideScrollButtons>
-               <template is="dom-repeat" items="{{ tabs }}" as="tab">
-                  <paper-tab class="source-tab">{{ tab.translation.title }}</paper-tab>
-               </template>
-         	</paper-tabs>
-			</div>
+        <div class="main">
+            <ts-translation-sources></ts-translation-sources>
 
-			<div>
-				<iron-pages id="source-pages" selected="[[ selected ]]">
-					<template is="dom-repeat" items="{{ tabs }}" as="tab">
-						<div class="source-page">
-							<template is="dom-repeat" items="{{ tab.content }}" as="chapter" indexAs="index">
-								<div class="card-sets">
-									<paper-card class="card top-card" elevation="2" >
-										<div class="tabs-hole"></div>
-										<div class="card-heading">
-											<h3>
-												<span>{{ tab.book_title }}</span> <span>{{ chapter.chapter }}</span>
-											</h3>
-										</div>
-										<div class="card-content">
-											<p>{{ chapter.text }}</p>
-										</div>
-									</paper-card>
-								</div>
-							</template>
-						</div>
-					</template>
-				</iron-pages>
-			</div>
+            <div id="cue" class="container sticky-cue">
 
-		</div>
-	
+                <div id="cardsets" class="tabs-container card-sets sticky-ele">
+                    <div class="icon-container">
+                        <iron-icon icon="icons:tab" class="icon24 icon" on-click="showSources"></iron-icon>
+                    </div>
+                    <paper-tabs id="source-tabs" selected="{{ selected }}" noink scrollable hideScrollButtons>
+                        <template is="dom-repeat" items="{{ tabs }}" as="tab">
+                            <paper-tab class="source-tab">{{ tab.translation.title }}</paper-tab>
+                        </template>
+                    </paper-tabs>
+                </div>
+
+                <div>
+                    <iron-pages id="source-pages" selected="[[ selected ]]">
+                        <template is="dom-repeat" items="{{ tabs }}" as="tab">
+                            <div class="source-page">
+                                <template is="dom-repeat" items="{{ tab.content }}" as="chapter" indexAs="index">
+                                    <div class="card-sets">
+                                        <paper-card class="card top-card" elevation="2" >
+                                            <div class="tabs-hole"></div>
+                                            <div class="card-heading">
+                                                <h3>
+                                                    <span>{{ tab.book_title }}</span> <span>{{ chapter.chapter }}</span>
+                                                </h3>
+                                            </div>
+                                            <div class="card-content">
+                                                <p>{{ chapter.text }}</p>
+                                            </div>
+                                        </paper-card>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </iron-pages>
+                </div>
+            </div>
+        </div>
+
 	</template>
 
 </dom-module>
@@ -191,7 +221,7 @@
 
 (function() {
 
-	// Function: 
+	// Function:
 	function findPos(obj) {
 		var curtop = 0;
 
@@ -251,7 +281,7 @@
 			'backwardTo': backwardTo
 		}
 	}
-	
+
 	Polymer({
 
 		is: 'ts-read-mode',
@@ -400,7 +430,7 @@
 
 		// 	this.$['source-tabs'].selected = this.tabs.length - 1;
 	 //  	},
- 
+
  		// Function that got called with every scroll move
 		stickEle: function(event) {
 			var cue = this.$.cue,
@@ -438,10 +468,10 @@
 				window.setTimeout(function() {cardsets.classList.remove('animate');}, 150);
 			}
 		},
-     
+
 		ready: function() {
 			this.async(function() {
-				
+
 				this.selected = 0;
 
 			}, 1);

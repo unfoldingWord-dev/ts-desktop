@@ -1,10 +1,6 @@
-<!--
-View Button
--->
 
 <link rel="import" href="../../components/polymer/polymer.html">
 <link rel="import" href="../../components/paper-fab/paper-fab.html">
-
 
 <dom-module id="ts-new-project-button">
 
@@ -38,7 +34,7 @@ View Button
   <template>
 
         <div id="buttonbox">
-            <paper-fab class="fixed clickable" id="new" icon="add" title="New Project"></paper-fab>
+            <a href="#!/language"><paper-fab class="fixed" icon="add" title="New Project"></paper-fab></a>
         </div>
 
   </template>
@@ -51,7 +47,6 @@ Polymer({
 
   ready: function() {
 
-    // oh boy!
   }
 });
 

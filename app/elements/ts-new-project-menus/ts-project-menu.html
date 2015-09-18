@@ -1,0 +1,253 @@
+
+<link rel="import" href="ts-project-menu-icons.html">
+
+<dom-module id="ts-project-menu">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .contain {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .bar {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 45px;
+        }
+
+        .titles {
+            flex: auto;
+            font-size: 125%;
+        }
+
+        [icon="arrow-back"] {
+            margin: 0 1em 0 .2em;
+        }
+
+        [icon="autorenew"] {
+            padding: 0;
+        }
+
+        .header {
+            color: #888;
+            font-size: 110%;
+            background: var(--primary-color);
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            min-height: 60px;
+        }
+
+        .header div {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 1px solid #eee;
+            background: white;
+            width: 410px;
+            box-shadow: 0 -1px 2px 1px var(--primary-color-dark);
+        }
+
+        iron-list {
+            font-size: 110%;
+            max-height: 90vh;
+            width: 450px;
+            background: white;
+            box-shadow: 0 2px 3px 2px #ccc;
+        }
+
+        .row {
+            display: block;
+            margin: 0;
+            padding: 1em;
+            border-bottom: 1px solid #eee;
+            transition: background .3s, color .3s;
+        }
+
+        .row:hover {
+            background: var(--accent-color-dark);
+            color: #fff;
+        }
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        .right {
+            float: right;
+        }
+
+        .small {
+            --iron-icon-height: 17px;
+            --iron-icon-width: 17px;
+            padding-right: 1em;
+        }
+
+        .bar a {
+            color: white;
+        }
+
+        .contain a {
+            text-decoration: none;
+            color: black;
+        }
+
+    </style>
+
+  <template>
+
+      <div class="bar">
+          <a href="#!/language"><paper-icon-button icon="arrow-back" title="Go Back"></paper-icon-button></a>
+          <div class="titles">New Project</div>
+      </div>
+
+      <div class="header">
+          <div>
+              <em>Choose a project</em>
+              <paper-icon-button class="right" icon="autorenew"></paper-icon-button>
+          </div>
+      </div>
+
+      <div class="contain">
+          <iron-list items="[[grouplist]]" as="grp">
+              <template>
+                  <a href="#!/book">
+                      <div class="row" on-tap="store">
+                          <div>
+                              <iron-icon class="small" icon="[[grp.lefticon]]"></iron-icon>
+                              <span>[[grp.name]]</span>
+                              <iron-icon class="right" icon="[[grp.righticon]]"></iron-icon>
+                          </div>
+                      </div>
+                  </a>
+              </template>
+          </iron-list>
+      </div>
+
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+    is: 'ts-project-menu',
+
+      properties: {
+          group: {
+              type: Object,
+              value: {},
+              notify: true
+          }
+      },
+
+      store: function(e) {
+
+          this.group = e.model.grp;
+
+      },
+
+    ready: function() {
+
+        this.grouplist = [
+            {"name": "Open Bible Stories", "lefticon": "project-menu:project", "righticon": "", "list": [
+                {"name": "Adam and Eve"},
+                {"name": "Noah and the Flood"},
+                {"name": "Moses"},
+                {"name": "The Wall of Jericho"},
+                {"name": "Jonah and the Whale"},
+                {"name": "Jesus' Birth"},
+                {"name": "Feeding of the 5000"},
+                {"name": "Palm Sunday"},
+                {"name": "Jesus' Crucifixion"},
+                {"name": "Jesus' Resurrection"},
+                {"name": "Day of Pentecost"}
+            ]},
+            {"name": "Old Testament", "lefticon": "project-menu:project", "righticon": "chevron-right", "list": [
+                {"name": "Genesis", "chapters": 50},
+                {"name": "Exodus", "chapters": 40},
+                {"name": "Leviticus", "chapters": 27},
+                {"name": "Numbers", "chapters": 36},
+                {"name": "Deutoronomy", "chapters": 34},
+                {"name": "Joshua", "chapters": 24},
+                {"name": "Judges", "chapters": 21},
+                {"name": "Ruth", "chapters": 4},
+                {"name": "1 Samuel", "chapters": 31},
+                {"name": "2 Samuel", "chapters": 24},
+                {"name": "1 Kings", "chapters": 22},
+                {"name": "2 Kings", "chapters": 25},
+                {"name": "1 Chronicles", "chapters": 29},
+                {"name": "2 Chronicles", "chapters": 36},
+                {"name": "Ezra", "chapters": 10},
+                {"name": "Nehemiah", "chapters": 13},
+                {"name": "Esther", "chapters": 10},
+                {"name": "Job", "chapters": 42},
+                {"name": "Psalms", "chapters": 150},
+                {"name": "Proverbs", "chapters": 31},
+                {"name": "Ecclesiastes", "chapters": 12},
+                {"name": "Song of Songs", "chapters": 8},
+                {"name": "Isaiah", "chapters": 66},
+                {"name": "Jeremiah", "chapters": 52},
+                {"name": "Lamentations", "chapters": 5},
+                {"name": "Ezekiel", "chapters": 48},
+                {"name": "Daniel", "chapters": 12},
+                {"name": "Hosea", "chapters": 14},
+                {"name": "Joel", "chapters": 3},
+                {"name": "Amos", "chapters": 9},
+                {"name": "Obadiah", "chapters": 1},
+                {"name": "Jonah", "chapters": 4},
+                {"name": "Micah", "chapters": 7},
+                {"name": "Nahum", "chapters": 3},
+                {"name": "Habakkuk", "chapters": 3},
+                {"name": "Zephaniah", "chapters": 3},
+                {"name": "Haggai", "chapters": 2},
+                {"name": "Zechariah", "chapters": 14},
+                {"name": "Malachi", "chapters": 4},
+            ]},
+            {"name": "New Testament", "lefticon": "project-menu:project", "righticon": "chevron-right", "list": [
+                {"name": "Matthew", "chapters": 28},
+                {"name": "Mark", "chapters": 16},
+                {"name": "Luke", "chapters": 24},
+                {"name": "John", "chapters": 21},
+                {"name": "Acts", "chapters": 28},
+                {"name": "Romans", "chapters": 16},
+                {"name": "1 Corinthians", "chapters": 16},
+                {"name": "2 Corinthians", "chapters": 13},
+                {"name": "Galatians", "chapters": 6},
+                {"name": "Ephesians", "chapters": 6},
+                {"name": "Philippians", "chapters": 4},
+                {"name": "Colossians", "chapters": 4},
+                {"name": "1 Thessalonians", "chapters": 5},
+                {"name": "2 Thessalonians", "chapters": 3},
+                {"name": "1 Timothy", "chapters": 6},
+                {"name": "2 Timothy", "chapters": 4},
+                {"name": "Titus", "chapters": 3},
+                {"name": "Philemon", "chapters": 1},
+                {"name": "Hebrews", "chapters": 13},
+                {"name": "James", "chapters": 5},
+                {"name": "1 Peter", "chapters": 5},
+                {"name": "2 Peter", "chapters": 3},
+                {"name": "1 John", "chapters": 5},
+                {"name": "2 John", "chapters": 1},
+                {"name": "3 John", "chapters": 1},
+                {"name": "Jude", "chapters": 1},
+                {"name": "Revelation", "chapters": 22},
+            ]}
+        ]
+
+    }
+  });
+
+</script>

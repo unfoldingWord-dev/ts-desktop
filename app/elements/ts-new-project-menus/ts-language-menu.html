@@ -1,0 +1,190 @@
+
+<link rel="import" href="../../components/polymer/polymer.html">
+<link rel="import" href="../../components/iron-list/iron-list.html">
+<link rel="import" href="../../components/iron-input/iron-input.html">
+
+<dom-module id="ts-language-menu">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .contain {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .bar {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 45px;
+        }
+
+        .titles {
+            flex: auto;
+            font-size: 125%;
+        }
+
+        [icon="arrow-back"] {
+            margin: 0 1em 0 .2em;
+        }
+
+        [icon="search"] {
+            padding: 0;
+        }
+
+        .header {
+            color: #888;
+            font-size: 110%;
+            background: var(--primary-color);
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            min-height: 60px;
+        }
+
+        .header div {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 1px solid #eee;
+            background: white;
+            width: 410px;
+            box-shadow: 0 -1px 2px 1px var(--primary-color-dark);
+        }
+
+        iron-list {
+            font-size: 110%;
+            max-height: 90vh;
+            width: 450px;
+            background: white;
+            box-shadow: 0 2px 3px 2px #ccc;
+        }
+
+        .row {
+            display: block;
+            margin: 0;
+            padding: 1em;
+            border-bottom: 1px solid #eee;
+            transition: background .3s, color .3s;
+        }
+
+        .row:hover {
+            background: var(--accent-color-dark);
+            color: #fff;
+        }
+
+        .clickable {
+            cursor: pointer;
+        }
+
+        .right {
+            float: right;
+            color: #888;
+            font-style: italic;
+            font-size: 70%
+        }
+
+        input {
+            border: none;
+            font-size: 120%;
+            font-style: italic;
+        }
+
+        .bar a {
+            color: white;
+        }
+
+        .contain a {
+            text-decoration: none;
+            color: black;
+        }
+
+    </style>
+
+  <template>
+
+      <div class="bar">
+            <a href="#!/home"><paper-icon-button icon="arrow-back" title="Go Back"></paper-icon-button></a>
+            <div class="titles">New Project</div>
+      </div>
+
+      <div class="header">
+          <div>
+              <input is="iron-input" bind-value="{{query}}" placeholder="Choose target language">
+              <paper-icon-button class="right" icon="search" title="Search Languages"></paper-icon-button>
+          </div>
+      </div>
+
+      <div class="contain">
+          <iron-list items="{{searchfilter(query,languagelist)}}" as="lang">
+              <template>
+                  <a href="#!/project">
+                      <div class="row" on-tap="store">
+                          <div>
+                              <span>[[lang.ln]]</span>
+                              <span class="right">[[lang.lc]]</span>
+                          </div>
+                      </div>
+                  </a>
+              </template>
+          </iron-list>
+      </div>
+
+  </template>
+
+</dom-module>
+
+<script>
+
+;(function (root) {
+  'use strict';
+
+  Polymer({
+      is: 'ts-language-menu',
+
+      properties: {
+          language: {
+              type: Object,
+              value: {},
+              notify: true
+          },
+          query: {
+              type: String,
+              value: ""
+          },
+          languagelist: {
+              type: Array,
+              value: []
+          }
+      },
+
+      searchfilter: function (query, languagelist) {
+          let search = App.util.startsWithBase.bind(null, query);
+
+          return languagelist.filter(function (lang) {
+              return search(lang.ln) || search(lang.lc);
+          });
+      },
+
+      store: function (e) {
+          this.language = e.model.lang;
+      },
+
+      ready: function () {
+          this.languagelist = App.translator.targetLanguages;
+      }
+  });
+
+})(window);
+
+</script>

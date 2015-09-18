@@ -2,9 +2,10 @@
   "name": "package",
   "version": "0.0.0",
   "dependencies": {
-    "polymer": "Polymer/polymer#~1.1.2",
+    "async": "~1.4.2",
     "iron-elements": "PolymerElements/iron-elements#~1.0.3",
+    "more-routing": "Polymore/more-routing#~1.0.0",
     "paper-elements": "PolymerElements/paper-elements#~1.0.5",
-    "async": "~1.4.2"
+    "polymer": "Polymer/polymer#~1.1.2"
   }
 }

@@ -83,10 +83,6 @@
             min-height: 60px;
         }
 
-        .clickable {
-            cursor: pointer;
-        }
-
         .publish {
             background: #1FC2FC;
             color: white;
@@ -129,12 +125,20 @@
             background: #1FC2FC;
         }
 
+        .bar a {
+            color: white;
+        }
+
+        .contain a {
+            text-decoration: none;
+        }
+
     </style>
 
   <template>
 
       <div class="bar">
-          <paper-icon-button class="clickable" id="back" icon="arrow-back" title="Go Back"></paper-icon-button>
+          <a href="#!/review"><paper-icon-button icon="arrow-back" title="Go Back"></paper-icon-button></a>
           <div class="titles">Publish Project</div>
       </div>
 
@@ -158,15 +162,15 @@
           <div class="right">
               <div>
                   <p>Publish your project directly to unfoldingWord</p>
-                  <div class="clickable publish">
+                  <div class="publish">
                       <span>UPLOAD</span>
                   </div>
               </div>
               <div class="lower">
                   <p>You may also share and distribute your project using these options.</p>
-                  <div class="clickable link">Send to SD card</div>
-                  <div class="clickable link">Send via Bluetooth</div>
-                  <div class="clickable link">Other Sharing</div>
+                  <div class="link">Send to SD card</div>
+                  <div class="link">Send via Bluetooth</div>
+                  <div class="link">Other Sharing</div>
               </div>
           </div>
       </div>

@@ -1,7 +1,8 @@
 <link rel="import" href="../../components/iron-pages/iron-pages.html">
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html" />
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../components/more-routing/more-routing.html">
 
-<link rel="import" href="../ts-read-mode/ts-read-mode.html" />
+<link rel="import" href="../ts-read-mode/ts-read-mode.html">
 <link rel="import" href="../ts-home-blank/ts-home-blank.html">
 <link rel="import" href="../ts-home-menu/ts-home-menu.html">
 <link rel="import" href="../ts-language-menu/ts-language-menu.html">
@@ -24,6 +25,11 @@
       flex: auto;
   }
 
+  more-route-selector {
+      flex: auto;
+      display: flex;
+  }
+
   iron-pages {
       flex: auto;
       display: flex;
@@ -33,27 +39,27 @@
       flex: auto;
   }
 
-  #pages {
-    height: 100%;
-  }
-
   </style>
 
   <template>
 
-      <iron-pages class="clickable" on-tap="onTap" selected="[[selected]]">
-          <ts-home-blank></ts-home-blank>
-          <ts-home-menu></ts-home-menu>
-          <ts-language-menu language="{{targetlanguage}}"></ts-language-menu>
-          <ts-project-menu language="[[targetlanguage]]" group="{{targetgroup}}"></ts-project-menu>
-          <ts-book-menu language="[[targetlanguage]]" group="[[targetgroup]]" book="{{targetbook}}" chapters="{{targetchapters}}"></ts-book-menu>
-          <ts-chapter-menu language="[[targetlanguage]]" group="[[targetgroup]]" book="[[targetbook]]" chapters="[[targetchapters]]" chapter="{{targetchapter}}"></ts-chapter-menu>
-          <ts-read-mode></ts-read-mode>
-          <ts-publish-book language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-book>
-          <ts-publish-profile language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-profile>
-          <ts-publish-review language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-review>
-          <ts-publish-publish language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-publish>
-      </iron-pages>
+      <more-routing-config driver="hash"></more-routing-config>
+
+      <more-route-selector>
+          <iron-pages>
+              <ts-home-blank route="/"></ts-home-blank>
+              <ts-home-menu route="/home"></ts-home-menu>
+              <ts-language-menu route="/language" language="{{targetlanguage}}"></ts-language-menu>
+              <ts-project-menu route="/project" language="[[targetlanguage]]" group="{{targetgroup}}"></ts-project-menu>
+              <ts-book-menu route="/book" language="[[targetlanguage]]" group="[[targetgroup]]" book="{{targetbook}}" chapters="{{targetchapters}}"></ts-book-menu>
+              <ts-chapter-menu route="/chapter" language="[[targetlanguage]]" group="[[targetgroup]]" book="[[targetbook]]" chapters="[[targetchapters]]" chapter="{{targetchapter}}"></ts-chapter-menu>
+              <ts-read-mode route="/read"></ts-read-mode>
+              <ts-publish-book route="/publish" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-book>
+              <ts-publish-profile route="/profile" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-profile>
+              <ts-publish-review route="/review" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-review>
+              <ts-publish-publish route="/upload" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-publish>
+          </iron-pages>
+      </more-route-selector>
 
 </template>
 
@@ -89,36 +95,6 @@
               type: Number,
               value: null
           }
-
-      },
-
-      onTap: function(event) {
-          var etarget = event.target;
-
-          while (!etarget.classList.contains("clickable")) {
-              etarget = etarget.parentNode;
-          }
-
-          if (etarget.classList.contains("tolang")) {
-              this.selected = 2;
-          } else if (etarget.classList.contains("togroup")) {
-              this.selected = 3;
-          } else if (etarget.classList.contains("tobook")) {
-              this.selected = 4;
-          } else if (etarget.classList.contains("tochap")) {
-              this.selected = 5;
-          } else if (etarget.classList.contains("toread")) {
-              this.selected = 6;
-          } else if (etarget.classList.contains("toprofile")) {
-              this.selected = 7;
-          } else if (etarget.classList.contains("toreview")) {
-              this.selected = 8;
-          } else if (etarget.classList.contains("topublish")) {
-              this.selected = 9;
-          } else if (etarget.id === "back") {
-              this.selected = this.selected - 1;
-          }
-
       },
 
       ready: function() {

@@ -43,10 +43,6 @@
             min-height: 60px;
         }
 
-        .clickable {
-            cursor: pointer;
-        }
-
         .list {
             background: white;
             width: 450px;
@@ -123,12 +119,20 @@
             color: forestgreen;
         }
 
+        .bar a {
+            color: white;
+        }
+
+        .contain a {
+            text-decoration: none;
+        }
+
     </style>
 
   <template>
 
       <div class="bar">
-          <paper-icon-button class="clickable" id="back" icon="arrow-back" title="Go Back"></paper-icon-button>
+          <a href="#!/profile"><paper-icon-button icon="arrow-back" title="Go Back"></paper-icon-button></a>
           <div class="titles">Publish Project</div>
       </div>
 
@@ -155,9 +159,11 @@
                   <li>Statement of Faith<iron-icon class="right" icon="done"></iron-icon></li>
               </ul>
           </div>
-          <div class="clickable topublish next">
-              <span>NEXT STEP</span>
-          </div>
+          <a href="#!/upload">
+              <div class="next">
+                  <span>NEXT STEP</span>
+              </div>
+          </a>
       </div>
 
   </template>

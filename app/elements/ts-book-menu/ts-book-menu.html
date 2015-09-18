@@ -86,8 +86,18 @@
             padding: 0 10px;
         }
 
-        .clickable {
-            cursor: pointer;
+        .bar a {
+            color: white;
+        }
+
+        .contain a {
+            text-decoration: none;
+            color: black;
+        }
+
+        .header a {
+            color: #888;
+            text-decoration: none;
         }
 
     </style>
@@ -95,13 +105,13 @@
   <template>
 
       <div class="bar">
-          <paper-icon-button class="clickable" id="back" icon="arrow-back" title="Go Back"></paper-icon-button>
+          <a href="#!/project"><paper-icon-button icon="arrow-back" title="Go Back"></paper-icon-button></a>
           <div class="titles">New Project</div>
       </div>
 
       <div class="header">
           <div>
-              <span class="clickable togroup">[[group.name]]</span>
+              <a href="#!/project"><span>[[group.name]]</span></a>
               <iron-icon icon="chevron-right"></iron-icon>
               <em>Choose a book</em>
           </div>
@@ -110,11 +120,13 @@
       <div class="contain">
           <iron-list items="[[group.list]]" as="bk">
               <template>
-                  <div class="row clickable tochap" on-tap="store">
-                      <div>
-                          <span>[[bk.name]]</span>
+                  <a href="#!/chapter">
+                      <div class="row" on-tap="store">
+                          <div>
+                              <span>[[bk.name]]</span>
+                          </div>
                       </div>
-                  </div>
+                  </a>
               </template>
           </iron-list>
       </div>

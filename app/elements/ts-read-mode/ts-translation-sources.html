@@ -26,14 +26,12 @@
             width: 60%;
             height: 80%;
             min-height: 320px;
-            max-height: 600px;
+            max-height: 800px;
             top: 50%;
             transform: translateY(-50%);
             left: 0;
             right: 0;
             overflow: hidden;
-            /*min-height: 213px;*/
-            /*bottom: 88px;   50px + 38px */
             margin-left: auto;
             margin-right: auto;
             background: white;
@@ -56,15 +54,17 @@
             display: block;
             padding: 1em;
         }
-        .collapse-control {
+        .collapse-container {
             /*height: auto;*/
             /*max-height: 100px;*/
             overflow-y: auto;
+            height: 35%;
         }
         #selected-collpase-control {
-
+            height: auto;
+            /*max-height: 150px;*/
         }
-        #available-collapse-control {
+        #available-collapse-container {
             margin-bottom: 56px;
         }
         .selected-list {
@@ -122,12 +122,12 @@
                 <span>Choose source translations<paper-icon-button class="right" icon="search"></paper-icon-button></span>
             </div>
 
-            <div id="selected-sources-header" class="row-header" on-click="toggleSelected">
+            <div id="selected-sources-header" class="row-header clickable" on-click="toggleSelected">
                 <span>Selected</span>
             </div>
 
-            <div id="selected-collapse-control" class="collapse-control" style="height: calc((100% - 112px)/2); background-color: red;">
-<!--                 <iron-collapse id="collapse-selected" opened>
+            <div id="selected-collapse-container" class="collapse-container" style="">
+                <iron-collapse id="selected-collapsible" opened style="max-height: 200px;">
                     <div class="collapse-content">
                         <div class="selected-list">
                             <template is="dom-repeat" items="[[ list ]]" as="l">
@@ -140,14 +140,14 @@
                             </template>
                         </div>
                     </div>
-                </iron-collapse> -->
+                </iron-collapse>
             </div>
 
             <div id="available-sources-header" class="row-header" on-click="toggleAvailable">
                 <span>Available</span>
             </div>
 
-            <div id="available-collapse-control" class="collapse-control" style="">
+            <div id="available-collapse-container" class="collapse-container" style="">
                 <iron-collapse id="collapse-available" opened>
                     <div class="collapse-content">
                         <div class="available-list">
@@ -188,34 +188,38 @@
     }
 
     Polymer({
+
         is: 'ts-translation-sources',
 
         properties: {
-
+            lastHeight: {
+                type: 'String',
+                value: ''
+            }
         },
 
         toggleSelected: function() {
-            // this.$['collapse-selected'].toggle();
-            // toggleControlHeight('#selected-collapse-control');
+            // this.$['selected-collapsible'].toggle();
+            this.lastHeight = toggleControlHeight('#selected-collapse-container');
         },
 
         toggleAvailable: function() {
             // this.$['collapse-available'].toggle();
-            // toggleControlHeight('#available-collapse-control');
+            // toggleControlHeight('#available-collapse-container');
         },
 
         closeModal: function() {
-            // console.log(this);
+            this.style.display = 'none';
         },
 
         calcAvailableListHeight: function() {
-            available = this.$['available-collapse-control'];
-            selected = this.$['selected-collapse-control'];
+            available = this.$['available-collapse-container'];
+            selected = this.$['selected-collapse-container'];
             // console.dir(available.style.height, selected.style.height);
         },     
 
         attached: function () {
-            this.list = [{ title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }, { title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }];
+            this.list = [{ title: 'Thing 1' }];
 
             // var height = this.$.container.clientHeight;
             // console.dir(this.$.container.clientHeight);
@@ -225,14 +229,14 @@
             console.log(this);
 
             this.addEventListener('DOMAttrModified', function() {
-                console.log('mimimim');
+                console.log('chips');
             });
 
             this.$.container.addEventListener('DOMAttrModified', function() {
-                console.log('mamama');
+                console.log('ahoy');
             });
 
-            // this.$['available-collapse-control'].style.height = 0;
+            // this.$['available-collapse-container'].style.height = 0;
 
             // this.calcAvailableListHeight();
         }

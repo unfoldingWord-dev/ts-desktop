@@ -1,5 +1,5 @@
 
-<link rel="import" href="ts-project-menu-icons.html">
+<link rel="import" href="../ts-icons/ts-icons.html">
 
 <dom-module id="ts-project-menu">
 
@@ -90,9 +90,12 @@
         }
 
         .small {
-            --iron-icon-height: 17px;
-            --iron-icon-width: 17px;
-            padding-right: 1em;
+            --iron-icon-height: 18px;
+            --iron-icon-width: 18px;
+        }
+
+        .row span {
+            padding-left: 15px;
         }
 
         .bar a {
@@ -162,7 +165,7 @@
     ready: function() {
 
         this.grouplist = [
-            {"name": "Open Bible Stories", "lefticon": "project-menu:project", "righticon": "", "list": [
+            {"name": "Open Bible Stories", "lefticon": "uw-icon:uw-icon-small", "righticon": "", "list": [
                 {"name": "Adam and Eve"},
                 {"name": "Noah and the Flood"},
                 {"name": "Moses"},
@@ -175,7 +178,7 @@
                 {"name": "Jesus' Resurrection"},
                 {"name": "Day of Pentecost"}
             ]},
-            {"name": "Old Testament", "lefticon": "project-menu:project", "righticon": "chevron-right", "list": [
+            {"name": "Old Testament", "lefticon": "project:project", "righticon": "chevron-right", "list": [
                 {"name": "Genesis", "chapters": 50},
                 {"name": "Exodus", "chapters": 40},
                 {"name": "Leviticus", "chapters": 27},
@@ -216,7 +219,7 @@
                 {"name": "Zechariah", "chapters": 14},
                 {"name": "Malachi", "chapters": 4},
             ]},
-            {"name": "New Testament", "lefticon": "project-menu:project", "righticon": "chevron-right", "list": [
+            {"name": "New Testament", "lefticon": "project:project", "righticon": "chevron-right", "list": [
                 {"name": "Matthew", "chapters": 28},
                 {"name": "Mark", "chapters": 16},
                 {"name": "Luke", "chapters": 24},

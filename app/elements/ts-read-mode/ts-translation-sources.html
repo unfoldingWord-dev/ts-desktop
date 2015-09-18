@@ -23,16 +23,20 @@
         .container {
             display: block;
             position: absolute;
-            top: 41px;
+            width: 60%;
+            height: 80%;
+            min-height: 320px;
+            max-height: 600px;
+            top: 50%;
+            transform: translateY(-50%);
             left: 0;
             right: 0;
-            top: 50px;
-            /*height: 80%;*/
-            bottom: 88px;  /* 50px + 38px */
+            overflow: hidden;
+            /*min-height: 213px;*/
+            /*bottom: 88px;   50px + 38px */
             margin-left: auto;
             margin-right: auto;
             background: white;
-            width: 60%;
             box-shadow: -4px 0 30px rgba(22, 22, 22, 0.3);
         }
         [icon="arrow-back"] {
@@ -53,8 +57,15 @@
             padding: 1em;
         }
         .collapse-control {
-            height: 50%;
+            /*height: auto;*/
+            /*max-height: 100px;*/
             overflow-y: auto;
+        }
+        #selected-collpase-control {
+
+        }
+        #available-collapse-control {
+            margin-bottom: 56px;
         }
         .selected-list {
             font-family: 'Roboto';
@@ -88,7 +99,11 @@
             cursor: pointer;
         }
         .footer {
-            height: 10.3%;
+            width: 100%;
+            height: 56px;
+            position: absolute;
+            bottom: 0;
+            background-color: pink;
         }
         paper-button {
             margin-top: 0.75rem;
@@ -102,7 +117,7 @@
 
     <template>
 
-        <div class="container">
+        <div id="container" class="container">
             <div class="header">
                 <span>Choose source translations<paper-icon-button class="right" icon="search"></paper-icon-button></span>
             </div>
@@ -111,8 +126,8 @@
                 <span>Selected</span>
             </div>
 
-            <div id="selected-collapse-control" class="collapse-control" style="height: 37%;">
-                <iron-collapse id="collapse-selected" opened>
+            <div id="selected-collapse-control" class="collapse-control" style="height: calc((100% - 112px)/2); background-color: red;">
+<!--                 <iron-collapse id="collapse-selected" opened>
                     <div class="collapse-content">
                         <div class="selected-list">
                             <template is="dom-repeat" items="[[ list ]]" as="l">
@@ -125,14 +140,14 @@
                             </template>
                         </div>
                     </div>
-                </iron-collapse>
+                </iron-collapse> -->
             </div>
 
             <div id="available-sources-header" class="row-header" on-click="toggleAvailable">
                 <span>Available</span>
             </div>
 
-            <div id="available-collapse-control" class="collapse-control" style="height: 37%">
+            <div id="available-collapse-control" class="collapse-control" style="">
                 <iron-collapse id="collapse-available" opened>
                     <div class="collapse-content">
                         <div class="available-list">
@@ -180,21 +195,46 @@
         },
 
         toggleSelected: function() {
-            this.$['collapse-selected'].toggle();
-            toggleControlHeight('#selected-collapse-control');
+            // this.$['collapse-selected'].toggle();
+            // toggleControlHeight('#selected-collapse-control');
         },
 
         toggleAvailable: function() {
-            this.$['collapse-available'].toggle();
-            toggleControlHeight('#available-collapse-control');
+            // this.$['collapse-available'].toggle();
+            // toggleControlHeight('#available-collapse-control');
         },
 
         closeModal: function() {
-            console.log(this);
+            // console.log(this);
         },
 
+        calcAvailableListHeight: function() {
+            available = this.$['available-collapse-control'];
+            selected = this.$['selected-collapse-control'];
+            // console.dir(available.style.height, selected.style.height);
+        },     
+
         attached: function () {
-            this.list = [{ title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }];
+            this.list = [{ title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }, { title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }];
+
+            // var height = this.$.container.clientHeight;
+            // console.dir(this.$.container.clientHeight);
+
+            this.setAttribute('display', 'none');
+
+            console.log(this);
+
+            this.addEventListener('DOMAttrModified', function() {
+                console.log('mimimim');
+            });
+
+            this.$.container.addEventListener('DOMAttrModified', function() {
+                console.log('mamama');
+            });
+
+            // this.$['available-collapse-control'].style.height = 0;
+
+            // this.calcAvailableListHeight();
         }
     });
 

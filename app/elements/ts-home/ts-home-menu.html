@@ -44,34 +44,32 @@
             flex: auto;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
         }
 
-        .projectlist {
-            background: white;
-            width: 450px;
-            box-shadow: 0 2px 3px 2px #ccc;
+        table {
+            min-width: 450px;
+            border-collapse: collapse;
         }
 
-        ul {
-            margin: 0;
-            padding: 0;
-            list-style-type: none;
+        tbody {
+            background: white;
             font-size: 110%;
         }
 
-        ul li {
-            display: block;
-            margin: 0;
-            padding: 1em;
+        tbody tr {
             border-bottom: 1px solid #eee;
             transition: background .3s, color .3s;
         }
 
-        ul li:hover {
+        tbody tr:hover {
             background: var(--accent-color-dark);
             color: #fff;
+        }
+
+        td {
+            padding: 15px;
         }
 
         .titles {
@@ -80,13 +78,15 @@
             padding-left: 20px;
         }
 
-        .small {
+        .smallicon {
             --iron-icon-height: 18px;
             --iron-icon-width: 18px;
+            color: #888;
         }
 
-        .projectlist span {
-            padding-left: 15px;
+        .smalltext {
+            font-size: 75%;
+            color: #666;
         }
 
     </style>
@@ -102,13 +102,24 @@
               <div class="titles">Your Translation Projects</div>
           </div>
           <div class="contain">
-              <div class="projectlist">
-                  <ul>
+              <table>
+                  <thead>
+                  <tr class="smalltext">
+                      <td></td><td>Project</td><td>Language</td><td>Progress</td><td></td>
+                  </tr>
+                  </thead>
+                  <tbody>
                       <template is="dom-repeat" items="[[projects]]" as="project">
-                          <li><iron-icon class="small" icon="[[project.icon]]"></iron-icon><span>[[project.name]]</span><span>[[project.language]]</span></li>
+                          <tr>
+                              <td><iron-icon class="smallicon" icon="[[project.icon]]"></iron-icon></td>
+                              <td><span>[[project.name]]</span></td>
+                              <td><span class="smalltext">[[project.language]]</span></td>
+                              <td></td>
+                              <td><iron-icon class="smallicon" icon="info" title="More Info"></iron-icon></td>
+                          </tr>
                       </template>
-                  </ul>
-              </div>
+                  </tbody>
+              </table>
           </div>
       </div>
 

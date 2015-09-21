@@ -6,31 +6,39 @@
 <link rel="import" href="../ts-new-project-menus/ts-new-project-menus.html">
 <link rel="import" href="../ts-publish/ts-publish.html">
 <link rel="import" href="../ts-read-mode/ts-read-mode.html">
+<link rel="import" href="../ts-read-mode/ts-review-mode.html">
 
 <dom-module id="ts-dashboard">
 
   <style>
 
-  :host {
-      display: flex;
-      width: 100%;
-      position: relative;
-      flex: auto;
-  }
+      :host {
+          display: flex;
+          width: 100%;
+          position: relative;
+          flex: auto;
+      }
 
-  more-route-selector {
-      flex: auto;
-      display: flex;
-  }
+      more-route-selector {
+          flex: auto;
+          display: flex;
+      }
 
-  iron-pages {
-      flex: auto;
-      display: flex;
-  }
+      iron-pages {
+          flex: auto;
+          display: flex;
 
-  iron-pages * {
-      flex: auto;
-  }
+      }
+
+      iron-pages>* {
+          flex: auto;
+          opacity: .5;
+          transition: opacity 1s;
+      }
+
+      iron-pages>.active {
+          opacity: 1;
+      }
 
   </style>
 
@@ -40,21 +48,22 @@
 
       <more-route-selector>
           <iron-pages>
-              <ts-home-blank route="/"></ts-home-blank>
+              <ts-home-blank class="active" route="/"></ts-home-blank>
 
               <ts-home-menu route="/home"></ts-home-menu>
 
-              <ts-language-menu route="/language" language="{{targetlanguage}}"></ts-language-menu>
-              <ts-project-menu route="/project" language="[[targetlanguage]]" group="{{targetgroup}}"></ts-project-menu>
-              <ts-book-menu route="/book" language="[[targetlanguage]]" group="[[targetgroup]]" book="{{targetbook}}" chapters="{{targetchapters}}"></ts-book-menu>
-              <ts-chapter-menu route="/chapter" language="[[targetlanguage]]" group="[[targetgroup]]" book="[[targetbook]]" chapters="[[targetchapters]]" chapter="{{targetchapter}}"></ts-chapter-menu>
-              
-              <ts-read-mode route="/read"></ts-read-mode>
+              <ts-language-menu route="/languagemenu" language="{{targetlanguage}}"></ts-language-menu>
+              <ts-project-menu route="/projectmenu" language="[[targetlanguage]]" group="{{targetgroup}}"></ts-project-menu>
+              <ts-book-menu route="/bookmenu" language="[[targetlanguage]]" group="[[targetgroup]]" book="{{targetbook}}" chapters="{{targetchapters}}"></ts-book-menu>
+              <ts-chapter-menu route="/chaptermenu" language="[[targetlanguage]]" group="[[targetgroup]]" book="[[targetbook]]" chapters="[[targetchapters]]" chapter="{{targetchapter}}"></ts-chapter-menu>
 
-              <ts-publish-book route="/publish" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-book>
-              <ts-publish-profile route="/profile" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-profile>
-              <ts-publish-review route="/review" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-review>
-              <ts-publish-publish route="/upload" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-publish>
+              <ts-read-mode route="/readmode"></ts-read-mode>
+              <ts-review-mode route="/reviewmode"></ts-review-mode>
+
+              <ts-publish-book route="/publishbook" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-book>
+              <ts-publish-profile route="/publishprofile" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-profile>
+              <ts-publish-review route="/publishreview" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-review>
+              <ts-publish-publish route="/publishupload" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-publish>
           </iron-pages>
       </more-route-selector>
 
@@ -63,6 +72,32 @@
 </dom-module>
 
 <script>
+
+    MoreRouting.HashDriver.before = function (cb) {
+        console.log("before");
+        var h = location.hash.substr(2);
+        var e = document.querySelector("[route='" + h + "']");
+        e.classList.remove("active");
+        setTimeout(cb, 1000);
+    };
+
+    MoreRouting.HashDriver.after = function () {
+        console.log("after");
+        var h = location.hash.substr(2);
+        var e = document.querySelector("[route='" + h + "']");
+        e.classList.add("active");
+    };
+
+    var old = MoreRouting.HashDriver.prototype.navigateToUrl;
+    console.log(JSON.stringify(old));
+
+    MoreRouting.HashDriver.prototype.navigateToUrl = function (url) {
+        console.log("hi");
+        MoreRouting.HashDriver.before(function () {
+            old(url);
+            MoreRouting.HashDriver.after();
+        });
+    };
 
   Polymer({
       is: 'ts-dashboard',
@@ -94,7 +129,9 @@
           }
       },
 
-      ready: function() {
+      attached: function() {
+
+
 
       }
   });

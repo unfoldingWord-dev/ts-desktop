@@ -106,15 +106,15 @@
   <template>
 
       <div class="bar">
-          <a href="#!/book"><paper-icon-button icon="arrow-back" title="Go Back"></paper-icon-button></a>
+          <a href="#!/bookmenu"><paper-icon-button icon="arrow-back" title="Go Back"></paper-icon-button></a>
           <div class="titles">New Project</div>
       </div>
 
       <div class="header">
           <div>
-              <a href="#!/project"><span>[[group.name]]</span></a>
+              <a href="#!/projectmenu"><span>[[group.name]]</span></a>
               <iron-icon icon="chevron-right"></iron-icon>
-              <a href="#!/book"><span>[[book.name]]</span></a>
+              <a href="#!/bookmenu"><span>[[book.name]]</span></a>
               <iron-icon icon="chevron-right"></iron-icon>
               <em>Choose a chapter</em>
           </div>
@@ -123,7 +123,7 @@
       <div class="contain">
           <div>
               <template is="dom-repeat" items="[[chapters]]" as="chap">
-                  <a href="#!/read">
+                  <a href="#!/readmode">
                       <span class="block" on-tap="store">[[chap]]</span>
                   </a>
               </template>

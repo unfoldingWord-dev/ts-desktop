@@ -150,7 +150,13 @@
             align-self: stretch;
             display: flex;
             flex-direction: column;
-            justify-content: flex-end;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .overflow>div {
+            display: flex;
+            flex-direction: column;
             align-items: center;
         }
 
@@ -159,6 +165,10 @@
         }
 
         .overflow a {
+            color: #B7E1DF;
+        }
+
+        .overflow a.current {
             color: white;
         }
 
@@ -167,8 +177,15 @@
 	<template>
 
         <div class="overflow">
-            <a href="#!/chapter"><paper-icon-button icon="arrow-back" title="Go Back"></paper-icon-button></a>
-            <a href="#!/publish"><paper-icon-button icon="more-vert" title="more options"></paper-icon-button></a>
+            <div>
+                <a href="#!/chaptermenu" class="current"><paper-icon-button icon="arrow-back" title="Go Back"></paper-icon-button></a>
+                <a href="#!/readmode" class="current"><paper-icon-button icon="recent-actors" title="Read Mode"></paper-icon-button></a>
+                <a href="#!/readmode"><paper-icon-button icon="flip-to-front" title="Chunk Mode"></paper-icon-button></a>
+                <a href="#!/reviewmode"><paper-icon-button icon="assignment-turned-in" title="Review Mode"></paper-icon-button></a>
+            </div>
+            <div>
+                <a href="#!/publishbook" class="current"><paper-icon-button icon="more-vert" title="more options"></paper-icon-button></a>
+            </div>
         </div>
 
         <div class="main">

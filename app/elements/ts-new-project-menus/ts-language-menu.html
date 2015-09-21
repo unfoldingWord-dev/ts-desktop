@@ -83,10 +83,6 @@
             color: #fff;
         }
 
-        .clickable {
-            cursor: pointer;
-        }
-
         .right {
             float: right;
             color: #888;
@@ -128,7 +124,7 @@
       <div class="contain">
           <iron-list items="{{searchfilter(query,languagelist)}}" as="lang">
               <template>
-                  <a href="#!/project">
+                  <a href="#!/projectmenu">
                       <div class="row" on-tap="store">
                           <div>
                               <span>[[lang.ln]]</span>

@@ -105,13 +105,13 @@
   <template>
 
       <div class="bar">
-          <a href="#!/project"><paper-icon-button icon="arrow-back" title="Go Back"></paper-icon-button></a>
+          <a href="#!/projectmenu"><paper-icon-button icon="arrow-back" title="Go Back"></paper-icon-button></a>
           <div class="titles">New Project</div>
       </div>
 
       <div class="header">
           <div>
-              <a href="#!/project"><span>[[group.name]]</span></a>
+              <a href="#!/projectmenu"><span>[[group.name]]</span></a>
               <iron-icon icon="chevron-right"></iron-icon>
               <em>Choose a book</em>
           </div>
@@ -120,7 +120,7 @@
       <div class="contain">
           <iron-list items="[[group.list]]" as="bk">
               <template>
-                  <a href="#!/chapter">
+                  <a href="#!/chaptermenu">
                       <div class="row" on-tap="store">
                           <div>
                               <span>[[bk.name]]</span>

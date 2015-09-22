@@ -15,6 +15,24 @@
 
     <link rel="stylesheet" href="../css/main.css">
     <script src="../js/bootstrap.js"></script>
+
+    <script src="../components/page/page.js"></script>
+
+    <script>
+        page('/', blank);
+        page('/home', home);
+        page('/lang', lang);
+        page('/proj', proj);
+        page('/book', book);
+        page('/chap', chap);
+        page('/pubbook', pubbook);
+        page('/pubprof', pubprof);
+        page('/pubrev', pubrev);
+        page('/pubpub', pubpub);
+
+        page({hashbang: true});
+    </script>
+
 </head>
 <body>
     <ts-app-titlebar></ts-app-titlebar>

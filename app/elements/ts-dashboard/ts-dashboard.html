@@ -6,7 +6,6 @@
 <link rel="import" href="../ts-home/ts-home.html">
 <link rel="import" href="../ts-new-project-menus/ts-new-project-menus.html">
 <link rel="import" href="../ts-publish/ts-publish.html">
-
 <link rel="import" href="../ts-read-mode/ts-read-mode.html">
 <link rel="import" href="../ts-read-mode/ts-review-mode.html">
 
@@ -33,6 +32,8 @@
 
       neon-animated-pages>* {
           flex: auto;
+          opacity: .5;
+          transition: opacity 1s;
       }
 
   </style>
@@ -130,7 +131,9 @@
           }
       },
 
-      ready: function() {
+      attached: function() {
+
+
 
 
       }

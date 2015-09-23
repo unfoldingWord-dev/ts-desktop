@@ -15,132 +15,7 @@
         }
 
         .main {
-			display: block;
-			overflow-y: auto;
-			box-sizing: border-box;
             flex: auto;
-		}
-
-		.container {
-			display: block;
-			width: 100%;
-			height: 100%;
-			position: relative;
-			z-index: 0;
-			box-sizing: border-box;
-			padding: 20px 20px 0;
-		}
-		.card-sets {
-			width: 100%;
-			position: relative;
-			margin-bottom: 40px;
-		}
-		paper-card {
-			width: calc(100% - 20px);
-		}
-		.top-card {
-			position: relative;
-			z-index: 1;
-		}
-		.bottom-card {
-			position: absolute;
-			top: 20px;
-			right: 0;
-			background-color: #EEE;
-			cursor: pointer;
-			transition: all 0.15s ease-out;
-		}
-		.bottom-card:hover {
-			right: -3px;
-			top: 25px;
-		}
-		.card-heading {
-			padding: 0.75rem 0;
-			text-align: center;
-		}
-		.tabs-hole {
-			display: block;
-			width: 100;
-			height: 3rem;
-			/*background-color: #444;*/
-		}
-		.card-heading h3 {
-			margin: 0;
-			padding: 0;
-			color: #888;
-		}
-		.card-content {
-			width: 60%;
-			margin: 0 auto;
-			padding-top: 0.75rem;
-		}
-		.card-content p {
-			line-height: 1.8;
-			margin-top: 0;
-		}
-		.hidden {
-			visibility: hidden;
-		}
-
-		paper-tabs {
-			--paper-tabs-selection-bar-color: #AAA;
-			--paper-tabs: {
-				padding: 0.75rem 0;
-				height: 1.5rem;
-			}
-		}
-		paper-tab {
-			--paper-tab: {
-				padding: 0;
-				margin: 0 0.5rem;
-				color: #AAA;
-				font-weight: 300;
-			}
-		}
-		paper-tab:focus {
-			--paper-tab: {
-				color: red;
-				font-weight: 300;
-			}
-		}
-		.icon-container {
-			height: 48px;
-			width: 48px;
-			display: inline-block;
-			float: right;
-		}
-		.tabs-container {
-			width: calc(100% - 60px);
-			position: absolute;
-			top: 20px;
-			left: 20px;
-			z-index: 100;
-			margin: 0;
-		}
-		.tabs-container.animate {
-			transition: all 0.15s ease;
-		}
-		.tabs-container.sticky {
-			width: calc(100% - 77px);
-			position: fixed;
-			top: 38px;
-			background-color: #EEE;
-		}
-		#source-tabs {
-			text-align: center;
-		}
-		#source-tabs::shadow #tabsContent {
-			position: relative;
-		}
-		.icon {
-			position: relative;
-			top: 50%;
-			left: 50%;
-			-webkit-transform: translate(-50%, -50%);
-			--moz-transform: translate(-50%, -50%);
-			transform: translate(-50%, -50%);
-			cursor: pointer;
-			color: #CCC;
 		}
 
         .overflow {
@@ -154,7 +29,7 @@
             align-items: center;
         }
 
-        .overflow>div {
+        .overflow > div {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -178,10 +53,10 @@
 
         <div class="overflow">
             <div>
-                <a href="#!/readmode" class="current"><paper-icon-button icon="arrow-back" title="Go Back"></paper-icon-button></a>
-                <a href="#!/readmode" class="current"><paper-icon-button icon="recent-actors" title="Read Mode"></paper-icon-button></a>
+                <a href="#!/chaptermenu" class="current"><paper-icon-button icon="arrow-back" title="Go Back"></paper-icon-button></a>
+                <a href="#!/readmode"><paper-icon-button icon="assignment" title="Read Mode"></paper-icon-button></a>
                 <a href="#!/readmode"><paper-icon-button icon="flip-to-front" title="Chunk Mode"></paper-icon-button></a>
-                <a href="#!/reviewmode"><paper-icon-button icon="assignment-turned-in" title="Review Mode"></paper-icon-button></a>
+                <a href="#!/reviewmode" class="current"><paper-icon-button icon="assignment-turned-in" title="Review Mode"></paper-icon-button></a>
             </div>
             <div>
                 <a href="#!/publishbook" class="current"><paper-icon-button icon="more-vert" title="more options"></paper-icon-button></a>

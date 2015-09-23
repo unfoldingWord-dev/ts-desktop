@@ -1,7 +1,6 @@
 <link rel="import" href="../../components/iron-pages/iron-pages.html">
 <link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../components/more-routing/more-routing.html">
-<link rel="import" href="../../components/neon-animation/neon-animation.html">
 
 <link rel="import" href="../ts-home/ts-home.html">
 <link rel="import" href="../ts-new-project-menus/ts-new-project-menus.html">
@@ -25,28 +24,24 @@
           display: flex;
       }
 
-      neon-animated-pages {
+      iron-pages {
           flex: auto;
           display: flex;
       }
 
-      neon-animated-pages>* {
+      iron-pages > * {
           flex: auto;
-          opacity: .5;
-          transition: opacity 1s;
       }
 
   </style>
 
   <template>
 
-
       <more-routing-config driver="hash"></more-routing-config>
 
       <more-route-selector>
-          <neon-animated-pages entry-animation="slide-from-left-animation" exit-animation="slide-right-animation">
+          <iron-pages>
               <ts-home-blank route="/"></ts-home-blank>
-
               <ts-home-menu route="/home"></ts-home-menu>
 
               <ts-language-menu route="/languagemenu" language="{{targetlanguage}}"></ts-language-menu>
@@ -57,14 +52,11 @@
               <ts-read-mode route="/readmode"></ts-read-mode>
               <ts-review-mode route="/reviewmode"></ts-review-mode>
 
-              <ts-publish-publish route="/publishupload" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-publish>
-              <ts-publish-review route="/publishreview" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-review>
-              <ts-publish-profile route="/publishprofile" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-profile>
               <ts-publish-book route="/publishbook" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-book>
-
-
-
-          </neon-animated-pages>
+              <ts-publish-profile route="/publishprofile" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-profile>
+              <ts-publish-review route="/publishreview" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-review>
+              <ts-publish-publish route="/publishupload" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-publish>
+          </iron-pages>
       </more-route-selector>
 
 </template>
@@ -72,34 +64,6 @@
 </dom-module>
 
 <script>
-
-/*
-    MoreRouting.HashDriver.before = function (cb) {
-        console.log("before");
-        var h = location.hash.substr(2);
-        var e = document.querySelector("[route='" + h + "']");
-        e.classList.remove("active");
-        setTimeout(cb, 1000);
-    };
-
-    MoreRouting.HashDriver.after = function () {
-        console.log("after");
-        var h = location.hash.substr(2);
-        var e = document.querySelector("[route='" + h + "']");
-        e.classList.add("active");
-    };
-
-    var old = MoreRouting.HashDriver.prototype.navigateToUrl;
-    console.log(JSON.stringify(old));
-
-    MoreRouting.HashDriver.prototype.navigateToUrl = function (url) {
-        console.log("hi");
-        MoreRouting.HashDriver.before(function () {
-            old(url);
-            MoreRouting.HashDriver.after();
-        });
-    };
-*/
 
   Polymer({
       is: 'ts-dashboard',
@@ -131,10 +95,7 @@
           }
       },
 
-      attached: function() {
-
-
-
+      ready: function() {
 
       }
 

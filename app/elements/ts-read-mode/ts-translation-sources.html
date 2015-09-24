@@ -44,16 +44,31 @@
             padding: 0;
         }
         .header {
-            height: 56px;
+            min-height: 56px;
             border-bottom: 1px solid #EEE;
             color: #888;
             font-style: italic;
             font-family: 'Roboto';
             font-size: 110%;
+            display: flex;
         }
-        .header span {
-            display: block;
-            padding: 1em;
+        .header div {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 1px solid #eee;
+            background: white;
+            width: 100%;
+        }
+        input {
+            border: none;
+            font-size: 110%;
+            font-style: italic;
+            width: 100%;
+        }
+        input:focus {
+            outline: none;
         }
         .body {
             height: calc(100% - 56px - 56px);
@@ -119,7 +134,10 @@
 
         <div id="container" class="container">
             <div class="header">
-                <span>Choose source translations<paper-icon-button class="right" icon="search"></paper-icon-button></span>
+                <div>
+                    <input is="iron-input" bind-value="{{query}}" name="source-search" placeholder="Choose a source translation" type="text" />
+                    <paper-icon-button class="right" icon="search" title="Search Languages"></paper-icon-button>
+                </div>
             </div>
 
             <div class="body">
@@ -138,7 +156,7 @@
                 <div id="available-sources-header" class="row-header">
                     <span>Available</span>
                 </div>
-                <iron-list id="available-list" items="[[ availableList ]]" as="al" selection-enabled multi-selection>
+                <iron-list id="available-list" items="{{ searchfilter(query,availableList) }}" as="al" selection-enabled multi-selection>
                     <template>
                         <div class="row clickable" on-tap="selectAvailable">
                             <span>[[ al.title ]]</span>
@@ -160,6 +178,9 @@
 </dom-module>
 
 <script>
+
+;(function (root) {
+    'use strict';
 
     Polymer({
 
@@ -186,7 +207,18 @@
             initialOpened: {
                 type: Array,
                 value: []
+            },
+            query: {
+                type: String,
+                value: ""
             }
+        },
+
+        searchfilter: function(query, availableList) {
+            let search = App.util.startsWithBase.bind(null, query);
+            return availableList.filter(function(al) {
+                return search(al.title);
+            });
         },
 
         getAvailable: function(opened) {
@@ -199,11 +231,11 @@
         cancel: function() {
             this.opened = this.initialOpened.slice();
             this.availableList = this.getAvailable(this.opened);
-            this.style.display = 'none';
+            closeModal(this);
         },
 
         confirm: function() {
-            this.style.display = 'none';
+            closeModal(this);
         },
 
         selectAvailable: function(event) {
@@ -218,7 +250,6 @@
 
         onOpen: function() {
             this.initialOpened = this.opened.slice();
-            console.log(this.initialOpened);
         },
 
         removeSelected: function(event) {
@@ -237,5 +268,13 @@
             this.availableList = this.getAvailable(this.opened);
         }
     });
+
+    function closeModal(el) {
+        document.querySelector('input[name="source-search"]').value = '';
+        el.query = '';
+        el.style.display = 'none';
+    }
+
+})(window);
 
 </script>

@@ -172,7 +172,7 @@
 
         <div id="cue" class="main sticky-cue">
 
-            <ts-translation-sources selected-translation="[[selectedList]]"></ts-translation-sources>
+            <ts-translation-sources opened="{{openedTranslations}}"></ts-translation-sources>
 
 				<div class="container">
 					
@@ -224,17 +224,17 @@
 (function() {
 
 	// Function:
-	function findPos(obj) {
-		var curtop = 0;
+	// function findPos(obj) {
+	// 	var curtop = 0;
 
-		if (obj.offsetParent) {
-			do {
-				curtop += obj.offsetTop;
-			} while (obj = obj.offsetParent);
-		}
+	// 	if (obj.offsetParent) {
+	// 		do {
+	// 			curtop += obj.offsetTop;
+	// 		} while (obj = obj.offsetParent);
+	// 	}
 
-		return curtop;
-	}
+	// 	return curtop;
+	// }
 
 	// Function: Compile the tops and heights of cards in the active iron-page
 	function getCardPos(obj) {
@@ -253,8 +253,6 @@
 
 	// Function: Calculate the trigger points to stick or move the tabs
 	function getTabPos(obj) {
-
-		// console.log(obj.cardPos, obj.tabPos);
 
 		var tops = obj.cardPos.tops,
 			heights = obj.cardPos.heights,
@@ -276,8 +274,6 @@
 			backwardTo = tops[current-1];
 		}
 
-		console.log(obj.cardPos);
-		console.log(current, stickyAt, forwardTrigger, forwardTo, backwardTrigger, backwardTo);
 		return {
 			'current': current,
 			'stickyAt': stickyAt,
@@ -299,7 +295,7 @@
 				value: 'John'
 			},
 
-			selectedList: {
+			openedTranslations: {
 				type: Array,
 				value: []
 			},
@@ -380,19 +376,20 @@
 
 		// Function that runs when ts-read-mode is attached to the DOM
 		attached: function() {
-				var cue = this.$.cue,
-					stick = this.stickEle.bind(this),
-					calc = this.recalcCardTabPos.bind(this),
-					scrollEvent = (/Firefox/i.test(navigator.userAgent))? 'DOMMouseScroll' : 'mousewheel';
 
-				['scroll', scrollEvent].forEach(function(e) {
-					cue.addEventListener(e, stick);
-				});
+			var cue = this.$.cue,
+				stick = this.stickEle.bind(this),
+				calc = this.recalcCardTabPos.bind(this),
+				scrollEvent = (/Firefox/i.test(navigator.userAgent))? 'DOMMouseScroll' : 'mousewheel';
 
-				this.$['source-tabs'].addEventListener('iron-select', calc);
+			['scroll', scrollEvent].forEach(function(e) {
+				cue.addEventListener(e, stick);
+			});
 
-				var sourcesModal = document.querySelector('ts-translation-sources');
-				sourcesModal.display = 'none';
+			this.$['source-tabs'].addEventListener('iron-select', calc);
+
+			var sourcesModal = document.querySelector('ts-translation-sources');
+			sourcesModal.display = 'none';
 		},
 
 		// Function that runs when ts-read-mode is displayed
@@ -412,6 +409,7 @@
 		showSources: function() {
 			var sourcesModal = document.querySelector('ts-translation-sources');
 			sourcesModal.style.display = 'block';
+			sourcesModal.fire('open');
 			document.querySelector('iron-list').fire('resize');
 		},
 

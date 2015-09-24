@@ -10,47 +10,46 @@
     <style>
 
         :host {
+            box-sizing: border-box;
             display: none;
             height: 100vh;
             width: 100%;
             position: absolute;
             top: 0;
             left: 0;
-            z-index: 100;
             background-color: rgba(0,0,0,0.5);
-            box-sizing: border-box;
+            z-index: 100;
         }
         .container {
             display: block;
-            position: fixed;
             width: 60%;
             height: 80%;
             min-height: 320px;
             max-height: 800px;
-            top: calc(50% + 18px);
-            transform: translateY(-50%);
+            position: fixed;
             left: 0;
             right: 0;
-            overflow: hidden;
+            top: calc(50% + 18px);
+            transform: translateY(-50%);
             margin-left: auto;
             margin-right: auto;
+            overflow: hidden;
             background: white;
             box-shadow: -4px 0 30px rgba(22, 22, 22, 0.3);
         }
         [icon="arrow-back"] {
             margin: 0 .2em;
         }
-
         [icon="search"] {
             padding: 0;
         }
         .header {
+            height: 56px;
+            border-bottom: 1px solid #EEE;
             color: #888;
             font-style: italic;
             font-family: 'Roboto';
             font-size: 110%;
-            height: 56px;
-            border-bottom: 1px solid #EEE;
         }
         .header span {
             display: block;
@@ -79,12 +78,12 @@
             display: block;
             margin: 0;
             padding: 0.25em 1em;
+            border-bottom: 1px solid #E4E4E4;
             background-color: #EEE;
             text-transform: uppercase;
             font-size: 80%;
-            color: #888;
             font-weight: 500;
-            border-bottom: 1px solid #E4E4E4;
+            color: #888;
         }
         .right {
             float: right;
@@ -127,7 +126,7 @@
                 <div id="selected-sources-header" class="row-header">
                     <span>Selected</span>
                 </div>
-                <iron-list id="selected-list" items="[[ selectedList ]]" as="sl">
+                <iron-list id="selected-list" items="[[ opened ]]" as="sl">
                     <template>
                         <div class="row clickable" on-tap="removeSelected">
                             <span>[[ sl.title ]]</span>
@@ -166,6 +165,10 @@
 
         is: 'ts-translation-sources',
 
+        listeners: {
+            'open': 'onOpen'
+        },
+
         properties: {
             masterList: {
                 type: Array,
@@ -175,26 +178,27 @@
                 type: Array,
                 value: []
             },
-            selectedList: {
+            opened: {
                 type: Array,
-                value: []
+                value: [],
+                notify: true,
             },
-            initialSelected: {
+            initialOpened: {
                 type: Array,
                 value: []
             }
         },
 
-        getAvailable: function(selectedList) {
+        getAvailable: function(opened) {
             var me = this;
             return me.masterList.filter(function(i) {
-                return selectedList.indexOf(i) < 0;
+                return opened.indexOf(i) < 0;
             });
         },
 
         cancel: function() {
-            this.selectedList = this.initialSelected.slice();
-            this.availableList = this.getAvailable(this.selectedList);
+            this.opened = this.initialOpened.slice();
+            this.availableList = this.getAvailable(this.opened);
             this.style.display = 'none';
         },
 
@@ -206,27 +210,31 @@
             var elem = event.model.al;
             var index = event.model.index;
             elem.checked = true;
-            this.push('selectedList', elem);
+            this.push('opened', elem);
             this.async(function() {
-                this.availableList = this.getAvailable(this.selectedList);
+                this.availableList = this.getAvailable(this.opened);
             }, 1);
+        },
+
+        onOpen: function() {
+            this.initialOpened = this.opened.slice();
+            console.log(this.initialOpened);
         },
 
         removeSelected: function(event) {
             var elem = event.model.sl;
             var index = event.model.index;
             elem.checked = false;
-            this.splice('selectedList', index, 1);
+            this.splice('opened', index, 1);
             this.async(function() {
-                this.availableList = this.getAvailable(this.selectedList);
+                this.availableList = this.getAvailable(this.opened);
             }, 1);
         },
 
         attached: function () {
             this.masterList = [{title: 'Thing 1'}, {title: 'Thing 2'}, {title: 'Thing 3'}];
-            this.selectedList = [];
-            this.availableList = this.getAvailable(this.selectedList);
-            this.initialSelected = this.selectedList.slice();
+            this.opened = [];
+            this.availableList = this.getAvailable(this.opened);
         }
     });
 

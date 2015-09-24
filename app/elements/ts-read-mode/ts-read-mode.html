@@ -172,45 +172,48 @@
         </div>
 
         <div class="main">
-            <ts-translation-sources></ts-translation-sources>
 
-            <div id="cue" class="container sticky-cue">
+            <ts-translation-sources selected-translation="[[selectedList]]"></ts-translation-sources>
 
-                <div id="cardsets" class="tabs-container card-sets sticky-ele">
-                    <div class="icon-container">
-                        <iron-icon icon="icons:tab" class="icon24 icon" on-click="showSources"></iron-icon>
-                    </div>
-                    <paper-tabs id="source-tabs" selected="{{ selected }}" noink scrollable hideScrollButtons>
-                        <template is="dom-repeat" items="{{ tabs }}" as="tab">
-                            <paper-tab class="source-tab">{{ tab.translation.title }}</paper-tab>
-                        </template>
-                    </paper-tabs>
-                </div>
+				<div id="cue" class="container sticky-cue">
+					
+					<div id="cardsets" class="tabs-container card-sets sticky-ele">
+						<div class="icon-container">
+							<iron-icon icon="icons:tab" class="icon24 icon" on-click="showSources"></iron-icon>
+						</div>
+						<paper-tabs id="source-tabs" selected="{{ selected }}" noink scrollable hideScrollButtons>
+		               <template is="dom-repeat" items="{{ tabs }}" as="tab">
+		                  <paper-tab class="source-tab">{{ tab.translation.title }}</paper-tab>
+		               </template>
+		         	</paper-tabs>
+					</div>
 
-                <div>
-                    <iron-pages id="source-pages" selected="[[ selected ]]">
-                        <template is="dom-repeat" items="{{ tabs }}" as="tab">
-                            <div class="source-page">
-                                <template is="dom-repeat" items="{{ tab.content }}" as="chapter" indexAs="index">
-                                    <div class="card-sets">
-                                        <paper-card class="card top-card" elevation="2" >
-                                            <div class="tabs-hole"></div>
-                                            <div class="card-heading">
-                                                <h3>
-                                                    <span>{{ tab.book_title }}</span> <span>{{ chapter.chapter }}</span>
-                                                </h3>
-                                            </div>
-                                            <div class="card-content">
-                                                <p>{{ chapter.text }}</p>
-                                            </div>
-                                        </paper-card>
-                                    </div>
-                                </template>
-                            </div>
-                        </template>
-                    </iron-pages>
-                </div>
-            </div>
+					<div>
+						<iron-pages id="source-pages" selected="[[ selected ]]">
+							<template is="dom-repeat" items="{{ tabs }}" as="tab">
+								<div class="source-page">
+									<template is="dom-repeat" items="{{ tab.content }}" as="chapter" indexAs="index">
+										<div class="card-sets">
+											<paper-card class="card top-card" elevation="2" >
+												<div class="tabs-hole"></div>
+												<div class="card-heading">
+													<h3>
+														<span>{{ tab.book_title }}</span> <span>{{ chapter.chapter }}</span>
+													</h3>
+												</div>
+												<div class="card-content">
+													<p>{{ chapter.text }}</p>
+												</div>
+											</paper-card>
+										</div>
+									</template>
+								</div>
+							</template>
+						</iron-pages>
+					</div>
+
+				</div>
+
         </div>
 
 	</template>
@@ -292,6 +295,11 @@
 				type: String,
 				value: 'John'
 			},
+
+			selectedList: {
+				type: Array,
+				value: []
+			}
 
 			selected: {
 				type: String,

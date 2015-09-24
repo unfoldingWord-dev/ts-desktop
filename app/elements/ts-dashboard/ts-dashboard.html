@@ -33,7 +33,7 @@
 
   <template>
 
-      <neon-animated-pages attr-for-selected="data-route" selected="{{route}}" entry-animation="slide-from-left-animation" exit-animation="slide-right-animation">
+      <neon-animated-pages attr-for-selected="data-route" selected="{{route}}" exit-animation="slide-right-animation" entry-animation="slide-from-left-animation">
           <ts-home-blank data-route="blank"></ts-home-blank>
           <ts-home-menu data-route="home"></ts-home-menu>
 
@@ -98,44 +98,13 @@
           page('/', function() {
               dashboard.route = 'blank';
           });
-          page('/home', function() {
-              dashboard.route = 'home';
-          });
-          page('/languagemenu', function() {
-              dashboard.route = 'languagemenu';
-          });
-          page('/projectmenu', function() {
-              dashboard.route = 'projectmenu';
-          });
-          page('/bookmenu', function() {
-              dashboard.route = 'bookmenu';
-          });
-          page('/chaptermenu', function() {
-              dashboard.route = 'chaptermenu';
-          });
-          page('/readmode', function() {
-              dashboard.route = 'readmode';
-          });
-          page('/reviewmode', function() {
-              dashboard.route = 'reviewmode';
-          });
-          page('/publishbook', function() {
-              dashboard.route = 'publishbook';
-          });
-          page('/publishprofile', function() {
-              dashboard.route = 'publishprofile';
-          });
-          page('/publishreview', function() {
-              dashboard.route = 'publishreview';
-          });
-          page('/publishupload', function() {
-              dashboard.route = 'publishupload';
+          page('/:page', function(ctx) {
+              dashboard.route = ctx.params.page;
           });
 
           page({
               hashbang: true
           });
-
       }
 
   });

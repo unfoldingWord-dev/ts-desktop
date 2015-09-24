@@ -122,7 +122,7 @@
       </div>
 
       <div class="contain">
-          <iron-list items="{{searchfilter(query,languagelist)}}" as="lang">
+          <iron-list id="list" items="{{searchfilter(query,languagelist)}}" as="lang">
               <template>
                   <a href="/projectmenu">
                       <div class="row" on-tap="store">
@@ -164,6 +164,10 @@
           }
       },
 
+      behaviors: [
+          Polymer.IronResizableBehavior
+      ],
+
       searchfilter: function (query, languagelist) {
           let search = App.util.startsWithBase.bind(null, query);
 
@@ -177,7 +181,9 @@
       },
 
       ready: function () {
+
           this.languagelist = App.translator.targetLanguages;
+
       }
   });
 

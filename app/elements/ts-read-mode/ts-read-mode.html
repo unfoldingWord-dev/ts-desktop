@@ -142,7 +142,7 @@
 
 	<template>
 
-		<ts-translation-sources></ts-translation-sources>
+		<ts-translation-sources selected-translation="[[selectedList]]"></ts-translation-sources>
 
 		<div id="cue" class="container sticky-cue">
 			
@@ -262,6 +262,11 @@
 				type: String,
 				value: 'John'
 			},
+
+			selectedList: {
+				type: Array,
+				value: []
+			}
 
 			selected: {
 				type: String,

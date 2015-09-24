@@ -22,12 +22,12 @@
         }
         .container {
             display: block;
-            position: absolute;
+            position: fixed;
             width: 60%;
             height: 80%;
             min-height: 320px;
             max-height: 800px;
-            top: 50%;
+            top: calc(50% + 18px);
             transform: translateY(-50%);
             left: 0;
             right: 0;
@@ -48,24 +48,17 @@
             color: #888;
             font-style: italic;
             font-family: 'Roboto';
-            font-size: 110%
+            font-size: 110%;
+            height: 56px;
+            border-bottom: 1px solid #EEE;
         }
         .header span {
             display: block;
             padding: 1em;
         }
-        .collapse-container {
-            /*height: auto;*/
-            /*max-height: 100px;*/
+        .body {
+            height: calc(100% - 56px - 56px);
             overflow-y: auto;
-            height: 35%;
-        }
-        #selected-collpase-control {
-            height: auto;
-            /*max-height: 150px;*/
-        }
-        #available-collapse-container {
-            margin-bottom: 56px;
         }
         .selected-list {
             font-family: 'Roboto';
@@ -75,7 +68,7 @@
             display: block;
             margin: 0;
             padding: 1em;
-            border-bottom: 1px solid #bbb;
+            border-bottom: 1px solid #EEE;
         }
         .row:hover {
             background: var(--accent-color-dark);
@@ -91,6 +84,7 @@
             font-size: 80%;
             color: #888;
             font-weight: 500;
+            border-bottom: 1px solid #E4E4E4;
         }
         .right {
             float: right;
@@ -103,14 +97,21 @@
             height: 56px;
             position: absolute;
             bottom: 0;
-            background-color: pink;
+            border-top: 1px solid #EEE;
         }
         paper-button {
-            margin-top: 0.75rem;
-            color: blue;
+            margin-top: 0.6rem;
+            color: #00C5E8;
         }
         ::-webkit-scrollbar {
             display: none;
+        }
+        paper-checkbox[disabled][checked]::shadow #checkbox.paper-checkbox {
+            background-color: #00C5E8;
+            border-color: #00C5E8;
+        }
+        paper-checkbox[disabled]::shadow #checkbox.paper-checkbox {
+            opacity: 1;
         }
 
     </style>
@@ -122,123 +123,110 @@
                 <span>Choose source translations<paper-icon-button class="right" icon="search"></paper-icon-button></span>
             </div>
 
-            <div id="selected-sources-header" class="row-header clickable" on-click="toggleSelected">
-                <span>Selected</span>
-            </div>
-
-            <div id="selected-collapse-container" class="collapse-container" style="">
-                <iron-collapse id="selected-collapsible" opened style="max-height: 200px;">
-                    <div class="collapse-content">
-                        <div class="selected-list">
-                            <template is="dom-repeat" items="[[ list ]]" as="l">
-                                <div class="row clickable">
-                                    <div class="" on-tap="">
-                                        <span>[[ l.title ]]</span>
-                                        <paper-checkbox class="right"></paper-checkbox>
-                                    </div>
-                                </div>
-                            </template>
+            <div class="body">
+                <div id="selected-sources-header" class="row-header">
+                    <span>Selected</span>
+                </div>
+                <iron-list id="selected-list" items="[[ selectedList ]]" as="sl">
+                    <template>
+                        <div class="row clickable" on-tap="removeSelected">
+                            <span>[[ sl.title ]]</span>
+                            <paper-checkbox class="right" disabled checked style="opacity: 1;"></paper-checkbox>
                         </div>
-                    </div>
-                </iron-collapse>
-            </div>
+                    </template>
+                </iron-list>
 
-            <div id="available-sources-header" class="row-header" on-click="toggleAvailable">
-                <span>Available</span>
-            </div>
-
-            <div id="available-collapse-container" class="collapse-container" style="">
-                <iron-collapse id="collapse-available" opened>
-                    <div class="collapse-content">
-                        <div class="available-list">
-                            <iron-list items="[[ list ]]" as="l">
-                                <template>
-                                    <div class="row clickable">
-                                        <div class="" on-tap=""><span>[[ l.title ]]</span>
-                                            <paper-checkbox class="right"></paper-checkbox>
-                                        </div>
-                                    </div>
-                                </template>
-                            </iron-list>
+                <div id="available-sources-header" class="row-header">
+                    <span>Available</span>
+                </div>
+                <iron-list id="available-list" items="[[ availableList ]]" as="al" selection-enabled multi-selection>
+                    <template>
+                        <div class="row clickable" on-tap="selectAvailable">
+                            <span>[[ al.title ]]</span>
+                            <paper-checkbox class="right" disabled style="opacity: 1;"></paper-checkbox>
                         </div>
-                    </div>
-                </iron-collapse>
+                    </template>
+                </iron-list>
             </div>
 
             <div class="footer">
-                <paper-button class="right" on-tap="closeModal">Cancel</paper-button>
-                <paper-button class="right">Confirm</paper-button>
+                <paper-button class="right" on-tap="confirm">Confirm</paper-button>
+                <paper-button class="right" on-tap="cancel">Cancel</paper-button>
             </div>
 
         </div>
 
-  </template>
+   </template>
 
 </dom-module>
 
 <script>
-
-    function toggleControlHeight(controller) {
-        var collapseControl = document.querySelector(controller);
-        if (collapseControl.style.height == '' || collapseControl.style.height === '0px') {
-            collapseControl.style.height = "37%";
-        } else {
-            collapseControl.style.height = "0px";
-        }
-    }
 
     Polymer({
 
         is: 'ts-translation-sources',
 
         properties: {
-            lastHeight: {
-                type: 'String',
-                value: ''
+            masterList: {
+                type: Array,
+                value: []
+            },
+            availableList: {
+                type: Array,
+                value: []
+            },
+            selectedList: {
+                type: Array,
+                value: []
+            },
+            initialSelected: {
+                type: Array,
+                value: []
             }
         },
 
-        toggleSelected: function() {
-            // this.$['selected-collapsible'].toggle();
-            this.lastHeight = toggleControlHeight('#selected-collapse-container');
+        getAvailable: function(selectedList) {
+            var me = this;
+            return me.masterList.filter(function(i) {
+                return selectedList.indexOf(i) < 0;
+            });
         },
 
-        toggleAvailable: function() {
-            // this.$['collapse-available'].toggle();
-            // toggleControlHeight('#available-collapse-container');
-        },
-
-        closeModal: function() {
+        cancel: function() {
+            this.selectedList = this.initialSelected.slice();
+            this.availableList = this.getAvailable(this.selectedList);
             this.style.display = 'none';
         },
 
-        calcAvailableListHeight: function() {
-            available = this.$['available-collapse-container'];
-            selected = this.$['selected-collapse-container'];
-            // console.dir(available.style.height, selected.style.height);
-        },     
+        confirm: function() {
+            this.style.display = 'none';
+        },
+
+        selectAvailable: function(event) {
+            var elem = event.model.al;
+            var index = event.model.index;
+            elem.checked = true;
+            this.push('selectedList', elem);
+            this.async(function() {
+                this.availableList = this.getAvailable(this.selectedList);
+            }, 1);
+        },
+
+        removeSelected: function(event) {
+            var elem = event.model.sl;
+            var index = event.model.index;
+            elem.checked = false;
+            this.splice('selectedList', index, 1);
+            this.async(function() {
+                this.availableList = this.getAvailable(this.selectedList);
+            }, 1);
+        },
 
         attached: function () {
-            this.list = [{ title: 'Thing 1' }];
-
-            // var height = this.$.container.clientHeight;
-            // console.dir(this.$.container.clientHeight);
-
-            this.setAttribute('display', 'none');
-
-            console.log(this);
-
-            this.addEventListener('DOMAttrModified', function() {
-                console.log('chips');
-            });
-
-            this.$.container.addEventListener('DOMAttrModified', function() {
-                console.log('ahoy');
-            });
-
-            // this.$['available-collapse-container'].style.height = 0;
-
-            // this.calcAvailableListHeight();
+            this.masterList = [{title: 'Thing 1'}, {title: 'Thing 2'}, {title: 'Thing 3'}];
+            this.selectedList = [];
+            this.availableList = this.getAvailable(this.selectedList);
+            this.initialSelected = this.selectedList.slice();
         }
     });
 

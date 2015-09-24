@@ -11,16 +11,14 @@
 	<style is="custom-style">
 
 		:host {
-            display: flex;
-        }
-
+         display: flex;
+      }
         .main {
 			display: block;
 			overflow-y: auto;
 			box-sizing: border-box;
             flex: auto;
 		}
-
 		.container {
 			display: block;
 			width: 100%;
@@ -112,18 +110,19 @@
 		.tabs-container {
 			width: calc(100% - 60px);
 			position: absolute;
-			top: 20px;
+			top: 40px;
 			left: 20px;
 			z-index: 100;
 			margin: 0;
 		}
 		.tabs-container.animate {
-			transition: all 0.15s ease;
+			transition: all 0.15s ease-out;
 		}
 		.tabs-container.sticky {
-			width: calc(100% - 77px);
+			width: calc(100% - 127px);
 			position: fixed;
-			top: 38px;
+			top: 40px;
+			left: 70px;
 			background-color: #EEE;
 		}
 		#source-tabs {
@@ -143,24 +142,24 @@
 			color: #CCC;
 		}
 
-        .overflow {
-            background: var(--primary-color-dark);
-            color: white;
-            min-width: 50px;
-            align-self: stretch;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            align-items: center;
-        }
+		.overflow {
+		   background: var(--primary-color-dark);
+		   color: white;
+		   min-width: 50px;
+		   align-self: stretch;
+		   display: flex;
+		   flex-direction: column;
+		   justify-content: flex-end;
+		   align-items: center;
+		}
 
-        .overflow paper-icon-button {
-            padding-bottom: 15px;
-        }
+		.overflow paper-icon-button {
+		   padding-bottom: 15px;
+		}
 
-        .overflow a {
-            color: white;
-        }
+		.overflow a {
+		   color: white;
+		}
 
 	</style>
 
@@ -171,17 +170,17 @@
             <a href="#!/publish"><paper-icon-button icon="more-vert" title="more options"></paper-icon-button></a>
         </div>
 
-        <div class="main">
+        <div id="cue" class="main sticky-cue">
 
             <ts-translation-sources selected-translation="[[selectedList]]"></ts-translation-sources>
 
-				<div id="cue" class="container sticky-cue">
+				<div class="container">
 					
 					<div id="cardsets" class="tabs-container card-sets sticky-ele">
 						<div class="icon-container">
 							<iron-icon icon="icons:tab" class="icon24 icon" on-click="showSources"></iron-icon>
 						</div>
-						<paper-tabs id="source-tabs" selected="{{ selected }}" noink scrollable hideScrollButtons>
+						<paper-tabs id="source-tabs" selected="{{ selected }}" noink scrollable hide-scroll-buttons>
 		               <template is="dom-repeat" items="{{ tabs }}" as="tab">
 		                  <paper-tab class="source-tab">{{ tab.translation.title }}</paper-tab>
 		               </template>
@@ -255,6 +254,8 @@
 	// Function: Calculate the trigger points to stick or move the tabs
 	function getTabPos(obj) {
 
+		// console.log(obj.cardPos, obj.tabPos);
+
 		var tops = obj.cardPos.tops,
 			heights = obj.cardPos.heights,
 			current = obj.tabPos.current,
@@ -275,6 +276,8 @@
 			backwardTo = tops[current-1];
 		}
 
+		console.log(obj.cardPos);
+		console.log(current, stickyAt, forwardTrigger, forwardTo, backwardTrigger, backwardTo);
 		return {
 			'current': current,
 			'stickyAt': stickyAt,
@@ -299,7 +302,7 @@
 			selectedList: {
 				type: Array,
 				value: []
-			}
+			},
 
 			selected: {
 				type: String,
@@ -377,24 +380,26 @@
 
 		// Function that runs when ts-read-mode is attached to the DOM
 		attached: function() {
-			var cue = this.$.cue,
-				stick = this.stickEle.bind(this),
-				calc = this.recalcCardTabPos.bind(this),
-				scrollEvent = (/Firefox/i.test(navigator.userAgent))? 'DOMMouseScroll' : 'mousewheel';
+				var cue = this.$.cue,
+					stick = this.stickEle.bind(this),
+					calc = this.recalcCardTabPos.bind(this),
+					scrollEvent = (/Firefox/i.test(navigator.userAgent))? 'DOMMouseScroll' : 'mousewheel';
 
-			['scroll', scrollEvent].forEach(function(e) {
-				cue.addEventListener(e, stick);
-			});
+				['scroll', scrollEvent].forEach(function(e) {
+					cue.addEventListener(e, stick);
+				});
 
-			this.$['source-tabs'].addEventListener('iron-select', calc);
+				this.$['source-tabs'].addEventListener('iron-select', calc);
 
-			var sourcesModal = document.querySelector('ts-translation-sources');
-			sourcesModal.display = 'none';
+				var sourcesModal = document.querySelector('ts-translation-sources');
+				sourcesModal.display = 'none';
 		},
 
 		// Function that runs when ts-read-mode is displayed
 		attributeChanged: function() {
-			this.recalcCardTabPos();
+			this.async(function() {
+				this.recalcCardTabPos();
+			}, 100);
 		},
 
 		// Function that got called when tabs are moved or another translation selected
@@ -410,35 +415,6 @@
 			document.querySelector('iron-list').fire('resize');
 		},
 
-		// Function that runs whenever the folder icon is clicked
-		// NOTE: This functionality will be changed to comply with the current design
-		// addNewTab: function() {
-		// 	var newNumber = (this.tabs.length + 1).toString();
-		// 	var translation = {
-		// 		'code': 'AAA' + newNumber,
-		// 		'title': 'translation ' + newNumber
-		// 	}
-		// 	var bookTitle = 'James';
-		// 	var content = [
-		// 		{
-		// 		   chapter: 1,
-		// 		   text: 'This is page ' + newNumber
-		// 		},
-		// 		{
-		// 		   chapter: 2,
-		// 		   text: 'for ' + bookTitle
-		// 		}
-		// 	];
-
-		// 	this.push('tabs', {
-		// 		'translation': translation,
-		// 		'book_title': bookTitle,
-		// 		'content': content
-		// 	});
-
-		// 	this.$['source-tabs'].selected = this.tabs.length - 1;
-	 //  	},
-
  		// Function that got called with every scroll move
 		stickEle: function(event) {
 			var cue = this.$.cue,
@@ -452,7 +428,7 @@
 
 			// Determine whether tabs should stick or not
 			if (cue.scrollTop > stickyAt) {
-				cardsets.style.top = '38px';
+				cardsets.style.top = '40px';
 				cardsets.classList.add('sticky');
 			} else if (cue.scrollTop <= stickyAt) {
 				cardsets.classList.remove('sticky');
@@ -469,7 +445,7 @@
 				window.setTimeout(function() {cardsets.classList.remove('animate');}, 150);
 			} else if (cue.scrollTop <= backwardTrigger) {
 				cardsets.classList.add('animate');
-				cardsets.style.top = '38px';
+				cardsets.style.top = '40px';
 				cardsets.classList.add('sticky');
 				this.tabPos.current -= 1;
 				this.tabPos = getTabPos(this);

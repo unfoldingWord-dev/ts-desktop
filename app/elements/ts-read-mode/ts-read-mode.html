@@ -4,6 +4,7 @@
 
 <link rel="import" href="../../components/paper-card/paper-card.html">
 <link rel="import" href="../../components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../../components/iron-resizable-behavior/iron-resizable-behavior.html">
 <link rel="import" href="ts-translation-sources.html">
 
 <dom-module id="ts-read-mode">
@@ -192,7 +193,7 @@
             <ts-translation-sources opened="{{openedTranslations}}"></ts-translation-sources>
 
 				<div class="container">
-					
+
 					<div id="cardsets" class="tabs-container card-sets sticky-ele">
 						<div class="icon-container">
 							<iron-icon icon="icons:tab" class="icon24 icon" on-click="showSources"></iron-icon>
@@ -304,6 +305,10 @@
 	Polymer({
 
 		is: 'ts-read-mode',
+
+        behaviors: [
+            Polymer.IronResizableBehavior
+        ],
 
 		properties: {
 

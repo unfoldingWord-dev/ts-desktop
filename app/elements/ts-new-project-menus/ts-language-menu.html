@@ -110,7 +110,7 @@
   <template>
 
       <div class="bar">
-            <a href="#!/home"><paper-icon-button icon="arrow-back" title="Go Back"></paper-icon-button></a>
+            <a href="/home"><paper-icon-button icon="arrow-back" title="Go Back"></paper-icon-button></a>
             <div class="titles">New Project</div>
       </div>
 
@@ -124,7 +124,7 @@
       <div class="contain">
           <iron-list items="{{searchfilter(query,languagelist)}}" as="lang">
               <template>
-                  <a href="#!/projectmenu">
+                  <a href="/projectmenu">
                       <div class="row" on-tap="store">
                           <div>
                               <span>[[lang.ln]]</span>

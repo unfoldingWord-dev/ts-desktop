@@ -1,6 +1,7 @@
-<link rel="import" href="../../components/iron-pages/iron-pages.html">
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../components/more-routing/more-routing.html">
+
+<link rel="import" href="../../components/neon-animation/neon-animation.html">
+
+<script src="../../components/page/page.js"></script>
 
 <link rel="import" href="../ts-home/ts-home.html">
 <link rel="import" href="../ts-new-project-menus/ts-new-project-menus.html">
@@ -19,17 +20,12 @@
           flex: auto;
       }
 
-      more-route-selector {
+      neon-animated-pages {
           flex: auto;
           display: flex;
       }
 
-      iron-pages {
-          flex: auto;
-          display: flex;
-      }
-
-      iron-pages > * {
+      neon-animated-pages > * {
           flex: auto;
       }
 
@@ -37,27 +33,23 @@
 
   <template>
 
-      <more-routing-config driver="hash"></more-routing-config>
+      <neon-animated-pages attr-for-selected="data-route" selected="{{route}}" entry-animation="slide-from-left-animation" exit-animation="slide-right-animation">
+          <ts-home-blank data-route="blank"></ts-home-blank>
+          <ts-home-menu data-route="home"></ts-home-menu>
 
-      <more-route-selector>
-          <iron-pages>
-              <ts-home-blank route="/"></ts-home-blank>
-              <ts-home-menu route="/home"></ts-home-menu>
+          <ts-language-menu data-route="languagemenu" language="{{targetlanguage}}"></ts-language-menu>
+          <ts-project-menu data-route="projectmenu" language="[[targetlanguage]]" group="{{targetgroup}}"></ts-project-menu>
+          <ts-book-menu data-route="bookmenu" language="[[targetlanguage]]" group="[[targetgroup]]" book="{{targetbook}}" chapters="{{targetchapters}}"></ts-book-menu>
+          <ts-chapter-menu data-route="chaptermenu" language="[[targetlanguage]]" group="[[targetgroup]]" book="[[targetbook]]" chapters="[[targetchapters]]" chapter="{{targetchapter}}"></ts-chapter-menu>
 
-              <ts-language-menu route="/languagemenu" language="{{targetlanguage}}"></ts-language-menu>
-              <ts-project-menu route="/projectmenu" language="[[targetlanguage]]" group="{{targetgroup}}"></ts-project-menu>
-              <ts-book-menu route="/bookmenu" language="[[targetlanguage]]" group="[[targetgroup]]" book="{{targetbook}}" chapters="{{targetchapters}}"></ts-book-menu>
-              <ts-chapter-menu route="/chaptermenu" language="[[targetlanguage]]" group="[[targetgroup]]" book="[[targetbook]]" chapters="[[targetchapters]]" chapter="{{targetchapter}}"></ts-chapter-menu>
+          <ts-read-mode data-route="readmode"></ts-read-mode>
+          <ts-review-mode data-route="reviewmode"></ts-review-mode>
 
-              <ts-read-mode route="/readmode"></ts-read-mode>
-              <ts-review-mode route="/reviewmode"></ts-review-mode>
-
-              <ts-publish-book route="/publishbook" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-book>
-              <ts-publish-profile route="/publishprofile" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-profile>
-              <ts-publish-review route="/publishreview" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-review>
-              <ts-publish-publish route="/publishupload" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-publish>
-          </iron-pages>
-      </more-route-selector>
+          <ts-publish-book data-route="publishbook" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-book>
+          <ts-publish-profile data-route="publishprofile" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-profile>
+          <ts-publish-review data-route="publishreview" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-review>
+          <ts-publish-publish data-route="publishupload" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-publish>
+      </neon-animated-pages>
 
 </template>
 
@@ -92,10 +84,57 @@
           targetchapter: {
               type: Number,
               value: null
+          },
+          route: {
+              type: String,
+              value: 'blank'
           }
       },
 
       ready: function() {
+
+          var dashboard = this;
+
+          page('/', function() {
+              dashboard.route = 'blank';
+          });
+          page('/home', function() {
+              dashboard.route = 'home';
+          });
+          page('/languagemenu', function() {
+              dashboard.route = 'languagemenu';
+          });
+          page('/projectmenu', function() {
+              dashboard.route = 'projectmenu';
+          });
+          page('/bookmenu', function() {
+              dashboard.route = 'bookmenu';
+          });
+          page('/chaptermenu', function() {
+              dashboard.route = 'chaptermenu';
+          });
+          page('/readmode', function() {
+              dashboard.route = 'readmode';
+          });
+          page('/reviewmode', function() {
+              dashboard.route = 'reviewmode';
+          });
+          page('/publishbook', function() {
+              dashboard.route = 'publishbook';
+          });
+          page('/publishprofile', function() {
+              dashboard.route = 'publishprofile';
+          });
+          page('/publishreview', function() {
+              dashboard.route = 'publishreview';
+          });
+          page('/publishupload', function() {
+              dashboard.route = 'publishupload';
+          });
+
+          page({
+              hashbang: true
+          });
 
       }
 

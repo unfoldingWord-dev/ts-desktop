@@ -10,50 +10,68 @@
     <style>
 
         :host {
+            box-sizing: border-box;
             display: none;
             height: 100vh;
             width: 100%;
             position: absolute;
             top: 0;
             left: 0;
-            z-index: 100;
             background-color: rgba(0,0,0,0.5);
-            box-sizing: border-box;
+            z-index: 100;
         }
         .container {
             display: block;
-            position: absolute;
-            top: 41px;
+            width: 60%;
+            height: 80%;
+            min-height: 320px;
+            max-height: 800px;
+            position: fixed;
             left: 0;
             right: 0;
-            top: 50px;
-            /*height: 80%;*/
-            bottom: 88px;  /* 50px + 38px */
+            top: calc(50% + 18px);
+            transform: translateY(-50%);
             margin-left: auto;
             margin-right: auto;
+            overflow: hidden;
             background: white;
-            width: 60%;
             box-shadow: -4px 0 30px rgba(22, 22, 22, 0.3);
         }
         [icon="arrow-back"] {
             margin: 0 .2em;
         }
-
         [icon="search"] {
             padding: 0;
         }
         .header {
+            min-height: 56px;
+            border-bottom: 1px solid #EEE;
             color: #888;
             font-style: italic;
             font-family: 'Roboto';
-            font-size: 110%
+            font-size: 110%;
+            display: flex;
         }
-        .header span {
-            display: block;
-            padding: 1em;
+        .header div {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 1px solid #eee;
+            background: white;
+            width: 100%;
         }
-        .collapse-control {
-            height: 50%;
+        input {
+            border: none;
+            font-size: 110%;
+            font-style: italic;
+            width: 100%;
+        }
+        input:focus {
+            outline: none;
+        }
+        .body {
+            height: calc(100% - 56px - 56px);
             overflow-y: auto;
         }
         .selected-list {
@@ -64,7 +82,7 @@
             display: block;
             margin: 0;
             padding: 1em;
-            border-bottom: 1px solid #bbb;
+            border-bottom: 1px solid #EEE;
         }
         .row:hover {
             background: var(--accent-color-dark);
@@ -75,11 +93,12 @@
             display: block;
             margin: 0;
             padding: 0.25em 1em;
+            border-bottom: 1px solid #E4E4E4;
             background-color: #EEE;
             text-transform: uppercase;
             font-size: 80%;
-            color: #888;
             font-weight: 500;
+            color: #888;
         }
         .right {
             float: right;
@@ -88,114 +107,174 @@
             cursor: pointer;
         }
         .footer {
-            height: 10.3%;
+            width: 100%;
+            height: 56px;
+            position: absolute;
+            bottom: 0;
+            border-top: 1px solid #EEE;
         }
         paper-button {
-            margin-top: 0.75rem;
-            color: blue;
+            margin-top: 0.6rem;
+            color: #00C5E8;
         }
         ::-webkit-scrollbar {
             display: none;
+        }
+        paper-checkbox[disabled][checked]::shadow #checkbox.paper-checkbox {
+            background-color: #00C5E8;
+            border-color: #00C5E8;
+        }
+        paper-checkbox[disabled]::shadow #checkbox.paper-checkbox {
+            opacity: 1;
         }
 
     </style>
 
     <template>
 
-        <div class="container">
+        <div id="container" class="container">
             <div class="header">
-                <span>Choose source translations<paper-icon-button class="right" icon="search"></paper-icon-button></span>
+                <div>
+                    <input is="iron-input" bind-value="{{query}}" name="source-search" placeholder="Choose a source translation" type="text" />
+                    <paper-icon-button class="right" icon="search" title="Search Languages"></paper-icon-button>
+                </div>
             </div>
 
-            <div id="selected-sources-header" class="row-header" on-click="toggleSelected">
-                <span>Selected</span>
-            </div>
-
-            <div id="selected-collapse-control" class="collapse-control" style="height: 37%;">
-                <iron-collapse id="collapse-selected" opened>
-                    <div class="collapse-content">
-                        <div class="selected-list">
-                            <template is="dom-repeat" items="[[ list ]]" as="l">
-                                <div class="row clickable">
-                                    <div class="" on-tap="">
-                                        <span>[[ l.title ]]</span>
-                                        <paper-checkbox class="right"></paper-checkbox>
-                                    </div>
-                                </div>
-                            </template>
+            <div class="body">
+                <div id="selected-sources-header" class="row-header">
+                    <span>Selected</span>
+                </div>
+                <iron-list id="selected-list" items="[[ opened ]]" as="sl">
+                    <template>
+                        <div class="row clickable" on-tap="removeSelected">
+                            <span>[[ sl.title ]]</span>
+                            <paper-checkbox class="right" disabled checked style="opacity: 1;"></paper-checkbox>
                         </div>
-                    </div>
-                </iron-collapse>
-            </div>
+                    </template>
+                </iron-list>
 
-            <div id="available-sources-header" class="row-header" on-click="toggleAvailable">
-                <span>Available</span>
-            </div>
-
-            <div id="available-collapse-control" class="collapse-control" style="height: 37%">
-                <iron-collapse id="collapse-available" opened>
-                    <div class="collapse-content">
-                        <div class="available-list">
-                            <iron-list items="[[ list ]]" as="l">
-                                <template>
-                                    <div class="row clickable">
-                                        <div class="" on-tap=""><span>[[ l.title ]]</span>
-                                            <paper-checkbox class="right"></paper-checkbox>
-                                        </div>
-                                    </div>
-                                </template>
-                            </iron-list>
+                <div id="available-sources-header" class="row-header">
+                    <span>Available</span>
+                </div>
+                <iron-list id="available-list" items="{{ searchfilter(query,availableList) }}" as="al" selection-enabled multi-selection>
+                    <template>
+                        <div class="row clickable" on-tap="selectAvailable">
+                            <span>[[ al.title ]]</span>
+                            <paper-checkbox class="right" disabled style="opacity: 1;"></paper-checkbox>
                         </div>
-                    </div>
-                </iron-collapse>
+                    </template>
+                </iron-list>
             </div>
 
             <div class="footer">
-                <paper-button class="right" on-tap="closeModal">Cancel</paper-button>
-                <paper-button class="right">Confirm</paper-button>
+                <paper-button class="right" on-tap="confirm">Confirm</paper-button>
+                <paper-button class="right" on-tap="cancel">Cancel</paper-button>
             </div>
 
         </div>
 
-  </template>
+   </template>
 
 </dom-module>
 
 <script>
 
-    function toggleControlHeight(controller) {
-        var collapseControl = document.querySelector(controller);
-        if (collapseControl.style.height == '' || collapseControl.style.height === '0px') {
-            collapseControl.style.height = "37%";
-        } else {
-            collapseControl.style.height = "0px";
-        }
-    }
+;(function (root) {
+    'use strict';
 
     Polymer({
+
         is: 'ts-translation-sources',
 
+        listeners: {
+            'open': 'onOpen'
+        },
+
         properties: {
-
+            masterList: {
+                type: Array,
+                value: []
+            },
+            availableList: {
+                type: Array,
+                value: []
+            },
+            opened: {
+                type: Array,
+                value: [],
+                notify: true,
+            },
+            initialOpened: {
+                type: Array,
+                value: []
+            },
+            query: {
+                type: String,
+                value: ""
+            }
         },
 
-        toggleSelected: function() {
-            this.$['collapse-selected'].toggle();
-            toggleControlHeight('#selected-collapse-control');
+        searchfilter: function(query, availableList) {
+            let search = App.util.startsWithBase.bind(null, query);
+            return availableList.filter(function(al) {
+                return search(al.title);
+            });
         },
 
-        toggleAvailable: function() {
-            this.$['collapse-available'].toggle();
-            toggleControlHeight('#available-collapse-control');
+        getAvailable: function(opened) {
+            var me = this;
+            return me.masterList.filter(function(i) {
+                return opened.indexOf(i) < 0;
+            });
         },
 
-        closeModal: function() {
-            console.log(this);
+        cancel: function() {
+            this.opened = this.initialOpened.slice();
+            this.availableList = this.getAvailable(this.opened);
+            closeModal(this);
+        },
+
+        confirm: function() {
+            closeModal(this);
+        },
+
+        selectAvailable: function(event) {
+            var elem = event.model.al;
+            var index = event.model.index;
+            elem.checked = true;
+            this.push('opened', elem);
+            this.async(function() {
+                this.availableList = this.getAvailable(this.opened);
+            }, 1);
+        },
+
+        onOpen: function() {
+            this.initialOpened = this.opened.slice();
+        },
+
+        removeSelected: function(event) {
+            var elem = event.model.sl;
+            var index = event.model.index;
+            elem.checked = false;
+            this.splice('opened', index, 1);
+            this.async(function() {
+                this.availableList = this.getAvailable(this.opened);
+            }, 1);
         },
 
         attached: function () {
-            this.list = [{ title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }, { title: 'Thing 1' }, { title: 'Thing 2' }, { title: 'Thing 3' }];
+            this.masterList = [{title: 'Thing 1'}, {title: 'Thing 2'}, {title: 'Thing 3'}];
+            this.opened = [];
+            this.availableList = this.getAvailable(this.opened);
         }
     });
+
+    function closeModal(el) {
+        document.querySelector('input[name="source-search"]').value = '';
+        el.query = '';
+        el.style.display = 'none';
+    }
+
+})(window);
 
 </script>

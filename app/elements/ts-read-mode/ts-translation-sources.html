@@ -19,6 +19,7 @@
             left: 0;
             background-color: rgba(0,0,0,0.5);
             z-index: 100;
+            transition: opacity 1s ease-out;
         }
         .container {
             display: block;
@@ -215,6 +216,11 @@
             query: {
                 type: String,
                 value: ""
+            },
+            selectedTab: {
+                type: String,
+                value: '0',
+                notify: true,
             }
         },
 
@@ -247,6 +253,7 @@
             var index = event.model.index;
             elem.checked = true;
             this.push('opened', elem);
+            this.selectedTab = (this.opened.length - 1).toString();
             this.async(function() {
                 this.availableList = this.getAvailable(this.opened);
             }, 1);
@@ -274,9 +281,10 @@
     });
 
     function closeModal(el) {
-        document.querySelector('input[name="source-search"]').value = '';
+        el.querySelector('input[name="source-search"]').value = '';
         el.query = '';
         el.style.display = 'none';
+        console.dir(el);
     }
 
 })(window);

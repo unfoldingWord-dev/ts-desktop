@@ -191,24 +191,24 @@
 
         <div id="cue" class="main sticky-cue">
 
-            <ts-translation-sources opened="{{openedTranslations}}"></ts-translation-sources>
+            <ts-translation-sources opened="{{ openedTabs }}" selected-tab="{{ selectedTab }}"></ts-translation-sources>
 
 				<div class="container">
 
 					<div id="cardsets" class="tabs-container card-sets sticky-ele">
 						<div class="icon-container">
-							<iron-icon icon="icons:tab" class="icon24 icon" on-click="showSources"></iron-icon>
+							<iron-icon icon="icons:tab" class="icon24 icon" on-click="openSourcesModal"></iron-icon>
 						</div>
-						<paper-tabs id="source-tabs" selected="{{ selected }}" noink scrollable hide-scroll-buttons>
-		               <template is="dom-repeat" items="{{ tabs }}" as="tab">
-		                  <paper-tab class="source-tab">{{ tab.translation.title }}</paper-tab>
-		               </template>
-		         	</paper-tabs>
+						<paper-tabs id="source-tabs" selected="{{ selectedTab }}" noink scrollable hide-scroll-buttons>
+			                <template is="dom-repeat" items="{{ data }}" as="tab">
+			                   <paper-tab class="source-tab">{{ tab.translation.title }}</paper-tab>
+			                </template>
+			         	</paper-tabs>
 					</div>
 
 					<div>
-						<iron-pages id="source-pages" selected="[[ selected ]]">
-							<template is="dom-repeat" items="{{ tabs }}" as="tab">
+						<iron-pages id="source-pages" selected="[[ selectedTab ]]">
+							<template is="dom-repeat" items="{{ data }}" as="tab">
 								<div class="source-page">
 									<template is="dom-repeat" items="{{ tab.content }}" as="chapter" indexAs="index">
 										<div class="card-sets">
@@ -241,19 +241,6 @@
 <script>
 
 (function() {
-
-	// Function:
-	// function findPos(obj) {
-	// 	var curtop = 0;
-
-	// 	if (obj.offsetParent) {
-	// 		do {
-	// 			curtop += obj.offsetTop;
-	// 		} while (obj = obj.offsetParent);
-	// 	}
-
-	// 	return curtop;
-	// }
 
 	// Function: Compile the tops and heights of cards in the active iron-page
 	function getCardPos(obj) {
@@ -313,22 +300,19 @@
 
 		properties: {
 
-			title: {
-				type: String,
-				value: 'John'
-			},
-
-			openedTranslations: {
+			openedTabs: {
 				type: Array,
-				value: []
+				value: [],
+				observer: '_openedTabsChaged'
 			},
 
-			selected: {
+			selectedTab: {
 				type: String,
-				value: '0'
+				value: '0',
+				notify: true
 			},
 
-			tabs: {
+			data: {
 				type: Array,
 				value: [
 					{
@@ -397,47 +381,70 @@
 			},
 		},
 
-		// Function that runs when ts-read-mode is attached to the DOM
+		// Function runs when DOM is ready (before attached)
+		ready: function() {
+			console.log('ready');
+			// Note: Async helps to make sure the assignment sticks
+			// Note: May not be needed since originally there is no tab opened
+			this.async(function() {
+				this.selectedTab = 0;
+			}, 1);
+		},
+
+		// When this element is attached to DOM...
 		attached: function() {
 
+			console.log('attached');
+
 			var cue = this.$.cue,
-				stick = this.stickEle.bind(this),
+				sourceTabs = this.$['source-tabs'],
+				sourcesModal = this.querySelector('ts-translation-sources'),
+				reposTab = this.reposTab.bind(this),
 				calc = this.recalcCardTabPos.bind(this),
 				scrollEvent = (/Firefox/i.test(navigator.userAgent))? 'DOMMouseScroll' : 'mousewheel';
 
+			// ... attach event-handler to elements,
+			sourceTabs.addEventListener('iron-select', calc);
 			['scroll', scrollEvent].forEach(function(e) {
-				cue.addEventListener(e, stick);
+				cue.addEventListener(e, reposTab);
 			});
 
-			this.$['source-tabs'].addEventListener('iron-select', calc);
-
-			var sourcesModal = document.querySelector('ts-translation-sources');
+			// ... hide translation sources modal
 			sourcesModal.display = 'none';
+		},
+
+		_openedTabsChaged: function() {
+			console.log(this.querySelectorAll('.iron-selected > .card-sets'));
 		},
 
 		// Function that runs when ts-read-mode is displayed
 		attributeChanged: function() {
+			// Note: Removing the async may cause recalcCardTabPos() not to run properly
 			this.async(function() {
 				this.recalcCardTabPos();
 			}, 100);
 		},
 
-		// Function that got called when tabs are moved or another translation selected
+		// Function: Calculate jumping points based on card positions and trigger position check
+		// Note: Is called manually when tabs or its position is changed
 		recalcCardTabPos: function() {
+			console.log('recalcCardTabPos');
 			this.cardPos = getCardPos(this);
 			this.tabPos = getTabPos(this);
-			this.stickEle();
+			this.reposTab();
 		},
 
-		showSources: function() {
-			var sourcesModal = document.querySelector('ts-translation-sources');
+		// Function: Show translation sources modal and fire a custom event
+		openSourcesModal: function() {
+			var sourcesModal = this.querySelector('ts-translation-sources');
 			sourcesModal.style.display = 'block';
 			sourcesModal.fire('open');
-			document.querySelector('iron-list').fire('resize');
+			this.querySelector('iron-list').fire('resize');
 		},
 
- 		// Function that got called with every scroll move
-		stickEle: function(event) {
+ 		// Function: Calculate jumping points for tabs
+		reposTab: function(event) {
+			console.log('reposTab');
 			var cue = this.$.cue,
 				cardsets = this.$.cardsets,
 				current = this.tabPos.current,
@@ -472,15 +479,6 @@
 				this.tabPos = getTabPos(this);
 				window.setTimeout(function() {cardsets.classList.remove('animate');}, 150);
 			}
-		},
-
-		ready: function() {
-			this.async(function() {
-
-				this.selected = 0;
-
-			}, 1);
-
 		}
 	});
 

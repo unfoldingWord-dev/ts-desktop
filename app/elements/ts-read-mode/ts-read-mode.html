@@ -200,8 +200,8 @@
 							<iron-icon icon="icons:tab" class="icon24 icon" on-click="openSourcesModal"></iron-icon>
 						</div>
 						<paper-tabs id="source-tabs" selected="{{ selectedTab }}" noink scrollable hide-scroll-buttons>
-			                <template is="dom-repeat" items="{{ data }}" as="tab">
-			                   <paper-tab class="source-tab">{{ tab.translation.title }}</paper-tab>
+			                <template is="dom-repeat" items="{{ openedTabs }}" as="tab">
+			                   <paper-tab class="source-tab">{{ tab.title }}</paper-tab>
 			                </template>
 			         	</paper-tabs>
 					</div>
@@ -302,8 +302,7 @@
 
 			openedTabs: {
 				type: Array,
-				value: [],
-				observer: '_openedTabsChaged'
+				value: []
 			},
 
 			selectedTab: {
@@ -408,6 +407,9 @@
 			['scroll', scrollEvent].forEach(function(e) {
 				cue.addEventListener(e, reposTab);
 			});
+
+			// ...
+			this.openedTabs.observer = '_openedTabsChaged';
 
 			// ... hide translation sources modal
 			sourcesModal.display = 'none';

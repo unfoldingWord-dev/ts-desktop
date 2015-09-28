@@ -24,6 +24,11 @@
 
         paper-icon-button {
             padding-bottom: 15px;
+            color: #B7E1DF;
+        }
+
+        .current {
+            color: white;
         }
 
     </style>
@@ -31,13 +36,13 @@
     <template>
 
         <div>
-            <paper-icon-button icon="arrow-back" title="Go Back" on-tap="back"></paper-icon-button>
-            <paper-icon-button icon="assignment" title="Read Mode" on-tap="read"></paper-icon-button>
-            <paper-icon-button icon="flip-to-front" title="Chunk Mode" on-tap="chunk"></paper-icon-button>
-            <paper-icon-button icon="assignment-turned-in" title="Review Mode" on-tap="review"></paper-icon-button>
+            <paper-icon-button class="current" icon="arrow-back" title="Go Back" on-tap="back"></paper-icon-button>
+            <paper-icon-button id="read" class="current" icon="assignment" title="Read Mode" on-tap="read"></paper-icon-button>
+            <paper-icon-button id="chunk" icon="flip-to-front" title="Chunk Mode" on-tap="chunk"></paper-icon-button>
+            <paper-icon-button id="review" icon="assignment-turned-in" title="Review Mode" on-tap="review"></paper-icon-button>
         </div>
         <div>
-            <paper-icon-button icon="more-vert" title="more options" on-tap="publish"></paper-icon-button>
+            <paper-icon-button class="current" icon="more-vert" title="more options" on-tap="publish"></paper-icon-button>
         </div>
 
     </template>
@@ -69,14 +74,23 @@
 
         read: function () {
             this.selected = 0;
+            this.$.read.classList.add("current");
+            this.$.chunk.classList.remove("current");
+            this.$.review.classList.remove("current");
         },
 
         chunk: function () {
             this.selected = 1;
+            this.$.read.classList.remove("current");
+            this.$.chunk.classList.add("current");
+            this.$.review.classList.remove("current");
         },
 
         review: function () {
             this.selected = 2;
+            this.$.read.classList.remove("current");
+            this.$.chunk.classList.remove("current");
+            this.$.review.classList.add("current");
         },
 
         publish: function () {

@@ -14,10 +14,7 @@
 
 	<style is="custom-style">
 
-		:host {
-         display: flex;
-      }
-        .main {
+        :host {
 			display: block;
 			overflow-y: auto;
 			box-sizing: border-box;
@@ -146,52 +143,11 @@
 			color: #CCC;
 		}
 
-        .overflow {
-            background: var(--primary-color-dark);
-            color: white;
-            min-width: 50px;
-            align-self: stretch;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .overflow>div {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .overflow paper-icon-button {
-            padding-bottom: 15px;
-        }
-
-        .overflow a {
-            color: #B7E1DF;
-        }
-
-        .overflow a.current {
-            color: white;
-        }
-
 	</style>
 
 	<template>
 
-        <div class="overflow">
-            <div>
-                <a href="/chaptermenu" class="current"><paper-icon-button icon="arrow-back" title="Go Back"></paper-icon-button></a>
-                <a href="/readmode" class="current"><paper-icon-button icon="assignment" title="Read Mode"></paper-icon-button></a>
-                <a href="/readmode"><paper-icon-button icon="flip-to-front" title="Chunk Mode"></paper-icon-button></a>
-                <a href="/reviewmode"><paper-icon-button icon="assignment-turned-in" title="Review Mode"></paper-icon-button></a>
-            </div>
-            <div>
-                <a href="/publishbook" class="current"><paper-icon-button icon="more-vert" title="more options"></paper-icon-button></a>
-            </div>
-        </div>
-
-        <div id="cue" class="main sticky-cue">
+        <div id="cue" class="sticky-cue">
 
             <ts-translation-sources opened="{{openedTranslations}}"></ts-translation-sources>
 

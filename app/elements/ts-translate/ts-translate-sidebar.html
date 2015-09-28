@@ -1,0 +1,105 @@
+
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+
+<dom-module id="ts-translate-sidebar">
+
+    <style>
+
+        :host {
+            background: var(--primary-color-dark);
+            color: white;
+            min-width: 50px;
+            align-self: stretch;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        div {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        paper-icon-button {
+            padding-bottom: 15px;
+            color: #B7E1DF;
+        }
+
+        .current {
+            color: white;
+        }
+
+    </style>
+
+    <template>
+
+        <div>
+            <paper-icon-button class="current" icon="arrow-back" title="Go Back" on-tap="back"></paper-icon-button>
+            <paper-icon-button id="read" class="current" icon="assignment" title="Read Mode" on-tap="read"></paper-icon-button>
+            <paper-icon-button id="chunk" icon="flip-to-front" title="Chunk Mode" on-tap="chunk"></paper-icon-button>
+            <paper-icon-button id="review" icon="assignment-turned-in" title="Review Mode" on-tap="review"></paper-icon-button>
+        </div>
+        <div>
+            <paper-icon-button class="current" icon="more-vert" title="more options" on-tap="publish"></paper-icon-button>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-translate-sidebar',
+
+        properties: {
+            selected: {
+                type: Number,
+                value: 0,
+                notify: true
+            },
+            route: {
+                type: String,
+                value: '',
+                notify: true
+            }
+        },
+
+        back: function () {
+            this.route = "chaptermenu";
+        },
+
+        read: function () {
+            this.selected = 0;
+            this.$.read.classList.add("current");
+            this.$.chunk.classList.remove("current");
+            this.$.review.classList.remove("current");
+        },
+
+        chunk: function () {
+            this.selected = 1;
+            this.$.read.classList.remove("current");
+            this.$.chunk.classList.add("current");
+            this.$.review.classList.remove("current");
+        },
+
+        review: function () {
+            this.selected = 2;
+            this.$.read.classList.remove("current");
+            this.$.chunk.classList.remove("current");
+            this.$.review.classList.add("current");
+        },
+
+        publish: function () {
+            this.route = "publish";
+        },
+
+        ready: function() {
+
+        }
+    });
+
+</script>

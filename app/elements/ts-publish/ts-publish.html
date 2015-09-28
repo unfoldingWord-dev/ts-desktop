@@ -1,5 +1,142 @@
 
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../components/neon-animation/neon-animation.html">
+
 <link rel="import" href="./ts-publish-book.html">
 <link rel="import" href="./ts-publish-profile.html">
 <link rel="import" href="./ts-publish-review.html">
 <link rel="import" href="./ts-publish-publish.html">
+
+<dom-module id="ts-publish">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
+
+        neon-animated-pages {
+            flex: auto;
+            display: flex;
+        }
+
+        neon-animated-pages > * {
+            flex: auto;
+        }
+
+        .bar {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 45px;
+        }
+
+        .titles {
+            flex: auto;
+            font-size: 125%;
+        }
+
+        [icon="arrow-back"] {
+            margin: 0 1em 0 .2em;
+        }
+
+        .header {
+            background: var(--primary-color);
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 60px;
+        }
+
+        .steps {
+            color: #B7E1DF;
+        }
+
+        .steps .current {
+            color: white;
+        }
+
+        .circle {
+            border-radius: 50%;
+            border: 1px solid;
+            width: 25px;
+            height: 25px;
+            text-align: center;
+            display: inline-block;
+            margin: 0 10px 0 20px;
+            line-height: 25px;
+        }
+
+        .circle.current {
+            background: #1FC2FC;
+        }
+
+        .bar a {
+            color: white;
+        }
+
+    </style>
+
+    <template>
+
+        <div class="bar">
+            <paper-icon-button icon="arrow-back" title="Go Back" on-tap="back"></paper-icon-button>
+            <div class="titles">Publish Project</div>
+        </div>
+
+        <div class="header">
+            <div class="steps">
+                <div class="circle current">1</div>
+                <span class="current">BOOK</span>
+                <div class="circle">2</div>
+                <span>PROFILE</span>
+                <div class="circle">3</div>
+                <span>REVIEW</span>
+                <div class="circle">4</div>
+                <span>PUBLISH</span>
+            </div>
+        </div>
+
+        <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
+            <ts-publish-book selected="{{selected}}" language="[[language]]" book="[[book]]"></ts-publish-book>
+            <ts-publish-profile selected="{{selected}}"></ts-publish-profile>
+            <ts-publish-review selected="{{selected}}" language="[[language]]" book="[[book]]"></ts-publish-review>
+            <ts-publish-publish selected="{{selected}}"></ts-publish-publish>
+        </neon-animated-pages>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+        is: 'ts-publish',
+
+        properties: {
+            selected: {
+                type: Number,
+                value: 0
+            },
+            route: {
+                type: String,
+                value: '',
+                notify: true
+            }
+        },
+
+        back: function () {
+            this.selected === 0 ? this.route = "readmode" : this.selected = this.selected - 1;
+        },
+
+        ready: function() {
+
+        }
+    });
+
+</script>

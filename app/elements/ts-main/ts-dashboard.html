@@ -32,7 +32,7 @@
 
   <template>
 
-      <neon-animated-pages attr-for-selected="data-route" selected="{{route}}" exit-animation="slide-right-animation" entry-animation="slide-from-left-animation">
+      <neon-animated-pages attr-for-selected="data-route" selected="{{route}}" exit-animation="slide-left-animation" entry-animation="slide-from-right-animation">
           <ts-home-blank data-route="blank"></ts-home-blank>
           <ts-home-menu data-route="home"></ts-home-menu>
 
@@ -44,10 +44,8 @@
           <ts-read-mode data-route="readmode"></ts-read-mode>
           <ts-review-mode data-route="reviewmode"></ts-review-mode>
 
-          <ts-publish-book data-route="publishbook" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-book>
-          <ts-publish-profile data-route="publishprofile" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-profile>
-          <ts-publish-review data-route="publishreview" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-review>
-          <ts-publish-publish data-route="publishupload" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish-publish>
+          <ts-publish data-route="publishbook" route="{{route}}" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish>
+
       </neon-animated-pages>
 
 </template>

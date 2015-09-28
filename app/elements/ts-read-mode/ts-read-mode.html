@@ -252,54 +252,6 @@
 
 (function() {
 
-	// Function: Compile the tops and heights of cards in the active iron-page
-	function getCardPos(obj) {
-		var cards = obj.querySelectorAll('.iron-selected > .card-sets');
-
-		var tops = [];
-		var heights = [];
-
-		for (i = 0; i < cards.length; i++) {
-			tops.push(cards[i].offsetTop);
-			heights.push(cards[i].offsetHeight);
-		}
-
-		return {'tops': tops, 'heights': heights};
-	}
-
-	// Function: Calculate the trigger points to stick or move the tabs
-	function getTabPos(obj) {
-
-		var tops = obj.cardPos.tops,
-			heights = obj.cardPos.heights,
-			current = obj.tabPos.current,
-			stickyAt = obj.tabPos.stickyAt,
-			forwardTrigger = obj.tabPos.forwardTrigger,
-			forwardTo = obj.tabPos.forwardTo,
-			backwardTrigger = obj.tabPos.backwardTrigger,
-			backwardTo = obj.tabPos.backwardTo,
-
-		stickyAt = tops[current];
-		forwardTrigger = heights[current]*0.6 + tops[current];
-		forwardTo = tops[current+1];
-		if (current === 0) {
-			backwardTrigger = -1;
-			backwardTo = -1;
-		} else if (current > 0 && current < tops.length) {
-			backwardTrigger = heights[current-1]*0.6 + tops[current-1];
-			backwardTo = tops[current-1];
-		}
-
-		return {
-			'current': current,
-			'stickyAt': stickyAt,
-			'forwardTrigger': forwardTrigger,
-			'forwardTo': forwardTo,
-			'backwardTrigger': backwardTrigger,
-			'backwardTo': backwardTo
-		}
-	}
-
 	Polymer({
 
 		is: 'ts-read-mode',
@@ -309,19 +261,16 @@
         ],
 
 		properties: {
-
 			openedTabs: {
 				type: Array,
 				value: [],
 				notify: true
 			},
-
 			selectedTab: {
 				type: String,
-				value: '0',
+				value: '',
 				notify: true
 			},
-
 			data: {
 				type: Array,
 				value: [
@@ -369,7 +318,6 @@
 					}
 				]
 			},
-
 			cardPos: {
 				type: 'Object',
 				value: {
@@ -377,7 +325,6 @@
 					heights: []
 				}
 			},
-
 			tabPos: {
 				type: 'Object',
 				value: {
@@ -418,25 +365,17 @@
 		onConfirm: function() {
 			this.splice.apply(this,
 				['openedTabs', 0, this.openedTabs.length].concat(this.$['tab-edit-modal'].openedTabs));
-			this.loadUnloadData();
 			if (this.openedTabs.length) {
 				this.async(function() {
 					this.selectedTab = this.$['tab-edit-modal'].selectedTab;
 					if (this.selectedTab >= 0 && this.selectedTab < this.openedTabs.length) {
 						this.querySelectorAll('paper-tab')[this.selectedTab].fire('tap');
+						console.log('tap');
 					}
 					this.recalcCardTabPos();
 					this.reposTab();
-				}, 1);
+				}, 10);
 			}
-		},
-
-		loadUnloadData: function() {
-			var current = this.openedTabs;
-			var initial = this.$['tab-edit-modal'].initialOpened;
-			var toLoad = [];
-			var toUnload = [];
-			console.log(current, initial);
 		},
 
 		// Runs when ts-read-mode is displayed
@@ -501,6 +440,54 @@
 			}
 		}
 	});
+
+	// Function: Compile the tops and heights of cards in the active iron-page
+	function getCardPos(obj) {
+		var cards = obj.querySelectorAll('.iron-selected > .card-sets');
+
+		var tops = [];
+		var heights = [];
+
+		for (i = 0; i < cards.length; i++) {
+			tops.push(cards[i].offsetTop);
+			heights.push(cards[i].offsetHeight);
+		}
+
+		return {'tops': tops, 'heights': heights};
+	}
+
+	// Function: Calculate the trigger points to stick or move the tabs
+	function getTabPos(obj) {
+
+		var tops = obj.cardPos.tops,
+			heights = obj.cardPos.heights,
+			current = obj.tabPos.current,
+			stickyAt = obj.tabPos.stickyAt,
+			forwardTrigger = obj.tabPos.forwardTrigger,
+			forwardTo = obj.tabPos.forwardTo,
+			backwardTrigger = obj.tabPos.backwardTrigger,
+			backwardTo = obj.tabPos.backwardTo,
+
+		stickyAt = tops[current];
+		forwardTrigger = heights[current]*0.6 + tops[current];
+		forwardTo = tops[current+1];
+		if (current === 0) {
+			backwardTrigger = -1;
+			backwardTo = -1;
+		} else if (current > 0 && current < tops.length) {
+			backwardTrigger = heights[current-1]*0.6 + tops[current-1];
+			backwardTo = tops[current-1];
+		}
+
+		return {
+			'current': current,
+			'stickyAt': stickyAt,
+			'forwardTrigger': forwardTrigger,
+			'forwardTo': forwardTo,
+			'backwardTrigger': backwardTrigger,
+			'backwardTo': backwardTo
+		}
+	}
 
 })();
 

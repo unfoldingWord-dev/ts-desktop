@@ -207,7 +207,6 @@
             openedTabs: {
                 type: Array,
                 value: [],
-                // notify: true,
             },
             initialOpened: {
                 type: Array,
@@ -219,13 +218,18 @@
             },
             selectedTab: {
                 type: String,
-                value: '0',
-                notify: true
+                value: '',
+                // notify: true
+            },
+            initialSelected: {
+                type: String,
+                value: '',
             }
         },
 
         onOpen: function() {
             this.initialOpened = this.openedTabs.slice();
+            this.initialSelected = this.selectedTab;
         },
 
         searchfilter: function(query, availableList) {
@@ -244,8 +248,10 @@
 
         cancel: function() {
             this.openedTabs = this.initialOpened.slice();
+            this.selectedTab = this.initialSelected;
             this.availableList = this.getAvailable(this.openedTabs);
             closeModal(this);
+            console.log(this.initialSelected);
         },
 
         confirm: function() {
@@ -258,10 +264,10 @@
             var index = event.model.index;
             elem.checked = true;
             this.push('openedTabs', elem);
-            this.selectedTab = this.openedTabs.indexOf(elem).toString();
             this.async(function() {
                 this.availableList = this.getAvailable(this.openedTabs);
             }, 1);
+            this.selectedTab = this.openedTabs.indexOf(elem).toString();
         },
 
         removeSelected: function(event) {
@@ -288,6 +294,7 @@
         },
 
         attached: function () {
+            // NOTE: Replace below with a script to get all available items
             this.masterList = [{title: 'English ULB'}, {title: 'English UDB'}, {title: 'Arabic'}, {title: 'Bahasa Indonesia'}];
             this.openedTabs = [];
             this.availableList = this.getAvailable(this.openedTabs);

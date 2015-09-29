@@ -28,28 +28,9 @@
             overflow-x: hidden;
         }
 
-        .bar {
-            background-color: var(--primary-color);
-            color: var(--text-color);
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            min-height: 45px;
-        }
-
-        .titles {
-            flex: auto;
-            font-size: 125%;
-        }
-
-        [icon="arrow-back"] {
-            margin: 0 1em 0 .2em;
-        }
-
         .header {
             color: #888;
             font-size: 110%;
-            background: var(--primary-color);
             width: 100%;
             display: flex;
             justify-content: center;
@@ -83,40 +64,26 @@
             padding-bottom: 15px;
             font-size: 110%;
             transition: background .3s, color .3s;
+            cursor: pointer;
         }
 
         .header iron-icon {
             padding: 0 10px;
         }
 
-        .bar a {
-            color: white;
-        }
-
-        .contain a {
-            text-decoration: none;
-            color: black;
-        }
-
-        .header a {
-            color: #888;
-            text-decoration: none;
+        .click {
+            cursor: pointer;
         }
 
     </style>
 
   <template>
 
-      <div class="bar">
-          <a href="/bookmenu"><paper-icon-button icon="arrow-back" title="Go Back"></paper-icon-button></a>
-          <div class="titles">New Project</div>
-      </div>
-
       <div class="header">
           <div>
-              <a href="/projectmenu"><span>[[group.name]]</span></a>
+              <span class="click" on-tap="togroup">[[group.name]]</span>
               <iron-icon icon="chevron-right"></iron-icon>
-              <a href="/bookmenu"><span>[[book.name]]</span></a>
+              <span class="click" on-tap="tobook">[[book.name]]</span>
               <iron-icon icon="chevron-right"></iron-icon>
               <em>Choose a chapter</em>
           </div>
@@ -125,9 +92,7 @@
       <div class="contain">
           <div>
               <template is="dom-repeat" items="[[chapters]]" as="chap">
-                  <a href="/translate">
-                      <span class="block" on-tap="store">[[chap]]</span>
-                  </a>
+                  <span class="block" on-tap="store">[[chap]]</span>
               </template>
           </div>
       </div>
@@ -142,6 +107,16 @@
     is: 'ts-chapter-menu',
 
       properties: {
+          selected: {
+              type: Number,
+              value: 0,
+              notify: true
+          },
+          route: {
+              type: String,
+              value: '',
+              notify: true
+          },
           chapter: {
               type: Number,
               value: null,
@@ -150,11 +125,18 @@
       },
 
       store: function(e) {
-
           this.chapter = e.model.chap;
-
+          this.route = "translate";
+          this.selected = 0;
       },
 
+      togroup: function () {
+          this.selected = 1;
+      },
+
+      tobook: function () {
+          this.selected = 2;
+      },
 
     ready: function() {
 

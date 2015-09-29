@@ -53,6 +53,7 @@
             padding: 1em;
             border-bottom: 1px solid #eee;
             transition: background .3s, color .3s;
+            cursor: pointer;
         }
 
         .row:hover {
@@ -68,13 +69,17 @@
             padding: 0 10px;
         }
 
+        .click {
+            cursor: pointer;
+        }
+
     </style>
 
   <template>
 
       <div class="header">
           <div>
-              <a href="/projectmenu"><span>[[group.name]]</span></a>
+              <span class="click" on-tap="togroup">[[group.name]]</span>
               <iron-icon icon="chevron-right"></iron-icon>
               <em>Choose a book</em>
           </div>
@@ -102,6 +107,11 @@
     is: 'ts-book-menu',
 
       properties: {
+          selected: {
+              type: Number,
+              value: 0,
+              notify: true
+          },
           book: {
               type: Object,
               value: {},
@@ -129,6 +139,10 @@
           }
           this.chapters = chaparray;
           this.selected = this.selected + 1;
+      },
+
+      togroup: function () {
+          this.selected = 1;
       },
 
     ready: function() {

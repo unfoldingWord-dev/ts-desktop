@@ -66,10 +66,10 @@
         </div>
 
         <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
-            <ts-language-menu selected="{{selected}}"></ts-language-menu>
-            <ts-project-menu selected="{{selected}}"></ts-project-menu>
-            <ts-book-menu selected="{{selected}}"></ts-book-menu>
-            <ts-chapter-menu selected="{{selected}}"></ts-chapter-menu>
+            <ts-language-menu selected="{{selected}}" language="{{language}}"></ts-language-menu>
+            <ts-project-menu selected="{{selected}}" language="[[language]]" group="{{group}}"></ts-project-menu>
+            <ts-book-menu selected="{{selected}}" language="[[language]]" group="[[group]]" book="{{book}}" chapters="{{chapters}}"></ts-book-menu>
+            <ts-chapter-menu selected="{{selected}}" route="{{route}}" language="[[language]]" group="[[group]]" book="[[book]]" chapters="[[chapters]]" chapter="{{chapter}}"></ts-chapter-menu>
         </neon-animated-pages>
 
     </template>
@@ -109,6 +109,11 @@
             chapters: {
                 type: Array,
                 value: [],
+                notify: true
+            },
+            chapter: {
+                type: Number,
+                value: null,
                 notify: true
             }
         },

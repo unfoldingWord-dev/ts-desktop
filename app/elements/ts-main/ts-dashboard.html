@@ -1,8 +1,6 @@
 
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
 
-<script src="../../components/page/page.js"></script>
-
 <link rel="import" href="../ts-home/ts-home.html">
 <link rel="import" href="../ts-new/ts-new.html">
 <link rel="import" href="../ts-publish/ts-publish.html">
@@ -81,18 +79,6 @@
 
       ready: function() {
 
-          var dashboard = this;
-
-          page('/', function() {
-              dashboard.route = 'blank';
-          });
-          page('/:page', function(ctx) {
-              dashboard.route = ctx.params.page;
-          });
-
-          page({
-              hashbang: true
-          });
       }
 
   });

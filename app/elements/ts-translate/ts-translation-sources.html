@@ -21,6 +21,7 @@
             left: 0;
             background-color: rgba(0,0,0,0.5);
             z-index: 100;
+            transition: opacity 1s ease-out;
         }
         .container {
             display: block;
@@ -146,7 +147,7 @@
                 <div id="selected-sources-header" class="row-header">
                     <span>Selected</span>
                 </div>
-                <iron-list id="selected-list" items="[[ opened ]]" as="sl">
+                <iron-list id="selected-list" items="[[ openedTabs ]]" as="sl">
                     <template>
                         <div class="row clickable" on-tap="removeSelected">
                             <span>[[ sl.title ]]</span>
@@ -205,10 +206,9 @@
                 type: Array,
                 value: []
             },
-            opened: {
+            openedTabs: {
                 type: Array,
-                value: [],
-                notify: true,
+                value: function() {return [];}
             },
             initialOpened: {
                 type: Array,
@@ -217,7 +217,26 @@
             query: {
                 type: String,
                 value: ""
+            },
+            selectedTab: {
+                type: String,
+                value: '',
+                // notify: true
+            },
+            initialSelected: {
+                type: String,
+                value: '',
             }
+        },
+
+        ready: function() {
+            console.log('child:', this.openedTabs);
+        },
+
+        onOpen: function() {
+            console.log(this.openedTabs);
+            this.initialOpened = this.openedTabs.slice();
+            this.initialSelected = this.selectedTab;
         },
 
         searchfilter: function(query, availableList) {
@@ -227,56 +246,70 @@
             });
         },
 
-        getAvailable: function(opened) {
+        getAvailable: function(openedTabs) {
             var me = this;
             return me.masterList.filter(function(i) {
-                return opened.indexOf(i) < 0;
+                return openedTabs.indexOf(i) < 0;
             });
         },
 
         cancel: function() {
-            this.opened = this.initialOpened.slice();
-            this.availableList = this.getAvailable(this.opened);
+            this.openedTabs = this.initialOpened.slice();
+            this.selectedTab = this.initialSelected;
+            this.availableList = this.getAvailable(this.openedTabs);
             closeModal(this);
+            console.log(this.initialSelected);
         },
 
         confirm: function() {
             closeModal(this);
+            this.fire('confirm');
         },
 
         selectAvailable: function(event) {
             var elem = event.model.al;
             var index = event.model.index;
             elem.checked = true;
-            this.push('opened', elem);
+            this.push('openedTabs', elem);
             this.async(function() {
-                this.availableList = this.getAvailable(this.opened);
+                this.availableList = this.getAvailable(this.openedTabs);
             }, 1);
-        },
-
-        onOpen: function() {
-            this.initialOpened = this.opened.slice();
+            this.selectedTab = this.openedTabs.indexOf(elem).toString();
         },
 
         removeSelected: function(event) {
             var elem = event.model.sl;
             var index = event.model.index;
             elem.checked = false;
-            this.splice('opened', index, 1);
+            this.splice('openedTabs', index, 1);
             this.async(function() {
-                this.availableList = this.getAvailable(this.opened);
+                this.availableList = this.getAvailable(this.openedTabs);
             }, 1);
+
+            // Assign the selected tab
+            if (this.selectedTab == index) {
+                if (this.openedTabs.length == 0) {
+                    this.selectedTab = '';
+                }
+                else if (index >= this.openedTabs.length - 1) {
+                    this.selectedTab = (this.openedTabs.length - 1).toString();
+                }
+            }
+            else if (index < this.selectedTab) {
+                this.selectedTab -= 1;
+            }
         },
 
         attached: function () {
-            this.masterList = [{title: 'Thing 1'}, {title: 'Thing 2'}, {title: 'Thing 3'}];
-            this.opened = [];
-            this.availableList = this.getAvailable(this.opened);
+            // NOTE: Replace below with a script to get all available items
+            this.masterList = [{title: 'English ULB'}, {title: 'English UDB'}, {title: 'Arabic'}, {title: 'Bahasa Indonesia'}];
+            // this.openedTabs = [];
+            this.availableList = this.getAvailable(this.openedTabs);
         }
     });
 
     function closeModal(el) {
-        document.querySelector('input[name="source-search"]').value = '';
+        el.querySelector('input[name="source-search"]').value = '';
         el.query = '';
         el.style.display = 'none';
     }

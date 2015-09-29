@@ -84,7 +84,7 @@
 		paper-tabs {
 			--paper-tabs-selection-bar-color: #AAA;
 			--paper-tabs: {
-				padding: 0.75rem 0;
+				padding: 0.75rem 0 0.75rem 48px;
 				height: 1.5rem;
 			}
 		}
@@ -111,7 +111,7 @@
 		.tabs-container {
 			width: calc(100% - 60px);
 			position: absolute;
-			top: 40px;
+			top: 20px;
 			left: 20px;
 			z-index: 100;
 			margin: 0;
@@ -149,46 +149,38 @@
 
         <div id="cue" class="sticky-cue">
 
-            <ts-translation-sources opened="{{openedTranslations}}"></ts-translation-sources>
+            <ts-translation-sources id="tab-edit-modal" opened-tabs="[[ openedTabs ]]" selected-tab="[[ selectedTab ]]" on-confirm="onConfirm"></ts-translation-sources>
 
-				<div class="container">
+			<div class="container">
 
-					<div id="cardsets" class="tabs-container card-sets sticky-ele">
-						<div class="icon-container">
-							<iron-icon icon="icons:tab" class="icon24 icon" on-click="showSources"></iron-icon>
-						</div>
-						<paper-tabs id="source-tabs" selected="{{ selected }}" noink scrollable hide-scroll-buttons>
-		               <template is="dom-repeat" items="{{ tabs }}" as="tab">
-		                  <paper-tab class="source-tab">{{ tab.translation.title }}</paper-tab>
-		               </template>
+				<div id="cardsets" class="tabs-container card-sets sticky-ele">
+					<div class="icon-container">
+						<iron-icon icon="icons:tab" class="icon24 icon" on-click="openSourcesModal"></iron-icon>
+					</div>
+					<paper-tabs id="source-tabs" selected="{{ selectedTab }}" noink scrollable hide-scroll-buttons>
+		                <template is="dom-repeat" items="{{ openedTabs }}">
+		                   <paper-tab class="source-tab">{{ item.title }}</paper-tab>
+		                </template>
 		         	</paper-tabs>
-					</div>
-
-					<div>
-						<iron-pages id="source-pages" selected="[[ selected ]]">
-							<template is="dom-repeat" items="{{ tabs }}" as="tab">
-								<div class="source-page">
-									<template is="dom-repeat" items="{{ tab.content }}" as="chapter" indexAs="index">
-										<div class="card-sets">
-											<paper-card class="card top-card" elevation="2" >
-												<div class="tabs-hole"></div>
-												<div class="card-heading">
-													<h3>
-														<span>{{ tab.book_title }}</span> <span>{{ chapter.chapter }}</span>
-													</h3>
-												</div>
-												<div class="card-content">
-													<p>{{ chapter.text }}</p>
-												</div>
-											</paper-card>
-										</div>
-									</template>
-								</div>
-							</template>
-						</iron-pages>
-					</div>
-
 				</div>
+
+				<div class="source-page">
+					<template is="dom-repeat" items="{{ data.chapters }}" as="chapter">
+						<div class="card-sets content">
+							<paper-card class="card top-card" elevation="2" >
+								<div class="tabs-hole"></div>
+								<div class="card-heading">
+									<h3>
+										<span>{{ data.book_title }}</span> <span>{{ chapter.number }}</span>
+									</h3>
+								</div>
+								<div class="card-content"><p>{{ chapter.text }}</p></div>
+							</paper-card>
+						</div>
+					</template>
+				</div>
+
+			</div>
 
         </div>
 
@@ -200,22 +192,189 @@
 
 (function() {
 
-	// Function:
-	// function findPos(obj) {
-	// 	var curtop = 0;
+	Polymer({
 
-	// 	if (obj.offsetParent) {
-	// 		do {
-	// 			curtop += obj.offsetTop;
-	// 		} while (obj = obj.offsetParent);
-	// 	}
+		is: 'ts-read-mode',
 
-	// 	return curtop;
-	// }
+        behaviors: [
+            Polymer.IronResizableBehavior
+        ],
+
+		properties: {
+			openedTabs: {
+				type: Array,
+				value: function() {return [{'title': 'test', 'checked': true}];},
+				// notify: true
+			},
+			selectedTab: {
+				type: String,
+				value: '',
+				notify: true
+			},
+			data: {
+				type: Object,
+				value: {
+					book_title: '',
+					chapters: []
+				}
+			},
+			cardPos: {
+				type: 'Object',
+				value: {
+					tops: [],
+					heights: []
+				}
+			},
+			tabPos: {
+				type: 'Object',
+				value: {
+					current: 0,
+					stickyAt: 0,
+					forwardTrigger: 0,
+					forwardTo: 0,
+					backwardTrigger: 0,
+					backwardTo: 0
+				}
+			},
+		},
+
+		// Function runs when DOM is ready (before attached)
+		ready: function() {
+			console.log(this.openedTabs);
+		},
+
+		// When this element is attached to DOM...
+		attached: function() {
+			var cue = this.$.cue,
+				sourceTabs = this.$['source-tabs'],
+				sourcesModal = this.querySelector('ts-translation-sources'),
+				reposTab = this.reposTab.bind(this),
+				calc = this.recalcCardTabPos.bind(this),
+				scrollEvent = (/Firefox/i.test(navigator.userAgent))? 'DOMMouseScroll' : 'mousewheel';
+
+			// ... attach event-handler to elements,
+			sourceTabs.addEventListener('iron-select', calc);
+			['scroll', scrollEvent].forEach(function(e) {
+				cue.addEventListener(e, reposTab);
+			});
+
+			// ... hide translation sources modal
+			sourcesModal.display = 'none';
+
+			// ... set initial data
+			var translation = 'English ULB';
+			var book_title = 'Matthew';
+			var chapters = [
+				{
+					number: '1',
+					text: 'THIS IS A TEST'
+				},
+				{
+					number: '2',
+					text: 'THIS IS A TEST'
+				},
+				{
+					number: '3',
+					text: 'THIS IS A TEST'
+				},
+				{
+					number: '4',
+					text: 'THIS IS A TEST'
+				},
+			];
+			this.push('openedTabs', {'title': translation, 'checked': true});
+			this.data.book_title = book_title;
+			this.splice.apply(this,
+				['data.chapters', 0, this.data.chapters.length].concat(chapters));
+			this.async(function() {
+				this.selectedTab = '0';
+				this.recalcCardTabPos();
+				this.reposTab();
+			}, 1);	
+		},
+
+		// Runs when tab-edit modal is confirmed
+		onConfirm: function() {
+			this.splice.apply(this,
+				['openedTabs', 0, this.openedTabs.length].concat(this.$['tab-edit-modal'].openedTabs));
+			if (this.openedTabs.length) {
+				this.async(function() {
+					this.selectedTab = this.$['tab-edit-modal'].selectedTab;
+					if (this.selectedTab >= 0 && this.selectedTab < this.openedTabs.length) {
+						this.querySelectorAll('paper-tab')[this.selectedTab].fire('tap');
+					}
+					this.recalcCardTabPos();
+					this.reposTab();
+				}, 10);
+			}
+		},
+
+		// Runs when ts-read-mode is displayed
+		attributeChanged: function() {
+			// Note: Removing the async may cause recalcCardTabPos() not to run properly
+			this.async(function() {
+				this.recalcCardTabPos();
+			}, 100);
+		},
+
+		// Function: Calculate jumping points based on card positions and trigger position check
+		// Note: Is called manually when tabs or its position is changed
+		recalcCardTabPos: function() {
+			this.cardPos = getCardPos(this);
+			this.tabPos = getTabPos(this);
+			this.reposTab();
+		},
+
+		// Function: Show translation sources modal and fire a custom event
+		openSourcesModal: function() {
+			var sourcesModal = this.querySelector('ts-translation-sources');
+			sourcesModal.style.display = 'block';
+			sourcesModal.fire('open');
+			this.querySelector('iron-list').fire('resize');
+		},
+
+ 		// Function: Calculate jumping points for tabs
+		reposTab: function(event) {
+			var cue = this.$.cue,
+				cardsets = this.$.cardsets,
+				current = this.tabPos.current,
+				stickyAt = this.tabPos.stickyAt,
+				forwardTrigger = this.tabPos.forwardTrigger,
+				forwardTo = this.tabPos.forwardTo,
+				backwardTrigger = this.tabPos.backwardTrigger,
+				backwardTo = this.tabPos.backwardTo;
+
+			// Determine whether tabs should stick or not
+			if (cue.scrollTop > stickyAt) {
+				cardsets.style.top = '40px';
+				cardsets.classList.add('sticky');
+			} else if (cue.scrollTop <= stickyAt) {
+				cardsets.classList.remove('sticky');
+				cardsets.style.top = String(this.cardPos.tops[current]) + 'px';
+			}
+
+			// Determine wether tabs should jump forward or backward
+			if (cue.scrollTop > forwardTrigger) {
+				cardsets.classList.remove('sticky');
+				cardsets.classList.add('animate');
+				cardsets.style.top = String(forwardTo) + 'px';
+				this.tabPos.current += 1;
+				this.tabPos = getTabPos(this);
+				window.setTimeout(function() {cardsets.classList.remove('animate');}, 150);
+			} else if (cue.scrollTop <= backwardTrigger) {
+				cardsets.classList.add('animate');
+				cardsets.style.top = '40px';
+				cardsets.classList.add('sticky');
+				this.tabPos.current -= 1;
+				this.tabPos = getTabPos(this);
+				window.setTimeout(function() {cardsets.classList.remove('animate');}, 150);
+			}
+		}
+	});
 
 	// Function: Compile the tops and heights of cards in the active iron-page
 	function getCardPos(obj) {
-		var cards = obj.querySelectorAll('.iron-selected > .card-sets');
+		var cards = obj.querySelectorAll('.card-sets.content');
 
 		var tops = [];
 		var heights = [];
@@ -251,6 +410,8 @@
 			backwardTo = tops[current-1];
 		}
 
+		// console.log(current, stickyAt, forwardTrigger, forwardTo, backwardTrigger, backwardTo);
+
 		return {
 			'current': current,
 			'stickyAt': stickyAt,
@@ -260,187 +421,6 @@
 			'backwardTo': backwardTo
 		}
 	}
-
-	Polymer({
-
-		is: 'ts-read-mode',
-
-        behaviors: [
-            Polymer.IronResizableBehavior
-        ],
-
-		properties: {
-
-			title: {
-				type: String,
-				value: 'John'
-			},
-
-			openedTranslations: {
-				type: Array,
-				value: []
-			},
-
-			selected: {
-				type: String,
-				value: '0'
-			},
-
-			tabs: {
-				type: Array,
-				value: [
-					{
-						translation: {
-							code: 'ulb',
-							title: 'English ULB'
-						},
-						book_title: 'John',
-						content: [
-							{
-								chapter: 1,
-								text: 'In the beginning was the Word, and the Word was with God, and the Word was God. The same was in the beginning with God. All things were made by him; and without him was not any thing made that was made.'
-							},
-							{
-								chapter: 2,
-								text: 'And the Word was made flesh, and dwelt among us, (and we beheld his glory, the glory as of the only begotten of the Father,) full of grace and truth. John bare witness of him, and cried, saying, This was he of whom I spake, He that cometh after me is preferred before me: for he was before me.'
-							},
-							{
-								chapter: 3,
-								text: 'They came and saw where he dwelt, and abode with him that day: for it was about the tenth hour.'
-							}
-						]
-					},
-					{
-						translation: {
-							code: 'udb',
-							title: 'English UDB'
-						},
-						book_title: 'Josh',
-						content: [
-							{
-								chapter: 1,
-								text: 'And the Word was made flesh, and dwelt among us, (and we beheld his glory, the glory as of the only begotten of the Father,) full of grace and truth. John bare witness of him, and cried, saying, This was he of whom I spake, He that cometh after me is preferred before me: for he was before me.'
-							},
-							{
-								chapter: 2,
-								text: 'In the beginning was the Word, and the Word was with God, and the Word was God. The same was in the beginning with God. All things were made by him; and without him was not any thing made that was made.'
-							},
-							{
-								chapter: 3,
-								text: 'They came and saw where he dwelt, and abode with him that day: for it was about the tenth hour.'
-							}
-						]
-					}
-				]
-			},
-
-			cardPos: {
-				type: 'Object',
-				value: {
-					tops: [],
-					heights: []
-				}
-			},
-
-			tabPos: {
-				type: 'Object',
-				value: {
-					current: 0,
-					stickyAt: 0,
-					forwardTrigger: 0,
-					forwardTo: 0,
-					backwardTrigger: 0,
-					backwardTo: 0
-				}
-			},
-		},
-
-		// Function that runs when ts-read-mode is attached to the DOM
-		attached: function() {
-
-			var cue = this.$.cue,
-				stick = this.stickEle.bind(this),
-				calc = this.recalcCardTabPos.bind(this),
-				scrollEvent = (/Firefox/i.test(navigator.userAgent))? 'DOMMouseScroll' : 'mousewheel';
-
-			['scroll', scrollEvent].forEach(function(e) {
-				cue.addEventListener(e, stick);
-			});
-
-			this.$['source-tabs'].addEventListener('iron-select', calc);
-
-			var sourcesModal = document.querySelector('ts-translation-sources');
-			sourcesModal.display = 'none';
-		},
-
-		// Function that runs when ts-read-mode is displayed
-		attributeChanged: function() {
-			this.async(function() {
-				this.recalcCardTabPos();
-			}, 100);
-		},
-
-		// Function that got called when tabs are moved or another translation selected
-		recalcCardTabPos: function() {
-			this.cardPos = getCardPos(this);
-			this.tabPos = getTabPos(this);
-			this.stickEle();
-		},
-
-		showSources: function() {
-			var sourcesModal = document.querySelector('ts-translation-sources');
-			sourcesModal.style.display = 'block';
-			sourcesModal.fire('open');
-			document.querySelector('iron-list').fire('resize');
-		},
-
- 		// Function that got called with every scroll move
-		stickEle: function(event) {
-			var cue = this.$.cue,
-				cardsets = this.$.cardsets,
-				current = this.tabPos.current,
-				stickyAt = this.tabPos.stickyAt,
-				forwardTrigger = this.tabPos.forwardTrigger,
-				forwardTo = this.tabPos.forwardTo,
-				backwardTrigger = this.tabPos.backwardTrigger,
-				backwardTo = this.tabPos.backwardTo;
-
-			// Determine whether tabs should stick or not
-			if (cue.scrollTop > stickyAt) {
-				cardsets.style.top = '40px';
-				cardsets.classList.add('sticky');
-			} else if (cue.scrollTop <= stickyAt) {
-				cardsets.classList.remove('sticky');
-				cardsets.style.top = String(this.cardPos.tops[current]) + 'px';
-			}
-
-			// Determine wether tabs should jump forward or backward
-			if (cue.scrollTop > forwardTrigger) {
-				cardsets.classList.remove('sticky');
-				cardsets.classList.add('animate');
-				cardsets.style.top = String(forwardTo) + 'px';
-				this.tabPos.current += 1;
-				this.tabPos = getTabPos(this);
-				window.setTimeout(function() {cardsets.classList.remove('animate');}, 150);
-			} else if (cue.scrollTop <= backwardTrigger) {
-				cardsets.classList.add('animate');
-				cardsets.style.top = '40px';
-				cardsets.classList.add('sticky');
-				this.tabPos.current -= 1;
-				this.tabPos = getTabPos(this);
-				window.setTimeout(function() {cardsets.classList.remove('animate');}, 150);
-			}
-		},
-
-		ready: function() {
-			this.async(function() {
-
-				this.selected = 0;
-
-			}, 1);
-
-		}
-	});
 
 })();
 

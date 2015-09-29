@@ -33,8 +33,8 @@
   <template>
 
       <neon-animated-pages attr-for-selected="data-route" selected="{{route}}" exit-animation="slide-left-animation" entry-animation="slide-from-right-animation">
-          <ts-home-blank data-route="blank"></ts-home-blank>
-          <ts-home-menu data-route="home"></ts-home-menu>
+
+          <ts-home data-route="home" route="{{route}}"></ts-home>
 
           <ts-language-menu data-route="languagemenu" language="{{targetlanguage}}"></ts-language-menu>
           <ts-project-menu data-route="projectmenu" language="[[targetlanguage]]" group="{{targetgroup}}"></ts-project-menu>
@@ -83,7 +83,7 @@
           },
           route: {
               type: String,
-              value: 'blank'
+              value: 'home'
           }
       },
 

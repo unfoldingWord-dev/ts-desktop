@@ -1,6 +1,5 @@
 
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="ts-new-project-button.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
 
 <dom-module id="ts-home-blank">
 
@@ -8,34 +7,6 @@
 
         :host {
             display: flex;
-        }
-
-        .overflow {
-            background: var(--primary-color-dark);
-            color: white;
-            width: 50px;
-            align-self: stretch;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            align-items: center;
-        }
-
-        .main {
-            flex: auto;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .bar {
-            background: #ddd;
-            color: black;
-            width: 100%;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            box-shadow: 0 1px 2px 0 #ccc;
         }
 
         .contain {
@@ -57,10 +28,6 @@
         .start {
             background: var(--primary-color);
             color: white;
-            padding: 10px;
-            font-size: 110%;
-            box-shadow: 0 2px 3px 2px #ccc;
-            text-align: center;
         }
 
         p {
@@ -68,47 +35,18 @@
             padding: 0 1.5em;
         }
 
-        .titles {
-            flex: auto;
-            font-size: 125%;
-            padding-left: 20px;
-        }
-
-        paper-icon-button {
-            padding-bottom: 15px;
-        }
-
-        a {
-            text-decoration: none;
-        }
-
     </style>
 
   <template>
 
-      <div class="overflow">
-          <paper-icon-button icon="more-vert" title="more options"></paper-icon-button>
-      </div>
-
-      <div class="main">
-          <div class="bar">
-              <div class="titles">Your Translation Projects</div>
+      <div class="contain">
+          <div class="welcome">
+              <p>Welcome!</p>
+              <p>This is your Home Screen. When you have translation projects on this device, they will appear here.</p>
+              <p>You can start a new project anytime by tapping the blue button in the top right.</p>
           </div>
-          <div class="contain">
-              <div class="welcome">
-                  <p>Welcome!</p>
-                  <p>This is your Home Screen. When you have translation projects on this device, they will appear here.</p>
-                  <p>You can start a new project anytime by tapping the blue button in the top right.</p>
-              </div>
-              <a href="/languagemenu">
-                  <div class="start" title="New Project">
-                      <span>Start a new project</span>
-                  </div>
-              </a>
-          </div>
+          <paper-button raised class="start" on-tap="start">Start a new project</paper-button>
       </div>
-
-      <ts-new-project-button></ts-new-project-button>
 
   </template>
 
@@ -118,6 +56,18 @@
 
   Polymer({
     is: 'ts-home-blank',
+
+      properties: {
+          route: {
+              type: String,
+              value: '',
+              notify: true
+          }
+      },
+
+      start: function () {
+          this.route = "languagemenu";
+      },
 
     ready: function() {
 

@@ -33,7 +33,7 @@
   <template>
 
         <div id="buttonbox">
-            <a href="/languagemenu"><paper-fab class="fixed" icon="add" title="New Project"></paper-fab></a>
+            <paper-fab class="fixed" icon="add" title="New Project" on-tap="new"></paper-fab>
         </div>
 
   </template>
@@ -43,6 +43,18 @@
 
 Polymer({
   is: 'ts-new-project-button',
+
+    properties: {
+        route: {
+            type: String,
+            value: '',
+            notify: true
+        }
+    },
+
+    new: function () {
+        this.route = "languagemenu";
+    },
 
   ready: function() {
 

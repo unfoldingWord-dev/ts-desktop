@@ -1,6 +1,129 @@
 
 <link rel="import" href="../../components/iron-resizable-behavior/iron-resizable-behavior.html">
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../components/iron-list/iron-list.html">
+<link rel="import" href="../../components/neon-animation/neon-animation.html">
+
 <link rel="import" href="./ts-language-menu.html">
 <link rel="import" href="./ts-project-menu.html">
 <link rel="import" href="./ts-book-menu.html">
 <link rel="import" href="./ts-chapter-menu.html">
+
+<dom-module id="ts-new">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
+
+        neon-animated-pages {
+            flex: auto;
+            display: flex;
+            transform: translateY(-60px);
+        }
+
+        neon-animated-pages > * {
+            flex: auto;
+        }
+
+        .bar {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 45px;
+        }
+
+        .titles {
+            flex: auto;
+            font-size: 125%;
+        }
+
+        [icon="arrow-back"] {
+            margin: 0 1em 0 .2em;
+        }
+
+        .spacer {
+            background: var(--primary-color);
+            width: 100%;
+            min-height: 60px;
+        }
+
+    </style>
+
+    <template>
+
+        <div class="bar">
+            <paper-icon-button icon="arrow-back" title="Go Back" on-tap="back"></paper-icon-button>
+            <div class="titles">New Project</div>
+        </div>
+
+        <div class="spacer">
+        </div>
+
+        <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
+            <ts-language-menu selected="{{selected}}"></ts-language-menu>
+            <ts-project-menu selected="{{selected}}"></ts-project-menu>
+            <ts-book-menu selected="{{selected}}"></ts-book-menu>
+            <ts-chapter-menu selected="{{selected}}"></ts-chapter-menu>
+        </neon-animated-pages>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+        is: 'ts-new',
+
+        properties: {
+            selected: {
+                type: Number,
+                value: 0
+            },
+            route: {
+                type: String,
+                value: '',
+                notify: true
+            },
+            language: {
+                type: Object,
+                value: {},
+                notify: true
+            },
+            group: {
+                type: Object,
+                value: {},
+                notify: true
+            },
+            book: {
+                type: Object,
+                value: {},
+                notify: true
+            },
+            chapters: {
+                type: Array,
+                value: [],
+                notify: true
+            }
+        },
+
+        behaviors: [
+            Polymer.IronResizableBehavior
+        ],
+
+        back: function () {
+            this.selected === 0 ? this.route = "home" : this.selected = this.selected - 1;
+        },
+
+        ready: function() {
+
+        }
+    });
+
+</script>

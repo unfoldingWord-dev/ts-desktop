@@ -33,18 +33,10 @@
   <template>
 
       <neon-animated-pages attr-for-selected="data-route" selected="{{route}}" exit-animation="slide-left-animation" entry-animation="slide-from-right-animation">
-
           <ts-home data-route="home" route="{{route}}"></ts-home>
-
-          <ts-language-menu data-route="languagemenu" language="{{targetlanguage}}"></ts-language-menu>
-          <ts-project-menu data-route="projectmenu" language="[[targetlanguage]]" group="{{targetgroup}}"></ts-project-menu>
-          <ts-book-menu data-route="bookmenu" language="[[targetlanguage]]" group="[[targetgroup]]" book="{{targetbook}}" chapters="{{targetchapters}}"></ts-book-menu>
-          <ts-chapter-menu data-route="chaptermenu" language="[[targetlanguage]]" group="[[targetgroup]]" book="[[targetbook]]" chapters="[[targetchapters]]" chapter="{{targetchapter}}"></ts-chapter-menu>
-
+          <ts-new data-route="new" route="{{route}}" language="{{targetlanguage}}" group="{{targetgroup}}" book="{{targetbook}}" chapters="{{targetchapters}}" chapter="{{targetchapter}}"></ts-new>
           <ts-translate data-route="translate" route="{{route}}"></ts-translate>
-
           <ts-publish data-route="publish" route="{{route}}" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish>
-
       </neon-animated-pages>
 
 </template>

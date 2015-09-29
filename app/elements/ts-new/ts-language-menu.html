@@ -19,24 +19,6 @@
             align-items: center;
         }
 
-        .bar {
-            background-color: var(--primary-color);
-            color: var(--text-color);
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            min-height: 45px;
-        }
-
-        .titles {
-            flex: auto;
-            font-size: 125%;
-        }
-
-        [icon="arrow-back"] {
-            margin: 0 1em 0 .2em;
-        }
-
         [icon="search"] {
             padding: 0;
         }
@@ -44,7 +26,6 @@
         .header {
             color: #888;
             font-size: 110%;
-            background: var(--primary-color);
             width: 100%;
             display: flex;
             justify-content: center;
@@ -76,6 +57,7 @@
             padding: 1em;
             border-bottom: 1px solid #eee;
             transition: background .3s, color .3s;
+            cursor: pointer;
         }
 
         .row:hover {
@@ -96,23 +78,9 @@
             font-style: italic;
         }
 
-        .bar a {
-            color: white;
-        }
-
-        .contain a {
-            text-decoration: none;
-            color: black;
-        }
-
     </style>
 
   <template>
-
-      <div class="bar">
-            <a href="/home"><paper-icon-button icon="arrow-back" title="Go Back"></paper-icon-button></a>
-            <div class="titles">New Project</div>
-      </div>
 
       <div class="header">
           <div>
@@ -124,14 +92,12 @@
       <div class="contain">
           <iron-list id="list" items="{{searchfilter(query,languagelist)}}" as="lang">
               <template>
-                  <a href="/projectmenu">
-                      <div class="row" on-tap="store">
-                          <div>
-                              <span>[[lang.ln]]</span>
-                              <span class="right">[[lang.lc]]</span>
-                          </div>
+                  <div class="row" on-tap="store">
+                      <div>
+                          <span>[[lang.ln]]</span>
+                          <span class="right">[[lang.lc]]</span>
                       </div>
-                  </a>
+                  </div>
               </template>
           </iron-list>
       </div>
@@ -149,6 +115,11 @@
       is: 'ts-language-menu',
 
       properties: {
+          selected: {
+              type: Number,
+              value: 0,
+              notify: true
+          },
           language: {
               type: Object,
               value: {},
@@ -178,12 +149,11 @@
 
       store: function (e) {
           this.language = e.model.lang;
+          this.selected = this.selected + 1;
       },
 
       ready: function () {
-
           this.languagelist = App.translator.targetLanguages;
-
       }
   });
 

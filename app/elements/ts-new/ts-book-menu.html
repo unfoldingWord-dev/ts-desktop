@@ -19,28 +19,9 @@
             align-items: center;
         }
 
-        .bar {
-            background-color: var(--primary-color);
-            color: var(--text-color);
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            min-height: 45px;
-        }
-
-        .titles {
-            flex: auto;
-            font-size: 125%;
-        }
-
-        [icon="arrow-back"] {
-            margin: 0 1em 0 .2em;
-        }
-
         .header {
             color: #888;
             font-size: 110%;
-            background: var(--primary-color);
             width: 100%;
             display: flex;
             justify-content: center;
@@ -87,28 +68,9 @@
             padding: 0 10px;
         }
 
-        .bar a {
-            color: white;
-        }
-
-        .contain a {
-            text-decoration: none;
-            color: black;
-        }
-
-        .header a {
-            color: #888;
-            text-decoration: none;
-        }
-
     </style>
 
   <template>
-
-      <div class="bar">
-          <a href="/projectmenu"><paper-icon-button icon="arrow-back" title="Go Back"></paper-icon-button></a>
-          <div class="titles">New Project</div>
-      </div>
 
       <div class="header">
           <div>
@@ -121,13 +83,11 @@
       <div class="contain">
           <iron-list items="[[group.list]]" as="bk">
               <template>
-                  <a href="/chaptermenu">
-                      <div class="row" on-tap="store">
-                          <div>
-                              <span>[[bk.name]]</span>
-                          </div>
+                  <div class="row" on-tap="store">
+                      <div>
+                          <span>[[bk.name]]</span>
                       </div>
-                  </a>
+                  </div>
               </template>
           </iron-list>
       </div>
@@ -168,7 +128,7 @@
               chaparray.push(i);
           }
           this.chapters = chaparray;
-
+          this.selected = this.selected + 1;
       },
 
     ready: function() {

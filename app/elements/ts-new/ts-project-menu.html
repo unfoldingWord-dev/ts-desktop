@@ -20,24 +20,6 @@
             align-items: center;
         }
 
-        .bar {
-            background-color: var(--primary-color);
-            color: var(--text-color);
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            min-height: 45px;
-        }
-
-        .titles {
-            flex: auto;
-            font-size: 125%;
-        }
-
-        [icon="arrow-back"] {
-            margin: 0 1em 0 .2em;
-        }
-
         [icon="autorenew"] {
             padding: 0;
         }
@@ -45,7 +27,6 @@
         .header {
             color: #888;
             font-size: 110%;
-            background: var(--primary-color);
             width: 100%;
             display: flex;
             justify-content: center;
@@ -102,23 +83,9 @@
             padding-left: 15px;
         }
 
-        .bar a {
-            color: white;
-        }
-
-        .contain a {
-            text-decoration: none;
-            color: black;
-        }
-
     </style>
 
   <template>
-
-      <div class="bar">
-          <a href="/languagemenu"><paper-icon-button icon="arrow-back" title="Go Back"></paper-icon-button></a>
-          <div class="titles">New Project</div>
-      </div>
 
       <div class="header">
           <div>
@@ -130,15 +97,13 @@
       <div class="contain">
           <iron-list items="[[grouplist]]" as="grp">
               <template>
-                  <a href="/bookmenu">
-                      <div class="row" on-tap="store">
-                          <div>
-                              <iron-icon class="small" icon="[[grp.lefticon]]"></iron-icon>
-                              <span>[[grp.name]]</span>
-                              <iron-icon class="right" icon="[[grp.righticon]]"></iron-icon>
-                          </div>
+                  <div class="row" on-tap="store">
+                      <div>
+                          <iron-icon class="small" icon="[[grp.lefticon]]"></iron-icon>
+                          <span>[[grp.name]]</span>
+                          <iron-icon class="right" icon="[[grp.righticon]]"></iron-icon>
                       </div>
-                  </a>
+                  </div>
               </template>
           </iron-list>
       </div>
@@ -153,6 +118,11 @@
     is: 'ts-project-menu',
 
       properties: {
+          selected: {
+              type: Number,
+              value: 0,
+              notify: true
+          },
           group: {
               type: Object,
               value: {},
@@ -165,9 +135,8 @@
       ],
 
       store: function(e) {
-
           this.group = e.model.grp;
-
+          this.selected = this.selected + 1;
       },
 
     ready: function() {

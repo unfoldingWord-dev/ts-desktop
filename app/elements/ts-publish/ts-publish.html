@@ -53,19 +53,22 @@
             min-height: 60px;
         }
 
-        .steps {
+        .future {
             color: #B7E1DF;
+            display: inline-block;
         }
 
-        .steps .current {
+        .current {
             color: white;
+            display: inline-block;
         }
 
-        .steps .past {
+        .past {
             color: white;
+            display: inline-block;
         }
 
-        .small {
+        .icon {
             --iron-icon-height: 17px;
             --iron-icon-width: 17px;
         }
@@ -81,8 +84,20 @@
             line-height: 25px;
         }
 
-        .circle.current {
+        .current .circle {
             background: #1FC2FC;
+        }
+
+        .past .text {
+            display: none;
+        }
+
+        .current .icon {
+            display: none;
+        }
+
+        .future .icon {
+            display: none;
         }
 
     </style>
@@ -95,16 +110,12 @@
         </div>
 
         <div class="header">
-            <div class="steps">
-                <div class="circle past"><iron-icon icon="done" class="small"></iron-icon></div>
-                <span class="past">BOOK</span>
-                <div class="circle past"><iron-icon icon="done" class="small"></iron-icon></div>
-                <span class="past">PROFILE</span>
-                <div class="circle current">3</div>
-                <span class="current">REVIEW</span>
-                <div class="circle">4</div>
-                <span>PUBLISH</span>
-            </div>
+            <template is="dom-repeat" items="[[stepslist]]" as="step">
+                <div class$="[[step.level]]">
+                    <div class="circle"><span class="text">[[step.number]]</span><iron-icon icon="done" class="icon"></iron-icon></div>
+                    <span>[[step.name]]</span>
+                </div>
+            </template>
         </div>
 
         <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
@@ -132,7 +143,47 @@
                 type: String,
                 value: '',
                 notify: true
+            },
+            stepslist: {
+                type: Array,
+                value: [],
+                computed: 'createlist(selected)'
+
             }
+        },
+
+        createlist: function (selected) {
+            var list = [];
+            if (selected === 0) {
+                list = [
+                    {number: 1, name: "BOOK", level: "current"},
+                    {number: 2, name: "PROFILE", level: "future"},
+                    {number: 3, name: "REVIEW", level: "future"},
+                    {number: 4, name: "PUBLISH", level: "future"}
+                ]
+            } else if (selected === 1) {
+                list = [
+                    {number: 1, name: "BOOK", level: "past"},
+                    {number: 2, name: "PROFILE", level: "current"},
+                    {number: 3, name: "REVIEW", level: "future"},
+                    {number: 4, name: "PUBLISH", level: "future"}
+                ]
+            } else if (selected === 2) {
+                list = [
+                    {number: 1, name: "BOOK", level: "past"},
+                    {number: 2, name: "PROFILE", level: "past"},
+                    {number: 3, name: "REVIEW", level: "current"},
+                    {number: 4, name: "PUBLISH", level: "future"}
+                ]
+            } else if (selected === 3) {
+                list = [
+                    {number: 1, name: "BOOK", level: "past"},
+                    {number: 2, name: "PROFILE", level: "past"},
+                    {number: 3, name: "REVIEW", level: "past"},
+                    {number: 4, name: "PUBLISH", level: "current"}
+                ]
+            }
+            return list;
         },
 
         back: function () {

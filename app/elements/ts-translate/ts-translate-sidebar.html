@@ -1,5 +1,8 @@
 
 <link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../components/paper-menu/paper-menu.html">
+<link rel="import" href="../../components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../../components/paper-item/paper-item.html">
 
 <dom-module id="ts-translate-sidebar">
 
@@ -31,20 +34,35 @@
             color: white;
         }
 
+        paper-item:hover {
+            background: var(--accent-color-dark);
+            color: white;
+            cursor: pointer;
+        }
+
+        paper-menu {
+            --paper-menu-selected-item: {
+                 font-weight: normal;
+             }
+        }
+
     </style>
 
     <template>
-
         <div>
-            <paper-icon-button class="current" icon="arrow-back" title="Go Back" on-tap="back"></paper-icon-button>
             <paper-icon-button id="read" class="current" icon="assignment" title="Read Mode" on-tap="read"></paper-icon-button>
             <paper-icon-button id="chunk" icon="flip-to-front" title="Chunk Mode" on-tap="chunk"></paper-icon-button>
             <paper-icon-button id="review" icon="assignment-turned-in" title="Review Mode" on-tap="review"></paper-icon-button>
         </div>
-        <div>
-            <paper-icon-button class="current" icon="more-vert" title="more options" on-tap="publish"></paper-icon-button>
-        </div>
-
+        <paper-menu-button horizontal-offset="10" vertical-offset="10" vertical-align="bottom">
+            <paper-icon-button class="current dropdown-trigger" icon="more-vert" title="options"></paper-icon-button>
+            <paper-menu class="dropdown-content">
+                <paper-item on-tap="home">Home</paper-item>
+                <paper-item on-tap="publish">Publish</paper-item>
+                <paper-item><span>Feedback</span></paper-item>
+                <paper-item>Settings</paper-item>
+            </paper-menu>
+        </paper-menu-button>
     </template>
 
 </dom-module>
@@ -97,7 +115,12 @@
             this.route = "publish";
         },
 
+        home: function () {
+            this.route = "home";
+        },
+
         ready: function() {
+
 
         }
     });

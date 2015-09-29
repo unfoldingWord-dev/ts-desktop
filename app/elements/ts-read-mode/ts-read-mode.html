@@ -195,16 +195,6 @@
 
 			<div class="container">
 
-				<template is="dom-if" if="{{ !openedTabs.length }}">
-					<div class="card-sets">
-						<paper-card class="card top-card blank-card">
-							<div class="card-heading">
-								<h3>New Project</h3>
-							</div>
-						</paper-card>
-					</div>
-				</template>
-
 				<div id="cardsets" class="tabs-container card-sets sticky-ele">
 					<div class="icon-container">
 						<iron-icon icon="icons:tab" class="icon24 icon" on-click="openSourcesModal"></iron-icon>
@@ -216,28 +206,20 @@
 		         	</paper-tabs>
 				</div>
 
-				<div>
-					<iron-pages id="source-pages" selected="[[ selectedTab ]]">
-						<template is="dom-repeat" items="{{ data }}" as="tab">
-							<div class="source-page">
-								<template is="dom-repeat" items="{{ tab.content }}" as="chapter" indexAs="index">
-									<div class="card-sets">
-										<paper-card class="card top-card" elevation="2" >
-											<div class="tabs-hole"></div>
-											<div class="card-heading">
-												<h3>
-													<span>{{ tab.book_title }}</span> <span>{{ chapter.chapter }}</span>
-												</h3>
-											</div>
-											<div class="card-content">
-												<p>{{ chapter.text }}</p>
-											</div>
-										</paper-card>
-									</div>
-								</template>
-							</div>
-						</template>
-					</iron-pages>
+				<div class="source-page">
+					<template is="dom-repeat" items="{{ data.chapters }}" as="chapter">
+						<div class="card-sets content">
+							<paper-card class="card top-card" elevation="2" >
+								<div class="tabs-hole"></div>
+								<div class="card-heading">
+									<h3>
+										<span>{{ data.book_title }}</span> <span>{{ chapter.number }}</span>
+									</h3>
+								</div>
+								<div class="card-content"><p>{{ chapter.text }}</p></div>
+							</paper-card>
+						</div>
+					</template>
 				</div>
 
 			</div>
@@ -263,8 +245,8 @@
 		properties: {
 			openedTabs: {
 				type: Array,
-				value: [],
-				notify: true
+				value: function() {return [{'title': 'test', 'checked': true}];},
+				// notify: true
 			},
 			selectedTab: {
 				type: String,
@@ -272,51 +254,11 @@
 				notify: true
 			},
 			data: {
-				type: Array,
-				value: [
-					{
-						translation: {
-							code: 'ulb',
-							title: 'English ULB'
-						},
-						book_title: 'John',
-						content: [
-							{
-								chapter: 1,
-								text: 'In the beginning was the Word, and the Word was with God, and the Word was God. The same was in the beginning with God. All things were made by him; and without him was not any thing made that was made.'
-							},
-							{
-								chapter: 2,
-								text: 'And the Word was made flesh, and dwelt among us, (and we beheld his glory, the glory as of the only begotten of the Father,) full of grace and truth. John bare witness of him, and cried, saying, This was he of whom I spake, He that cometh after me is preferred before me: for he was before me.'
-							},
-							{
-								chapter: 3,
-								text: 'They came and saw where he dwelt, and abode with him that day: for it was about the tenth hour.'
-							}
-						]
-					},
-					{
-						translation: {
-							code: 'udb',
-							title: 'English UDB'
-						},
-						book_title: 'Josh',
-						content: [
-							{
-								chapter: 1,
-								text: 'And the Word was made flesh, and dwelt among us, (and we beheld his glory, the glory as of the only begotten of the Father,) full of grace and truth. John bare witness of him, and cried, saying, This was he of whom I spake, He that cometh after me is preferred before me: for he was before me.'
-							},
-							{
-								chapter: 2,
-								text: 'In the beginning was the Word, and the Word was with God, and the Word was God. The same was in the beginning with God. All things were made by him; and without him was not any thing made that was made.'
-							},
-							{
-								chapter: 3,
-								text: 'They came and saw where he dwelt, and abode with him that day: for it was about the tenth hour.'
-							}
-						]
-					}
-				]
+				type: Object,
+				value: {
+					book_title: '',
+					chapters: []
+				}
 			},
 			cardPos: {
 				type: 'Object',
@@ -340,6 +282,7 @@
 
 		// Function runs when DOM is ready (before attached)
 		ready: function() {
+			console.log(this.openedTabs);
 		},
 
 		// When this element is attached to DOM...
@@ -359,6 +302,37 @@
 
 			// ... hide translation sources modal
 			sourcesModal.display = 'none';
+
+			// ... set initial data
+			var translation = 'English ULB';
+			var book_title = 'Matthew';
+			var chapters = [
+				{
+					number: '1',
+					text: 'THIS IS A TEST'
+				},
+				{
+					number: '2',
+					text: 'THIS IS A TEST'
+				},
+				{
+					number: '3',
+					text: 'THIS IS A TEST'
+				},
+				{
+					number: '4',
+					text: 'THIS IS A TEST'
+				},
+			];
+			this.push('openedTabs', {'title': translation, 'checked': true});
+			this.data.book_title = book_title;
+			this.splice.apply(this,
+				['data.chapters', 0, this.data.chapters.length].concat(chapters));
+			this.async(function() {
+				this.selectedTab = '0';
+				this.recalcCardTabPos();
+				this.reposTab();
+			}, 1);	
 		},
 
 		// Runs when tab-edit modal is confirmed
@@ -370,7 +344,6 @@
 					this.selectedTab = this.$['tab-edit-modal'].selectedTab;
 					if (this.selectedTab >= 0 && this.selectedTab < this.openedTabs.length) {
 						this.querySelectorAll('paper-tab')[this.selectedTab].fire('tap');
-						console.log('tap');
 					}
 					this.recalcCardTabPos();
 					this.reposTab();
@@ -443,7 +416,7 @@
 
 	// Function: Compile the tops and heights of cards in the active iron-page
 	function getCardPos(obj) {
-		var cards = obj.querySelectorAll('.iron-selected > .card-sets');
+		var cards = obj.querySelectorAll('.card-sets.content');
 
 		var tops = [];
 		var heights = [];
@@ -478,6 +451,8 @@
 			backwardTrigger = heights[current-1]*0.6 + tops[current-1];
 			backwardTo = tops[current-1];
 		}
+
+		// console.log(current, stickyAt, forwardTrigger, forwardTo, backwardTrigger, backwardTo);
 
 		return {
 			'current': current,

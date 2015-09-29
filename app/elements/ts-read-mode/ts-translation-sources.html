@@ -206,7 +206,7 @@
             },
             openedTabs: {
                 type: Array,
-                value: [],
+                value: function() {return [];}
             },
             initialOpened: {
                 type: Array,
@@ -227,7 +227,12 @@
             }
         },
 
+        ready: function() {
+            console.log('child:', this.openedTabs);
+        },
+
         onOpen: function() {
+            console.log(this.openedTabs);
             this.initialOpened = this.openedTabs.slice();
             this.initialSelected = this.selectedTab;
         },
@@ -296,7 +301,7 @@
         attached: function () {
             // NOTE: Replace below with a script to get all available items
             this.masterList = [{title: 'English ULB'}, {title: 'English UDB'}, {title: 'Arabic'}, {title: 'Bahasa Indonesia'}];
-            this.openedTabs = [];
+            // this.openedTabs = [];
             this.availableList = this.getAvailable(this.openedTabs);
         }
     });

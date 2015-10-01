@@ -46,11 +46,15 @@
             padding-left: 20px;
         }
 
+        ts-new-project-button {
+            position: absolute;
+            right: 15px;
+            top: 20px;
+        }
+
     </style>
 
     <template>
-
-        <ts-new-project-button route="{{route}}"></ts-new-project-button>
 
         <ts-home-sidebar route="{{route}}" selected="{{selected}}"></ts-home-sidebar>
 
@@ -63,6 +67,8 @@
                 <ts-home-menu route="{{route}}"></ts-home-menu>
             </neon-animated-pages>
         </div>
+
+        <ts-new-project-button route="{{route}}"></ts-new-project-button>
 
     </template>
 

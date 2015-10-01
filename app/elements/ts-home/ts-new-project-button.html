@@ -5,36 +5,23 @@
 
     <style>
 
+        :host {
+            height: 60px;
+            width: 60px;
+        }
+
         paper-fab {
             border-radius: 49.9999%;
-        }
-
-        paper-fab.fixed {
             background: var(--accent-color-light);
             color: white;
-        }
-
-        .fixed {
-            position: absolute;
-            right: 12px;
-            top: 12px;
-        }
-
-        #buttonbox {
-            position: fixed;
-            right: 12px;
-            top: 48px;
-            height: 80px;
-            width: 80px;
+            margin: 2px;
         }
 
     </style>
 
     <template>
 
-        <div id="buttonbox">
-            <paper-fab class="fixed" icon="add" title="New Project" on-tap="new"></paper-fab>
-        </div>
+        <paper-fab icon="add" title="New Project" on-tap="new"></paper-fab>
 
     </template>
 

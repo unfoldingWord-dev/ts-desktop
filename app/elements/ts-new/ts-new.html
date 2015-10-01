@@ -1,8 +1,6 @@
 
 <link rel="import" href="../../components/iron-resizable-behavior/iron-resizable-behavior.html">
 <link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../components/iron-icons/iron-icons.html">
-<link rel="import" href="../../components/iron-list/iron-list.html">
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
 
 <link rel="import" href="./ts-language-menu.html">
@@ -30,8 +28,13 @@
             flex: auto;
         }
 
-        .bar {
+        .header {
             background-color: var(--primary-color);
+            min-height: 105px;
+        }
+
+        .title {
+            font-size: 125%;
             color: var(--text-color);
             display: flex;
             justify-content: flex-start;
@@ -39,38 +42,26 @@
             min-height: 45px;
         }
 
-        .titles {
-            flex: auto;
-            font-size: 125%;
-        }
-
         [icon="arrow-back"] {
             margin: 0 1em 0 .2em;
-        }
-
-        .spacer {
-            background: var(--primary-color);
-            width: 100%;
-            min-height: 60px;
         }
 
     </style>
 
     <template>
 
-        <div class="bar">
-            <paper-icon-button icon="arrow-back" title="Go Back" on-tap="back"></paper-icon-button>
-            <div class="titles">New Project</div>
-        </div>
-
-        <div class="spacer">
+        <div class="header">
+            <div class="title">
+                <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
+                <span>New Project</span>
+            </div>
         </div>
 
         <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
             <ts-language-menu selected="{{selected}}" language="{{language}}"></ts-language-menu>
-            <ts-project-menu selected="{{selected}}" language="[[language]]" group="{{group}}"></ts-project-menu>
-            <ts-book-menu selected="{{selected}}" language="[[language]]" group="[[group]]" book="{{book}}" chapters="{{chapters}}"></ts-book-menu>
-            <ts-chapter-menu selected="{{selected}}" route="{{route}}" language="[[language]]" group="[[group]]" book="[[book]]" chapters="[[chapters]]" chapter="{{chapter}}"></ts-chapter-menu>
+            <ts-project-menu selected="{{selected}}" group="{{group}}"></ts-project-menu>
+            <ts-book-menu selected="{{selected}}" group="[[group]]" book="{{book}}" chapters="{{chapters}}"></ts-book-menu>
+            <ts-chapter-menu selected="{{selected}}" route="{{route}}" group="[[group]]" book="[[book]]" chapters="[[chapters]]" chapter="{{chapter}}"></ts-chapter-menu>
         </neon-animated-pages>
 
     </template>

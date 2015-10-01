@@ -1,5 +1,4 @@
 
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../components/iron-icons/iron-icons.html">
 
 <dom-module id="ts-chapter-menu">
@@ -18,7 +17,7 @@
             align-items: center;
         }
 
-        .contain>div {
+        .contain > div {
             display: inline-block;
             background: white;
             width: 450px;
@@ -37,7 +36,7 @@
             min-height: 60px;
         }
 
-        .header div {
+        .header > div {
             display: flex;
             justify-content: flex-start;
             align-items: center;
@@ -116,6 +115,18 @@
               type: String,
               value: '',
               notify: true
+          },
+          group: {
+              type: Object,
+              value: {}
+          },
+          book: {
+              type: Object,
+              value: {}
+          },
+          chapters: {
+              type: Array,
+              value: []
           },
           chapter: {
               type: Number,

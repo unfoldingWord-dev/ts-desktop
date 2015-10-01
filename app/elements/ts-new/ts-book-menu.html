@@ -28,7 +28,7 @@
             min-height: 60px;
         }
 
-        .header div {
+        .header > div {
             display: flex;
             justify-content: flex-start;
             align-items: center;
@@ -111,6 +111,10 @@
               type: Number,
               value: 0,
               notify: true
+          },
+          group: {
+              type: Object,
+              value: {}
           },
           book: {
               type: Object,

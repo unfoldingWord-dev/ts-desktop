@@ -12,8 +12,6 @@
 
       :host {
           display: flex;
-          width: 100%;
-          position: relative;
           flex: auto;
       }
 
@@ -32,12 +30,12 @@
 
       <neon-animated-pages attr-for-selected="data-route" selected="{{route}}" exit-animation="slide-left-animation" entry-animation="slide-from-right-animation">
           <ts-home data-route="home" route="{{route}}"></ts-home>
-          <ts-new data-route="new" route="{{route}}" language="{{targetlanguage}}" group="{{targetgroup}}" book="{{targetbook}}" chapters="{{targetchapters}}" chapter="{{targetchapter}}"></ts-new>
+          <ts-new data-route="new" route="{{route}}" language="{{language}}" group="{{group}}" book="{{book}}" chapters="{{chapters}}" chapter="{{chapter}}"></ts-new>
           <ts-translate data-route="translate" route="{{route}}"></ts-translate>
-          <ts-publish data-route="publish" route="{{route}}" language="[[targetlanguage]]" book="[[targetbook]]"></ts-publish>
+          <ts-publish data-route="publish" route="{{route}}" language="[[language]]" book="[[book]]"></ts-publish>
       </neon-animated-pages>
 
-</template>
+  </template>
 
 </dom-module>
 
@@ -47,27 +45,23 @@
       is: 'ts-dashboard',
 
       properties: {
-          selected: {
-              type: Number,
-              value: 0
-          },
-          targetlanguage: {
+          language: {
               type: Object,
               value: {}
           },
-          targetgroup: {
+          group: {
               type: Object,
               value: {}
           },
-          targetbook: {
+          book: {
               type: Object,
               value: {}
           },
-          targetchapters: {
+          chapters: {
               type: Array,
               value: []
           },
-          targetchapter: {
+          chapter: {
               type: Number,
               value: null
           },

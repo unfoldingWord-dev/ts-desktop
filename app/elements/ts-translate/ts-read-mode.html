@@ -5,8 +5,8 @@
 <link rel="import" href="../../components/paper-card/paper-card.html">
 <link rel="import" href="../../components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../../components/iron-pages/iron-pages.html">
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../components/iron-icons/iron-icons.html">
+<!-- <link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../components/iron-icons/iron-icons.html"> -->
 <link rel="import" href="../../components/iron-resizable-behavior/iron-resizable-behavior.html">
 <link rel="import" href="ts-translation-sources.html">
 
@@ -16,9 +16,7 @@
 
         :host {
 			display: block;
-			overflow-y: auto;
 			box-sizing: border-box;
-            flex: auto;
 		}
 		.container {
 			display: block;
@@ -28,6 +26,7 @@
 			z-index: 0;
 			box-sizing: border-box;
 			padding: 20px 20px 0;
+			overflow-y:auto;
 		}
 		.card-sets {
 			width: 100%;
@@ -61,7 +60,6 @@
 			display: block;
 			width: 100;
 			height: 3rem;
-			/*background-color: #444;*/
 		}
 		.card-heading h3 {
 			margin: 0;
@@ -147,42 +145,36 @@
 
 	<template>
 
-        <div id="cue" class="sticky-cue">
+		<div id="cue" class="container sticky-cue">
+    		<ts-translation-sources id="tab-edit-modal" opened-tabs="[[ openedTabs ]]" selected-tab="[[ selectedTab ]]" on-confirm="onConfirm"></ts-translation-sources>
 
-            <ts-translation-sources id="tab-edit-modal" opened-tabs="[[ openedTabs ]]" selected-tab="[[ selectedTab ]]" on-confirm="onConfirm"></ts-translation-sources>
-
-			<div class="container">
-
-				<div id="cardsets" class="tabs-container card-sets sticky-ele">
-					<div class="icon-container">
-						<iron-icon icon="icons:tab" class="icon24 icon" on-click="openSourcesModal"></iron-icon>
-					</div>
-					<paper-tabs id="source-tabs" selected="{{ selectedTab }}" noink scrollable hide-scroll-buttons>
-		                <template is="dom-repeat" items="{{ openedTabs }}">
-		                   <paper-tab class="source-tab">{{ item.title }}</paper-tab>
-		                </template>
-		         	</paper-tabs>
+			<div id="cardsets" class="tabs-container card-sets sticky-ele">
+				<div class="icon-container">
+					<iron-icon icon="icons:tab" class="icon24 icon" on-click="openSourcesModal"></iron-icon>
 				</div>
-
-				<div class="source-page">
-					<template is="dom-repeat" items="{{ data.chapters }}" as="chapter">
-						<div class="card-sets content">
-							<paper-card class="card top-card" elevation="2" >
-								<div class="tabs-hole"></div>
-								<div class="card-heading">
-									<h3>
-										<span>{{ data.book_title }}</span> <span>{{ chapter.number }}</span>
-									</h3>
-								</div>
-								<div class="card-content"><p>{{ chapter.text }}</p></div>
-							</paper-card>
-						</div>
-					</template>
-				</div>
-
+				<paper-tabs id="source-tabs" selected="{{ selectedTab }}" noink scrollable hide-scroll-buttons>
+	                <template is="dom-repeat" items="{{ openedTabs }}">
+	                   <paper-tab class="source-tab">{{ item.title }}</paper-tab>
+	                </template>
+	         	</paper-tabs>
 			</div>
 
-        </div>
+			<div class="source-page">
+				<template is="dom-repeat" items="{{ data.chapters }}" as="chapter">
+					<div class="card-sets content">
+						<paper-card class="card top-card" elevation="2" >
+							<div class="tabs-hole"></div>
+							<div class="card-heading">
+								<h3>
+									<span>{{ data.book_title }}</span> <span>{{ chapter.number }}</span>
+								</h3>
+							</div>
+							<div class="card-content"><p>{{ chapter.text }}</p></div>
+						</paper-card>
+					</div>
+				</template>
+			</div>
+		</div>
 
 	</template>
 
@@ -203,8 +195,8 @@
 		properties: {
 			openedTabs: {
 				type: Array,
-				value: function() {return [{'title': 'test', 'checked': true}];},
-				// notify: true
+				value: function() {return [];},
+				notify: true
 			},
 			selectedTab: {
 				type: String,
@@ -213,34 +205,39 @@
 			},
 			data: {
 				type: Object,
-				value: {
-					book_title: '',
-					chapters: []
+				value: function() {
+					return {
+						book_title: '',
+						chapters: []	
+					}
 				}
 			},
 			cardPos: {
-				type: 'Object',
-				value: {
-					tops: [],
-					heights: []
+				type: Object,
+				value: function() {
+					return {
+						tops: [],
+						heights: []
+					};
 				}
 			},
 			tabPos: {
-				type: 'Object',
-				value: {
-					current: 0,
-					stickyAt: 0,
-					forwardTrigger: 0,
-					forwardTo: 0,
-					backwardTrigger: 0,
-					backwardTo: 0
+				type: Object,
+				value: function() {
+					return {
+						current: 0,
+						stickyAt: 0,
+						forwardTrigger: 0,
+						forwardTo: 0,
+						backwardTrigger: 0,
+						backwardTo: 0
+					};
 				}
 			},
 		},
 
 		// Function runs when DOM is ready (before attached)
 		ready: function() {
-			console.log(this.openedTabs);
 		},
 
 		// When this element is attached to DOM...
@@ -260,43 +257,14 @@
 
 			// ... hide translation sources modal
 			sourcesModal.display = 'none';
-
-			// ... set initial data
-			var translation = 'English ULB';
-			var book_title = 'Matthew';
-			var chapters = [
-				{
-					number: '1',
-					text: 'THIS IS A TEST'
-				},
-				{
-					number: '2',
-					text: 'THIS IS A TEST'
-				},
-				{
-					number: '3',
-					text: 'THIS IS A TEST'
-				},
-				{
-					number: '4',
-					text: 'THIS IS A TEST'
-				},
-			];
-			this.push('openedTabs', {'title': translation, 'checked': true});
-			this.data.book_title = book_title;
-			this.splice.apply(this,
-				['data.chapters', 0, this.data.chapters.length].concat(chapters));
-			this.async(function() {
-				this.selectedTab = '0';
-				this.recalcCardTabPos();
-				this.reposTab();
-			}, 1);	
 		},
 
 		// Runs when tab-edit modal is confirmed
 		onConfirm: function() {
-			this.splice.apply(this,
-				['openedTabs', 0, this.openedTabs.length].concat(this.$['tab-edit-modal'].openedTabs));
+			var openedTabs = this.$['tab-edit-modal'].openedTabs;
+			this.openedTabs = [];
+			this.push.apply(this, ['openedTabs'].concat(openedTabs));
+
 			if (this.openedTabs.length) {
 				this.async(function() {
 					this.selectedTab = this.$['tab-edit-modal'].selectedTab;
@@ -313,13 +281,15 @@
 		attributeChanged: function() {
 			// Note: Removing the async may cause recalcCardTabPos() not to run properly
 			this.async(function() {
+				// console.log('attr changed. recalculating');
 				this.recalcCardTabPos();
-			}, 100);
+			}, 10);
 		},
 
 		// Function: Calculate jumping points based on card positions and trigger position check
 		// Note: Is called manually when tabs or its position is changed
 		recalcCardTabPos: function() {
+			// console.log('recalculating');
 			this.cardPos = getCardPos(this);
 			this.tabPos = getTabPos(this);
 			this.reposTab();
@@ -330,6 +300,7 @@
 			var sourcesModal = this.querySelector('ts-translation-sources');
 			sourcesModal.style.display = 'block';
 			sourcesModal.fire('open');
+			sourcesModal.querySelector('iron-list').fire('open');
 			this.querySelector('iron-list').fire('resize');
 		},
 
@@ -344,24 +315,33 @@
 				backwardTrigger = this.tabPos.backwardTrigger,
 				backwardTo = this.tabPos.backwardTo;
 
+			// console.log('reposTab', cue);
+			// console.log(cue.scrollTop, stickyAt);
+			
 			// Determine whether tabs should stick or not
 			if (cue.scrollTop > stickyAt) {
+				// console.log('making sticky');
 				cardsets.style.top = '40px';
 				cardsets.classList.add('sticky');
-			} else if (cue.scrollTop <= stickyAt) {
+			} else if (cue.scrollTop < stickyAt) {
+				// console.log('making NOT sticky');
 				cardsets.classList.remove('sticky');
+				console.log('setting top to ' + this.cardPos[current] + 'px');
 				cardsets.style.top = String(this.cardPos.tops[current]) + 'px';
 			}
 
 			// Determine wether tabs should jump forward or backward
 			if (cue.scrollTop > forwardTrigger) {
+				// console.log('jumping forward');
 				cardsets.classList.remove('sticky');
 				cardsets.classList.add('animate');
+				console.log('setting top to ' + forwardTo + 'px');
 				cardsets.style.top = String(forwardTo) + 'px';
 				this.tabPos.current += 1;
 				this.tabPos = getTabPos(this);
 				window.setTimeout(function() {cardsets.classList.remove('animate');}, 150);
 			} else if (cue.scrollTop <= backwardTrigger) {
+				// console.log('jumping backward');
 				cardsets.classList.add('animate');
 				cardsets.style.top = '40px';
 				cardsets.classList.add('sticky');
@@ -383,6 +363,8 @@
 			tops.push(cards[i].offsetTop);
 			heights.push(cards[i].offsetHeight);
 		}
+
+		// console.log('get card pos', tops, heights);
 
 		return {'tops': tops, 'heights': heights};
 	}
@@ -410,7 +392,7 @@
 			backwardTo = tops[current-1];
 		}
 
-		// console.log(current, stickyAt, forwardTrigger, forwardTo, backwardTrigger, backwardTo);
+		// console.log('get tab pos', current, stickyAt, forwardTrigger, forwardTo, backwardTrigger, backwardTo);
 
 		return {
 			'current': current,

@@ -1,11 +1,9 @@
 <!-- ts-translation-sources -->
 
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/polymer/polymer.html">
 <link rel="import" href="../../components/iron-list/iron-list.html">
 <link rel="import" href="../../components/iron-collapse/iron-collapse.html">
 <link rel="import" href="../../components/paper-checkbox/paper-checkbox.html">
-<link rel="import" href="../../components/iron-input/iron-input.html">
 
 <dom-module id="ts-translation-sources">
 
@@ -20,7 +18,7 @@
             top: 0;
             left: 0;
             background-color: rgba(0,0,0,0.5);
-            z-index: 100;
+            z-index: 1000;
             transition: opacity 1s ease-out;
         }
         .container {
@@ -200,19 +198,23 @@
         properties: {
             masterList: {
                 type: Array,
-                value: []
+                value: function() {return [];},
+                notify: true
             },
             availableList: {
                 type: Array,
-                value: []
+                value: function() {return [];},
+                notify: true
             },
             openedTabs: {
                 type: Array,
-                value: function() {return [];}
+                value: function() {return [];},
+                notify: true
             },
             initialOpened: {
                 type: Array,
-                value: []
+                value: function() {return [];},
+                notify: true
             },
             query: {
                 type: String,
@@ -221,7 +223,6 @@
             selectedTab: {
                 type: String,
                 value: '',
-                // notify: true
             },
             initialSelected: {
                 type: String,
@@ -230,23 +231,34 @@
         },
 
         ready: function() {
-            console.log('child:', this.openedTabs);
         },
 
         onOpen: function() {
-            console.log(this.openedTabs);
-            this.initialOpened = this.openedTabs.slice();
-            this.initialSelected = this.selectedTab;
+            this.async(function() {
+                this.splice('initialOpened', 0, this.initialOpened.length);
+                var openedTabs = this.openedTabs;
+                this.push.apply(this, ['initialOpened'].concat(openedTabs));
+                // this.initialOpened = this.openedTabs.slice();
+                this.initialSelected = this.selectedTab;
+                this.availableList = this.getAvailable(this.openedTabs);
+                // this.querySelector('iron-list').fire('open');
+                console.log('OPENING');
+                console.log('openedTabs', this.openedTabs);
+                console.log('selectedTab', this.selectedTab);
+                console.log('availableList', this.availableList);
+            }, 1000);
         },
 
         searchfilter: function(query, availableList) {
+            console.log('search filter');
             let search = App.util.startsWithBase.bind(null, query);
-            return availableList.filter(function(al) {
+            return this.availableList.filter(function(al) {
                 return search(al.title);
             });
         },
 
         getAvailable: function(openedTabs) {
+            console.log('get available');
             var me = this;
             return me.masterList.filter(function(i) {
                 return openedTabs.indexOf(i) < 0;
@@ -254,11 +266,19 @@
         },
 
         cancel: function() {
-            this.openedTabs = this.initialOpened.slice();
-            this.selectedTab = this.initialSelected;
-            this.availableList = this.getAvailable(this.openedTabs);
-            closeModal(this);
-            console.log(this.initialSelected);
+            this.async(function() {
+                this.splice('openedTabs', 0, this.openedTabs.length);
+                var initialOpened = this.initialOpened;
+                this.push.apply(this, ['openedTabs'].concat(initialOpened));
+                // this.openedTabs = this.initialOpened.slice();
+                this.selectedTab = this.initialSelected;
+                this.availableList = this.getAvailable(this.openedTabs);
+                closeModal(this);
+                console.log('CANCELLING');
+                console.log('openedTabs', this.openedTabs);
+                console.log('selectedTab', this.selectedTab);
+                console.log('availableList', this.availableList);
+            }, 1000);
         },
 
         confirm: function() {
@@ -267,6 +287,7 @@
         },
 
         selectAvailable: function(event) {
+            console.log('selecting available');
             var elem = event.model.al;
             var index = event.model.index;
             elem.checked = true;
@@ -302,9 +323,9 @@
 
         attached: function () {
             // NOTE: Replace below with a script to get all available items
-            this.masterList = [{title: 'English ULB'}, {title: 'English UDB'}, {title: 'Arabic'}, {title: 'Bahasa Indonesia'}];
-            // this.openedTabs = [];
+            this.push('masterList', {title: 'English ULB'}, {title: 'English UDB'}, {title: 'Arabic'}, {title: 'Bahasa Indonesia'});
             this.availableList = this.getAvailable(this.openedTabs);
+            // console.log(this.availableList, this.openedTabs);
         }
     });
 

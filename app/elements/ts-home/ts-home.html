@@ -29,7 +29,7 @@
             flex: auto;
         }
 
-        .bar {
+        .header {
             background: #ddd;
             color: black;
             width: 100%;
@@ -40,7 +40,7 @@
             box-shadow: 0 1px 2px 0 #ccc;
         }
 
-        .titles {
+        .title {
             flex: auto;
             font-size: 125%;
             padding-left: 20px;
@@ -52,15 +52,15 @@
 
         <ts-new-project-button route="{{route}}"></ts-new-project-button>
 
-        <ts-home-sidebar selected="{{selected}}"></ts-home-sidebar>
+        <ts-home-sidebar route="{{route}}" selected="{{selected}}"></ts-home-sidebar>
 
         <div class="main">
-            <div class="bar">
-                <div class="titles">Your Translation Projects</div>
+            <div class="header">
+                <div class="title">Your Translation Projects</div>
             </div>
             <neon-animated-pages selected="[[selected]]" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
                 <ts-home-blank route="{{route}}"></ts-home-blank>
-                <ts-home-menu></ts-home-menu>
+                <ts-home-menu route="{{route}}"></ts-home-menu>
             </neon-animated-pages>
         </div>
 

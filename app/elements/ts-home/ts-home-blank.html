@@ -37,25 +37,26 @@
 
     </style>
 
-  <template>
+    <template>
 
-      <div class="contain">
-          <div class="welcome">
-              <p>Welcome!</p>
-              <p>This is your Home Screen. When you have translation projects on this device, they will appear here.</p>
-              <p>You can start a new project anytime by tapping the blue button in the top right.</p>
-          </div>
-          <paper-button raised class="start" on-tap="start">Start a new project</paper-button>
-      </div>
+        <div class="contain">
+            <div class="welcome">
+                <p>Welcome!</p>
+                <p>This is your Home Screen. When you have translation projects on this device, they will appear here.</p>
+                <p>You can start a new project anytime by tapping the blue button in the top right.</p>
+            </div>
+            <paper-button raised class="start" on-tap="start">Start a new project</paper-button>
+        </div>
 
-  </template>
+    </template>
 
 </dom-module>
 
 <script>
 
   Polymer({
-    is: 'ts-home-blank',
+
+      is: 'ts-home-blank',
 
       properties: {
           route: {
@@ -69,9 +70,10 @@
           this.route = "new";
       },
 
-    ready: function() {
+      ready: function() {
 
-    }
+      }
+
   });
 
 </script>

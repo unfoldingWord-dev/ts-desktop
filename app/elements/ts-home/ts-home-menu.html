@@ -37,6 +37,7 @@
         tbody tr:hover {
             background: var(--accent-color-dark);
             color: #fff;
+            cursor: pointer;
         }
 
         td {
@@ -56,45 +57,63 @@
 
     </style>
 
-  <template>
+    <template>
 
-      <div class="contain">
-          <table>
-              <thead>
-                  <tr class="smalltext">
-                      <td></td><td>Project</td><td>Language</td><td>Progress</td><td></td>
-                  </tr>
-              </thead>
-              <tbody>
-                  <template is="dom-repeat" items="[[projects]]" as="project">
-                      <tr>
-                          <td><iron-icon class="smallicon" icon="[[project.icon]]"></iron-icon></td>
-                          <td><span>[[project.name]]</span></td>
-                          <td><span class="smalltext">[[project.language]]</span></td>
-                          <td></td>
-                          <td><iron-icon class="smallicon" icon="info" title="More Info"></iron-icon></td>
-                      </tr>
-                  </template>
-              </tbody>
-          </table>
-      </div>
+        <div class="contain">
+            <table>
+                <thead>
+                    <tr class="smalltext">
+                        <td></td><td>Project</td><td>Language</td><td>Progress</td><td></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template is="dom-repeat" items="[[projects]]" as="project">
+                        <tr on-tap="open">
+                            <td><iron-icon class="smallicon" icon="[[project.icon]]"></iron-icon></td>
+                            <td><span>[[project.name]]</span></td>
+                            <td><span class="smalltext">[[project.language]]</span></td>
+                            <td></td>
+                            <td><iron-icon class="smallicon" icon="info" title="Info"></iron-icon></td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
 
-  </template>
+    </template>
 
 </dom-module>
 
 <script>
 
   Polymer({
-    is: 'ts-home-menu',
 
-    ready: function() {
-      this.projects = [
-          {"name": 'Genesis', "language": 'Amharic', "icon": 'project:project'},
-          {"name": 'John', "language": 'Afaraf', "icon": 'project:project'},
-          {"name": 'Open Bible Stories', "language": 'Amal', "icon": 'uw-icon:uw-icon-small'}
-      ];
-    }
+      is: 'ts-home-menu',
+
+      properties: {
+          route: {
+              type: String,
+              value: '',
+              notify: true
+          },
+          projects: {
+              type: Array,
+              value: []
+          }
+      },
+
+      open: function () {
+          this.route = "translate";
+      },
+
+      ready: function() {
+          this.projects = [
+              {"name": 'Genesis', "language": 'Amharic', "icon": 'project:project'},
+              {"name": 'John', "language": 'Afaraf', "icon": 'project:project'},
+              {"name": 'Open Bible Stories', "language": 'Amal', "icon": 'uw-icon:uw-icon-small'}
+          ];
+      }
+
   });
 
 </script>

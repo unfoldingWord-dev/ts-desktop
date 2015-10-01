@@ -21,11 +21,6 @@
 
         paper-icon-button {
             padding-bottom: 15px;
-            color: #B7E1DF;
-        }
-
-        .current {
-            color: white;
         }
 
         paper-item:hover {
@@ -44,11 +39,11 @@
 
     <template>
         <paper-menu-button horizontal-offset="10" vertical-offset="10" vertical-align="bottom">
-            <paper-icon-button class="current dropdown-trigger" icon="more-vert" title="options"></paper-icon-button>
+            <paper-icon-button class="dropdown-trigger" icon="more-vert" title="options"></paper-icon-button>
             <paper-menu class="dropdown-content">
                 <paper-item on-tap="home1">Home 1</paper-item>
                 <paper-item on-tap="home2">Home 2</paper-item>
-                <paper-item><span>Feedback</span></paper-item>
+                <paper-item>Feedback</paper-item>
                 <paper-item>Settings</paper-item>
             </paper-menu>
         </paper-menu-button>
@@ -85,8 +80,8 @@
 
         ready: function() {
 
-
         }
+
     });
 
 </script>

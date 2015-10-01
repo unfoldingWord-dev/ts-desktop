@@ -3,62 +3,65 @@
 
 <dom-module id="ts-new-project-button">
 
-  <style>
+    <style>
 
-      paper-fab {
-          border-radius: 49.9999%;
-      }
+        paper-fab {
+            border-radius: 49.9999%;
+        }
 
-      paper-fab.fixed {
-          background: var(--accent-color-light);
-          color: white;
-      }
+        paper-fab.fixed {
+            background: var(--accent-color-light);
+            color: white;
+        }
 
-      .fixed {
-          position: absolute;
-          right: 12px;
-          top: 12px;
-      }
+        .fixed {
+            position: absolute;
+            right: 12px;
+            top: 12px;
+        }
 
-      #buttonbox {
-          position: fixed;
-          right: 12px;
-          top: 48px;
-          height: 80px;
-          width: 80px;
-      }
+        #buttonbox {
+            position: fixed;
+            right: 12px;
+            top: 48px;
+            height: 80px;
+            width: 80px;
+        }
 
-  </style>
+    </style>
 
-  <template>
+    <template>
 
         <div id="buttonbox">
             <paper-fab class="fixed" icon="add" title="New Project" on-tap="new"></paper-fab>
         </div>
 
-  </template>
+    </template>
+
 </dom-module>
 
 <script>
 
-Polymer({
-  is: 'ts-new-project-button',
+    Polymer({
 
-    properties: {
-        route: {
-            type: String,
-            value: '',
-            notify: true
+        is: 'ts-new-project-button',
+
+        properties: {
+            route: {
+                type: String,
+                value: '',
+                notify: true
+            }
+        },
+
+        new: function () {
+            this.route = "new";
+        },
+
+        ready: function() {
+
         }
-    },
 
-    new: function () {
-        this.route = "new";
-    },
-
-  ready: function() {
-
-  }
-});
+    });
 
 </script>

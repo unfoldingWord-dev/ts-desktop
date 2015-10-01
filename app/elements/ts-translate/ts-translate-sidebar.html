@@ -19,7 +19,7 @@
             align-items: center;
         }
 
-        div {
+        .top {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -49,7 +49,7 @@
     </style>
 
     <template>
-        <div>
+        <div class="top">
             <paper-icon-button id="read" class="current" icon="assignment" title="Read Mode" on-tap="read"></paper-icon-button>
             <paper-icon-button id="chunk" icon="flip-to-front" title="Chunk Mode" on-tap="chunk"></paper-icon-button>
             <paper-icon-button id="review" icon="assignment-turned-in" title="Review Mode" on-tap="review"></paper-icon-button>

@@ -26,17 +26,18 @@
             flex: auto;
         }
 
-        .bar {
+        .header {
             background-color: var(--primary-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .title {
             color: var(--text-color);
             display: flex;
             justify-content: flex-start;
             align-items: center;
             min-height: 45px;
-        }
-
-        .titles {
-            flex: auto;
             font-size: 125%;
         }
 
@@ -44,9 +45,7 @@
             margin: 0 1em 0 .2em;
         }
 
-        .header {
-            background: var(--primary-color);
-            width: 100%;
+        .steps {
             display: flex;
             justify-content: center;
             align-items: center;
@@ -104,25 +103,26 @@
 
     <template>
 
-        <div class="bar">
-            <paper-icon-button icon="arrow-back" title="Go Back" on-tap="back"></paper-icon-button>
-            <div class="titles">Publish Project</div>
-        </div>
-
         <div class="header">
-            <template is="dom-repeat" items="[[stepslist]]" as="step">
-                <div class$="[[step.level]]">
-                    <div class="circle"><span class="text">[[step.number]]</span><iron-icon icon="done" class="icon"></iron-icon></div>
-                    <span>[[step.name]]</span>
-                </div>
-            </template>
+            <div class="title">
+                <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
+                <span>Publish Project</span>
+            </div>
+            <div class="steps">
+                <template is="dom-repeat" items="[[stepslist]]" as="step">
+                    <div class$="[[step.level]]">
+                        <div class="circle"><span class="text">[[step.number]]</span><iron-icon icon="done" class="icon"></iron-icon></div>
+                        <span>[[step.name]]</span>
+                    </div>
+                </template>
+            </div>
         </div>
 
         <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
             <ts-publish-book selected="{{selected}}" language="[[language]]" book="[[book]]"></ts-publish-book>
             <ts-publish-profile selected="{{selected}}"></ts-publish-profile>
             <ts-publish-review selected="{{selected}}" language="[[language]]" book="[[book]]"></ts-publish-review>
-            <ts-publish-publish selected="{{selected}}"></ts-publish-publish>
+            <ts-publish-publish></ts-publish-publish>
         </neon-animated-pages>
 
     </template>

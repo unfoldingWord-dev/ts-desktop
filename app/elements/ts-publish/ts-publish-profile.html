@@ -51,48 +51,50 @@
 
     </style>
 
-  <template>
+    <template>
 
-      <div class="contain">
-          <div class="input">
-              <input is="iron-input" bind-value="" placeholder="Your Name">
-              <iron-icon class="right" icon="info" title="More Info"></iron-icon>
-          </div>
-          <div class="input">
-              <input is="iron-input" bind-value="" placeholder="Your Email Address">
-              <iron-icon class="right" icon="info" title="More Info"></iron-icon>
-          </div>
-          <div class="input">
-              <input is="iron-input" bind-value="" placeholder="Your Phone Number">
-              <iron-icon class="right" icon="info" title="More Info"></iron-icon>
-          </div>
-          <paper-button raised class="next" on-tap="next">NEXT STEP</paper-button>
-      </div>
+        <div class="contain">
+            <div class="input">
+                <input is="iron-input" bind-value="" placeholder="Your Name">
+                <iron-icon class="right" icon="info" title="Info"></iron-icon>
+            </div>
+            <div class="input">
+                <input is="iron-input" bind-value="" placeholder="Your Email Address">
+                <iron-icon class="right" icon="info" title="Info"></iron-icon>
+            </div>
+            <div class="input">
+                <input is="iron-input" bind-value="" placeholder="Your Phone Number">
+                <iron-icon class="right" icon="info" title="Info"></iron-icon>
+            </div>
+            <paper-button raised class="next" on-tap="next">NEXT STEP</paper-button>
+        </div>
 
-  </template>
+    </template>
 
 </dom-module>
 
 <script>
 
-  Polymer({
-    is: 'ts-publish-profile',
+    Polymer({
 
-      properties: {
-          selected: {
-              type: Number,
-              value: 1,
-              notify: true
-          }
-      },
+        is: 'ts-publish-profile',
 
-      next: function () {
-          this.selected = this.selected + 1;
-      },
+        properties: {
+            selected: {
+                type: Number,
+                value: 1,
+                notify: true
+            }
+        },
 
-    ready: function() {
+        next: function () {
+            this.selected = this.selected + 1;
+        },
 
-    }
-  });
+        ready: function() {
+
+        }
+
+    });
 
 </script>

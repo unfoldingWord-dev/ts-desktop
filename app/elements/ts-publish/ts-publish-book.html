@@ -57,41 +57,51 @@
 
     </style>
 
-  <template>
+    <template>
 
-      <div class="contain">
-          <div class="list">
-              <ul>
-                  <li><span>[[book.name]]</span><iron-icon class="right" icon="done"></iron-icon></li>
-              </ul>
-          </div>
-          <paper-button raised class="next" on-tap="next">NEXT STEP</paper-button>
-      </div>
+        <div class="contain">
+            <div class="list">
+                <ul>
+                    <li><span>[[book.name]]</span><iron-icon class="right" icon="done"></iron-icon></li>
+                </ul>
+            </div>
+            <paper-button raised class="next" on-tap="next">NEXT STEP</paper-button>
+        </div>
 
-  </template>
+    </template>
 
 </dom-module>
 
 <script>
 
-  Polymer({
-    is: 'ts-publish-book',
+    Polymer({
 
-      properties: {
-          selected: {
-              type: Number,
-              value: 0,
-              notify: true
-          }
-      },
+        is: 'ts-publish-book',
 
-      next: function () {
-          this.selected = this.selected + 1;
-      },
+        properties: {
+            selected: {
+                type: Number,
+                value: 0,
+                notify: true
+            },
+            language: {
+                type: Object,
+                value: {}
+            },
+            book: {
+                type: Object,
+                value: {}
+            }
+        },
 
-    ready: function() {
+        next: function () {
+            this.selected = this.selected + 1;
+        },
 
-    }
-  });
+        ready: function() {
+
+        }
+
+    });
 
 </script>

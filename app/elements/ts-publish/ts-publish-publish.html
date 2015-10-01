@@ -15,7 +15,7 @@
             flex: auto;
         }
 
-        .contain>div {
+        .contain > div {
             background: white;
             box-shadow: 0 2px 3px 2px #ccc;
         }
@@ -33,7 +33,7 @@
             flex-direction: column;
         }
 
-        .right>div {
+        .right > div {
             display: flex;
             justify-content: center;
             flex-direction: column;
@@ -41,7 +41,7 @@
             flex-grow: 1;
         }
 
-        .right>div>* {
+        .right > div > * {
             margin: 10px 20px;
         }
 
@@ -62,43 +62,45 @@
 
     </style>
 
-  <template>
+    <template>
 
-      <div class="contain">
-          <div class="left">
-              <img src="../ts-icons/uw-title-image.png" width="326" height="68">
-              <p>Explanation of the publishing process will appear here!</p>
-          </div>
-          <div class="right">
-              <div>
-                  <p>Publish your project directly to unfoldingWord</p>
-                  <paper-button raised class="publish" on-tap="">UPLOAD</paper-button>
-              </div>
-              <div class="lower">
-                  <p>You may also share and distribute your project using these options.</p>
-                  <div class="link">Send to SD card</div>
-                  <div class="link">Send via Bluetooth</div>
-                  <div class="link">Other Sharing</div>
-              </div>
-          </div>
-      </div>
+        <div class="contain">
+            <div class="left">
+                <img src="../ts-icons/uw-title-image.png" width="326" height="68">
+                <p>Explanation of the publishing process will appear here!</p>
+            </div>
+            <div class="right">
+                <div>
+                    <p>Publish your project directly to unfoldingWord</p>
+                    <paper-button raised class="publish" on-tap="">UPLOAD</paper-button>
+                </div>
+                <div class="lower">
+                    <p>You may also share and distribute your project using these options.</p>
+                    <div class="link">Send to SD card</div>
+                    <div class="link">Send via Bluetooth</div>
+                    <div class="link">Other Sharing</div>
+                </div>
+            </div>
+        </div>
 
-  </template>
+    </template>
 
 </dom-module>
 
 <script>
 
-  Polymer({
-    is: 'ts-publish-publish',
+    Polymer({
 
-      properties: {
+        is: 'ts-publish-publish',
 
-      },
+        properties: {
 
-    ready: function() {
+        },
 
-    }
-  });
+        ready: function() {
+
+        }
+
+    });
 
 </script>

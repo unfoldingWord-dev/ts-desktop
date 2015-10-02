@@ -6,6 +6,7 @@
     let path = require('path');
     let mkdirp = require('mkdirp');
     let rimraf = require('rimraf');
+    let SQL = require('sql.js');
     let md5 = require('md5');
     let _ = require('lodash');
     let raiseWithContext = require('./lib/util').raiseWithContext;
@@ -31,9 +32,53 @@
         _this.config = _.merge({indexDir: ''}, configJson);
         _this.indexId = indexName;
         _this.rootPath = path.join(_this.config.indexDir, indexName);
+        _this.dbFilePath = path.resolve('./', path.join( _this.config.indexDir, indexName + '.sqlite'));
+        _this.dbDirPath = path.dirname(_this.dbFilePath);
+        _this.needsDbSave = 0;
+        if (!fs.existsSync(_this.dbFilePath)) {
+            try {
+                mkdirp.sync(_this.dbDirPath, '0755');
+            }
+            catch (err) {
+                console.log(err);
+                return false;
+            }
+            let db = new SQL.Database();
+            db.exec("CREATE TABLE file (path text, dir text, file text, content text);");
+            let data = db.export();
+            let buffer = new Buffer(data);
+            fs.writeFileSync(_this.dbFilePath, buffer);
+        }
+        let buffer = fs.readFileSync(_this.dbFilePath);
+        let db = new SQL.Database(buffer);
 
         //internal functions
+        function saveDb () {
+            if (_this.needsDbSave !== 1) {
+                return;
+            }
+            let data = db.export();
+            let buffer = new Buffer(data);
+            try {
+                mkdirp.sync(_this.dbDirPath, '0755');
+            }
+            catch (err) {
+                console.log(err);
+                return false;
+            }
+            try {
+                fs.writeFileSync(_this.dbFilePath, buffer);
+            }
+            catch (err) {
+                console.log(err);
+                return false;
+            }
+            _this.needsDbSave = 0;
+            return true;
+        }
+
         function openFile (filePath) {
+            /** /
             let fullPath = path.join(_this.rootPath, filePath);
             let fileContents = null;
             if (fs.existsSync(fullPath)) {
@@ -46,9 +91,16 @@
                 }
             }
             return fileContents;
+            /**/
+
+            let statement = db.prepare("SELECT content FROM file WHERE path=:path");
+            let result = statement.getAsObject({':path': filePath});
+            statement.free();
+            return result.content || null;
         }
 
         function deleteFile (filePath) {
+            /** /
             let fullPath = path.join(_this.rootPath, filePath);
             if (fs.existsSync(fullPath)) {
                 let stats = fs.lstatSync(fullPath);
@@ -58,6 +110,11 @@
                     fs.unlinkSync(fullPath);
                 }
             }
+            /**/
+
+            db.run("DELETE FROM file WHERE path = :path", {':path': filePath});
+            _this.needsDbSave = 1;
+            return true;
         }
 
         function openJson (filePath) {
@@ -69,6 +126,7 @@
         }
 
         function saveFile (filePath, fileContents) {
+            /** /
             let fullPath = path.join(_this.rootPath, filePath);
             let fullDirPath = path.dirname(fullPath);
             if (fullDirPath.indexOf('test') === 0) {
@@ -89,6 +147,14 @@
                 return false;
             }
             return true;
+            /**/
+
+            let fileDirPath = path.dirname(filePath);
+            let fileName = path.basename(filePath, '.json');
+            db.run("DELETE FROM file WHERE path = :path", {':path': filePath});
+            db.run("INSERT INTO file (path, dir, file, content) VALUES (:path, :dir, :file, :content)", {':path': filePath, ':dir': fileDirPath, ':file': fileName, ':content': fileContents});
+            _this.needsDbSave = 1;
+            return true;
         }
 
         function saveJson (filePath, fileContents) {
@@ -105,6 +171,7 @@
             }
             links[md5Hash]++;
             saveJson(linksJsonPath, links);
+            let links2 = openJson(linksJsonPath);
         }
 
         function decrementLink (md5Hash) {
@@ -188,6 +255,7 @@
             if (subFolder !== undefined) {
                 md5Path = path.join(md5Path, subFolder);
             }
+            /** /
             let fullPath = path.join(_this.rootPath, md5Path);
             let items = [];
             if (fs.existsSync(fullPath)) {
@@ -199,6 +267,22 @@
                         }
                     }
                 }
+            }
+            return items;
+            /**/
+
+            let items = [];
+            if (catalogApiUrl.indexOf('source.json') !== -1 && subFolder === undefined) {
+                //get chapters
+                let trimDir = md5Path + path.sep;
+                let statementChapters = db.prepare("SELECT DISTINCT dir FROM file WHERE dir LIKE :dir AND file <> 'chapter' AND file <> 'meta' ORDER BY path", {':dir': md5Path + '%'});
+                while (statementChapters.step()) items.push(statementChapters.get()[0].replace(trimDir, ''));
+                statementChapters.free();
+            } else {
+                //get items
+                let statement = db.prepare("SELECT file FROM file WHERE dir = :dir AND file <> 'chapter' AND file <> 'meta' ORDER BY path", {':dir': md5Path});
+                while (statement.step()) items.push(statement.get()[0]);
+                statement.free();
             }
             return items;
         }
@@ -336,7 +420,7 @@
             return _this.indexId;
         };
         _this.getIndexPath = function () {
-            return _this.rootPath;
+            return _this.config.indexDir;
         };
 
         //public indexing functions
@@ -348,7 +432,9 @@
             let md5Hash = md5(catalogApiUrl);
             let catalogLinkFile = path.join(sourceDirPath, 'projects_catalog.link');
             let catalogType = 'simple';
-            return indexItems(md5Hash, catalogLinkFile, catalogType, catalogJson);
+            let returnData = indexItems(md5Hash, catalogLinkFile, catalogType, catalogJson);
+            saveDb();
+            return returnData;
         };
 
         _this.indexSourceLanguages = function (projectId, catalogJson, metaObj) {
@@ -373,7 +459,9 @@
             let md5Hash = md5(catalogApiUrl);
             let catalogLinkFile = path.join(sourceDirPath, projectId, 'languages_catalog.link');
             let catalogType = 'simple';
-            return indexItems(md5Hash, catalogLinkFile, catalogType, catalogJson, metaObj);
+            let returnData = indexItems(md5Hash, catalogLinkFile, catalogType, catalogJson, metaObj);
+            saveDb();
+            return returnData;
         };
 
         _this.indexResources = function (projectId, sourceLanguageId, catalogJson, metaObj) {
@@ -394,7 +482,9 @@
             let md5Hash = md5(catalogApiUrl);
             let catalogLinkFile = path.join(sourceDirPath, projectId, sourceLanguageId, 'resources_catalog.link');
             let catalogType = 'simple';
-            return indexItems(md5Hash, catalogLinkFile, catalogType, catalogJson, metaObj);
+            let returnData = indexItems(md5Hash, catalogLinkFile, catalogType, catalogJson, metaObj);
+            saveDb();
+            return returnData;
         };
 
         _this.indexSource = function (projectId, sourceLanguageId, resourceId, catalogJson, metaObj) {
@@ -411,7 +501,9 @@
             let md5Hash = md5(catalogApiUrl);
             let catalogLinkFile = path.join(sourceDirPath, projectId, sourceLanguageId, resourceId, 'source.link');
             let catalogType = 'source';
-            return indexItems(md5Hash, catalogLinkFile, catalogType, catalogJson, metaObj);
+            let returnData = indexItems(md5Hash, catalogLinkFile, catalogType, catalogJson, metaObj);
+            saveDb();
+            return returnData;
         };
 
         _this.indexNotes = function (projectId, sourceLanguageId, resourceId, catalogJson, metaObj) {
@@ -422,7 +514,9 @@
             let md5Hash = md5(catalogApiUrl);
             let catalogLinkFile = path.join(sourceDirPath, projectId, sourceLanguageId, resourceId, 'notes.link');
             let catalogType = 'advanced';
-            return indexItems(md5Hash, catalogLinkFile, catalogType, catalogJson, metaObj);
+            let returnData = indexItems(md5Hash, catalogLinkFile, catalogType, catalogJson, metaObj);
+            saveDb();
+            return returnData;
         };
 
         _this.indexTerms = function (projectId, sourceLanguageId, resourceId, catalogJson, metaObj) {
@@ -433,7 +527,9 @@
             let md5Hash = md5(catalogApiUrl);
             let catalogLinkFile = path.join(sourceDirPath, projectId, sourceLanguageId, resourceId, 'terms.link');
             let catalogType = 'advanced';
-            return indexItems(md5Hash, catalogLinkFile, catalogType, catalogJson, metaObj);
+            let returnData = indexItems(md5Hash, catalogLinkFile, catalogType, catalogJson, metaObj);
+            saveDb();
+            return returnData;
         };
 
         _this.indexQuestions = function (projectId, sourceLanguageId, resourceId, catalogJson, metaObj) {
@@ -444,7 +540,9 @@
             let md5Hash = md5(catalogApiUrl);
             let catalogLinkFile = path.join(sourceDirPath, projectId, sourceLanguageId, resourceId, 'checking_questions.link');
             let catalogType = 'advanced';
-            return indexItems(md5Hash, catalogLinkFile, catalogType, catalogJson, metaObj);
+            let returnData = indexItems(md5Hash, catalogLinkFile, catalogType, catalogJson, metaObj);
+            saveDb();
+            return returnData;
         };
 
         //public string retrieval functions

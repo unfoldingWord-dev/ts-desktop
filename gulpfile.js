@@ -5,7 +5,7 @@
  */
 
 var gulp = require('gulp'),
-    mocha = require('gulp-mocha');
+    mocha = require('gulp-mocha'),
     jshint = require('gulp-jshint'),
     stylish = require('jshint-stylish'),
     jscs = require('gulp-jscs'),
@@ -16,12 +16,12 @@ var gulp = require('gulp'),
 var APP_NAME = 'translationStudio',
     JS_FILES = './app/js/**/*.js',
     UNIT_TEST_FILES = './unit_tests/**/*.js';
-    
+
 gulp.task('test', function () {
     return gulp.src(UNIT_TEST_FILES, { read: false })
-        .pipe(mocha({reporter: 'spec'}));
+        .pipe(mocha({reporter: 'spec', grep: (argv.grep || argv.g)}));
 });
-    
+
 gulp.task('jscs', function () {
     return gulp.src([JS_FILES, UNIT_TEST_FILES])
         .pipe(jscs({
@@ -59,7 +59,7 @@ gulp.task('lint', [
 ]);
 
 gulp.task('build', ['lint', 'test'], function () {
-  
+
     var nw = new NwBuilder({
         files: './app/**/**', // use the glob format
         platforms: ['osx64', 'win64'],
@@ -71,4 +71,4 @@ gulp.task('build', ['lint', 'test'], function () {
     }).catch(console.error.bind(console, 'there was an error building...'));
 });
 
-gulp.task('default', ['build']);
+gulp.task('default', ['lint', 'test']);

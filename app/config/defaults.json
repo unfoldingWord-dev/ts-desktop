@@ -54,5 +54,29 @@
             "mutable": false,
             "type": "string"
         }
+    },
+    {
+        "name": "apiUrl",
+        "value": "https://api.unfoldingword.org/ts/txt/2/catalog.json",
+        "meta":{
+            "mutable": false,
+            "type": "string"
+        }
+    },
+    {
+        "name": "i18nLibrary",
+        "value": "app/i18n/",
+        "meta": {
+            "mutable": false,
+            "type": "string"
+        }
+    },
+    {
+        "name": "asyncLimit",
+        "value": 5,
+        "meta": {
+            "mutable": false,
+            "type": "number"
+        }
     }
 ]

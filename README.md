@@ -1,4 +1,6 @@
-[![Crowdin](https://d322cqt584bo4o.cloudfront.net/translation-studio/localized.png)](https://crowdin.com/project/translation-studio) [![Build Status](https://travis-ci.org/unfoldingWord-dev/ts-desktop.svg?branch=develop)](https://travis-ci.org/unfoldingWord-dev/ts-desktop)
+[![Crowdin](https://d322cqt584bo4o.cloudfront.net/translation-studio/localized.png)](https://crowdin.com/project/translation-studio)
+[![Build Status](https://travis-ci.org/unfoldingWord-dev/ts-desktop.svg?branch=develop)](https://travis-ci.org/unfoldingWord-dev/ts-desktop)
+[![io.js supported](https://img.shields.io/badge/io.js-supported-green.svg?style=flat)](https://iojs.org)
 
 translationStudio Desktop
 --
@@ -31,10 +33,12 @@ For more information please read the [wiki](https://github.com/unfoldingWord-dev
 ###Commands
 The following commands are available from within the project directory:
 
-* `$ gulp` builds a distribution package
+* `$ gulp build` builds a distribution package
 * `$ gulp lint` runs the linter and the JS style checker
 * `$ gulp lint --fix` same as above, but attempts to fix the JS styles for you
 * `$ gulp test` runs all Mocha unit tests
+* `$ gulp test --grep [string]` runs the Mocha unit tests that match the string
+* `$ gulp` runs the `lint` and `test` tasks
 * `$ npm start` runs the application (without building it)
 * `$ DEBUG_MODE=1 npm start` same as above, but has live reloading (which is a bit unstable, hence "debug mode")
 

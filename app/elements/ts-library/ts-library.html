@@ -5,20 +5,23 @@ Library drawer.
 <link rel="import" href="../../components/polymer/polymer.html">
 <link rel="import" href="../../components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../../components/iron-pages/iron-pages.html">
+<link rel="import" href="../../elements/ts-project-page/ts-project-page.html">
+<link rel="import" href="../../elements/ts-chapter-page/ts-chapter-page.html">
+<link rel="import" href="../../elements/ts-frame-page/ts-frame-page.html">
 
 <dom-module id="ts-library">
-  
+
   <style>
   :host {
     display: block;
     width: 50vw;
     height: 100%;
   }
-  
+
   .bar {
     @apply(--header-bar);
   }
-  
+
   ul {
     margin: 0;
     padding: 0;
@@ -42,27 +45,27 @@ Library drawer.
   }
 
   .page {
-    padding: 1em;
+    padding: 0;
     width: 100%;
   }
-  
+
   paper-tabs {
     --paper-tabs-selection-bar-color: var(--primary-color-light);
   }
-  
+
   paper-tab {
     text-transform: uppercase;
     font-weight: 300;
     font-size: 110%;
   }
   </style>
-  
+
   <template>
-  
+
     <header class="bar">
       <h2>Library</h2>
     </header>
-  
+
     <paper-tabs id="tabs" selected="{{selected}}">
       <paper-tab>Project</paper-tab>
       <paper-tab>Chapter</paper-tab>
@@ -71,25 +74,22 @@ Library drawer.
 
     <iron-pages selected="[[selected]]">
       <section class="page page-1">
-        <div clas="page-1">
-          <h3>Project</h3>
-          <div>project</div>
+        <div class="page-1">
+          <ts-project-page></ts-project-page>
         </div>
       </section>
       <section class="page page-2">
         <div class="page-2" hero-id="page-2" hero>
-          <h3>Chapter</h3>
-          <div>chapter</div>
+            <ts-chapter-page></ts-chapter-page>
           </div>
       </section>
       <section class="page page-3">
         <div class="page-3" hero-id="page-3" hero>
-          <h3>Frame</h3>
-          <div>frame</div>
+            <ts-frame-page></ts-frame-page>
         </div>
       </section>
     </iron-pages>
-    
+
   </template>
 </dom-module>
 
@@ -97,14 +97,14 @@ Library drawer.
 
 Polymer({
   is: 'ts-library',
-  
+
   properties: {
     selected: {
       type: Number,
       value: 0
     }
   },
-  
+
   ready: function() {
     // oh boy!
   }

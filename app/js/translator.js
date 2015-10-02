@@ -1,92 +1,193 @@
-var _ = require('lodash');
-var utils = require('./lib/utils');
-var setPath = utils.setPath;
-var pathObj = require('path');
-var fs = require('fs');
-var conf = require('./configurator');
-var rootDir;
-var tsIndex;
+'use strict';
 
-var translator = {
-    setResources: function (inRootDir, inIndex) {
-        'use strict';
-        tsIndex = inIndex;
-        rootDir = inRootDir;
-    },
+;(function () {
 
-    getResourcePath: function (path) {
-        'use strict';
+    let Configurator = require('./configurator').Configurator;
+    let configurator = new Configurator();
 
-        try {
-            return setPath(_.get(tsIndex, path).replace(/\//gm, pathObj.sep),
-                rootDir);
+    function Translator (appIndex) {
 
-        } catch (e) {
-            return null;
+        //reassign this to _this, set indexId and rootPath
+        //let _this = this;
+
+        function getFrame (sourceTranslation, chapterId, frameId) {
+
+            //build return object
+            let returnObj = {
+                getSource: function () {
+                    return appIndex.getFrame(sourceTranslation.projectId, sourceTranslation.sourceLanguageId, sourceTranslation.resourceId, chapterId, frameId);
+                }
+            };
+
+            //return object
+            return returnObj;
         }
 
-    },
+        function getFrames (sourceTranslation, chapterId) {
 
-    readResourceFileContent: function (path) {
-        'use strict';
-        if (fs.existsSync(path)) {
-            var data = fs.readFileSync(path, 'utf8');
-            if (data) {
-                return JSON.parse(data);
+            //get data
+            let frames = appIndex.getFrames(sourceTranslation.projectId, sourceTranslation.sourceLanguageId, sourceTranslation.resourceId, chapterId);
+
+            //build return object
+            let returnObj = {};
+            for (let frameId of frames) {
+                returnObj[frameId] = getFrame(sourceTranslation, chapterId, frameId);
             }
+
+            //return object
+            return returnObj;
         }
-        return null;
-    },
 
-    readProject: function (project) {
-        'use strict';
-        var path = project + '.lang_catalog';
-        return this.readResourceFileContent(this.getResourcePath(path,
-            tsIndex, rootDir));
+        function getChapter (sourceTranslation, chapterId) {
 
-    },
+            //get data
+            let chapterData = appIndex.getChapter(sourceTranslation.projectId, sourceTranslation.sourceLanguageId, sourceTranslation.resourceId, chapterId);
 
-    getProject: function (projectId, languageId, resourceId) {
-        'use strict';
-        var path = projectId + '.' + languageId + '.' + resourceId + '.source';
-        var resPath = this.getResourcePath(path, tsIndex, rootDir);
-        if (resPath) {
-            conf.setValue('last_project_id', projectId);
-            conf.setValue(projectId + '_source_language_id', languageId);
-            conf.setValue(projectId + '_resource_id', resourceId);
-            return this.readResourceFileContent(resPath);
+            //build return object
+            let returnObj = {
+                getNumber: function () {
+                    return chapterData.number;
+                },
+                getReference: function () {
+                    return chapterData.ref;
+                },
+                getTitle: function () {
+                    return chapterData.title;
+                },
+                getFrames: function () {
+                    return getFrames(sourceTranslation, chapterId);
+                },
+                getFrame: function (frameId) {
+                    return getFrame(sourceTranslation, chapterId, frameId);
+                }
+            };
+
+            //return object
+            return returnObj;
         }
-        return null;
-    },
 
-    getTargetLanguage: function (projectId) {
-        'use strict';
-        if (arguments.length < 1 || projectId === null) {
-            return null;
+        function getChapters (sourceTranslation) {
+
+            //get data
+            let chapters = appIndex.getChapters(sourceTranslation.projectId, sourceTranslation.sourceLanguageId, sourceTranslation.resourceId);
+
+            //build return object
+            let returnObj = {};
+            for (let chapterId of chapters) {
+                returnObj[chapterId] = getChapter(sourceTranslation, chapterId);
+            }
+
+            //return object
+            return returnObj;
         }
-        return conf.getString(projectId + '_target_language_id');
-    },
 
-    getLastProject: function () {
-        'use strict';
-        var projectId = conf.getString('last_project_id');
-        var languageId = conf.getString(projectId + '_source_language_id');
-        var resourceId = conf.getString(projectId + '_resource_id');
-        return this.getProject(projectId, languageId, resourceId);
-    },
+        let translator = {
+            getIndexId: function () {
+                return appIndex.getIndexId();
+            },
 
-    getLastTargetLanguage: function () {
-        'use strict';
-        return conf.getString(conf.getString('last_project_id') + '_target_language_id');
+            getProject: function (projectId, sourceLanguageId, resourceId) {
 
+                //verify lets
+                if (projectId === null || sourceLanguageId === null || resourceId === null) {
+                    return null;
+                }
+
+                //get data
+                let projectData = appIndex.getProject(projectId);
+                let sourceLanguageData = appIndex.getSourceLanguage(projectId, sourceLanguageId);
+                let resourceData = appIndex.getResource(projectId, sourceLanguageId, resourceId);
+
+                //verify data
+                if (projectData === null || sourceLanguageData === null || resourceData === null) {
+                    return null;
+                }
+
+                //build sourceTranslation object
+                //TODO: eventually this will be what is passed into this method
+                let sourceTranslation = {
+                    projectId: projectId,
+                    sourceLanguageId: sourceLanguageId,
+                    resourceId: resourceId
+                };
+
+                //build return object
+                let returnObj = {
+                    getProjectId: function () {
+                        return projectId;
+                    },
+                    getSourceLanguageId: function () {
+                        return sourceLanguageId;
+                    },
+                    getResourceId: function () {
+                        return resourceId;
+                    },
+                    getTitle: function () {
+                        return sourceLanguageData.project.name;
+                    },
+                    getDescription: function () {
+                        return sourceLanguageData.project.desc;
+                    },
+                    getImage: function () {
+                        return '';//TODO: where do we get this???
+                    },
+                    getSortKey: function () {
+                        return projectData.sort;
+                    },
+                    getChapters: function () {
+                        return getChapters(sourceTranslation);
+                    },
+                    getChapter: function (chapterId) {
+                        return getChapter(sourceTranslation, chapterId);
+                    },
+                    getFrames: function (chapterId) {
+                        return getFrames(sourceTranslation, chapterId);
+                    },
+                    getFrame: function (chapterId, frameId) {
+                        return getFrame(sourceTranslation, chapterId, frameId);
+                    }
+                };
+
+                //save last used values
+                configurator.setValue('lastProjectId', projectId);
+                configurator.setValue(projectId + 'SourceLanguageId', sourceLanguageId);
+                configurator.setValue(projectId + 'ResourceId', resourceId);
+
+                //return object
+                return returnObj;
+            },
+
+            getLastProject: function () {
+
+                //get last used values
+                let projectId = configurator.getValue('lastProjectId');
+                let sourceLanguageId = configurator.getValue(projectId + 'SourceLanguageId');
+                let resourceId = configurator.getValue(projectId + 'ResourceId');
+
+                //return object
+                return this.getProject(projectId, sourceLanguageId, resourceId);
+            },
+
+            getTargetLanguage: function (projectId) {
+
+                //verify data
+                if (projectId === null) {
+                    return null;
+                }
+
+                //return string
+                return configurator.getString(projectId + 'TargetLanguageId');
+            },
+
+            getLastTargetLanguage: function () {
+
+                //return string
+                return configurator.getString(configurator.getString('lastProjectId') + 'TargetLanguageId');
+            }
+        };
+
+        return translator;
     }
-};
 
-exports.setResources = translator.setResources;
-exports.getResourcePath = translator.getResourcePath;
-exports.readResourceFileContent = translator.readResourceFileContent;
-exports.readProject = translator.readProject;
-exports.getProject = translator.getProject;
-exports.getTargetLanguage = translator.getTargetLanguage;
-exports.getLastProject = translator.getLastProject;
-exports.getLastTargetLanguage = translator.getLastTargetLanguage;
+    exports.Translator = Translator;
+}());

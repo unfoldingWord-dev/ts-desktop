@@ -17,6 +17,7 @@
       "after": false,
       "afterEach": false
     },
+    "sub": true,
     "strict": true,
     "trailing": true,
     "smarttabs": true,
@@ -27,5 +28,6 @@
     "freeze": true,
     "nonew": true,
     "singleGroups": true,
-    "node": true
+    "node": true,
+    "predef": ["App"]
 }

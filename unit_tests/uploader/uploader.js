@@ -1,60 +1,51 @@
 /**
  * Created by Emmitt on 7/24/2015.
  */
-
-var assert = require('assert');
-var uploader = require('../../app/js/uploader');
-
+'use strict';
 ;(function () {
-    'use strict';
+
+    let assert = require('assert');
+    let uploader = require('../../app/js/uploader');
+    let User = require('../../app/js/user').User;
 
     describe('@Uploader', function () {
-
-        after(function () {
+        after(function (done) {
             uploader.disconnect();
+            done();
         });
-
-        describe('@setPort', function () {
-            it('should set the host of the uploader', function () {
-                var key =  'ts.door43.org';
-                uploader.setHost(key);
-                var results = uploader.getServerInfo().host;
-                assert.equal(results, key);
-            });
-        });
-
-        describe('@setPort', function () {
-            it('should set the port of the uploader', function () {
-                var key =  '9095';
-                uploader.setPort(key);
-                var results = uploader.getServerInfo().port;
-                assert.equal(results, key);
-            });
-        });
-
-        describe('@connect', function () {
-            it('should attempt to connect to the server', function () {
+        describe('@register', function () {
+            this.timeout(10000);
+            it('should register with the server', function (done) {
                 var key =  'done';
-                uploader.connect(function (data) {
+                var deviceID = 'uploaderUnitTest';
+                uploader.register('ts.door43.org', 9095, deviceID, function (data) {
                     if (data.error) {
-                        assert.fail(true, false, data.error);
+                        if (data.error === 'duplicate username') {
+                            assert.ok(true, data.error);
+                            done();
+                        } else {
+                            assert.fail(true, false, data.error);
+                            done();
+                        }
                     } else {
                         assert.equal(data.ok, key);
+                        done();
                     }
                 });
             });
         });
-
-        describe('@setServerInfo', function () {
-            it('should set the port and host at the same time', function () {
-                var host =  'hello';
-                var port =  '101';
-                uploader.setServerInfo({'host': host, 'port': port});
-                var results = uploader.getServerInfo();
-                assert.equal(results.port, port);
-                assert.equal(results.host, host);
+        describe('@verifyProfile', function () {
+            it('should make sure a profile has a name and email', function () {
+                var user = new User({
+                    profilesDirectory: 'unit_tests/user/data/',
+                    username: 'username',
+                    password: 'password'
+                });
+                user.setEmail('test@example.com');
+                user.setName('Tester');
+                var returned = uploader.verifyProfile(user);
+                assert.equal(returned, true);
             });
         });
     });
-
 })();

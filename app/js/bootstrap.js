@@ -6,11 +6,13 @@
 ;(function (root) {
     'use strict';
 
-    let configurator = require('../js/configurator');
+    let path = require('path');
+    let Configurator = require('../js/configurator').Configurator;
+    let configurator = new Configurator();
     let gui = require('nw.gui');
     let mainWindow = gui.Window.get();
-    let reporter = require('../js/reporter.js');
-    let uploader = require('../js/uploader.js');
+    let Reporter = require('../js/reporter').Reporter;
+    let uploader = require('../js/uploader');
 
     /**
      * FIX - This provides a fix to the native chrome shadow missing
@@ -33,23 +35,28 @@
 
         window: mainWindow,
 
-        reporter: new reporter.instance({
-            logPath:configurator.getString('logPath'),
-            repoOwner: configurator.getString('repoOwner'),
-            repo: configurator.getString('repo'),
-            maxLogFileKb: configurator.getInt('maxLogFileKb'),
-            appVersion: require('../package.json').version
-        }),
-
         uploader: uploader,
 
         isMaximized: false,
 
         display: function () {
             let win = this.window;
-            win.show();
-            // NOTE: needs to be in a setTimeout, otherwise doesn't work properly
-            setTimeout(win.focus.bind(win), 1);
+
+            if (!win.shown) {
+                win.show();
+                win.shown = true;
+                // NOTE: needs to be in a setTimeout, otherwise doesn't work properly
+                setTimeout(win.focus.bind(win), 1);
+            }
+        },
+
+        reload: function () {
+            this.window.removeAllListeners();
+            this.window.reload();
+        },
+
+        showDevTools: function () {
+            this.window.showDevTools('', true);
         },
 
         /**
@@ -83,7 +90,14 @@
                 key: 'Ctrl+Alt+I',
 
                 active: function () {
-                    this.window.showDevTools('', true);
+                    App.showDevTools();
+                }
+            },
+            reload: {
+                key: 'Ctrl+R',
+
+                active: function () {
+                    App.reload();
                 }
             }
         },
@@ -112,7 +126,7 @@
                     option[prop] = s[prop].bind(_this, s);
                 });
 
-                var shortcut = new _this.gui.Shortcut(option);
+                let shortcut = new _this.gui.Shortcut(option);
 
                 // Register global desktop shortcut, which can work without focus.
                 _this.gui.App.registerGlobalHotKey(shortcut);
@@ -128,11 +142,13 @@
 
             _this.configurator.setStorage(window.localStorage);
 
-            var config = require('../config/ts-config');
-            var defaults = require('../config/defaults');
+            let config = require('../config/ts-config');
+            let defaults = require('../config/defaults');
 
             _this.configurator.loadConfig(config);
             _this.configurator.loadConfig(defaults);
+            _this.configurator.setValue('rootDir', gui.App.dataPath, {'mutable':false});
+            _this.configurator.setValue('indexDir', path.join(gui.App.dataPath, 'index'), {'mutable':false});
         },
 
         /**
@@ -159,15 +175,30 @@
             }
         },
 
+        initializeReporter: function () {
+            let _this = this;
+
+            _this.reporter = new Reporter({
+                logPath: configurator.getValue('logPath'),
+                repoOwner: configurator.getValue('repoOwner'),
+                repo: configurator.getValue('repo'),
+                maxLogFileKb: configurator.getValue('maxLogFileKb'),
+                appVersion: require('../package.json').version
+            });
+
+            return _this.reporter;
+        },
+
         /**
          * A hook for global error catching
          */
         registerErrorReporter: function () {
+            process.removeAllListeners('uncaughtException');
             process.on('uncaughtException', function (err) {
-                var date = new Date();
+                let date = new Date();
                 date = date.getFullYear() + '_' + date.getMonth() + '_' + date.getDay();
-                var path = configurator.getString('crashDir') + '/' +  date + '.crash';
-                var crashReporter = new reporter.instance({logPath: path});
+                let path = configurator.getValue('crashDir') + '/' +  date + '.crash';
+                let crashReporter = new Reporter({logPath: path});
                 crashReporter.logError(err.message + '\n' + err.stack, function () {
                     /**
                      * TODO: Hook in a UI
@@ -180,21 +211,14 @@
             });
         },
 
-        initializeUploader: function () {
-            uploader.setServerInfo({
-                'host': configurator.getString('authServer'),
-                'port': configurator.getString('authServerPort')
-            });
-        },
-
         init: function () {
             let _this = this;
 
             _this.registerEvents();
             _this.registerShortcuts();
             _this.initializeConfig();
+            _this.initializeReporter();
             _this.registerErrorReporter();
-            _this.initializeUploader();
 
             let platformInit = _this.platformInit[process.platform];
             platformInit && platformInit.call(_this);
@@ -214,7 +238,7 @@
  * From: https://github.com/nwjs/nw.js/wiki/Livereload-nw.js-on-changes
  */
 
-;(function () {
+;(function (root) {
     'use strict';
 
     if (process.env.DEBUG_MODE) {
@@ -230,9 +254,7 @@
             console.log('Initiating auto reload...');
 
             gulp.task('html', function () {
-                if (location) {
-                    location.reload();
-                }
+                root.App.reload();
             });
 
             gulp.task('css', function () {
@@ -249,4 +271,4 @@
             gulp.watch(['**/*.html'], ['html']);
         }
     }
-})();
+})(this);

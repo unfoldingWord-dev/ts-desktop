@@ -1,5 +1,6 @@
 
-<link rel="import" href="../../components/paper-card/paper-card.html">
+<link rel="import" href="./ts-translation-card.html">
+<link rel="import" href="./ts-fakesource-card.html">
 
 <dom-module id="ts-review-mode">
 
@@ -7,22 +8,24 @@
 
 		:host {
             display: flex;
-            justify-content: center;
-            align-items: center;
+            overflow: auto;
         }
 
-        .main {
-            height: 200px;
-            width: 450px;
-		}
+        ts-translation-card {
+            flex: auto;
+            margin: 15px 0 0 15px;
+            min-width: 400px;
+        }
 
 	</style>
 
 	<template>
 
-        <paper-card class="main">
-            <p>Placeholder for review mode page</p>
-        </paper-card>
+        <ts-fakesource-card sources="[[sources]]"></ts-fakesource-card>
+
+        <ts-translation-card translation="{{translation}}"></ts-translation-card>
+
+        <ts-translation-card translation="{{translation}}"></ts-translation-card>
 
 	</template>
 
@@ -33,6 +36,18 @@
 	Polymer({
 
 		is: 'ts-review-mode',
+
+        properties: {
+            sources: {
+                type: Array,
+                value: []
+            },
+            translation: {
+                type: Object,
+                value: {},
+                notify: true
+            }
+        },
 
 		ready: function() {
 

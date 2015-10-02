@@ -32,7 +32,7 @@
         <neon-animated-pages selected="[[selected]]" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
             <ts-read-mode></ts-read-mode>
             <ts-chunk-mode></ts-chunk-mode>
-            <ts-review-mode></ts-review-mode>
+            <ts-review-mode sources="[[sources]]" translation="{{translation}}"></ts-review-mode>
         </neon-animated-pages>
 
     </template>
@@ -54,10 +54,86 @@
                 type: String,
                 value: '',
                 notify: true
+            },
+            sources: {
+                type: Array,
+                value: []
+            },
+            translation: {
+                type: Object,
+                value: {}
             }
         },
 
         ready: function() {
+
+            this.translation = {
+                language: {
+                    code: 'ulb',
+                    name: 'English ULB'
+                },
+                project: 'John',
+                divisions: [
+                    {
+                        title: 1,
+                        content: [
+                            'In the beginning was the Word, and the Word was with God, and the Word was God.',
+                            'The same was in the beginning with God. All things were made by him;',
+                            'and without him was not any thing made that was made.'
+                        ]
+
+                    },
+                    {
+                        title: 2,
+                        content: [
+                            'And the Word was made flesh, and dwelt among us, (and we beheld his glory, the glory as of the only begotten of the Father,) full of grace and truth.',
+                            'John bore witness of him, and cried, saying, This was he of whom I spake, He that cometh after me is preferred before me: for he was before me.'
+                        ]
+                    },
+                    {
+                        title: 3,
+                        content: [
+                            'They came and saw where he dwelt, and abode with him that day: for it was about the tenth hour.',
+                            'And then there was some more text here, that said something else.  And it was good'
+                        ]
+                    }
+                ]
+            };
+
+            this.sources = [
+                {
+                    language: {
+                        code: 'ulb',
+                        name: 'English ULB'
+                    },
+                    project: 'John',
+                    divisions: [
+                        {
+                            title: 1,
+                            content: [
+                                'In the beginning was the Word, and the Word was with God, and the Word was God.',
+                                'The same was in the beginning with God. All things were made by him;',
+                                'and without him was not any thing made that was made.'
+                            ]
+
+                        },
+                        {
+                            title: 2,
+                            content: [
+                                'And the Word was made flesh, and dwelt among us, (and we beheld his glory, the glory as of the only begotten of the Father,) full of grace and truth.',
+                                'John bore witness of him, and cried, saying, This was he of whom I spake, He that cometh after me is preferred before me: for he was before me.'
+                            ]
+                        },
+                        {
+                            title: 3,
+                            content: [
+                                'They came and saw where he dwelt, and abode with him that day: for it was about the tenth hour.',
+                                'And then there was some more text here, that said something else.  And it was good'
+                            ]
+                        }
+                    ]
+                }
+            ]
 
         }
     });

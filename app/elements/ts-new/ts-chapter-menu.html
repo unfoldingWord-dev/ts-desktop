@@ -21,14 +21,14 @@
             display: inline-block;
             background: white;
             width: 450px;
-            box-shadow: 0 2px 3px 2px #ccc;
+            box-shadow: 0 2px 3px 2px var(--greyed-out-light);
             overflow-y: auto;
             max-height: 600px;
             overflow-x: hidden;
         }
 
         .header {
-            color: #888;
+            color: var(--greyed-out-dark);
             font-size: 110%;
             width: 100%;
             display: flex;
@@ -41,7 +41,7 @@
             justify-content: flex-start;
             align-items: center;
             padding-left: 20px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--greyed-out-light);
             background: white;
             width: 430px;
             box-shadow: 0 -1px 2px 1px var(--primary-color-dark);
@@ -49,11 +49,11 @@
 
         .block:hover {
             background: var(--accent-color-dark);
-            color: #fff;
+            color: var(--text-color);
         }
 
         .block {
-            border: 1px solid #eee;
+            border: 1px solid var(--greyed-out-light);
             width: 49px;
             margin-top: -1px;
             margin-right: -5px;

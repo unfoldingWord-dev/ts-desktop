@@ -20,13 +20,13 @@
         .list {
             background: white;
             width: 450px;
-            box-shadow: 0 2px 3px 2px #ccc;
+            box-shadow: 0 2px 3px 2px var(--greyed-out-light);
             margin-top: 30px;
         }
 
         .next {
-            background: #1FC2FC;
-            color: white;
+            background: var(--highlight-primary);
+            color: var(--text-color);
             margin-top: 20px;
         }
 
@@ -41,18 +41,18 @@
             display: block;
             margin: 0;
             padding: 1em;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--greyed-out-light);
             transition: background .3s, color .3s;
         }
 
         ul li:hover {
             background: var(--accent-color-dark);
-            color: #fff;
+            color: var(--text-color);
         }
 
         .right {
             float: right;
-            color: forestgreen;
+            color: var(--completed-color);
         }
 
     </style>

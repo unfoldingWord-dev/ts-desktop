@@ -21,7 +21,7 @@
         .list {
             background: white;
             width: 450px;
-            box-shadow: 0 2px 3px 2px #ccc;
+            box-shadow: 0 2px 3px 2px var(--greyed-out-light);
             margin-top: 10px;
             display: flex;
             flex-direction: column;
@@ -29,8 +29,8 @@
         }
 
         .next {
-            background: #1FC2FC;
-            color: white;
+            background: var(--highlight-primary);
+            color: var(--text-color);
         }
 
         ul {
@@ -45,8 +45,8 @@
         ul li {
             margin: 0;
             padding: 1em;
-            color: #888;
-            border-bottom: 1px solid #eee;
+            color: var(--greyed-out-dark);
+            border-bottom: 1px solid var(--greyed-out-light);
             transition: background .3s, color .3s;
             display: flex;
             align-items: center;
@@ -55,12 +55,12 @@
 
         ul li:hover {
             background: var(--accent-color-dark);
-            color: #fff;
+            color: var(--text-color);
         }
 
         .right {
             float: right;
-            color: forestgreen;
+            color: var(--completed-color);
         }
 
     </style>

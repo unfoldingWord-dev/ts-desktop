@@ -24,7 +24,7 @@
         }
 
         .header {
-            color: #888;
+            color: var(--greyed-out-dark);
             font-size: 110%;
             width: 100%;
             display: flex;
@@ -37,7 +37,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 0 20px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--greyed-out-light);
             background: white;
             width: 410px;
             box-shadow: 0 -1px 2px 1px var(--primary-color-dark);
@@ -48,26 +48,26 @@
             max-height: 90vh;
             width: 450px;
             background: white;
-            box-shadow: 0 2px 3px 2px #ccc;
+            box-shadow: 0 2px 3px 2px var(--greyed-out-light);
         }
 
         .row {
             display: block;
             margin: 0;
             padding: 1em;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--greyed-out-light);
             transition: background .3s, color .3s;
             cursor: pointer;
         }
 
         .row:hover {
             background: var(--accent-color-dark);
-            color: #fff;
+            color: var(--text-color);
         }
 
         .right {
             float: right;
-            color: #888;
+            color: var(--greyed-out-dark);
             font-style: italic;
             font-size: 70%
         }

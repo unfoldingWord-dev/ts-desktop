@@ -32,7 +32,7 @@
         _this.config = _.merge({indexDir: ''}, configJson);
         _this.indexId = indexName;
         _this.rootPath = path.join(_this.config.indexDir, indexName);
-        _this.dbFilePath = path.resolve('./', path.join( _this.config.indexDir, indexName + '.sqlite'));
+        _this.dbFilePath = path.resolve('./', path.join(_this.config.indexDir, indexName + '.sqlite'));
         _this.dbDirPath = path.dirname(_this.dbFilePath);
         _this.needsDbSave = 0;
         if (!fs.existsSync(_this.dbFilePath)) {
@@ -44,7 +44,7 @@
                 return false;
             }
             let db = new SQL.Database();
-            db.exec("CREATE TABLE file (path text, dir text, file text, content text);");
+            db.exec('CREATE TABLE file (path text, dir text, file text, content text);');
             let data = db.export();
             let buffer = new Buffer(data);
             fs.writeFileSync(_this.dbFilePath, buffer);
@@ -93,7 +93,7 @@
             return fileContents;
             /**/
 
-            let statement = db.prepare("SELECT content FROM file WHERE path=:path");
+            let statement = db.prepare('SELECT content FROM file WHERE path=:path');
             let result = statement.getAsObject({':path': filePath});
             statement.free();
             return result.content || null;
@@ -112,7 +112,7 @@
             }
             /**/
 
-            db.run("DELETE FROM file WHERE path = :path", {':path': filePath});
+            db.run('DELETE FROM file WHERE path = :path', {':path': filePath});
             _this.needsDbSave = 1;
             return true;
         }
@@ -151,8 +151,8 @@
 
             let fileDirPath = path.dirname(filePath);
             let fileName = path.basename(filePath, '.json');
-            db.run("DELETE FROM file WHERE path = :path", {':path': filePath});
-            db.run("INSERT INTO file (path, dir, file, content) VALUES (:path, :dir, :file, :content)", {':path': filePath, ':dir': fileDirPath, ':file': fileName, ':content': fileContents});
+            db.run('DELETE FROM file WHERE path = :path', {':path': filePath});
+            db.run('INSERT INTO file (path, dir, file, content) VALUES (:path, :dir, :file, :content)', {':path': filePath, ':dir': fileDirPath, ':file': fileName, ':content': fileContents});
             _this.needsDbSave = 1;
             return true;
         }
@@ -171,7 +171,6 @@
             }
             links[md5Hash]++;
             saveJson(linksJsonPath, links);
-            let links2 = openJson(linksJsonPath);
         }
 
         function decrementLink (md5Hash) {
@@ -275,13 +274,17 @@
             if (catalogApiUrl.indexOf('source.json') !== -1 && subFolder === undefined) {
                 //get chapters
                 let trimDir = md5Path + path.sep;
-                let statementChapters = db.prepare("SELECT DISTINCT dir FROM file WHERE dir LIKE :dir AND file <> 'chapter' AND file <> 'meta' ORDER BY path", {':dir': md5Path + '%'});
-                while (statementChapters.step()) items.push(statementChapters.get()[0].replace(trimDir, ''));
+                let statementChapters = db.prepare('SELECT DISTINCT dir FROM file WHERE dir LIKE :dir AND file <> \'chapter\' AND file <> \'meta\' ORDER BY path', {':dir': md5Path + '%'});
+                while (statementChapters.step()) {
+                    items.push(statementChapters.get()[0].replace(trimDir, ''));
+                }
                 statementChapters.free();
             } else {
                 //get items
-                let statement = db.prepare("SELECT file FROM file WHERE dir = :dir AND file <> 'chapter' AND file <> 'meta' ORDER BY path", {':dir': md5Path});
-                while (statement.step()) items.push(statement.get()[0]);
+                let statement = db.prepare('SELECT file FROM file WHERE dir = :dir AND file <> \'chapter\' AND file <> \'meta\' ORDER BY path', {':dir': md5Path});
+                while (statement.step()) {
+                    items.push(statement.get()[0]);
+                }
                 statement.free();
             }
             return items;

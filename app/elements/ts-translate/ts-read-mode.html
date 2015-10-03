@@ -22,7 +22,8 @@
 
 	<template>
 		<div class="main-container">
-			<ts-source-card mode="read" heading="Book" text="this is a text"></ts-source-card>
+			<ts-source-card mode="read" heading="Chapter 1" text="{{bible.text}}"></ts-source-card>
+			<ts-source-card mode="read" heading="Chapter 2" text="{{bible.text}}"></ts-source-card>
 		</div>
 	</template>
 
@@ -47,6 +48,7 @@ Polymer({
 	},
 
 	attached: function() {
+		this.bible = {'text': "In the beginning God created the heavens and the earth. And the earth was without form and void. And the spirit of God moved upon the face of the waters."};
 	},
 
 	_bibleChanged: function() {

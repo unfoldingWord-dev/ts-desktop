@@ -8,11 +8,21 @@
 <dom-module is="ts-source-card">
 	
 	<style is="custom_style">
+		/* ------------------- */
+		/* STYLE FOR ALL MODE */
+		/* ------------------- */
 		:host {
 			background-color: #FFF;
+			display: block;
 		}
-		:host.read-mode paper-card {
-			width: 100%;
+
+		/* ------------------- */
+		/* STYLE FOR READ-MODE */
+		/* ------------------- */
+		/* Note: Look for common style in other mode and condense them if possible. */
+		:host.read-mode {
+			width: calc(100% - 20px);  /* the 20px is to show the ts-translation-card underneath to the right*/
+			margin-bottom: 40px;
 		}
 		:host.read-mode .tab-station {
 			display: block;
@@ -29,25 +39,22 @@
 		:host.read-mode .card-content {
 			padding: 0.75rem 1.5rem 1.5rem;
 		}
-		.card-content span {
-			color: red;
+		:host.read-mode .card-content {
+			width: 62.5%;
+			min-width: 380px;
 			display: block;
-			width: 60%;
-			min-width: 280px;
 			margin: 0 auto;
+			line-height: 1.5;
 		}
+		/* END STYLE FOR READ-MODE
 
 	</style>
 
 	<template>
-		<paper-card>
+		<paper-card elevation="2">
 			<div class="tab-station"></div>
-			<div class="card-heading">
-				<span>{{ heading }}</span>
-			</div>
-			<div class="card-content">
-				<span>{{ text }}</span>
-			</div>
+			<div class="card-heading"><span>{{ heading }}</span></div>
+			<div class="card-content"><span>{{ text }}</span></div>
 		</paper-card>
 	</template>
 
@@ -66,22 +73,40 @@ Polymer({
 		},
 		heading: {
 			type: String,
+			value: '',
+			observer: '_headingChanged'
 		},
 		text: {
 			type: String,
+			value: '',
+			observer: '_textChanged'
 		},
-	},
-
-	ready: function() {
-	},
-
-	attached: function() {
+		top: {
+			type: Number,
+			computed: 'getOffsetTop(heading, text)'
+		}
 	},
 
 	_modeChanged: function(mode) {
 		// Assign class according to the given mode
 		this.classList.add(mode + '-mode');
-	}
+	},
+
+	getOffsetTop: function(heading, text) {
+		console.dir(this.offsetTop);
+		return 0;
+	},
+
+	// attributeChanged: function() {
+	// 	console.log('attributeChanged');
+	// },
+
+	_headingChanged: function() {
+	},
+
+	_textChanged: function() {
+	},
+
 
 });
 

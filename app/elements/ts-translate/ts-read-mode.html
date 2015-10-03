@@ -13,6 +13,7 @@
 			height: 100%;
 			background-color: #DDD;
 			padding: 20px 20px 0 20px;
+			overflow-y: auto;
 		}
 		.main-container {
 			width: 100%;
@@ -22,8 +23,8 @@
 
 	<template>
 		<div class="main-container">
-			<ts-source-card mode="read" heading="Chapter 1" text="{{bible.text}}"></ts-source-card>
-			<ts-source-card mode="read" heading="Chapter 2" text="{{bible.text}}"></ts-source-card>
+			<ts-source-card mode="read" heading="Chapter 1" text="{{text.0}}"></ts-source-card>
+			<ts-source-card mode="read" heading="Chapter 2" text="{{text.1}}"></ts-source-card>
 		</div>
 	</template>
 
@@ -41,6 +42,10 @@ Polymer({
 			value: function() { return {}; },
 			observer: '_bibleChanged',
 			notify: true,
+		},
+		text: {
+			type: Array,
+			computed: '_processReadModeText(bible)'
 		}
 	},
 
@@ -48,10 +53,40 @@ Polymer({
 	},
 
 	attached: function() {
-		this.bible = {'text': "In the beginning God created the heavens and the earth. And the earth was without form and void. And the spirit of God moved upon the face of the waters."};
 	},
 
-	_bibleChanged: function() {
+	_bibleChanged: function(bible) {
+		this._processReadModeText(bible);
+	},
+
+	// NOTE: The logic of text extraction will depend on the data structure of the bible
+	// NOTE: What should remain are the object passed into, and the array returned by the function
+	_processReadModeText: function(bible) {
+		// Check for undefined. For some reason, there can be an undefined.
+		return (bible.content) ? this._collectChapterText(bible.content) : [];
+	},
+
+	// Function: Takes in an array of chapter objects
+	// Function: Returns an array of chapter text
+	_collectChapterText: function(chapters) {
+		var chapterText = [];
+		// Go through each chapter and collect all the verses inside its chunks
+		for (var i = 0; i < chapters.length; i++) {
+			var chunkText = this._collectChunkText(chapters[i].chapterContent);
+			chapterText[i] = chunkText.join(' ');
+		}
+		return chapterText;
+	},
+
+	// Function: Takes in an array of chunk objects
+	// Function: Returns an array of verses contained in chunk objects
+	_collectChunkText: function(chunks) {
+		var chunkText = [];
+		// Go through each chunk object and store the combined verses as a chunk text
+		for (var i = 0; i < chunks.length; i++) {
+			chunkText[i] = chunks[i].verses.join(' ');
+		}
+		return chunkText;
 	}
 
 });

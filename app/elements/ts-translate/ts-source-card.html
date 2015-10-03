@@ -83,7 +83,7 @@ Polymer({
 		},
 		top: {
 			type: Number,
-			computed: 'getOffsetTop(heading, text)'
+			value: 0
 		}
 	},
 
@@ -94,17 +94,20 @@ Polymer({
 
 	getOffsetTop: function(heading, text) {
 		console.dir(this.offsetTop);
-		return 0;
+		return this.offsetTop;
 	},
 
-	// attributeChanged: function() {
-	// 	console.log('attributeChanged');
-	// },
+	attributeChanged: function() {
+		console.log('attributeChanged');
+		this.getOffsetTop();
+	},
 
 	_headingChanged: function() {
+		this.getOffsetTop();
 	},
 
 	_textChanged: function() {
+		this.getOffsetTop();
 	},
 
 

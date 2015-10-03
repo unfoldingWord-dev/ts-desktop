@@ -1,0 +1,78 @@
+<!-- ts-source-card -->
+<!-- imported into ts-read-mode -->
+<!-- imported into ts-review-mode -->
+
+<link rel="import" href="../../components/paper-card/paper-card.html">
+<!-- <link rel="import" href="../../components/iron-resizable-behavior/iron-resizable-behavior.html"> -->
+
+<dom-module is="ts-source-card">
+	
+	<style is="custom_style">
+		:host {
+			background-color: #FFF;
+		}
+		:host.read-mode paper-card {
+			width: 100%;
+		}
+		h1, p {
+			margin: 0;
+		}
+	</style>
+
+	<template>
+		<paper-card>
+			<div class="card-heading">
+				<span>{{ heading }}</span>
+			</div>
+			<div class="card-content">
+				<p>{{ text }}</p>
+			</div>
+		</paper-card>
+	</template>
+
+</dom-module>
+
+<script>
+	
+Polymer({
+
+	is: 'ts-source-card',
+
+	properties: {
+		mode: {
+			type: String,
+			observer: '_modeChanged'
+		},
+		heading: {
+			type: String,
+			observer: '_headingChanged'
+		},
+		text: {
+			type: String,
+			observer: '_textChanged'
+		},
+	},
+
+	ready: function() {
+	},
+
+	attached: function() {
+	},
+
+	_modeChanged: function(mode) {
+		// Assign class according to the given mode
+		this.classList.add(mode + '-mode');
+		console.log('mode');
+	},
+	
+	_titleChanged: function() {
+		console.log('title');
+	},
+
+	_textChanged: function() {
+		console.log('text');
+	},
+
+});
+
+</script>

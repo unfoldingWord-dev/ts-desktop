@@ -146,7 +146,6 @@
 	<template>
 
 		<div id="cue" class="container sticky-cue">
-    		<ts-translation-sources id="tab-edit-modal" opened-tabs="[[ openedTabs ]]" selected-tab="[[ selectedTab ]]" on-confirm="onConfirm"></ts-translation-sources>
 
 			<div id="cardsets" class="tabs-container card-sets sticky-ele">
 				<div class="icon-container">
@@ -236,15 +235,12 @@
 			},
 		},
 
-		// Function runs when DOM is ready (before attached)
 		ready: function() {
 		},
 
-		// When this element is attached to DOM...
 		attached: function() {
 			var cue = this.$.cue,
 				sourceTabs = this.$['source-tabs'],
-				sourcesModal = this.querySelector('ts-translation-sources'),
 				reposTab = this.reposTab.bind(this),
 				calc = this.recalcCardTabPos.bind(this),
 				scrollEvent = (/Firefox/i.test(navigator.userAgent))? 'DOMMouseScroll' : 'mousewheel';
@@ -254,42 +250,58 @@
 			['scroll', scrollEvent].forEach(function(e) {
 				cue.addEventListener(e, reposTab);
 			});
-
-			// ... hide translation sources modal
-			sourcesModal.display = 'none';
 		},
 
-		// Runs when tab-edit modal is confirmed
 		onConfirm: function() {
-			var openedTabs = this.$['tab-edit-modal'].openedTabs;
-			this.openedTabs = [];
-			this.push.apply(this, ['openedTabs'].concat(openedTabs));
+			this.async(function() {
+				// Store modal's values to be used by the this element
+				var modal = this.querySelector('#tab-edit-modal');
+				var selectedTab = modal.selectedTab;
+				var openedTabs = modal.openedTabs;
 
-			if (this.openedTabs.length) {
-				this.async(function() {
-					this.selectedTab = this.$['tab-edit-modal'].selectedTab;
-					if (this.selectedTab >= 0 && this.selectedTab < this.openedTabs.length) {
-						this.querySelectorAll('paper-tab')[this.selectedTab].fire('tap');
-					}
-					this.recalcCardTabPos();
-					this.reposTab();
-				}, 10);
-			}
+				// Reset openedTabs to the modal's openedTabs
+				this.openedTabs = [];
+				this.push.apply(this, ['openedTabs'].concat(openedTabs));
+
+				// If there's at least one tab in the openedTabs
+				if (this.openedTabs.length) {
+					this.async(function() {
+						// Set the selected tab. If the selectedTab is in range, click the Nth paper tab,
+						//    where N is the selectedTab.
+						this.selectedTab = selectedTab;
+						if (this.selectedTab >= 0 && this.selectedTab < this.openedTabs.length) {
+							this.querySelectorAll('paper-tab')[this.selectedTab].fire('tap');
+						}
+						// Calculate and reposition the tabs after all these changes
+						this.recalcCardTabPos();
+						this.reposTab();
+					}, 30);
+				}
+
+				// Execute cancel, which essentially destroys the the modal element
+				this.onCancel();
+
+			}, 30);
 		},
 
-		// Runs when ts-read-mode is displayed
+		onCancel: function() {
+			this.async(function() {
+				// Removes modal from the DOM
+				var modal = this.querySelector('#tab-edit-modal');
+				this.removeChild(modal);
+			}, 30);
+		},
+
 		attributeChanged: function() {
 			// Note: Removing the async may cause recalcCardTabPos() not to run properly
 			this.async(function() {
-				// console.log('attr changed. recalculating');
 				this.recalcCardTabPos();
-			}, 10);
+			}, 30);
 		},
 
 		// Function: Calculate jumping points based on card positions and trigger position check
 		// Note: Is called manually when tabs or its position is changed
 		recalcCardTabPos: function() {
-			// console.log('recalculating');
 			this.cardPos = getCardPos(this);
 			this.tabPos = getTabPos(this);
 			this.reposTab();
@@ -297,11 +309,15 @@
 
 		// Function: Show translation sources modal and fire a custom event
 		openSourcesModal: function() {
-			var sourcesModal = this.querySelector('ts-translation-sources');
-			sourcesModal.style.display = 'block';
-			sourcesModal.fire('open');
-			sourcesModal.querySelector('iron-list').fire('open');
-			this.querySelector('iron-list').fire('resize');
+			var modal = document.createElement('ts-translation-sources');
+			modal.openedTabs = this.openedTabs.slice();
+			modal.selectedTab = this.selectedTab;
+			modal.id = "tab-edit-modal";
+			modal.style.display = 'block';
+			modal.addEventListener('confirm', this.onConfirm.bind(this));
+			modal.addEventListener('cancel', this.onCancel.bind(this));
+			this.appendChild(modal);
+			modal.fire('open');
 		},
 
  		// Function: Calculate jumping points for tabs

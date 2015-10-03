@@ -157,9 +157,9 @@
                 <div id="available-sources-header" class="row-header">
                     <span>Available</span>
                 </div>
-                <iron-list id="available-list" items="{{ searchfilter(query,availableList) }}" as="al" selection-enabled multi-selection>
+                <iron-list id="available-list" items="[[ availableList ]]" as="al" selection-enabled multi-selection on-tap="selectAvailable">
                     <template>
-                        <div class="row clickable" on-tap="selectAvailable">
+                        <div class="row clickable" data-element="[[al]]" data-index="[[index]]">
                             <span>[[ al.title ]]</span>
                             <paper-checkbox class="right" disabled style="opacity: 1;"></paper-checkbox>
                         </div>
@@ -198,23 +198,16 @@
         properties: {
             masterList: {
                 type: Array,
-                value: function() {return [];},
-                notify: true
+                value: function() {return [];}
             },
             availableList: {
                 type: Array,
-                value: function() {return [];},
-                notify: true
+                computed: '_getAvailable(masterList,openedTabs)'
+                // value: function() {return [];}
             },
             openedTabs: {
                 type: Array,
-                value: function() {return [];},
-                notify: true
-            },
-            initialOpened: {
-                type: Array,
-                value: function() {return [];},
-                notify: true
+                value: function() {return [];}
             },
             query: {
                 type: String,
@@ -222,11 +215,7 @@
             },
             selectedTab: {
                 type: String,
-                value: '',
-            },
-            initialSelected: {
-                type: String,
-                value: '',
+                value: ""
             }
         },
 
@@ -234,67 +223,39 @@
         },
 
         onOpen: function() {
-            this.async(function() {
-                this.splice('initialOpened', 0, this.initialOpened.length);
-                var openedTabs = this.openedTabs;
-                this.push.apply(this, ['initialOpened'].concat(openedTabs));
-                // this.initialOpened = this.openedTabs.slice();
-                this.initialSelected = this.selectedTab;
-                this.availableList = this.getAvailable(this.openedTabs);
-                // this.querySelector('iron-list').fire('open');
-                console.log('OPENING');
-                console.log('openedTabs', this.openedTabs);
-                console.log('selectedTab', this.selectedTab);
-                console.log('availableList', this.availableList);
-            }, 1000);
         },
 
-        searchfilter: function(query, availableList) {
-            console.log('search filter');
+        searchfilter: function(query) {
             let search = App.util.startsWithBase.bind(null, query);
             return this.availableList.filter(function(al) {
                 return search(al.title);
             });
         },
 
-        getAvailable: function(openedTabs) {
-            console.log('get available');
-            var me = this;
-            return me.masterList.filter(function(i) {
+        _getAvailable: function(masterList, openedTabs) {
+            // console.log('get available', masterList, openedTabs);
+            return masterList.filter(function(i) {
                 return openedTabs.indexOf(i) < 0;
             });
         },
 
         cancel: function() {
-            this.async(function() {
-                this.splice('openedTabs', 0, this.openedTabs.length);
-                var initialOpened = this.initialOpened;
-                this.push.apply(this, ['openedTabs'].concat(initialOpened));
-                // this.openedTabs = this.initialOpened.slice();
-                this.selectedTab = this.initialSelected;
-                this.availableList = this.getAvailable(this.openedTabs);
-                closeModal(this);
-                console.log('CANCELLING');
-                console.log('openedTabs', this.openedTabs);
-                console.log('selectedTab', this.selectedTab);
-                console.log('availableList', this.availableList);
-            }, 1000);
+            this.fire('cancel');
         },
 
         confirm: function() {
-            closeModal(this);
             this.fire('confirm');
         },
 
         selectAvailable: function(event) {
-            console.log('selecting available');
-            var elem = event.model.al;
-            var index = event.model.index;
+            var elem = event.target.dataElement;
+            var index = event.target.dataIndex;
             elem.checked = true;
-            this.push('openedTabs', elem);
-            this.async(function() {
-                this.availableList = this.getAvailable(this.openedTabs);
-            }, 1);
+            this.openedTabs = this.openedTabs.concat([elem]);
+            // this.push('openedTabs', elem);
+            // this.async(function() {
+            //     this.availableList = this.getAvailable(this.openedTabs);
+            // }, 1);
             this.selectedTab = this.openedTabs.indexOf(elem).toString();
         },
 
@@ -302,10 +263,10 @@
             var elem = event.model.sl;
             var index = event.model.index;
             elem.checked = false;
-            this.splice('openedTabs', index, 1);
-            this.async(function() {
-                this.availableList = this.getAvailable(this.openedTabs);
-            }, 1);
+            this.openedTabs = this.openedTabs.splice(index, 1);
+            // this.async(function() {
+            //     this.availableList = this.getAvailable(this.openedTabs);
+            // }, 1);
 
             // Assign the selected tab
             if (this.selectedTab == index) {
@@ -323,17 +284,9 @@
 
         attached: function () {
             // NOTE: Replace below with a script to get all available items
-            this.push('masterList', {title: 'English ULB'}, {title: 'English UDB'}, {title: 'Arabic'}, {title: 'Bahasa Indonesia'});
-            this.availableList = this.getAvailable(this.openedTabs);
-            // console.log(this.availableList, this.openedTabs);
+            this.masterList = [{title: 'English ULB'}, {title: 'English UDB'}, {title: 'Arabic'}, {title: 'Bahasa Indonesia'}];
         }
     });
-
-    function closeModal(el) {
-        el.querySelector('input[name="source-search"]').value = '';
-        el.query = '';
-        el.style.display = 'none';
-    }
 
 })(window);
 

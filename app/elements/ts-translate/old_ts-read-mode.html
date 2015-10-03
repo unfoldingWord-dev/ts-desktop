@@ -1,0 +1,425 @@
+<!-- ts-read-mode -->
+
+<!-- Used in <ts-dashboard> -->
+
+<link rel="import" href="../../components/paper-card/paper-card.html">
+<link rel="import" href="../../components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../../components/iron-pages/iron-pages.html">
+<!-- <link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../components/iron-icons/iron-icons.html"> -->
+<link rel="import" href="../../components/iron-resizable-behavior/iron-resizable-behavior.html">
+<link rel="import" href="ts-translation-sources.html">
+
+<dom-module id="ts-read-mode">
+
+	<style is="custom-style">
+
+        :host {
+			display: block;
+			box-sizing: border-box;
+		}
+		.container {
+			display: block;
+			width: 100%;
+			height: 100%;
+			position: relative;
+			z-index: 0;
+			box-sizing: border-box;
+			padding: 20px 20px 0;
+			overflow-y:auto;
+		}
+		.card-sets {
+			width: 100%;
+			position: relative;
+			margin-bottom: 40px;
+		}
+		paper-card {
+			width: calc(100% - 20px);
+		}
+		.top-card {
+			position: relative;
+			z-index: 1;
+		}
+		.bottom-card {
+			position: absolute;
+			top: 20px;
+			right: 0;
+			background-color: #EEE;
+			cursor: pointer;
+			transition: all 0.15s ease-out;
+		}
+		.bottom-card:hover {
+			right: -3px;
+			top: 25px;
+		}
+		.card-heading {
+			padding: 0.75rem 0;
+			text-align: center;
+		}
+		.tabs-hole {
+			display: block;
+			width: 100;
+			height: 3rem;
+		}
+		.card-heading h3 {
+			margin: 0;
+			padding: 0;
+			color: #888;
+		}
+		.card-content {
+			width: 60%;
+			margin: 0 auto;
+			padding-top: 0.75rem;
+		}
+		.card-content p {
+			line-height: 1.8;
+			margin-top: 0;
+		}
+		.hidden {
+			visibility: hidden;
+		}
+
+		paper-tabs {
+			--paper-tabs-selection-bar-color: #AAA;
+			--paper-tabs: {
+				padding: 0.75rem 0 0.75rem 48px;
+				height: 1.5rem;
+			}
+		}
+		paper-tab {
+			--paper-tab: {
+				padding: 0;
+				margin: 0 0.5rem;
+				color: #AAA;
+				font-weight: 300;
+			}
+		}
+		paper-tab:focus {
+			--paper-tab: {
+				color: red;
+				font-weight: 300;
+			}
+		}
+		.icon-container {
+			height: 48px;
+			width: 48px;
+			display: inline-block;
+			float: right;
+		}
+		.tabs-container {
+			width: calc(100% - 60px);
+			position: absolute;
+			top: 20px;
+			left: 20px;
+			z-index: 100;
+			margin: 0;
+		}
+		.tabs-container.animate {
+			transition: all 0.15s ease-out;
+		}
+		.tabs-container.sticky {
+			width: calc(100% - 127px);
+			position: fixed;
+			top: 40px;
+			left: 70px;
+			background-color: #EEE;
+		}
+		#source-tabs {
+			text-align: center;
+		}
+		#source-tabs::shadow #tabsContent {
+			position: relative;
+		}
+		.icon {
+			position: relative;
+			top: 50%;
+			left: 50%;
+			-webkit-transform: translate(-50%, -50%);
+			--moz-transform: translate(-50%, -50%);
+			transform: translate(-50%, -50%);
+			cursor: pointer;
+			color: #CCC;
+		}
+
+	</style>
+
+	<template>
+
+		<div id="cue" class="container sticky-cue">
+
+			<div id="cardsets" class="tabs-container card-sets sticky-ele">
+				<div class="icon-container">
+					<iron-icon icon="icons:tab" class="icon24 icon" on-click="openSourcesModal"></iron-icon>
+				</div>
+				<paper-tabs id="source-tabs" selected="{{ selectedTab }}" noink scrollable hide-scroll-buttons>
+	                <template is="dom-repeat" items="{{ openedTabs }}">
+	                   <paper-tab class="source-tab">{{ item.title }}</paper-tab>
+	                </template>
+	         	</paper-tabs>
+			</div>
+
+			<div class="source-page">
+				<template is="dom-repeat" items="{{ data.chapters }}" as="chapter">
+					<div class="card-sets content">
+						<paper-card class="card top-card" elevation="2" >
+							<div class="tabs-hole"></div>
+							<div class="card-heading">
+								<h3>
+									<span>{{ data.book_title }}</span> <span>{{ chapter.number }}</span>
+								</h3>
+							</div>
+							<div class="card-content"><p>{{ chapter.text }}</p></div>
+						</paper-card>
+					</div>
+				</template>
+			</div>
+		</div>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+(function() {
+
+	Polymer({
+
+		is: 'ts-read-mode',
+
+        behaviors: [
+            Polymer.IronResizableBehavior
+        ],
+
+		properties: {
+			openedTabs: {
+				type: Array,
+				value: function() {return [];},
+				notify: true
+			},
+			selectedTab: {
+				type: String,
+				value: '',
+				notify: true
+			},
+			data: {
+				type: Object,
+				value: function() {
+					return {
+						book_title: '',
+						chapters: []	
+					}
+				}
+			},
+			cardPos: {
+				type: Object,
+				value: function() {
+					return {
+						tops: [],
+						heights: []
+					};
+				}
+			},
+			tabPos: {
+				type: Object,
+				value: function() {
+					return {
+						current: 0,
+						stickyAt: 0,
+						forwardTrigger: 0,
+						forwardTo: 0,
+						backwardTrigger: 0,
+						backwardTo: 0
+					};
+				}
+			},
+		},
+
+		ready: function() {
+		},
+
+		attached: function() {
+			var cue = this.$.cue,
+				sourceTabs = this.$['source-tabs'],
+				reposTab = this.reposTab.bind(this),
+				calc = this.recalcCardTabPos.bind(this),
+				scrollEvent = (/Firefox/i.test(navigator.userAgent))? 'DOMMouseScroll' : 'mousewheel';
+
+			// ... attach event-handler to elements,
+			sourceTabs.addEventListener('iron-select', calc);
+			['scroll', scrollEvent].forEach(function(e) {
+				cue.addEventListener(e, reposTab);
+			});
+		},
+
+		onConfirm: function() {
+			this.async(function() {
+				// Store modal's values to be used by the this element
+				var modal = this.querySelector('#tab-edit-modal');
+				var selectedTab = modal.selectedTab;
+				var openedTabs = modal.openedTabs;
+
+				// Reset openedTabs to the modal's openedTabs
+				this.openedTabs = [];
+				this.push.apply(this, ['openedTabs'].concat(openedTabs));
+
+				// If there's at least one tab in the openedTabs
+				if (this.openedTabs.length) {
+					this.async(function() {
+						// Set the selected tab. If the selectedTab is in range, click the Nth paper tab,
+						//    where N is the selectedTab.
+						this.selectedTab = selectedTab;
+						if (this.selectedTab >= 0 && this.selectedTab < this.openedTabs.length) {
+							this.querySelectorAll('paper-tab')[this.selectedTab].fire('tap');
+						}
+						// Calculate and reposition the tabs after all these changes
+						this.recalcCardTabPos();
+						this.reposTab();
+					}, 30);
+				}
+
+				// Execute cancel, which essentially destroys the the modal element
+				this.onCancel();
+
+			}, 30);
+		},
+
+		onCancel: function() {
+			this.async(function() {
+				// Removes modal from the DOM
+				var modal = this.querySelector('#tab-edit-modal');
+				this.removeChild(modal);
+			}, 30);
+		},
+
+		attributeChanged: function() {
+			// Note: Removing the async may cause recalcCardTabPos() not to run properly
+			this.async(function() {
+				this.recalcCardTabPos();
+			}, 30);
+		},
+
+		// Function: Calculate jumping points based on card positions and trigger position check
+		// Note: Is called manually when tabs or its position is changed
+		recalcCardTabPos: function() {
+			this.cardPos = getCardPos(this);
+			this.tabPos = getTabPos(this);
+			this.reposTab();
+		},
+
+		// Function: Show translation sources modal and fire a custom event
+		openSourcesModal: function() {
+			var modal = document.createElement('ts-translation-sources');
+			modal.openedTabs = this.openedTabs.slice();
+			modal.selectedTab = this.selectedTab;
+			modal.id = "tab-edit-modal";
+			modal.style.display = 'block';
+			modal.addEventListener('confirm', this.onConfirm.bind(this));
+			modal.addEventListener('cancel', this.onCancel.bind(this));
+			this.appendChild(modal);
+			modal.fire('open');
+		},
+
+ 		// Function: Calculate jumping points for tabs
+		reposTab: function(event) {
+			var cue = this.$.cue,
+				cardsets = this.$.cardsets,
+				current = this.tabPos.current,
+				stickyAt = this.tabPos.stickyAt,
+				forwardTrigger = this.tabPos.forwardTrigger,
+				forwardTo = this.tabPos.forwardTo,
+				backwardTrigger = this.tabPos.backwardTrigger,
+				backwardTo = this.tabPos.backwardTo;
+
+			// console.log('reposTab', cue);
+			// console.log(cue.scrollTop, stickyAt);
+			
+			// Determine whether tabs should stick or not
+			if (cue.scrollTop > stickyAt) {
+				// console.log('making sticky');
+				cardsets.style.top = '40px';
+				cardsets.classList.add('sticky');
+			} else if (cue.scrollTop < stickyAt) {
+				// console.log('making NOT sticky');
+				cardsets.classList.remove('sticky');
+				console.log('setting top to ' + this.cardPos[current] + 'px');
+				cardsets.style.top = String(this.cardPos.tops[current]) + 'px';
+			}
+
+			// Determine wether tabs should jump forward or backward
+			if (cue.scrollTop > forwardTrigger) {
+				// console.log('jumping forward');
+				cardsets.classList.remove('sticky');
+				cardsets.classList.add('animate');
+				console.log('setting top to ' + forwardTo + 'px');
+				cardsets.style.top = String(forwardTo) + 'px';
+				this.tabPos.current += 1;
+				this.tabPos = getTabPos(this);
+				window.setTimeout(function() {cardsets.classList.remove('animate');}, 150);
+			} else if (cue.scrollTop <= backwardTrigger) {
+				// console.log('jumping backward');
+				cardsets.classList.add('animate');
+				cardsets.style.top = '40px';
+				cardsets.classList.add('sticky');
+				this.tabPos.current -= 1;
+				this.tabPos = getTabPos(this);
+				window.setTimeout(function() {cardsets.classList.remove('animate');}, 150);
+			}
+		}
+	});
+
+	// Function: Compile the tops and heights of cards in the active iron-page
+	function getCardPos(obj) {
+		var cards = obj.querySelectorAll('.card-sets.content');
+
+		var tops = [];
+		var heights = [];
+
+		for (i = 0; i < cards.length; i++) {
+			tops.push(cards[i].offsetTop);
+			heights.push(cards[i].offsetHeight);
+		}
+
+		// console.log('get card pos', tops, heights);
+
+		return {'tops': tops, 'heights': heights};
+	}
+
+	// Function: Calculate the trigger points to stick or move the tabs
+	function getTabPos(obj) {
+
+		var tops = obj.cardPos.tops,
+			heights = obj.cardPos.heights,
+			current = obj.tabPos.current,
+			stickyAt = obj.tabPos.stickyAt,
+			forwardTrigger = obj.tabPos.forwardTrigger,
+			forwardTo = obj.tabPos.forwardTo,
+			backwardTrigger = obj.tabPos.backwardTrigger,
+			backwardTo = obj.tabPos.backwardTo,
+
+		stickyAt = tops[current];
+		forwardTrigger = heights[current]*0.6 + tops[current];
+		forwardTo = tops[current+1];
+		if (current === 0) {
+			backwardTrigger = -1;
+			backwardTo = -1;
+		} else if (current > 0 && current < tops.length) {
+			backwardTrigger = heights[current-1]*0.6 + tops[current-1];
+			backwardTo = tops[current-1];
+		}
+
+		// console.log('get tab pos', current, stickyAt, forwardTrigger, forwardTo, backwardTrigger, backwardTo);
+
+		return {
+			'current': current,
+			'stickyAt': stickyAt,
+			'forwardTrigger': forwardTrigger,
+			'forwardTo': forwardTo,
+			'backwardTrigger': backwardTrigger,
+			'backwardTo': backwardTo
+		}
+	}
+
+})();
+
+</script>

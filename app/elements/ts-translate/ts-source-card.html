@@ -14,18 +14,39 @@
 		:host.read-mode paper-card {
 			width: 100%;
 		}
-		h1, p {
-			margin: 0;
+		:host.read-mode .tab-station {
+			display: block;
+			width: 100%;
+			height: 3rem;  /* 36px */
+		} 
+		:host.read-mode .card-heading {
+			padding: 1.5rem 0 0.75rem;
+			text-align: center;
+			font-size: 120%;
+			font-weight: bold;
+			color: #666;
 		}
+		:host.read-mode .card-content {
+			padding: 0.75rem 1.5rem 1.5rem;
+		}
+		.card-content span {
+			color: red;
+			display: block;
+			width: 60%;
+			min-width: 280px;
+			margin: 0 auto;
+		}
+
 	</style>
 
 	<template>
 		<paper-card>
+			<div class="tab-station"></div>
 			<div class="card-heading">
 				<span>{{ heading }}</span>
 			</div>
 			<div class="card-content">
-				<p>{{ text }}</p>
+				<span>{{ text }}</span>
 			</div>
 		</paper-card>
 	</template>
@@ -45,11 +66,9 @@ Polymer({
 		},
 		heading: {
 			type: String,
-			observer: '_headingChanged'
 		},
 		text: {
 			type: String,
-			observer: '_textChanged'
 		},
 	},
 
@@ -62,16 +81,7 @@ Polymer({
 	_modeChanged: function(mode) {
 		// Assign class according to the given mode
 		this.classList.add(mode + '-mode');
-		console.log('mode');
-	},
-	
-	_titleChanged: function() {
-		console.log('title');
-	},
-
-	_textChanged: function() {
-		console.log('text');
-	},
+	}
 
 });
 

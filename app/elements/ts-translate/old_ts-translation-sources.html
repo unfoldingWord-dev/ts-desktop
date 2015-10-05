@@ -1,11 +1,9 @@
 <!-- ts-translation-sources -->
 
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/polymer/polymer.html">
 <link rel="import" href="../../components/iron-list/iron-list.html">
 <link rel="import" href="../../components/iron-collapse/iron-collapse.html">
 <link rel="import" href="../../components/paper-checkbox/paper-checkbox.html">
-<link rel="import" href="../../components/iron-input/iron-input.html">
 
 <dom-module id="ts-translation-sources">
 
@@ -20,7 +18,8 @@
             top: 0;
             left: 0;
             background-color: rgba(0,0,0,0.5);
-            z-index: 100;
+            z-index: 1000;
+            transition: opacity 1s ease-out;
         }
         .container {
             display: block;
@@ -146,7 +145,7 @@
                 <div id="selected-sources-header" class="row-header">
                     <span>Selected</span>
                 </div>
-                <iron-list id="selected-list" items="[[ opened ]]" as="sl">
+                <iron-list id="selected-list" items="[[ openedTabs ]]" as="sl">
                     <template>
                         <div class="row clickable" on-tap="removeSelected">
                             <span>[[ sl.title ]]</span>
@@ -158,9 +157,9 @@
                 <div id="available-sources-header" class="row-header">
                     <span>Available</span>
                 </div>
-                <iron-list id="available-list" items="{{ searchfilter(query,availableList) }}" as="al" selection-enabled multi-selection>
+                <iron-list id="available-list" items="[[ availableList ]]" as="al" selection-enabled multi-selection on-tap="selectAvailable">
                     <template>
-                        <div class="row clickable" on-tap="selectAvailable">
+                        <div class="row clickable" data-element="[[al]]" data-index="[[index]]">
                             <span>[[ al.title ]]</span>
                             <paper-checkbox class="right" disabled style="opacity: 1;"></paper-checkbox>
                         </div>
@@ -199,87 +198,95 @@
         properties: {
             masterList: {
                 type: Array,
-                value: []
+                value: function() {return [];}
             },
             availableList: {
                 type: Array,
-                value: []
+                computed: '_getAvailable(masterList,openedTabs)'
+                // value: function() {return [];}
             },
-            opened: {
+            openedTabs: {
                 type: Array,
-                value: [],
-                notify: true,
-            },
-            initialOpened: {
-                type: Array,
-                value: []
+                value: function() {return [];}
             },
             query: {
+                type: String,
+                value: ""
+            },
+            selectedTab: {
                 type: String,
                 value: ""
             }
         },
 
-        searchfilter: function(query, availableList) {
+        ready: function() {
+        },
+
+        onOpen: function() {
+        },
+
+        searchfilter: function(query) {
             let search = App.util.startsWithBase.bind(null, query);
-            return availableList.filter(function(al) {
+            return this.availableList.filter(function(al) {
                 return search(al.title);
             });
         },
 
-        getAvailable: function(opened) {
-            var me = this;
-            return me.masterList.filter(function(i) {
-                return opened.indexOf(i) < 0;
+        _getAvailable: function(masterList, openedTabs) {
+            // console.log('get available', masterList, openedTabs);
+            return masterList.filter(function(i) {
+                return openedTabs.indexOf(i) < 0;
             });
         },
 
         cancel: function() {
-            this.opened = this.initialOpened.slice();
-            this.availableList = this.getAvailable(this.opened);
-            closeModal(this);
+            this.fire('cancel');
         },
 
         confirm: function() {
-            closeModal(this);
+            this.fire('confirm');
         },
 
         selectAvailable: function(event) {
-            var elem = event.model.al;
-            var index = event.model.index;
+            var elem = event.target.dataElement;
+            var index = event.target.dataIndex;
             elem.checked = true;
-            this.push('opened', elem);
-            this.async(function() {
-                this.availableList = this.getAvailable(this.opened);
-            }, 1);
-        },
-
-        onOpen: function() {
-            this.initialOpened = this.opened.slice();
+            this.openedTabs = this.openedTabs.concat([elem]);
+            // this.push('openedTabs', elem);
+            // this.async(function() {
+            //     this.availableList = this.getAvailable(this.openedTabs);
+            // }, 1);
+            this.selectedTab = this.openedTabs.indexOf(elem).toString();
         },
 
         removeSelected: function(event) {
             var elem = event.model.sl;
             var index = event.model.index;
             elem.checked = false;
-            this.splice('opened', index, 1);
-            this.async(function() {
-                this.availableList = this.getAvailable(this.opened);
-            }, 1);
+            this.openedTabs = this.openedTabs.splice(index, 1);
+            // this.async(function() {
+            //     this.availableList = this.getAvailable(this.openedTabs);
+            // }, 1);
+
+            // Assign the selected tab
+            if (this.selectedTab == index) {
+                if (this.openedTabs.length == 0) {
+                    this.selectedTab = '';
+                }
+                else if (index >= this.openedTabs.length - 1) {
+                    this.selectedTab = (this.openedTabs.length - 1).toString();
+                }
+            }
+            else if (index < this.selectedTab) {
+                this.selectedTab -= 1;
+            }
         },
 
         attached: function () {
-            this.masterList = [{title: 'Thing 1'}, {title: 'Thing 2'}, {title: 'Thing 3'}];
-            this.opened = [];
-            this.availableList = this.getAvailable(this.opened);
+            // NOTE: Replace below with a script to get all available items
+            this.masterList = [{title: 'English ULB'}, {title: 'English UDB'}, {title: 'Arabic'}, {title: 'Bahasa Indonesia'}];
         }
     });
-
-    function closeModal(el) {
-        document.querySelector('input[name="source-search"]').value = '';
-        el.query = '';
-        el.style.display = 'none';
-    }
 
 })(window);
 

@@ -30,7 +30,8 @@
         <ts-translate-sidebar route="{{route}}" selected="{{selected}}"></ts-translate-sidebar>
 
         <neon-animated-pages selected="[[selected]]" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
-            <ts-read-mode></ts-read-mode>
+            <!-- bible="{{bible}}" is part of textual data -->
+            <ts-read-mode bible="{{bible}}"></ts-read-mode>
             <ts-chunk-mode></ts-chunk-mode>
             <ts-review-mode></ts-review-mode>
         </neon-animated-pages>
@@ -54,11 +55,75 @@
                 type: String,
                 value: '',
                 notify: true
+            },
+            // Textual data for read-mode, chunk-mode, and review-mode
+            // -------------------------------------------------------
+            bible: {
+                type: Object,
+                value: function() { return {}; }
             }
+            // end of textual data
         },
 
         ready: function() {
-
+            // Textual data
+            // ------------
+            this.bible = {
+                book: "Genesis",
+                translation: "English KJV",
+                content: [
+                    {
+                        chapterNumber: 1,
+                        chapterContent: [
+                            {
+                                section: 1,
+                                startVerse: 1,
+                                endVerse: 2,
+                                verses: [
+                                    'In the beginning God created the heaven and the earth.',
+                                    'And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters.',
+                                ]
+                            },
+                            {
+                                section: 2,
+                                startVerse: 3,
+                                endVerse: 5,
+                                verses: [
+                                    'And God said, Let there be light: and there was light.',
+                                    'And God saw the light, that it was good: and God divided the light from the darkness.',
+                                    'And God called the light Day, and the darkness he called Night. And the evening and the morning were the first day.'
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        chapterNumber: 2,
+                        chapterContent: [
+                            {
+                                section: 1,
+                                startVerse: 1,
+                                endVerse: 3,
+                                verses: [
+                                    'Thus the heavens and the earth were finished, and all the host of them.',
+                                    'And on the seventh day God ended his work which he had made; and he rested on the seventh day from all his work which he had made.',
+                                    'And God blessed the seventh day, and sanctified it: because that in it he had rested from all his work which God created and made.'
+                                ]
+                            },
+                            {
+                                section: 2,
+                                startVerse: 4,
+                                endVerse: 6,
+                                verses: [
+                                    'These are the generations of the heavens and of the earth when they were created, in the day that the LORD God made the earth and the heavens,',
+                                    'And every plant of the field before it was in the earth, and every herb of the field beforeit grew: for the LORD God had not caused it to rain upon the earth, and there was not a man to till the ground.',
+                                    'But there went up a mist from the earth, and watered the whole face of the ground.'
+                                ]
+                            },
+                        ]
+                    }
+                ]
+            };
+            // end of textual data
         }
     });
 

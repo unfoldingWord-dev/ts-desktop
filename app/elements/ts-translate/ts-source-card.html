@@ -1,0 +1,116 @@
+<!-- ts-source-card -->
+<!-- imported into ts-read-mode -->
+<!-- imported into ts-review-mode -->
+
+<link rel="import" href="../../components/paper-card/paper-card.html">
+<!-- <link rel="import" href="../../components/iron-resizable-behavior/iron-resizable-behavior.html"> -->
+
+<dom-module is="ts-source-card">
+	
+	<style is="custom_style">
+		/* ------------------- */
+		/* STYLE FOR ALL MODE */
+		/* ------------------- */
+		:host {
+			background-color: #FFF;
+			display: block;
+		}
+
+		/* ------------------- */
+		/* STYLE FOR READ-MODE */
+		/* ------------------- */
+		/* Note: Look for common style in other mode and condense them if possible. */
+		:host.read-mode {
+			width: calc(100% - 20px);  /* the 20px is to show the ts-translation-card underneath to the right*/
+			margin-bottom: 40px;
+		}
+		:host.read-mode .tab-station {
+			display: block;
+			width: 100%;
+			height: 3rem;  /* 36px */
+		} 
+		:host.read-mode .card-heading {
+			padding: 1.5rem 0 0.75rem;
+			text-align: center;
+			font-size: 120%;
+			font-weight: bold;
+			color: #666;
+		}
+		:host.read-mode .card-content {
+			padding: 0.75rem 1.5rem 1.5rem;
+		}
+		:host.read-mode .card-content {
+			width: 62.5%;
+			min-width: 380px;
+			display: block;
+			margin: 0 auto;
+			line-height: 1.5;
+		}
+		/* END STYLE FOR READ-MODE
+
+	</style>
+
+	<template>
+		<paper-card elevation="2">
+			<div class="tab-station"></div>
+			<div class="card-heading"><span>{{ heading }}</span></div>
+			<div class="card-content"><span>{{ text }}</span></div>
+		</paper-card>
+	</template>
+
+</dom-module>
+
+<script>
+	
+Polymer({
+
+	is: 'ts-source-card',
+
+	properties: {
+		mode: {
+			type: String,
+			observer: '_modeChanged'
+		},
+		heading: {
+			type: String,
+			value: '',
+			observer: '_headingChanged'
+		},
+		text: {
+			type: String,
+			value: '',
+			observer: '_textChanged'
+		},
+		top: {
+			type: Number,
+			value: 0
+		}
+	},
+
+	_modeChanged: function(mode) {
+		// Assign class according to the given mode
+		this.classList.add(mode + '-mode');
+	},
+
+	getOffsetTop: function(heading, text) {
+		console.dir(this.offsetTop);
+		return this.offsetTop;
+	},
+
+	attributeChanged: function() {
+		console.log('attributeChanged');
+		this.getOffsetTop();
+	},
+
+	_headingChanged: function() {
+		this.getOffsetTop();
+	},
+
+	_textChanged: function() {
+		this.getOffsetTop();
+	},
+
+
+});
+
+</script>

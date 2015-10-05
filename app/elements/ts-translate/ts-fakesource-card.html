@@ -6,52 +6,64 @@
 	<style>
 
         :host {
-			display: flex;
+            display: flex;
             flex: auto;
-		}
+            flex-direction: column;
+            overflow: auto;
+        }
 
-		paper-card {
-			margin-bottom: 15px;
-		}
+        paper-card {
+            margin-bottom: 15px;
+            min-height: 150px;
+        }
 
-		.card-heading {
-			padding: 0.75rem 0;
-			text-align: center;
-		}
+        .card-heading {
+            padding: 0.75rem 0;
+            text-align: center;
+        }
 
         .card-heading h3 {
-			margin: 0;
-			padding: 0;
-			color: #888;
-		}
+            margin: 0;
+            padding: 0;
+            color: #888;
+        }
 
         .card-content {
-			width: 85%;
-			margin: 0 auto;
-			padding-top: 0.75rem;
-		}
+            width: 85%;
+            margin: 0 auto;
+            padding-top: 0.75rem;
+        }
 
         .card-content p {
-			line-height: 1.8;
-			margin-top: 0;
-		}
+            line-height: 1.8;
+            margin-top: 0;
+        }
 
 	</style>
 
 	<template>
 
-        <template is="dom-repeat" items="{{ tabs.content }}" as="chapter" indexAs="index">
-            <paper-card>
-                <div class="card-heading">
-                    <h3>
-                        <span>{{ tabs.book_title }}</span> <span>{{ chapter.chapter }}</span>
-                    </h3>
-                </div>
-                <div class="card-content">
-                    <p>{{ chapter.text }}</p>
-                </div>
-            </paper-card>
+        <template is="dom-repeat" items="{{sources}}" as="source">
+
+            <template is="dom-repeat" items="{{ source.divisions }}" as="chapters">
+                <template is="dom-repeat" items="{{chapters.content}}" as="chunks">
+                    <paper-card>
+                        <div class="card-heading">
+                            <h3>
+                                <span>{{ source.project }}</span> <span>{{ chapters.title }}</span>
+                            </h3>
+                        </div>
+                        <div class="card-content">
+                            <p>{{ chunks }}</p>
+                        </div>
+                    </paper-card>
+                </template>
+            </template>
+
+
         </template>
+
+
 
 	</template>
 

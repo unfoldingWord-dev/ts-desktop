@@ -17,6 +17,12 @@
             min-width: 400px;
         }
 
+        ts-fakesource-card {
+            flex: auto;
+            margin: 15px 0 0 15px;
+            min-width: 400px;
+        }
+
 	</style>
 
 	<template>
@@ -46,10 +52,16 @@
                 type: Object,
                 value: {},
                 notify: true
+            },
+            combination: {
+                type: Object,
+                value: {}
             }
         },
 
 		ready: function() {
+
+
 
 		}
 	});

@@ -19,40 +19,21 @@
             align-items: center;
         }
 
-        .bar {
-            background-color: var(--primary-color);
-            color: var(--text-color);
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            min-height: 45px;
-        }
-
-        .titles {
-            flex: auto;
-            font-size: 125%;
-        }
-
-        [icon="arrow-back"] {
-            margin: 0 1em 0 .2em;
-        }
-
         .header {
-            color: #888;
+            color: var(--greyed-out-dark);
             font-size: 110%;
-            background: var(--primary-color);
             width: 100%;
             display: flex;
             justify-content: center;
             min-height: 60px;
         }
 
-        .header div {
+        .header > div {
             display: flex;
             justify-content: flex-start;
             align-items: center;
             padding-left: 20px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--greyed-out-light);
             background: white;
             width: 430px;
             box-shadow: 0 -1px 2px 1px var(--primary-color-dark);
@@ -63,20 +44,21 @@
             max-height: 90vh;
             width: 450px;
             background: white;
-            box-shadow: 0 2px 3px 2px #ccc;
+            box-shadow: 0 2px 3px 2px var(--greyed-out-light);
         }
 
         .row {
             display: block;
             margin: 0;
             padding: 1em;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--greyed-out-light);
             transition: background .3s, color .3s;
+            cursor: pointer;
         }
 
         .row:hover {
             background: var(--accent-color-dark);
-            color: #fff;
+            color: var(--text-color);
         }
 
         ::-webkit-scrollbar {
@@ -87,32 +69,17 @@
             padding: 0 10px;
         }
 
-        .bar a {
-            color: white;
-        }
-
-        .contain a {
-            text-decoration: none;
-            color: black;
-        }
-
-        .header a {
-            color: #888;
-            text-decoration: none;
+        .click {
+            cursor: pointer;
         }
 
     </style>
 
   <template>
 
-      <div class="bar">
-          <a href="/projectmenu"><paper-icon-button icon="arrow-back" title="Go Back"></paper-icon-button></a>
-          <div class="titles">New Project</div>
-      </div>
-
       <div class="header">
           <div>
-              <a href="/projectmenu"><span>[[group.name]]</span></a>
+              <span class="click" on-tap="togroup">[[group.name]]</span>
               <iron-icon icon="chevron-right"></iron-icon>
               <em>Choose a book</em>
           </div>
@@ -121,13 +88,11 @@
       <div class="contain">
           <iron-list items="[[group.list]]" as="bk">
               <template>
-                  <a href="/chaptermenu">
-                      <div class="row" on-tap="store">
-                          <div>
-                              <span>[[bk.name]]</span>
-                          </div>
+                  <div class="row" on-tap="store">
+                      <div>
+                          <span>[[bk.name]]</span>
                       </div>
-                  </a>
+                  </div>
               </template>
           </iron-list>
       </div>
@@ -142,6 +107,15 @@
     is: 'ts-book-menu',
 
       properties: {
+          selected: {
+              type: Number,
+              value: 0,
+              notify: true
+          },
+          group: {
+              type: Object,
+              value: {}
+          },
           book: {
               type: Object,
               value: {},
@@ -168,7 +142,11 @@
               chaparray.push(i);
           }
           this.chapters = chaparray;
+          this.selected = this.selected + 1;
+      },
 
+      togroup: function () {
+          this.selected = 1;
       },
 
     ready: function() {

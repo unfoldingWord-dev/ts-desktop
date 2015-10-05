@@ -1,0 +1,87 @@
+
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../components/paper-menu/paper-menu.html">
+<link rel="import" href="../../components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../../components/paper-item/paper-item.html">
+
+<dom-module id="ts-home-sidebar">
+
+    <style>
+
+        :host {
+            background: var(--primary-color);
+            color: var(--text-color);
+            min-width: 50px;
+            align-self: stretch;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        paper-icon-button {
+            padding-bottom: 15px;
+        }
+
+        paper-item:hover {
+            background: var(--accent-color-dark);
+            color: var(--text-color);
+            cursor: pointer;
+        }
+
+        paper-menu {
+            --paper-menu-selected-item: {
+                 font-weight: normal;
+             }
+        }
+
+    </style>
+
+    <template>
+        <paper-menu-button horizontal-offset="10" vertical-offset="10" vertical-align="bottom">
+            <paper-icon-button class="dropdown-trigger" icon="more-vert" title="options"></paper-icon-button>
+            <paper-menu class="dropdown-content">
+                <paper-item on-tap="home1">Home 1</paper-item>
+                <paper-item on-tap="home2">Home 2</paper-item>
+                <paper-item>Feedback</paper-item>
+                <paper-item>Settings</paper-item>
+            </paper-menu>
+        </paper-menu-button>
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-home-sidebar',
+
+        properties: {
+            selected: {
+                type: Number,
+                value: 0,
+                notify: true
+            },
+            route: {
+                type: String,
+                value: '',
+                notify: true
+            }
+        },
+
+        home1: function () {
+            this.selected = 0;
+        },
+
+        home2: function () {
+            this.selected = 1;
+        },
+
+        ready: function() {
+
+        }
+
+    });
+
+</script>

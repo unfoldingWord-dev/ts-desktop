@@ -26,17 +26,18 @@
             flex: auto;
         }
 
-        .bar {
+        .header {
             background-color: var(--primary-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .title {
             color: var(--text-color);
             display: flex;
             justify-content: flex-start;
             align-items: center;
             min-height: 45px;
-        }
-
-        .titles {
-            flex: auto;
             font-size: 125%;
         }
 
@@ -44,28 +45,29 @@
             margin: 0 1em 0 .2em;
         }
 
-        .header {
-            background: var(--primary-color);
-            width: 100%;
+        .steps {
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 60px;
         }
 
-        .steps {
-            color: #B7E1DF;
+        .future {
+            color: var(--primary-color-light);
+            display: inline-block;
         }
 
-        .steps .current {
-            color: white;
+        .current {
+            color: var(--text-color);
+            display: inline-block;
         }
 
-        .steps .past {
-            color: white;
+        .past {
+            color: var(--text-color);
+            display: inline-block;
         }
 
-        .small {
+        .icon {
             --iron-icon-height: 17px;
             --iron-icon-width: 17px;
         }
@@ -81,29 +83,38 @@
             line-height: 25px;
         }
 
-        .circle.current {
-            background: #1FC2FC;
+        .current .circle {
+            background: var(--highlight-primary);
+        }
+
+        .past .text {
+            display: none;
+        }
+
+        .current .icon {
+            display: none;
+        }
+
+        .future .icon {
+            display: none;
         }
 
     </style>
 
     <template>
 
-        <div class="bar">
-            <paper-icon-button icon="arrow-back" title="Go Back" on-tap="back"></paper-icon-button>
-            <div class="titles">Publish Project</div>
-        </div>
-
         <div class="header">
+            <div class="title">
+                <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
+                <span>Publish Project</span>
+            </div>
             <div class="steps">
-                <div class="circle past"><iron-icon icon="done" class="small"></iron-icon></div>
-                <span class="past">BOOK</span>
-                <div class="circle past"><iron-icon icon="done" class="small"></iron-icon></div>
-                <span class="past">PROFILE</span>
-                <div class="circle current">3</div>
-                <span class="current">REVIEW</span>
-                <div class="circle">4</div>
-                <span>PUBLISH</span>
+                <template is="dom-repeat" items="[[stepslist]]" as="step">
+                    <div class$="[[step.level]]">
+                        <div class="circle"><span class="text">[[step.number]]</span><iron-icon icon="done" class="icon"></iron-icon></div>
+                        <span>[[step.name]]</span>
+                    </div>
+                </template>
             </div>
         </div>
 
@@ -111,7 +122,7 @@
             <ts-publish-book selected="{{selected}}" language="[[language]]" book="[[book]]"></ts-publish-book>
             <ts-publish-profile selected="{{selected}}"></ts-publish-profile>
             <ts-publish-review selected="{{selected}}" language="[[language]]" book="[[book]]"></ts-publish-review>
-            <ts-publish-publish selected="{{selected}}"></ts-publish-publish>
+            <ts-publish-publish></ts-publish-publish>
         </neon-animated-pages>
 
     </template>
@@ -132,7 +143,54 @@
                 type: String,
                 value: '',
                 notify: true
+            },
+            language: {
+                type: Object,
+                value: {}
+            },
+            book: {
+                type: Object,
+                value: {}
+            },
+            stepslist: {
+                type: Array,
+                value: [],
+                computed: 'createlist(selected)'
             }
+        },
+
+        createlist: function (selected) {
+            var list = [];
+            if (selected === 0) {
+                list = [
+                    {number: 1, name: "BOOK", level: "current"},
+                    {number: 2, name: "PROFILE", level: "future"},
+                    {number: 3, name: "REVIEW", level: "future"},
+                    {number: 4, name: "PUBLISH", level: "future"}
+                ]
+            } else if (selected === 1) {
+                list = [
+                    {number: 1, name: "BOOK", level: "past"},
+                    {number: 2, name: "PROFILE", level: "current"},
+                    {number: 3, name: "REVIEW", level: "future"},
+                    {number: 4, name: "PUBLISH", level: "future"}
+                ]
+            } else if (selected === 2) {
+                list = [
+                    {number: 1, name: "BOOK", level: "past"},
+                    {number: 2, name: "PROFILE", level: "past"},
+                    {number: 3, name: "REVIEW", level: "current"},
+                    {number: 4, name: "PUBLISH", level: "future"}
+                ]
+            } else if (selected === 3) {
+                list = [
+                    {number: 1, name: "BOOK", level: "past"},
+                    {number: 2, name: "PROFILE", level: "past"},
+                    {number: 3, name: "REVIEW", level: "past"},
+                    {number: 4, name: "PUBLISH", level: "current"}
+                ]
+            }
+            return list;
         },
 
         back: function () {

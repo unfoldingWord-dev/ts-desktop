@@ -19,44 +19,25 @@
             align-items: center;
         }
 
-        .bar {
-            background-color: var(--primary-color);
-            color: var(--text-color);
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            min-height: 45px;
-        }
-
-        .titles {
-            flex: auto;
-            font-size: 125%;
-        }
-
-        [icon="arrow-back"] {
-            margin: 0 1em 0 .2em;
-        }
-
         [icon="search"] {
             padding: 0;
         }
 
         .header {
-            color: #888;
+            color: var(--greyed-out-dark);
             font-size: 110%;
-            background: var(--primary-color);
             width: 100%;
             display: flex;
             justify-content: center;
             min-height: 60px;
         }
 
-        .header div {
+        .header > div {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 20px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--greyed-out-light);
             background: white;
             width: 410px;
             box-shadow: 0 -1px 2px 1px var(--primary-color-dark);
@@ -67,25 +48,26 @@
             max-height: 90vh;
             width: 450px;
             background: white;
-            box-shadow: 0 2px 3px 2px #ccc;
+            box-shadow: 0 2px 3px 2px var(--greyed-out-light);
         }
 
         .row {
             display: block;
             margin: 0;
             padding: 1em;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--greyed-out-light);
             transition: background .3s, color .3s;
+            cursor: pointer;
         }
 
         .row:hover {
             background: var(--accent-color-dark);
-            color: #fff;
+            color: var(--text-color);
         }
 
         .right {
             float: right;
-            color: #888;
+            color: var(--greyed-out-dark);
             font-style: italic;
             font-size: 70%
         }
@@ -96,23 +78,9 @@
             font-style: italic;
         }
 
-        .bar a {
-            color: white;
-        }
-
-        .contain a {
-            text-decoration: none;
-            color: black;
-        }
-
     </style>
 
   <template>
-
-      <div class="bar">
-            <a href="/home"><paper-icon-button icon="arrow-back" title="Go Back"></paper-icon-button></a>
-            <div class="titles">New Project</div>
-      </div>
 
       <div class="header">
           <div>
@@ -124,14 +92,12 @@
       <div class="contain">
           <iron-list id="list" items="{{searchfilter(query,languagelist)}}" as="lang">
               <template>
-                  <a href="/projectmenu">
-                      <div class="row" on-tap="store">
-                          <div>
-                              <span>[[lang.ln]]</span>
-                              <span class="right">[[lang.lc]]</span>
-                          </div>
+                  <div class="row" on-tap="store">
+                      <div>
+                          <span>[[lang.ln]]</span>
+                          <span class="right">[[lang.lc]]</span>
                       </div>
-                  </a>
+                  </div>
               </template>
           </iron-list>
       </div>
@@ -149,6 +115,11 @@
       is: 'ts-language-menu',
 
       properties: {
+          selected: {
+              type: Number,
+              value: 0,
+              notify: true
+          },
           language: {
               type: Object,
               value: {},
@@ -178,12 +149,11 @@
 
       store: function (e) {
           this.language = e.model.lang;
+          this.selected = this.selected + 1;
       },
 
       ready: function () {
-
           this.languagelist = App.translator.targetLanguages;
-
       }
   });
 

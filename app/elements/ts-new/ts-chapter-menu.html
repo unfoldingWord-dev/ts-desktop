@@ -1,5 +1,4 @@
 
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../components/iron-icons/iron-icons.html">
 
 <dom-module id="ts-chapter-menu">
@@ -18,50 +17,31 @@
             align-items: center;
         }
 
-        .contain>div {
+        .contain > div {
             display: inline-block;
             background: white;
             width: 450px;
-            box-shadow: 0 2px 3px 2px #ccc;
+            box-shadow: 0 2px 3px 2px var(--greyed-out-light);
             overflow-y: auto;
             max-height: 600px;
             overflow-x: hidden;
         }
 
-        .bar {
-            background-color: var(--primary-color);
-            color: var(--text-color);
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            min-height: 45px;
-        }
-
-        .titles {
-            flex: auto;
-            font-size: 125%;
-        }
-
-        [icon="arrow-back"] {
-            margin: 0 1em 0 .2em;
-        }
-
         .header {
-            color: #888;
+            color: var(--greyed-out-dark);
             font-size: 110%;
-            background: var(--primary-color);
             width: 100%;
             display: flex;
             justify-content: center;
             min-height: 60px;
         }
 
-        .header div {
+        .header > div {
             display: flex;
             justify-content: flex-start;
             align-items: center;
             padding-left: 20px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--greyed-out-light);
             background: white;
             width: 430px;
             box-shadow: 0 -1px 2px 1px var(--primary-color-dark);
@@ -69,11 +49,11 @@
 
         .block:hover {
             background: var(--accent-color-dark);
-            color: #fff;
+            color: var(--text-color);
         }
 
         .block {
-            border: 1px solid #eee;
+            border: 1px solid var(--greyed-out-light);
             width: 49px;
             margin-top: -1px;
             margin-right: -5px;
@@ -83,40 +63,26 @@
             padding-bottom: 15px;
             font-size: 110%;
             transition: background .3s, color .3s;
+            cursor: pointer;
         }
 
         .header iron-icon {
             padding: 0 10px;
         }
 
-        .bar a {
-            color: white;
-        }
-
-        .contain a {
-            text-decoration: none;
-            color: black;
-        }
-
-        .header a {
-            color: #888;
-            text-decoration: none;
+        .click {
+            cursor: pointer;
         }
 
     </style>
 
   <template>
 
-      <div class="bar">
-          <a href="/bookmenu"><paper-icon-button icon="arrow-back" title="Go Back"></paper-icon-button></a>
-          <div class="titles">New Project</div>
-      </div>
-
       <div class="header">
           <div>
-              <a href="/projectmenu"><span>[[group.name]]</span></a>
+              <span class="click" on-tap="togroup">[[group.name]]</span>
               <iron-icon icon="chevron-right"></iron-icon>
-              <a href="/bookmenu"><span>[[book.name]]</span></a>
+              <span class="click" on-tap="tobook">[[book.name]]</span>
               <iron-icon icon="chevron-right"></iron-icon>
               <em>Choose a chapter</em>
           </div>
@@ -125,9 +91,7 @@
       <div class="contain">
           <div>
               <template is="dom-repeat" items="[[chapters]]" as="chap">
-                  <a href="/translate">
-                      <span class="block" on-tap="store">[[chap]]</span>
-                  </a>
+                  <span class="block" on-tap="store">[[chap]]</span>
               </template>
           </div>
       </div>
@@ -142,6 +106,28 @@
     is: 'ts-chapter-menu',
 
       properties: {
+          selected: {
+              type: Number,
+              value: 0,
+              notify: true
+          },
+          route: {
+              type: String,
+              value: '',
+              notify: true
+          },
+          group: {
+              type: Object,
+              value: {}
+          },
+          book: {
+              type: Object,
+              value: {}
+          },
+          chapters: {
+              type: Array,
+              value: []
+          },
           chapter: {
               type: Number,
               value: null,
@@ -150,11 +136,18 @@
       },
 
       store: function(e) {
-
           this.chapter = e.model.chap;
-
+          this.route = "translate";
+          this.selected = 0;
       },
 
+      togroup: function () {
+          this.selected = 1;
+      },
+
+      tobook: function () {
+          this.selected = 2;
+      },
 
     ready: function() {
 

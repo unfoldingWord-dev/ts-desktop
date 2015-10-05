@@ -1,4 +1,99 @@
 
+<link rel="import" href="../../components/neon-animation/neon-animation.html">
+
 <link rel="import" href="./ts-home-blank.html">
 <link rel="import" href="./ts-home-menu.html">
 <link rel="import" href="./ts-new-project-button.html">
+<link rel="import" href="./ts-home-sidebar.html">
+
+<dom-module id="ts-home">
+
+    <style>
+
+        :host {
+            display: flex;
+        }
+
+        .main {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        neon-animated-pages {
+            flex: auto;
+            display: flex;
+        }
+
+        neon-animated-pages > * {
+            flex: auto;
+        }
+
+        .header {
+            background: var(--greyed-out-light);
+            color: black;
+            width: 100%;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            box-shadow: 0 1px 2px 0 #ccc;
+        }
+
+        .title {
+            flex: auto;
+            font-size: 125%;
+            padding-left: 20px;
+        }
+
+        ts-new-project-button {
+            position: absolute;
+            right: 15px;
+            top: 20px;
+        }
+
+    </style>
+
+    <template>
+
+        <ts-home-sidebar route="{{route}}" selected="{{selected}}"></ts-home-sidebar>
+
+        <div class="main">
+            <div class="header">
+                <div class="title">Your Translation Projects</div>
+            </div>
+            <neon-animated-pages selected="[[selected]]" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
+                <ts-home-blank route="{{route}}"></ts-home-blank>
+                <ts-home-menu route="{{route}}"></ts-home-menu>
+            </neon-animated-pages>
+        </div>
+
+        <ts-new-project-button route="{{route}}"></ts-new-project-button>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+        is: 'ts-home',
+
+        properties: {
+            selected: {
+                type: Number,
+                value: 0
+            },
+            route: {
+                type: String,
+                value: '',
+                notify: true
+            }
+        },
+
+        ready: function() {
+
+        }
+    });
+
+</script>

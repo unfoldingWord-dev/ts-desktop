@@ -1,6 +1,5 @@
 
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="ts-new-project-button.html">
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
 <link rel="import" href="../ts-icons/ts-icons.html">
 
 <dom-module id="ts-home-menu">
@@ -9,34 +8,6 @@
 
         :host {
             display: flex;
-        }
-
-        .overflow {
-            background: var(--primary-color-dark);
-            color: white;
-            width: 50px;
-            align-self: stretch;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            align-items: center;
-        }
-
-        .main {
-            flex: auto;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .bar {
-            background: #ddd;
-            color: black;
-            width: 100%;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            box-shadow: 0 1px 2px 0 #ccc;
         }
 
         .contain {
@@ -59,88 +30,90 @@
         }
 
         tbody tr {
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--greyed-out-light);
             transition: background .3s, color .3s;
         }
 
         tbody tr:hover {
             background: var(--accent-color-dark);
-            color: #fff;
+            color: var(--text-color);
+            cursor: pointer;
         }
 
         td {
             padding: 15px;
         }
 
-        .titles {
-            flex: auto;
-            font-size: 125%;
-            padding-left: 20px;
-        }
-
         .smallicon {
             --iron-icon-height: 18px;
             --iron-icon-width: 18px;
-            color: #888;
+            color: var(--greyed-out-dark);
         }
 
         .smalltext {
             font-size: 75%;
-            color: #666;
+            color: var(--greyed-out-dark);
         }
 
     </style>
 
-  <template>
+    <template>
 
-      <div class="overflow">
-          <paper-icon-button icon="more-vert"></paper-icon-button>
-      </div>
+        <div class="contain">
+            <table>
+                <thead>
+                    <tr class="smalltext">
+                        <td></td><td>Project</td><td>Language</td><td>Progress</td><td></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template is="dom-repeat" items="[[projects]]" as="project">
+                        <tr on-tap="open">
+                            <td><iron-icon class="smallicon" icon="[[project.icon]]"></iron-icon></td>
+                            <td><span>[[project.name]]</span></td>
+                            <td><span class="smalltext">[[project.language]]</span></td>
+                            <td></td>
+                            <td><iron-icon class="smallicon" icon="info" title="Info"></iron-icon></td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
 
-      <div class="main">
-          <div class="bar">
-              <div class="titles">Your Translation Projects</div>
-          </div>
-          <div class="contain">
-              <table>
-                  <thead>
-                  <tr class="smalltext">
-                      <td></td><td>Project</td><td>Language</td><td>Progress</td><td></td>
-                  </tr>
-                  </thead>
-                  <tbody>
-                      <template is="dom-repeat" items="[[projects]]" as="project">
-                          <tr>
-                              <td><iron-icon class="smallicon" icon="[[project.icon]]"></iron-icon></td>
-                              <td><span>[[project.name]]</span></td>
-                              <td><span class="smalltext">[[project.language]]</span></td>
-                              <td></td>
-                              <td><iron-icon class="smallicon" icon="info" title="More Info"></iron-icon></td>
-                          </tr>
-                      </template>
-                  </tbody>
-              </table>
-          </div>
-      </div>
-
-      <ts-new-project-button></ts-new-project-button>
-
-  </template>
+    </template>
 
 </dom-module>
 
 <script>
 
   Polymer({
-    is: 'ts-home-menu',
 
-    ready: function() {
-      this.projects = [
-          {"name": 'Genesis', "language": 'Amharic', "icon": 'project:project'},
-          {"name": 'John', "language": 'Afaraf', "icon": 'project:project'},
-          {"name": 'Open Bible Stories', "language": 'Amal', "icon": 'uw-icon:uw-icon-small'}
-      ];
-    }
+      is: 'ts-home-menu',
+
+      properties: {
+          route: {
+              type: String,
+              value: '',
+              notify: true
+          },
+          projects: {
+              type: Array,
+              value: []
+          }
+      },
+
+      open: function () {
+          this.route = "translate";
+      },
+
+      ready: function() {
+          this.projects = [
+              {"name": 'Genesis', "language": 'Amharic', "icon": 'project:project'},
+              {"name": 'John', "language": 'Afaraf', "icon": 'project:project'},
+              {"name": 'Open Bible Stories', "language": 'Amal', "icon": 'uw-icon:uw-icon-small'}
+          ];
+      }
+
   });
 
 </script>

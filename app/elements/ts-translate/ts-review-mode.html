@@ -27,11 +27,20 @@
 
 	<template>
 
-        <ts-fakesource-card sources="[[sources]]"></ts-fakesource-card>
+        <template is="dom-repeat" items="{{flattrans}}" as="chunks">
+            <paper-card>
+                <div class="card-heading">
+                    <h3>
+                        <span>Test</span>
+                    </h3>
+                </div>
+                <div class="card-content">
+                    <p>{{ chunks }}</p>
+                </div>
+            </paper-card>
+        </template>
 
-        <ts-translation-card translation="{{translation}}"></ts-translation-card>
 
-        <ts-translation-card translation="{{translation}}"></ts-translation-card>
 
 	</template>
 
@@ -53,15 +62,30 @@
                 value: {},
                 notify: true
             },
+            flattrans: {
+                type: Array,
+                value: [],
+                computed: 'createflat(sources)'
+            },
             combination: {
                 type: Object,
                 value: {}
             }
         },
 
+        createflat: function (source) {
+            var flat = [];
+            flat = source.map(function(src){
+                return src.divisions.map(function(chapters) {
+                    return chapters.title;
+                });
+            });
+
+            flat = _.flattenDeep(flat);
+            return flat;
+        },
+
 		ready: function() {
-
-
 
 		}
 	});

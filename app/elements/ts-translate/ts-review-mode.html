@@ -8,12 +8,25 @@
 
 		:host {
             display: flex;
+            flex: auto;
+
+        }
+
+        .outer {
+            flex: auto;
             overflow: auto;
+
+        }
+
+        .inner {
+            display: flex;
+
+            margin-top: 15px;
         }
 
         ts-translation-card {
-            flex: auto;
-            margin: 15px 0 0 15px;
+
+            margin-left: 15px;
             min-width: 400px;
         }
 
@@ -27,20 +40,15 @@
 
 	<template>
 
-        <template is="dom-repeat" items="{{flattrans}}" as="chunks">
-            <paper-card>
-                <div class="card-heading">
-                    <h3>
-                        <span>Test</span>
-                    </h3>
+        <div class="outer">
+            <template is="dom-repeat" items="{{trans}}" as="chunk">
+                <div class="inner">
+                    <ts-translation-card projectmeta="[[translation.projectmeta]]" chunk="[[chunk]]"></ts-translation-card>
+                    <ts-translation-card projectmeta="[[translation.projectmeta]]" chunk="[[chunk]]"></ts-translation-card>
+                    <ts-translation-card projectmeta="[[translation.projectmeta]]" chunk="[[chunk]]"></ts-translation-card>
                 </div>
-                <div class="card-content">
-                    <p>{{ chunks }}</p>
-                </div>
-            </paper-card>
-        </template>
-
-
+            </template>
+        </div>
 
 	</template>
 
@@ -53,36 +61,35 @@
 		is: 'ts-review-mode',
 
         properties: {
-            sources: {
-                type: Array,
-                value: []
+            source: {
+                type: Object,
+                value: {}
             },
             translation: {
                 type: Object,
                 value: {},
                 notify: true
             },
-            flattrans: {
+            trans: {
                 type: Array,
                 value: [],
-                computed: 'createflat(sources)'
+                computed: 'createtrans(translation)'
             },
             combination: {
                 type: Object,
                 value: {}
             }
+
         },
 
-        createflat: function (source) {
-            var flat = [];
-            flat = source.map(function(src){
-                return src.divisions.map(function(chapters) {
-                    return chapters.title;
-                });
+        createtrans: function (translation) {
+            var trans = [];
+            var start = this.translation.chunks;
+            trans = start.map(function(chunk){
+                return chunk.content;
             });
 
-            flat = _.flattenDeep(flat);
-            return flat;
+            return trans;
         },
 
 		ready: function() {

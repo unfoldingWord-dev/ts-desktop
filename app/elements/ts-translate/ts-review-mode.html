@@ -9,30 +9,25 @@
 		:host {
             display: flex;
             flex: auto;
-
         }
 
         .outer {
             flex: auto;
             overflow: auto;
-
         }
 
         .inner {
             display: flex;
-
             margin-top: 15px;
         }
 
         ts-translation-card {
-
             margin-left: 15px;
             min-width: 400px;
         }
 
         ts-fakesource-card {
-            flex: auto;
-            margin: 15px 0 0 15px;
+            margin-left: 15px;
             min-width: 400px;
         }
 
@@ -41,9 +36,9 @@
 	<template>
 
         <div class="outer">
-            <template is="dom-repeat" items="{{translation}}" as="chunk">
+            <template is="dom-repeat" items="{{combination.data}}" as="chunk">
                 <div class="inner">
-                    <ts-translation-card language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-translation-card>
+                    <ts-fakesource-card language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-fakesource-card>
                     <ts-translation-card language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-translation-card>
                     <ts-translation-card language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-translation-card>
                 </div>
@@ -79,25 +74,73 @@
                 value: {}
             },
             trans: {
-                type: Array,
-                value: []
-
+                type: Object,
+                value: {},
+                computed: 'createtrans(translation)'
+            },
+            src: {
+                type: Object,
+                value: {},
+                computed: 'createsrc(source)'
+            },
+            meta: {
+                type: Object,
+                value: {},
+                computed: 'createmeta(source)'
             },
             combination: {
                 type: Object,
-                value: {}
+                value: {},
+                computed: 'createcombo(src, trans, meta)'
             }
 
         },
 
+        createcombo: function (src, trans, meta) {
+            var combo = {};
+
+            combo = _.merge(src, trans, meta);
+
+            return combo;
+        },
+
         createtrans: function (translation) {
             var trans = [];
-            var start = this.translation.chunks;
-            trans = start.map(function(chunk){
-                return chunk.content;
+            var transdata = {};
+
+            trans = translation.map(function(chunk){
+                return {transcontent: chunk.content};
             });
 
-            return trans;
+            transdata.data = trans;
+
+            return transdata;
+        },
+
+        createsrc: function (source) {
+            var src = [];
+            var srcdata = {};
+
+            src = source.map(function(chunk){
+                return {srccontent: chunk.content};
+            });
+
+            srcdata.data = src;
+
+            return srcdata;
+        },
+
+        createmeta: function (source) {
+            var meta = [];
+            var metadata = {};
+
+            meta = source.map(function(chunk){
+                return {meta: chunk.meta};
+            });
+
+            metadata.data = meta;
+
+            return metadata;
         },
 
 		ready: function() {

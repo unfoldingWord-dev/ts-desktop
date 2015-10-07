@@ -6,15 +6,6 @@
 	<style>
 
         :host {
-            display: flex;
-            flex: auto;
-            flex-direction: column;
-            overflow: auto;
-        }
-
-        paper-card {
-            margin-bottom: 15px;
-            min-height: 150px;
         }
 
         .card-heading {
@@ -43,27 +34,16 @@
 
 	<template>
 
-        <template is="dom-repeat" items="{{sources}}" as="source">
-
-            <template is="dom-repeat" items="{{ source.divisions }}" as="chapters">
-                <template is="dom-repeat" items="{{chapters.content}}" as="chunks">
-                    <paper-card>
-                        <div class="card-heading">
-                            <h3>
-                                <span>{{ source.project }}</span> <span>{{ chapters.title }}</span>
-                            </h3>
-                        </div>
-                        <div class="card-content">
-                            <p>{{ chunks }}</p>
-                        </div>
-                    </paper-card>
-                </template>
-            </template>
-
-
-        </template>
-
-
+        <paper-card>
+            <div class="card-heading">
+                <h3>
+                    <span>[[book.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[language.ln]]</span>
+                </h3>
+            </div>
+            <div class="card-content">
+                <p>[[chunk.srccontent]]</p>
+            </div>
+        </paper-card>
 
 	</template>
 
@@ -76,9 +56,17 @@
 		is: 'ts-fakesource-card',
 
 		properties: {
-            sources: {
-                type: Array,
-                value: []
+            language: {
+                type: Object,
+                value: {}
+            },
+            book: {
+                type: Object,
+                value: {}
+            },
+            chunk: {
+                type: Object,
+                value: {}
             }
 		},
 

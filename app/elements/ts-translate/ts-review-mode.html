@@ -41,11 +41,11 @@
 	<template>
 
         <div class="outer">
-            <template is="dom-repeat" items="{{trans}}" as="chunk">
+            <template is="dom-repeat" items="{{translation}}" as="chunk">
                 <div class="inner">
-                    <ts-translation-card projectmeta="[[translation.projectmeta]]" chunk="[[chunk]]"></ts-translation-card>
-                    <ts-translation-card projectmeta="[[translation.projectmeta]]" chunk="[[chunk]]"></ts-translation-card>
-                    <ts-translation-card projectmeta="[[translation.projectmeta]]" chunk="[[chunk]]"></ts-translation-card>
+                    <ts-translation-card language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-translation-card>
+                    <ts-translation-card language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-translation-card>
+                    <ts-translation-card language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-translation-card>
                 </div>
             </template>
         </div>
@@ -62,18 +62,26 @@
 
         properties: {
             source: {
+                type: Array,
+                value: []
+            },
+            translation: {
+                type: Array,
+                value: [],
+                notify: true
+            },
+            language: {
                 type: Object,
                 value: {}
             },
-            translation: {
+            book: {
                 type: Object,
-                value: {},
-                notify: true
+                value: {}
             },
             trans: {
                 type: Array,
-                value: [],
-                computed: 'createtrans(translation)'
+                value: []
+
             },
             combination: {
                 type: Object,

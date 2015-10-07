@@ -32,7 +32,7 @@
         <neon-animated-pages selected="[[selected]]" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
             <ts-read-mode></ts-read-mode>
             <ts-chunk-mode></ts-chunk-mode>
-            <ts-review-mode source="[[source]]" translation="{{translation}}"></ts-review-mode>
+            <ts-review-mode language="[[language]]" book="[[book]]" source="[[source]]" translation="{{translation}}"></ts-review-mode>
         </neon-animated-pages>
 
     </template>
@@ -55,104 +55,79 @@
                 value: '',
                 notify: true
             },
-            source: {
+            language: {
                 type: Object,
                 value: {}
             },
-            translation: {
+            book: {
                 type: Object,
                 value: {}
+            },
+            source: {
+                type: Array,
+                value: []
+            },
+            translation: {
+                type: Array,
+                value: []
             }
         },
 
         ready: function() {
 
-            this.translation = {
-                projectmeta: {
-                    book: 'John',
-                    language: 'Afaraf'
+            this.translation = [
+                {
+                    meta: {
+                        chapter: 1,
+                        startverse: 1,
+                        endverse: 3
+                    },
+                    content: 'Translation - In the beginning was the Word, and the Word was with God, and the Word was God. The same was in the beginning with God. All things were made by him; and without him was not any thing made that was made.'
                 },
-                chunks: [
-                    {
-                        chunkmeta: {
-                            chapter: 1,
-                            startverse: 1,
-                            endverse: 3
-                        },
-                        content: [
-                            'Translation - In the beginning was the Word, and the Word was with God, and the Word was God.',
-                            'The same was in the beginning with God. All things were made by him;',
-                            'and without him was not any thing made that was made.'
-                        ]
+                {
+                    meta: {
+                        chapter: 1,
+                        startverse: 4,
+                        endverse: 5
                     },
-                    {
-                        chunkmeta: {
-                            chapter: 1,
-                            startverse: 4,
-                            endverse: 5
-                        },
-                        content: [
-                            'Translation - And the Word was made flesh, and dwelt among us, (and we beheld his glory, the glory as of the only begotten of the Father,) full of grace and truth.',
-                            'John bore witness of him, and cried, saying, This was he of whom I spake, He that cometh after me is preferred before me: for he was before me.'
-                        ]
-                    },
-                    {
-                        chunkmeta: {
-                            chapter: 2,
-                            startverse: 1,
-                            endverse: 2
-                        },
-                        content: [
-                            'Translation - They came and saw where he dwelt, and abode with him that day: for it was about the tenth hour.',
-                            'And then there was some more text here, that said something else.  And it was good'
-                        ]
-                    }
-                ]
-            };
-
-            this.source = {
-                projectmeta: {
-                    book: 'John',
-                    language: 'English ULB'
+                    content: 'Translation - And the Word was made flesh, and dwelt among us, (and we beheld his glory, the glory as of the only begotten of the Father,) full of grace and truth. John bore witness of him, and cried, saying, This was he of whom I spake, He that cometh after me is preferred before me: for he was before me.'
                 },
-                chunks: [
-                    {
-                        chunkmeta: {
-                            chapter: 1,
-                            startverse: 1,
-                            endverse: 3
-                        },
-                        content: [
-                            'Source - In the beginning was the Word, and the Word was with God, and the Word was God.',
-                            'The same was in the beginning with God. All things were made by him;',
-                            'and without him was not any thing made that was made.'
-                        ]
+                {
+                    meta: {
+                        chapter: 2,
+                        startverse: 1,
+                        endverse: 2
+                    },
+                    content: 'Translation - They came and saw where he dwelt, and abode with him that day: for it was about the tenth hour. And then there was some more text here, that said something else.  And it was good.'
+                }
+            ];
 
+            this.source = [
+                {
+                    meta: {
+                        chapter: 1,
+                        startverse: 1,
+                        endverse: 3
                     },
-                    {
-                        chunkmeta: {
-                            chapter: 1,
-                            startverse: 4,
-                            endverse: 5
-                        },
-                        content: [
-                            'Source - And the Word was made flesh, and dwelt among us, (and we beheld his glory, the glory as of the only begotten of the Father,) full of grace and truth.',
-                            'John bore witness of him, and cried, saying, This was he of whom I spake, He that cometh after me is preferred before me: for he was before me.'
-                        ]
+                    content: 'Source - In the beginning was the Word, and the Word was with God, and the Word was God. The same was in the beginning with God. All things were made by him; and without him was not any thing made that was made.'
+                },
+                {
+                    meta: {
+                        chapter: 1,
+                        startverse: 4,
+                        endverse: 5
                     },
-                    {
-                        chunkmeta: {
-                            chapter: 2,
-                            startverse: 1,
-                            endverse: 2
-                        },
-                        content: [
-                            'Source - They came and saw where he dwelt, and abode with him that day: for it was about the tenth hour.',
-                            'And then there was some more text here, that said something else.  And it was good'
-                        ]
-                    }
-                ]
-            };
+                    content: 'Source - And the Word was made flesh, and dwelt among us, (and we beheld his glory, the glory as of the only begotten of the Father,) full of grace and truth. John bore witness of him, and cried, saying, This was he of whom I spake, He that cometh after me is preferred before me: for he was before me.'
+                },
+                {
+                    meta: {
+                        chapter: 2,
+                        startverse: 1,
+                        endverse: 2
+                    },
+                    content: 'Source - They came and saw where he dwelt, and abode with him that day: for it was about the tenth hour. And then there was some more text here, that said something else.  And it was good.'
+                }
+            ];
 
         }
     });

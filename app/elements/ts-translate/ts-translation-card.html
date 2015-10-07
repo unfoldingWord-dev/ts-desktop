@@ -43,11 +43,11 @@
         <paper-card>
             <div class="card-heading">
                 <h3>
-                    <span>[[projectmeta.book]]</span> <span>[[chunk.chunkmeta.chapter]]</span>:<span>[[chunk.chunkmeta.startverse]]</span>-<span>[[chunk.chunkmeta.endverse]]</span> - <span>[[projectmeta.language]]</span>
+                    <span>[[book.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[language.ln]]</span>
                 </h3>
             </div>
             <div class="card-content">
-                <p>[[chunk]]</p>
+                <p>[[chunk.content]]</p>
             </div>
         </paper-card>
 
@@ -62,13 +62,17 @@
 		is: 'ts-translation-card',
 
 		properties: {
-            projectmeta: {
+            language: {
+                type: Object,
+                value: {}
+            },
+            book: {
                 type: Object,
                 value: {}
             },
             chunk: {
-                type: Array,
-                value: []
+                type: Object,
+                value: {}
             }
 		},
 

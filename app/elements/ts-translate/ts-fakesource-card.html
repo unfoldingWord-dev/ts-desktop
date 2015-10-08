@@ -1,5 +1,5 @@
 
-<link rel="import" href="../../components/paper-card/paper-card.html">
+<link rel="import" href="../../components/paper-material/paper-material.html">
 
 <dom-module id="ts-fakesource-card">
 
@@ -10,31 +10,33 @@
             display: flex;
         }
 
-        paper-card {
+        paper-material {
             flex: auto;
             display: flex;
+            background: white;
+            flex-direction: column;
         }
 
-        .card-heading {
+        .heading {
             padding: 0.75rem 0;
             text-align: center;
         }
 
-        .card-heading h3 {
+        .heading h3 {
             margin: 0;
             padding: 0;
             color: #888;
         }
 
-        .card-content {
+        .content {
             width: 85%;
             margin: 0 auto;
             padding-top: 0.75rem;
             flex: auto;
         }
 
-        .card-content p {
-            line-height: 1.8;
+        .content p {
+            line-height: 1.5;
             margin-top: 0;
         }
 
@@ -42,16 +44,16 @@
 
 	<template>
 
-        <paper-card>
-            <div class="card-heading">
+        <paper-material>
+            <div class="heading">
                 <h3>
                     <span>[[book.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[language.ln]]</span>
                 </h3>
             </div>
-            <div class="card-content">
+            <div class="content">
                 <p>[[chunk.srccontent]]</p>
             </div>
-        </paper-card>
+        </paper-material>
 
 	</template>
 

@@ -1,6 +1,7 @@
 
-<link rel="import" href="../../components/paper-card/paper-card.html">
+<link rel="import" href="../../components/paper-material/paper-material.html">
 <link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../components/iron-icons/iron-icons.html">
 
 <dom-module id="ts-translation-card">
@@ -12,24 +13,29 @@
             display: flex;
         }
 
-        paper-card {
+        paper-material {
             flex: auto;
             display: flex;
+            background: white;
+            flex-direction: column;
         }
 
-		.card-heading {
-			padding: 0.5em 1em;
+		.heading {
+			padding: 5px 1em;
 			color: var(--greyed-out-dark);
             border-bottom: 1px solid var(--greyed-out-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            min-height: 35px;
 		}
 
-        .card-content {
-
+        .content {
 			padding: 0.5em 1em;
-
+            flex: auto;
 		}
 
-        .card-content p {
+        .content p {
 			line-height: 1.5;
 			margin: 0;
 		}
@@ -40,7 +46,7 @@
             margin: 10px 0;
         }
 
-        .notdone .center iron-icon {
+        .notdone .button iron-icon {
             display: none;
         }
 
@@ -51,49 +57,55 @@
             width: 100%
         }
 
-        .done .center iron-icon {
+        .button iron-icon {
             padding-right: 10px;
         }
 
-        .done .card-heading iron-icon {
+        .done .heading paper-icon-button {
             display: none;
         }
 
-        .center {
+        .button {
             text-align: center;
         }
 
-        .right {
-            float: right;
+        .heading paper-icon-button {
+            padding: 5px;
         }
 
-        .verse {
+        .content iron-icon {
             color: var(--highlight-primary);
+        }
+
+        .content span:hover {
+            font-weight: bold;
         }
 
 	</style>
 
 	<template>
 
-        <paper-card id="toggle" class="notdone">
-            <div class="card-heading">
-                <span>[[book.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[language.ln]]</span>
-                <iron-icon class="right" icon="create"></iron-icon>
+        <paper-material id="toggle" class="notdone">
+            <div class="heading">
+                <div>
+                    <span>[[book.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[language.ln]]</span>
+                </div>
+                <paper-icon-button icon="create" title="edit" on-tap=""></paper-icon-button>
             </div>
-            <div class="card-content">
+            <div class="content">
                 <p>
-                    <iron-icon id="verse1" draggable="true" ondragstart="" class="verse" icon="room"></iron-icon>
-                    <iron-icon id="verse2" draggable="true" ondragstart="" class="verse" icon="room"></iron-icon>
-                    <iron-icon id="verse3" draggable="true" ondragstart="" class="verse" icon="room"></iron-icon>
+                    <iron-icon draggable="true" ondragstart="" icon="room"></iron-icon>
+                    <iron-icon draggable="true" ondragstart="" icon="room"></iron-icon>
+                    <iron-icon draggable="true" ondragstart="" icon="room"></iron-icon>
                     <template is="dom-repeat" items="{{text}}" as="word">
                         <span ondrop="" ondragover="">[[word]]</span>
                     </template>
                 </p>
-                <div class="center">
-                    <paper-button raised on-tap="done"><iron-icon icon="done"></iron-icon>DONE</paper-button>
-                </div>
             </div>
-        </paper-card>
+            <div class="button">
+                <paper-button raised on-tap="done"><iron-icon icon="done"></iron-icon>DONE</paper-button>
+            </div>
+        </paper-material>
 
 	</template>
 

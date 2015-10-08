@@ -1,5 +1,6 @@
 
-<link rel="import" href="../../components/paper-card/paper-card.html">
+<link rel="import" href="./ts-translation-card.html">
+<link rel="import" href="./ts-fakesource-card.html">
 
 <dom-module id="ts-review-mode">
 
@@ -7,22 +8,42 @@
 
 		:host {
             display: flex;
-            justify-content: center;
-            align-items: center;
+            flex: auto;
         }
 
-        .main {
-            height: 200px;
-            width: 450px;
-		}
+        .outer {
+            flex: auto;
+            overflow: auto;
+        }
+
+        .inner {
+            display: flex;
+            margin: 15px 0;
+        }
+
+        ts-translation-card {
+            margin-right: 15px;
+            flex: 1 0 400px;
+        }
+
+        ts-fakesource-card {
+            margin: 0 15px;
+            flex: 1 0 400px;
+        }
 
 	</style>
 
 	<template>
 
-        <paper-card class="main">
-            <p>Placeholder for review mode page</p>
-        </paper-card>
+        <div class="outer">
+            <template is="dom-repeat" items="{{combined.data}}" as="chunk">
+                <div class="inner">
+                    <ts-fakesource-card language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-fakesource-card>
+                    <ts-translation-card language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-translation-card>
+                    <ts-translation-card language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-translation-card>
+                </div>
+            </template>
+        </div>
 
 	</template>
 
@@ -34,9 +55,57 @@
 
 		is: 'ts-review-mode',
 
+        properties: {
+            source: {
+                type: Array,
+                value: []
+            },
+            translation: {
+                type: Array,
+                value: [],
+                notify: true
+            },
+            language: {
+                type: Object,
+                value: {}
+            },
+            book: {
+                type: Object,
+                value: {}
+            },
+            combined: {
+                type: Object,
+                value: {},
+                computed: 'combinedata(source, translation)'
+            }
+
+        },
+
+        combinedata: function (source, translation) {
+
+            var transdata = {};
+            var srcdata = {};
+            var metadata = {};
+
+            transdata.data = translation.map(function(chunk){
+                return {transcontent: chunk.content};
+            });
+
+            srcdata.data = source.map(function(chunk){
+                return {srccontent: chunk.content};
+            });
+
+            metadata.data = source.map(function(chunk){
+                return {meta: chunk.meta};
+            });
+
+            return _.merge(srcdata, transdata, metadata);
+        },
+
 		ready: function() {
 
 		}
+
 	});
 
 </script>

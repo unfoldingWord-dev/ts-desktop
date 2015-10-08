@@ -31,7 +31,7 @@
       <neon-animated-pages attr-for-selected="data-route" selected="{{route}}" exit-animation="slide-left-animation" entry-animation="slide-from-right-animation">
           <ts-home data-route="home" route="{{route}}"></ts-home>
           <ts-new data-route="new" route="{{route}}" language="{{language}}" group="{{group}}" book="{{book}}" chapters="{{chapters}}" chapter="{{chapter}}"></ts-new>
-          <ts-translate data-route="translate" route="{{route}}"></ts-translate>
+          <ts-translate data-route="translate" route="{{route}}" language="[[language]]" book="[[book]]"></ts-translate>
           <ts-publish data-route="publish" route="{{route}}" language="[[language]]" book="[[book]]"></ts-publish>
       </neon-animated-pages>
 

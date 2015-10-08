@@ -1,6 +1,7 @@
 
 <link rel="import" href="./ts-translation-card.html">
 <link rel="import" href="./ts-fakesource-card.html">
+<link rel="import" href="./ts-resource-card.html">
 
 <dom-module id="ts-review-mode">
 
@@ -22,7 +23,11 @@
         }
 
         ts-translation-card {
-            margin-right: 15px;
+            flex: 1 0 400px;
+        }
+
+        ts-resource-card {
+            margin: 0 15px;
             flex: 1 0 400px;
         }
 
@@ -40,7 +45,7 @@
                 <div class="inner">
                     <ts-fakesource-card language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-fakesource-card>
                     <ts-translation-card language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-translation-card>
-                    <ts-translation-card language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-translation-card>
+                    <ts-resource-card></ts-resource-card>
                 </div>
             </template>
         </div>

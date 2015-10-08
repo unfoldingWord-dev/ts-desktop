@@ -1,0 +1,75 @@
+
+<link rel="import" href="../../components/paper-material/paper-material.html">
+
+<dom-module id="ts-resource-card">
+
+	<style>
+
+        :host {
+            flex: auto;
+            display: flex;
+        }
+
+        paper-material {
+            flex: auto;
+            display: flex;
+            background: white;
+            flex-direction: column;
+        }
+
+		.heading {
+			padding: 5px 1em;
+			color: var(--greyed-out-dark);
+            border-bottom: 1px solid var(--greyed-out-light);
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-end;
+            min-height: 35px;
+		}
+
+        .content {
+			padding: 0.5em 1em;
+            flex: auto;
+		}
+
+        .content p {
+			line-height: 1.5;
+			margin: 0;
+		}
+
+	</style>
+
+	<template>
+
+        <paper-material>
+            <div class="heading">
+                <div>
+                    <span>Notes</span> <span>Words</span>
+                </div>
+            </div>
+            <div class="content">
+                <p>This is where all the notes and resources will go</p>
+            </div>
+        </paper-material>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+		is: 'ts-resource-card',
+
+		properties: {
+
+		},
+
+		ready: function() {
+
+		}
+
+	});
+
+</script>

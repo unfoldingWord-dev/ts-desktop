@@ -1,0 +1,102 @@
+
+<link rel="import" href="../../components/paper-material/paper-material.html">
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+
+<dom-module id="ts-trans-edit">
+
+	<style>
+
+        :host {
+            flex: auto;
+            display: flex;
+        }
+
+        paper-material {
+            flex: auto;
+            display: flex;
+            background: white;
+            flex-direction: column;
+        }
+
+		.heading {
+			padding: 5px 1em;
+			color: var(--greyed-out-dark);
+            border-bottom: 1px solid var(--greyed-out-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            min-height: 35px;
+		}
+
+        .content {
+			padding: 0.5em 1em;
+            flex: auto;
+            display: flex;
+		}
+
+        .content p {
+			line-height: 1.5;
+			margin: 0;
+		}
+
+        .heading paper-icon-button {
+            padding: 5px;
+        }
+
+	</style>
+
+	<template>
+
+        <paper-material>
+            <div class="heading">
+                <div>
+                    <span>[[book.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[language.ln]]</span>
+                </div>
+                <paper-icon-button icon="clear" on-tap="review"></paper-icon-button>
+            </div>
+            <div class="content">
+                <p>[[chunk.transcontent]]</p>
+            </div>
+        </paper-material>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+		is: 'ts-trans-edit',
+
+		properties: {
+            language: {
+                type: Object,
+                value: {}
+            },
+            book: {
+                type: Object,
+                value: {}
+            },
+            chunk: {
+                type: Object,
+                value: {}
+            },
+            selected: {
+                type: Number,
+                value: 0,
+                notify: true
+            }
+		},
+
+        review: function () {
+            this.selected = 0;
+        },
+
+		ready: function() {
+
+		}
+
+	});
+
+</script>

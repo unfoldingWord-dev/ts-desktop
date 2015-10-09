@@ -44,7 +44,7 @@
             <template is="dom-repeat" items="{{combined.data}}" as="chunk">
                 <div class="inner">
                     <ts-fakesource-card language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-fakesource-card>
-                    <ts-translation-card language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-translation-card>
+                    <ts-translation-card language="[[language]]" book="[[book]]" chunk="{{chunk}}"></ts-translation-card>
                     <ts-resource-card></ts-resource-card>
                 </div>
             </template>
@@ -81,11 +81,16 @@
             combined: {
                 type: Object,
                 value: {},
-                computed: 'combinedata(source, translation)'
+                computed: 'combinedata(source, translation)',
+                notify: true
             }
         },
 
         combinedata: function (source, translation) {
+
+            for (var i = 0; i < this.translation.length; i++) {
+                this.linkPaths('combined.data[' + i + '].transcontent', 'translation[' + i + '].content');
+            }
 
             var transdata = {};
             var srcdata = {};

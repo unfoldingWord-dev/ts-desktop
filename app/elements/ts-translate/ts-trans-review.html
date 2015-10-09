@@ -98,7 +98,9 @@
                     <iron-icon draggable="true" ondragstart="" icon="room"></iron-icon>
                     <iron-icon draggable="true" ondragstart="" icon="room"></iron-icon>
                     <iron-icon draggable="true" ondragstart="" icon="room"></iron-icon>
-                    <span>[[chunk.transcontent]]</span>
+                    <template is="dom-repeat" items="{{text}}" as="word">
+                        <span ondrop="" ondragover="">[[word]]</span>
+                    </template>
                 </p>
             </div>
             <div class="button">
@@ -111,12 +113,6 @@
 </dom-module>
 
 <script>
-
-    //
-
-    //<template is="dom-repeat" items="{{text}}" as="word">
-      //  <span ondrop="" ondragover="">[[word]]</span>
-       // </template>
 
 	Polymer({
 
@@ -133,12 +129,13 @@
             },
             chunk: {
                 type: Object,
-                value: {}
+                value: {},
+                notify: true
             },
             text: {
                 type: Array,
                 value: [],
-                computed: 'breaktext(chunk)'
+                computed: 'breaktext(chunk.*)'
             },
             selected: {
                 type: Number,
@@ -151,20 +148,19 @@
             this.selected = 1;
         },
 
-        breaktext: function (chunk) {
-            var string = chunk.transcontent;
-            return string.split(" ");
+        breaktext: function () {
+            return this.chunk.transcontent.split(" ");
         },
 
         done: function () {
-            var test = this.$.toggle;
+            var toggle = this.$.toggle;
 
-            if (test.classList.contains("notdone")) {
-                test.classList.remove("notdone");
-                test.classList.add("done");
+            if (toggle.classList.contains("notdone")) {
+                toggle.classList.remove("notdone");
+                toggle.classList.add("done");
             } else {
-                test.classList.remove("done");
-                test.classList.add("notdone");
+                toggle.classList.remove("done");
+                toggle.classList.add("notdone");
             }
         },
 

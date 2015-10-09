@@ -23,7 +23,7 @@
 	<template>
 
         <iron-pages selected="{{selected}}">
-            <ts-trans-review selected="{{selected}}" language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-trans-review>
+            <ts-trans-review selected="{{selected}}" language="[[language]]" book="[[book]]" chunk="{{chunk}}"></ts-trans-review>
             <ts-trans-edit selected="{{selected}}" language="[[language]]" book="[[book]]" chunk="{{chunk}}"></ts-trans-edit>
         </iron-pages>
 
@@ -48,7 +48,8 @@
             },
             chunk: {
                 type: Object,
-                value: {}
+                value: {},
+                notify: true
             },
             selected: {
                 type: Number,

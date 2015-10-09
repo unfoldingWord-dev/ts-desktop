@@ -34,7 +34,6 @@
 			padding: 0.5em 1em;
             flex: auto;
             display: flex;
-
 		}
 
         .content p {
@@ -99,9 +98,7 @@
                     <iron-icon draggable="true" ondragstart="" icon="room"></iron-icon>
                     <iron-icon draggable="true" ondragstart="" icon="room"></iron-icon>
                     <iron-icon draggable="true" ondragstart="" icon="room"></iron-icon>
-                    <template is="dom-repeat" items="{{text}}" as="word">
-                        <span ondrop="" ondragover="">[[word]]</span>
-                    </template>
+                    <span>[[chunk.transcontent]]</span>
                 </p>
             </div>
             <div class="button">
@@ -114,6 +111,12 @@
 </dom-module>
 
 <script>
+
+    //
+
+    //<template is="dom-repeat" items="{{text}}" as="word">
+      //  <span ondrop="" ondragover="">[[word]]</span>
+       // </template>
 
 	Polymer({
 

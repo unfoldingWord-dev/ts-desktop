@@ -57,7 +57,7 @@
                 <paper-icon-button icon="clear" on-tap="review"></paper-icon-button>
             </div>
             <div class="content">
-                <iron-autogrow-textarea bind-value="{{chunk.transcontent}}"></iron-autogrow-textarea>
+                <iron-autogrow-textarea on-change="changetrigger" bind-value="{{chunk.transcontent}}"></iron-autogrow-textarea>
             </div>
         </paper-material>
 
@@ -91,6 +91,10 @@
                 notify: true
             }
 		},
+
+        changetrigger: function () {
+            this.fire('edittrigger');
+        },
 
         review: function () {
             this.selected = 0;

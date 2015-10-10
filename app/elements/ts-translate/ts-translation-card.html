@@ -24,7 +24,7 @@
 
         <iron-pages selected="{{selected}}">
             <ts-trans-review selected="{{selected}}" language="[[language]]" book="[[book]]" chunk="{{chunk}}"></ts-trans-review>
-            <ts-trans-edit selected="{{selected}}" language="[[language]]" book="[[book]]" chunk="{{chunk}}"></ts-trans-edit>
+            <ts-trans-edit on-edittrigger="edittrigger" selected="{{selected}}" language="[[language]]" book="[[book]]" chunk="{{chunk}}"></ts-trans-edit>
         </iron-pages>
 
 	</template>
@@ -56,6 +56,10 @@
                 value: 0
             }
 		},
+
+        edittrigger: function () {
+            this.fire('uploadtrigger');
+        },
 
 		ready: function() {
 

@@ -29,7 +29,7 @@
             min-height: 35px;
 		}
 
-        .content {
+        #content {
 			padding: 0 1em;
             flex: auto;
             display: flex;
@@ -37,7 +37,7 @@
             background-image: -webkit-linear-gradient(white 25px, var(--greyed-out-light) 25px, var(--greyed-out-light) 26px, white 26px);
 		}
 
-        .content iron-autogrow-textarea {
+        #content iron-autogrow-textarea {
 			line-height: 26px;
             border: none;
 			margin: 0;
@@ -46,6 +46,10 @@
 
         .heading paper-icon-button {
             padding: 5px;
+        }
+
+        :host([noicon]) paper-icon-button {
+            display: none;
         }
 
 	</style>
@@ -59,7 +63,7 @@
                 </div>
                 <paper-icon-button icon="clear" on-tap="review"></paper-icon-button>
             </div>
-            <div class="content">
+            <div id="content">
                 <iron-autogrow-textarea on-change="changetrigger" bind-value="{{chunk.transcontent}}"></iron-autogrow-textarea>
             </div>
         </paper-material>
@@ -94,6 +98,16 @@
                 notify: true
             }
 		},
+
+        observers: [
+            'disableedit(chunk.status)'
+        ],
+
+        disableedit: function (status) {
+            if (status === "Complete") {
+
+            }
+        },
 
         changetrigger: function () {
             this.fire('edittrigger');

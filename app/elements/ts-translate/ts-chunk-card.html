@@ -1,6 +1,6 @@
 
 <link rel="import" href="./ts-trans-edit.html">
-<link rel="import" href="./ts-fakesource-card.html">
+<link rel="import" href="./ts-source-chunk.html">
 
 <dom-module id="ts-chunk-card">
 
@@ -24,7 +24,7 @@
             z-index: 1;
         }
 
-        ts-fakesource-card {
+        ts-source-chunk {
             position: relative;
             margin: 0 40px 0 15px;
             z-index: 1;
@@ -39,7 +39,7 @@
     <template>
 
         <div class="contain">
-            <ts-fakesource-card id="srccard" class="topcard" on-tap="srctop" language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-fakesource-card>
+            <ts-source-chunk id="srccard" class="topcard" on-tap="srctop" language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-source-chunk>
             <ts-trans-edit id="transcard" on-tap="transtop" on-edittrigger="edittrigger" language="[[language]]" book="[[book]]" chunk="{{chunk}}"></ts-trans-edit>
         </div>
 

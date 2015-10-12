@@ -1,7 +1,7 @@
 
 <link rel="import" href="../../components/paper-material/paper-material.html">
 
-<dom-module id="ts-fakesource-card">
+<dom-module id="ts-source-chunk">
 
 	<style>
 
@@ -18,20 +18,16 @@
         }
 
         .heading {
-            padding: 0.75rem 0;
-            text-align: center;
-        }
-
-        .heading h3 {
-            margin: 0;
-            padding: 0;
-            color: #888;
+            padding: 5px 1em;
+            color: var(--greyed-out-dark);
+            display: flex;
+            justify-content: flex-end;
+            min-height: 35px;
+            align-items: center;
         }
 
         .content {
-            width: 85%;
-            margin: 0 auto;
-            padding-top: 0.75rem;
+            padding: 0.5em 1em;
             flex: auto;
         }
 
@@ -46,9 +42,9 @@
 
         <paper-material>
             <div class="heading">
-                <h3>
+                <div>
                     <span>[[book.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[language.ln]]</span>
-                </h3>
+                </div>
             </div>
             <div class="content">
                 <p>[[chunk.srccontent]]</p>
@@ -63,7 +59,7 @@
 
 	Polymer({
 
-		is: 'ts-fakesource-card',
+		is: 'ts-source-chunk',
 
 		properties: {
             language: {

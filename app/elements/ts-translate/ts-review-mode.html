@@ -1,7 +1,5 @@
 
-<link rel="import" href="./ts-translation-card.html">
-<link rel="import" href="./ts-fakesource-card.html">
-<link rel="import" href="./ts-resource-card.html">
+<link rel="import" href="./ts-review-card.html">
 
 <dom-module id="ts-review-mode">
 
@@ -12,41 +10,18 @@
             flex: auto;
         }
 
-        .outer {
+        .contain {
             flex: auto;
             overflow: auto;
-        }
-
-        .inner {
-            display: flex;
-            margin: 15px 0;
-        }
-
-        ts-translation-card {
-            flex: 1 0 400px;
-        }
-
-        ts-resource-card {
-            margin: 0 15px;
-            flex: 1 0 400px;
-        }
-
-        ts-fakesource-card {
-            margin: 0 15px;
-            flex: 1 0 400px;
         }
 
 	</style>
 
 	<template>
 
-        <div class="outer">
+        <div class="contain">
             <template is="dom-repeat" items="{{combined.data}}" as="chunk">
-                <div class="inner">
-                    <ts-fakesource-card language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-fakesource-card>
-                    <ts-translation-card language="[[language]]" book="[[book]]" chunk="{{chunk}}" on-uploadtrigger="uploaddata"></ts-translation-card>
-                    <ts-resource-card></ts-resource-card>
-                </div>
+                <ts-review-card language="[[language]]" book="[[book]]" chunk="{{chunk}}" on-uploadtrigger="uploaddata"></ts-review-card>
             </template>
         </div>
 

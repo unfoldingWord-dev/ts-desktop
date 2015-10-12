@@ -1,0 +1,98 @@
+
+<link rel="import" href="./ts-trans-edit.html">
+<link rel="import" href="./ts-fakesource-card.html">
+
+<dom-module id="ts-chunk-card">
+
+    <style>
+
+        :host {
+            flex: auto;
+        }
+
+        .contain {
+            position: relative;
+            margin: 15px 0 40px 0;
+        }
+
+        ts-trans-edit {
+            position: absolute;
+            top: 25px;
+            left: 40px;
+            width: calc(100% - 55px);
+            height: 100%;
+            z-index: 1;
+        }
+
+        ts-fakesource-card {
+            position: relative;
+            margin: 0 40px 0 15px;
+            z-index: 1;
+        }
+
+        .topcard {
+            z-index: 2;
+        }
+
+    </style>
+
+    <template>
+
+        <div class="contain">
+            <ts-fakesource-card id="srccard" class="topcard" on-tap="srctop" language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-fakesource-card>
+            <ts-trans-edit id="transcard" on-tap="transtop" on-edittrigger="edittrigger" language="[[language]]" book="[[book]]" chunk="{{chunk}}"></ts-trans-edit>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+		is: 'ts-chunk-card',
+
+        properties: {
+            language: {
+                type: Object,
+                value: {}
+            },
+            book: {
+                type: Object,
+                value: {}
+            },
+            chunk: {
+                type: Object,
+                value: {},
+                notify: true
+            }
+        },
+
+        transtop: function () {
+            var trans = this.$.transcard;
+            var src = this.$.srccard;
+
+            trans.classList.add("topcard");
+            src.classList.remove("topcard");
+        },
+
+        srctop: function () {
+            var trans = this.$.transcard;
+            var src = this.$.srccard;
+
+            trans.classList.remove("topcard");
+            src.classList.add("topcard");
+        },
+
+        edittrigger: function () {
+            this.fire('uploadtrigger');
+        },
+
+		ready: function() {
+
+		}
+
+	});
+
+</script>

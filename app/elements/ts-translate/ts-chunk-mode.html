@@ -1,6 +1,5 @@
 
-<link rel="import" href="./ts-trans-edit.html">
-<link rel="import" href="./ts-fakesource-card.html">
+<link rel="import" href="./ts-chunk-card.html">
 
 <dom-module id="ts-chunk-mode">
 
@@ -11,36 +10,18 @@
             flex: auto;
         }
 
-        .outer {
+        .contain {
             flex: auto;
             overflow: auto;
-        }
-
-        .inner {
-            display: flex;
-            margin: 15px 0;
-        }
-
-        ts-trans-edit {
-            flex: 1 0 400px;
-            margin-right: 15px;
-        }
-
-        ts-fakesource-card {
-            margin: 0 15px;
-            flex: 1 0 400px;
         }
 
     </style>
 
     <template>
 
-        <div class="outer">
+        <div class="contain">
             <template is="dom-repeat" items="{{combined.data}}" as="chunk">
-                <div class="inner">
-                    <ts-fakesource-card language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-fakesource-card>
-                    <ts-trans-edit on-edittrigger="uploaddata" language="[[language]]" book="[[book]]" chunk="{{chunk}}"></ts-trans-edit>
-                </div>
+                <ts-chunk-card on-uploadtrigger="uploaddata" language="[[language]]" book="[[book]]" chunk="{{chunk}}"></ts-chunk-card>
             </template>
         </div>
 

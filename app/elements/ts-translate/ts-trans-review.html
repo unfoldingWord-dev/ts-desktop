@@ -158,9 +158,11 @@
             if (toggle.classList.contains("notdone")) {
                 toggle.classList.remove("notdone");
                 toggle.classList.add("done");
+                this.chunk.status = "Complete";
             } else {
                 toggle.classList.remove("done");
                 toggle.classList.add("notdone");
+                this.chunk.status = "Incomplete";
             }
         },
 

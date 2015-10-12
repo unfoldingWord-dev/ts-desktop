@@ -30,15 +30,18 @@
 		}
 
         .content {
-			padding: 0.5em 1em;
+			padding: 0 1em;
             flex: auto;
             display: flex;
+            background-size: 100% 26px;
+            background-image: -webkit-linear-gradient(white 25px, var(--greyed-out-light) 25px, var(--greyed-out-light) 26px, white 26px);
 		}
 
         .content iron-autogrow-textarea {
-			line-height: 1.5;
+			line-height: 26px;
             border: none;
 			margin: 0;
+            width: 100%;
 		}
 
         .heading paper-icon-button {

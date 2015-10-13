@@ -160,6 +160,7 @@
                 toggle.classList.add("notdone");
                 this.chunk.status = "Incomplete";
             }
+            this.fire('edittrigger');
         },
 
 		ready: function() {

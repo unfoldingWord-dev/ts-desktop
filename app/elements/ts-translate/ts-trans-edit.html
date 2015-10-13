@@ -33,9 +33,12 @@
 			padding: 0 1em;
             flex: auto;
             display: flex;
+		}
+
+        #content.editmode {
             background-size: 100% 26px;
             background-image: -webkit-linear-gradient(white 25px, var(--greyed-out-light) 25px, var(--greyed-out-light) 26px, white 26px);
-		}
+        }
 
         #content iron-autogrow-textarea {
 			line-height: 26px;
@@ -63,8 +66,8 @@
                 </div>
                 <paper-icon-button icon="clear" on-tap="review"></paper-icon-button>
             </div>
-            <div id="content">
-                <iron-autogrow-textarea on-change="changetrigger" bind-value="{{chunk.transcontent}}"></iron-autogrow-textarea>
+            <div id="content" class="editmode">
+                <iron-autogrow-textarea id="textbox" on-change="changetrigger" bind-value="{{chunk.transcontent}}"></iron-autogrow-textarea>
             </div>
         </paper-material>
 
@@ -105,7 +108,12 @@
 
         disableedit: function (status) {
             if (status === "Complete") {
-
+                this.$.content.classList.remove("editmode");
+                this.$.textbox.disabled = true;
+            }
+            if (status === "Incomplete") {
+                this.$.content.classList.add("editmode");
+                this.$.textbox.disabled = false;
             }
         },
 

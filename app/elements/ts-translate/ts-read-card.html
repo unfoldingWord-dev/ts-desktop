@@ -1,0 +1,93 @@
+
+<link rel="import" href="./ts-trans-view.html">
+<link rel="import" href="./ts-source-card.html">
+
+<dom-module id="ts-read-card">
+
+    <style>
+
+        :host {
+            flex: auto;
+        }
+
+        .contain {
+            position: relative;
+            margin: 15px 0 40px 0;
+        }
+
+        ts-trans-view {
+            position: absolute;
+            top: 25px;
+            left: 40px;
+            width: calc(100% - 55px);
+            height: 100%;
+            z-index: 1;
+        }
+
+        ts-source-card {
+            position: relative;
+            margin: 0 40px 0 15px;
+            z-index: 1;
+        }
+
+        .topcard {
+            z-index: 2;
+        }
+
+    </style>
+
+    <template>
+
+        <div class="contain">
+            <ts-source-card id="srccard" class="topcard" on-tap="srctop" language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-source-card>
+            <ts-trans-view id="transcard" on-tap="transtop" language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-trans-view>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+		is: 'ts-read-card',
+
+        properties: {
+            language: {
+                type: Object,
+                value: {}
+            },
+            book: {
+                type: Object,
+                value: {}
+            },
+            chunk: {
+                type: Object,
+                value: {}
+            }
+        },
+
+        transtop: function () {
+            var trans = this.$.transcard;
+            var src = this.$.srccard;
+
+            trans.classList.add("topcard");
+            src.classList.remove("topcard");
+        },
+
+        srctop: function () {
+            var trans = this.$.transcard;
+            var src = this.$.srccard;
+
+            trans.classList.remove("topcard");
+            src.classList.add("topcard");
+        },
+
+		ready: function() {
+
+		}
+
+	});
+
+</script>

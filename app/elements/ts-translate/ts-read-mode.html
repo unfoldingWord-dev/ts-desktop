@@ -1,94 +1,84 @@
-<!-- ts-read-mode -->
-<!-- imported into ts-translate -->
 
-<link rel="import" href="ts-jumping-tab.html">
-<link rel="import" href="ts-source-card.html">
+<link rel="import" href="./ts-read-card.html">
 
-<dom-module is="ts-read-mode">
-	
-	<style is="custom_style">
-		:host {
-			box-sizing: border-box;
-			width: 100%;
-			height: 100%;
-			background-color: #DDD;
-			padding: 20px 20px 0 20px;
-			overflow-y: auto;
-		}
-		.main-container {
-			width: 100%;
-			height: 100%;
-		}
-	</style>
+<dom-module id="ts-read-mode">
 
-	<template>
-		<div class="main-container">
-			<ts-source-card mode="read" heading="Chapter 1" text="{{text.0}}"></ts-source-card>
-			<ts-source-card mode="read" heading="Chapter 2" text="{{text.1}}"></ts-source-card>
-		</div>
-	</template>
+    <style>
+
+        :host {
+            display: flex;
+            flex: auto;
+        }
+
+        .contain {
+            flex: auto;
+            overflow: auto;
+        }
+
+    </style>
+
+    <template>
+
+        <div class="contain">
+            <template is="dom-repeat" items="{{combined.data}}" as="chunk">
+                <ts-read-card language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-read-card>
+            </template>
+        </div>
+
+    </template>
 
 </dom-module>
 
 <script>
-	
-Polymer({
 
-	is: 'ts-read-mode',
+    Polymer({
 
-	properties: {
-		bible: {
-			type: Object,
-			value: function() { return {}; },
-			observer: '_bibleChanged',
-			notify: true,
-		},
-		text: {
-			type: Array,
-			computed: '_processReadModeText(bible)'
-		}
-	},
+        is: 'ts-read-mode',
 
-	ready: function() {
-	},
+        properties: {
+            source: {
+                type: Array,
+                value: []
+            },
+            translation: {
+                type: Array,
+                value: []
+            },
+            language: {
+                type: Object,
+                value: {}
+            },
+            book: {
+                type: Object,
+                value: {}
+            },
+            combined: {
+                type: Object,
+                value: {},
+                computed: 'combinedata(source.*, translation.*)'
+            }
+        },
 
-	attached: function() {
-	},
+        combinedata: function () {
 
-	_bibleChanged: function(bible) {
-		this._processReadModeText(bible);
-	},
+            var transdata = {};
+            var srcdata = {};
 
-	// NOTE: The logic of text extraction will depend on the data structure of the bible
-	// NOTE: What should remain are the object passed into, and the array returned by the function
-	_processReadModeText: function(bible) {
-		// Check for undefined. For some reason, there can be an undefined.
-		return (bible.content) ? this._collectChapterText(bible.content) : [];
-	},
+            transdata.data = this.translation.map(function(chunk){
+                return {transcontent: chunk.content, status: chunk.status};
+            });
 
-	// Function: Takes in an array of chapter objects
-	// Function: Returns an array of chapter text
-	_collectChapterText: function(chapters) {
-		var chapterText = [];
-		// Go through each chapter and collect all the verses inside its chunks
-		for (var i = 0; i < chapters.length; i++) {
-			var chunkText = this._collectChunkText(chapters[i].chapterContent);
-			chapterText[i] = chunkText.join(' ');
-		}
-		return chapterText;
-	},
+            srcdata.data = this.source.map(function(chunk){
+                return {srccontent: chunk.content, meta: chunk.meta};
+            });
 
-	// Function: Takes in an array of chunk objects
-	// Function: Returns an array of verses contained in chunk objects
-	_collectChunkText: function(chunks) {
-		var chunkText = [];
-		// Go through each chunk object and store the combined verses as a chunk text
-		for (var i = 0; i < chunks.length; i++) {
-			chunkText[i] = chunks[i].verses.join(' ');
-		}
-		return chunkText;
-	}
+            return _.merge(srcdata, transdata);
+        },
 
-});
+        ready: function() {
+
+        }
+
+    });
 
 </script>

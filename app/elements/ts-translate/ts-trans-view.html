@@ -1,9 +1,9 @@
 
 <link rel="import" href="../../components/paper-material/paper-material.html">
 
-<dom-module id="ts-source-card">
+<dom-module id="ts-trans-view">
 
-    <style>
+	<style>
 
         :host {
             flex: auto;
@@ -17,11 +17,7 @@
             flex-direction: column;
         }
 
-        #tabs {
-            min-height: 50px;
-        }
-
-        #heading {
+		#heading {
             color: var(--greyed-out-dark);
             display: flex;
             justify-content: center;
@@ -29,44 +25,48 @@
             align-items: center;
             font-size: 150%;
             font-weight: bold;
-        }
+            border-bottom: 1px solid var(--greyed-out-light);
+		}
 
         #content {
-            margin: 0 20%;
+			padding: 0 50px;
             flex: auto;
-        }
+            display: flex;
+            background-size: 100% 26px;
+            background-image: -webkit-linear-gradient(white 25px, var(--greyed-out-light) 25px, var(--greyed-out-light) 26px, white 26px);
+		}
 
         #content p {
-            line-height: 1.5;
-        }
+			line-height: 26px;
+            margin-top: 0;
+		}
 
-    </style>
+	</style>
 
-    <template>
+	<template>
 
         <paper-material>
-            <div id="tabs"></div>
             <div id="heading">
                 <div>
-                    <span>[[book.name]]</span> <span>[[chunk.meta.chapter]]</span>
+                    <span>[[book.name]]</span> <span>[[chunk.meta.chapter]]</span></span> - <span>[[language.ln]]</span>
                 </div>
             </div>
             <div id="content">
-                <p>[[chunk.srccontent]]</p>
+                <p>{{chunk.transcontent}}</p>
             </div>
         </paper-material>
 
-    </template>
+	</template>
 
 </dom-module>
 
 <script>
 
-    Polymer({
+	Polymer({
 
-        is: 'ts-source-card',
+		is: 'ts-trans-view',
 
-        properties: {
+		properties: {
             language: {
                 type: Object,
                 value: {}
@@ -79,12 +79,12 @@
                 type: Object,
                 value: {}
             }
-        },
+		},
 
-        ready: function() {
+		ready: function() {
 
-        }
+		}
 
-    });
+	});
 
 </script>

@@ -10,7 +10,7 @@
             flex: auto;
         }
 
-        .contain {
+        #contain {
             flex: auto;
             overflow: auto;
         }
@@ -19,7 +19,7 @@
 
     <template>
 
-        <div class="contain">
+        <div id="contain">
             <template is="dom-repeat" items="{{combined.data}}" as="chunk">
                 <ts-read-card language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-read-card>
             </template>

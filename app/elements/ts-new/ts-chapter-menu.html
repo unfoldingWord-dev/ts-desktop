@@ -10,14 +10,14 @@
             flex-direction: column;
         }
 
-        .contain {
+        #contain {
             flex: auto;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        .contain > div {
+        #contain > div {
             display: inline-block;
             background: white;
             width: 450px;
@@ -27,7 +27,7 @@
             overflow-x: hidden;
         }
 
-        .header {
+        #header {
             color: var(--greyed-out-dark);
             font-size: 110%;
             width: 100%;
@@ -36,7 +36,7 @@
             min-height: 60px;
         }
 
-        .header > div {
+        #header > div {
             display: flex;
             justify-content: flex-start;
             align-items: center;
@@ -66,7 +66,7 @@
             cursor: pointer;
         }
 
-        .header iron-icon {
+        #header iron-icon {
             padding: 0 10px;
         }
 
@@ -78,7 +78,7 @@
 
   <template>
 
-      <div class="header">
+      <div id="header">
           <div>
               <span class="click" on-tap="togroup">[[group.name]]</span>
               <iron-icon icon="chevron-right"></iron-icon>
@@ -88,7 +88,7 @@
           </div>
       </div>
 
-      <div class="contain">
+      <div id="contain">
           <div>
               <template is="dom-repeat" items="[[chapters]]" as="chap">
                   <span class="block" on-tap="store">[[chap]]</span>

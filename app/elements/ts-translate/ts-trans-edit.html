@@ -19,7 +19,7 @@
             flex-direction: column;
         }
 
-		.heading {
+		#heading {
 			padding: 5px 1em;
 			color: var(--greyed-out-dark);
             border-bottom: 1px solid var(--greyed-out-light);
@@ -44,7 +44,7 @@
             width: 100%;
 		}
 
-        .heading paper-icon-button {
+        #heading paper-icon-button {
             padding: 5px;
         }
 
@@ -57,7 +57,7 @@
 	<template>
 
         <paper-material>
-            <div class="heading">
+            <div id="heading">
                 <div>
                     <span>[[book.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[language.ln]]</span>
                 </div>

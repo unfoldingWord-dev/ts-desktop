@@ -9,31 +9,31 @@
             display: flex;
         }
 
-        .contain {
+        #contain {
             display: flex;
             justify-content: center;
             flex: auto;
         }
 
-        .contain > div {
+        #contain > div {
             background: white;
             box-shadow: 0 2px 3px 2px var(--greyed-out-light);
         }
 
-        .left {
+        #left {
             margin: 15px;
             flex: 2 2;
             padding: 20px;
         }
 
-        .right {
+        #right {
             flex: 1 1;
             margin: 15px 15px 15px 0;
             display: flex;
             flex-direction: column;
         }
 
-        .right > div {
+        #right > div {
             display: flex;
             justify-content: center;
             flex-direction: column;
@@ -41,11 +41,11 @@
             flex-grow: 1;
         }
 
-        .right > div > * {
+        #right > div > * {
             margin: 10px 20px;
         }
 
-        .lower {
+        #lower {
             border-top: 1px solid var(--greyed-out-light);
         }
 
@@ -55,7 +55,7 @@
             text-transform: uppercase;
         }
 
-        .publish {
+        #publish {
             background: var(--highlight-primary);
             color: var(--text-color);
         }
@@ -64,17 +64,17 @@
 
     <template>
 
-        <div class="contain">
-            <div class="left">
+        <div id="contain">
+            <div id="left">
                 <img src="../ts-icons/uw-title-image.png" width="326" height="68">
                 <p>Explanation of the publishing process will appear here!</p>
             </div>
-            <div class="right">
+            <div id="right">
                 <div>
                     <p>Publish your project directly to unfoldingWord</p>
-                    <paper-button raised class="publish" on-tap="">UPLOAD</paper-button>
+                    <paper-button raised id="publish" on-tap="">UPLOAD</paper-button>
                 </div>
-                <div class="lower">
+                <div id="lower">
                     <p>You may also share and distribute your project using these options.</p>
                     <div class="link">Send to SD card</div>
                     <div class="link">Send via Bluetooth</div>

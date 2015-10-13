@@ -20,7 +20,7 @@
             flex-direction: column;
         }
 
-		.heading {
+		#heading {
 			padding: 5px 1em;
 			color: var(--greyed-out-dark);
             border-bottom: 1px solid var(--greyed-out-light);
@@ -30,13 +30,13 @@
             min-height: 35px;
 		}
 
-        .content {
+        #content {
 			padding: 0.5em 1em;
             flex: auto;
             display: flex;
 		}
 
-        .content p {
+        #content p {
 			line-height: 1.5;
 			margin: 0;
 		}
@@ -47,7 +47,7 @@
             margin: 10px 0;
         }
 
-        .notdone .button iron-icon {
+        .notdone #button iron-icon {
             display: none;
         }
 
@@ -58,28 +58,24 @@
             width: 100%
         }
 
-        .button iron-icon {
+        #button iron-icon {
             padding-right: 10px;
         }
 
-        .done .heading paper-icon-button {
+        .done #heading paper-icon-button {
             display: none;
         }
 
-        .button {
+        #button {
             text-align: center;
         }
 
-        .heading paper-icon-button {
+        #heading paper-icon-button {
             padding: 5px;
         }
 
-        .content iron-icon {
+        #content iron-icon {
             color: var(--highlight-primary);
-        }
-
-        span {
-            display: inline-block;
         }
 
 	</style>
@@ -87,13 +83,13 @@
 	<template>
 
         <paper-material id="toggle" class="notdone">
-            <div class="heading">
+            <div id="heading">
                 <div>
                     <span>[[book.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[language.ln]]</span>
                 </div>
                 <paper-icon-button icon="create" title="edit" on-tap="edit"></paper-icon-button>
             </div>
-            <div class="content">
+            <div id="content">
                 <p>
                     <iron-icon draggable="true" ondragstart="" icon="room"></iron-icon>
                     <iron-icon draggable="true" ondragstart="" icon="room"></iron-icon>
@@ -103,7 +99,7 @@
                     </template>
                 </p>
             </div>
-            <div class="button">
+            <div id="button">
                 <paper-button raised on-tap="done"><iron-icon icon="done"></iron-icon>DONE</paper-button>
             </div>
         </paper-material>

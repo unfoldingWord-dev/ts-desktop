@@ -10,7 +10,7 @@
             flex: auto;
         }
 
-        .contain {
+        #contain {
             position: relative;
             margin: 15px 0 40px 0;
         }
@@ -38,7 +38,7 @@
 
     <template>
 
-        <div class="contain">
+        <div id="contain">
             <ts-source-card id="srccard" class="topcard" on-tap="srctop" language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-source-card>
             <ts-trans-view id="transcard" on-tap="transtop" language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-trans-view>
         </div>

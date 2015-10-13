@@ -28,12 +28,12 @@
             flex: auto;
         }
 
-        .header {
+        #header {
             background-color: var(--primary-color);
             min-height: 105px;
         }
 
-        .title {
+        #title {
             font-size: 125%;
             color: var(--text-color);
             display: flex;
@@ -50,8 +50,8 @@
 
     <template>
 
-        <div class="header">
-            <div class="title">
+        <div id="header">
+            <div id="title">
                 <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
                 <span>New Project</span>
             </div>

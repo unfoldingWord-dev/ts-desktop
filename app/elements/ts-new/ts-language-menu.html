@@ -12,7 +12,7 @@
             flex-direction: column;
         }
 
-        .contain {
+        #contain {
             flex: auto;
             display: flex;
             flex-direction: column;
@@ -23,7 +23,7 @@
             padding: 0;
         }
 
-        .header {
+        #header {
             color: var(--greyed-out-dark);
             font-size: 110%;
             width: 100%;
@@ -32,7 +32,7 @@
             min-height: 60px;
         }
 
-        .header > div {
+        #header > div {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -82,14 +82,14 @@
 
   <template>
 
-      <div class="header">
+      <div id="header">
           <div>
               <input is="iron-input" bind-value="{{query}}" placeholder="Choose target language">
               <paper-icon-button class="right" icon="search" title="Search Languages"></paper-icon-button>
           </div>
       </div>
 
-      <div class="contain">
+      <div id="contain">
           <iron-list id="list" items="{{searchfilter(query,languagelist)}}" as="lang">
               <template>
                   <div class="row" on-tap="store">

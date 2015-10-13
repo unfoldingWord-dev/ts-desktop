@@ -15,7 +15,7 @@
             display: flex;
         }
 
-        .contain {
+        #contain {
             display: flex;
             margin: 15px 0;
             flex: auto;
@@ -40,7 +40,7 @@
 
 	<template>
 
-        <div class="contain">
+        <div id="contain">
             <ts-source-chunk language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-source-chunk>
             <iron-pages selected="{{selected}}">
                 <ts-trans-review selected="{{selected}}" language="[[language]]" book="[[book]]" chunk="{{chunk}}"></ts-trans-review>

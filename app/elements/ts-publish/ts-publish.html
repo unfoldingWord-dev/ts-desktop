@@ -26,13 +26,13 @@
             flex: auto;
         }
 
-        .header {
+        #header {
             background-color: var(--primary-color);
             display: flex;
             flex-direction: column;
         }
 
-        .title {
+        #title {
             color: var(--text-color);
             display: flex;
             justify-content: flex-start;
@@ -45,7 +45,7 @@
             margin: 0 1em 0 .2em;
         }
 
-        .steps {
+        #steps {
             display: flex;
             justify-content: center;
             align-items: center;
@@ -103,12 +103,12 @@
 
     <template>
 
-        <div class="header">
-            <div class="title">
+        <div id="header">
+            <div id="title">
                 <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
                 <span>Publish Project</span>
             </div>
-            <div class="steps">
+            <div id="steps">
                 <template is="dom-repeat" items="[[stepslist]]" as="step">
                     <div class$="[[step.level]]">
                         <div class="circle"><span class="text">[[step.number]]</span><iron-icon icon="done" class="icon"></iron-icon></div>

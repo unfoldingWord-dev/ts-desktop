@@ -9,7 +9,7 @@
             display: flex;
         }
 
-        .contain {
+        #contain {
             width: 100%;
             flex: auto;
             display: flex;
@@ -18,14 +18,14 @@
             align-items: center;
         }
 
-        .welcome {
+        #welcome {
             background: white;
             box-shadow: 0 2px 3px 2px var(--greyed-out-light);
             width: 450px;
             margin: 30px 0;
         }
 
-        .start {
+        #start {
             background: var(--primary-color);
             color: var(--text-color);
         }
@@ -39,13 +39,13 @@
 
     <template>
 
-        <div class="contain">
-            <div class="welcome">
+        <div id="contain">
+            <div id="welcome">
                 <p>Welcome!</p>
                 <p>This is your Home Screen. When you have translation projects on this device, they will appear here.</p>
                 <p>You can start a new project anytime by tapping the blue button in the top right.</p>
             </div>
-            <paper-button raised class="start" on-tap="start">Start a new project</paper-button>
+            <paper-button raised id="start" on-tap="start">Start a new project</paper-button>
         </div>
 
     </template>

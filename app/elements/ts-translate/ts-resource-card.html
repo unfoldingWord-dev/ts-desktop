@@ -17,7 +17,7 @@
             flex-direction: column;
         }
 
-		.heading {
+		#heading {
 			padding: 5px 1em;
 			color: var(--greyed-out-dark);
             border-bottom: 1px solid var(--greyed-out-light);
@@ -27,12 +27,12 @@
             min-height: 35px;
 		}
 
-        .content {
+        #content {
 			padding: 0.5em 1em;
             flex: auto;
 		}
 
-        .content p {
+        #content p {
 			line-height: 1.5;
 			margin: 0;
 		}
@@ -42,12 +42,12 @@
 	<template>
 
         <paper-material>
-            <div class="heading">
+            <div id="heading">
                 <div>
                     <span>Notes</span> <span>Words</span>
                 </div>
             </div>
-            <div class="content">
+            <div id="content">
                 <p>This is where all the notes and resources will go</p>
             </div>
         </paper-material>

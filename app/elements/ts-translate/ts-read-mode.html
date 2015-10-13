@@ -63,14 +63,37 @@
 
             var transdata = {};
             var srcdata = {};
+            var transchapters = [];
+            var srcchapters = [];
 
-            transdata.data = this.translation.map(function(chunk){
-                return {transcontent: chunk.content, status: chunk.status};
+            _.forEach(_.groupBy(this.translation, function(chunks) {
+                return chunks.meta.chapter;
+            }), function (data, chap) {
+                var chapstatus = "Complete";
+                var chapcontent = "";
+
+                _.forEach(data, function (chunk) {
+                    if (chunk.status === "Incomplete") {
+                        chapstatus = "Incomplete";
+                    }
+                    chapcontent += chunk.content + " ";
+                });
+                transchapters.push({status: chapstatus, transcontent: chapcontent});
             });
 
-            srcdata.data = this.source.map(function(chunk){
-                return {srccontent: chunk.content, meta: chunk.meta};
+            _.forEach(_.groupBy(this.source, function(chunks) {
+                return chunks.meta.chapter;
+            }), function (data, chap) {
+                var chapcontent = "";
+
+                _.forEach(data, function (chunk) {
+                    chapcontent += chunk.content + " ";
+                });
+                srcchapters.push({chapter: chap, srccontent: chapcontent});
             });
+
+            transdata.data = transchapters;
+            srcdata.data = srcchapters;
 
             return _.merge(srcdata, transdata);
         },

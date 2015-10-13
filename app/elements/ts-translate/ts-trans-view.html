@@ -32,9 +32,12 @@
 			padding: 0 50px;
             flex: auto;
             display: flex;
+		}
+
+        #content.editmode {
             background-size: 100% 26px;
             background-image: -webkit-linear-gradient(white 25px, var(--greyed-out-light) 25px, var(--greyed-out-light) 26px, white 26px);
-		}
+        }
 
         #content p {
 			line-height: 26px;
@@ -51,7 +54,7 @@
                     <span>[[book.name]]</span> <span>[[chunk.chapter]]</span></span> - <span>[[language.ln]]</span>
                 </div>
             </div>
-            <div id="content">
+            <div id="content" class="editmode">
                 <p>{{chunk.transcontent}}</p>
             </div>
         </paper-material>
@@ -80,6 +83,19 @@
                 value: {}
             }
 		},
+
+        observers: [
+            'disableedit(chunk.status)'
+        ],
+
+        disableedit: function (status) {
+            if (status === "Complete") {
+                this.$.content.classList.remove("editmode");
+            }
+            if (status === "Incomplete") {
+                this.$.content.classList.add("editmode");
+            }
+        },
 
 		ready: function() {
 

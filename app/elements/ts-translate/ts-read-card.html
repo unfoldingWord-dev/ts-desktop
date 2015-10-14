@@ -30,8 +30,52 @@
             z-index: 1;
         }
 
-        .topcard {
+        .top {
             z-index: 2;
+        }
+
+        #transcard.up {
+            -webkit-animation: transup 1s;
+        }
+
+        #transcard.down {
+            -webkit-animation: transdown 1s;
+        }
+
+        #srccard.down {
+            -webkit-animation: srcdown 1s;
+        }
+
+        #srccard.up {
+            -webkit-animation: srcup 1s;
+        }
+
+        @-webkit-keyframes transup {
+            0% {z-index: 1}
+            49% {transform: translateX(50%); z-index: 1}
+            50% {z-index: 2}
+            100% {transform: translateX(0); z-index: 2}
+        }
+
+        @-webkit-keyframes transdown {
+            0% {z-index: 2}
+            49% {transform: translateX(50%); z-index: 2}
+            50% {z-index: 1}
+            100% {transform: translateX(0); z-index: 1}
+        }
+
+        @-webkit-keyframes srcup {
+            0% {z-index: 1}
+            49% {transform: translateX(-50%); z-index: 1}
+            50% {z-index: 2}
+            100% {transform: translateX(0); z-index: 2}
+        }
+
+        @-webkit-keyframes srcdown {
+            0% {z-index: 2}
+            49% {transform: translateX(-50%); z-index: 2}
+            50% {z-index: 1}
+            100% {transform: translateX(0); z-index: 1}
         }
 
     </style>
@@ -39,7 +83,7 @@
     <template>
 
         <div id="contain">
-            <ts-source-card id="srccard" class="topcard" on-tap="srctop" language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-source-card>
+            <ts-source-card id="srccard" class="top" on-tap="srctop" language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-source-card>
             <ts-trans-view id="transcard" on-tap="transtop" language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-trans-view>
         </div>
 
@@ -72,16 +116,32 @@
             var trans = this.$.transcard;
             var src = this.$.srccard;
 
-            trans.classList.add("topcard");
-            src.classList.remove("topcard");
+            if(!trans.classList.contains("top")) {
+                trans.classList.add("up");
+                src.classList.add("down");
+                trans.classList.add("top");
+                src.classList.remove("top");
+                setTimeout(function () {
+                    trans.classList.remove("up");
+                    src.classList.remove("down");
+                }, 1000);
+            }
         },
 
         srctop: function () {
             var trans = this.$.transcard;
             var src = this.$.srccard;
 
-            trans.classList.remove("topcard");
-            src.classList.add("topcard");
+            if(!src.classList.contains("top")) {
+                trans.classList.add("down");
+                src.classList.add("up");
+                trans.classList.remove("top");
+                src.classList.add("top");
+                setTimeout(function () {
+                    trans.classList.remove("down");
+                    src.classList.remove("up");
+                }, 1000);
+            }
         },
 
 		ready: function() {

@@ -4,6 +4,9 @@
 <link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../components/iron-icons/iron-icons.html">
 
+<link rel="import" href="../../components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../components/neon-animation/neon-animation.html">
+
 <dom-module id="ts-trans-review">
 
 	<style>
@@ -78,6 +81,31 @@
             color: var(--highlight-primary);
         }
 
+        #popup {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 50px;
+            right: 15px;
+            margin: auto;
+            width: 350px;
+            height: 225px;
+            text-align: center;
+        }
+
+        #popup p {
+            margin: 0;
+        }
+
+        #popup p#spaced {
+            margin-bottom: 15px;
+        }
+
+        #popup .buttons {
+            display: flex;
+            justify-content: center;
+        }
+
 	</style>
 
 	<template>
@@ -103,6 +131,20 @@
                 <paper-button raised on-tap="done"><iron-icon icon="done"></iron-icon>DONE</paper-button>
             </div>
         </paper-material>
+
+        <paper-dialog id="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <h2>Chunk Checklist</h2>
+            <div>
+                <p id="spaced">Are you sure you're Done with this chunk?</p>
+                <p>I have placed the verses correctly</p>
+                <p>I have reviewed the words and meanings</p>
+                <p>I have reviewed the translationQuestions</p>
+            </div>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Cancel</paper-button>
+                <paper-button dialog-confirm on-tap="completechunk">Confirm</paper-button>
+            </div>
+        </paper-dialog>
 
 	</template>
 
@@ -148,19 +190,26 @@
             return this.chunk.transcontent.split(" ");
         },
 
+        completechunk: function () {
+            var toggle = this.$.toggle;
+            toggle.classList.remove("notdone");
+            toggle.classList.add("done");
+            this.chunk.status = "Complete";
+            this.fire('edittrigger');
+        },
+
         done: function () {
             var toggle = this.$.toggle;
+            var popup = this.$.popup;
 
             if (toggle.classList.contains("notdone")) {
-                toggle.classList.remove("notdone");
-                toggle.classList.add("done");
-                this.chunk.status = "Complete";
+                popup.open();
             } else {
                 toggle.classList.remove("done");
                 toggle.classList.add("notdone");
                 this.chunk.status = "Incomplete";
+                this.fire('edittrigger');
             }
-            this.fire('edittrigger');
         },
 
 		ready: function() {

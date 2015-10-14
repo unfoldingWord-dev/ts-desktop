@@ -1,5 +1,6 @@
 
 <link rel="import" href="../../components/paper-material/paper-material.html">
+<link rel="import" href="./ts-source-tab.html">
 
 <dom-module id="ts-source-card">
 
@@ -45,7 +46,9 @@
     <template>
 
         <paper-material>
-            <div id="tabs"></div>
+            <div id="tabs">
+                <ts-source-tab sources="{{sources}}" selected-source="{{selectedSource}}"></ts-source-tab>
+            </div>
             <div id="heading">
                 <div>
                     <span>[[book.name]]</span> <span>[[chunk.chapter]]</span>
@@ -78,6 +81,16 @@
             chunk: {
                 type: Object,
                 value: {}
+            },
+            sources: {
+                type: Array,
+                value: [],
+                notify: true
+            },
+            selectedSource: {
+                type: Number,
+                // value: 0,
+                notify: true
             }
         },
 

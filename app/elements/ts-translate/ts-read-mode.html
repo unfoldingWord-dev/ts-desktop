@@ -21,7 +21,7 @@
 
         <div id="contain">
             <template is="dom-repeat" items="{{combined.data}}" as="chunk">
-                <ts-read-card language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-read-card>
+                <ts-read-card language="[[language]]" book="[[book]]" chunk="[[chunk]]" sources="{{sources}}" selected-source="{{selectedSource}}"></ts-read-card>
             </template>
         </div>
 
@@ -36,6 +36,16 @@
         is: 'ts-read-mode',
 
         properties: {
+            sources: {
+                type: Array,
+                value: [],
+                notify: true
+            },
+            selectedSource: {
+                type: Number,
+                value: 0, /* is this defined by the parent? */
+                notify: true
+            },
             source: {
                 type: Array,
                 value: []

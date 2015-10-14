@@ -30,7 +30,7 @@
         <ts-translate-sidebar route="{{route}}" selected="{{selected}}"></ts-translate-sidebar>
 
         <neon-animated-pages selected="[[selected]]" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
-            <ts-read-mode language="[[language]]" book="[[book]]" source="[[source]]" translation="[[translation]]"></ts-read-mode>
+            <ts-read-mode language="[[language]]" book="[[book]]" source="[[source]]" translation="[[translation]]" sources="{{sources}}" selected-source="{{selectedSource}}"></ts-read-mode>
             <ts-chunk-mode language="[[language]]" book="[[book]]" source="[[source]]" translation="{{translation}}"></ts-chunk-mode>
             <ts-review-mode language="[[language]]" book="[[book]]" source="[[source]]" translation="{{translation}}"></ts-review-mode>
         </neon-animated-pages>
@@ -63,6 +63,14 @@
                 type: Object,
                 value: {}
             },
+            sources: {
+                type: Array,
+                value: []
+            },
+            selectedSource: {
+                type: Number,
+                value: null,
+            },
             source: {
                 type: Array,
                 value: []
@@ -73,7 +81,21 @@
             }
         },
 
+        observers: [
+            'onSelectedSourceChanged(selectedSource)'
+        ],
+
+        onSelectedSourceChanged: function() {
+            // Get new data based on source tab selection
+        },
+
+        attached: function() {
+            this.selectedSource = 0;
+        },
+
         ready: function() {
+
+            this.sources = ["English ULB", "Arabic", "Bahasa Indonesia", "English UDB", "German", "Old Chinese"];
 
             this.translation = [
                 {

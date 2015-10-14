@@ -1,5 +1,7 @@
 
 <link rel="import" href="../../components/paper-material/paper-material.html">
+<link rel="import" href="../../components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../../components/iron-pages/iron-pages.html">
 
 <dom-module id="ts-resource-card">
 
@@ -20,10 +22,9 @@
 		#heading {
 			padding: 5px 1em;
 			color: var(--greyed-out-dark);
-            border-bottom: 1px solid var(--greyed-out-light);
             display: flex;
             justify-content: flex-start;
-            align-items: flex-end;
+            align-items: center;
             min-height: 35px;
 		}
 
@@ -43,12 +44,20 @@
 
         <paper-material>
             <div id="heading">
-                <div>
-                    <span>Notes</span> <span>Words</span>
-                </div>
+                <paper-tabs selected="{{selected}}">
+                    <paper-tab>Notes</paper-tab>
+                    <paper-tab>Words</paper-tab>
+                </paper-tabs>
             </div>
             <div id="content">
-                <p>This is where all the notes and resources will go</p>
+                <iron-pages selected="{{selected}}">
+                    <div>
+                        <p>These are the notes for this chunk</p>
+                    </div>
+                    <div>
+                        <p>These are the words for this chunk</p>
+                    </div>
+                </iron-pages>
             </div>
         </paper-material>
 
@@ -63,7 +72,10 @@
 		is: 'ts-resource-card',
 
 		properties: {
-
+            selected: {
+                type: Number,
+                value: 0
+            }
 		},
 
 		ready: function() {

@@ -76,7 +76,7 @@
             });
 
             srcdata.data = this.source.map(function(chunk){
-                return {srccontent: chunk.content, meta: chunk.meta};
+                return {srccontent: chunk.content, meta: chunk.meta, notes: chunk.notes, words: chunk.words};
             });
 
             return _.merge(srcdata, transdata);

@@ -35,6 +35,14 @@
 
         is: 'ts-read-mode',
 
+        behaviors: [
+            Polymer.IronResizableBehavior
+        ],
+
+        listeners: {
+            'iron-resize': 'onResize'
+        },
+
         properties: {
             sources: {
                 type: Array,
@@ -109,6 +117,10 @@
         },
 
         ready: function() {
+
+        },
+
+        onResize: function() {
 
         }
 

@@ -69,6 +69,14 @@
 
         is: 'ts-source-card',
 
+        behaviors: [
+            Polymer.IronResizableBehavior
+        ],
+
+        listeners: {
+            'iron-resize': 'onResize'
+        },
+
         properties: {
             language: {
                 type: Object,
@@ -95,6 +103,10 @@
         },
 
         ready: function() {
+
+        },
+
+        onResize: function() {
 
         }
 

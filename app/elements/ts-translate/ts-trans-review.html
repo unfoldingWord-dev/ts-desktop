@@ -126,14 +126,7 @@
                 <paper-icon-button icon="create" title="edit" on-tap="edit"></paper-icon-button>
             </div>
             <div id="content">
-                <p>
-                    <ts-verse-marker id="drag1" draggable="true" ondragstart="drag(event)"  verse="1"></ts-verse-marker>
-                    <ts-verse-marker id="drag2" draggable="true" ondragstart="drag(event)"  verse="2"></ts-verse-marker>
-                    <ts-verse-marker id="drag3" draggable="true" ondragstart="drag(event)"  verse="15"></ts-verse-marker>
-                    <template is="dom-repeat" items="{{text}}" as="word">
-                        <span ondrop="drop(event)" ondragover="allowDrop(event)">[[word]]</span>
-                    </template>
-                </p>
+                <p id="textholder"></p>
             </div>
             <div id="button">
                 <paper-button raised on-tap="done"><iron-icon icon="done"></iron-icon>DONE</paper-button>
@@ -179,8 +172,8 @@
                 notify: true
             },
             text: {
-                type: Array,
-                value: [],
+                type: String,
+                value: "",
                 computed: 'breaktext(chunk.*)'
             },
             selected: {
@@ -195,16 +188,27 @@
         },
 
         breaktext: function () {
-            var returnarray = this.chunk.transcontent.split(" ");
-            var marker = 'VM';
+            var breakarray = this.chunk.transcontent.split(" ");
+            var vmstr1 = "\<ts-verse-marker id='drag";
+            var vmstr2 = "' draggable='true' ondragstart='drag(event)'  verse='";
+            var vmstr3 = "'\>\<\/ts-verse-marker\>";
+            var str1 = "\<span ondrop='drop(event)' ondragover='allowDrop(event)'\>";
+            var str2 = "\<\/span\> ";
+            var returnstr = "";
 
-            for (var i = 0; i < returnarray.length; i++) {
-                if (returnarray[i].substring(0, 2) === "/v") {
-                    returnarray[i] = marker;
+            for (var i = 0; i < breakarray.length; i++) {
+                if (breakarray[i].substring(0, 2) === "/v") {
+                    var verse = breakarray[i].substring(2);
+                    breakarray[i] = vmstr1 + verse + vmstr2 + verse + vmstr3;
+                } else {
+                    breakarray[i] = str1 + breakarray[i] + str2;
                 }
+                returnstr += breakarray[i];
             }
 
-            return returnarray;
+            this.$.textholder.innerHTML = returnstr;
+
+            return returnstr;
         },
 
         completechunk: function () {

@@ -7,6 +7,8 @@
 <link rel="import" href="../../components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
 
+<link rel="import" href="./ts-verse-marker.html">
+
 <script src="../../js/dragging.js"></script>
 
 <dom-module id="ts-trans-review">
@@ -108,6 +110,10 @@
             justify-content: center;
         }
 
+        ts-verse-marker {
+
+        }
+
 	</style>
 
 	<template>
@@ -121,9 +127,9 @@
             </div>
             <div id="content">
                 <p>
-                    <iron-icon id="drag1" draggable="true" ondragstart="drag(event)" icon="room"></iron-icon>
-                    <iron-icon id="drag2" draggable="true" ondragstart="drag(event)" icon="room"></iron-icon>
-                    <iron-icon id="drag3" draggable="true" ondragstart="drag(event)" icon="room"></iron-icon>
+                    <ts-verse-marker id="drag1" draggable="true" ondragstart="drag(event)"  verse="1"></ts-verse-marker>
+                    <ts-verse-marker id="drag2" draggable="true" ondragstart="drag(event)"  verse="2"></ts-verse-marker>
+                    <ts-verse-marker id="drag3" draggable="true" ondragstart="drag(event)"  verse="15"></ts-verse-marker>
                     <template is="dom-repeat" items="{{text}}" as="word">
                         <span ondrop="drop(event)" ondragover="allowDrop(event)">[[word]]</span>
                     </template>
@@ -189,7 +195,16 @@
         },
 
         breaktext: function () {
-            return this.chunk.transcontent.split(" ");
+            var returnarray = this.chunk.transcontent.split(" ");
+            var marker = 'VM';
+
+            for (var i = 0; i < returnarray.length; i++) {
+                if (returnarray[i].substring(0, 2) === "/v") {
+                    returnarray[i] = marker;
+                }
+            }
+
+            return returnarray;
         },
 
         completechunk: function () {

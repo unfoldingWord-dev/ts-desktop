@@ -1,9 +1,9 @@
 
-<link rel="import" href="../../components/paper-material/paper-material.html">
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../components/iron-autogrow-textarea/iron-autogrow-textarea.html">
+<link rel="import" href="../../../components/paper-material/paper-material.html">
+<link rel="import" href="../../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../../components/iron-autogrow-textarea/iron-autogrow-textarea.html">
 
-<dom-module id="ts-trans-edit">
+<dom-module id="ts-target-edit">
 
 	<style>
 
@@ -59,7 +59,7 @@
 
 	<template>
 
-        <paper-material>
+        <paper-material elevation="1">
             <div id="heading">
                 <div>
                     <span>[[book.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[language.ln]]</span>
@@ -79,7 +79,7 @@
 
 	Polymer({
 
-		is: 'ts-trans-edit',
+		is: 'ts-target-edit',
 
 		properties: {
             language: {

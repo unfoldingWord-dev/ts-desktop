@@ -1,10 +1,10 @@
 
-<link rel="import" href="../../components/iron-pages/iron-pages.html">
+<link rel="import" href="../../../components/iron-pages/iron-pages.html">
 
-<link rel="import" href="./ts-trans-review.html">
-<link rel="import" href="./ts-trans-edit.html">
-<link rel="import" href="./ts-source-chunk.html">
-<link rel="import" href="./ts-resource-card.html">
+<link rel="import" href="../ts-target/ts-target-review.html">
+<link rel="import" href="../ts-target/ts-target-edit.html">
+<link rel="import" href="../ts-source/ts-source-chunk.html">
+<link rel="import" href="../ts-resource/ts-resource-card.html">
 
 <dom-module id="ts-review-card">
 
@@ -43,8 +43,8 @@
         <div id="contain">
             <ts-source-chunk language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-source-chunk>
             <iron-pages selected="{{selected}}">
-                <ts-trans-review on-edittrigger="edittrigger" selected="{{selected}}" language="[[language]]" book="[[book]]" chunk="{{chunk}}"></ts-trans-review>
-                <ts-trans-edit on-edittrigger="edittrigger" selected="{{selected}}" language="[[language]]" book="[[book]]" chunk="{{chunk}}"></ts-trans-edit>
+                <ts-target-review on-edittrigger="edittrigger" selected="{{selected}}" language="[[language]]" book="[[book]]" chunk="{{chunk}}"></ts-target-review>
+                <ts-target-edit on-edittrigger="edittrigger" selected="{{selected}}" language="[[language]]" book="[[book]]" chunk="{{chunk}}"></ts-target-edit>
             </iron-pages>
             <ts-resource-card></ts-resource-card>
         </div>

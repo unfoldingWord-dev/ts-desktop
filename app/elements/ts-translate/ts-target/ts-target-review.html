@@ -1,13 +1,12 @@
 
-<link rel="import" href="../../components/paper-material/paper-material.html">
-<link rel="import" href="../../components/paper-button/paper-button.html">
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../../components/paper-material/paper-material.html">
+<link rel="import" href="../../../components/paper-button/paper-button.html">
+<link rel="import" href="../../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../../components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../../components/neon-animation/neon-animation.html">
 
-<link rel="import" href="../../components/paper-dialog/paper-dialog.html">
-<link rel="import" href="../../components/neon-animation/neon-animation.html">
-
-<dom-module id="ts-trans-review">
+<dom-module id="ts-target-review">
 
 	<style>
 
@@ -110,7 +109,7 @@
 
 	<template>
 
-        <paper-material id="toggle" class="notdone">
+        <paper-material id="toggle" class="notdone" elevation="1">
             <div id="heading">
                 <div>
                     <span>[[book.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[language.ln]]</span>
@@ -154,7 +153,7 @@
 
 	Polymer({
 
-		is: 'ts-trans-review',
+		is: 'ts-target-review',
 
 		properties: {
             language: {

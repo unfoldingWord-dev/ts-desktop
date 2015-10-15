@@ -1,6 +1,6 @@
 
-<link rel="import" href="./ts-trans-view.html">
-<link rel="import" href="./ts-source-card.html">
+<link rel="import" href="../ts-target/ts-target-view.html">
+<link rel="import" href="../ts-source/ts-source-card.html">
 
 <dom-module id="ts-read-card">
 
@@ -15,7 +15,7 @@
             margin: 15px 0 40px 0;
         }
 
-        ts-trans-view {
+        ts-target-view {
             position: absolute;
             top: 25px;
             left: 40px;
@@ -84,7 +84,7 @@
 
         <div id="contain">
             <ts-source-card id="srccard" class="topcard" on-tap="srctop" language="[[language]]" book="[[book]]" chunk="[[chunk]]" sources="{{sources}}" selected-source="{{selectedSource}}"></ts-source-card>
-            <ts-trans-view id="transcard" on-tap="transtop" language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-trans-view>
+            <ts-target-view id="transcard" on-tap="transtop" language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-target-view>
         </div>
 
     </template>

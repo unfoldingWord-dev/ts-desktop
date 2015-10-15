@@ -1,6 +1,6 @@
 
-<link rel="import" href="./ts-trans-edit.html">
-<link rel="import" href="./ts-source-chunk.html">
+<link rel="import" href="../ts-target/ts-target-edit.html">
+<link rel="import" href="../ts-source/ts-source-chunk.html">
 
 <dom-module id="ts-chunk-card">
 
@@ -15,7 +15,7 @@
             margin: 15px 0 40px 0;
         }
 
-        ts-trans-edit {
+        ts-target-edit {
             position: absolute;
             top: 25px;
             left: 40px;
@@ -84,7 +84,7 @@
 
         <div id="contain">
             <ts-source-chunk id="srccard" class="top" on-tap="srctop" language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-source-chunk>
-            <ts-trans-edit noicon id="transcard" on-tap="transtop" on-edittrigger="edittrigger" language="[[language]]" book="[[book]]" chunk="{{chunk}}"></ts-trans-edit>
+            <ts-target-edit noicon id="transcard" on-tap="transtop" on-edittrigger="edittrigger" language="[[language]]" book="[[book]]" chunk="{{chunk}}"></ts-target-edit>
         </div>
 
     </template>

@@ -1,5 +1,5 @@
 
-<link rel="import" href="../../components/paper-material/paper-material.html">
+<link rel="import" href="../../../components/paper-material/paper-material.html">
 <link rel="import" href="./ts-source-tab.html">
 
 <dom-module id="ts-source-card">
@@ -28,8 +28,9 @@
             justify-content: center;
             min-height: 50px;
             align-items: center;
-            font-size: 150%;
-            font-weight: bold;
+            font-size: 135%;
+            font-weight: normal;
+            text-transform: uppercase;
         }
 
         #content {
@@ -38,14 +39,15 @@
         }
 
         #content p {
-            line-height: 1.5;
+            line-height: 2;
+            color: var(--text-read-color);
         }
 
     </style>
 
     <template>
 
-        <paper-material>
+        <paper-material elevation="1">
             <div id="tabs">
                 <ts-source-tab sources="{{sources}}" selected-source="{{selectedSource}}"></ts-source-tab>
             </div>

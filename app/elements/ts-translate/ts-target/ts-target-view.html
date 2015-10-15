@@ -1,7 +1,7 @@
 
-<link rel="import" href="../../components/paper-material/paper-material.html">
+<link rel="import" href="../../../components/paper-material/paper-material.html">
 
-<dom-module id="ts-trans-view">
+<dom-module id="ts-target-view">
 
 	<style>
 
@@ -20,12 +20,15 @@
 		#heading {
             color: var(--greyed-out-dark);
             display: flex;
-            justify-content: center;
-            min-height: 50px;
-            align-items: center;
-            font-size: 150%;
-            font-weight: bold;
-            border-bottom: 1px solid var(--greyed-out-light);
+            justify-content: flex-start;
+            min-height: 42px;
+            align-items: flex-end;
+            font-size: 88%;
+            font-weight: 300;
+            border-bottom: 1px solid var(--note-card-pink);
+            margin-bottom: 4px;
+            letter-spacing: 1px;
+            padding: 0 0 0.25em 1.75em;
 		}
 
         #content {
@@ -35,12 +38,12 @@
 		}
 
         #content.editmode {
-            background-size: 100% 26px;
-            background-image: -webkit-linear-gradient(white 25px, var(--greyed-out-light) 25px, var(--greyed-out-light) 26px, white 26px);
+            background-size: 100% 32px;
+            background-image: -webkit-linear-gradient(white 27px, var(--greyed-out-light) 27px, var(--greyed-out-light) 28px, white 28px);
         }
 
         #content p {
-			line-height: 26px;
+			line-height: 2;
             margin-top: 0;
 		}
 
@@ -48,10 +51,10 @@
 
 	<template>
 
-        <paper-material>
+        <paper-material elevation="1">
             <div id="heading">
                 <div>
-                    <span>[[book.name]]</span> <span>[[chunk.chapter]]</span></span> - <span>[[language.ln]]</span>
+                    <span>[[book.name]]</span> <span>[[chunk.chapter]]</span></span> &mdash; <span>[[language.ln]]</span>
                 </div>
             </div>
             <div id="content" class="editmode">
@@ -67,7 +70,7 @@
 
 	Polymer({
 
-		is: 'ts-trans-view',
+		is: 'ts-target-view',
 
 		properties: {
             language: {

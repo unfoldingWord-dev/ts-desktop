@@ -1,0 +1,119 @@
+
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
+
+<dom-module id="ts-publish-review">
+
+    <style>
+
+        :host {
+            display: flex;
+        }
+
+        #contain {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-around;
+        }
+
+        #list {
+            background: white;
+            width: 450px;
+            box-shadow: 0 2px 3px 2px var(--greyed-out-light);
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        #next {
+            background: var(--highlight-primary);
+            color: var(--text-color);
+        }
+
+        ul {
+            margin: 0;
+            padding: 0;
+            list-style-type: none;
+            font-size: 110%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        ul li {
+            margin: 0;
+            padding: 1em;
+            color: var(--greyed-out-dark);
+            border-bottom: 1px solid var(--greyed-out-light);
+            transition: background .3s, color .3s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        ul li:hover {
+            background: var(--accent-color-dark);
+            color: var(--text-color);
+        }
+
+        .right {
+            float: right;
+            color: var(--completed-color);
+        }
+
+    </style>
+
+    <template>
+
+        <div id="contain">
+            <div id="list">
+                <ul>
+                    <li><div>Project: <span>[[book.name]]</span> - <span>[[language.ln]]</span></div><iron-icon class="right" icon="done"></iron-icon></li>
+                    <li>Profile<iron-icon class="right" icon="done"></iron-icon></li>
+                    <li>License Agreement<iron-icon class="right" icon="done"></iron-icon></li>
+                    <li>Translation Guidelines<iron-icon class="right" icon="done"></iron-icon></li>
+                    <li>Statement of Faith<iron-icon class="right" icon="done"></iron-icon></li>
+                </ul>
+            </div>
+            <paper-button raised id="next" on-tap="next">NEXT STEP</paper-button>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-publish-review',
+
+        properties: {
+            selected: {
+                type: Number,
+                value: 2,
+                notify: true
+            },
+            language: {
+                type: Object,
+                value: {}
+            },
+            book: {
+                type: Object,
+                value: {}
+            }
+        },
+
+        next: function () {
+            this.selected = this.selected + 1;
+        },
+
+        ready: function() {
+
+        }
+
+    });
+
+</script>

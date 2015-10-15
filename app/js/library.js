@@ -1,3 +1,4 @@
+
 'use strict';
 
 ;(function () {
@@ -186,6 +187,7 @@
         };
 
         return library;
+
     }
 
     exports.Library = Library;

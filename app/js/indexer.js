@@ -1,6 +1,7 @@
-'use strict';
+// indexer module
 
 ;(function () {
+    'use strict';
 
     let fs = require('fs');
     let path = require('path');
@@ -197,7 +198,7 @@
             incrementLink(md5Hash);
 
             //save meta file
-            if (typeof metaObj !== 'undefined') {
+            if (metaObj) {
                 let metaFilePath = path.join(md5Path, 'meta.json');
                 let metaFileContent = typeof metaObj === 'object' ? JSON.stringify(metaObj) : metaObj;
                 saveFile(metaFilePath, metaFileContent);

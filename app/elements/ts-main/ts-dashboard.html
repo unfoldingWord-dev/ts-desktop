@@ -1,0 +1,80 @@
+
+<link rel="import" href="../../components/neon-animation/neon-animation.html">
+
+<link rel="import" href="../ts-home/ts-home.html">
+<link rel="import" href="../ts-new/ts-new.html">
+<link rel="import" href="../ts-publish/ts-publish.html">
+<link rel="import" href="../ts-translate/ts-translate.html">
+
+<dom-module id="ts-dashboard">
+
+  <style>
+
+      :host {
+          display: flex;
+          flex: auto;
+      }
+
+      neon-animated-pages {
+          flex: auto;
+          display: flex;
+      }
+
+      neon-animated-pages > * {
+          flex: auto;
+      }
+
+  </style>
+
+  <template>
+
+      <neon-animated-pages attr-for-selected="data-route" selected="{{route}}" exit-animation="slide-left-animation" entry-animation="slide-from-right-animation">
+          <ts-home data-route="home" route="{{route}}"></ts-home>
+          <ts-new data-route="new" route="{{route}}" language="{{language}}" group="{{group}}" book="{{book}}" chapters="{{chapters}}" chapter="{{chapter}}"></ts-new>
+          <ts-translate data-route="translate" route="{{route}}" language="[[language]]" book="[[book]]"></ts-translate>
+          <ts-publish data-route="publish" route="{{route}}" language="[[language]]" book="[[book]]"></ts-publish>
+      </neon-animated-pages>
+
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+      is: 'ts-dashboard',
+
+      properties: {
+          language: {
+              type: Object,
+              value: {}
+          },
+          group: {
+              type: Object,
+              value: {}
+          },
+          book: {
+              type: Object,
+              value: {}
+          },
+          chapters: {
+              type: Array,
+              value: []
+          },
+          chapter: {
+              type: Number,
+              value: null
+          },
+          route: {
+              type: String,
+              value: 'home'
+          }
+      },
+
+      ready: function() {
+
+      }
+
+  });
+
+</script>

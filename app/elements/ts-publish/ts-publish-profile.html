@@ -1,0 +1,100 @@
+
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../components/iron-input/iron-input.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
+
+<dom-module id="ts-publish-profile">
+
+    <style>
+
+        :host {
+            display: flex;
+        }
+
+        #contain {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #next {
+            background: var(--highlight-primary);
+            color: var(--text-color);
+            margin-top: 20px;
+        }
+
+        input {
+            width: 350px;
+            height: 30px;
+            font-size: 120%;
+            margin: 10px 0;
+            border: none;
+            border-bottom: 1px solid var(--greyed-out-light);
+            color: var(--greyed-out-dark);
+        }
+
+        .input {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-top: 20px;
+            background: white;
+            width: 450px;
+            box-shadow: 0 2px 3px 2px var(--greyed-out-light);
+        }
+
+        .right {
+            float: right;
+            color: var(--greyed-out-primary);
+        }
+
+    </style>
+
+    <template>
+
+        <div id="contain">
+            <div class="input">
+                <input is="iron-input" bind-value="" placeholder="Your Name">
+                <iron-icon class="right" icon="info" title="Info"></iron-icon>
+            </div>
+            <div class="input">
+                <input is="iron-input" bind-value="" placeholder="Your Email Address">
+                <iron-icon class="right" icon="info" title="Info"></iron-icon>
+            </div>
+            <div class="input">
+                <input is="iron-input" bind-value="" placeholder="Your Phone Number">
+                <iron-icon class="right" icon="info" title="Info"></iron-icon>
+            </div>
+            <paper-button raised id="next" on-tap="next">NEXT STEP</paper-button>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-publish-profile',
+
+        properties: {
+            selected: {
+                type: Number,
+                value: 1,
+                notify: true
+            }
+        },
+
+        next: function () {
+            this.selected = this.selected + 1;
+        },
+
+        ready: function() {
+
+        }
+
+    });
+
+</script>

@@ -1,0 +1,92 @@
+
+<link rel="import" href="../../../components/iron-pages/iron-pages.html">
+
+<link rel="import" href="../ts-target/ts-target-review.html">
+<link rel="import" href="../ts-target/ts-target-edit.html">
+<link rel="import" href="../ts-source/ts-source-chunk.html">
+<link rel="import" href="../ts-resource/ts-resource-card.html">
+
+<dom-module id="ts-review-card">
+
+	<style>
+
+        :host {
+            flex: auto;
+            display: flex;
+        }
+
+        #contain {
+            display: flex;
+            margin: 15px 0;
+            flex: auto;
+        }
+
+        iron-pages {
+            flex: 1 0 400px;
+            display: flex;
+        }
+
+        ts-resource-card {
+            margin: 0 15px;
+            flex: 1 0 400px;
+        }
+
+        ts-source-chunk {
+            margin: 0 15px;
+            flex: 1 0 400px;
+        }
+
+	</style>
+
+	<template>
+
+        <div id="contain">
+            <ts-source-chunk language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-source-chunk>
+            <iron-pages selected="{{selected}}">
+                <ts-target-review on-edittrigger="edittrigger" selected="{{selected}}" language="[[language]]" book="[[book]]" chunk="{{chunk}}"></ts-target-review>
+                <ts-target-edit on-edittrigger="edittrigger" selected="{{selected}}" language="[[language]]" book="[[book]]" chunk="{{chunk}}"></ts-target-edit>
+            </iron-pages>
+            <ts-resource-card></ts-resource-card>
+        </div>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+		is: 'ts-review-card',
+
+		properties: {
+            language: {
+                type: Object,
+                value: {}
+            },
+            book: {
+                type: Object,
+                value: {}
+            },
+            chunk: {
+                type: Object,
+                value: {},
+                notify: true
+            },
+            selected: {
+                type: Number,
+                value: 0
+            }
+		},
+
+        edittrigger: function () {
+            this.fire('uploadtrigger');
+        },
+
+		ready: function() {
+
+		}
+
+	});
+
+</script>

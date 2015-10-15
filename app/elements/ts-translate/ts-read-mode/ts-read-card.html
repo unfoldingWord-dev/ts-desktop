@@ -1,0 +1,168 @@
+
+<link rel="import" href="../ts-target/ts-target-view.html">
+<link rel="import" href="../ts-source/ts-source-card.html">
+
+<dom-module id="ts-read-card">
+
+    <style>
+
+        :host {
+            flex: auto;
+        }
+
+        #contain {
+            position: relative;
+            margin: 15px 0 40px 0;
+        }
+
+        ts-target-view {
+            position: absolute;
+            top: 25px;
+            left: 40px;
+            width: calc(100% - 55px);
+            height: 100%;
+            z-index: 1;
+        }
+
+        ts-source-card {
+            position: relative;
+            margin: 0 40px 0 15px;
+            z-index: 1;
+        }
+
+        .top {
+            z-index: 2;
+        }
+
+        #transcard.up {
+            -webkit-animation: transup 1s;
+        }
+
+        #transcard.down {
+            -webkit-animation: transdown 1s;
+        }
+
+        #srccard.down {
+            -webkit-animation: srcdown 1s;
+        }
+
+        #srccard.up {
+            -webkit-animation: srcup 1s;
+        }
+
+        @-webkit-keyframes transup {
+            0% {z-index: 1}
+            49% {transform: translateX(50%); z-index: 1}
+            50% {z-index: 2}
+            100% {transform: translateX(0); z-index: 2}
+        }
+
+        @-webkit-keyframes transdown {
+            0% {z-index: 2}
+            49% {transform: translateX(50%); z-index: 2}
+            50% {z-index: 1}
+            100% {transform: translateX(0); z-index: 1}
+        }
+
+        @-webkit-keyframes srcup {
+            0% {z-index: 1}
+            49% {transform: translateX(-50%); z-index: 1}
+            50% {z-index: 2}
+            100% {transform: translateX(0); z-index: 2}
+        }
+
+        @-webkit-keyframes srcdown {
+            0% {z-index: 2}
+            49% {transform: translateX(-50%); z-index: 2}
+            50% {z-index: 1}
+            100% {transform: translateX(0); z-index: 1}
+        }
+
+    </style>
+
+    <template>
+
+        <div id="contain">
+            <ts-source-card id="srccard" class="topcard" on-tap="srctop" language="[[language]]" book="[[book]]" chunk="[[chunk]]" sources="{{sources}}" selected-source="{{selectedSource}}"></ts-source-card>
+            <ts-target-view id="transcard" on-tap="transtop" language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-target-view>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+		is: 'ts-read-card',
+
+        properties: {
+            language: {
+                type: Object,
+                value: {}
+            },
+            book: {
+                type: Object,
+                value: {}
+            },
+            chunk: {
+                type: Object,
+                value: {}
+            },
+            sources: {
+                type: Array,
+                value: [],
+                notify: true
+            },
+            selectedSource: {
+                type: Number,
+                // value: 0,
+                notify: true
+                // observer: '_selectedChanged'
+            }
+        },
+
+        transtop: function () {
+            var trans = this.$.transcard;
+            var src = this.$.srccard;
+
+            if(!trans.classList.contains("top")) {
+                trans.classList.add("up");
+                src.classList.add("down");
+                trans.classList.add("top");
+                src.classList.remove("top");
+                setTimeout(function () {
+                    trans.classList.remove("up");
+                    src.classList.remove("down");
+                }, 1000);
+            }
+        },
+
+        srctop: function () {
+            var trans = this.$.transcard;
+            var src = this.$.srccard;
+
+            if(!src.classList.contains("top")) {
+                trans.classList.add("down");
+                src.classList.add("up");
+                trans.classList.remove("top");
+                src.classList.add("top");
+                setTimeout(function () {
+                    trans.classList.remove("down");
+                    src.classList.remove("up");
+                }, 1000);
+            }
+        },
+
+        _selectedChanged: function() {
+            console.log('hello');
+        },
+
+		ready: function() {
+
+		}
+
+	});
+
+</script>

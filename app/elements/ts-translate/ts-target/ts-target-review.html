@@ -1,0 +1,220 @@
+
+<link rel="import" href="../../../components/paper-material/paper-material.html">
+<link rel="import" href="../../../components/paper-button/paper-button.html">
+<link rel="import" href="../../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../../components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../../components/neon-animation/neon-animation.html">
+
+<dom-module id="ts-target-review">
+
+	<style>
+
+        :host {
+            flex: auto;
+            display: flex;
+        }
+
+        paper-material {
+            flex: auto;
+            display: flex;
+            background: white;
+            flex-direction: column;
+        }
+
+		#heading {
+			padding: 5px 1em;
+			color: var(--greyed-out-dark);
+            border-bottom: 1px solid var(--greyed-out-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 35px;
+		}
+
+        #content {
+			padding: 0.5em 1em;
+            flex: auto;
+            display: flex;
+		}
+
+        #content p {
+			line-height: 1.5;
+			margin: 0;
+		}
+
+        .notdone paper-button {
+            background: var(--highlight-primary);
+            color: var(--text-color);
+            margin: 10px 0;
+        }
+
+        .notdone #button iron-icon {
+            display: none;
+        }
+
+        .done paper-button {
+            background: var(--completed-color);
+            color: var(--text-color);
+            margin: 10px 0;
+            width: 100%
+        }
+
+        #button iron-icon {
+            padding-right: 10px;
+        }
+
+        .done #heading paper-icon-button {
+            display: none;
+        }
+
+        #button {
+            text-align: center;
+        }
+
+        #heading paper-icon-button {
+            padding: 5px;
+        }
+
+        #content iron-icon {
+            color: var(--highlight-primary);
+        }
+
+        #popup {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 50px;
+            right: 15px;
+            margin: auto;
+            width: 350px;
+            height: 225px;
+            text-align: center;
+        }
+
+        #popup p {
+            margin: 0;
+        }
+
+        #popup p#spaced {
+            margin-bottom: 15px;
+        }
+
+        #popup .buttons {
+            display: flex;
+            justify-content: center;
+        }
+
+	</style>
+
+	<template>
+
+        <paper-material id="toggle" class="notdone" elevation="1">
+            <div id="heading">
+                <div>
+                    <span>[[book.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[language.ln]]</span>
+                </div>
+                <paper-icon-button icon="create" title="edit" on-tap="edit"></paper-icon-button>
+            </div>
+            <div id="content">
+                <p>
+                    <iron-icon draggable="true" ondragstart="" icon="room"></iron-icon>
+                    <iron-icon draggable="true" ondragstart="" icon="room"></iron-icon>
+                    <iron-icon draggable="true" ondragstart="" icon="room"></iron-icon>
+                    <template is="dom-repeat" items="{{text}}" as="word">
+                        <span ondrop="" ondragover="">[[word]]</span>
+                    </template>
+                </p>
+            </div>
+            <div id="button">
+                <paper-button raised on-tap="done"><iron-icon icon="done"></iron-icon>DONE</paper-button>
+            </div>
+        </paper-material>
+
+        <paper-dialog id="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <h2>Chunk Checklist</h2>
+            <div>
+                <p id="spaced">Are you sure you're Done with this chunk?</p>
+                <p>I have placed the verses correctly</p>
+                <p>I have reviewed the words and meanings</p>
+                <p>I have reviewed the translationQuestions</p>
+            </div>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Cancel</paper-button>
+                <paper-button dialog-confirm on-tap="completechunk">Confirm</paper-button>
+            </div>
+        </paper-dialog>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+		is: 'ts-target-review',
+
+		properties: {
+            language: {
+                type: Object,
+                value: {}
+            },
+            book: {
+                type: Object,
+                value: {}
+            },
+            chunk: {
+                type: Object,
+                value: {},
+                notify: true
+            },
+            text: {
+                type: Array,
+                value: [],
+                computed: 'breaktext(chunk.*)'
+            },
+            selected: {
+                type: Number,
+                value: 0,
+                notify: true
+            }
+		},
+
+        edit: function () {
+            this.selected = 1;
+        },
+
+        breaktext: function () {
+            return this.chunk.transcontent.split(" ");
+        },
+
+        completechunk: function () {
+            var toggle = this.$.toggle;
+            toggle.classList.remove("notdone");
+            toggle.classList.add("done");
+            this.chunk.status = "Complete";
+            this.fire('edittrigger');
+        },
+
+        done: function () {
+            var toggle = this.$.toggle;
+            var popup = this.$.popup;
+
+            if (toggle.classList.contains("notdone")) {
+                popup.open();
+            } else {
+                toggle.classList.remove("done");
+                toggle.classList.add("notdone");
+                this.chunk.status = "Incomplete";
+                this.fire('edittrigger');
+            }
+        },
+
+		ready: function() {
+
+		}
+
+	});
+
+</script>

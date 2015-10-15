@@ -7,6 +7,8 @@
 <link rel="import" href="../../components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
 
+<script src="../../js/dragging.js"></script>
+
 <dom-module id="ts-trans-review">
 
 	<style>
@@ -119,11 +121,11 @@
             </div>
             <div id="content">
                 <p>
-                    <iron-icon draggable="true" ondragstart="" icon="room"></iron-icon>
-                    <iron-icon draggable="true" ondragstart="" icon="room"></iron-icon>
-                    <iron-icon draggable="true" ondragstart="" icon="room"></iron-icon>
+                    <iron-icon id="drag1" draggable="true" ondragstart="drag(event)" icon="room"></iron-icon>
+                    <iron-icon id="drag2" draggable="true" ondragstart="drag(event)" icon="room"></iron-icon>
+                    <iron-icon id="drag3" draggable="true" ondragstart="drag(event)" icon="room"></iron-icon>
                     <template is="dom-repeat" items="{{text}}" as="word">
-                        <span ondrop="" ondragover="">[[word]]</span>
+                        <span ondrop="drop(event)" ondragover="allowDrop(event)">[[word]]</span>
                     </template>
                 </p>
             </div>

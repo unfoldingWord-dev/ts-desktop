@@ -45,6 +45,14 @@
 
         is: 'ts-translate',
 
+        behaviors: [
+            Polymer.IronResizableBehavior
+        ],
+
+        listeners: {
+            'iron-resize': 'onResize'
+        },
+
         properties: {
             selected: {
                 type: Number,
@@ -89,8 +97,12 @@
             // Get new data based on source tab selection
         },
 
+        onResize: function() {
+
+        },
+
         attached: function() {
-            this.selectedSource = 0;
+            this.selectedSource = 1;
         },
 
         ready: function() {

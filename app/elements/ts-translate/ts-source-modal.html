@@ -1,0 +1,278 @@
+<!-- ts-translation-sources -->
+
+<!-- <link rel="import" href="../../components/polymer/polymer.html"> -->
+<link rel="import" href="../../components/iron-list/iron-list.html">
+<link rel="import" href="../../components/paper-checkbox/paper-checkbox.html">
+
+<dom-module id="ts-source-modal">
+
+    <style>
+
+        :host {
+            box-sizing: border-box;
+            position: fixed;
+            top: 40px;
+            bottom: 0;
+            left: 56px;
+            right: 0;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        .container {
+            display: block;
+            width: 60%;
+            height: 80%;
+            min-height: 320px;
+            max-height: 800px;
+            position: fixed;
+            left: 0;
+            right: 0;
+            top: calc(50% + 18px);
+            transform: translateY(-50%);
+            margin-left: auto;
+            margin-right: auto;
+            overflow: hidden;
+            background: white;
+            box-shadow: -4px 0 30px rgba(22, 22, 22, 0.3);
+        }
+        [icon="arrow-back"] {
+            margin: 0 .2em;
+        }
+        [icon="search"] {
+            padding: 0;
+        }
+        .header {
+            min-height: 56px;
+            border-bottom: 1px solid #EEE;
+            color: #888;
+            font-style: italic;
+            font-family: 'Roboto';
+            font-size: 110%;
+            display: flex;
+        }
+        .header div {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 1px solid #eee;
+            background: white;
+            width: 100%;
+        }
+        input {
+            border: none;
+            font-size: 110%;
+            font-style: italic;
+            width: 100%;
+        }
+        input:focus {
+            outline: none;
+        }
+        .body {
+            height: calc(100% - 56px - 56px);
+            overflow-y: auto;
+        }
+        .selected-list {
+            font-family: 'Roboto';
+            font-size: 110%;
+        }
+        .row {
+            display: block;
+            margin: 0;
+            padding: 1em;
+            border-bottom: 1px solid #EEE;
+        }
+        .row:hover {
+            background: var(--accent-color-dark);
+            box-shadow: inset 0 -1px rgba(0,0,0,0);
+            color: #fff;
+        }
+        .row-header {
+            display: block;
+            margin: 0;
+            padding: 0.25em 1em;
+            border-bottom: 1px solid #E4E4E4;
+            background-color: #EEE;
+            text-transform: uppercase;
+            font-size: 80%;
+            font-weight: 500;
+            color: #888;
+        }
+        .right {
+            float: right;
+        }
+        .clickable {
+            cursor: pointer;
+        }
+        .footer {
+            width: 100%;
+            height: 56px;
+            position: absolute;
+            bottom: 0;
+            border-top: 1px solid #EEE;
+        }
+        paper-button {
+            margin-top: 0.6rem;
+            color: #00C5E8;
+        }
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        paper-checkbox[disabled][checked]::shadow #checkbox.paper-checkbox {
+            background-color: #00C5E8;
+            border-color: #00C5E8;
+        }
+        paper-checkbox[disabled]::shadow #checkbox.paper-checkbox {
+            opacity: 1;
+        }
+
+    </style>
+
+    <template>
+
+        <div id="container" class="container">
+            <div class="header">
+                <div>
+                    <input is="iron-input" bind-value="{{query}}" name="source-search" placeholder="Choose a source translation" type="text" />
+                    <paper-icon-button class="right" icon="search" title="Search Languages"></paper-icon-button>
+                </div>
+            </div>
+
+            <div class="body">
+                <div id="selected-sources-header" class="row-header">Selected</div>
+                <iron-list id="selected-list" items="[[sources]]" as="source">
+                    <template>
+                        <div class="row clickable" on-tap="removeSelected">
+                            <span>[[ source ]]</span>
+                            <paper-checkbox class="right" disabled checked style="opacity: 1;"></paper-checkbox>
+                        </div>
+                    </template>
+                </iron-list>
+
+                <div id="available-sources-header" class="row-header">Available</div>
+                <iron-list id="available-list" items="[[available]]" as="source" selection-enabled multi-selection on-tap="selectAvailable">
+                    <template>
+                        <div class="row clickable" data-element="[[source]]" data-index="[[index]]">
+                            <span>[[ source.title ]]</span>
+                            <paper-checkbox class="right" disabled style="opacity: 1;"></paper-checkbox>
+                        </div>
+                    </template>
+                </iron-list>
+            </div>
+
+            <div class="footer">
+                <paper-button class="right" on-tap="confirm">Confirm</paper-button>
+                <paper-button class="right" on-tap="cancel">Cancel</paper-button>
+            </div>
+
+        </div>
+
+   </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-source-modal',
+
+        listeners: {
+            'open': 'onOpen'
+        },
+
+        behaviors: [
+            Polymer.IronResizableBehavior
+        ],
+
+        properties: {
+            allSources: {
+                type: Array,
+                value: []
+            },
+            sources: {
+                type: Array,
+                value: []
+            },
+            available: {
+                type: Array,
+                computed: '_getAvailable(sources)'
+            },
+            selectedSource: {
+                type: Number,
+                value: null
+            },
+            query: {
+                type: String,
+                value: ""
+            }
+        },
+
+        ready: function() {
+        },
+
+        onOpen: function() {
+        },
+
+        searchfilter: function(query) {
+            // var search = App.util.startsWithBase.bind(null, query);
+            // return this.availableList.filter(function(al) {
+            //     return search(al.title);
+            // });
+        },
+
+        _getAvailable: function(sources) {
+            // return this.masterList.filter(function(i) {
+            //     return sources.indexOf(i) < 0;
+            // });
+        },
+
+        cancel: function() {
+            this.fire('cancel');
+        },
+
+        confirm: function() {
+            // this.fire('confirm');
+        },
+
+        selectAvailable: function(event) {
+            // var elem = event.target.dataElement;
+            // var index = event.target.dataIndex;
+            // elem.checked = true;
+            // this.openedTabs = this.openedTabs.concat([elem]);
+            // // this.push('openedTabs', elem);
+            // // this.async(function() {
+            // //     this.availableList = this.getAvailable(this.openedTabs);
+            // // }, 1);
+            // this.selectedTab = this.openedTabs.indexOf(elem).toString();
+        },
+
+        removeSelected: function(event) {
+            // var elem = event.model.sl;
+            // var index = event.model.index;
+            // elem.checked = false;
+            // this.openedTabs = this.openedTabs.splice(index, 1);
+            // // this.async(function() {
+            // //     this.availableList = this.getAvailable(this.openedTabs);
+            // // }, 1);
+
+            // // Assign the selected tab
+            // if (this.selectedTab == index) {
+            //     if (this.openedTabs.length == 0) {
+            //         this.selectedTab = '';
+            //     }
+            //     else if (index >= this.openedTabs.length - 1) {
+            //         this.selectedTab = (this.openedTabs.length - 1).toString();
+            //     }
+            // }
+            // else if (index < this.selectedTab) {
+            //     this.selectedTab -= 1;
+            // }
+        },
+
+        attached: function () {
+            // this.allSources = [{title: 'English ULB'}, {title: 'English UDB'}, {title: 'Arabic'}, {title: 'Bahasa Indonesia'}];
+        }
+    });
+
+</script>

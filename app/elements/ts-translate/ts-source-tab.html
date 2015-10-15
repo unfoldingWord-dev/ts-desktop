@@ -23,13 +23,12 @@
 			--paper-tabs-selection-bar-color: var(--greyed-out-dark);
         }
 
-
 		paper-tabs::shadow #tabsContent.scrollable.paper-tabs {
 			position: relative;
 		}
 
 		/* This is like the selection bar on paper-tab but without animation or the bugginess */
-        paper-tab.iron-selected::after::shadow {
+        paper-tab.iron-selected::shadow .tab-content::after {
         	content: '';
         	display: block;
         	width: 100%;
@@ -49,6 +48,7 @@
 			flex: 0 0 48px;
 			justify-content: center;
 			align-items: center;
+			cursor: pointer;
         }
 		
 		.modal-btn-container .icon {
@@ -67,7 +67,7 @@
 		</div>
 		<div class="modal-btn-container">
 			<div class="modal-btn-inner-container">
-				<iron-icon icon="icons:tab" class="icon24 icon" on-click=""></iron-icon>
+				<iron-icon icon="icons:tab" class="icon24 icon" on-click="openModal"></iron-icon>
 			</div>
 		</div>
 	</template>
@@ -88,17 +88,19 @@
         	},
         	selectedSource: {
         		type: Number,
-        		// value: 0,
         		notify: true,
         		observer: '_selectedSourceChanged'
         	}
+        },
+
+        attached: function() {	
         },
 
         _selectedSourceChanged: function() {
         	console.log('source-tab selected changed');
         },
 
-        attached: function() {
+        openModal: function() {
         	
         }
 

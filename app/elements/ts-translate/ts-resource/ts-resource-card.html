@@ -1,0 +1,87 @@
+
+<link rel="import" href="../../../components/paper-material/paper-material.html">
+<link rel="import" href="../../../components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../../../components/iron-pages/iron-pages.html">
+
+<dom-module id="ts-resource-card">
+
+	<style>
+
+        :host {
+            flex: auto;
+            display: flex;
+        }
+
+        paper-material {
+            flex: auto;
+            display: flex;
+            background: white;
+            flex-direction: column;
+        }
+
+		#heading {
+			padding: 5px 1em;
+			color: var(--greyed-out-dark);
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 35px;
+		}
+
+        #content {
+			padding: 0.5em 1em;
+            flex: auto;
+		}
+
+        #content p {
+			line-height: 1.5;
+			margin: 0;
+		}
+
+	</style>
+
+	<template>
+
+        <paper-material elevation="1">
+            <div id="heading">
+                <paper-tabs selected="{{selected}}">
+                    <paper-tab>Notes</paper-tab>
+                    <paper-tab>Words</paper-tab>
+                </paper-tabs>
+            </div>
+            <div id="content">
+                <iron-pages selected="{{selected}}">
+                    <div>
+                        <p>These are the notes for this chunk</p>
+                    </div>
+                    <div>
+                        <p>These are the words for this chunk</p>
+                    </div>
+                </iron-pages>
+            </div>
+        </paper-material>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+		is: 'ts-resource-card',
+
+		properties: {
+            selected: {
+                type: Number,
+                value: 0
+            }
+		},
+
+		ready: function() {
+
+		}
+
+	});
+
+</script>

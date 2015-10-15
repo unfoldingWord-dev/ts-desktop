@@ -1,0 +1,109 @@
+
+<link rel="import" href="../../../components/paper-material/paper-material.html">
+
+<dom-module id="ts-target-view">
+
+	<style>
+
+        :host {
+            flex: auto;
+            display: flex;
+        }
+
+        paper-material {
+            flex: auto;
+            display: flex;
+            background: white;
+            flex-direction: column;
+        }
+
+		#heading {
+            color: var(--greyed-out-dark);
+            display: flex;
+            justify-content: flex-start;
+            min-height: 42px;
+            align-items: flex-end;
+            font-size: 88%;
+            font-weight: 300;
+            border-bottom: 1px solid var(--note-card-pink);
+            margin-bottom: 4px;
+            letter-spacing: 1px;
+            padding: 0 0 0.25em 1.75em;
+		}
+
+        #content {
+			padding: 0 50px;
+            flex: auto;
+            display: flex;
+		}
+
+        #content.editmode {
+            background-size: 100% 32px;
+            background-image: -webkit-linear-gradient(white 27px, var(--greyed-out-light) 27px, var(--greyed-out-light) 28px, white 28px);
+        }
+
+        #content p {
+			line-height: 2;
+            margin-top: 0;
+		}
+
+	</style>
+
+	<template>
+
+        <paper-material elevation="1">
+            <div id="heading">
+                <div>
+                    <span>[[book.name]]</span> <span>[[chunk.chapter]]</span></span> &mdash; <span>[[language.ln]]</span>
+                </div>
+            </div>
+            <div id="content" class="editmode">
+                <p>{{chunk.transcontent}}</p>
+            </div>
+        </paper-material>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+		is: 'ts-target-view',
+
+		properties: {
+            language: {
+                type: Object,
+                value: {}
+            },
+            book: {
+                type: Object,
+                value: {}
+            },
+            chunk: {
+                type: Object,
+                value: {}
+            }
+		},
+
+        observers: [
+            'disableedit(chunk.status)'
+        ],
+
+        disableedit: function (status) {
+            if (status === "Complete") {
+                this.$.content.classList.remove("editmode");
+            }
+            if (status === "Incomplete") {
+                this.$.content.classList.add("editmode");
+            }
+        },
+
+		ready: function() {
+
+		}
+
+	});
+
+</script>

@@ -1,8 +1,8 @@
-/**
- * Created by Emmitt on 7/23/2015.
- */
- 'use strict';
+// uploader module
+
 ;(function () {
+    'use strict';
+
     let net = require('net');
     let keypair = require('keypair');
     let jsonfile = require('jsonfile');

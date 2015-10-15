@@ -1,0 +1,134 @@
+
+<link rel="import" href="../../../components/paper-material/paper-material.html">
+<link rel="import" href="../../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../../components/iron-autogrow-textarea/iron-autogrow-textarea.html">
+
+<dom-module id="ts-target-edit">
+
+	<style>
+
+        :host {
+            flex: auto;
+            display: flex;
+        }
+
+        paper-material {
+            flex: auto;
+            display: flex;
+            background: white;
+            flex-direction: column;
+        }
+
+		#heading {
+			padding: 5px 1em;
+			color: var(--greyed-out-dark);
+            border-bottom: 1px solid var(--greyed-out-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 35px;
+		}
+
+        #content {
+			padding: 0 1em;
+            flex: auto;
+            display: flex;
+		}
+
+        #content.editmode {
+            background-size: 100% 26px;
+            background-image: -webkit-linear-gradient(white 25px, var(--greyed-out-light) 25px, var(--greyed-out-light) 26px, white 26px);
+        }
+
+        #content iron-autogrow-textarea {
+			line-height: 26px;
+            border: none;
+			margin: 0;
+            width: 100%;
+		}
+
+        #heading paper-icon-button {
+            padding: 5px;
+        }
+
+        :host([noicon]) paper-icon-button {
+            display: none;
+        }
+
+	</style>
+
+	<template>
+
+        <paper-material elevation="1">
+            <div id="heading">
+                <div>
+                    <span>[[book.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[language.ln]]</span>
+                </div>
+                <paper-icon-button icon="clear" on-tap="review"></paper-icon-button>
+            </div>
+            <div id="content" class="editmode">
+                <iron-autogrow-textarea id="textbox" on-change="changetrigger" bind-value="{{chunk.transcontent}}"></iron-autogrow-textarea>
+            </div>
+        </paper-material>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+		is: 'ts-target-edit',
+
+		properties: {
+            language: {
+                type: Object,
+                value: {}
+            },
+            book: {
+                type: Object,
+                value: {}
+            },
+            chunk: {
+                type: Object,
+                value: {},
+                notify: true
+            },
+            selected: {
+                type: Number,
+                value: 0,
+                notify: true
+            }
+		},
+
+        observers: [
+            'disableedit(chunk.status)'
+        ],
+
+        disableedit: function (status) {
+            if (status === "Complete") {
+                this.$.content.classList.remove("editmode");
+                this.$.textbox.disabled = true;
+            }
+            if (status === "Incomplete") {
+                this.$.content.classList.add("editmode");
+                this.$.textbox.disabled = false;
+            }
+        },
+
+        changetrigger: function () {
+            this.fire('edittrigger');
+        },
+
+        review: function () {
+            this.selected = 0;
+        },
+
+		ready: function() {
+
+		}
+
+	});
+
+</script>

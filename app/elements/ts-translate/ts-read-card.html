@@ -83,7 +83,7 @@
     <template>
 
         <div id="contain">
-            <ts-source-card id="srccard" class="top" on-tap="srctop" language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-source-card>
+            <ts-source-card id="srccard" class="topcard" on-tap="srctop" language="[[language]]" book="[[book]]" chunk="[[chunk]]" sources="{{sources}}" selected-source="{{selectedSource}}"></ts-source-card>
             <ts-trans-view id="transcard" on-tap="transtop" language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-trans-view>
         </div>
 
@@ -109,6 +109,17 @@
             chunk: {
                 type: Object,
                 value: {}
+            },
+            sources: {
+                type: Array,
+                value: [],
+                notify: true
+            },
+            selectedSource: {
+                type: Number,
+                // value: 0,
+                notify: true
+                // observer: '_selectedChanged'
             }
         },
 
@@ -142,6 +153,10 @@
                     src.classList.remove("up");
                 }, 1000);
             }
+        },
+
+        _selectedChanged: function() {
+            console.log('hello');
         },
 
 		ready: function() {

@@ -1,0 +1,107 @@
+<link rel="import" href="../../components/paper-tabs/paper-tabs.html">
+
+<dom-module is="ts-source-tab">
+	
+	<style>
+
+        :host {
+            flex: auto;
+            display: flex;
+        }
+
+        .tabs {
+        	flex: auto;
+        	display: flex;
+        	padding-left: 48px; /* Counter-balance to the folder icon to the right */
+        	justify-content: center;
+        }
+
+        paper-tabs {
+			box-sizing: border-box;
+			padding: 0.5rem 0;
+			color: var(--greyed-out-dark);
+			--paper-tabs-selection-bar-color: var(--greyed-out-dark);
+        }
+
+
+		paper-tabs::shadow #tabsContent.scrollable.paper-tabs {
+			position: relative;
+		}
+
+		/* This is like the selection bar on paper-tab but without animation or the bugginess */
+        paper-tab.iron-selected::after::shadow {
+        	content: '';
+        	display: block;
+        	width: 100%;
+        	height: 2px;
+        	position: absolute;
+        	bottom: 0;
+        	left: 0;
+			background-color: var(--greyed-out-dark);
+        }
+
+		paper-tab:focus::shadow .tab-content.paper-tab{
+			font-weight: 500;
+		}
+
+        .modal-btn-container {
+        	display: flex;
+			flex: 0 0 48px;
+			justify-content: center;
+			align-items: center;
+        }
+		
+		.modal-btn-container .icon {
+			color: var(--greyed-out-light);
+		}
+
+	</style>
+
+	<template>
+		<div class="tabs">
+			<paper-tabs noink no-bar hide-scroll-buttons scrollable selected="{{ selectedSource }}">
+				<template is="dom-repeat" items="[[ sources ]]" as="source">
+                   <paper-tab class="tab">{{ source }}</paper-tab>
+                </template>
+			</paper-tabs>
+		</div>
+		<div class="modal-btn-container">
+			<div class="modal-btn-inner-container">
+				<iron-icon icon="icons:tab" class="icon24 icon" on-click=""></iron-icon>
+			</div>
+		</div>
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+        is: 'ts-source-tab',
+
+        properties: {
+        	sources: {
+        		type: Array,
+        		value: [],
+        		notify: true
+        	},
+        	selectedSource: {
+        		type: Number,
+        		// value: 0,
+        		notify: true,
+        		observer: '_selectedSourceChanged'
+        	}
+        },
+
+        _selectedSourceChanged: function() {
+        	console.log('source-tab selected changed');
+        },
+
+        attached: function() {
+        	
+        }
+
+    });
+	
+</script>

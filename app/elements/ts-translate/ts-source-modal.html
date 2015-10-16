@@ -140,28 +140,20 @@
 
             <div class="body">
                 <div id="selected-sources-header" class="row-header">Selected</div>
-                <!-- <iron-list id="selected-list" items="[[sources]]" as="source"> -->
                 <template is="dom-repeat" items="[[sources]]" as="source">
-                    <!-- <template> -->
-                        <div class="row clickable" on-tap="removeSelected">
-                            <span>[[ source ]]</span>
-                            <paper-checkbox class="right" disabled checked style="opacity: 1;"></paper-checkbox>
-                        </div>
-                    <!-- </template> -->
+                    <div class="row clickable" data-element="[[source]]" data-index="[[index]]" on-tap="removeSelected">
+                        <span>[[ source ]]</span>
+                        <paper-checkbox class="right" disabled checked style="opacity: 1;"></paper-checkbox>
+                    </div>
                 </template>
-                <!-- </iron-list> -->
 
                 <div id="available-sources-header" class="row-header">Available</div>
-                <!-- <iron-list id="available-list" items="{{searchfilter(query, available)}}" as="source" selection-enabled multi-selection on-tap="selectAvailable"> -->
                 <template is="dom-repeat" items="{{searchfilter(query, available)}}" as="source">
-                    <!-- <template> -->
-                        <div class="row clickable" data-element="[[source]]" data-index="[[index]]" on-tap="selectAvailable">
-                            <span>[[ source ]]</span>
-                            <paper-checkbox class="right" disabled style="opacity: 1;"></paper-checkbox>
-                        </div>
-                    <!-- </template> -->
+                    <div class="row clickable" data-element="[[source]]" data-index="[[index]]" on-tap="selectAvailable">
+                        <span>[[ source ]]</span>
+                        <paper-checkbox class="right" disabled style="opacity: 1;"></paper-checkbox>
+                    </div>
                 </template>
-                <!-- </iron-list> -->
             </div>
 
             <div class="footer">
@@ -219,12 +211,13 @@
 
         onOpen: function() {
             console.log('opening');
-            // this.push('available', 'hello');  // works
-            // this.available = ['hello'];  // works
             this.available = this._getAvailable();
+            // this.push('available', 'hello');  // works too
+            // this.available = ['hello'];  // works too
         },
 
         searchfilter: function(query, available) {
+            // Refactor this when everything's running okay and the console.logs() are not needed
             console.log('search is running');
             if (query) {
                 var search = App.util.startsWithBase.bind(null, query);
@@ -245,6 +238,7 @@
         },
 
         _getAvailable: function() {
+            // Refactor this when everything's okay and the console.log() are not needed
             console.log('get available is called');
             var that = this;
             var available = this.allSources.filter(function(source) {
@@ -268,38 +262,30 @@
             var elem = event.target.dataElement;
             this.push('sources', elem);
             this.available = this._getAvailable();
-
-            // var index = event.target.dataIndex;
-            // elem.checked = true;
-            // this.openedTabs = this.openedTabs.concat([elem]);
-            // // this.push('openedTabs', elem);
-            // // this.async(function() {
-            // //     this.availableList = this.getAvailable(this.openedTabs);
-            // // }, 1);
-            // this.selectedTab = this.openedTabs.indexOf(elem).toString();
+            this.selectedSource = this.sources.indexOf(elem);
+            console.log('selectedSource is now', this.selectedSource);
         },
 
         removeSelected: function(event) {
-            // var elem = event.model.sl;
-            // var index = event.model.index;
-            // elem.checked = false;
-            // this.openedTabs = this.openedTabs.splice(index, 1);
-            // // this.async(function() {
-            // //     this.availableList = this.getAvailable(this.openedTabs);
-            // // }, 1);
+            var elem = event.target.dataElement;
+            var index = event.target.dataIndex;
+            this.splice('sources', index, 1);
+            this.available = this._getAvailable();
+            console.log('removing', elem, index);
 
-            // // Assign the selected tab
-            // if (this.selectedTab == index) {
-            //     if (this.openedTabs.length == 0) {
-            //         this.selectedTab = '';
-            //     }
-            //     else if (index >= this.openedTabs.length - 1) {
-            //         this.selectedTab = (this.openedTabs.length - 1).toString();
-            //     }
-            // }
-            // else if (index < this.selectedTab) {
-            //     this.selectedTab -= 1;
-            // }
+            // Assign the selected tab
+            if (this.selectedSource == index) {
+                if (this.sources.length == 0) {
+                    this.selectedSource = null;
+                }
+                else if (index >= this.sources.length - 1) {
+                    this.selectedSource = (this.sources.length - 1);
+                }
+            }
+            else if (index < this.selectedSource) {
+                this.selectedSource -= 1;
+            }
+            console.log('selectedSource is now', this.selectedSource);
         },
 
         created: function () {

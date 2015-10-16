@@ -126,13 +126,28 @@
 			modal.fire('open');
         },
 
+        removeModal: function() {
+        	var modal = this.querySelector('ts-source-modal');
+			this.removeChild(modal);
+        },
+
         onConfirm: function() {
-        	console.log('confirm is pressed');
+        	console.log('modal is confirmed');
+        	var modal = this.querySelector('ts-source-modal');
+        	this.sources = modal.sources;
+        	this.selectedSource = modal.selectedSource;
+        	this.async(function() {
+	        	if (this.selectedSource != null) {
+	        		var tab = this.querySelector('paper-tab.iron-selected');
+	        		tab.fire('tap');
+	        	}
+        	}, 30);
+        	this.removeModal();
         },
 
         onCancel: function() {
-        	var modal = this.querySelector('ts-source-modal');
-			this.removeChild(modal);
+        	console.log('modal is canceled');
+        	this.removeModal();
         },
 
         onResize: function() {

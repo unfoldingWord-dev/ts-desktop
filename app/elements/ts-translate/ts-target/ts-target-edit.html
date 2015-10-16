@@ -20,28 +20,32 @@
         }
 
 		#heading {
-			padding: 5px 1em;
-			color: var(--greyed-out-dark);
-            border-bottom: 1px solid var(--greyed-out-light);
+            color: var(--greyed-out-dark);
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            min-height: 35px;
+            min-height: 42px;
+            align-items: flex-end;
+            font-size: 88%;
+            font-weight: 300;
+            border-bottom: 1px solid var(--note-card-pink);
+            margin-bottom: 4px;
+            letter-spacing: 1px;
+            padding: 0 0 0.25em 1.75em;
 		}
 
         #content {
-			padding: 0 1em;
+			padding: 0 50px;
             flex: auto;
             display: flex;
 		}
 
         #content.editmode {
-            background-size: 100% 26px;
-            background-image: -webkit-linear-gradient(white 25px, var(--greyed-out-light) 25px, var(--greyed-out-light) 26px, white 26px);
+            background-size: 100% 32px;
+            background-image: -webkit-linear-gradient(white 27px, var(--greyed-out-light) 27px, var(--greyed-out-light) 28px, white 28px);
         }
 
         #content iron-autogrow-textarea {
-			line-height: 26px;
+			line-height: 2;
             border: none;
 			margin: 0;
             width: 100%;

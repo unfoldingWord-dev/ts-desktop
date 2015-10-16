@@ -52,10 +52,10 @@
             <div id="content">
                 <iron-pages selected="{{selected}}">
                     <div>
-                        <p>These are the notes for this chunk</p>
+                        <p>{{chunk.notes}}</p>
                     </div>
                     <div>
-                        <p>These are the words for this chunk</p>
+                        <p>{{chunk.words}}</p>
                     </div>
                 </iron-pages>
             </div>
@@ -75,6 +75,10 @@
             selected: {
                 type: Number,
                 value: 0
+            },
+            chunk: {
+                type: Object,
+                value: {}
             }
 		},
 

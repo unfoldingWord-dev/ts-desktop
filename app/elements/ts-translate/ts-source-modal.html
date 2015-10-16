@@ -150,10 +150,10 @@
                 </iron-list>
 
                 <div id="available-sources-header" class="row-header">Available</div>
-                <iron-list id="available-list" items="[[available]]" as="source" selection-enabled multi-selection on-tap="selectAvailable">
+                <iron-list id="available-list" items="{{searchfilter(query, available)}}" as="source" selection-enabled multi-selection on-tap="selectAvailable">
                     <template>
                         <div class="row clickable" data-element="[[source]]" data-index="[[index]]">
-                            <span>[[ source.title ]]</span>
+                            <span>[[ source ]]</span>
                             <paper-checkbox class="right" disabled style="opacity: 1;"></paper-checkbox>
                         </div>
                     </template>
@@ -209,22 +209,24 @@
         },
 
         ready: function() {
+
         },
 
         onOpen: function() {
+
         },
 
-        searchfilter: function(query) {
-            // var search = App.util.startsWithBase.bind(null, query);
-            // return this.availableList.filter(function(al) {
-            //     return search(al.title);
-            // });
+        searchfilter: function(query, available) {
+            var search = App.util.startsWithBase.bind(null, query);
+            return available.filter(function(al) {
+                return search(al);
+            });
         },
 
         _getAvailable: function(sources) {
-            // return this.masterList.filter(function(i) {
-            //     return sources.indexOf(i) < 0;
-            // });
+            return this.allSources.filter(function(source) {
+                return sources.indexOf(source) < 0;
+            });
         },
 
         cancel: function() {
@@ -232,7 +234,7 @@
         },
 
         confirm: function() {
-            // this.fire('confirm');
+            this.fire('confirm');
         },
 
         selectAvailable: function(event) {
@@ -270,8 +272,9 @@
             // }
         },
 
-        attached: function () {
-            // this.allSources = [{title: 'English ULB'}, {title: 'English UDB'}, {title: 'Arabic'}, {title: 'Bahasa Indonesia'}];
+        created: function () {
+            // NOTE: Replace with real data
+            this.allSources = ['English ULB', 'English UDB', 'Arabic', 'German', 'Old Chinese', 'Klingon'];
         }
     });
 

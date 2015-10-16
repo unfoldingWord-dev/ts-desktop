@@ -140,24 +140,28 @@
 
             <div class="body">
                 <div id="selected-sources-header" class="row-header">Selected</div>
-                <iron-list id="selected-list" items="[[sources]]" as="source">
-                    <template>
+                <!-- <iron-list id="selected-list" items="[[sources]]" as="source"> -->
+                <template is="dom-repeat" items="[[sources]]" as="source">
+                    <!-- <template> -->
                         <div class="row clickable" on-tap="removeSelected">
                             <span>[[ source ]]</span>
                             <paper-checkbox class="right" disabled checked style="opacity: 1;"></paper-checkbox>
                         </div>
-                    </template>
-                </iron-list>
+                    <!-- </template> -->
+                </template>
+                <!-- </iron-list> -->
 
                 <div id="available-sources-header" class="row-header">Available</div>
-                <iron-list id="available-list" items="{{searchfilter(query, available)}}" as="source" selection-enabled multi-selection on-tap="selectAvailable">
-                    <template>
-                        <div class="row clickable" data-element="[[source]]" data-index="[[index]]">
+                <!-- <iron-list id="available-list" items="{{searchfilter(query, available)}}" as="source" selection-enabled multi-selection on-tap="selectAvailable"> -->
+                <template is="dom-repeat" items="{{searchfilter(query, available)}}" as="source">
+                    <!-- <template> -->
+                        <div class="row clickable" data-element="[[source]]" data-index="[[index]]" on-tap="selectAvailable">
                             <span>[[ source ]]</span>
                             <paper-checkbox class="right" disabled style="opacity: 1;"></paper-checkbox>
                         </div>
-                    </template>
-                </iron-list>
+                    <!-- </template> -->
+                </template>
+                <!-- </iron-list> -->
             </div>
 
             <div class="footer">
@@ -192,11 +196,12 @@
             },
             sources: {
                 type: Array,
-                value: []
+                value: [],
+                observer: '_sourcesChanged'
             },
             available: {
                 type: Array,
-                computed: '_getAvailable(sources)'
+                value: []
             },
             selectedSource: {
                 type: Number,
@@ -213,20 +218,42 @@
         },
 
         onOpen: function() {
-
+            console.log('opening');
+            // this.push('available', 'hello');  // works
+            // this.available = ['hello'];  // works
+            this.available = this._getAvailable();
         },
 
         searchfilter: function(query, available) {
-            var search = App.util.startsWithBase.bind(null, query);
-            return available.filter(function(al) {
-                return search(al);
-            });
+            console.log('search is running');
+            if (query) {
+                var search = App.util.startsWithBase.bind(null, query);
+                var result = available.filter(function(al) {
+                    return search(al);
+                }); 
+                console.log('search returning result', result);
+                return result;
+            } else {
+                console.log('search returning available', available);
+                return available;
+            }
         },
 
-        _getAvailable: function(sources) {
-            return this.allSources.filter(function(source) {
-                return sources.indexOf(source) < 0;
+        _sourcesChanged: function() {
+            console.log('sources changed');
+            this.available = this._getAvailable();
+        },
+
+        _getAvailable: function() {
+            console.log('get available is called');
+            var that = this;
+            var available = this.allSources.filter(function(source) {
+                return that.sources.indexOf(source) < 0;
+                // console.log(that.sources, source);  // testing
+                // return true;  // testing
             });
+            console.log('available is now', available);
+            return available;
         },
 
         cancel: function() {
@@ -238,7 +265,10 @@
         },
 
         selectAvailable: function(event) {
-            // var elem = event.target.dataElement;
+            var elem = event.target.dataElement;
+            this.push('sources', elem);
+            this.available = this._getAvailable();
+
             // var index = event.target.dataIndex;
             // elem.checked = true;
             // this.openedTabs = this.openedTabs.concat([elem]);

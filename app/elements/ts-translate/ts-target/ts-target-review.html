@@ -170,11 +170,6 @@
                 value: {},
                 notify: true
             },
-            text: {
-                type: String,
-                value: "",
-                computed: 'breaktext(chunk.*)'
-            },
             selected: {
                 type: Number,
                 value: 0,
@@ -182,32 +177,52 @@
             }
 		},
 
+        observers: [
+            'rendertext(chunk.*)'
+        ],
+
         edit: function () {
             this.selected = 1;
         },
 
-        breaktext: function () {
-            var breakarray = this.chunk.transcontent.split(" ");
-            var vmstr1 = "\<ts-verse-marker id='drag";
-            var vmstr2 = "' draggable='true' ondragstart='drag(event)'  verse='";
-            var vmstr3 = "'\>\<\/ts-verse-marker\>";
-            var str1 = "\<span ondrop='drop(event)' ondragover='allowDrop(event)'\>";
-            var str2 = "\<\/span\> ";
+        rendertext: function () {
+            var start = this.chunk.meta.startverse;
+            var end = this.chunk.meta.endverse;
+            var chap = this.chunk.meta.chapter;
+            var status = this.chunk.status;
+            var content = this.chunk.transcontent;
+            var textarray = content.split(" ");
+            var vmstr1 = "\<ts-verse-marker id='c";
+            var vmstr2 = "v";
+            var vmstr3 = "' draggable='true' ondragstart='drag(event)' verse='";
+            var vmstr4 = "'\>\<\/ts-verse-marker\>";
+            var textstr1 = "\<span ondrop='drop(event)' ondragover='allowDrop(event)'\>";
+            var textstr2 = "\<\/span\> ";
+            var numstr1 = "\<sup\>";
+            var numstr2 = "\<\/sup\>";
             var returnstr = "";
+            var verse = 0;
+            var i = 0;
 
-            for (var i = 0; i < breakarray.length; i++) {
-                if (breakarray[i].substring(0, 2) === "/v") {
-                    var verse = breakarray[i].substring(2);
-                    breakarray[i] = vmstr1 + verse + vmstr2 + verse + vmstr3;
-                } else {
-                    breakarray[i] = str1 + breakarray[i] + str2;
+            if(status === "Incomplete") {
+                for (i = start; i <= end; i++) {
+                    returnstr += vmstr1 + chap + vmstr2 + i + vmstr3 + i + vmstr4;
                 }
-                returnstr += breakarray[i];
+                for (i = 0; i < textarray.length; i++) {
+                    returnstr += textstr1 + textarray[i] + textstr2;
+                }
+            } else {
+                for (i = 0; i < textarray.length; i++) {
+                    if (textarray[i].substring(0, 2) === "/v") {
+                        verse = textarray[i].substring(2);
+                        returnstr += numstr1 + verse + numstr2;
+                    } else {
+                        returnstr += textarray[i] + " ";
+                    }
+                }
             }
 
             this.$.textholder.innerHTML = returnstr;
-
-            return returnstr;
         },
 
         completechunk: function () {

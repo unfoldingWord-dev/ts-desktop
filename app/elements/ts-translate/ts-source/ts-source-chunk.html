@@ -48,7 +48,7 @@
                 </div>
             </div>
             <div id="content">
-                <p>[[chunk.srccontent]]</p>
+                <p id="textholder"></p>
             </div>
         </paper-material>
 
@@ -76,6 +76,29 @@
                 value: {}
             }
 		},
+
+        observers: [
+            'rendertext(chunk.*)'
+        ],
+
+        rendertext: function () {
+            var textarray = this.chunk.srccontent.split(" ");
+            var numstr1 = "\<sup\>";
+            var numstr2 = "\<\/sup\>";
+            var returnstr = "";
+            var verse = 0;
+
+            for (var i = 0; i < textarray.length; i++) {
+                if (textarray[i].substring(0, 2) === "/v") {
+                    verse = textarray[i].substring(2);
+                    returnstr += numstr1 + verse + numstr2;
+                } else {
+                    returnstr += textarray[i] + " ";
+                }
+            }
+
+            this.$.textholder.innerHTML = returnstr;
+        },
 
 		ready: function() {
 

@@ -93,9 +93,18 @@
             }
         },
 
-        onSelectedSourceChanged: function(selectedSource) {
-            // Get new data based on source tab selection
-            console.log('refresh data now');
+        onSelectedSourceChanged: function(newValue) {
+            if (newValue != null && newValue >= 0) {
+                // The paper-tab won't get programmatically selected until after 30ms
+                this.async(function() {
+                    var source = document.querySelector('paper-tab.iron-selected').innerText;
+                    
+                    // 
+                    // Write code to get new data based on source tab selection here...
+                    // 
+                    console.log('refreshing data now to fetch', source);
+                }, 30);
+            }
         },
 
         onResize: function() {
@@ -107,6 +116,7 @@
 
         ready: function() {
 
+            // Commenting this out to do the read-mode when it's empty
             this.translation = [
                 {
                     meta: {
@@ -191,6 +201,7 @@
                 }
             ];
 
+            // Commenting this out to do the read-mode when it's empty
             this.source = [
                 {
                     meta: {

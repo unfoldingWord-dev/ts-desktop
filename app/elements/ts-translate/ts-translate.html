@@ -53,6 +53,10 @@
             'iron-resize': 'onResize'
         },
 
+        observers: [
+            'onSelectedSourceChanged(selectedSource)'
+        ],
+
         properties: {
             selected: {
                 type: Number,
@@ -89,12 +93,9 @@
             }
         },
 
-        observers: [
-            'onSelectedSourceChanged(selectedSource)'
-        ],
-
-        onSelectedSourceChanged: function() {
+        onSelectedSourceChanged: function(selectedSource) {
             // Get new data based on source tab selection
+            console.log('refresh data now');
         },
 
         onResize: function() {
@@ -102,12 +103,9 @@
         },
 
         attached: function() {
-            this.selectedSource = 1;
         },
 
         ready: function() {
-
-            this.sources = ["English ULB", "Arabic", "Bahasa Indonesia"];
 
             this.translation = [
                 {

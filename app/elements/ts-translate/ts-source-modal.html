@@ -188,7 +188,6 @@
             },
             sources: {
                 type: Array,
-                value: [],
                 observer: '_sourcesChanged'
             },
             available: {
@@ -206,48 +205,35 @@
         },
 
         ready: function() {
-
         },
 
         onOpen: function() {
-            console.log('opening');
             this.available = this._getAvailable();
-            // this.push('available', 'hello');  // works too
-            // this.available = ['hello'];  // works too
         },
 
         searchfilter: function(query, available) {
-            // Refactor this when everything's running okay and the console.logs() are not needed
-            console.log('search is running');
+            // Check if there's a search term. If not, don't do the search.
+            // This is called unexpectedly when opening the modal and unexpectedly returns an empty array
+            //    because it thought the search term was "" and nothing matches "".
             if (query) {
                 var search = App.util.startsWithBase.bind(null, query);
-                var result = available.filter(function(al) {
-                    return search(al);
-                }); 
-                console.log('search returning result', result);
-                return result;
+                return available.filter(function(source) {
+                    return search(source);
+                });
             } else {
-                console.log('search returning available', available);
                 return available;
             }
         },
 
         _sourcesChanged: function() {
-            console.log('sources changed');
             this.available = this._getAvailable();
         },
 
         _getAvailable: function() {
-            // Refactor this when everything's okay and the console.log() are not needed
-            console.log('get available is called');
             var that = this;
-            var available = this.allSources.filter(function(source) {
+            return this.allSources.filter(function(source) {
                 return that.sources.indexOf(source) < 0;
-                // console.log(that.sources, source);  // testing
-                // return true;  // testing
             });
-            console.log('available is now', available);
-            return available;
         },
 
         cancel: function() {
@@ -263,7 +249,6 @@
             this.push('sources', elem);
             this.available = this._getAvailable();
             this.selectedSource = this.sources.indexOf(elem);
-            console.log('selectedSource is now', this.selectedSource);
         },
 
         removeSelected: function(event) {
@@ -271,8 +256,6 @@
             var index = event.target.dataIndex;
             this.splice('sources', index, 1);
             this.available = this._getAvailable();
-            console.log('removing', elem, index);
-
             // Assign the selected tab
             if (this.selectedSource == index) {
                 if (this.sources.length == 0) {
@@ -285,7 +268,6 @@
             else if (index < this.selectedSource) {
                 this.selectedSource -= 1;
             }
-            console.log('selectedSource is now', this.selectedSource);
         },
 
         created: function () {

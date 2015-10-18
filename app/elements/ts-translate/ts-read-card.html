@@ -73,9 +73,7 @@
             },
             selectedSource: {
                 type: Number,
-                // value: 0,
                 notify: true
-                // observer: '_selectedChanged'
             }
         },
 
@@ -93,10 +91,6 @@
 
             trans.classList.remove("topcard");
             src.classList.add("topcard");
-        },
-
-        _selectedChanged: function() {
-            console.log('hello');
         },
 
 		ready: function() {

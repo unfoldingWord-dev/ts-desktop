@@ -31,8 +31,8 @@
 
         <neon-animated-pages selected="[[selected]]" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
             <ts-read-mode language="[[language]]" book="[[book]]" source="[[source]]" translation="[[translation]]" sources="{{sources}}" selected-source="{{selectedSource}}"></ts-read-mode>
-            <ts-chunk-mode language="[[language]]" book="[[book]]" source="[[source]]" translation="{{translation}}"></ts-chunk-mode>
-            <ts-review-mode language="[[language]]" book="[[book]]" source="[[source]]" translation="{{translation}}"></ts-review-mode>
+            <ts-chunk-mode language="[[language]]" book="[[book]]" source="[[source]]" translation="{{translation}}" sources="{{sources}}" selected-source="{{selectedSource}}"></ts-chunk-mode>
+            <ts-review-mode language="[[language]]" book="[[book]]" source="[[source]]" translation="{{translation}}" sources="{{sources}}" selected-source="{{selectedSource}}"></ts-review-mode>
         </neon-animated-pages>
 
     </template>
@@ -48,10 +48,6 @@
         behaviors: [
             Polymer.IronResizableBehavior
         ],
-
-        listeners: {
-            'iron-resize': 'onResize'
-        },
 
         observers: [
             'onSelectedSourceChanged(selectedSource)'
@@ -105,10 +101,6 @@
                     console.log('refreshing data now to fetch', source);
                 }, 30);
             }
-        },
-
-        onResize: function() {
-
         },
 
         attached: function() {

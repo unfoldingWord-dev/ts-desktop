@@ -39,7 +39,7 @@
     <template>
 
         <div id="contain">
-            <ts-source-chunk id="srccard" class="topcard" on-tap="srctop" language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-source-chunk>
+            <ts-source-chunk id="srccard" class="topcard" on-tap="srctop" language="[[language]]" book="[[book]]" chunk="[[chunk]]" sources="{{sources}}" selected-source="{{selectedSource}}"></ts-source-chunk>
             <ts-trans-edit noicon id="transcard" on-tap="transtop" on-edittrigger="edittrigger" language="[[language]]" book="[[book]]" chunk="{{chunk}}"></ts-trans-edit>
         </div>
 
@@ -53,6 +53,10 @@
 
 		is: 'ts-chunk-card',
 
+        behaviors: [
+            Polymer.IronResizableBehavior
+        ],
+
         properties: {
             language: {
                 type: Object,
@@ -65,6 +69,14 @@
             chunk: {
                 type: Object,
                 value: {},
+                notify: true
+            },
+            sources: {
+                type: Array,
+                notify: true
+            },
+            selectedSource: {
+                type: Number,
                 notify: true
             }
         },

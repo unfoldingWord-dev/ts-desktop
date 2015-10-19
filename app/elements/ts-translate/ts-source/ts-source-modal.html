@@ -138,24 +138,20 @@
 
             <div class="body">
                 <div id="selected-sources-header" class="row-header">Selected</div>
-                <iron-list id="selected-list" items="[[sources]]" as="source">
-                    <template>
-                        <div class="row clickable" on-tap="removeSelected">
-                            <span>[[ source ]]</span>
-                            <paper-checkbox class="right" disabled checked style="opacity: 1;"></paper-checkbox>
-                        </div>
-                    </template>
-                </iron-list>
+                <template is="dom-repeat" items="[[sources]]" as="source">
+                    <div class="row clickable" data-element="[[source]]" data-index="[[index]]" on-tap="removeSelected">
+                        <span>[[ source ]]</span>
+                        <paper-checkbox class="right" disabled checked style="opacity: 1;"></paper-checkbox>
+                    </div>
+                </template>
 
                 <div id="available-sources-header" class="row-header">Available</div>
-                <iron-list id="available-list" items="[[available]]" as="source" selection-enabled multi-selection on-tap="selectAvailable">
-                    <template>
-                        <div class="row clickable" data-element="[[source]]" data-index="[[index]]">
-                            <span>[[ source.title ]]</span>
-                            <paper-checkbox class="right" disabled style="opacity: 1;"></paper-checkbox>
-                        </div>
-                    </template>
-                </iron-list>
+                <template is="dom-repeat" items="{{searchfilter(query, available)}}" as="source">
+                    <div class="row clickable" data-element="[[source]]" data-index="[[index]]" on-tap="selectAvailable">
+                        <span>[[ source ]]</span>
+                        <paper-checkbox class="right" disabled style="opacity: 1;"></paper-checkbox>
+                    </div>
+                </template>
             </div>
 
             <div class="footer">
@@ -190,11 +186,11 @@
             },
             sources: {
                 type: Array,
-                value: []
+                observer: '_sourcesChanged'
             },
             available: {
                 type: Array,
-                computed: '_getAvailable(sources)'
+                value: []
             },
             selectedSource: {
                 type: Number,
@@ -210,19 +206,32 @@
         },
 
         onOpen: function() {
+            this.available = this._getAvailable();
         },
 
-        searchfilter: function(query) {
-            // var search = App.util.startsWithBase.bind(null, query);
-            // return this.availableList.filter(function(al) {
-            //     return search(al.title);
-            // });
+        searchfilter: function(query, available) {
+            // Check if there's a search term. If not, don't do the search.
+            // This is called unexpectedly when opening the modal and unexpectedly returns an empty array
+            //    because it thought the search term was "" and nothing matches "".
+            if (query) {
+                var search = App.util.startsWithBase.bind(null, query);
+                return available.filter(function(source) {
+                    return search(source);
+                });
+            } else {
+                return available;
+            }
         },
 
-        _getAvailable: function(sources) {
-            // return this.masterList.filter(function(i) {
-            //     return sources.indexOf(i) < 0;
-            // });
+        _sourcesChanged: function() {
+            this.available = this._getAvailable();
+        },
+
+        _getAvailable: function() {
+            var that = this;
+            return this.allSources.filter(function(source) {
+                return that.sources.indexOf(source) < 0;
+            });
         },
 
         cancel: function() {
@@ -230,46 +239,38 @@
         },
 
         confirm: function() {
-            // this.fire('confirm');
+            this.fire('confirm');
         },
 
         selectAvailable: function(event) {
-            // var elem = event.target.dataElement;
-            // var index = event.target.dataIndex;
-            // elem.checked = true;
-            // this.openedTabs = this.openedTabs.concat([elem]);
-            // // this.push('openedTabs', elem);
-            // // this.async(function() {
-            // //     this.availableList = this.getAvailable(this.openedTabs);
-            // // }, 1);
-            // this.selectedTab = this.openedTabs.indexOf(elem).toString();
+            var elem = event.target.dataElement;
+            this.push('sources', elem);
+            this.available = this._getAvailable();
+            this.selectedSource = this.sources.indexOf(elem);
         },
 
         removeSelected: function(event) {
-            // var elem = event.model.sl;
-            // var index = event.model.index;
-            // elem.checked = false;
-            // this.openedTabs = this.openedTabs.splice(index, 1);
-            // // this.async(function() {
-            // //     this.availableList = this.getAvailable(this.openedTabs);
-            // // }, 1);
-
-            // // Assign the selected tab
-            // if (this.selectedTab == index) {
-            //     if (this.openedTabs.length == 0) {
-            //         this.selectedTab = '';
-            //     }
-            //     else if (index >= this.openedTabs.length - 1) {
-            //         this.selectedTab = (this.openedTabs.length - 1).toString();
-            //     }
-            // }
-            // else if (index < this.selectedTab) {
-            //     this.selectedTab -= 1;
-            // }
+            var elem = event.target.dataElement;
+            var index = event.target.dataIndex;
+            this.splice('sources', index, 1);
+            this.available = this._getAvailable();
+            // Assign the selected tab
+            if (this.selectedSource == index) {
+                if (this.sources.length == 0) {
+                    this.selectedSource = null;
+                }
+                else if (index >= this.sources.length - 1) {
+                    this.selectedSource = (this.sources.length - 1);
+                }
+            }
+            else if (index < this.selectedSource) {
+                this.selectedSource -= 1;
+            }
         },
 
-        attached: function () {
-            // this.allSources = [{title: 'English ULB'}, {title: 'English UDB'}, {title: 'Arabic'}, {title: 'Bahasa Indonesia'}];
+        created: function () {
+            // NOTE: Replace with real data
+            this.allSources = ['English ULB', 'English UDB', 'Arabic', 'German', 'Old Chinese', 'Klingon'];
         }
     });
 

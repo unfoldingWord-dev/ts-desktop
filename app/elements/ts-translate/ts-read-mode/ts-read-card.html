@@ -117,9 +117,7 @@
             },
             selectedSource: {
                 type: Number,
-                // value: 0,
                 notify: true
-                // observer: '_selectedChanged'
             }
         },
 
@@ -153,10 +151,6 @@
                     src.classList.remove("up");
                 }, 1000);
             }
-        },
-
-        _selectedChanged: function() {
-            console.log('hello');
         },
 
 		ready: function() {

@@ -53,6 +53,10 @@
             'iron-resize': 'onResize'
         },
 
+        observers: [
+            'onSelectedSourceChanged(selectedSource)'
+        ],
+
         properties: {
             selected: {
                 type: Number,
@@ -89,12 +93,18 @@
             }
         },
 
-        observers: [
-            'onSelectedSourceChanged(selectedSource)'
-        ],
-
-        onSelectedSourceChanged: function() {
-            // Get new data based on source tab selection
+        onSelectedSourceChanged: function(newValue) {
+            if (newValue != null && newValue >= 0) {
+                // The paper-tab won't get programmatically selected until after 30ms
+                this.async(function() {
+                    var source = document.querySelector('paper-tab.iron-selected').innerText;
+                    
+                    // 
+                    // Write code to get new data based on source tab selection here...
+                    // 
+                    console.log('refreshing data now to fetch', source);
+                }, 30);
+            }
         },
 
         onResize: function() {
@@ -102,13 +112,11 @@
         },
 
         attached: function() {
-            this.selectedSource = 1;
         },
 
         ready: function() {
 
-            this.sources = ["English ULB", "Arabic", "Bahasa Indonesia", "English UDB", "German", "Old Chinese"];
-
+            // Commenting this out to do the read-mode when it's empty
             this.translation = [
                 {
                     meta: {
@@ -193,6 +201,7 @@
                 }
             ];
 
+            // Commenting this out to do the read-mode when it's empty
             this.source = [
                 {
                     meta: {

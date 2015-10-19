@@ -20,8 +20,13 @@
     <template>
 
         <div id="contain">
-            <template is="dom-repeat" items="{{combined.data}}" as="chunk">
-                <ts-read-card language="[[language]]" book="[[book]]" chunk="[[chunk]]" sources="{{sources}}" selected-source="{{selectedSource}}"></ts-read-card>
+            <template is="dom-if" if="{{combined.data.length}}">
+                <template is="dom-repeat" items="{{combined.data}}" as="chunk">
+                    <ts-read-card language="[[language]]" book="[[book]]" chunk="[[chunk]]" sources="{{sources}}" selected-source="{{selectedSource}}"></ts-read-card>
+                </template>
+            </template>
+            <template is="dom-if" if="{{!combined.data.length}}">
+                <ts-read-card sources="{{sources}}" selected-source="{{selectedSource}}"></ts-read-card>
             </template>
         </div>
 
@@ -46,12 +51,10 @@
         properties: {
             sources: {
                 type: Array,
-                value: [],
                 notify: true
             },
             selectedSource: {
                 type: Number,
-                value: 0, /* is this defined by the parent? */
                 notify: true
             },
             source: {
@@ -112,6 +115,8 @@
 
             transdata.data = transchapters;
             srcdata.data = srcchapters;
+
+            console.log('in combined data', srcdata, transdata);
 
             return _.merge(srcdata, transdata);
         },

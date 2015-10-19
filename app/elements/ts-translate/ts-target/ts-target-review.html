@@ -128,7 +128,7 @@
                 <p id="textholder"></p>
             </div>
             <div id="button">
-                <paper-button raised on-tap="done"><iron-icon icon="done"></iron-icon>DONE</paper-button>
+                <paper-button raised on-tap="checkdone"><iron-icon icon="done"></iron-icon>DONE</paper-button>
             </div>
         </paper-material>
 
@@ -190,8 +190,8 @@
             var end = this.chunk.meta.endverse;
             var chap = this.chunk.meta.chapter;
             var status = this.chunk.status;
-            var content = this.chunk.transcontent;
-            var textarray = content.split(" ");
+            var textholder = this.$.textholder;
+            var textarray = this.chunk.transcontent.split(" ");
             var vmstr1 = "\<ts-verse-marker id='c";
             var vmstr2 = "v";
             var vmstr3 = "' draggable='true' ondragstart='drag(event)' verse='";
@@ -222,24 +222,53 @@
                 }
             }
 
-            this.$.textholder.innerHTML = returnstr;
+            textholder.innerHTML = returnstr;
         },
 
         completechunk: function () {
             var toggle = this.$.toggle;
+            var textholder = this.$.textholder;
+            var children = textholder.children;
+            var type = "";
+            var text = "";
+            var versenum = 0;
+            var returnstr = "";
+
+            for (var i = 0; i < children.length; i++) {
+                type = children[i].nodeName;
+
+                if (type === "TS-VERSE-MARKER") {
+                    versenum = children[i].verse;
+                    returnstr += "/v" + versenum + " ";
+                } else {
+                    text = children[i].textContent;
+                    returnstr += text + " ";
+                }
+            }
+
+            this.chunk.transcontent = returnstr;
             toggle.classList.remove("notdone");
             toggle.classList.add("done");
             this.chunk.status = "Complete";
             this.fire('edittrigger');
         },
 
-        done: function () {
+        checkdone: function () {
             var toggle = this.$.toggle;
             var popup = this.$.popup;
+            var textarray = this.chunk.transcontent.split(" ");
+            var returnstr = "";
 
             if (toggle.classList.contains("notdone")) {
                 popup.open();
             } else {
+                for (var i = 0; i < textarray.length; i++) {
+                    if (textarray[i].substring(0, 2) !== "/v") {
+                        returnstr += textarray[i] + " ";
+                    }
+                }
+
+                this.chunk.transcontent = returnstr;
                 toggle.classList.remove("done");
                 toggle.classList.add("notdone");
                 this.chunk.status = "Incomplete";

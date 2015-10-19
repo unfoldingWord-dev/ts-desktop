@@ -9,8 +9,9 @@ function drag(ev) {
 
 function drop(ev) {
     ev.preventDefault();
-    var childid = ev.dataTransfer.getData("text");
-    var child = document.getElementById(childid);
-    var parent = ev.target;
-    parent.insertBefore(child, parent.firstChild);
+    var dragid = ev.dataTransfer.getData("text");
+    var dragelement = document.getElementById(dragid);
+    var targetelement = ev.target;
+    var parentelement = targetelement.parentNode;
+    parentelement.insertBefore(dragelement, targetelement);
 }

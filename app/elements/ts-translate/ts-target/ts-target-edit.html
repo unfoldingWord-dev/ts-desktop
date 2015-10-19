@@ -59,6 +59,10 @@
             display: none;
         }
 
+        .hide {
+            display: none;
+        }
+
 	</style>
 
 	<template>
@@ -72,6 +76,7 @@
             </div>
             <div id="content" class="editmode">
                 <iron-autogrow-textarea id="textbox" on-change="changetrigger" bind-value="{{chunk.transcontent}}"></iron-autogrow-textarea>
+                <p id="textholder"></p>
             </div>
         </paper-material>
 
@@ -107,17 +112,39 @@
 		},
 
         observers: [
-            'disableedit(chunk.status)'
+            'rendertext(chunk.*)'
         ],
 
-        disableedit: function (status) {
+        rendertext: function () {
+            var status = this.chunk.status;
+            var contentbox = this.$.content;
+            var textbox = this.$.textbox;
+            var textholder = this.$.textholder;
+            var textarray = this.chunk.transcontent.split(" ");
+            var numstr1 = "\<sup\>";
+            var numstr2 = "\<\/sup\>";
+            var returnstr = "";
+            var verse = 0;
+
             if (status === "Complete") {
-                this.$.content.classList.remove("editmode");
-                this.$.textbox.disabled = true;
-            }
-            if (status === "Incomplete") {
-                this.$.content.classList.add("editmode");
-                this.$.textbox.disabled = false;
+
+                for (var i = 0; i < textarray.length; i++) {
+                    if (textarray[i].substring(0, 2) === "/v") {
+                        verse = textarray[i].substring(2);
+                        returnstr += numstr1 + verse + numstr2;
+                    } else {
+                        returnstr += textarray[i] + " ";
+                    }
+                }
+
+                textholder.innerHTML = returnstr;
+                textholder.classList.remove("hide");
+                textbox.classList.add("hide");
+                contentbox.classList.remove("editmode");
+            } else {
+                textholder.classList.add("hide");
+                textbox.classList.remove("hide");
+                contentbox.classList.add("editmode");
             }
         },
 

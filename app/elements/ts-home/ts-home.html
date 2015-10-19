@@ -64,7 +64,7 @@
             </div>
             <neon-animated-pages selected="[[selected]]" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
                 <ts-home-blank route="{{route}}"></ts-home-blank>
-                <ts-home-menu route="{{route}}"></ts-home-menu>
+                <ts-home-menu route="{{route}}" projectlist="[[projectlist]]" project="{{project}}"></ts-home-menu>
             </neon-animated-pages>
         </div>
 
@@ -88,6 +88,15 @@
                 type: String,
                 value: '',
                 notify: true
+            },
+            project: {
+                type: Object,
+                value: {},
+                notify: true
+            },
+            projectlist: {
+                type: Array,
+                value: []
             }
         },
 

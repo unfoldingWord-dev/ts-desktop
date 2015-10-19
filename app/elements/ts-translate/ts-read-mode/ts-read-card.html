@@ -83,8 +83,8 @@
     <template>
 
         <div id="contain">
-            <ts-source-card id="srccard" class="top" on-tap="srctop" language="[[language]]" book="[[book]]" chunk="[[chunk]]" sources="{{sources}}" selected-source="{{selectedSource}}"></ts-source-card>
-            <ts-target-view id="transcard" on-tap="transtop" language="[[language]]" book="[[book]]" chunk="[[chunk]]"></ts-target-view>
+            <ts-source-card id="srccard" class="top" on-tap="srctop" project="[[project]]" chunk="[[chunk]]" sources="{{sources}}" selected-source="{{selectedSource}}"></ts-source-card>
+            <ts-target-view id="transcard" on-tap="transtop" project="[[project]]" chunk="[[chunk]]"></ts-target-view>
         </div>
 
     </template>
@@ -98,11 +98,7 @@
 		is: 'ts-read-card',
 
         properties: {
-            language: {
-                type: Object,
-                value: {}
-            },
-            book: {
+            project: {
                 type: Object,
                 value: {}
             },

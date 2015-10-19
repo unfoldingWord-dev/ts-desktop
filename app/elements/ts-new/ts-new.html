@@ -6,7 +6,6 @@
 <link rel="import" href="./ts-language-menu.html">
 <link rel="import" href="./ts-project-menu.html">
 <link rel="import" href="./ts-book-menu.html">
-<link rel="import" href="./ts-chapter-menu.html">
 
 <dom-module id="ts-new">
 
@@ -60,8 +59,7 @@
         <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
             <ts-language-menu selected="{{selected}}" language="{{language}}"></ts-language-menu>
             <ts-project-menu selected="{{selected}}" group="{{group}}"></ts-project-menu>
-            <ts-book-menu selected="{{selected}}" group="[[group]]" book="{{book}}" chapters="{{chapters}}"></ts-book-menu>
-            <ts-chapter-menu selected="{{selected}}" route="{{route}}" group="[[group]]" book="[[book]]" chapters="[[chapters]]" chapter="{{chapter}}"></ts-chapter-menu>
+            <ts-book-menu selected="{{selected}}" group="[[group]]" book="{{book}}" on-create="createproject"></ts-book-menu>
         </neon-animated-pages>
 
     </template>
@@ -85,27 +83,24 @@
             },
             language: {
                 type: Object,
-                value: {},
-                notify: true
+                value: {}
             },
             group: {
                 type: Object,
-                value: {},
-                notify: true
+                value: {}
             },
             book: {
                 type: Object,
-                value: {},
-                notify: true
+                value: {}
             },
-            chapters: {
+            projectlist: {
                 type: Array,
                 value: [],
                 notify: true
             },
-            chapter: {
-                type: Number,
-                value: null,
+            project: {
+                type: Object,
+                value: {},
                 notify: true
             }
         },
@@ -118,9 +113,21 @@
             this.selected === 0 ? this.route = "home" : this.selected = this.selected - 1;
         },
 
+        createproject: function () {
+            var newproj = {};
+            newproj.name = this.book.name;
+            newproj.language = this.language.ln;
+            newproj.icon = this.group.lefticon;
+            this.projectlist.push(newproj);
+            this.project = newproj;
+            this.route = "translate";
+            this.selected = 0;
+        },
+
         ready: function() {
 
         }
+
     });
 
 </script>

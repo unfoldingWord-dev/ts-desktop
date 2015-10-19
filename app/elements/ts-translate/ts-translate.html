@@ -30,9 +30,9 @@
         <ts-translate-sidebar route="{{route}}" selected="{{selected}}"></ts-translate-sidebar>
 
         <neon-animated-pages selected="[[selected]]" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
-            <ts-read-mode language="[[language]]" book="[[book]]" source="[[source]]" translation="[[translation]]" sources="{{sources}}" selected-source="{{selectedSource}}"></ts-read-mode>
-            <ts-chunk-mode language="[[language]]" book="[[book]]" source="[[source]]" translation="{{translation}}" sources="{{sources}}" selected-source="{{selectedSource}}"></ts-chunk-mode>
-            <ts-review-mode language="[[language]]" book="[[book]]" source="[[source]]" translation="{{translation}}" sources="{{sources}}" selected-source="{{selectedSource}}"></ts-review-mode>
+            <ts-read-mode project="[[project]]" source="[[source]]" translation="[[translation]]" sources="{{sources}}" selected-source="{{selectedSource}}"></ts-read-mode>
+            <ts-chunk-mode project="[[project]]" source="[[source]]" translation="{{translation}}" sources="{{sources}}" selected-source="{{selectedSource}}"></ts-chunk-mode>
+            <ts-review-mode project="[[project]]" source="[[source]]" translation="{{translation}}" sources="{{sources}}" selected-source="{{selectedSource}}"></ts-review-mode>
         </neon-animated-pages>
 
     </template>
@@ -63,11 +63,7 @@
                 value: '',
                 notify: true
             },
-            language: {
-                type: Object,
-                value: {}
-            },
-            book: {
+            project: {
                 type: Object,
                 value: {}
             },
@@ -94,10 +90,10 @@
                 // The paper-tab won't get programmatically selected until after 30ms
                 this.async(function() {
                     var source = document.querySelector('paper-tab.iron-selected').innerText;
-                    
-                    // 
+
+                    //
                     // Write code to get new data based on source tab selection here...
-                    // 
+                    //
                     console.log('refreshing data now to fetch', source);
                 }, 30);
             }

@@ -21,7 +21,7 @@
 
         <div id="contain">
             <template is="dom-repeat" items="{{combined.data}}" as="chunk">
-                <ts-chunk-card on-uploadtrigger="uploaddata" language="[[language]]" book="[[book]]" chunk="{{chunk}}" sources="{{sources}}" selected-source="{{selectedSource}}"></ts-chunk-card>
+                <ts-chunk-card on-uploadtrigger="uploaddata" project="[[project]]" chunk="{{chunk}}" sources="{{sources}}" selected-source="{{selectedSource}}"></ts-chunk-card>
             </template>
         </div>
 
@@ -49,11 +49,7 @@
                 value: [],
                 notify: true
             },
-            language: {
-                type: Object,
-                value: {}
-            },
-            book: {
+            project: {
                 type: Object,
                 value: {}
             },

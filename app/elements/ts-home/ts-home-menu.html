@@ -67,7 +67,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <template is="dom-repeat" items="[[projects]]" as="project">
+                    <template is="dom-repeat" items="[[projectlist]]" as="project">
                         <tr on-tap="open">
                             <td><iron-icon class="smallicon" icon="[[project.icon]]"></iron-icon></td>
                             <td><span>[[project.name]]</span></td>
@@ -96,22 +96,24 @@
               value: '',
               notify: true
           },
-          projects: {
+          projectlist: {
               type: Array,
               value: []
+          },
+          project: {
+              type: Object,
+              value: {},
+              notify: true
           }
       },
 
       open: function () {
           this.route = "translate";
+
       },
 
       ready: function() {
-          this.projects = [
-              {"name": 'Genesis', "language": 'Amharic', "icon": 'project:project'},
-              {"name": 'John', "language": 'Afaraf', "icon": 'project:project'},
-              {"name": 'Open Bible Stories', "language": 'Amal', "icon": 'uw-icon:uw-icon-small'}
-          ];
+
       }
 
   });

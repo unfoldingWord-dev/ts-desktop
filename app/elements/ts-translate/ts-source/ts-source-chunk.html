@@ -43,6 +43,7 @@
 
         <paper-material elevation="1">
             <div id="heading">
+                <ts-source-tab sources="{{sources}}" selected-source="{{selectedSource}}" lefty></ts-source-tab>
                 <div>
                     <span>[[book.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[language.ln]]</span>
                 </div>
@@ -62,6 +63,10 @@
 
 		is: 'ts-source-chunk',
 
+        behaviors: [
+            Polymer.IronResizableBehavior
+        ],
+
 		properties: {
             language: {
                 type: Object,
@@ -74,6 +79,14 @@
             chunk: {
                 type: Object,
                 value: {}
+            },
+            sources: {
+                type: Array,
+                notify: true
+            },
+            selectedSource: {
+                type: Number,
+                notify: true
             }
 		},
 

@@ -21,7 +21,7 @@
 
         <div id="contain">
             <template is="dom-repeat" items="{{combined.data}}" as="chunk">
-                <ts-review-card language="[[language]]" book="[[book]]" chunk="{{chunk}}" on-uploadtrigger="uploaddata"></ts-review-card>
+                <ts-review-card language="[[language]]" book="[[book]]" chunk="{{chunk}}" on-uploadtrigger="uploaddata" sources="{{sources}}" selected-source="{{selectedSource}}"></ts-review-card>
             </template>
         </div>
 
@@ -34,6 +34,10 @@
 	Polymer({
 
 		is: 'ts-review-mode',
+
+        behaviors: [
+            Polymer.IronResizableBehavior
+        ],
 
         properties: {
             source: {
@@ -57,6 +61,14 @@
                 type: Object,
                 value: {},
                 computed: 'combinedata(source.*, translation.*)'
+            },
+            sources: {
+                type: Array,
+                notify: true
+            },
+            selectedSource: {
+                type: Number,
+                notify: true
             }
         },
 

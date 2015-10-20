@@ -118,9 +118,22 @@
             newproj.name = this.book.name;
             newproj.language = this.language.ln;
             newproj.icon = this.group.lefticon;
-            this.projectlist.push(newproj);
-            this.project = newproj;
-            this.route = "translate";
+            var projectarray = this.projectlist;
+            var dupcheck = false;
+
+            for (var i = 0; i < projectarray.length; i++) {
+                if (projectarray[i].name === newproj.name && projectarray[i].language === newproj.language) {
+                    dupcheck = true;
+                }
+            }
+
+            if (dupcheck) {
+                alert("Duplicate Projects not Allowed! Please try again.");
+            } else {
+                this.projectlist.push(newproj);
+                this.project = newproj;
+                this.route = "translate";
+            }
             this.selected = 0;
         },
 

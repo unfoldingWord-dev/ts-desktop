@@ -1,5 +1,5 @@
 
-<link rel="import" href="../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../components/iron-pages/iron-pages.html">
 
 <link rel="import" href="./ts-home-blank.html">
 <link rel="import" href="./ts-home-menu.html">
@@ -20,12 +20,12 @@
             flex-direction: column;
         }
 
-        neon-animated-pages {
+        iron-pages {
             flex: auto;
             display: flex;
         }
 
-        neon-animated-pages > * {
+        iron-pages > * {
             flex: auto;
         }
 
@@ -62,10 +62,10 @@
             <div id="header">
                 <div id="title">Your Translation Projects</div>
             </div>
-            <neon-animated-pages selected="[[selected]]" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
+            <iron-pages selected="[[selected]]">
                 <ts-home-blank route="{{route}}"></ts-home-blank>
                 <ts-home-menu route="{{route}}" projectlist="[[projectlist]]" project="{{project}}"></ts-home-menu>
-            </neon-animated-pages>
+            </iron-pages>
         </div>
 
         <ts-new-project-button route="{{route}}"></ts-new-project-button>
@@ -82,7 +82,7 @@
         properties: {
             selected: {
                 type: Number,
-                value: 0
+                value: null
             },
             route: {
                 type: String,
@@ -97,6 +97,18 @@
             projectlist: {
                 type: Array,
                 value: []
+            }
+        },
+
+        observers: [
+            'homeselection(projectlist)'
+        ],
+
+        homeselection: function () {
+            if (this.projectlist.length > 0) {
+                this.selected = 1;
+            } else {
+                this.selected = 0;
             }
         },
 

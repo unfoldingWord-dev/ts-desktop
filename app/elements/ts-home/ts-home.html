@@ -1,8 +1,8 @@
 
-<link rel="import" href="../../components/iron-pages/iron-pages.html">
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
 
-<link rel="import" href="./ts-home-blank.html">
-<link rel="import" href="./ts-home-menu.html">
+<link rel="import" href="../ts-icons/ts-icons.html">
 <link rel="import" href="./ts-new-project-button.html">
 <link rel="import" href="./ts-home-sidebar.html">
 
@@ -52,6 +52,68 @@
             top: 20px;
         }
 
+        #contain1, #contain2 {
+            width: 100%;
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        #welcome {
+            background: white;
+            box-shadow: 0 2px 3px 2px var(--greyed-out-light);
+            width: 450px;
+            margin: 30px 0;
+        }
+
+        #start {
+            background: var(--primary-color);
+            color: var(--text-color);
+        }
+
+        p {
+            font-size: 110%;
+            padding: 0 1.5em;
+        }
+
+        table {
+            min-width: 450px;
+            border-collapse: collapse;
+        }
+
+        tbody {
+            background: white;
+            font-size: 110%;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--greyed-out-light);
+            transition: background .3s, color .3s;
+        }
+
+        tbody tr:hover {
+            background: var(--accent-color-dark);
+            color: var(--text-color);
+            cursor: pointer;
+        }
+
+        td {
+            padding: 15px;
+        }
+
+        .smallicon {
+            --iron-icon-height: 18px;
+            --iron-icon-width: 18px;
+            color: var(--greyed-out-dark);
+        }
+
+        .smalltext {
+            font-size: 75%;
+            color: var(--greyed-out-dark);
+        }
+
     </style>
 
     <template>
@@ -62,10 +124,38 @@
             <div id="header">
                 <div id="title">Your Translation Projects</div>
             </div>
-            <iron-pages selected="[[selected]]">
-                <ts-home-blank route="{{route}}"></ts-home-blank>
-                <ts-home-menu route="{{route}}" projectlist="[[projectlist]]" project="{{project}}"></ts-home-menu>
-            </iron-pages>
+            <template is="dom-if" if="{{!projectlist.length}}">
+                <div id="contain1">
+                    <div id="welcome">
+                        <p>Welcome!</p>
+                        <p>This is your Home Screen. When you have translation projects on this device, they will appear here.</p>
+                        <p>You can start a new project anytime by tapping the blue button in the top right.</p>
+                    </div>
+                    <paper-button raised id="start" on-tap="start">Start a new project</paper-button>
+                </div>
+            </template>
+            <template is="dom-if" if="{{projectlist.length}}">
+                <div id="contain2">
+                    <table>
+                        <thead>
+                        <tr class="smalltext">
+                            <td></td><td>Project</td><td>Language</td><td>Progress</td><td></td>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <template is="dom-repeat" items="[[projectlist]]" as="project">
+                            <tr on-tap="open">
+                                <td><iron-icon class="smallicon" icon="[[project.icon]]"></iron-icon></td>
+                                <td><span>[[project.name]]</span></td>
+                                <td><span class="smalltext">[[project.language]]</span></td>
+                                <td></td>
+                                <td><iron-icon class="smallicon" icon="info" title="Info"></iron-icon></td>
+                            </tr>
+                        </template>
+                        </tbody>
+                    </table>
+                </div>
+            </template>
         </div>
 
         <ts-new-project-button route="{{route}}"></ts-new-project-button>
@@ -80,10 +170,6 @@
         is: 'ts-home',
 
         properties: {
-            selected: {
-                type: Number,
-                value: null
-            },
             route: {
                 type: String,
                 value: '',
@@ -100,21 +186,19 @@
             }
         },
 
-        observers: [
-            'homeselection(projectlist)'
-        ],
+        start: function () {
+            this.route = "new";
+        },
 
-        homeselection: function () {
-            if (this.projectlist.length > 0) {
-                this.selected = 1;
-            } else {
-                this.selected = 0;
-            }
+        open: function (e) {
+            this.project = e.model.project;
+            this.route = "translate";
         },
 
         ready: function() {
 
         }
+
     });
 
 </script>

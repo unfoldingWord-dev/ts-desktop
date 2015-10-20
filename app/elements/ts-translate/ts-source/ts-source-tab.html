@@ -18,6 +18,11 @@
         	position: relative;
         }
 
+        :host.lefty .tabs {
+        	flex: initial;
+        	padding-left: 0;
+        }
+
         paper-tabs {
 			box-sizing: border-box;
 			padding: 0.5rem 0;
@@ -47,6 +52,13 @@
 			}
 		}
 
+		:host.lefty paper-tab {
+			--paper-tab: {
+				padding: 0;
+				margin: 0 1rem 0 0;
+			}
+		}
+
 		paper-tab:focus::shadow .tab-content.paper-tab{
 			font-weight: 500;
 		}
@@ -67,7 +79,7 @@
 
 	<template>
 		<div class="tabs">
-			<paper-tabs noink no-bar hide-scroll-buttons scrollable selected="{{ selectedSource }}">
+			<paper-tabs no-bar hide-scroll-buttons scrollable selected="{{ selectedSource }}">
 				<template is="dom-repeat" items="[[ sources ]]" as="source">
                    <paper-tab class="tab" on-tap="onResize">{{ source }}</paper-tab>
                 </template>
@@ -105,6 +117,16 @@
         	selectedSource: {
         		type: Number,
         		notify: true
+        	},
+        	lefty: {
+        		type: Boolean
+        	}
+        },
+
+        ready: function() {
+
+        	if (this.lefty) {
+        		this.classList.add('lefty');
         	}
         },
 

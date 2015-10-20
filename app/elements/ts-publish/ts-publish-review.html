@@ -70,7 +70,7 @@
         <div id="contain">
             <div id="list">
                 <ul>
-                    <li><div>Project: <span>[[book.name]]</span> - <span>[[language.ln]]</span></div><iron-icon class="right" icon="done"></iron-icon></li>
+                    <li><div>Project: <span>[[project.name]]</span> - <span>[[project.language]]</span></div><iron-icon class="right" icon="done"></iron-icon></li>
                     <li>Profile<iron-icon class="right" icon="done"></iron-icon></li>
                     <li>License Agreement<iron-icon class="right" icon="done"></iron-icon></li>
                     <li>Translation Guidelines<iron-icon class="right" icon="done"></iron-icon></li>
@@ -96,11 +96,7 @@
                 value: 2,
                 notify: true
             },
-            language: {
-                type: Object,
-                value: {}
-            },
-            book: {
+            project: {
                 type: Object,
                 value: {}
             }

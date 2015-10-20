@@ -120,11 +120,6 @@
               type: Object,
               value: {},
               notify: true
-          },
-          chapters: {
-              type: Array,
-              value: [],
-              notify: true
           }
       },
 
@@ -134,15 +129,7 @@
 
       store: function(e) {
           this.book = e.model.bk;
-
-          var num = e.model.bk.chapters;
-
-          var chaparray = [];
-          for (var i=1; i<=num; i++) {
-              chaparray.push(i);
-          }
-          this.chapters = chaparray;
-          this.selected = this.selected + 1;
+          this.fire('create');
       },
 
       togroup: function () {

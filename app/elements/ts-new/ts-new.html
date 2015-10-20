@@ -2,11 +2,11 @@
 <link rel="import" href="../../components/iron-resizable-behavior/iron-resizable-behavior.html">
 <link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../components/paper-dialog/paper-dialog.html">
 
 <link rel="import" href="./ts-language-menu.html">
 <link rel="import" href="./ts-project-menu.html">
 <link rel="import" href="./ts-book-menu.html">
-<link rel="import" href="./ts-chapter-menu.html">
 
 <dom-module id="ts-new">
 
@@ -46,6 +46,23 @@
             margin: 0 1em 0 .2em;
         }
 
+        #popup {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+            width: 320px;
+            height: 220px;
+            text-align: center;
+        }
+
+        #popup .buttons {
+            display: flex;
+            justify-content: center;
+        }
+
     </style>
 
     <template>
@@ -60,9 +77,18 @@
         <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
             <ts-language-menu selected="{{selected}}" language="{{language}}"></ts-language-menu>
             <ts-project-menu selected="{{selected}}" group="{{group}}"></ts-project-menu>
-            <ts-book-menu selected="{{selected}}" group="[[group]]" book="{{book}}" chapters="{{chapters}}"></ts-book-menu>
-            <ts-chapter-menu selected="{{selected}}" route="{{route}}" group="[[group]]" book="[[book]]" chapters="[[chapters]]" chapter="{{chapter}}"></ts-chapter-menu>
+            <ts-book-menu selected="{{selected}}" group="[[group]]" book="{{book}}" on-create="createproject"></ts-book-menu>
         </neon-animated-pages>
+
+        <paper-dialog id="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <h2>Duplicate Project</h2>
+            <div>
+                <p>This project has already been started. To work on it, select it from the project list. To start a new project, make a new selection.</p>
+            </div>
+            <div class="buttons">
+                <paper-button dialog-confirm on-tap="gohome">Confirm</paper-button>
+            </div>
+        </paper-dialog>
 
     </template>
 
@@ -85,27 +111,24 @@
             },
             language: {
                 type: Object,
-                value: {},
-                notify: true
+                value: {}
             },
             group: {
                 type: Object,
-                value: {},
-                notify: true
+                value: {}
             },
             book: {
                 type: Object,
-                value: {},
-                notify: true
+                value: {}
             },
-            chapters: {
+            projectlist: {
                 type: Array,
                 value: [],
                 notify: true
             },
-            chapter: {
-                type: Number,
-                value: null,
+            project: {
+                type: Object,
+                value: {},
                 notify: true
             }
         },
@@ -118,9 +141,40 @@
             this.selected === 0 ? this.route = "home" : this.selected = this.selected - 1;
         },
 
+        createproject: function () {
+            var newproj = {};
+            newproj.name = this.book.name;
+            newproj.language = this.language.ln;
+            newproj.icon = this.group.lefticon;
+            var projectarray = this.projectlist;
+            var dupcheck = false;
+            var popup = this.$.popup;
+
+            for (var i = 0; i < projectarray.length; i++) {
+                if (projectarray[i].name === newproj.name && projectarray[i].language === newproj.language) {
+                    dupcheck = true;
+                }
+            }
+
+            if (dupcheck) {
+                popup.open();
+            } else {
+                this.push('projectlist', newproj);
+                this.project = newproj;
+                this.route = "translate";
+                this.selected = 0;
+            }
+        },
+
+        gohome: function () {
+            this.route = "home";
+            this.selected = 0;
+        },
+
         ready: function() {
 
         }
+
     });
 
 </script>

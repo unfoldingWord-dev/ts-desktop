@@ -53,7 +53,7 @@
             </div>
             <div id="heading">
                 <div>
-                    <span>[[book.name]]</span> <span>[[chunk.chapter]]</span>
+                    <span>[[project.name]]</span> <span>[[chunk.chapter]]</span>
                 </div>
             </div>
             <div id="content">
@@ -80,11 +80,7 @@
         },
 
         properties: {
-            language: {
-                type: Object,
-                value: {}
-            },
-            book: {
+            project: {
                 type: Object,
                 value: {}
             },
@@ -94,12 +90,10 @@
             },
             sources: {
                 type: Array,
-                value: [],
                 notify: true
             },
             selectedSource: {
                 type: Number,
-                // value: 0,
                 notify: true
             }
         },

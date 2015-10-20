@@ -21,7 +21,7 @@
 
         <div id="contain">
             <template is="dom-repeat" items="{{combined.data}}" as="chunk">
-                <ts-chunk-card on-uploadtrigger="uploaddata" language="[[language]]" book="[[book]]" chunk="{{chunk}}"></ts-chunk-card>
+                <ts-chunk-card on-uploadtrigger="uploaddata" project="[[project]]" chunk="{{chunk}}" sources="{{sources}}" selected-source="{{selectedSource}}"></ts-chunk-card>
             </template>
         </div>
 
@@ -35,6 +35,10 @@
 
 		is: 'ts-chunk-mode',
 
+        behaviors: [
+            Polymer.IronResizableBehavior
+        ],
+
         properties: {
             source: {
                 type: Array,
@@ -45,11 +49,7 @@
                 value: [],
                 notify: true
             },
-            language: {
-                type: Object,
-                value: {}
-            },
-            book: {
+            project: {
                 type: Object,
                 value: {}
             },
@@ -57,6 +57,14 @@
                 type: Object,
                 value: {},
                 computed: 'combinedata(source.*, translation.*)'
+            },
+            sources: {
+                type: Array,
+                notify: true
+            },
+            selectedSource: {
+                type: Number,
+                notify: true
             }
         },
 

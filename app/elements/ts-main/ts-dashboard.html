@@ -29,10 +29,10 @@
   <template>
 
       <neon-animated-pages attr-for-selected="data-route" selected="{{route}}" exit-animation="slide-left-animation" entry-animation="slide-from-right-animation">
-          <ts-home data-route="home" route="{{route}}"></ts-home>
-          <ts-new data-route="new" route="{{route}}" language="{{language}}" group="{{group}}" book="{{book}}" chapters="{{chapters}}" chapter="{{chapter}}"></ts-new>
-          <ts-translate data-route="translate" route="{{route}}" language="[[language]]" book="[[book]]"></ts-translate>
-          <ts-publish data-route="publish" route="{{route}}" language="[[language]]" book="[[book]]"></ts-publish>
+          <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]" project="{{project}}"></ts-home>
+          <ts-new data-route="new" route="{{route}}" projectlist="{{projectlist}}" project="{{project}}"></ts-new>
+          <ts-translate data-route="translate" route="{{route}}" project="[[project]]"></ts-translate>
+          <ts-publish data-route="publish" route="{{route}}" project="[[project]]"></ts-publish>
       </neon-animated-pages>
 
   </template>
@@ -45,33 +45,27 @@
       is: 'ts-dashboard',
 
       properties: {
-          language: {
-              type: Object,
-              value: {}
-          },
-          group: {
-              type: Object,
-              value: {}
-          },
-          book: {
-              type: Object,
-              value: {}
-          },
-          chapters: {
-              type: Array,
-              value: []
-          },
-          chapter: {
-              type: Number,
-              value: null
-          },
           route: {
               type: String,
               value: 'home'
+          },
+          projectlist: {
+              type: Array,
+              value: []
+          },
+          project: {
+              type: Object,
+              value: {}
           }
       },
 
       ready: function() {
+          this.projectlist = [
+              {"name": 'Genesis', "language": 'Amharic', "icon": 'project:project'},
+              {"name": 'John', "language": 'Afaraf', "icon": 'project:project'},
+              {"name": 'Acts', "language": 'Solong', "icon": 'project:project'},
+              {"name": 'Open Bible Stories', "language": 'Amal', "icon": 'uw-icon:uw-icon-small'}
+          ];
 
       }
 

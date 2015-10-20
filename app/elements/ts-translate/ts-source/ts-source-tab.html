@@ -18,6 +18,11 @@
         	position: relative;
         }
 
+        :host.lefty .tabs {
+        	flex: initial;
+        	padding-left: 0;
+        }
+
         paper-tabs {
 			box-sizing: border-box;
 			padding: 0.5rem 0;
@@ -47,6 +52,13 @@
 			}
 		}
 
+		:host.lefty paper-tab {
+			--paper-tab: {
+				padding: 0;
+				margin: 0 1rem 0 0;
+			}
+		}
+
 		paper-tab:focus::shadow .tab-content.paper-tab{
 			font-weight: 500;
 		}
@@ -67,7 +79,7 @@
 
 	<template>
 		<div class="tabs">
-			<paper-tabs noink no-bar hide-scroll-buttons scrollable selected="{{ selectedSource }}">
+			<paper-tabs no-bar hide-scroll-buttons scrollable selected="{{ selectedSource }}">
 				<template is="dom-repeat" items="[[ sources ]]" as="source">
                    <paper-tab class="tab" on-tap="onResize">{{ source }}</paper-tab>
                 </template>
@@ -100,18 +112,22 @@
         properties: {
         	sources: {
         		type: Array,
-        		value: [],
         		notify: true
         	},
         	selectedSource: {
         		type: Number,
-        		notify: true,
-        		observer: '_selectedSourceChanged'
+        		notify: true
+        	},
+        	lefty: {
+        		type: Boolean
         	}
         },
 
-        _selectedSourceChanged: function() {
-        	console.log('refresh data now');
+        ready: function() {
+
+        	if (this.lefty) {
+        		this.classList.add('lefty');
+        	}
         },
 
         openModal: function() {
@@ -122,32 +138,53 @@
 			modal.selectedSource = this.selectedSource;
 			modal.addEventListener('confirm', this.onConfirm.bind(this));
 			modal.addEventListener('cancel', this.onCancel.bind(this));
-			this.appendChild(modal);
+			document.querySelector('ts-translate').appendChild(modal);
 			modal.fire('open');
         },
 
+        removeModal: function() {
+        	var modal = document.querySelector('ts-source-modal');
+			document.querySelector('ts-translate').removeChild(modal);
+        },
+
         onConfirm: function() {
-        	console.log('confirm is pressed');
+        	var modal = document.querySelector('ts-source-modal');
+        	this.sources = modal.sources;
+        	this.selectedSource = modal.selectedSource;
+        	// Execute these AFTER the state has changed and the values reflect that change.
+        	this.async(function() {
+	        	if (this.selectedSource != null) {
+	        		this.querySelector('paper-tab.iron-selected').fire('tap');
+	        	}
+        	}, 30);
+        	this.removeModal();
         },
 
         onCancel: function() {
-        	var modal = this.querySelector('ts-source-modal');
-			this.removeChild(modal);
+        	this.removeModal();
         },
 
         onResize: function() {
-        	// Since on-tap on paper-tab calls this method, I want the getOffsetLeft function to be called
-        	//    AFTER the state has changed so that the offsetLeft value will reflect the newly selected
-        	//    tab and not the old one.
-        	this.async(function() {
-	    		var offsetLeft = document.querySelector('paper-tab.iron-selected').offsetLeft;
-	    		var tabWidth = document.querySelector('paper-tab.iron-selected').clientWidth;
-	    		var bars = document.querySelectorAll('.selection-bar');
-	    		Array.prototype.forEach.call(bars, function(bar, index) {
-	    			bar.style.width = tabWidth+'px';
-	    			bar.style.left = offsetLeft+'px';
-	    		});
-        	}, 30);
+        	this._adjustSelectionBar();
+        },
+
+        // This function adjust the position and the width of the custom selection bar based on the position and
+        //    the width of the selected tab.
+        _adjustSelectionBar: function() {
+        	// Checks against null first when selecting the selected paper-tab.
+        	if (this.querySelector('paper-tab.iron-selected')) {
+	        	// Execute these AFTER the state has changed and the values reflect that change.
+	        	this.async(function() {
+	        		var selectedTab = this.querySelector('paper-tab.iron-selected');
+		    		var offsetLeft = selectedTab.offsetLeft;
+		    		var tabWidth = selectedTab.clientWidth;
+		    		var bars = document.querySelectorAll('.selection-bar');
+		    		Array.prototype.forEach.call(bars, function(bar, index) {
+		    			bar.style.width = tabWidth+'px';
+		    			bar.style.left = offsetLeft+'px';
+		    		});
+	        	}, 30);
+        	}
         }
 
     });

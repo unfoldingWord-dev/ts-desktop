@@ -22,11 +22,11 @@
         <div id="contain">
             <template is="dom-if" if="{{combined.data.length}}">
                 <template is="dom-repeat" items="{{combined.data}}" as="chunk">
-                    <ts-read-card project="[[project]]" chunk="[[chunk]]" sources="{{sources}}" selected-source="{{selectedSource}}"></ts-read-card>
+                    <ts-read-card project="{{project}}" chunk="[[chunk]]"></ts-read-card>
                 </template>
             </template>
             <template is="dom-if" if="{{!combined.data.length}}">
-                <ts-read-card sources="{{sources}}" selected-source="{{selectedSource}}"></ts-read-card>
+                <ts-read-card project="{{project}}"></ts-read-card>
             </template>
         </div>
 
@@ -49,30 +49,19 @@
         },
 
         properties: {
-            sources: {
-                type: Array,
-                notify: true
-            },
-            selectedSource: {
-                type: Number,
-                notify: true
-            },
             source: {
-                type: Array,
-                value: []
-            },
-            translation: {
                 type: Array,
                 value: []
             },
             project: {
                 type: Object,
-                value: {}
+                value: {},
+                notify: true
             },
             combined: {
                 type: Object,
                 value: {},
-                computed: 'combinedata(source.*, translation.*)'
+                computed: 'combinedata(source.*, project.translation.*)'
             }
         },
 
@@ -82,8 +71,10 @@
             var srcdata = {};
             var transchapters = [];
             var srcchapters = [];
+            var translation = this.project.translation;
+            var source = this.source;
 
-            _.forEach(_.groupBy(this.translation, function(chunks) {
+            _.forEach(_.groupBy(translation, function(chunks) {
                 return chunks.meta.chapter;
             }), function (data, chap) {
                 var chapstatus = "Complete";
@@ -98,7 +89,7 @@
                 transchapters.push({status: chapstatus, transcontent: chapcontent});
             });
 
-            _.forEach(_.groupBy(this.source, function(chunks) {
+            _.forEach(_.groupBy(source, function(chunks) {
                 return chunks.meta.chapter;
             }), function (data, chap) {
                 var chapcontent = "";

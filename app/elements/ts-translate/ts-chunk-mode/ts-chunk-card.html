@@ -83,7 +83,7 @@
     <template>
 
         <div id="contain">
-            <ts-source-chunk id="srccard" class="top" on-tap="srctop" project="[[project]]" chunk="[[chunk]]" sources="{{sources}}" selected-source="{{selectedSource}}"></ts-source-chunk>
+            <ts-source-chunk id="srccard" class="top" on-tap="srctop" project="{{project}}" chunk="[[chunk]]"></ts-source-chunk>
             <ts-target-edit noicon id="transcard" on-tap="transtop" on-edittrigger="edittrigger" project="[[project]]" chunk="{{chunk}}"></ts-target-edit>
         </div>
 
@@ -104,19 +104,12 @@
         properties: {
             project: {
                 type: Object,
-                value: {}
+                value: {},
+                notify: true
             },
             chunk: {
                 type: Object,
                 value: {},
-                notify: true
-            },
-            sources: {
-                type: Array,
-                notify: true
-            },
-            selectedSource: {
-                type: Number,
                 notify: true
             }
         },

@@ -83,7 +83,7 @@
     <template>
 
         <div id="contain">
-            <ts-source-card id="srccard" class="top" on-tap="srctop" project="[[project]]" chunk="[[chunk]]" sources="{{sources}}" selected-source="{{selectedSource}}"></ts-source-card>
+            <ts-source-card id="srccard" class="top" on-tap="srctop" project="{{project}}" chunk="[[chunk]]"></ts-source-card>
             <ts-target-view id="transcard" on-tap="transtop" project="[[project]]" chunk="[[chunk]]"></ts-target-view>
         </div>
 
@@ -100,20 +100,12 @@
         properties: {
             project: {
                 type: Object,
-                value: {}
+                value: {},
+                notify: true
             },
             chunk: {
                 type: Object,
                 value: {}
-            },
-            sources: {
-                type: Array,
-                value: [],
-                notify: true
-            },
-            selectedSource: {
-                type: Number,
-                notify: true
             }
         },
 

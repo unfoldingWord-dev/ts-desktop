@@ -21,7 +21,7 @@
 
         <div id="contain">
             <template is="dom-repeat" items="{{combined.data}}" as="chunk">
-                <ts-review-card project="[[project]]" chunk="{{chunk}}" on-uploadtrigger="uploaddata" sources="{{sources}}" selected-source="{{selectedSource}}"></ts-review-card>
+                <ts-review-card project="{{project}}" chunk="{{chunk}}" on-uploadtrigger="uploaddata"></ts-review-card>
             </template>
         </div>
 
@@ -44,32 +44,20 @@
                 type: Array,
                 value: []
             },
-            translation: {
-                type: Array,
-                value: [],
-                notify: true
-            },
             project: {
                 type: Object,
-                value: {}
+                value: {},
+                notify: true
             },
             combined: {
                 type: Object,
                 value: {},
-                computed: 'combinedata(source.*, translation.*)'
-            },
-            sources: {
-                type: Array,
-                notify: true
-            },
-            selectedSource: {
-                type: Number,
-                notify: true
+                computed: 'combinedata(source.*, project.translation.*)'
             }
         },
 
         uploaddata: function () {
-            this.translation = this.combined.data.map(function(chunk){
+            this.project.translation = this.combined.data.map(function(chunk){
                 return {meta: chunk.meta, content: chunk.transcontent, status: chunk.status};
             });
         },
@@ -78,12 +66,14 @@
 
             var transdata = {};
             var srcdata = {};
+            var translation = this.project.translation;
+            var source = this.source;
 
-            transdata.data = this.translation.map(function(chunk){
+            transdata.data = translation.map(function(chunk){
                 return {transcontent: chunk.content, status: chunk.status};
             });
 
-            srcdata.data = this.source.map(function(chunk){
+            srcdata.data = source.map(function(chunk){
                 return {srccontent: chunk.content, meta: chunk.meta, notes: chunk.notes, words: chunk.words};
             });
 

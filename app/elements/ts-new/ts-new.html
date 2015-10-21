@@ -146,6 +146,10 @@
             newproj.name = this.book.name;
             newproj.language = this.language.ln;
             newproj.icon = this.group.lefticon;
+            newproj.sources = [];
+            newproj.completion = 0;
+            newproj.currentsource = 0;
+            newproj.translation = [];
             var projectarray = this.projectlist;
             var dupcheck = false;
             var popup = this.$.popup;

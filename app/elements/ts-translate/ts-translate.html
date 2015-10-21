@@ -85,19 +85,14 @@
         },
 
         upload: function () {
-            console.log("uploading");
-
-             this.project.translation = this.chunks.data.map(function(chunk){
+             var update = this.chunks.data.map(function(chunk){
              return {meta: chunk.meta, content: chunk.transcontent, status: chunk.status};
              });
 
-            this.createchapters();
+            this.set('project.translation', update);
         },
 
         createchunks: function () {
-
-            console.log("creating chunks");
-
             var transdata = {};
             var srcdata = {};
             var translation = this.project.translation;
@@ -115,9 +110,6 @@
         },
 
         createchapters: function () {
-
-            console.log("creating chapters");
-
             var transdata = {};
             var srcdata = {};
             var transchapters = [];
@@ -167,7 +159,7 @@
                     //
                     // Write code to get new data based on source tab selection here...
                     //
-                    console.log('refreshing data now to fetch', source);
+
                 }, 30);
             }
         },

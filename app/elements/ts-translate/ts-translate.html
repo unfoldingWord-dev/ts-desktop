@@ -30,9 +30,9 @@
         <ts-translate-sidebar route="{{route}}" selected="{{selected}}"></ts-translate-sidebar>
 
         <neon-animated-pages selected="[[selected]]" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
-            <ts-read-mode project="{{project}}" source="[[source]]"></ts-read-mode>
-            <ts-chunk-mode project="{{project}}" source="[[source]]"></ts-chunk-mode>
-            <ts-review-mode project="{{project}}" source="[[source]]"></ts-review-mode>
+            <ts-read-mode project="{{project}}" chapters="[[chapters]]"></ts-read-mode>
+            <ts-chunk-mode project="{{project}}" chunks="{{chunks}}" on-modetrigger="upload"></ts-chunk-mode>
+            <ts-review-mode project="{{project}}" chunks="{{chunks}}" on-modetrigger="upload"></ts-review-mode>
         </neon-animated-pages>
 
     </template>
@@ -71,7 +71,90 @@
             source: {
                 type: Array,
                 value: []
+            },
+            chapters: {
+                type: Object,
+                value: {},
+                computed: 'createchapters(source.*, project.translation.*)'
+            },
+            chunks: {
+                type: Object,
+                value: {},
+                computed: 'createchunks(source.*, project.translation.*)'
             }
+        },
+
+        upload: function () {
+            console.log("uploading");
+
+             this.project.translation = this.chunks.data.map(function(chunk){
+             return {meta: chunk.meta, content: chunk.transcontent, status: chunk.status};
+             });
+
+            this.createchapters();
+        },
+
+        createchunks: function () {
+
+            console.log("creating chunks");
+
+            var transdata = {};
+            var srcdata = {};
+            var translation = this.project.translation;
+            var source = this.source;
+
+            transdata.data = translation.map(function(chunk){
+                return {transcontent: chunk.content, status: chunk.status};
+            });
+
+            srcdata.data = source.map(function(chunk){
+                return {srccontent: chunk.content, meta: chunk.meta, notes: chunk.notes, words: chunk.words};
+            });
+
+            return _.merge(srcdata, transdata);
+        },
+
+        createchapters: function () {
+
+            console.log("creating chapters");
+
+            var transdata = {};
+            var srcdata = {};
+            var transchapters = [];
+            var srcchapters = [];
+            var translation = this.project.translation;
+            var source = this.source;
+
+            _.forEach(_.groupBy(translation, function(chunks) {
+                return chunks.meta.chapter;
+            }), function (data, chap) {
+                var chapstatus = "Complete";
+                var chapcontent = "";
+
+                _.forEach(data, function (chunk) {
+                    if (chunk.status === "Incomplete") {
+                        chapstatus = "Incomplete";
+                    }
+                    chapcontent += chunk.content + " ";
+                });
+                transchapters.push({status: chapstatus, transcontent: chapcontent});
+            });
+
+            _.forEach(_.groupBy(source, function(chunks) {
+                return chunks.meta.chapter;
+            }), function (data, chap) {
+                var chapcontent = "";
+
+                _.forEach(data, function (chunk) {
+                    chapcontent += chunk.content + " ";
+                });
+                srcchapters.push({chapter: chap, srccontent: chapcontent});
+            });
+
+            transdata.data = transchapters;
+            srcdata.data = srcchapters;
+
+            return _.merge(srcdata, transdata);
         },
 
         onSelectedSourceChanged: function(newValue) {

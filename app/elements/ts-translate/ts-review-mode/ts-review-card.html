@@ -80,6 +80,14 @@
             }
 		},
 
+        observers: [
+            'reset(project.name)'
+        ],
+
+        reset: function () {
+            this.selected = 0;
+        },
+
         edittrigger: function () {
             this.fire('cardtrigger');
         },

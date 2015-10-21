@@ -83,7 +83,7 @@
     <template>
 
         <div id="contain">
-            <ts-source-card id="srccard" class="top" on-tap="srctop" project="{{project}}" chunk="[[chunk]]"></ts-source-card>
+            <ts-source-card id="srccard" on-tap="srctop" project="{{project}}" chunk="[[chunk]]"></ts-source-card>
             <ts-target-view id="transcard" on-tap="transtop" project="[[project]]" chunk="[[chunk]]"></ts-target-view>
         </div>
 
@@ -107,6 +107,17 @@
                 type: Object,
                 value: {}
             }
+        },
+
+        observers: [
+            'reset(project.name)'
+        ],
+
+        reset: function () {
+            var trans = this.$.transcard;
+            var src = this.$.srccard;
+            trans.classList.remove("top");
+            src.classList.add("top");
         },
 
         transtop: function () {

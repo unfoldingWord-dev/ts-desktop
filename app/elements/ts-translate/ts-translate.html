@@ -50,7 +50,8 @@
         ],
 
         observers: [
-            'onSelectedSourceChanged(project.currentsource)'
+            'onSelectedSourceChanged(project.currentsource)',
+            'reset(project.name)'
         ],
 
         properties: {
@@ -84,11 +85,25 @@
             }
         },
 
+        reset: function () {
+            this.selected = 0;
+        },
+
         upload: function () {
              var update = this.chunks.data.map(function(chunk){
              return {meta: chunk.meta, content: chunk.transcontent, status: chunk.status};
              });
 
+            var count = 0;
+
+            for (var i = 0; i < update.length; i++) {
+                if (update[i].status === "Complete") {
+                    count++;
+                }
+            }
+
+            var completion = Math.round((count / update.length) * 100);
+            this.set('project.completion', completion);
             this.set('project.translation', update);
         },
 

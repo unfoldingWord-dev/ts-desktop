@@ -83,7 +83,7 @@
     <template>
 
         <div id="contain">
-            <ts-source-chunk id="srccard" class="top" on-tap="srctop" project="{{project}}" chunk="[[chunk]]"></ts-source-chunk>
+            <ts-source-chunk id="srccard" on-tap="srctop" project="{{project}}" chunk="[[chunk]]"></ts-source-chunk>
             <ts-target-edit noicon id="transcard" on-tap="transtop" on-edittrigger="edittrigger" project="[[project]]" chunk="{{chunk}}"></ts-target-edit>
         </div>
 
@@ -112,6 +112,17 @@
                 value: {},
                 notify: true
             }
+        },
+
+        observers: [
+            'reset(project.name)'
+        ],
+
+        reset: function () {
+            var trans = this.$.transcard;
+            var src = this.$.srccard;
+            trans.classList.remove("top");
+            src.classList.add("top");
         },
 
         transtop: function () {

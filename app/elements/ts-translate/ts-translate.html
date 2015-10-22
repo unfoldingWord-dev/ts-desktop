@@ -23,17 +23,25 @@
             flex: auto;
         }
 
+        .hide {
+            display: none;
+        }
+
     </style>
 
     <template>
 
         <ts-translate-sidebar route="{{route}}" selected="{{selected}}"></ts-translate-sidebar>
 
-        <neon-animated-pages selected="[[selected]]" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
+        <neon-animated-pages id="pages" selected="[[selected]]" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
             <ts-read-mode project="{{project}}" chapters="[[chapters]]"></ts-read-mode>
             <ts-chunk-mode project="{{project}}" chunks="{{chunks}}" on-modetrigger="upload"></ts-chunk-mode>
             <ts-review-mode project="{{project}}" chunks="{{chunks}}" on-modetrigger="upload"></ts-review-mode>
         </neon-animated-pages>
+
+        <div id="newpage">
+            <p>This means you have no sources</p>
+        </div>
 
     </template>
 
@@ -47,11 +55,6 @@
 
         behaviors: [
             Polymer.IronResizableBehavior
-        ],
-
-        observers: [
-            'onSelectedSourceChanged(project.currentsource)',
-            'reset(project.name)'
         ],
 
         properties: {
@@ -81,8 +84,23 @@
             }
         },
 
+        observers: [
+            'onSelectedSourceChanged(project.currentsource)',
+            'reset(project.name)'
+        ],
+
         reset: function () {
             this.selected = 0;
+            var array = this.project.sources;
+            var pages = this.$.pages;
+            var newpage = this.$.newpage;
+            if (array === undefined || array.length === 0) {
+                pages.classList.add("hide");
+                newpage.classList.remove("hide");
+            } else {
+                pages.classList.remove("hide");
+                newpage.classList.add("hide");
+            }
         },
 
         upload: function () {

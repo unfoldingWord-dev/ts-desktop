@@ -1,6 +1,9 @@
 
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../components/paper-material/paper-material.html">
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 
+<link rel="import" href="./ts-source/ts-source-tab.html">
 <link rel="import" href="./ts-read-mode/ts-read-mode.html">
 <link rel="import" href="./ts-chunk-mode/ts-chunk-mode.html">
 <link rel="import" href="./ts-review-mode/ts-review-mode.html">
@@ -27,6 +30,70 @@
             display: none;
         }
 
+        paper-material {
+            background: white;
+        }
+
+        #heading {
+            padding: 5px 1em;
+            color: var(--greyed-out-dark);
+            display: flex;
+            justify-content: space-between;
+            min-height: 75px;
+            align-items: center;
+            font-size: 125%;
+        }
+
+        #newpage {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #newpage.hide {
+            display: none;
+        }
+
+        #topbox {
+            margin: 15px 40px 15px 15px;
+            position: relative;
+        }
+
+        #bottombox {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--greyed-out-dark);
+            font-style: italic;
+            font-size: 110%;
+        }
+
+        #bottomcard {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            top: 25px;
+            left: 25px;
+            background-size: 100% 32px;
+            background-image: -webkit-linear-gradient(white 27px, var(--greyed-out-light) 27px, var(--greyed-out-light) 28px, white 28px);
+        }
+
+        #topcard {
+            z-index: 2;
+        }
+
+        .hide {
+            display: none;
+        }
+
+        .big {
+            --iron-icon-height: 100px;
+            --iron-icon-width: 100px;
+        }
+
     </style>
 
     <template>
@@ -40,7 +107,22 @@
         </neon-animated-pages>
 
         <div id="newpage">
-            <p>This means you have no sources</p>
+            <div id="topbox">
+                <paper-material id="topcard" elevation="1">
+                    <div id="heading">
+                        <div>
+                            Project: <span>[[project.name]]</span> - <span>[[project.language]]</span>
+                        </div>
+                        <ts-source-tab id="sourcetab" sources="{{project.sources}}" selected-source="{{project.currentsource}}"></ts-source-tab>
+                    </div>
+                </paper-material>
+                <paper-material id="bottomcard" elevation="1">
+                </paper-material>
+            </div>
+            <div id="bottombox">
+                <p>Choose source translation(s) to begin reading and translating</p>
+                <paper-icon-button icon="tab" class="big" on-tap="openmodal"></paper-icon-button>
+            </div>
         </div>
 
     </template>
@@ -86,11 +168,19 @@
 
         observers: [
             'onSelectedSourceChanged(project.currentsource)',
-            'reset(project.name)'
+            'reset(project.name)',
+            'checksources(project.sources)'
         ],
+
+        openmodal: function () {
+            this.$.sourcetab.openModal();
+        },
 
         reset: function () {
             this.selected = 0;
+        },
+
+        checksources: function () {
             var array = this.project.sources;
             var pages = this.$.pages;
             var newpage = this.$.newpage;

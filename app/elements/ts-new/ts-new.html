@@ -142,114 +142,59 @@
         },
 
         createproject: function () {
-            var newproj = {};
-            newproj.name = this.book.name;
-            newproj.language = this.language.ln;
-            newproj.icon = this.group.lefticon;
-            newproj.sources = [];
-            newproj.completion = 0;
-            newproj.currentsource = 0;
-            newproj.translation = [
-                {
-                    meta: {
-                        chapter: 1,
-                        startverse: 1,
-                        endverse: 5
-                    },
-                    content: '',
-                    status: 'Incomplete'
-                },
-                {
-                    meta: {
-                        chapter: 1,
-                        startverse: 6,
-                        endverse: 8
-                    },
-                    content: '',
-                    status: 'Incomplete'
-                },
-                {
-                    meta: {
-                        chapter: 1,
-                        startverse: 9,
-                        endverse: 12
-                    },
-                    content: '',
-                    status: 'Incomplete'
-                },
-                {
-                    meta: {
-                        chapter: 2,
-                        startverse: 1,
-                        endverse: 4
-                    },
-                    content: '',
-                    status: 'Incomplete'
-                },
-                {
-                    meta: {
-                        chapter: 2,
-                        startverse: 5,
-                        endverse: 8
-                    },
-                    content: '',
-                    status: 'Incomplete'
-                },
-                {
-                    meta: {
-                        chapter: 2,
-                        startverse: 9,
-                        endverse: 10
-                    },
-                    content: '',
-                    status: 'Incomplete'
-                },
-                {
-                    meta: {
-                        chapter: 3,
-                        startverse: 1,
-                        endverse: 4
-                    },
-                    content: '',
-                    status: 'Incomplete'
-                },
-                {
-                    meta: {
-                        chapter: 3,
-                        startverse: 5,
-                        endverse: 8
-                    },
-                    content: '',
-                    status: 'Incomplete'
-                },
-                {
-                    meta: {
-                        chapter: 3,
-                        startverse: 9,
-                        endverse: 12
-                    },
-                    content: '',
-                    status: 'Incomplete'
-                }
-            ];
+            var book = this.book.name;
+            var language = this.language.ln;
             var projectarray = this.projectlist;
-            var dupcheck = false;
+            var icon = this.group.lefticon;
+            var num = this.book.chapters;
             var popup = this.$.popup;
+            var translation = [];
+            var source = [];
+            var transchunk = {};
+            var srcchunk = {};
+            var duplicate = false;
+            var i;
 
-            for (var i = 0; i < projectarray.length; i++) {
-                if (projectarray[i].name === newproj.name && projectarray[i].language === newproj.language) {
-                    dupcheck = true;
+            for (i = 0; i < projectarray.length; i++) {
+                if (projectarray[i].name === book && projectarray[i].language === language) {
+                    duplicate = true;
                 }
             }
 
-            if (dupcheck) {
+            if (duplicate) {
                 popup.open();
-            } else {
-                this.push('projectlist', newproj);
-                this.project = newproj;
-                this.route = "translate";
-                this.selected = 0;
+                return;
             }
+
+            for (i = 1; i <= num; i++) {
+                transchunk = {
+                    meta: {
+                        chapter: i,
+                        startverse: i,
+                        endverse: i
+                    },
+                    content: '',
+                    status: 'Incomplete'
+                };
+                srcchunk = {
+                    meta: {
+                        chapter: i,
+                        startverse: i,
+                        endverse: i
+                    },
+                    content: 'This is blank source content for ' + book + ' chunk ' + i,
+                    notes: 'Notes for ' + book + ' chunk ' + i,
+                    words: 'Words for ' + book + ' chunk ' + i
+                };
+                translation.push(transchunk);
+                source.push(srcchunk);
+            }
+
+            var newproj = {"name": book, "language": language, "icon": icon, "sources": [], "completion": 0, "currentsource": 0, "translation": translation, "source": source};
+            this.push('projectlist', newproj);
+            this.set('project', newproj);
+            this.route = "translate";
+            this.selected = 0;
         },
 
         gohome: function () {

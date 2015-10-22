@@ -86,25 +86,36 @@
             }
         },
 
+        observers: [
+            'modechange(selected)'
+        ],
+
+        modechange: function (selected) {
+            if (selected === 0) {
+                this.$.read.classList.add("current");
+                this.$.chunk.classList.remove("current");
+                this.$.review.classList.remove("current");
+            } else if (selected === 1) {
+                this.$.read.classList.remove("current");
+                this.$.chunk.classList.add("current");
+                this.$.review.classList.remove("current");
+            } else if (selected === 2) {
+                this.$.read.classList.remove("current");
+                this.$.chunk.classList.remove("current");
+                this.$.review.classList.add("current");
+            }
+        },
+
         read: function () {
             this.selected = 0;
-            this.$.read.classList.add("current");
-            this.$.chunk.classList.remove("current");
-            this.$.review.classList.remove("current");
         },
 
         chunk: function () {
             this.selected = 1;
-            this.$.read.classList.remove("current");
-            this.$.chunk.classList.add("current");
-            this.$.review.classList.remove("current");
         },
 
         review: function () {
             this.selected = 2;
-            this.$.read.classList.remove("current");
-            this.$.chunk.classList.remove("current");
-            this.$.review.classList.add("current");
         },
 
         publish: function () {

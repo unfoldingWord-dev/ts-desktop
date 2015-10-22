@@ -20,13 +20,13 @@
     <template>
 
         <div id="contain">
-            <template is="dom-if" if="{{combined.data.length}}">
-                <template is="dom-repeat" items="{{combined.data}}" as="chunk">
-                    <ts-read-card project="[[project]]" chunk="[[chunk]]" sources="{{sources}}" selected-source="{{selectedSource}}"></ts-read-card>
+            <template is="dom-if" if="{{chapters.data.length}}">
+                <template is="dom-repeat" items="{{chapters.data}}" as="chunk">
+                    <ts-read-card project="{{project}}" chunk="[[chunk]]"></ts-read-card>
                 </template>
             </template>
-            <template is="dom-if" if="{{!combined.data.length}}">
-                <ts-read-card sources="{{sources}}" selected-source="{{selectedSource}}"></ts-read-card>
+            <template is="dom-if" if="{{!chapters.data.length}}">
+                <ts-read-card project="{{project}}"></ts-read-card>
             </template>
         </div>
 
@@ -49,70 +49,15 @@
         },
 
         properties: {
-            sources: {
-                type: Array,
-                notify: true
-            },
-            selectedSource: {
-                type: Number,
-                notify: true
-            },
-            source: {
-                type: Array,
-                value: []
-            },
-            translation: {
-                type: Array,
-                value: []
-            },
             project: {
                 type: Object,
-                value: {}
-            },
-            combined: {
-                type: Object,
                 value: {},
-                computed: 'combinedata(source.*, translation.*)'
+                notify: true
+            },
+            chapters: {
+                type: Object,
+                value: {}
             }
-        },
-
-        combinedata: function () {
-
-            var transdata = {};
-            var srcdata = {};
-            var transchapters = [];
-            var srcchapters = [];
-
-            _.forEach(_.groupBy(this.translation, function(chunks) {
-                return chunks.meta.chapter;
-            }), function (data, chap) {
-                var chapstatus = "Complete";
-                var chapcontent = "";
-
-                _.forEach(data, function (chunk) {
-                    if (chunk.status === "Incomplete") {
-                        chapstatus = "Incomplete";
-                    }
-                    chapcontent += chunk.content + " ";
-                });
-                transchapters.push({status: chapstatus, transcontent: chapcontent});
-            });
-
-            _.forEach(_.groupBy(this.source, function(chunks) {
-                return chunks.meta.chapter;
-            }), function (data, chap) {
-                var chapcontent = "";
-
-                _.forEach(data, function (chunk) {
-                    chapcontent += chunk.content + " ";
-                });
-                srcchapters.push({chapter: chap, srccontent: chapcontent});
-            });
-
-            transdata.data = transchapters;
-            srcdata.data = srcchapters;
-
-            return _.merge(srcdata, transdata);
         },
 
         ready: function() {

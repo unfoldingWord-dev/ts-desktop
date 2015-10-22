@@ -12,70 +12,73 @@
 
         #contain {
             position: relative;
-            margin: 15px 0 40px 0;
-        }
-
-        ts-target-view {
-            position: absolute;
-            top: 25px;
-            left: 40px;
-            width: calc(100% - 55px);
-            height: 100%;
-            z-index: 1;
+            margin: 15px 40px 40px 15px;
         }
 
         ts-source-card {
             position: relative;
-            margin: 0 40px 0 15px;
+        }
+
+        ts-target-view {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .bottom {
             z-index: 1;
+            top: 25px;
+            left: 25px;
         }
 
         .top {
             z-index: 2;
+            top: 0;
+            left: 0;
         }
 
         #transcard.up {
-            -webkit-animation: transup 1s;
+            -webkit-animation: newtransup 1s;
         }
 
         #transcard.down {
-            -webkit-animation: transdown 1s;
+            -webkit-animation: newtransdown 1s;
         }
 
         #srccard.down {
-            -webkit-animation: srcdown 1s;
+            -webkit-animation: newsrcdown 1s;
         }
 
         #srccard.up {
-            -webkit-animation: srcup 1s;
+            -webkit-animation: newsrcup 1s;
         }
 
-        @-webkit-keyframes transup {
-            0% {z-index: 1}
-            49% {transform: translateX(50%); z-index: 1}
-            50% {z-index: 2}
-            100% {transform: translateX(0); z-index: 2}
+        @-webkit-keyframes newtransup {
+            0% {z-index: 1; top: 25px; left: 25px}
+            49% {z-index: 1; top: 25px; left: 51%}
+            50% {z-index: 2; top: 25px; left: 51%}
+            100% {z-index: 2; top: 0; left: 0}
         }
 
-        @-webkit-keyframes transdown {
-            0% {z-index: 2}
-            49% {transform: translateX(50%); z-index: 2}
-            50% {z-index: 1}
-            100% {transform: translateX(0); z-index: 1}
+        @-webkit-keyframes newtransdown {
+            0% {z-index: 2; top: 0; left: 0}
+            49% {z-index: 2; top: 0; left: 51%}
+            50% {z-index: 1; top: 0; left: 51%}
+            100% {z-index: 1; top: 25px; left: 25px}
         }
 
-        @-webkit-keyframes srcup {
-            0% {z-index: 1}
-            49% {transform: translateX(-50%); z-index: 1}
-            50% {z-index: 2}
-            100% {transform: translateX(0); z-index: 2}
+        @-webkit-keyframes newsrcup {
+            0% {z-index: 1; top: 25px; left: 25px}
+            49% {z-index: 1; top: 25px; left: -51%}
+            50% {z-index: 2; top: 25px; left: -51%}
+            100% {z-index: 2; top: 0; left: 0}
         }
 
-        @-webkit-keyframes srcdown {
-            0% {z-index: 2}
-            49% {transform: translateX(-50%); z-index: 2}
-            50% {z-index: 1}
-            100% {transform: translateX(0); z-index: 1}
+        @-webkit-keyframes newsrcdown {
+            0% {z-index: 2; top: 0; left: 0}
+            49% {z-index: 2; top: 0; left: -51%}
+            50% {z-index: 1; top: 0; left: -51%}
+            100% {z-index: 1; top: 25px; left: 25px}
         }
 
     </style>
@@ -83,7 +86,7 @@
     <template>
 
         <div id="contain">
-            <ts-source-card id="srccard" class="top" on-tap="srctop" project="[[project]]" chunk="[[chunk]]" sources="{{sources}}" selected-source="{{selectedSource}}"></ts-source-card>
+            <ts-source-card id="srccard" on-tap="srctop" project="{{project}}" chunk="[[chunk]]"></ts-source-card>
             <ts-target-view id="transcard" on-tap="transtop" project="[[project]]" chunk="[[chunk]]"></ts-target-view>
         </div>
 
@@ -100,21 +103,26 @@
         properties: {
             project: {
                 type: Object,
-                value: {}
+                value: {},
+                notify: true
             },
             chunk: {
                 type: Object,
                 value: {}
-            },
-            sources: {
-                type: Array,
-                value: [],
-                notify: true
-            },
-            selectedSource: {
-                type: Number,
-                notify: true
             }
+        },
+
+        observers: [
+            'reset(project.name)'
+        ],
+
+        reset: function () {
+            var trans = this.$.transcard;
+            var src = this.$.srccard;
+            trans.classList.remove("top");
+            src.classList.add("top");
+            trans.classList.add("bottom");
+            src.classList.remove("bottom");
         },
 
         transtop: function () {
@@ -124,11 +132,13 @@
             if(!trans.classList.contains("top")) {
                 trans.classList.add("up");
                 src.classList.add("down");
-                trans.classList.add("top");
-                src.classList.remove("top");
                 setTimeout(function () {
                     trans.classList.remove("up");
                     src.classList.remove("down");
+                    trans.classList.add("top");
+                    src.classList.add("bottom");
+                    src.classList.remove("top");
+                    trans.classList.remove("bottom");
                 }, 1000);
             }
         },
@@ -140,11 +150,13 @@
             if(!src.classList.contains("top")) {
                 trans.classList.add("down");
                 src.classList.add("up");
-                trans.classList.remove("top");
-                src.classList.add("top");
                 setTimeout(function () {
                     trans.classList.remove("down");
                     src.classList.remove("up");
+                    src.classList.add("top");
+                    trans.classList.add("bottom");
+                    trans.classList.remove("top");
+                    src.classList.remove("bottom");
                 }, 1000);
             }
         },

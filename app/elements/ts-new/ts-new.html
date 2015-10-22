@@ -76,7 +76,7 @@
 
         <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
             <ts-language-menu selected="{{selected}}" language="{{language}}"></ts-language-menu>
-            <ts-project-menu selected="{{selected}}" group="{{group}}"></ts-project-menu>
+            <ts-project-menu selected="{{selected}}" group="{{group}}" on-create="createproject"></ts-project-menu>
             <ts-book-menu selected="{{selected}}" group="[[group]]" book="{{book}}" on-create="createproject"></ts-book-menu>
         </neon-animated-pages>
 
@@ -142,11 +142,18 @@
         },
 
         createproject: function () {
-            var book = this.book.name;
+            var name = "";
+            var num;
+            if (this.group.name === "Open Bible Stories") {
+                name = this.group.name;
+                num = 12;
+            } else {
+                name = this.book.name;
+                num = this.book.chapters;
+            }
             var language = this.language.ln;
             var projectarray = this.projectlist;
             var icon = this.group.lefticon;
-            var num = this.book.chapters;
             var popup = this.$.popup;
             var translation = [];
             var source = [];
@@ -156,7 +163,7 @@
             var i;
 
             for (i = 0; i < projectarray.length; i++) {
-                if (projectarray[i].name === book && projectarray[i].language === language) {
+                if (projectarray[i].name === name && projectarray[i].language === language) {
                     duplicate = true;
                 }
             }
@@ -182,15 +189,15 @@
                         startverse: i,
                         endverse: i
                     },
-                    content: 'This is blank source content for ' + book + ' chunk ' + i,
-                    notes: 'Notes for ' + book + ' chunk ' + i,
-                    words: 'Words for ' + book + ' chunk ' + i
+                    content: 'This is blank source content for ' + name + ' chunk ' + i,
+                    notes: 'Notes for ' + name + ' chunk ' + i,
+                    words: 'Words for ' + name + ' chunk ' + i
                 };
                 translation.push(transchunk);
                 source.push(srcchunk);
             }
 
-            var newproj = {"name": book, "language": language, "icon": icon, "sources": [], "completion": 0, "currentsource": 0, "translation": translation, "source": source};
+            var newproj = {"name": name, "language": language, "icon": icon, "sources": [], "completion": 0, "currentsource": 0, "translation": translation, "source": source};
             this.push('projectlist', newproj);
             this.set('project', newproj);
             this.route = "translate";

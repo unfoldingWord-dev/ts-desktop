@@ -144,7 +144,11 @@
 
       store: function(e) {
           this.group = e.model.grp;
-          this.selected = this.selected + 1;
+          if (this.group.name === "Open Bible Stories") {
+              this.fire('create');
+          } else {
+              this.selected = this.selected + 1;
+          }
       },
 
       ready: function() {

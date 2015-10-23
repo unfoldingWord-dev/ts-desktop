@@ -51,11 +51,20 @@
             width: 100%;
 		}
 
+        #content p {
+            line-height: 2;
+            margin-top: 0;
+        }
+
         #heading paper-icon-button {
             padding: 5px;
         }
 
         :host([noicon]) paper-icon-button {
+            display: none;
+        }
+
+        .hide {
             display: none;
         }
 
@@ -66,12 +75,13 @@
         <paper-material elevation="1">
             <div id="heading">
                 <div>
-                    <span>[[book.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[language.ln]]</span>
+                    <span>[[project.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[project.language]]</span>
                 </div>
                 <paper-icon-button icon="clear" on-tap="review"></paper-icon-button>
             </div>
             <div id="content" class="editmode">
                 <iron-autogrow-textarea id="textbox" on-change="changetrigger" bind-value="{{chunk.transcontent}}"></iron-autogrow-textarea>
+                <p id="textholder"></p>
             </div>
         </paper-material>
 
@@ -86,11 +96,7 @@
 		is: 'ts-target-edit',
 
 		properties: {
-            language: {
-                type: Object,
-                value: {}
-            },
-            book: {
+            project: {
                 type: Object,
                 value: {}
             },
@@ -107,17 +113,39 @@
 		},
 
         observers: [
-            'disableedit(chunk.status)'
+            'rendertext(chunk.*)'
         ],
 
-        disableedit: function (status) {
+        rendertext: function () {
+            var status = this.chunk.status;
+            var contentbox = this.$.content;
+            var textbox = this.$.textbox;
+            var textholder = this.$.textholder;
+            var textarray = this.chunk.transcontent.split(" ");
+            var numstr1 = "\<sup\>";
+            var numstr2 = "\<\/sup\>";
+            var returnstr = "";
+            var verse = 0;
+
             if (status === "Complete") {
-                this.$.content.classList.remove("editmode");
-                this.$.textbox.disabled = true;
-            }
-            if (status === "Incomplete") {
-                this.$.content.classList.add("editmode");
-                this.$.textbox.disabled = false;
+
+                for (var i = 0; i < textarray.length; i++) {
+                    if (textarray[i].substring(0, 2) === "/v") {
+                        verse = textarray[i].substring(2);
+                        returnstr += numstr1 + verse + numstr2;
+                    } else {
+                        returnstr += textarray[i] + " ";
+                    }
+                }
+
+                textholder.innerHTML = returnstr;
+                textholder.classList.remove("hide");
+                textbox.classList.add("hide");
+                contentbox.classList.remove("editmode");
+            } else {
+                textholder.classList.add("hide");
+                textbox.classList.remove("hide");
+                contentbox.classList.add("editmode");
             }
         },
 

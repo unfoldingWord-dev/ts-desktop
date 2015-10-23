@@ -1,6 +1,9 @@
 
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../components/paper-material/paper-material.html">
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 
+<link rel="import" href="./ts-source/ts-source-tab.html">
 <link rel="import" href="./ts-read-mode/ts-read-mode.html">
 <link rel="import" href="./ts-chunk-mode/ts-chunk-mode.html">
 <link rel="import" href="./ts-review-mode/ts-review-mode.html">
@@ -23,17 +26,100 @@
             flex: auto;
         }
 
+        .hide {
+            display: none;
+        }
+
+        paper-material {
+            background: white;
+        }
+
+        #heading {
+            padding: 5px 1em;
+            color: var(--greyed-out-dark);
+            display: flex;
+            justify-content: space-between;
+            min-height: 75px;
+            align-items: center;
+            font-size: 125%;
+        }
+
+        #newpage {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #newpage.hide {
+            display: none;
+        }
+
+        #topbox {
+            margin: 15px 40px 15px 15px;
+            position: relative;
+        }
+
+        #bottombox {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--greyed-out-dark);
+            font-style: italic;
+            font-size: 110%;
+        }
+
+        #bottomcard {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            top: 25px;
+            left: 25px;
+            background-size: 100% 32px;
+            background-image: -webkit-linear-gradient(white 27px, var(--greyed-out-light) 27px, var(--greyed-out-light) 28px, white 28px);
+        }
+
+        #topcard {
+            z-index: 2;
+        }
+
+        .big {
+            --iron-icon-height: 100px;
+            --iron-icon-width: 100px;
+        }
+
     </style>
 
     <template>
 
         <ts-translate-sidebar route="{{route}}" selected="{{selected}}"></ts-translate-sidebar>
 
-        <neon-animated-pages selected="[[selected]]" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
-            <ts-read-mode language="[[language]]" book="[[book]]" source="[[source]]" translation="[[translation]]" sources="{{sources}}" selected-source="{{selectedSource}}"></ts-read-mode>
-            <ts-chunk-mode language="[[language]]" book="[[book]]" source="[[source]]" translation="{{translation}}"></ts-chunk-mode>
-            <ts-review-mode language="[[language]]" book="[[book]]" source="[[source]]" translation="{{translation}}"></ts-review-mode>
+        <neon-animated-pages id="pages" selected="[[selected]]" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
+            <ts-read-mode project="{{project}}" chapters="[[chapters]]"></ts-read-mode>
+            <ts-chunk-mode project="{{project}}" chunks="{{chunks}}" on-modetrigger="upload"></ts-chunk-mode>
+            <ts-review-mode project="{{project}}" chunks="{{chunks}}" on-modetrigger="upload"></ts-review-mode>
         </neon-animated-pages>
+
+        <div id="newpage">
+            <div id="topbox">
+                <paper-material id="topcard" elevation="1">
+                    <div id="heading">
+                        <div>
+                            Project: <span>[[project.name]]</span> - <span>[[project.language]]</span>
+                        </div>
+                        <ts-source-tab id="sourcetab" sources="{{project.sources}}" selected-source="{{project.currentsource}}"></ts-source-tab>
+                    </div>
+                </paper-material>
+                <paper-material id="bottomcard" elevation="1">
+                </paper-material>
+            </div>
+            <div id="bottombox">
+                <p>Choose source translation(s) to begin reading and translating</p>
+                <paper-icon-button icon="tab" class="big" on-tap="openmodal"></paper-icon-button>
+            </div>
+        </div>
 
     </template>
 
@@ -49,10 +135,6 @@
             Polymer.IronResizableBehavior
         ],
 
-        listeners: {
-            'iron-resize': 'onResize'
-        },
-
         properties: {
             selected: {
                 type: Number,
@@ -63,228 +145,141 @@
                 value: '',
                 notify: true
             },
-            language: {
+            project: {
                 type: Object,
-                value: {}
+                value: {},
+                notify: true
             },
-            book: {
+            chapters: {
                 type: Object,
-                value: {}
+                value: {},
+                computed: 'createchapters(project.source.*, project.translation.*)'
             },
-            sources: {
-                type: Array,
-                value: []
-            },
-            selectedSource: {
-                type: Number,
-                value: null,
-            },
-            source: {
-                type: Array,
-                value: []
-            },
-            translation: {
-                type: Array,
-                value: []
+            chunks: {
+                type: Object,
+                value: {},
+                computed: 'createchunks(project.source.*, project.translation.*)'
             }
         },
 
         observers: [
-            'onSelectedSourceChanged(selectedSource)'
+            'onSelectedSourceChanged(project.currentsource)',
+            'reset(project.name)',
+            'checksources(project.sources)'
         ],
 
-        onSelectedSourceChanged: function() {
-            // Get new data based on source tab selection
+        openmodal: function () {
+            this.$.sourcetab.openModal();
         },
 
-        onResize: function() {
-
+        reset: function () {
+            this.selected = 0;
         },
 
-        attached: function() {
-            this.selectedSource = 1;
+        checksources: function () {
+            var array = this.project.sources;
+            var pages = this.$.pages;
+            var newpage = this.$.newpage;
+            if (array === undefined || array.length === 0) {
+                pages.classList.add("hide");
+                newpage.classList.remove("hide");
+            } else {
+                pages.classList.remove("hide");
+                newpage.classList.add("hide");
+            }
+        },
+
+        upload: function () {
+             var update = this.chunks.data.map(function(chunk){
+             return {meta: chunk.meta, content: chunk.transcontent, status: chunk.status};
+             });
+
+            var count = 0;
+
+            for (var i = 0; i < update.length; i++) {
+                if (update[i].status === "Complete") {
+                    count++;
+                }
+            }
+
+            var completion = Math.round((count / update.length) * 100);
+            this.set('project.completion', completion);
+            this.set('project.translation', update);
+        },
+
+        createchunks: function () {
+            var transdata = {};
+            var srcdata = {};
+            var translation = this.project.translation;
+            var source = this.project.source;
+
+            transdata.data = translation.map(function(chunk){
+                return {transcontent: chunk.content, status: chunk.status};
+            });
+
+            srcdata.data = source.map(function(chunk){
+                return {srccontent: chunk.content, meta: chunk.meta, notes: chunk.notes, words: chunk.words};
+            });
+
+            return _.merge(srcdata, transdata);
+        },
+
+        createchapters: function () {
+            var transdata = {};
+            var srcdata = {};
+            var transchapters = [];
+            var srcchapters = [];
+            var translation = this.project.translation;
+            var source = this.project.source;
+
+            _.forEach(_.groupBy(translation, function(chunks) {
+                return chunks.meta.chapter;
+            }), function (data, chap) {
+                var chapstatus = "Complete";
+                var chapcontent = "";
+
+                _.forEach(data, function (chunk) {
+                    if (chunk.status === "Incomplete") {
+                        chapstatus = "Incomplete";
+                    }
+                    chapcontent += chunk.content + " ";
+                });
+                transchapters.push({status: chapstatus, transcontent: chapcontent});
+            });
+
+            _.forEach(_.groupBy(source, function(chunks) {
+                return chunks.meta.chapter;
+            }), function (data, chap) {
+                var chapcontent = "";
+
+                _.forEach(data, function (chunk) {
+                    chapcontent += chunk.content + " ";
+                });
+                srcchapters.push({chapter: chap, srccontent: chapcontent});
+            });
+
+            transdata.data = transchapters;
+            srcdata.data = srcchapters;
+
+            return _.merge(srcdata, transdata);
+        },
+
+        onSelectedSourceChanged: function(newValue) {
+
+            if (newValue != null && newValue >= 0) {
+                // The paper-tab won't get programmatically selected until after 30ms
+                this.async(function() {
+                    var source = document.querySelector('paper-tab.iron-selected').innerText;
+
+                    //
+                    // Write code to get new data based on source tab selection here...
+                    //
+
+                }, 30);
+            }
         },
 
         ready: function() {
-
-            this.sources = ["English ULB", "Arabic", "Bahasa Indonesia", "English UDB", "German", "Old Chinese"];
-
-            this.translation = [
-                {
-                    meta: {
-                        chapter: 1,
-                        startverse: 1,
-                        endverse: 5
-                    },
-                    content: '/v1 /v2 /v3 /v4 /v5 Translation - In the beginning was the Word, and the Word was with God,  and the Word was God. He was with God in the beginning. Through him all things were made; without him nothing was made that has been made. In him was life, and that life was the light of all mankind.',
-                    status: 'Incomplete'
-                },
-                {
-                    meta: {
-                        chapter: 1,
-                        startverse: 6,
-                        endverse: 8
-                    },
-                    content: '/v6 /v7 /v8 Translation -  There was a man sent from God whose name was John. He came as a witness to testify concerning that light, so that through him all might believe. He himself was not the light; he came only as a witness to the light.',
-                    status: 'Incomplete'
-                },
-                {
-                    meta: {
-                        chapter: 1,
-                        startverse: 9,
-                        endverse: 12
-                    },
-                    content: '/v9 /v10 /v11 /v12 Translation - The true light that gives light to everyone was coming into the world. He was in the world, and though the world was made through him, the world did not recognize him. He came to that which was his own, but his own did not receive him. Yet to all who did receive him, to those who believed in his name, he gave the right to become children of God',
-                    status: 'Incomplete'
-                },
-                {
-                    meta: {
-                        chapter: 2,
-                        startverse: 1,
-                        endverse: 4
-                    },
-                    content: '/v1 /v2 /v3 /v4 Translation - On the third day a wedding took place at Cana in Galilee. Jesus’ mother was there, and Jesus and his disciples had also been invited to the wedding. When the wine was gone, Jesus’ mother said to him, “They have no more wine.” “Woman, why do you involve me?” Jesus replied. “My hour has not yet come.”',
-                    status: 'Incomplete'
-                },
-                {
-                    meta: {
-                        chapter: 2,
-                        startverse: 5,
-                        endverse: 8
-                    },
-                    content: 'Translation - His mother said to the servants, “Do whatever he tells you.” Nearby stood six stone water jars, the kind used by the Jews for ceremonial washing, each holding from twenty to thirty gallons. Jesus said to the servants, “Fill the jars with water”; so they filled them to the brim. Then he told them, “Now draw some out and take it to the master of the banquet.” They did so',
-                    status: 'Incomplete'
-                },
-                {
-                    meta: {
-                        chapter: 2,
-                        startverse: 9,
-                        endverse: 10
-                    },
-                    content: 'Translation - and the master of the banquet tasted the water that had been turned into wine. He did not realize where it had come from, though the servants who had drawn the water knew. Then he called the bridegroom aside and said, “Everyone brings out the choice wine first and then the cheaper wine after the guests have had too much to drink; but you have saved the best till now.”',
-                    status: 'Incomplete'
-                },
-                {
-                    meta: {
-                        chapter: 3,
-                        startverse: 1,
-                        endverse: 4
-                    },
-                    content: 'Translation - Now there was a Pharisee, a man named Nicodemus who was a member of the Jewish ruling council. He came to Jesus at night and said, “Rabbi, we know that you are a teacher who has come from God. For no one could perform the signs you are doing if God were not with him.” Jesus replied, “Very truly I tell you, no one can see the kingdom of God unless they are born again.” “How can someone be born when they are old?” Nicodemus asked. “Surely they cannot enter a second time into their mother’s womb to be born!',
-                    status: 'Incomplete'
-                },
-                {
-                    meta: {
-                        chapter: 3,
-                        startverse: 5,
-                        endverse: 8
-                    },
-                    content: 'Translation - Jesus answered, “Very truly I tell you, no one can enter the kingdom of God unless they are born of water and the Spirit. Flesh gives birth to flesh, but the Spirit[b] gives birth to spirit. You should not be surprised at my saying, ‘You must be born again.’ The wind blows wherever it pleases. You hear its sound, but you cannot tell where it comes from or where it is going. So it is with everyone born of the Spirit.”',
-                    status: 'Incomplete'
-                },
-                {
-                    meta: {
-                        chapter: 3,
-                        startverse: 9,
-                        endverse: 12
-                    },
-                    content: 'Translation - “How can this be?” Nicodemus asked. “You are Israel’s teacher,” said Jesus, “and do you not understand these things? Very truly I tell you, we speak of what we know, and we testify to what we have seen, but still you people do not accept our testimony. I have spoken to you of earthly things and you do not believe; how then will you believe if I speak of heavenly things?',
-                    status: 'Incomplete'
-                }
-            ];
-
-            this.source = [
-                {
-                    meta: {
-                        chapter: 1,
-                        startverse: 1,
-                        endverse: 5
-                    },
-                    content: 'Source - In the beginning was the Word, and the Word was with God, and the Word was God. He was with God in the beginning. Through him all things were made; without him nothing was made that has been made. In him was life, and that life was the light of all mankind. The light shines in the darkness, and the darkness has not overcome it.',
-                    notes: 'Notes for Chunk 1',
-                    words: 'Words for Chunk 1'
-                },
-                {
-                    meta: {
-                        chapter: 1,
-                        startverse: 6,
-                        endverse: 8
-                    },
-                    content: 'Source -  There was a man sent from God whose name was John. He came as a witness to testify concerning that light, so that through him all might believe. He himself was not the light; he came only as a witness to the light.',
-                    notes: 'Notes for Chunk 2',
-                    words: 'Words for Chunk 2'
-                },
-                {
-                    meta: {
-                        chapter: 1,
-                        startverse: 9,
-                        endverse: 12
-                    },
-                    content: 'Source - The true light that gives light to everyone was coming into the world. He was in the world, and though the world was made through him, the world did not recognize him. He came to that which was his own, but his own did not receive him. Yet to all who did receive him, to those who believed in his name, he gave the right to become children of God',
-                    notes: 'Notes for Chunk 3',
-                    words: 'Words for Chunk 3'
-                },
-                {
-                    meta: {
-                        chapter: 2,
-                        startverse: 1,
-                        endverse: 4
-                    },
-                    content: 'Source - On the third day a wedding took place at Cana in Galilee. Jesus’ mother was there, and Jesus and his disciples had also been invited to the wedding. When the wine was gone, Jesus’ mother said to him, “They have no more wine.” “Woman, why do you involve me?” Jesus replied. “My hour has not yet come.”',
-                    notes: 'Notes for Chunk 4',
-                    words: 'Words for Chunk 4'
-                },
-                {
-                    meta: {
-                        chapter: 2,
-                        startverse: 5,
-                        endverse: 8
-                    },
-                    content: 'Source - His mother said to the servants, “Do whatever he tells you.” Nearby stood six stone water jars, the kind used by the Jews for ceremonial washing, each holding from twenty to thirty gallons. Jesus said to the servants, “Fill the jars with water”; so they filled them to the brim. Then he told them, “Now draw some out and take it to the master of the banquet.” They did so',
-                    notes: 'Notes for Chunk 5',
-                    words: 'Words for Chunk 5'
-                },
-                {
-                    meta: {
-                        chapter: 2,
-                        startverse: 9,
-                        endverse: 10
-                    },
-                    content: 'Source - and the master of the banquet tasted the water that had been turned into wine. He did not realize where it had come from, though the servants who had drawn the water knew. Then he called the bridegroom aside and said, “Everyone brings out the choice wine first and then the cheaper wine after the guests have had too much to drink; but you have saved the best till now.”',
-                    notes: 'Notes for Chunk 6',
-                    words: 'Words for Chunk 6'
-                },
-                {
-                    meta: {
-                        chapter: 3,
-                        startverse: 1,
-                        endverse: 4
-                    },
-                    content: 'Source - Now there was a Pharisee, a man named Nicodemus who was a member of the Jewish ruling council. He came to Jesus at night and said, “Rabbi, we know that you are a teacher who has come from God. For no one could perform the signs you are doing if God were not with him.” Jesus replied, “Very truly I tell you, no one can see the kingdom of God unless they are born again.” “How can someone be born when they are old?” Nicodemus asked. “Surely they cannot enter a second time into their mother’s womb to be born!',
-                    notes: 'Notes for Chunk 7',
-                    words: 'Words for Chunk 7'
-                },
-                {
-                    meta: {
-                        chapter: 3,
-                        startverse: 5,
-                        endverse: 8
-                    },
-                    content: 'Source - Jesus answered, “Very truly I tell you, no one can enter the kingdom of God unless they are born of water and the Spirit. Flesh gives birth to flesh, but the Spirit[b] gives birth to spirit. You should not be surprised at my saying, ‘You must be born again.’ The wind blows wherever it pleases. You hear its sound, but you cannot tell where it comes from or where it is going. So it is with everyone born of the Spirit.”',
-                    notes: 'Notes for Chunk 8',
-                    words: 'Words for Chunk 8'
-                },
-                {
-                    meta: {
-                        chapter: 3,
-                        startverse: 9,
-                        endverse: 12
-                    },
-                    content: 'Source - “How can this be?” Nicodemus asked. “You are Israel’s teacher,” said Jesus, “and do you not understand these things? Very truly I tell you, we speak of what we know, and we testify to what we have seen, but still you people do not accept our testimony. I have spoken to you of earthly things and you do not believe; how then will you believe if I speak of heavenly things?',
-                    notes: 'Notes for Chunk 9',
-                    words: 'Words for Chunk 9'
-                }
-            ];
 
         }
 

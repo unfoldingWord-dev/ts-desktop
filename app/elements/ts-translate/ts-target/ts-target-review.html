@@ -120,7 +120,7 @@
         <paper-material id="toggle" class="notdone" elevation="1">
             <div id="heading">
                 <div>
-                    <span>[[book.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[language.ln]]</span>
+                    <span>[[project.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[project.language]]</span>
                 </div>
                 <paper-icon-button icon="create" title="edit" on-tap="edit"></paper-icon-button>
             </div>
@@ -128,7 +128,7 @@
                 <p id="textholder"></p>
             </div>
             <div id="button">
-                <paper-button raised on-tap="done"><iron-icon icon="done"></iron-icon>DONE</paper-button>
+                <paper-button raised on-tap="checkdone"><iron-icon icon="done"></iron-icon>DONE</paper-button>
             </div>
         </paper-material>
 
@@ -156,12 +156,8 @@
 
 		is: 'ts-target-review',
 
-		properties: {
-            language: {
-                type: Object,
-                value: {}
-            },
-            book: {
+        properties: {
+            project: {
                 type: Object,
                 value: {}
             },
@@ -170,64 +166,108 @@
                 value: {},
                 notify: true
             },
-            text: {
-                type: String,
-                value: "",
-                computed: 'breaktext(chunk.*)'
-            },
             selected: {
                 type: Number,
                 value: 0,
                 notify: true
             }
-		},
+        },
+
+        observers: [
+            'rendertext(chunk.*)'
+        ],
 
         edit: function () {
             this.selected = 1;
         },
 
-        breaktext: function () {
-            var breakarray = this.chunk.transcontent.split(" ");
-            var vmstr1 = "\<ts-verse-marker id='drag";
-            var vmstr2 = "' draggable='true' ondragstart='drag(event)'  verse='";
-            var vmstr3 = "'\>\<\/ts-verse-marker\>";
-            var str1 = "\<span ondrop='drop(event)' ondragover='allowDrop(event)'\>";
-            var str2 = "\<\/span\> ";
+        rendertext: function () {
+            var start = this.chunk.meta.startverse;
+            var end = this.chunk.meta.endverse;
+            var chap = this.chunk.meta.chapter;
+            var status = this.chunk.status;
+            var textholder = this.$.textholder;
+            var textarray = this.chunk.transcontent.split(" ");
+            var vmstr1 = "\<ts-verse-marker id='c";
+            var vmstr2 = "v";
+            var vmstr3 = "' draggable='true' ondragstart='drag(event)' verse='";
+            var vmstr4 = "'\>\<\/ts-verse-marker\>";
+            var textstr1 = "\<span ondrop='drop(event)' ondragover='allowDrop(event)'\>";
+            var textstr2 = "\<\/span\> ";
+            var numstr1 = "\<sup\>";
+            var numstr2 = "\<\/sup\>";
+            var toggle = this.$.toggle;
             var returnstr = "";
+            var verse = 0;
+            var i = 0;
 
-            for (var i = 0; i < breakarray.length; i++) {
-                if (breakarray[i].substring(0, 2) === "/v") {
-                    var verse = breakarray[i].substring(2);
-                    breakarray[i] = vmstr1 + verse + vmstr2 + verse + vmstr3;
-                } else {
-                    breakarray[i] = str1 + breakarray[i] + str2;
+            if(status === "Incomplete") {
+                for (i = start; i <= end; i++) {
+                    returnstr += vmstr1 + chap + vmstr2 + i + vmstr3 + i + vmstr4;
                 }
-                returnstr += breakarray[i];
+                for (i = 0; i < textarray.length; i++) {
+                    returnstr += textstr1 + textarray[i] + textstr2;
+                }
+                toggle.classList.remove("done");
+                toggle.classList.add("notdone");
+            } else {
+                for (i = 0; i < textarray.length; i++) {
+                    if (textarray[i].substring(0, 2) === "/v") {
+                        verse = textarray[i].substring(2);
+                        returnstr += numstr1 + verse + numstr2;
+                    } else {
+                        returnstr += textarray[i] + " ";
+                    }
+                }
+                toggle.classList.remove("notdone");
+                toggle.classList.add("done");
             }
 
-            this.$.textholder.innerHTML = returnstr;
-
-            return returnstr;
+            textholder.innerHTML = returnstr;
         },
 
         completechunk: function () {
-            var toggle = this.$.toggle;
-            toggle.classList.remove("notdone");
-            toggle.classList.add("done");
-            this.chunk.status = "Complete";
+            var textholder = this.$.textholder;
+            var children = textholder.children;
+            var type = "";
+            var text = "";
+            var versenum = 0;
+            var returnstr = "";
+
+            for (var i = 0; i < children.length; i++) {
+                type = children[i].nodeName;
+
+                if (type === "TS-VERSE-MARKER") {
+                    versenum = children[i].verse;
+                    returnstr += "/v" + versenum + " ";
+                } else {
+                    text = children[i].textContent;
+                    returnstr += text + " ";
+                }
+            }
+
+            this.set('chunk.transcontent', returnstr);
+            this.set('chunk.status', "Complete");
             this.fire('edittrigger');
         },
 
-        done: function () {
-            var toggle = this.$.toggle;
+        checkdone: function () {
             var popup = this.$.popup;
+            var textarray = this.chunk.transcontent.split(" ");
+            var status = this.chunk.status;
+            var returnstr = "";
 
-            if (toggle.classList.contains("notdone")) {
+            if (status === "Incomplete") {
                 popup.open();
             } else {
-                toggle.classList.remove("done");
-                toggle.classList.add("notdone");
-                this.chunk.status = "Incomplete";
+                for (var i = 0; i < textarray.length; i++) {
+                    if (textarray[i].substring(0, 2) !== "/v") {
+                        returnstr += textarray[i] + " ";
+                    }
+                }
+
+                this.set('chunk.transcontent', returnstr);
+                this.set('chunk.status', "Incomplete");
                 this.fire('edittrigger');
             }
         },

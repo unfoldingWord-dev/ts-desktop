@@ -20,8 +20,8 @@
     <template>
 
         <div id="contain">
-            <template is="dom-repeat" items="{{combined.data}}" as="chunk">
-                <ts-read-card language="[[language]]" book="[[book]]" chunk="[[chunk]]" sources="{{sources}}" selected-source="{{selectedSource}}"></ts-read-card>
+            <template is="dom-repeat" items="{{chapters.data}}" as="chunk">
+                <ts-read-card project="{{project}}" chunk="[[chunk]]"></ts-read-card>
             </template>
         </div>
 
@@ -39,88 +39,19 @@
             Polymer.IronResizableBehavior
         ],
 
-        listeners: {
-            'iron-resize': 'onResize'
-        },
-
         properties: {
-            sources: {
-                type: Array,
-                value: [],
-                notify: true
-            },
-            selectedSource: {
-                type: Number,
-                value: 0, /* is this defined by the parent? */
-                notify: true
-            },
-            source: {
-                type: Array,
-                value: []
-            },
-            translation: {
-                type: Array,
-                value: []
-            },
-            language: {
-                type: Object,
-                value: {}
-            },
-            book: {
-                type: Object,
-                value: {}
-            },
-            combined: {
+            project: {
                 type: Object,
                 value: {},
-                computed: 'combinedata(source.*, translation.*)'
+                notify: true
+            },
+            chapters: {
+                type: Object,
+                value: {}
             }
         },
 
-        combinedata: function () {
-
-            var transdata = {};
-            var srcdata = {};
-            var transchapters = [];
-            var srcchapters = [];
-
-            _.forEach(_.groupBy(this.translation, function(chunks) {
-                return chunks.meta.chapter;
-            }), function (data, chap) {
-                var chapstatus = "Complete";
-                var chapcontent = "";
-
-                _.forEach(data, function (chunk) {
-                    if (chunk.status === "Incomplete") {
-                        chapstatus = "Incomplete";
-                    }
-                    chapcontent += chunk.content + " ";
-                });
-                transchapters.push({status: chapstatus, transcontent: chapcontent});
-            });
-
-            _.forEach(_.groupBy(this.source, function(chunks) {
-                return chunks.meta.chapter;
-            }), function (data, chap) {
-                var chapcontent = "";
-
-                _.forEach(data, function (chunk) {
-                    chapcontent += chunk.content + " ";
-                });
-                srcchapters.push({chapter: chap, srccontent: chapcontent});
-            });
-
-            transdata.data = transchapters;
-            srcdata.data = srcchapters;
-
-            return _.merge(srcdata, transdata);
-        },
-
         ready: function() {
-
-        },
-
-        onResize: function() {
 
         }
 

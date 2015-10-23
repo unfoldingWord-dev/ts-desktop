@@ -1,5 +1,6 @@
 
 <link rel="import" href="../../../components/paper-material/paper-material.html">
+<link rel="import" href="./ts-source-tab.html">
 
 <dom-module id="ts-source-chunk">
 
@@ -37,18 +38,23 @@
             color: var(--text-read-color);
         }
 
+        :host([noref]) .ref {
+            display: none;
+        }
+
 	</style>
 
 	<template>
 
         <paper-material elevation="1">
             <div id="heading">
-                <div>
-                    <span>[[book.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[language.ln]]</span>
+                <ts-source-tab sources="{{project.sources}}" selected-source="{{project.currentsource}}" lefty></ts-source-tab>
+                <div class="ref">
+                    <span>[[project.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[project.language]]</span>
                 </div>
             </div>
             <div id="content">
-                <p>[[chunk.srccontent]]</p>
+                <p id="textholder"></p>
             </div>
         </paper-material>
 
@@ -62,20 +68,44 @@
 
 		is: 'ts-source-chunk',
 
+        behaviors: [
+            Polymer.IronResizableBehavior
+        ],
+
 		properties: {
-            language: {
+            project: {
                 type: Object,
-                value: {}
-            },
-            book: {
-                type: Object,
-                value: {}
+                value: {},
+                notify: true
             },
             chunk: {
                 type: Object,
                 value: {}
             }
 		},
+
+        observers: [
+            'rendertext(chunk.*)'
+        ],
+
+        rendertext: function () {
+            var textarray = this.chunk.srccontent.split(" ");
+            var numstr1 = "\<sup\>";
+            var numstr2 = "\<\/sup\>";
+            var returnstr = "";
+            var verse = 0;
+
+            for (var i = 0; i < textarray.length; i++) {
+                if (textarray[i].substring(0, 2) === "/v") {
+                    verse = textarray[i].substring(2);
+                    returnstr += numstr1 + verse + numstr2;
+                } else {
+                    returnstr += textarray[i] + " ";
+                }
+            }
+
+            this.$.textholder.innerHTML = returnstr;
+        },
 
 		ready: function() {
 

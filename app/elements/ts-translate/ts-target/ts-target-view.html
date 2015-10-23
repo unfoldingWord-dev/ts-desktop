@@ -54,11 +54,11 @@
         <paper-material elevation="1">
             <div id="heading">
                 <div>
-                    <span>[[book.name]]</span> <span>[[chunk.chapter]]</span></span> &mdash; <span>[[language.ln]]</span>
+                    <span>[[project.name]]</span> <span>[[chunk.chapter]]</span> &mdash; <span>[[project.language]]</span>
                 </div>
             </div>
             <div id="content" class="editmode">
-                <p>{{chunk.transcontent}}</p>
+                <p id="textholder"></p>
             </div>
         </paper-material>
 
@@ -73,11 +73,7 @@
 		is: 'ts-target-view',
 
 		properties: {
-            language: {
-                type: Object,
-                value: {}
-            },
-            book: {
+            project: {
                 type: Object,
                 value: {}
             },
@@ -88,15 +84,43 @@
 		},
 
         observers: [
-            'disableedit(chunk.status)'
+            'rendertext(chunk.*)'
         ],
 
-        disableedit: function (status) {
+        rendertext: function () {
+            var status = this.chunk.status;
+            var contentbox = this.$.content;
+            var textholder = this.$.textholder;
+            var textarray = this.chunk.transcontent.split(" ");
+            var numstr1 = "\<sup\>";
+            var numstr2 = "\<\/sup\>";
+            var returnstr = "";
+            var verse = 0;
+            var i = 0;
+
             if (status === "Complete") {
-                this.$.content.classList.remove("editmode");
-            }
-            if (status === "Incomplete") {
-                this.$.content.classList.add("editmode");
+
+                for (i = 0; i < textarray.length; i++) {
+                    if (textarray[i].substring(0, 2) === "/v") {
+                        verse = textarray[i].substring(2);
+                        returnstr += numstr1 + verse + numstr2;
+                    } else {
+                        returnstr += textarray[i] + " ";
+                    }
+                }
+
+                textholder.innerHTML = returnstr;
+                contentbox.classList.remove("editmode");
+            } else {
+
+                for (i = 0; i < textarray.length; i++) {
+                    if (textarray[i].substring(0, 2) !== "/v") {
+                        returnstr += textarray[i] + " ";
+                    }
+                }
+
+                textholder.innerHTML = returnstr;
+                contentbox.classList.add("editmode");
             }
         },
 

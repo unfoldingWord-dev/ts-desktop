@@ -37,8 +37,7 @@
         <paper-menu-button horizontal-offset="10" vertical-offset="10" vertical-align="bottom">
             <paper-icon-button class="dropdown-trigger" icon="more-vert" title="options"></paper-icon-button>
             <paper-menu class="dropdown-content">
-                <paper-item on-tap="home1">Home 1</paper-item>
-                <paper-item on-tap="home2">Home 2</paper-item>
+                <paper-item>Update Library</paper-item>
                 <paper-item>Feedback</paper-item>
                 <paper-item>Settings</paper-item>
             </paper-menu>
@@ -64,14 +63,6 @@
                 value: '',
                 notify: true
             }
-        },
-
-        home1: function () {
-            this.selected = 0;
-        },
-
-        home2: function () {
-            this.selected = 1;
         },
 
         ready: function() {

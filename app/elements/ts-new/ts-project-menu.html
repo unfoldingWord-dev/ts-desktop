@@ -20,12 +20,6 @@
             align-items: center;
         }
 
-        [icon="autorenew"] {
-            padding: 5px;
-            height: 38px;
-            width: 38px;
-        }
-
         #header {
             color: var(--greyed-out-dark);
             font-size: 110%;
@@ -80,6 +74,10 @@
             --iron-icon-height: 18px;
             --iron-icon-width: 18px;
             color: var(--greyed-out-dark);
+        }
+
+        .row:hover .small {
+            color: white;
         }
 
         .row span {
@@ -144,7 +142,11 @@
 
       store: function(e) {
           this.group = e.model.grp;
-          this.selected = this.selected + 1;
+          if (this.group.name === "Open Bible Stories") {
+              this.fire('create');
+          } else {
+              this.selected = this.selected + 1;
+          }
       },
 
       ready: function() {

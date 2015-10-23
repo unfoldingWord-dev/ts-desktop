@@ -1,5 +1,6 @@
 
 <link rel="import" href="../../../components/paper-material/paper-material.html">
+<link rel="import" href="./ts-source-tab.html">
 
 <dom-module id="ts-source-chunk">
 
@@ -37,14 +38,18 @@
             color: var(--text-read-color);
         }
 
+        :host([noref]) .ref {
+            display: none;
+        }
+
 	</style>
 
 	<template>
 
         <paper-material elevation="1">
             <div id="heading">
-                <ts-source-tab sources="{{sources}}" selected-source="{{selectedSource}}" lefty></ts-source-tab>
-                <div>
+                <ts-source-tab sources="{{project.sources}}" selected-source="{{project.currentsource}}" lefty></ts-source-tab>
+                <div class="ref">
                     <span>[[project.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[project.language]]</span>
                 </div>
             </div>
@@ -70,19 +75,12 @@
 		properties: {
             project: {
                 type: Object,
-                value: {}
+                value: {},
+                notify: true
             },
             chunk: {
                 type: Object,
                 value: {}
-            },
-            sources: {
-                type: Array,
-                notify: true
-            },
-            selectedSource: {
-                type: Number,
-                notify: true
             }
 		},
 

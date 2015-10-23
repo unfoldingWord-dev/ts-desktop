@@ -1,6 +1,9 @@
 
 <link rel="import" href="../../components/iron-icons/iron-icons.html">
 <link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../components/neon-animation/neon-animation.html">
 
 <link rel="import" href="../ts-icons/ts-icons.html">
 <link rel="import" href="./ts-new-project-button.html">
@@ -99,6 +102,18 @@
             cursor: pointer;
         }
 
+        tr:hover .trashcan {
+            color: white;
+        }
+
+        tr:hover .smallicon {
+            color: white;
+        }
+
+        tr:hover .smalltext {
+            color: white;
+        }
+
         td {
             padding: 15px;
         }
@@ -109,9 +124,32 @@
             color: var(--greyed-out-dark);
         }
 
+        .trashcan {
+            --iron-icon-height: 22px;
+            --iron-icon-width: 22px;
+            color: var(--greyed-out-dark);
+        }
+
         .smalltext {
             font-size: 75%;
             color: var(--greyed-out-dark);
+        }
+
+        #popup {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+            width: 320px;
+            height: 220px;
+            text-align: center;
+        }
+
+        #popup .buttons {
+            display: flex;
+            justify-content: center;
         }
 
     </style>
@@ -144,12 +182,12 @@
                         </thead>
                         <tbody>
                         <template is="dom-repeat" items="[[projectlist]]" as="project">
-                            <tr on-tap="open">
-                                <td><iron-icon class="smallicon" icon="[[project.icon]]"></iron-icon></td>
-                                <td><span>[[project.name]]</span></td>
-                                <td><span class="smalltext">[[project.language]]</span></td>
-                                <td></td>
-                                <td><iron-icon class="smallicon" icon="info" title="Info"></iron-icon></td>
+                            <tr>
+                                <td on-tap="open"><iron-icon class="smallicon" icon="[[project.icon]]"></iron-icon></td>
+                                <td on-tap="open"><span>[[project.name]]</span></td>
+                                <td on-tap="open"><span class="smalltext">[[project.language]]</span></td>
+                                <td on-tap="open"><span>[[project.completion]]</span></td>
+                                <td><paper-icon-button class="trashcan" icon="delete" on-tap="checkdelete" title="delete"></paper-icon-button></td>
                             </tr>
                         </template>
                         </tbody>
@@ -157,6 +195,17 @@
                 </div>
             </template>
         </div>
+
+        <paper-dialog id="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <h2>Delete Project</h2>
+            <div>
+                <p>Are you sure you want to delete this project permanently?</p>
+            </div>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Cancel</paper-button>
+                <paper-button dialog-confirm on-tap="deleteproject">Confirm</paper-button>
+            </div>
+        </paper-dialog>
 
         <ts-new-project-button route="{{route}}"></ts-new-project-button>
 
@@ -183,6 +232,10 @@
             projectlist: {
                 type: Array,
                 value: []
+            },
+            index: {
+                type: Number,
+                value: null
             }
         },
 
@@ -193,6 +246,16 @@
         open: function (e) {
             this.project = e.model.project;
             this.route = "translate";
+        },
+
+        checkdelete: function (e) {
+            var target = e.model.project;
+            this.index = this.projectlist.indexOf(target);
+            this.$.popup.open();
+        },
+
+        deleteproject: function () {
+            this.splice('projectlist', this.index, 1);
         },
 
         ready: function() {

@@ -3,6 +3,7 @@
 <link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
 <link rel="import" href="../../components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
 
 <link rel="import" href="./ts-language-menu.html">
 <link rel="import" href="./ts-project-menu.html">
@@ -76,7 +77,7 @@
 
         <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
             <ts-language-menu selected="{{selected}}" language="{{language}}"></ts-language-menu>
-            <ts-project-menu selected="{{selected}}" group="{{group}}"></ts-project-menu>
+            <ts-project-menu selected="{{selected}}" group="{{group}}" on-create="createproject"></ts-project-menu>
             <ts-book-menu selected="{{selected}}" group="[[group]]" book="{{book}}" on-create="createproject"></ts-book-menu>
         </neon-animated-pages>
 
@@ -142,28 +143,66 @@
         },
 
         createproject: function () {
-            var newproj = {};
-            newproj.name = this.book.name;
-            newproj.language = this.language.ln;
-            newproj.icon = this.group.lefticon;
+            var name = "";
+            var num;
+            if (this.group.name === "Open Bible Stories") {
+                name = this.group.name;
+                num = 12;
+            } else {
+                name = this.book.name;
+                num = this.book.chapters;
+            }
+            var language = this.language.ln;
             var projectarray = this.projectlist;
-            var dupcheck = false;
+            var icon = this.group.lefticon;
             var popup = this.$.popup;
+            var translation = [];
+            var source = [];
+            var transchunk = {};
+            var srcchunk = {};
+            var duplicate = false;
+            var i;
 
-            for (var i = 0; i < projectarray.length; i++) {
-                if (projectarray[i].name === newproj.name && projectarray[i].language === newproj.language) {
-                    dupcheck = true;
+            for (i = 0; i < projectarray.length; i++) {
+                if (projectarray[i].name === name && projectarray[i].language === language) {
+                    duplicate = true;
                 }
             }
 
-            if (dupcheck) {
+            if (duplicate) {
                 popup.open();
-            } else {
-                this.push('projectlist', newproj);
-                this.project = newproj;
-                this.route = "translate";
-                this.selected = 0;
+                return;
             }
+
+            for (i = 1; i <= num; i++) {
+                transchunk = {
+                    meta: {
+                        chapter: i,
+                        startverse: i,
+                        endverse: i
+                    },
+                    content: '',
+                    status: 'Incomplete'
+                };
+                srcchunk = {
+                    meta: {
+                        chapter: i,
+                        startverse: i,
+                        endverse: i
+                    },
+                    content: 'This is blank source content for ' + name + ' chunk ' + i,
+                    notes: 'Notes for ' + name + ' chunk ' + i,
+                    words: 'Words for ' + name + ' chunk ' + i
+                };
+                translation.push(transchunk);
+                source.push(srcchunk);
+            }
+
+            var newproj = {"name": name, "language": language, "icon": icon, "sources": [], "completion": 0, "currentsource": 0, "translation": translation, "source": source};
+            this.push('projectlist', newproj);
+            this.set('project', newproj);
+            this.route = "translate";
+            this.selected = 0;
         },
 
         gohome: function () {

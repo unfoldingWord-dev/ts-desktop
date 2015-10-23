@@ -20,13 +20,8 @@
     <template>
 
         <div id="contain">
-            <template is="dom-if" if="{{chapters.data.length}}">
-                <template is="dom-repeat" items="{{chapters.data}}" as="chunk">
-                    <ts-read-card project="{{project}}" chunk="[[chunk]]"></ts-read-card>
-                </template>
-            </template>
-            <template is="dom-if" if="{{!chapters.data.length}}">
-                <ts-read-card project="{{project}}"></ts-read-card>
+            <template is="dom-repeat" items="{{chapters.data}}" as="chunk">
+                <ts-read-card project="{{project}}" chunk="[[chunk]]"></ts-read-card>
             </template>
         </div>
 
@@ -44,10 +39,6 @@
             Polymer.IronResizableBehavior
         ],
 
-        listeners: {
-            'iron-resize': 'onResize'
-        },
-
         properties: {
             project: {
                 type: Object,
@@ -61,10 +52,6 @@
         },
 
         ready: function() {
-
-        },
-
-        onResize: function() {
 
         }
 

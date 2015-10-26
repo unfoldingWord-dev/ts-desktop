@@ -97,9 +97,9 @@
         <ts-translate-sidebar route="{{route}}" selected="{{selected}}"></ts-translate-sidebar>
 
         <neon-animated-pages id="pages" selected="[[selected]]" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
-            <ts-read-mode project="{{project}}" chapters="[[chapters]]"></ts-read-mode>
-            <ts-chunk-mode project="{{project}}" chunks="{{chunks}}" on-modetrigger="upload"></ts-chunk-mode>
-            <ts-review-mode project="{{project}}" chunks="{{chunks}}" on-modetrigger="upload"></ts-review-mode>
+            <ts-read-mode project="{{project}}" chapters="[[chapters]]" modestatus="{{modestatus}}"></ts-read-mode>
+            <ts-chunk-mode project="{{project}}" chunks="{{chunks}}" modestatus="{{modestatus}}" on-modetrigger="upload"></ts-chunk-mode>
+            <ts-review-mode project="{{project}}" chunks="{{chunks}}" modestatus="{{modestatus}}" on-modetrigger="upload"></ts-review-mode>
         </neon-animated-pages>
 
         <div id="newpage">
@@ -138,7 +138,8 @@
         properties: {
             selected: {
                 type: Number,
-                value: 0
+                value: 2,
+                observer: 'modechange'
             },
             route: {
                 type: String,
@@ -149,6 +150,10 @@
                 type: Object,
                 value: {},
                 notify: true
+            },
+            modestatus: {
+                type: Object,
+                value: {}
             },
             chapters: {
                 type: Object,
@@ -172,8 +177,16 @@
             this.$.sourcetab.openModal();
         },
 
+        modechange: function (tomode, frommode) {
+            console.log("start from translate");
+            this.set('modestatus.frommode', frommode);
+            this.set('modestatus.tomode', tomode);
+            this.set('modestatus.step', 1);
+        },
+
         reset: function () {
-            this.selected = 0;
+            this.modestatus = {"tomode": 0, "frommode": 0, "chapter": 1, "verse": 1, "scroll": 0, "step": 0};
+            this.selected = 2;
         },
 
         checksources: function () {
@@ -251,11 +264,12 @@
                 return chunks.meta.chapter;
             }), function (data, chap) {
                 var chapcontent = "";
+                var chapter = parseInt(chap);
 
                 _.forEach(data, function (chunk) {
                     chapcontent += chunk.content + " ";
                 });
-                srcchapters.push({chapter: chap, srccontent: chapcontent});
+                srcchapters.push({chapter: chapter, srccontent: chapcontent});
             });
 
             transdata.data = transchapters;

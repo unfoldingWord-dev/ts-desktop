@@ -116,12 +116,47 @@
                 type: Object,
                 value: {},
                 notify: true
+            },
+            modestatus: {
+                type: Object,
+                value: {},
+                notify: true
             }
         },
 
         observers: [
-            'reset(project.name)'
+            'reset(project.name)',
+            'modechange(modestatus.step)'
         ],
+
+        modechange: function (step) {
+            var frommode = this.modestatus.frommode;
+            var tomode = this.modestatus.tomode;
+            var rect = this.getBoundingClientRect();
+            var top = rect.top;
+            var height = rect.height;
+            var mychap = this.chunk.meta.chapter;
+            var myverse = this.chunk.meta.startverse;
+            var chapter = this.modestatus.chapter;
+            var verse = this.modestatus.verse;
+            var scroll = this.modestatus.scroll;
+
+            if (step === 1 && frommode === 1 && top > 0 && top < height) {
+                console.log("Step 1 from chunk");
+                this.set('modestatus.chapter', mychap);
+                this.set('modestatus.verse', myverse);
+                this.set('modestatus.step', 2);
+            }
+            if (step === 3 && tomode === 1 && mychap === chapter && myverse === verse) {
+                console.log("Step 3 from chunk");
+
+                var newscroll = scroll + top;
+                console.log(newscroll);
+
+                this.set('modestatus.scroll', newscroll);
+                this.set('modestatus.step', 4);
+            }
+        },
 
         reset: function () {
             var trans = this.$.transcard;

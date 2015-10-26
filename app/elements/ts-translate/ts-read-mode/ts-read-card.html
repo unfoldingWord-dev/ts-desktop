@@ -111,12 +111,41 @@
             chunk: {
                 type: Object,
                 value: {}
+            },
+            modestatus: {
+                type: Object,
+                value: {},
+                notify: true
             }
         },
 
         observers: [
-            'reset(project.name)'
+            'reset(project.name)',
+            'modechange(modestatus.step)'
         ],
+
+        modechange: function (step) {
+            var frommode = this.modestatus.frommode;
+            var tomode = this.modestatus.tomode;
+            var rect = this.getBoundingClientRect();
+            var top = rect.top;
+            var height = rect.height / 2;
+            var mychap = this.chunk.chapter;
+            var chapter = this.modestatus.chapter;
+            var verse = this.modestatus.verse;
+
+            if (step === 1 && frommode === 0 && top > 0 - height && top < height) {
+                console.log("Step 1 from read");
+                this.set('modestatus.chapter', mychap);
+                this.set('modestatus.verse', 1);
+                this.set('modestatus.step', 2);
+            }
+            if (step === 3 && tomode === 0 && mychap === chapter) {
+                console.log("Step 3 from read");
+                this.set('modestatus.scroll', top);
+                this.set('modestatus.step', 4);
+            }
+        },
 
         reset: function () {
             var trans = this.$.transcard;

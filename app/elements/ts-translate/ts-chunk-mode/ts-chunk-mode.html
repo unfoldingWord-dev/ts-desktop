@@ -22,7 +22,7 @@
 
         <div id="contain">
             <template is="dom-repeat" items="{{chunks.data}}" as="chunk">
-                <ts-chunk-card on-cardtrigger="cardtrigger" project="{{project}}" chunk="{{chunk}}"></ts-chunk-card>
+                <ts-chunk-card on-cardtrigger="cardtrigger" project="{{project}}" chunk="{{chunk}}" modestatus="{{modestatus}}"></ts-chunk-card>
             </template>
         </div>
 
@@ -50,6 +50,40 @@
                 type: Object,
                 value: {},
                 notify: true
+            },
+            modestatus: {
+                type: Object,
+                value: {},
+                notify: true
+            }
+        },
+
+        observers: [
+            'scroll(modestatus.step)'
+        ],
+
+        scroll: function (step) {
+            var tomode = this.modestatus.tomode;
+            var scroll = this.modestatus.scroll;
+            var contain = this.$.contain;
+            var mythis = this;
+
+            if (step === 2 && tomode === 1) {
+                console.log("Step 2 from chunk");
+
+                var location = contain.scrollTop;
+                console.log(location);
+
+                this.set('modestatus.scroll', location);
+                setTimeout(function() {
+                    mythis.set('modestatus.step', 3);
+                }, 1000);
+            }
+            if (step === 4 && tomode === 1) {
+                console.log("Step 4 from chunk");
+
+                contain.scrollTop = scroll - 40;
+                this.set('modestatus.step', 0);
             }
         },
 

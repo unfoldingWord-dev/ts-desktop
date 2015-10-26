@@ -22,7 +22,7 @@
 
         <div id="contain">
             <template is="dom-repeat" items="{{chapters.data}}" as="chunk">
-                <ts-read-card project="{{project}}" chunk="[[chunk]]"></ts-read-card>
+                <ts-read-card project="{{project}}" chunk="[[chunk]]" modestatus="{{modestatus}}"></ts-read-card>
             </template>
         </div>
 
@@ -49,6 +49,35 @@
             chapters: {
                 type: Object,
                 value: {}
+            },
+            modestatus: {
+                type: Object,
+                value: {},
+                notify: true
+            }
+        },
+
+        observers: [
+            'scroll(modestatus.step)'
+        ],
+
+        scroll: function (step) {
+            var tomode = this.modestatus.tomode;
+            var scroll = this.modestatus.scroll;
+            var contain = this.$.contain;
+            var mythis = this;
+
+            if (step === 2 && tomode === 0) {
+                console.log("Step 2 from read");
+                contain.scrollTop = 0;
+                setTimeout(function() {
+                    mythis.set('modestatus.step', 3);
+                }, 1000);
+            }
+            if (step === 4 && tomode === 0) {
+                console.log("Step 4 from read");
+                contain.scrollTop = scroll - 40;
+                this.set('modestatus.step', 0);
             }
         },
 

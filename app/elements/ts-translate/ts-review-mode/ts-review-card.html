@@ -77,43 +77,12 @@
             selected: {
                 type: Number,
                 value: 0
-            },
-            modestatus: {
-                type: Object,
-                value: {},
-                notify: true
             }
 		},
 
         observers: [
-            'reset(project.name)',
-            'modechange(modestatus.step)'
+            'reset(project.name)'
         ],
-
-        modechange: function (step) {
-            var frommode = this.modestatus.frommode;
-            var tomode = this.modestatus.tomode;
-            var rect = this.getBoundingClientRect();
-            var top = rect.top;
-            var height = rect.height;
-            var mychap = this.chunk.meta.chapter;
-            var myverse = this.chunk.meta.startverse;
-            var chapter = this.modestatus.chapter;
-            var verse = this.modestatus.verse;
-
-            if (step === 1 && frommode === 2 && top > 0 && top < height) {
-                console.log("Step 1 from review");
-                console.log(mychap + " " + myverse);
-                this.set('modestatus.chapter', mychap);
-                this.set('modestatus.verse', myverse);
-                this.set('modestatus.step', 2);
-            }
-            if (step === 3 && tomode === 2 && mychap === chapter && myverse === verse) {
-                console.log("Step 3 from review");
-                this.set('modestatus.scroll', top);
-                this.set('modestatus.step', 4);
-            }
-        },
 
         reset: function () {
             this.selected = 0;

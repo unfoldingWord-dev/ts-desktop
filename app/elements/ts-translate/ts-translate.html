@@ -17,13 +17,33 @@
             display: flex;
         }
 
-        neon-animated-pages {
+        #pages {
             flex: auto;
             display: flex;
+            position: relative;
         }
 
-        neon-animated-pages > * {
+        #pages > * {
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            visibility: hidden;
             flex: auto;
+
+        }
+
+        #pages .current {
+            visibility: visible;
+
+
+        }
+
+        @-webkit-keyframes movein {
+            0% {transform: scale(0,0); opacity: 0;}
+
+            100% {transform: scale(1,1); opacity: 1}
         }
 
         .hide {
@@ -96,11 +116,11 @@
 
         <ts-translate-sidebar route="{{route}}" selected="{{selected}}"></ts-translate-sidebar>
 
-        <neon-animated-pages id="pages" selected="[[selected]]" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
-            <ts-read-mode project="{{project}}" chapters="[[chapters]]" modestatus="{{modestatus}}"></ts-read-mode>
-            <ts-chunk-mode project="{{project}}" chunks="{{chunks}}" modestatus="{{modestatus}}" on-modetrigger="upload"></ts-chunk-mode>
-            <ts-review-mode project="{{project}}" chunks="{{chunks}}" modestatus="{{modestatus}}" on-modetrigger="upload"></ts-review-mode>
-        </neon-animated-pages>
+        <div id="pages">
+            <ts-read-mode id="readmode" project="{{project}}" chapters="[[chapters]]" modestatus="{{modestatus}}"></ts-read-mode>
+            <ts-chunk-mode id="chunkmode" project="{{project}}" chunks="{{chunks}}" modestatus="{{modestatus}}" on-modetrigger="upload"></ts-chunk-mode>
+            <ts-review-mode id="reviewmode" project="{{project}}" chunks="{{chunks}}" modestatus="{{modestatus}}" on-modetrigger="upload"></ts-review-mode>
+        </div>
 
         <div id="newpage">
             <div id="topbox">
@@ -178,6 +198,19 @@
         },
 
         modechange: function (tomode, frommode) {
+            if (tomode === 0) {
+                this.$.readmode.classList.add("current");
+                this.$.chunkmode.classList.remove("current");
+                this.$.reviewmode.classList.remove("current");
+            } else if (tomode === 1) {
+                this.$.readmode.classList.remove("current");
+                this.$.chunkmode.classList.add("current");
+                this.$.reviewmode.classList.remove("current");
+            } else if (tomode === 2) {
+                this.$.readmode.classList.remove("current");
+                this.$.chunkmode.classList.remove("current");
+                this.$.reviewmode.classList.add("current");
+            }
             console.log("start from translate");
             this.set('modestatus.frommode', frommode);
             this.set('modestatus.tomode', tomode);
@@ -186,7 +219,14 @@
 
         reset: function () {
             this.modestatus = {"tomode": 0, "frommode": 0, "chapter": 1, "verse": 1, "scroll": 0, "step": 0};
-            this.selected = 2;
+            this.selected = 0;
+            var mythis = this;
+            setTimeout(function() {
+                mythis.set('selected', 1);
+            }, 1500);
+            setTimeout(function() {
+                mythis.set('selected', 2);
+            }, 3000);
         },
 
         checksources: function () {

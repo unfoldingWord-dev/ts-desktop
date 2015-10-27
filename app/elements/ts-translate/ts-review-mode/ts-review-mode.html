@@ -7,7 +7,7 @@
 
 		:host {
             display: flex;
-            flex: auto;
+            position: absolute;
         }
 
         #contain {
@@ -22,7 +22,7 @@
 
         <div id="contain">
             <template is="dom-repeat" items="{{chunks.data}}" as="chunk">
-                <ts-review-card project="{{project}}" chunk="{{chunk}}" modestatus="{{modestatus}}" on-cardtrigger="cardtrigger"></ts-review-card>
+                <ts-review-card id="{{createid(index)}}" project="{{project}}" chunk="{{chunk}}" on-cardtrigger="cardtrigger"></ts-review-card>
             </template>
         </div>
 
@@ -59,27 +59,53 @@
         },
 
         observers: [
-            'scroll(modestatus.step)'
+            'stepchange(modestatus.step)'
         ],
 
-        scroll: function (step) {
-            var tomode = this.modestatus.tomode;
-            var scroll = this.modestatus.scroll;
-            var contain = this.$.contain;
+        stepchange: function (step) {
             var mythis = this;
+            var tomode = mythis.modestatus.tomode;
+            var frommode = mythis.modestatus.frommode;
+            var contain = this.$.contain;
+            var num = contain.children.length - 1;
+            var card;
+            var i;
 
+            if (step === 1 && frommode === 2) {
+                for (i = 0; i < num; i++) {
+                    card = document.getElementById("review" + i);
+                    if (card.getBoundingClientRect().top >= 0) {
+                        mythis.set('modestatus.chapter', card.chunk.meta.chapter);
+                        mythis.set('modestatus.verse', card.chunk.meta.startverse);
+                        mythis.set('modestatus.step', 2);
+                        return;
+                    }
+                }
+            }
             if (step === 2 && tomode === 2) {
-                console.log("Step 2 from review");
-                contain.scrollTop = 0;
+                mythis.set('modestatus.scroll', contain.scrollTop);
                 setTimeout(function() {
                     mythis.set('modestatus.step', 3);
-                }, 1000);
+                }, 500);
+            }
+            if (step === 3 && tomode === 2) {
+                for (i = 0; i < num; i++) {
+                    card = document.getElementById("review" + i);
+                    if (card.chunk.meta.chapter === mythis.modestatus.chapter && card.chunk.meta.startverse === mythis.modestatus.verse) {
+                        mythis.set('modestatus.scroll', mythis.modestatus.scroll + card.getBoundingClientRect().top);
+                        mythis.set('modestatus.step', 4);
+                        return;
+                    }
+                }
             }
             if (step === 4 && tomode === 2) {
-                console.log("Step 4 from review");
-                contain.scrollTop = scroll - 40;
-                this.set('modestatus.step', 0);
+                contain.scrollTop = mythis.modestatus.scroll - 60;
+                mythis.set('modestatus.step', 0);
             }
+        },
+
+        createid: function (index) {
+            return "review" + index;
         },
 
         cardtrigger: function () {

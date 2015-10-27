@@ -22,7 +22,7 @@
 
         <div id="contain">
             <template is="dom-repeat" items="{{chunks.data}}" as="chunk">
-                <ts-chunk-card on-cardtrigger="cardtrigger" project="{{project}}" chunk="{{chunk}}" modestatus="{{modestatus}}"></ts-chunk-card>
+                <ts-chunk-card id="{{createid(index)}}" on-cardtrigger="cardtrigger" project="{{project}}" chunk="{{chunk}}"></ts-chunk-card>
             </template>
         </div>
 
@@ -59,32 +59,53 @@
         },
 
         observers: [
-            'scroll(modestatus.step)'
+            'stepchange(modestatus.step)'
         ],
 
-        scroll: function (step) {
-            var tomode = this.modestatus.tomode;
-            var scroll = this.modestatus.scroll;
-            var contain = this.$.contain;
+        stepchange: function (step) {
             var mythis = this;
+            var tomode = mythis.modestatus.tomode;
+            var frommode = mythis.modestatus.frommode;
+            var contain = this.$.contain;
+            var num = contain.children.length - 1;
+            var card;
+            var i;
 
+            if (step === 1 && frommode === 1) {
+                for (i = 0; i < num; i++) {
+                    card = document.getElementById("chunk" + i);
+                    if (card.getBoundingClientRect().top >= 0) {
+                        mythis.set('modestatus.chapter', card.chunk.meta.chapter);
+                        mythis.set('modestatus.verse', card.chunk.meta.startverse);
+                        mythis.set('modestatus.step', 2);
+                        return;
+                    }
+                }
+            }
             if (step === 2 && tomode === 1) {
-                console.log("Step 2 from chunk");
-
-                var location = contain.scrollTop;
-                console.log(location);
-
-                this.set('modestatus.scroll', location);
+                mythis.set('modestatus.scroll', contain.scrollTop);
                 setTimeout(function() {
                     mythis.set('modestatus.step', 3);
-                }, 1000);
+                }, 500);
+            }
+            if (step === 3 && tomode === 1) {
+                for (i = 0; i < num; i++) {
+                    card = document.getElementById("chunk" + i);
+                    if (card.chunk.meta.chapter === mythis.modestatus.chapter && card.chunk.meta.startverse === mythis.modestatus.verse) {
+                        mythis.set('modestatus.scroll', mythis.modestatus.scroll + card.getBoundingClientRect().top);
+                        mythis.set('modestatus.step', 4);
+                        return;
+                    }
+                }
             }
             if (step === 4 && tomode === 1) {
-                console.log("Step 4 from chunk");
-
-                contain.scrollTop = scroll - 40;
-                this.set('modestatus.step', 0);
+                contain.scrollTop = mythis.modestatus.scroll - 60;
+                mythis.set('modestatus.step', 0);
             }
+        },
+
+        createid: function (index) {
+            return "chunk" + index;
         },
 
         cardtrigger: function () {

@@ -22,7 +22,7 @@
 
         <div id="contain">
             <template is="dom-repeat" items="{{chapters.data}}" as="chunk">
-                <ts-read-card project="{{project}}" chunk="[[chunk]]" modestatus="{{modestatus}}"></ts-read-card>
+                <ts-read-card id="{{createid(index)}}" project="{{project}}" chunk="[[chunk]]"></ts-read-card>
             </template>
         </div>
 
@@ -58,27 +58,53 @@
         },
 
         observers: [
-            'scroll(modestatus.step)'
+            'stepchange(modestatus.step)'
         ],
 
-        scroll: function (step) {
-            var tomode = this.modestatus.tomode;
-            var scroll = this.modestatus.scroll;
-            var contain = this.$.contain;
+        stepchange: function (step) {
             var mythis = this;
+            var tomode = mythis.modestatus.tomode;
+            var frommode = mythis.modestatus.frommode;
+            var contain = this.$.contain;
+            var num = contain.children.length - 1;
+            var card;
+            var i;
 
+            if (step === 1 && frommode === 0) {
+                for (i = 0; i < num; i++) {
+                    card = document.getElementById("read" + i);
+                    if (card.getBoundingClientRect().top > 0 - (card.getBoundingClientRect().height / 2) ) {
+                        mythis.set('modestatus.chapter', card.chunk.chapter);
+                        mythis.set('modestatus.verse', 1);
+                        mythis.set('modestatus.step', 2);
+                        return;
+                    }
+                }
+            }
             if (step === 2 && tomode === 0) {
-                console.log("Step 2 from read");
-                contain.scrollTop = 0;
+                mythis.set('modestatus.scroll', contain.scrollTop);
                 setTimeout(function() {
                     mythis.set('modestatus.step', 3);
-                }, 1000);
+                }, 500);
+            }
+            if (step === 3 && tomode === 0) {
+                for (i = 0; i < num; i++) {
+                    card = document.getElementById("read" + i);
+                    if (card.chunk.chapter === mythis.modestatus.chapter) {
+                        mythis.set('modestatus.scroll', mythis.modestatus.scroll + card.getBoundingClientRect().top);
+                        mythis.set('modestatus.step', 4);
+                        return;
+                    }
+                }
             }
             if (step === 4 && tomode === 0) {
-                console.log("Step 4 from read");
-                contain.scrollTop = scroll - 40;
-                this.set('modestatus.step', 0);
+                contain.scrollTop = mythis.modestatus.scroll - 60;
+                mythis.set('modestatus.step', 0);
             }
+        },
+
+        createid: function (index) {
+            return "read" + index;
         },
 
         ready: function() {

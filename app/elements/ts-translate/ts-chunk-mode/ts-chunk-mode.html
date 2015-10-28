@@ -6,14 +6,42 @@
     <style>
 
         :host {
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            visibility: hidden;
             display: flex;
-            flex: auto;
         }
 
         #contain {
             flex: auto;
-            overflow: auto;
+            overflow-y: auto;
+            overflow-x: hidden;
             padding-bottom: 100px;
+        }
+
+        .movein {
+            -webkit-animation: moveinto .5s;
+        }
+
+        .moveout {
+            -webkit-animation: moveout .5s;
+        }
+
+        .hide {
+            opacity: 0;
+        }
+
+        @-webkit-keyframes moveinto {
+            0% {transform: scale(0,0); opacity: 0}
+            100% {transform: scale(1,1); opacity: 1}
+        }
+
+        @-webkit-keyframes moveout {
+            0% {transform: scale(1,1); opacity: 1}
+            100% {transform: scale(0,0); opacity: 0}
         }
 
     </style>
@@ -72,6 +100,8 @@
             var i;
 
             if (step === 1 && frommode === 1) {
+                contain.classList.remove("movein");
+                contain.classList.add("moveout");
                 for (i = 0; i < num; i++) {
                     card = document.getElementById("chunk" + i);
                     if (card.getBoundingClientRect().top >= 0) {
@@ -83,6 +113,8 @@
                 }
             }
             if (step === 2 && tomode === 1) {
+                contain.classList.add("hide");
+                contain.classList.remove("moveout");
                 mythis.set('modestatus.scroll', contain.scrollTop);
                 setTimeout(function() {
                     mythis.set('modestatus.step', 3);
@@ -101,6 +133,10 @@
             if (step === 4 && tomode === 1) {
                 contain.scrollTop = mythis.modestatus.scroll - 60;
                 mythis.set('modestatus.step', 0);
+                setTimeout(function() {
+                    contain.classList.remove("hide");
+                    contain.classList.add("movein");
+                }, 500);
             }
         },
 

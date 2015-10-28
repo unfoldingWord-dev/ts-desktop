@@ -1,5 +1,6 @@
 
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../../components/paper-checkbox/paper-checkbox.html">
 
 <dom-module id="ts-settings">
 
@@ -7,22 +8,101 @@
 
         :host {
             display: flex;
+            flex-direction: column;
         }
 
         neon-animated-pages {
-            flex: auto;
+            flex: none;
             display: flex;
+            transform: translateY(-60px);
+            height: calc(100% - 45px);
         }
 
         neon-animated-pages > * {
             flex: auto;
         }
 
+        .header {
+            background-color: var(--primary-color);
+            min-height: 50px;
+        }
+
+        .title {
+            font-size: 125%;
+            color: var(--text-color);
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 45px;
+        }
+
+        [icon="arrow-back"] {
+            margin: 0 1em 0 .2em;
+        }
+
+        .body {
+            padding: 0 4rem;
+            overflow-y: auto;
+            background-color: white; /* change to var */
+        }
+
+        .setting-group-header {
+            color: var(--primary-color);
+            margin: 1.5rem 0 1rem;
+            font-size: 105%;
+        }
+
+        .setting-group-item {
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--greyed-out-light);
+            display: flex;
+        }
+
+        .setting-text {
+            flex: 1 1 auto;
+        }
+
+        .help-text {
+            color: var(--greyed-out-dark);
+            line-height: 1.6;
+        }
+
+        .setting-checkbox {
+            flex: 0 0 48px;
+        }
     </style>
 
     <template>
 
-        <div>hello</div>
+        <div class="header">
+            <div class="title">
+                <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
+                <span>Settings</span>
+            </div>
+        </div>
+
+        <div class="body">
+
+            <template is="dom-repeat" items="{{settings}}">
+                <div class="setting-group-header">{{capitalize(item.group)}}</div>
+                <div class="setting-group-body">
+                    <template is="dom-repeat" items="{{item.list}}" as="setting">
+                        <div id="setting-group-item" class="setting-group-item" on-tap="runTapHandler">
+                            <div class="setting-text">
+                                <div class="main-text">{{setting.mainText}}</div>
+                                <div class="help-text">{{computeHelpText(setting)}}</div>
+                            </div>
+                            <template is="dom-if" if="{{computeType(setting.type)}}">
+                                <div class="setting-checkbox">
+                                    <paper-checkbox class="right" checked$="{{setting.value}}"></paper-checkbox>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+            </template>
+
+        </div>
 
     </template>
 
@@ -39,16 +119,176 @@
         ],
 
         properties: {
-
+            route: {
+                type: String,
+                notify: true
+            },
+            backto: {
+                type: String
+            },
+            settings: {
+                type: Array,
+                value: []
+            }
         },
 
-        attached: function() {
+        capitalize: function(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        },
 
+        computeHelpText: function(setting) {
+            var text;
+            if (setting.type === "int" && setting.helpText) {
+                text = setting.helpText.replace("<int>", setting.value);
+            }
+            else {
+                text = setting.helpText || setting.value || "--";
+            }
+            return text;
+        },
+
+        computeType: function(type) {
+            return type == "bool" ? true : false;
+        },
+
+        runTapHandler: function(event) {
+            event.model.setting.tapHandler();
         },
 
         ready: function() {
+            var general = ['remembermyplace', 'highlightkeyterms', 'font', 'fontsize'];
+            var share = ['exportformat'];
+            var upload = ['autosavechanges', 'authserver', 'authserverport', 'dataserver', 'dataserverport', 'mediaserver'];
+            var advanced = ['backupinterval', 'logginglevel'];
+            // this.settings = App.configurator.getSettings({'general': general, 'share': share, 'upload': upload, 'advanced': advanced});
+            var config = App.configurator;
+            this.settings = [
+                {
+                    group: "general",
+                    list: [
+                        {
+                            name: "remembermyplace",
+                            mainText: "Remember My Place",
+                            helpText: "Display the last viewed screen when starting the app",
+                            value: config.getValue('remembermyplace'),
+                            type: "bool",
+                            tapHandler: function() {console.log('do what now?');}
+                        },
+                        {
+                            name: "highlightkeyterms",
+                            mainText: "Highlight Key Terms",
+                            helpText: "Make key terms clickable in the source text",
+                            value: config.getValue('highlightkeyterms'),
+                            type: "bool",
+                            tapHandler: function() {console.log('do what now?');}
+                        },
+                        {
+                            name: "font",
+                            mainText: "Font",
+                            value: config.getValue('font'),
+                            type: "string",
+                            tapHandler: function() {console.log('do what now?');}
+                        },
+                        {
+                            name: "fontsize",
+                            mainText: "Font Size",
+                            value: config.getValue('fontsize'),
+                            type: "string",
+                            tapHandler: function() {console.log('do what now?');}
+                        }
+                    ]
+                },
+                {
+                    group: "share",
+                    list: [
+                        {
+                            name: "exportformat",
+                            mainText: "Export Format",
+                            value: config.getValue('exportformat'),
+                            type: "string",
+                            tapHandler: function() {console.log('do what now?');}
+                        }
+                    ]
+                },
+                {
+                    group: "upload",
+                    list: [
+                        {
+                            name: "autosavechanges",
+                            mainText: "Auto Save Changes",
+                            helpText: "Every <int> seconds",
+                            nullText: "Never",
+                            value: config.getValue('autosavechanges'),
+                            type: "int",
+                            tapHandler: function() {console.log('do what now?');}
+                        },
+                        {
+                            name: "authserver",
+                            mainText: "Authentication Server",
+                            value: config.getValue('authserver'),
+                            type: "string",
+                            tapHandler: function() {console.log('do what now?');}
+                        },
+                        {
+                            name: "authserverport",
+                            mainText: "Authentication Server Port",
+                            value: config.getValue('authserverport'),
+                            type: "string",
+                            tapHandler: function() {console.log('do what now?');}
+                        },
+                        {
+                            name: "dataserver",
+                            mainText: "Data Server",
+                            value: config.getValue('dataserver'),
+                            type: "string",
+                            tapHandler: function() {console.log('do what now?');}
+                        },
+                        {
+                            name: "dataserverport",
+                            mainText: "Data Server Port",
+                            value: config.getValue('dataserverport'),
+                            type: "string",
+                            tapHandler: function() {console.log('do what now?');}
+                        },
+                        {
+                            name: "mediaserver",
+                            mainText: "Media Server",
+                            value: config.getValue('mediaserver'),
+                            type: "string",
+                            tapHandler: function() {console.log('do what now?');}
+                        }
+                    ]
+                },
+                {
+                    group: "advanced",
+                    list: [
+                        {
+                            name: "backupinterval",
+                            mainText: "Backup Interval",
+                            helpText: "<int> minutes",
+                            nullText: "Disable Backup",
+                            value: config.getValue('backupinterval'),
+                            type: "int",
+                            tapHandler: function() {console.log('do what now?');}
+                        },
+                        {
+                            name: "logginglevel",
+                            mainText: "Logging Level",
+                            value: config.getValue('logginglevel'),
+                            type: "string",
+                            tapHandler: function() {console.log('do what now?');}
+                        },
+                    ]
+                }
+            ];
+            // console.log(this.settings);
+        },
 
-        }
+        back: function() {
+            this.route = this.backto;
+        },
+
+        
 
     });
 

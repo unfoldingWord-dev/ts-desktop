@@ -60,7 +60,7 @@
                 <paper-item on-tap="home">Home</paper-item>
                 <paper-item on-tap="publish">Publish</paper-item>
                 <paper-item>Feedback</paper-item>
-                <paper-item>Settings</paper-item>
+                <paper-item on-tap="settings">Settings</paper-item>
             </paper-menu>
         </paper-menu-button>
     </template>
@@ -113,6 +113,10 @@
 
         home: function () {
             this.route = "home";
+        },
+
+        settings: function() {
+            this.route = "settings";
         },
 
         ready: function() {

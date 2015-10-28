@@ -102,10 +102,14 @@
             var contain = this.$.contain;
             var num = contain.children.length - 1;
             var card;
+            var pagescroll;
+            var cardscroll;
+            var found;
             var i;
 
+            console.log("Chunk step changed to " + step);
+
             if (frommode !== mymode && tomode !== mymode) {
-                console.log("not chunk");
                 mythis.classList.add("hide");
             }
 
@@ -128,31 +132,28 @@
             if (step === 2 && tomode === mymode) {
                 mythis.classList.add("preview");
                 mythis.classList.remove("hide");
-                mythis.set('modestatus.scroll', contain.scrollTop);
+                pagescroll = contain.scrollTop;
                 setTimeout(function() {
-                    mythis.set('modestatus.step', 3);
-                }, 500);
-            }
-            if (step === 3 && tomode === mymode) {
-                for (i = 0; i < num; i++) {
-                    card = document.getElementById(myname + i);
-                    if (card.chunk.meta.chapter === mythis.modestatus.chapter && card.chunk.meta.startverse === mythis.modestatus.verse) {
-                        mythis.set('modestatus.scroll', mythis.modestatus.scroll + card.getBoundingClientRect().top);
-                        mythis.set('modestatus.step', 4);
-                        return;
+                    found = false;
+                    i = 0;
+                    while (i < num && !found) {
+                        card = document.getElementById(myname + i);
+                        if (card.chunk.meta.chapter === mythis.modestatus.chapter && card.chunk.meta.startverse === mythis.modestatus.verse) {
+                            cardscroll = card.getBoundingClientRect().top;
+                            found = true;
+                        }
+                        i++;
                     }
-                }
-            }
-            if (step === 4 && tomode === mymode) {
-                contain.scrollTop = mythis.modestatus.scroll - 60;
-                mythis.set('modestatus.step', 0);
-                setTimeout(function() {
-                    mythis.classList.remove("preview");
-                    contain.classList.add("movein");
+                    contain.scrollTop = pagescroll + cardscroll - 60;
+                    mythis.set('modestatus.step', 0);
+                    setTimeout(function() {
+                        mythis.classList.remove("preview");
+                        contain.classList.add("movein");
+                    }, 500);
+                    setTimeout(function() {
+                        contain.classList.remove("movein");
+                    }, 1500);
                 }, 500);
-                setTimeout(function() {
-                    contain.classList.remove("movein");
-                }, 1500);
             }
         },
 

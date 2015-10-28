@@ -19,16 +19,6 @@
             position: relative;
         }
 
-        #pages .current {
-            visibility: visible;
-
-        }
-
-        #pages .preview {
-            visibility: visible;
-            opacity: 0;
-        }
-
     </style>
 
     <template>
@@ -36,7 +26,7 @@
         <ts-translate-sidebar route="{{route}}" selected="{{selected}}"></ts-translate-sidebar>
 
         <div id="pages">
-            <ts-read-mode class="current" id="readmode" project="{{project}}" chapters="[[chapters]]" modestatus="{{modestatus}}"></ts-read-mode>
+            <ts-read-mode id="readmode" project="{{project}}" chapters="[[chapters]]" modestatus="{{modestatus}}"></ts-read-mode>
             <ts-chunk-mode id="chunkmode" project="{{project}}" chunks="{{chunks}}" modestatus="{{modestatus}}" on-modetrigger="upload"></ts-chunk-mode>
             <ts-review-mode id="reviewmode" project="{{project}}" chunks="{{chunks}}" modestatus="{{modestatus}}" on-modetrigger="upload"></ts-review-mode>
             <ts-nosource-mode project="{{project}}" modestatus="{{modestatus}}"></ts-nosource-mode>
@@ -59,8 +49,8 @@
         properties: {
             selected: {
                 type: Number,
-                value: 0
-
+                value: 0,
+                observer: 'modechange'
             },
             route: {
                 type: String,
@@ -89,40 +79,22 @@
         },
 
         observers: [
-
+            'reset(project.name)',
+            'checksources(project.sources)'
         ],
 
         modechange: function (tomode, frommode) {
-            var read = this.$.readmode;
-            var chunk = this.$.chunkmode;
-            var review = this.$.reviewmode;
+            console.log("translate modechange");
 
             this.set('modestatus.frommode', frommode);
             this.set('modestatus.tomode', tomode);
             this.set('modestatus.step', 1);
 
-            if (tomode === 0) {
-                read.classList.add("current");
-                setTimeout(function() {
-                    chunk.classList.remove("current");
-                    review.classList.remove("current");
-                }, 500);
-            } else if (tomode === 1) {
-                chunk.classList.add("current");
-                setTimeout(function() {
-                    read.classList.remove("current");
-                    review.classList.remove("current");
-                }, 500);
-            } else if (tomode === 2) {
-                review.classList.add("current");
-                setTimeout(function() {
-                    read.classList.remove("current");
-                    chunk.classList.remove("current");
-                }, 500);
-            }
         },
 
         reset: function () {
+            console.log("translate reset");
+
 
             var read = this.$.readmode;
             var chunk = this.$.chunkmode;
@@ -134,25 +106,25 @@
             review.classList.add("preview");
             setTimeout(function() {
                 mythis.set('modestatus', {"tomode": 0, "frommode": 0, "chapter": 1, "verse": 1, "scroll": 0, "step": 0});
-                mythis.set('selected', 0);
+                mythis.set('modestatus.step', 2);
             }, 500);
             setTimeout(function() {
                 read.classList.remove("preview");
                 chunk.classList.remove("preview");
                 review.classList.remove("preview");
-            }, 1000);
+            }, 10000);
         },
 
         checksources: function () {
             var array = this.project.sources;
-            var pages = this.$.pages;
-            var newpage = this.$.newpage;
+            //var pages = this.$.pages;
+            //var newpage = this.$.newpage;
             if (array === undefined || array.length === 0) {
                 //pages.classList.add("hide");
                 //newpage.classList.remove("hide");
             } else {
-                pages.classList.remove("hide");
-                newpage.classList.add("hide");
+                //pages.classList.remove("hide");
+                //newpage.classList.add("hide");
             }
         },
 

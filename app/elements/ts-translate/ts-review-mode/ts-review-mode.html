@@ -85,86 +85,68 @@
                 type: Object,
                 value: {},
                 notify: true
+            },
+            modename: {
+                type: String,
+                value: "review"
             }
         },
 
-        observers: [
-            'stepchange(modestatus.step)'
-        ],
-
-        stepchange: function (step) {
+        frommode: function () {
             var mythis = this;
-            var mymode = 2;
-            var myname = "review";
-            var tomode = mythis.modestatus.tomode;
-            var frommode = mythis.modestatus.frommode;
+            var contain = this.$.contain;
+            var num = contain.children.length - 1;
+            var card;
+            var found = false;
+            var i = 0;
+
+            contain.classList.add("moveout");
+            setTimeout(function() {
+                contain.classList.remove("moveout");
+                mythis.classList.add("hide");
+            }, 500);
+            while (i < num && !found) {
+                card = document.getElementById(mythis.modename + i);
+                if (card.getBoundingClientRect().top >= 0) {
+                    mythis.set('modestatus.chapter', card.chunk.meta.chapter);
+                    mythis.set('modestatus.verse', card.chunk.meta.startverse);
+                    found = true;
+                }
+                i++;
+            }
+        },
+
+        tomode: function () {
+            var mythis = this;
             var contain = this.$.contain;
             var num = contain.children.length - 1;
             var card;
             var pagescroll;
             var cardscroll;
-            var found;
-            var step2 = false;
-            var i;
+            var found = false;
+            var i = 0;
 
-            console.log("Review step changed to " + step);
-
-            if (frommode !== mymode && tomode !== mymode) {
-                mythis.classList.add("hide");
-            }
-
-            if (step === 1 && frommode === mymode) {
-                contain.classList.add("moveout");
-                setTimeout(function() {
-                    contain.classList.remove("moveout");
-                    mythis.classList.add("hide");
-                }, 500);
-                for (i = 0; i < num; i++) {
-                    card = document.getElementById(myname + i);
-                    if (card.getBoundingClientRect().top >= 0) {
-                        mythis.set('modestatus.chapter', card.chunk.meta.chapter);
-                        mythis.set('modestatus.verse', card.chunk.meta.startverse);
-                        mythis.set('modestatus.step', 2);
-                        return;
-                    }
+            mythis.classList.add("preview");
+            mythis.classList.remove("hide");
+            pagescroll = contain.scrollTop;
+            while (i < num && !found) {
+                card = document.getElementById(mythis.modename + i);
+                if (card.chunk.meta.chapter === mythis.modestatus.chapter && card.chunk.meta.startverse === mythis.modestatus.verse) {
+                    cardscroll = card.getBoundingClientRect().top;
+                    found = true;
                 }
+                i++;
             }
-            if (step === 2 && tomode === mymode && !step2) {
-                mythis.classList.add("preview");
-                mythis.classList.remove("hide");
-                pagescroll = contain.scrollTop;
-                step2 = true;
-                console.log("review pagescroll = " + pagescroll);
-                setTimeout(function() {
-                    found = false;
-                    i = 0;
-                    while (i < num && !found) {
-                        card = document.getElementById(myname + i);
-                        if (card.chunk.meta.chapter === mythis.modestatus.chapter && card.chunk.meta.startverse === mythis.modestatus.verse) {
-                            cardscroll = card.getBoundingClientRect().top;
-                            console.log("review cardscroll = " + cardscroll);
-                            found = true;
-                        }
-                        i++;
-                    }
-                    setTimeout(function() {
-                        contain.scrollTop = pagescroll + cardscroll - 60;
-                    }, 2500);
-
-                    mythis.set('modestatus.step', 0);
-                    setTimeout(function() {
-                        mythis.classList.remove("preview");
-                        contain.classList.add("movein");
-                    }, 500);
-                    setTimeout(function() {
-                        contain.classList.remove("movein");
-                    }, 1500);
-                }, 500);
-            }
+            contain.scrollTop = pagescroll + cardscroll - 60;
+            mythis.classList.remove("preview");
+            contain.classList.add("movein");
+            setTimeout(function() {
+                contain.classList.remove("movein");
+            }, 500);
         },
 
         createid: function (index) {
-            return "review" + index;
+            return this.modename + index;
         },
 
         cardtrigger: function () {

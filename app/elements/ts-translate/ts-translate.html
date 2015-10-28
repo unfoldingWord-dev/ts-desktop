@@ -84,35 +84,40 @@
         ],
 
         modechange: function (tomode, frommode) {
-            console.log("translate modechange");
 
-            this.set('modestatus.frommode', frommode);
-            this.set('modestatus.tomode', tomode);
-            this.set('modestatus.step', 1);
+            var read = this.$.readmode;
+            var chunk = this.$.chunkmode;
+            var review = this.$.reviewmode;
+
+            if (frommode === 0) {
+                read.frommode();
+            } else if (frommode === 1) {
+                chunk.frommode();
+            } else if (frommode === 2) {
+                review.frommode();
+            }
+
+            if (tomode === 0) {
+                read.tomode();
+            } else if (tomode === 1) {
+                chunk.tomode();
+            } else if (tomode === 2) {
+                review.tomode();
+            }
 
         },
 
         reset: function () {
-            console.log("translate reset");
-
 
             var read = this.$.readmode;
             var chunk = this.$.chunkmode;
             var review = this.$.reviewmode;
             var mythis = this;
+            mythis.set('modestatus', {"chapter": 1, "verse": 1});
+            mythis.set('selected', 0);
+            chunk.classList.add("hide");
+            review.classList.add("hide");
 
-            read.classList.add("preview");
-            chunk.classList.add("preview");
-            review.classList.add("preview");
-            setTimeout(function() {
-                mythis.set('modestatus', {"tomode": 0, "frommode": 0, "chapter": 1, "verse": 1, "scroll": 0, "step": 0});
-                mythis.set('modestatus.step', 2);
-            }, 500);
-            setTimeout(function() {
-                read.classList.remove("preview");
-                chunk.classList.remove("preview");
-                review.classList.remove("preview");
-            }, 10000);
         },
 
         checksources: function () {

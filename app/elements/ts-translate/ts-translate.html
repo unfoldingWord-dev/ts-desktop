@@ -84,39 +84,41 @@
         ],
 
         modechange: function (tomode, frommode) {
-
             var read = this.$.readmode;
             var chunk = this.$.chunkmode;
             var review = this.$.reviewmode;
 
-            if (frommode === 0) {
+            if (frommode === 1) {
                 read.frommode();
-            } else if (frommode === 1) {
-                chunk.frommode();
             } else if (frommode === 2) {
+                chunk.frommode();
+            } else if (frommode === 3) {
                 review.frommode();
             }
 
-            if (tomode === 0) {
+            if (tomode === 1) {
                 read.tomode();
-            } else if (tomode === 1) {
-                chunk.tomode();
             } else if (tomode === 2) {
+                chunk.tomode();
+            } else if (tomode === 3) {
                 review.tomode();
             }
-
         },
 
         reset: function () {
-
             var read = this.$.readmode;
             var chunk = this.$.chunkmode;
             var review = this.$.reviewmode;
             var mythis = this;
-            mythis.set('modestatus', {"chapter": 1, "verse": 1});
+
             mythis.set('selected', 0);
+            mythis.set('modestatus', {"chapter": 1, "verse": 1});
+            read.classList.add("hide");
             chunk.classList.add("hide");
             review.classList.add("hide");
+            setTimeout(function() {
+                mythis.set('selected', 1);
+            }, 1000);
 
         },
 

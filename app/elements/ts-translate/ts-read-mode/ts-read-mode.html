@@ -138,10 +138,12 @@
                 i++;
             }
             contain.scrollTop = pagescroll + cardscroll - 60;
-            mythis.classList.remove("preview");
-            contain.classList.add("movein");
             setTimeout(function() {
-                contain.classList.remove("movein");
+                mythis.classList.remove("preview");
+                contain.classList.add("movein");
+                setTimeout(function() {
+                    contain.classList.remove("movein");
+                }, 500);
             }, 500);
         },
 

@@ -14,28 +14,39 @@
             left: 0;
             bottom: 0;
             right: 0;
-            visibility: hidden;
             display: flex;
         }
 
-        #pages .current {
-            visibility: visible;
+        #contain {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
         }
 
-        #pages .preview {
-            visibility: visible;
+        :host(.preview) {
             opacity: 0;
         }
 
-        @-webkit-keyframes movein {
-            0% {opacity: 0;}
-            50% {transform: scale(0,0); opacity: 1;}
+        :host(.hide) {
+            visibility: hidden;
+        }
+
+        .movein {
+            -webkit-animation: moveinto .5s;
+        }
+
+        .moveout {
+            -webkit-animation: moveout .5s;
+        }
+
+        @-webkit-keyframes moveinto {
+            0% {transform: scale(0,0); opacity: 0}
             100% {transform: scale(1,1); opacity: 1}
         }
 
         @-webkit-keyframes moveout {
-            0% {transform: scale(1,1);}
-            100% {transform: scale(0,0);}
+            0% {transform: scale(1,1); opacity: 1}
+            100% {transform: scale(0,0); opacity: 0}
         }
 
         paper-material {
@@ -50,12 +61,6 @@
             min-height: 75px;
             align-items: center;
             font-size: 125%;
-        }
-
-        #contain {
-            flex: auto;
-            display: flex;
-            flex-direction: column;
         }
 
         #topbox {
@@ -132,92 +137,41 @@
         ],
 
         properties: {
-            selected: {
-                type: Number,
-                value: 0
-
-            },
             project: {
                 type: Object,
                 value: {},
                 notify: true
-            },
-            modestatus: {
-                type: Object,
-                value: {}
             }
         },
 
-        observers: [
+        frommode: function () {
+            var mythis = this;
+            var contain = this.$.contain;
 
-        ],
+            contain.classList.add("moveout");
+            setTimeout(function() {
+                contain.classList.remove("moveout");
+                mythis.classList.add("hide");
+            }, 500);
+        },
+
+        tomode: function () {
+            var mythis = this;
+            var contain = this.$.contain;
+
+            mythis.classList.add("preview");
+            mythis.classList.remove("hide");
+            setTimeout(function() {
+                mythis.classList.remove("preview");
+                contain.classList.add("movein");
+                setTimeout(function() {
+                    contain.classList.remove("movein");
+                }, 500);
+            }, 500);
+        },
 
         openmodal: function () {
             this.$.sourcetab.openModal();
-        },
-
-        modechange: function (tomode, frommode) {
-            var read = this.$.readmode;
-            var chunk = this.$.chunkmode;
-            var review = this.$.reviewmode;
-
-            this.set('modestatus.frommode', frommode);
-            this.set('modestatus.tomode', tomode);
-            this.set('modestatus.step', 1);
-
-            if (tomode === 0) {
-                read.classList.add("current");
-                setTimeout(function() {
-                    chunk.classList.remove("current");
-                    review.classList.remove("current");
-                }, 500);
-            } else if (tomode === 1) {
-                chunk.classList.add("current");
-                setTimeout(function() {
-                    read.classList.remove("current");
-                    review.classList.remove("current");
-                }, 500);
-            } else if (tomode === 2) {
-                review.classList.add("current");
-                setTimeout(function() {
-                    read.classList.remove("current");
-                    chunk.classList.remove("current");
-                }, 500);
-            }
-        },
-
-        reset: function () {
-
-            var read = this.$.readmode;
-            var chunk = this.$.chunkmode;
-            var review = this.$.reviewmode;
-            var mythis = this;
-
-            read.classList.add("preview");
-            chunk.classList.add("preview");
-            review.classList.add("preview");
-            setTimeout(function() {
-                mythis.set('modestatus', {"tomode": 0, "frommode": 0, "chapter": 1, "verse": 1, "scroll": 0, "step": 0});
-                mythis.set('selected', 0);
-            }, 500);
-            setTimeout(function() {
-                read.classList.remove("preview");
-                chunk.classList.remove("preview");
-                review.classList.remove("preview");
-            }, 1000);
-        },
-
-        checksources: function () {
-            var array = this.project.sources;
-            var pages = this.$.pages;
-            var newpage = this.$.newpage;
-            if (array === undefined || array.length === 0) {
-                pages.classList.add("hide");
-                newpage.classList.remove("hide");
-            } else {
-                pages.classList.remove("hide");
-                newpage.classList.add("hide");
-            }
         },
 
         ready: function() {

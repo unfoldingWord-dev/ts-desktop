@@ -98,14 +98,30 @@
                 read.classList.add("current");
                 chunk.classList.remove("current");
                 review.classList.remove("current");
+                read.disabled = false;
+                chunk.disabled = false;
+                review.disabled = false;
             } else if (selected === 2) {
                 read.classList.remove("current");
                 chunk.classList.add("current");
                 review.classList.remove("current");
+                read.disabled = false;
+                chunk.disabled = false;
+                review.disabled = false;
             } else if (selected === 3) {
                 read.classList.remove("current");
                 chunk.classList.remove("current");
                 review.classList.add("current");
+                read.disabled = false;
+                chunk.disabled = false;
+                review.disabled = false;
+            } else if (selected === 4 || selected === 0) {
+                read.classList.remove("current");
+                chunk.classList.remove("current");
+                review.classList.remove("current");
+                read.disabled = true;
+                chunk.disabled = true;
+                review.disabled = true;
             }
         },
 
@@ -127,6 +143,7 @@
 
         home: function () {
             this.route = "home";
+            this.selected = 0;
         },
 
         ready: function() {

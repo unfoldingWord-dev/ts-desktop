@@ -29,7 +29,7 @@
             <ts-read-mode id="readmode" project="{{project}}" chapters="[[chapters]]" modestatus="{{modestatus}}"></ts-read-mode>
             <ts-chunk-mode id="chunkmode" project="{{project}}" chunks="{{chunks}}" modestatus="{{modestatus}}" on-modetrigger="upload"></ts-chunk-mode>
             <ts-review-mode id="reviewmode" project="{{project}}" chunks="{{chunks}}" modestatus="{{modestatus}}" on-modetrigger="upload"></ts-review-mode>
-            <ts-nosource-mode project="{{project}}" modestatus="{{modestatus}}"></ts-nosource-mode>
+            <ts-nosource-mode id="nosourcemode" project="{{project}}"></ts-nosource-mode>
         </div>
 
     </template>
@@ -87,6 +87,11 @@
             var read = this.$.readmode;
             var chunk = this.$.chunkmode;
             var review = this.$.reviewmode;
+            var nosource = this.$.nosourcemode;
+
+            if (frommode > 0) {
+                this.set('modestatus.lastmode', frommode);
+            }
 
             if (frommode === 1) {
                 read.frommode();
@@ -94,6 +99,8 @@
                 chunk.frommode();
             } else if (frommode === 3) {
                 review.frommode();
+            } else if (frommode === 4) {
+                nosource.frommode();
             }
 
             if (tomode === 1) {
@@ -102,36 +109,48 @@
                 chunk.tomode();
             } else if (tomode === 3) {
                 review.tomode();
+            } else if (tomode === 4) {
+                nosource.tomode();
             }
         },
 
         reset: function () {
+            var mythis = this;
             var read = this.$.readmode;
             var chunk = this.$.chunkmode;
             var review = this.$.reviewmode;
-            var mythis = this;
+            var nosource = this.$.nosourcemode;
+            var sources = this.project.sources;
 
             mythis.set('selected', 0);
-            mythis.set('modestatus', {"chapter": 1, "verse": 1});
+            mythis.set('modestatus', {"chapter": 1, "verse": 1, "lastmode": 1});
             read.classList.add("hide");
             chunk.classList.add("hide");
             review.classList.add("hide");
+            nosource.classList.add("hide");
             setTimeout(function() {
-                mythis.set('selected', 1);
+                if (sources === undefined || sources.length === 0) {
+                    mythis.set('selected', 4);
+                } else {
+                    mythis.set('selected', 1);
+                }
             }, 1000);
 
         },
 
         checksources: function () {
-            var array = this.project.sources;
-            //var pages = this.$.pages;
-            //var newpage = this.$.newpage;
-            if (array === undefined || array.length === 0) {
-                //pages.classList.add("hide");
-                //newpage.classList.remove("hide");
-            } else {
-                //pages.classList.remove("hide");
-                //newpage.classList.add("hide");
+            var sources = this.project.sources;
+            var lastmode = this.modestatus.lastmode;
+            var selected = this.selected;
+
+            if (selected === 4) {
+                if (sources !== undefined && sources.length !== 0) {
+                    this.set('selected', lastmode);
+                }
+            } else if (selected > 0) {
+                if (sources === undefined || sources.length === 0) {
+                    this.set('selected', 4);
+                }
             }
         },
 

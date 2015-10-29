@@ -22,7 +22,7 @@
     });
     let translator = new Translator(indexer);
     let Library = require('../js/library').Library;
-    let library = Library(indexer);
+    let library = new Library(indexer);
 
     let util = require('../js/lib/util');
 

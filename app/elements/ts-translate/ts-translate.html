@@ -128,17 +128,16 @@
             chunk.classList.add("hide");
             review.classList.add("hide");
             nosource.classList.add("hide");
-            setTimeout(function() {
-                if (sources === undefined || sources.length === 0) {
-                    mythis.set('selected', 4);
-                } else {
-                    mythis.set('selected', 1);
-                }
-            }, 1000);
 
+            if (sources !== undefined && sources.length !== 0) {
+                setTimeout(function() {
+                    mythis.set('selected', 1);
+                }, 500);
+            }
         },
 
         checksources: function () {
+            var mythis = this;
             var sources = this.project.sources;
             var lastmode = this.modestatus.lastmode;
             var selected = this.selected;
@@ -147,9 +146,11 @@
                 if (sources !== undefined && sources.length !== 0) {
                     this.set('selected', lastmode);
                 }
-            } else if (selected > 0) {
+            } else {
                 if (sources === undefined || sources.length === 0) {
-                    this.set('selected', 4);
+                    setTimeout(function() {
+                        mythis.set('selected', 4);
+                    }, 500);
                 }
             }
         },

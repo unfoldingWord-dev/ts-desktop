@@ -3,7 +3,7 @@
 ;(function () {
 
     let assert = require('assert');
-    //let rimraf = require('rimraf');
+    let rimraf = require('rimraf');
     let Indexer = require('../../app/js/indexer').Indexer;
     let Configurator = require('../../app/js/configurator').Configurator;
     let configurator = new Configurator();
@@ -36,7 +36,6 @@
 
     describe('@Indexer', function () {
 
-        /** /
         before(function (done) {
             rimraf(indexConfig.indexDir, function () {
                 done();
@@ -48,7 +47,6 @@
                 done();
             });
         });
-        /**/
 
         describe('@Utils', function () {
 

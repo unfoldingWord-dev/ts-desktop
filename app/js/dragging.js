@@ -1,3 +1,4 @@
+'use strict';
 
 function allowDrop(ev) {
     ev.preventDefault();

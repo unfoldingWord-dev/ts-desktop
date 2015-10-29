@@ -1,0 +1,195 @@
+
+<link rel="import" href="../../../components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../../../components/paper-icon-button/paper-icon-button.html">
+
+<link rel="import" href="./ts-source-modal.html">
+
+<dom-module id="ts-source-tab">
+
+	<style>
+
+        :host {
+            flex: auto;
+            display: flex;
+        }
+
+        .tabs {
+        	flex: auto;
+        	display: flex;
+        	padding-left: 48px; /* Counter-balance to the folder icon to the right */
+        	justify-content: center;
+        	position: relative;
+        }
+
+        :host.lefty .tabs {
+        	flex: initial;
+        	padding-left: 0;
+        }
+
+        paper-tabs {
+			box-sizing: border-box;
+			padding: 0.5rem 0;
+			color: var(--greyed-out-dark);
+			--paper-tabs-selection-bar-color: var(--greyed-out-dark);
+        }
+
+		paper-tabs::shadow #tabsContent.scrollable.paper-tabs {
+			position: relative;
+		}
+
+		/* This is like the selection bar on paper-tab but without the bugginess */
+        .selection-bar {
+        	width: 100%;
+        	height: 2px !important;
+        	position: absolute;
+        	bottom: 0;
+        	left: 0;
+			background-color: var(--greyed-out-dark);
+			transition: width 333ms ease-out, left 155ms ease-out;
+        }
+
+		paper-tab {
+			--paper-tab: {
+				padding: 0;
+				margin: 0 0.75rem;
+			}
+		}
+
+		:host.lefty paper-tab {
+			--paper-tab: {
+				padding: 0;
+				margin: 0 1rem 0 0;
+			}
+		}
+
+		paper-tab:focus::shadow .tab-content.paper-tab{
+			font-weight: 500;
+		}
+
+        .modal-btn-container {
+        	display: flex;
+			flex: 0 0 48px;
+			justify-content: center;
+			align-items: center;
+			cursor: pointer;
+        }
+
+		.modal-btn-container .icon {
+			color: var(--greyed-out-light);
+		}
+
+	</style>
+
+	<template>
+		<div class="tabs">
+			<paper-tabs no-bar hide-scroll-buttons scrollable selected="{{ selectedSource }}">
+				<template is="dom-repeat" items="[[ sources ]]" as="source">
+                   <paper-tab class="tab" on-tap="onResize">{{ source }}</paper-tab>
+                </template>
+            	<div class="selection-bar"></div>
+			</paper-tabs>
+		</div>
+		<div class="modal-btn-container">
+			<div class="modal-btn-inner-container">
+				<paper-icon-button icon="icons:tab" class="icon24 icon" on-click="openModal"></paper-icon-button>
+			</div>
+		</div>
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+        is: 'ts-source-tab',
+
+        behaviors: [
+            Polymer.IronResizableBehavior
+        ],
+
+        listeners: {
+            'iron-resize': 'onResize'
+        },
+
+        properties: {
+        	sources: {
+        		type: Array,
+        		notify: true
+        	},
+        	selectedSource: {
+        		type: Number,
+        		notify: true
+        	},
+        	lefty: {
+        		type: Boolean
+        	}
+        },
+
+        ready: function() {
+
+        	if (this.lefty) {
+        		this.classList.add('lefty');
+        	}
+        },
+
+        openModal: function() {
+			var modal = document.createElement('ts-source-modal');
+			modal.id = "source-tab-modal";
+			modal.style.display = 'block';
+			modal.sources = this.sources.slice();
+			modal.selectedSource = this.selectedSource;
+			modal.addEventListener('confirm', this.onConfirm.bind(this));
+			modal.addEventListener('cancel', this.onCancel.bind(this));
+			document.querySelector('ts-translate').appendChild(modal);
+			modal.fire('open');
+        },
+
+        removeModal: function() {
+        	var modal = document.querySelector('ts-source-modal');
+			document.querySelector('ts-translate').removeChild(modal);
+        },
+
+        onConfirm: function() {
+        	var modal = document.querySelector('ts-source-modal');
+        	this.sources = modal.sources;
+        	this.selectedSource = modal.selectedSource;
+        	// Execute these AFTER the state has changed and the values reflect that change.
+        	this.async(function() {
+	        	if (this.selectedSource != null) {
+	        		this.querySelector('paper-tab.iron-selected').fire('tap');
+	        	}
+        	}, 30);
+        	this.removeModal();
+        },
+
+        onCancel: function() {
+        	this.removeModal();
+        },
+
+        onResize: function() {
+        	this._adjustSelectionBar();
+        },
+
+        // This function adjust the position and the width of the custom selection bar based on the position and
+        //    the width of the selected tab.
+        _adjustSelectionBar: function() {
+        	// Checks against null first when selecting the selected paper-tab.
+        	if (this.querySelector('paper-tab.iron-selected')) {
+	        	// Execute these AFTER the state has changed and the values reflect that change.
+	        	this.async(function() {
+	        		var selectedTab = this.querySelector('paper-tab.iron-selected');
+		    		var offsetLeft = selectedTab.offsetLeft;
+		    		var tabWidth = selectedTab.clientWidth;
+		    		var bars = document.querySelectorAll('.selection-bar');
+		    		Array.prototype.forEach.call(bars, function(bar, index) {
+		    			bar.style.width = tabWidth+'px';
+		    			bar.style.left = offsetLeft+'px';
+		    		});
+	        	}, 30);
+        	}
+        }
+
+    });
+
+</script>

@@ -1,0 +1,165 @@
+
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../components/iron-list/iron-list.html">
+<link rel="import" href="../../components/iron-input/iron-input.html">
+
+<dom-module id="ts-language-menu">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #contain {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #header {
+            color: var(--greyed-out-dark);
+            font-size: 110%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            min-height: 60px;
+        }
+
+        #header > div {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 1px solid var(--greyed-out-light);
+            background: white;
+            width: 410px;
+            box-shadow: 0 -1px 2px 1px var(--primary-color-dark);
+        }
+
+        iron-list {
+            font-size: 110%;
+            max-height: 90vh;
+            width: 450px;
+            background: white;
+            box-shadow: 0 2px 3px 2px var(--greyed-out-light);
+        }
+
+        .row {
+            display: block;
+            margin: 0;
+            padding: 1em;
+            border-bottom: 1px solid var(--greyed-out-light);
+            transition: background .3s, color .3s;
+            cursor: pointer;
+        }
+
+        .row:hover {
+            background: var(--accent-color-dark);
+            color: var(--text-color);
+        }
+
+        .right {
+            float: right;
+            color: var(--greyed-out-dark);
+            font-style: italic;
+            font-size: 80%
+        }
+
+        .row:hover .right {
+            color: white;
+        }
+
+        input {
+            border: none;
+            font-size: 110%;
+            font-style: italic;
+            width: 75%;
+            padding: 0.25em 5px;
+            margin-left: -5px;
+        }
+
+    </style>
+
+  <template>
+
+      <div id="header">
+          <div>
+              <input is="iron-input" bind-value="{{query}}" placeholder="Choose target language">
+              <paper-icon-button class="right" icon="search" title="Search Languages"></paper-icon-button>
+          </div>
+      </div>
+
+      <div id="contain">
+          <iron-list id="list" items="{{searchfilter(query,languagelist)}}" as="lang">
+              <template>
+                  <div class="row" on-tap="store">
+                      <div>
+                          <span>[[lang.ln]]</span>
+                          <span class="right">[[lang.lc]]</span>
+                      </div>
+                  </div>
+              </template>
+          </iron-list>
+      </div>
+
+  </template>
+
+</dom-module>
+
+<script>
+
+;(function (root) {
+  'use strict';
+
+  Polymer({
+      is: 'ts-language-menu',
+
+      properties: {
+          selected: {
+              type: Number,
+              value: 0,
+              notify: true
+          },
+          language: {
+              type: Object,
+              value: {},
+              notify: true
+          },
+          query: {
+              type: String,
+              value: ""
+          },
+          languagelist: {
+              type: Array,
+              value: []
+          }
+      },
+
+      behaviors: [
+          Polymer.IronResizableBehavior
+      ],
+
+      searchfilter: function (query, languagelist) {
+          let search = App.util.startsWithBase.bind(null, query);
+
+          return languagelist.filter(function (lang) {
+              return search(lang.ln) || search(lang.lc);
+          });
+      },
+
+      store: function (e) {
+          this.language = e.model.lang;
+          this.selected = this.selected + 1;
+      },
+
+      ready: function () {
+          this.languagelist = App.translator.targetLanguages;
+      }
+  });
+
+})(window);
+
+</script>

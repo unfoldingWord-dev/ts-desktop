@@ -1,0 +1,103 @@
+
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
+
+<dom-module id="ts-publish-book">
+
+    <style>
+
+        :host {
+            display: flex;
+        }
+
+        #contain {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #list {
+            background: white;
+            width: 450px;
+            box-shadow: 0 2px 3px 2px var(--greyed-out-light);
+            margin-top: 30px;
+        }
+
+        #next {
+            background: var(--highlight-primary);
+            color: var(--text-color);
+            margin-top: 20px;
+        }
+
+        ul {
+            margin: 0;
+            padding: 0;
+            list-style-type: none;
+            font-size: 110%;
+        }
+
+        ul li {
+            display: block;
+            margin: 0;
+            padding: 1em;
+            border-bottom: 1px solid var(--greyed-out-light);
+            transition: background .3s, color .3s;
+        }
+
+        ul li:hover {
+            background: var(--accent-color-dark);
+            color: var(--text-color);
+        }
+
+        .right {
+            float: right;
+            color: var(--completed-color);
+        }
+
+    </style>
+
+    <template>
+
+        <div id="contain">
+            <div id="list">
+                <ul>
+                    <li><span>[[project.name]]</span><iron-icon class="right" icon="done"></iron-icon></li>
+                </ul>
+            </div>
+            <paper-button raised id="next" on-tap="next">NEXT STEP</paper-button>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-publish-book',
+
+        properties: {
+            selected: {
+                type: Number,
+                value: 0,
+                notify: true
+            },
+            project: {
+                type: Object,
+                value: {}
+            }
+        },
+
+        next: function () {
+            this.selected = this.selected + 1;
+        },
+
+        ready: function() {
+
+        }
+
+    });
+
+</script>

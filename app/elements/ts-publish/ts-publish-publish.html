@@ -1,0 +1,106 @@
+
+<link rel="import" href="../../components/paper-button/paper-button.html">
+
+<dom-module id="ts-publish-publish">
+
+    <style>
+
+        :host {
+            display: flex;
+        }
+
+        #contain {
+            display: flex;
+            justify-content: center;
+            flex: auto;
+        }
+
+        #contain > div {
+            background: white;
+            box-shadow: 0 2px 3px 2px var(--greyed-out-light);
+        }
+
+        #left {
+            margin: 15px;
+            flex: 2 2;
+            padding: 20px;
+        }
+
+        #right {
+            flex: 1 1;
+            margin: 15px 15px 15px 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #right > div {
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: flex-start;
+            flex-grow: 1;
+        }
+
+        #right > div > * {
+            margin: 10px 20px;
+        }
+
+        #lower {
+            border-top: 1px solid var(--greyed-out-light);
+        }
+
+        .link {
+            color: var(--highlight-primary);
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        #publish {
+            background: var(--highlight-primary);
+            color: var(--text-color);
+        }
+
+    </style>
+
+    <template>
+
+        <div id="contain">
+            <div id="left">
+                <img src="../ts-icons/uw-title-image.png" width="326" height="68">
+                <p>Explanation of the publishing process will appear here!</p>
+            </div>
+            <div id="right">
+                <div>
+                    <p>Publish your project directly to unfoldingWord</p>
+                    <paper-button raised id="publish" on-tap="">UPLOAD</paper-button>
+                </div>
+                <div id="lower">
+                    <p>You may also share and distribute your project using these options.</p>
+                    <div class="link">Send to SD card</div>
+                    <div class="link">Send via Bluetooth</div>
+                    <div class="link">Other Sharing</div>
+                </div>
+            </div>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-publish-publish',
+
+        properties: {
+
+        },
+
+        ready: function() {
+
+        }
+
+    });
+
+</script>

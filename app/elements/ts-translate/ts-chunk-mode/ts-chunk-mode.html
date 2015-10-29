@@ -1,0 +1,65 @@
+
+<link rel="import" href="./ts-chunk-card.html">
+
+<dom-module id="ts-chunk-mode">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex: auto;
+        }
+
+        #contain {
+            flex: auto;
+            overflow: auto;
+        }
+
+    </style>
+
+    <template>
+
+        <div id="contain">
+            <template is="dom-repeat" items="{{chunks.data}}" as="chunk">
+                <ts-chunk-card on-cardtrigger="cardtrigger" project="{{project}}" chunk="{{chunk}}"></ts-chunk-card>
+            </template>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+		is: 'ts-chunk-mode',
+
+        behaviors: [
+            Polymer.IronResizableBehavior
+        ],
+
+        properties: {
+            project: {
+                type: Object,
+                value: {},
+                notify: true
+            },
+            chunks: {
+                type: Object,
+                value: {},
+                notify: true
+            }
+        },
+
+        cardtrigger: function () {
+            this.fire('modetrigger');
+        },
+
+		ready: function() {
+
+		}
+
+	});
+
+</script>

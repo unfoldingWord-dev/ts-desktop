@@ -14,6 +14,18 @@
     let Reporter = require('../js/reporter').Reporter;
     let uploader = require('../js/uploader');
 
+    let Translator = require('../js/translator').Translator;
+    let Indexer = require('../js/indexer').Indexer;
+    let indexer = new Indexer('app', {
+        apiUrl: configurator.getValue('apiUrl'),
+        indexDir: './index/'
+    });
+    let translator = new Translator(indexer);
+    let Library = require('../js/library').Library;
+    let library = Library(indexer);
+
+    let util = require('../js/lib/util');
+
     /**
      * FIX - This provides a fix to the native chrome shadow missing
      * see: https://github.com/nwjs/nw.js/issues/2903#issuecomment-77099590
@@ -36,6 +48,14 @@
         window: mainWindow,
 
         uploader: uploader,
+
+        translator: translator,
+
+        library: library,
+
+        indexer: indexer,
+
+        util: util,
 
         isMaximized: false,
 
@@ -148,6 +168,7 @@
             _this.configurator.loadConfig(config);
             _this.configurator.loadConfig(defaults);
             _this.configurator.setValue('rootDir', gui.App.dataPath, {'mutable':false});
+            _this.configurator.setValue('targetTranslationsDir', path.join(gui.App.dataPath, 'targetTranslations'), {'mutable':false});
             _this.configurator.setValue('indexDir', path.join(gui.App.dataPath, 'index'), {'mutable':false});
         },
 

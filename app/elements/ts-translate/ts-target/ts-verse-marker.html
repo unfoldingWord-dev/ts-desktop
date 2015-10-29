@@ -1,0 +1,66 @@
+
+<link rel="import" href="../../../components/iron-icons/iron-icons.html">
+
+<dom-module id="ts-verse-marker">
+
+	<style>
+
+        :host {
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        #contain {
+            width: 24px;
+            height: 24px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+        }
+
+        iron-icon {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        #num {
+            font-size: 55%;
+            color: white;
+            z-index: 1;
+            padding-top: 2px;
+        }
+
+	</style>
+
+	<template>
+
+        <div id="contain">
+            <iron-icon icon="verse:marker"></iron-icon>
+            <div id="num">{{verse}}</div>
+        </div>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+		is: 'ts-verse-marker',
+
+		properties: {
+            verse: {
+                type: Number,
+                value: 0
+            }
+		},
+
+		ready: function() {
+
+		}
+
+	});
+
+</script>

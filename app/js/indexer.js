@@ -1,6 +1,7 @@
-'use strict';
+// indexer module
 
 ;(function () {
+    'use strict';
 
     //let md5 = require('md5');
     let url = require('url');

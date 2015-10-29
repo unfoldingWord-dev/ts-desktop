@@ -1,0 +1,65 @@
+
+<link rel="import" href="./ts-review-card.html">
+
+<dom-module id="ts-review-mode">
+
+	<style>
+
+		:host {
+            display: flex;
+            flex: auto;
+        }
+
+        #contain {
+            flex: auto;
+            overflow: auto;
+        }
+
+	</style>
+
+	<template>
+
+        <div id="contain">
+            <template is="dom-repeat" items="{{chunks.data}}" as="chunk">
+                <ts-review-card project="{{project}}" chunk="{{chunk}}" on-cardtrigger="cardtrigger"></ts-review-card>
+            </template>
+        </div>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+		is: 'ts-review-mode',
+
+        behaviors: [
+            Polymer.IronResizableBehavior
+        ],
+
+        properties: {
+            project: {
+                type: Object,
+                value: {},
+                notify: true
+            },
+            chunks: {
+                type: Object,
+                value: {},
+                notify: true
+            }
+        },
+
+        cardtrigger: function () {
+            this.fire('modetrigger');
+        },
+
+		ready: function() {
+
+		}
+
+	});
+
+</script>

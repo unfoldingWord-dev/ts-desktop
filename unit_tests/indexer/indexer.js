@@ -3,7 +3,7 @@
 ;(function () {
 
     let assert = require('assert');
-    let rimraf = require('rimraf');
+    //let rimraf = require('rimraf');
     let Indexer = require('../../app/js/indexer').Indexer;
     let Configurator = require('../../app/js/configurator').Configurator;
     let configurator = new Configurator();
@@ -23,7 +23,6 @@
     let resourceCatalogJson = JSON.stringify(require('./data/avd.json'));
     let chapterCatalogJson = JSON.stringify(require('./data/chapter.json'));
     let frameCatalogJson = JSON.stringify(require('./data/01.json'));
-    let projectMetaJson = JSON.stringify(require('./data/1ch-meta.json'));
 
     let config = require('../../app/config/defaults');
     configurator.setStorage({});
@@ -37,6 +36,7 @@
 
     describe('@Indexer', function () {
 
+        /** /
         before(function (done) {
             rimraf(indexConfig.indexDir, function () {
                 done();
@@ -48,6 +48,7 @@
                 done();
             });
         });
+        /**/
 
         describe('@Utils', function () {
 
@@ -66,6 +67,7 @@
 
             describe('@IndexProjects', function () {
                 it('should index projects catalog', function () {
+                    this.timeout(3500);
                     assert.equal(
                         testIndexer.indexProjects(projectsCatalogJson),
                         true
@@ -78,8 +80,7 @@
                     assert.equal(
                         testIndexer.indexSourceLanguages(
                             '1ch',
-                            sourceLanguagesCatalogJson,
-                            {'date_modified':'20150801'}
+                            sourceLanguagesCatalogJson
                         ),
                         true
                     );
@@ -318,62 +319,6 @@
                     assert.equal(
                         true,
                         true
-                    );
-                });
-            });
-
-        });
-
-        describe('@MetaRetrievalTools', function () {
-
-            describe('@GetProjectMeta', function () {
-                it('should get 1ch project meta', function () {
-                    assert.equal(
-                        JSON.stringify(
-                            testIndexer.getProjectMeta(
-                                '1ch'
-                            )
-                        ),
-                        projectMetaJson
-                    );
-                });
-            });
-
-            describe('@GetProjectMetaDateModified', function () {
-                it('should get 1ch project meta', function () {
-                    assert.equal(
-                        testIndexer.getProjectMeta(
-                            '1ch',
-                            'date_modified'
-                        ),
-                        '20150801'
-                    );
-                });
-            });
-
-            describe('@GetSourceLanguageModified', function () {
-                it('should get 1ch project meta', function () {
-                    assert.equal(
-                        testIndexer.getSourceLanguageMeta(
-                            '1ch',
-                            'ar',
-                            'date_modified'
-                        ),
-                        '20150801'
-                    );
-                });
-            });
-
-            describe('@GetResourceModified', function () {
-                it('should get 1ch project meta', function () {
-                    assert.equal(
-                        testIndexer.getResourceMeta(
-                            '1ch',
-                            'ar',
-                            'avd',
-                            'date_modified'
-                        ),
-                        '20150801'
                     );
                 });
             });

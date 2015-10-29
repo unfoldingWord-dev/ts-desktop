@@ -1,0 +1,119 @@
+
+<link rel="import" href="../../../components/paper-material/paper-material.html">
+<link rel="import" href="./ts-source-tab.html">
+
+<dom-module id="ts-source-card">
+
+    <style>
+
+        :host {
+            flex: auto;
+            display: flex;
+        }
+
+        paper-material {
+            flex: auto;
+            display: flex;
+            background: white;
+            flex-direction: column;
+        }
+
+        #tabs {
+            min-height: 50px;
+        }
+
+        #heading {
+            color: var(--greyed-out-dark);
+            display: flex;
+            justify-content: center;
+            min-height: 50px;
+            align-items: center;
+            font-size: 135%;
+            font-weight: normal;
+            text-transform: uppercase;
+        }
+
+        #content {
+            margin: 0 20%;
+            flex: auto;
+        }
+
+        #content p {
+            line-height: 2;
+            color: var(--text-read-color);
+        }
+
+    </style>
+
+    <template>
+
+        <paper-material elevation="1">
+            <div id="tabs">
+                <ts-source-tab sources="{{project.sources}}" selected-source="{{project.currentsource}}"></ts-source-tab>
+            </div>
+            <div id="heading">
+                <div>
+                    <span>[[project.name]]</span> <span>[[chunk.chapter]]</span>
+                </div>
+            </div>
+            <div id="content">
+                <p id="textholder"></p>
+            </div>
+        </paper-material>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-source-card',
+
+        behaviors: [
+            Polymer.IronResizableBehavior
+        ],
+
+        properties: {
+            project: {
+                type: Object,
+                value: {},
+                notify: true
+            },
+            chunk: {
+                type: Object,
+                value: {}
+            }
+        },
+
+        observers: [
+            'rendertext(chunk.*)'
+        ],
+
+        rendertext: function () {
+            var textarray = this.chunk.srccontent.split(" ");
+            var numstr1 = "\<sup\>";
+            var numstr2 = "\<\/sup\>";
+            var returnstr = "";
+            var verse = 0;
+
+            for (var i = 0; i < textarray.length; i++) {
+                if (textarray[i].substring(0, 2) === "/v") {
+                    verse = textarray[i].substring(2);
+                    returnstr += numstr1 + verse + numstr2;
+                } else {
+                    returnstr += textarray[i] + " ";
+                }
+            }
+
+            this.$.textholder.innerHTML = returnstr;
+        },
+
+        ready: function() {
+
+        }
+
+    });
+
+</script>

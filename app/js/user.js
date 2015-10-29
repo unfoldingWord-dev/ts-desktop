@@ -1,6 +1,7 @@
-'use strict';
+// user module
 
 ;(function () {
+    'use strict';
 
     let mkdirp = require('mkdirp');
     let jsonfile = require('jsonfile');

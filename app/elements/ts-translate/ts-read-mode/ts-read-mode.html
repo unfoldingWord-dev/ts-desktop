@@ -1,0 +1,60 @@
+
+<link rel="import" href="./ts-read-card.html">
+
+<dom-module id="ts-read-mode">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex: auto;
+        }
+
+        #contain {
+            flex: auto;
+            overflow: auto;
+        }
+
+    </style>
+
+    <template>
+
+        <div id="contain">
+            <template is="dom-repeat" items="{{chapters.data}}" as="chunk">
+                <ts-read-card project="{{project}}" chunk="[[chunk]]"></ts-read-card>
+            </template>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-read-mode',
+
+        behaviors: [
+            Polymer.IronResizableBehavior
+        ],
+
+        properties: {
+            project: {
+                type: Object,
+                value: {},
+                notify: true
+            },
+            chapters: {
+                type: Object,
+                value: {}
+            }
+        },
+
+        ready: function() {
+
+        }
+
+    });
+
+</script>

@@ -1,6 +1,7 @@
-'use strict';
+// renderer module
 
 ;(function () {
+    'use strict';
 
     let _ = require('lodash');
     let paraRegExp = /<\/para>\s*/g;

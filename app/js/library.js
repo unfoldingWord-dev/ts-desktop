@@ -183,6 +183,14 @@
 
                 //return object
                 return this.getProject(projectId, sourceLanguageId, resourceId);
+            },
+
+            getTargetLanguages: function () {
+
+            },
+
+            getTargetLanguage: function () {
+
             }
         };
 

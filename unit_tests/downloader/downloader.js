@@ -1,7 +1,7 @@
 'use strict';
 
 ;(function () {
-
+    /** /
     let assert = require('assert');
     let rimraf = require('rimraf');
     let Indexer = require('../../app/js/indexer').Indexer;
@@ -106,4 +106,5 @@
             });
         });
     });
+    /**/
 })();

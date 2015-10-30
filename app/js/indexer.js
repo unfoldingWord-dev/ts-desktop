@@ -3,17 +3,17 @@
 ;(function () {
     'use strict';
 
-    let fs = require('fs');
-    let path = require('path');
-    let mkdirp = require('mkdirp');
-    let rimraf = require('rimraf');
-    let SQL = require('sql.js');
-    let md5 = require('md5');
+    //let md5 = require('md5');
+    let url = require('url');
     let _ = require('lodash');
-    let raiseWithContext = require('./lib/util').raiseWithContext;
-    let dataDirPath = 'data';
-    let linksJsonPath = path.join(dataDirPath, 'links.json');
-    let sourceDirPath = 'source';
+    //let raiseWithContext = require('./lib/util').raiseWithContext;
+    //let dataDirPath = 'data';
+    //let linksJsonPath = path.join(dataDirPath, 'links.json');
+    //let sourceDirPath = 'source';
+    let Db = require('./lib/db').Db;
+    let ContentValues = require('./lib/content-values').ContentValues;
+
+    let apiVersion = 2;
 
     /**
      *
@@ -27,397 +27,58 @@
             throw new Error('missing the indexer configuration parameter');
         }
 
-
         //reassign this to _this, set indexId and rootPath
         let _this = this;
         _this.config = _.merge({indexDir: ''}, configJson);
         _this.indexId = indexName;
-        _this.rootPath = path.join(_this.config.indexDir, indexName);
-        _this.dbFilePath = path.resolve('./', path.join(_this.config.indexDir, indexName + '.sqlite'));
-        _this.dbDirPath = path.dirname(_this.dbFilePath);
+        //_this.rootPath = path.join(_this.config.indexDir, indexName);
         _this.needsDbSave = 0;
-        if (!fs.existsSync(_this.dbFilePath)) {
-            try {
-                mkdirp.sync(_this.dbDirPath, '0755');
-            }
-            catch (err) {
-                console.log(err);
-                return false;
-            }
-            let db = new SQL.Database();
-            db.exec('CREATE TABLE file (path text, dir text, file text, content text);');
-            let data = db.export();
-            let buffer = new Buffer(data);
-            fs.writeFileSync(_this.dbFilePath, buffer);
-        }
-        let buffer = fs.readFileSync(_this.dbFilePath);
-        let db = new SQL.Database(buffer);
+        let db = new Db(_this.config.indexDir);
 
-        //internal functions
-        function saveDb () {
-            if (_this.needsDbSave !== 1) {
-                return;
-            }
-            let data = db.export();
-            let buffer = new Buffer(data);
-            try {
-                mkdirp.sync(_this.dbDirPath, '0755');
-            }
-            catch (err) {
-                console.log(err);
-                return false;
-            }
-            try {
-                fs.writeFileSync(_this.dbFilePath, buffer);
-            }
-            catch (err) {
-                console.log(err);
-                return false;
-            }
-            _this.needsDbSave = 0;
-            return true;
-        }
-
-        function openFile (filePath) {
-            /** /
-            let fullPath = path.join(_this.rootPath, filePath);
-            let fileContents = null;
-            if (fs.existsSync(fullPath)) {
-                try {
-                    fileContents = fs.readFileSync(fullPath, 'utf8');
-                }
-                catch (err) {
-                    console.log(err);
-                    fileContents = null;
-                }
-            }
-            return fileContents;
-            /**/
-
-            let statement = db.prepare('SELECT content FROM file WHERE path=:path');
-            let result = statement.getAsObject({':path': filePath});
-            statement.free();
-            return result.content || null;
-        }
-
-        function deleteFile (filePath) {
-            /** /
-            let fullPath = path.join(_this.rootPath, filePath);
-            if (fs.existsSync(fullPath)) {
-                let stats = fs.lstatSync(fullPath);
-                if (stats.isDirectory()) {
-                    rimraf(fullPath);
-                } else {
-                    fs.unlinkSync(fullPath);
-                }
-            }
-            /**/
-
-            db.run('DELETE FROM file WHERE path = :path', {':path': filePath});
-            _this.needsDbSave = 1;
-            return true;
-        }
-
-        function openJson (filePath) {
-            let fileContents = openFile(filePath);
-            if (fileContents === null) {
+        //private db id lookup functions
+        function getProjectDbId (projectId) {
+            let results = db.selectOne('project', 'id', '`slug`=?', [projectId]);
+            if (typeof results.id === 'undefined') {
                 return null;
             }
-            return JSON.parse(fileContents);
+            return results.id;
         }
 
-        function saveFile (filePath, fileContents) {
-            /** /
-            let fullPath = path.join(_this.rootPath, filePath);
-            let fullDirPath = path.dirname(fullPath);
-            if (fullDirPath.indexOf('test') === 0) {
-                return false;
+        function getSourceLanguageDbId (projectId, sourceLanguageId) {
+            let projectDbId = getProjectDbId(projectId);
+            let results = db.selectOne('source_language', 'id', '`slug`=? AND `project_id`=?', [sourceLanguageId, projectDbId]);
+            if (typeof results.id === 'undefined') {
+                return null;
             }
-            try {
-                mkdirp.sync(fullDirPath, '0755');
-            }
-            catch (err) {
-                console.log(err);
-                return false;
-            }
-            try {
-                fs.writeFileSync(fullPath, fileContents);
-            }
-            catch (err) {
-                console.log(err);
-                return false;
-            }
-            return true;
-            /**/
-
-            let fileDirPath = path.dirname(filePath);
-            let fileName = path.basename(filePath, '.json');
-            db.run('DELETE FROM file WHERE path = :path', {':path': filePath});
-            db.run('INSERT INTO file (path, dir, file, content) VALUES (:path, :dir, :file, :content)', {':path': filePath, ':dir': fileDirPath, ':file': fileName, ':content': fileContents});
-            _this.needsDbSave = 1;
-            return true;
+            return results.id;
         }
 
-        function saveJson (filePath, fileContents) {
-            return saveFile(filePath, JSON.stringify(fileContents));
+        function getResourceDbId (projectId, sourceLanguageId, resourceId) {
+            let sourceLanguageDbId = getSourceLanguageDbId(projectId, sourceLanguageId);
+            let results = db.selectOne('resource', 'id', '`slug`=? AND `source_language_id`=?', [resourceId, sourceLanguageDbId]);
+            if (typeof results.id === 'undefined') {
+                return null;
+            }
+            return results.id;
         }
 
-        function incrementLink (md5Hash) {
-            let links = openJson(linksJsonPath);
-            if (links === null) {
-                links = {};
+        function getChapterDbId (projectId, sourceLanguageId, resourceId, chapterId) {
+            let resourceDbId = getResourceDbId(projectId, sourceLanguageId, resourceId);
+            let results = db.selectOne('chapter', 'id', '`slug`=? AND `resource_id`=?', [chapterId, resourceDbId]);
+            if (typeof results.id === 'undefined') {
+                return null;
             }
-            if (!(md5Hash in links)) {
-                links[md5Hash] = 0;
-            }
-            links[md5Hash]++;
-            saveJson(linksJsonPath, links);
+            return results.id;
         }
 
-        function decrementLink (md5Hash) {
-            let links = openJson(linksJsonPath);
-            if (links === null) {
-                links = {};
+        function getFrameDbId (projectId, sourceLanguageId, resourceId, chapterId, frameId) {
+            let chapterDbId = getChapterDbId(projectId, sourceLanguageId, resourceId, chapterId);
+            let results = db.selectOne('frame', 'id', '`slug`=? AND `chapter_id`=?', [frameId, chapterDbId]);
+            if (typeof results.id === 'undefined') {
+                return null;
             }
-            if (md5Hash in links) {
-                links[md5Hash]--;
-            }
-            if (links.md5Hash < 1) {
-                let md5Path = path.join(dataDirPath, md5Hash);
-                rimraf(md5Path);
-            }
-            saveFile(linksJsonPath, JSON.stringify(links));
+            return results.id;
         }
-
-        function indexItems (md5Hash, catalogLinkFile, catalogType, catalogJson, metaObj) {
-            let items = JSON.parse(catalogJson);
-            let md5Path = path.join(dataDirPath, md5Hash);
-
-            //save link file
-            saveFile(catalogLinkFile, md5Hash);
-            incrementLink(md5Hash);
-
-            //save meta file
-            if (metaObj) {
-                let metaFilePath = path.join(md5Path, 'meta.json');
-                let metaFileContent = typeof metaObj === 'object' ? JSON.stringify(metaObj) : metaObj;
-                saveFile(metaFilePath, metaFileContent);
-            }
-
-            //save individual json files
-            let filePath;
-            let fileContent;
-            let fileName;
-            if (catalogType === 'simple') {
-                for (let item of items) {
-                    fileName = item.slug || null;
-                    if (fileName !== null) {
-                        filePath = path.join(md5Path, fileName);
-                        fileContent = JSON.stringify(item);
-                        saveFile(filePath, fileContent);
-                    }
-                }
-            }
-            if (catalogType === 'source') {
-                for (let chapter of items) {
-                    let folderName = chapter.number || null;
-                    if (folderName !== null) {
-                        let frames = chapter.frames;
-                        delete chapter.frames;
-                        filePath = path.join(md5Path, folderName, 'chapter.json');
-                        fileContent = JSON.stringify(chapter);
-                        saveFile(filePath, fileContent);
-                        for (let frame of frames) {
-                            fileName = frame.id.replace(/[0-9]+\-/g, '') || null;
-                            if (fileName !== null) {
-                                filePath = path.join(md5Path, folderName, fileName);
-                                fileContent = JSON.stringify(frame);
-                                saveFile(filePath, fileContent);
-                            }
-                        }
-                    }
-                }
-            }
-
-            return true;
-        }
-
-        function getItemsArray (itemObj, urlProp, subFolder) {
-            if (itemObj === null) {
-                return [];
-            }
-            let catalogApiUrl = getUrlFromObj(
-                itemObj,
-                urlProp
-            );
-            let md5Hash = md5(catalogApiUrl);
-            let md5Path = path.join(dataDirPath, md5Hash);
-            if (subFolder !== undefined) {
-                md5Path = path.join(md5Path, subFolder);
-            }
-            /** /
-            let fullPath = path.join(_this.rootPath, md5Path);
-            let items = [];
-            if (fs.existsSync(fullPath)) {
-                let files = fs.readdirSync(fullPath);
-                for (let x in files) {
-                    if (files.hasOwnProperty(x)) {
-                        if (files[x] !== '.DS_Store' && files[x] !== 'meta.json' && files[x] !== 'chapter.json') {
-                            items.push(files[x].replace('.json', ''));
-                        }
-                    }
-                }
-            }
-            return items;
-            /**/
-
-            let items = [];
-            if (catalogApiUrl.indexOf('source.json') !== -1 && subFolder === undefined) {
-                //get chapters
-                let trimDir = md5Path + path.sep;
-                let statementChapters = db.prepare('SELECT DISTINCT dir FROM file WHERE dir LIKE :dir AND file <> \'chapter\' AND file <> \'meta\' ORDER BY path', {':dir': md5Path + '%'});
-                while (statementChapters.step()) {
-                    items.push(statementChapters.get()[0].replace(trimDir, ''));
-                }
-                statementChapters.free();
-            } else {
-                //get items
-                let statement = db.prepare('SELECT file FROM file WHERE dir = :dir AND file <> \'chapter\' AND file <> \'meta\' ORDER BY path', {':dir': md5Path});
-                while (statement.step()) {
-                    items.push(statement.get()[0]);
-                }
-                statement.free();
-            }
-            return items;
-        }
-
-        function getUrlFromObj (itemObj, urlProp) {
-            return itemObj[urlProp].split('?')[0];
-        }
-
-        function deleteResource (projectId, sourceLanguageId, resourceId) {
-            let questions = _this.getQuestions(projectId, sourceLanguageId, resourceId);
-            if (questions !== null) {
-                throw new Error('deleting questions has not been implemented yet');
-            }
-            let notes = _this.getNotes(projectId, sourceLanguageId, resourceId);
-            if (notes !== null) {
-                throw new Error('deleting notes has not been implemented yet');
-            }
-            let terms = _this.getTerms(projectId, sourceLanguageId, resourceId);
-            if (terms !== null) {
-                throw new Error('deleting terms has not been implemented yet');
-            }
-            for (let chapterId of _this.getChapters(projectId, sourceLanguageId, resourceId)) {
-                chapterId = chapterId;
-                throw  new Error('deleting chapters has not been implemented yet');
-            }
-
-            // delete resource
-            let resourceCatalogPath = path.join(sourceDirPath, projectId, sourceLanguageId, 'resources_catalog.link');
-            let md5Hash = openFile(resourceCatalogPath);
-            if (md5Hash !== null) {
-                let hashPath = path.join(dataDirPath, md5Hash);
-                let resourcePath = path.join(hashPath, resourceId);
-                deleteFile(resourcePath);
-
-                // delete empty resource catalog
-                let files = fs.readdirSync(path.join(_this.rootPath, hashPath));
-                if (_.size(files) <= 0 || _.size(files) === 1 && files[0] === 'meta.json') {
-                    decrementLink(md5Hash);
-                    deleteFile(resourceCatalogPath);
-                }
-            }
-        }
-
-        _this.deleteSourceLanguage = function (projectId, sourceLanguageId) {
-            for (let resourceId of _this.getResources(projectId, sourceLanguageId)) {
-                deleteResource(projectId, sourceLanguageId, resourceId);
-            }
-            // delete source language
-            let languagesCatalogPath = path.join(sourceDirPath, projectId, 'languages_catalog.link');
-            let md5Hash = openFile(languagesCatalogPath);
-            if (md5Hash !== null) {
-                let hashPath = path.join(dataDirPath, md5Hash);
-                let sourceLanguagePath = path.join(hashPath, sourceLanguageId);
-                deleteFile(sourceLanguagePath);
-
-                // delete empty language catalog
-                let files = fs.readdirSync(path.join(_this.rootPath, hashPath));
-                if (_.size(files) <= 0 || _.size(files) === 1 && files[0] === 'meta.json') {
-                    decrementLink(md5Hash);
-                    deleteFile(languagesCatalogPath);
-                }
-            }
-        };
-
-        _this.deleteProject = function (projectId) {
-            for (let sourceLanguageId of _this.getSourceLanguages(projectId)) {
-                _this.deleteSourceLanguage(projectId, sourceLanguageId);
-            }
-            // delete project
-            let md5Hash = openFile(path.join(sourceDirPath, 'projects_catalog.link'));
-            if (md5Hash !== null) {
-                let projectPath = path.join(dataDirPath, md5Hash, projectId);
-                deleteFile(projectPath);
-            }
-        };
-
-        /**
-         * Merges another index into this index
-         * @param index
-         */
-        _this.mergeIndex = function (index) {
-            for (let projectId of index.getProjects()) {
-                _this.mergeProject(index, projectId);
-            }
-        };
-
-        /**
-         * Merges a project from another index into this index
-         * @param index
-         * @param projectId
-         */
-        _this.mergeProject = function (index, projectId) {
-            let newProject = index.getProject(projectId);
-            if (newProject !== null) {
-                let existingProject = _this.getProject(projectId);
-                if (existingProject !== null) {
-                    _this.deleteProject(projectId);
-                }
-                // insert project
-                // TODO: update the project meta
-                _this.indexProjects(JSON.stringify([newProject]));
-                for (let sourceLanguageId of index.getSourceLanguages(projectId)) {
-                    // TODO: update the source language meta
-                    // insert source language
-                    let sourceLanguageJson = JSON.stringify([index.getSourceLanguage(projectId, sourceLanguageId)]);
-                    _this.indexSourceLanguages(projectId, sourceLanguageJson);
-                    for (let resourceId of index.getResources(projectId, sourceLanguageId)) {
-                        // TODO: update the resource meta
-                        let resourceJson = JSON.stringify([index.getResource(projectId, sourceLanguageId, resourceId)]);
-                        _this.indexResources(projectId, sourceLanguageId, resourceJson);
-
-                        let questions = index.getQuestions(projectId, sourceLanguageId, resourceId);
-                        if (questions !== null) {
-                            throw new Error('merging questions has not been implemented yet');
-                        }
-                        let notes = index.getNotes(projectId, sourceLanguageId, resourceId);
-                        if (notes !== null) {
-                            throw new Error('merging notes has not been implemented yet');
-                        }
-                        let terms = index.getTerms(projectId, sourceLanguageId, resourceId);
-                        if (terms !== null) {
-                            throw new Error('merging terms has not been implemented yet');
-                        }
-                        for (let chapterId of index.getChapters(projectId, sourceLanguageId, resourceId)) {
-                            chapterId = chapterId;
-                            throw  new Error('merging chapters has not been implemented yet');
-                        }
-                    }
-                }
-            }
-        };
 
         //public utility functions
         _this.getIndexId = function () {
@@ -429,165 +90,579 @@
 
         //public indexing functions
         _this.indexProjects = function (catalogJson) {
-            let catalogApiUrl = getUrlFromObj(
-                _this.getCatalog(),
-                'proj_catalog'
-            );
-            let md5Hash = md5(catalogApiUrl);
-            let catalogLinkFile = path.join(sourceDirPath, 'projects_catalog.link');
-            let catalogType = 'simple';
-            let returnData = indexItems(md5Hash, catalogLinkFile, catalogType, catalogJson);
-            saveDb();
-            return returnData;
-        };
 
-        _this.indexSourceLanguages = function (projectId, catalogJson, metaObj) {
-            //KLUDGE: modify v2 sourceLanguages catalogJson to match expected catalogJson format
+            //set table
+            let table = 'project';
+
+            //set variable mapping
+            let apiPropLists = {
+                2: {
+                    dateModified: 'date_modified',
+                    slug: 'slug',
+                    sort: 'sort',
+                    languageCatalog: 'lang_catalog',
+                    categorySlugs: 'meta'
+                },
+                3: {
+                    dateModified: 'mod',
+                    slug: 'slug',
+                    sort: 'sort',
+                    languageCatalog: 'lang_cat',
+                    categorySlugs: 'category_slugs'
+                }
+            };
+            let apiProps = apiPropLists[apiVersion];
+
+            //parse JSON
             let items = JSON.parse(catalogJson);
+
+            //get existing slug: id list
+            let existingItems = {};
+            let results = db.select(table, ['slug', 'id']);
+            if (results !== null) {
+                for (let result of results) {
+                    existingItems[result[0]] = result[1];
+                }
+            }
+
+            //insert items into db
             for (let item of items) {
-                let language = item.language;
-                for (let childProp in language) {
-                    if (language.hasOwnProperty(childProp)) {
-                        item[childProp] = language[childProp];
+
+                //save item
+                let itemSlug = _.get(item, apiProps.slug);
+                let itemId = existingItems[itemSlug] || null;
+                let dbFields = {
+                    dateModified: 'modified_at',
+                    slug: 'slug',
+                    sort: 'sort',
+                    languageCatalog: 'source_language_catalog_url'
+                };
+                let values = new ContentValues();
+                for (let key in apiProps) {
+                    if (apiProps.hasOwnProperty(key) && typeof dbFields[key] !== 'undefined') {
+                        values.set(dbFields[key], _.get(item, apiProps[key]));
                     }
                 }
-                delete item.language;
-            }
-            catalogJson = JSON.stringify(items);
-            //KLUDGE: end modify v2
+                if (itemId === null) {
+                    itemId = db.insert(table, values);
+                    existingItems[itemSlug] = itemId;
+                } else {
+                    db.update(table, values, '`id`=?', [itemId]);
+                }
 
-            let catalogApiUrl = getUrlFromObj(
-                _this.getProject(projectId),
-                'lang_catalog'
-            );
-            let md5Hash = md5(catalogApiUrl);
-            let catalogLinkFile = path.join(sourceDirPath, projectId, 'languages_catalog.link');
-            let catalogType = 'simple';
-            let returnData = indexItems(md5Hash, catalogLinkFile, catalogType, catalogJson, metaObj);
-            saveDb();
-            return returnData;
+                //reset relational links
+                db.delete(table + '__category', '`' + table + '_id`=?', [itemId]);
+
+                //add categories
+                let categorySlugs = _.get(item, apiProps.categorySlugs);
+                addProjectCategories(itemId, categorySlugs);
+            }
+            db.saveToDisk();
+            return true;
         };
 
-        _this.indexResources = function (projectId, sourceLanguageId, catalogJson, metaObj) {
-            let catalogApiUrl = '';
+        function addProjectCategories (projectDbId, categorySlugs) {
+            if (categorySlugs === null || categorySlugs.length <= 0) {
+                return false;
+            }
+            let categoryDbId = 0;
+            for (let categorySlug of categorySlugs) {
+                let results = db.selectOne('category', 'id', 'slug=? AND parent_id=?', [categorySlug, categoryDbId]);
+                if (typeof results.id !== 'undefined') {
+                    categoryDbId = results.id;
+                } else {
+                    let values = new ContentValues();
+                    values.set('slug', categorySlug);
+                    values.set('parent_id', categoryDbId);
+                    categoryDbId = db.insert('category', values);
+                }
+            }
+            let values = new ContentValues();
+            values.set('project_id', projectDbId);
+            values.set('category_id', categoryDbId);
+            db.insert('project__category', values);
+            return true;
+        }
 
-            try {
-                catalogApiUrl = getUrlFromObj(
-                    _this.getSourceLanguage(projectId, sourceLanguageId),
-                    'res_catalog'
-                );
-            } catch (e) {
-                raiseWithContext(e, {
-                    projectId: projectId,
-                    sourceLanguageId: sourceLanguageId
-                });
+        _this.indexSourceLanguages = function (projectId, catalogJson) {
+
+            if (typeof projectId === 'undefined') {
+                return null;
             }
 
-            let md5Hash = md5(catalogApiUrl);
-            let catalogLinkFile = path.join(sourceDirPath, projectId, sourceLanguageId, 'resources_catalog.link');
-            let catalogType = 'simple';
-            let returnData = indexItems(md5Hash, catalogLinkFile, catalogType, catalogJson, metaObj);
-            saveDb();
-            return returnData;
-        };
+            //get id
+            let projectDbId = getProjectDbId(projectId);
+            if (projectDbId === null) {
+                return null;
+            }
 
-        _this.indexSource = function (projectId, sourceLanguageId, resourceId, catalogJson, metaObj) {
-            //KLUDGE: modify v2 sources catalogJson to match expected catalogJson format
+            //set table
+            let table = 'source_language';
+
+            //set variable mapping
+            let apiPropLists = {
+                2: {
+                    dateModified: 'language.date_modified',
+                    slug: 'language.slug',
+                    name: 'language.name',
+                    direction: 'language.direction',
+                    projectName: 'project.name',
+                    projectDescription: 'project.desc',
+                    categoryNames: 'project.meta',
+                    resourceCatalog: 'res_catalog'
+                },
+                3: {
+                    dateModified: 'mod',
+                    slug: 'slug',
+                    name: 'name',
+                    direction: 'dir',
+                    projectName: 'project.name',
+                    projectDescription: 'project.desc',
+                    categoryNames: 'project.category_names',
+                    resourceCatalog: 'res_cat'
+                }
+            };
+            let apiProps = apiPropLists[apiVersion];
+
+            //parse JSON
             let items = JSON.parse(catalogJson);
-            items = items.chapters;
-            catalogJson = JSON.stringify(items);
-            //KLUDGE: end modify v2
 
-            let catalogApiUrl = getUrlFromObj(
-                _this.getResource(projectId, sourceLanguageId, resourceId),
-                'source'
-            );
-            let md5Hash = md5(catalogApiUrl);
-            let catalogLinkFile = path.join(sourceDirPath, projectId, sourceLanguageId, resourceId, 'source.link');
-            let catalogType = 'source';
-            let returnData = indexItems(md5Hash, catalogLinkFile, catalogType, catalogJson, metaObj);
-            saveDb();
-            return returnData;
+            //get existing slug: id list
+            let existingItems = {};
+            let results = db.select(table, ['slug', 'id'], '`project_id`=?', [projectDbId]);
+            if (results !== null) {
+                for (let result of results) {
+                    existingItems[result[0]] = result[1];
+                }
+            }
+
+            //insert items into db
+            for (let item of items) {
+
+                //save item
+                let itemSlug = _.get(item, apiProps.slug);
+                let itemId = existingItems[itemSlug] || null;
+                let dbFields = {
+                    dateModified: 'modified_at',
+                    projectId: 'project_id',
+                    slug: 'slug',
+                    name: 'name',
+                    direction: 'direction',
+                    projectName: 'project_name',
+                    projectDescription: 'project_description',
+                    resourceCatalog: 'resource_catalog_url'
+                };
+                let values = new ContentValues();
+                for (let key in apiProps) {
+                    if (apiProps.hasOwnProperty(key) && typeof dbFields[key] !== 'undefined') {
+                        values.set(dbFields[key], _.get(item, apiProps[key]));
+                    }
+                }
+                values.set(dbFields.projectId, projectDbId);
+                if (itemId === null) {
+                    itemId = db.insert(table, values);
+                    existingItems[itemSlug] = itemId;
+                } else {
+                    db.update(table, values, '`id`=?', [itemId]);
+                }
+
+                //reset relational links
+                db.delete(table + '__category', '`' + table + '_id`=?', [itemId]);
+
+                //add categories
+                let categoryNames = _.get(item, apiProps.categoryNames);
+                addSourceLanguageCategories(projectDbId, itemId, categoryNames);
+            }
+            db.saveToDisk();
+            return true;
         };
 
-        _this.indexNotes = function (projectId, sourceLanguageId, resourceId, catalogJson, metaObj) {
-            let catalogApiUrl = getUrlFromObj(
-                _this.getResource(projectId, sourceLanguageId, resourceId),
-                'notes'
-            );
-            let md5Hash = md5(catalogApiUrl);
-            let catalogLinkFile = path.join(sourceDirPath, projectId, sourceLanguageId, resourceId, 'notes.link');
-            let catalogType = 'advanced';
-            let returnData = indexItems(md5Hash, catalogLinkFile, catalogType, catalogJson, metaObj);
-            saveDb();
-            return returnData;
+        function addSourceLanguageCategories (projectDbId, sourceLanguageDbId, categoryNames) {
+            if (categoryNames === null || categoryNames.length <= 0) {
+                return false;
+            }
+            let query = 'SELECT `c`.`id` FROM `category` AS `c` ' +
+                'LEFT JOIN `project__category` AS `pc` ON `pc`.`category_id`=`c`.`id` ' +
+                'WHERE `pc`.`project_id`=:project_id';
+            let results = db.selectRaw(query, {':project_id': projectDbId});
+            if (results === null) {
+                return false;
+            }
+            let categoryDbId = results[0][0];
+            for (let categoryName of categoryNames) {
+                let values = new ContentValues();
+                values.set('source_language_id', sourceLanguageDbId);
+                values.set('category_id', categoryDbId);
+                values.set('category_name', categoryName);
+                db.insert('source_language__category', values);
+
+                let results = db.selectOne('category', 'parent_id', 'id=?', [categoryDbId]);
+                if (typeof results.id !== 'undefined') {
+                    categoryDbId = results.id;
+                } else {
+                    break;
+                }
+            }
+            return true;
+        }
+
+        _this.indexResources = function (projectId, sourceLanguageId, catalogJson) {
+
+            if (typeof projectId === 'undefined' || typeof sourceLanguageId === 'undefined') {
+                return null;
+            }
+
+            //get id
+            let sourceLanguageDbId = getSourceLanguageDbId(projectId, sourceLanguageId);
+            if (sourceLanguageDbId === null) {
+                return null;
+            }
+
+            //set table
+            let table = 'resource';
+
+            //set variable mapping
+            let apiPropLists = {
+                2: {
+                    dateModified: 'date_modified',
+                    slug: 'slug',
+                    name: 'name',
+                    checkingLevel: 'status.checking_level',
+                    version: 'status.version',
+                    sourceCatalog: 'source',
+                    translationNotesCatalog: 'notes',
+                    translationWordsCatalog: 'terms',
+                    translationWordAssignmentsCatalog: '???',
+                    checkingQuestionsCatalog: 'checking_questions'
+                },
+                3: {
+                    dateModified: 'mod',
+                    slug: 'slug',
+                    name: 'name',
+                    checkingLevel: 'checking_lvl',
+                    version: 'ver',
+                    sourceCatalog: 'src_cat',
+                    translationNotesCatalog: 'tn_cat',
+                    translationWordsCatalog: 'tw_cat',
+                    translationWordAssignmentsCatalog: 'twq_cat',
+                    checkingQuestionsCatalog: 'cq_cat'
+                }
+            };
+            let apiProps = apiPropLists[apiVersion];
+
+            //parse JSON
+            let items = JSON.parse(catalogJson);
+
+            //get existing slug: id list
+            let existingItems = {};
+            let results = db.select(table, ['slug', 'id'], '`source_language_id`=?', [sourceLanguageDbId]);
+            if (results !== null) {
+                for (let result of results) {
+                    existingItems[result[0]] = result[1];
+                }
+            }
+
+            //insert items into db
+            for (let item of items) {
+
+                //save item
+                let itemSlug = _.get(item, apiProps.slug);
+                let itemId = existingItems[itemSlug] || null;
+                let dbFields = {
+                    dateModified: 'modified_at',
+                    sourceLanguageId: 'source_language_id',
+                    slug: 'slug',
+                    name: 'name',
+                    checkingLevel: 'checking_level',
+                    version: 'version',
+                    sourceCatalog: 'source_catalog_url',
+                    sourceDateModified: 'source_catalog_server_modified_at',
+                    translationNotesCatalog: 'translation_notes_catalog_url',
+                    translationNotesDateModified: 'translation_notes_catalog_server_modified_at',
+                    translationWordsCatalog: 'translation_words_catalog_url',
+                    translationWordsDateModified: 'translation_words_catalog_server_modified_at',
+                    translationWordAssignmentsCatalog: 'translation_word_assignments_catalog_url',
+                    translationWordAssignmentsDateModified: 'translation_word_assignments_catalog_server_modified_at',
+                    checkingQuestionsCatalog: 'checking_questions_catalog_url',
+                    checkingQuestionsDateModified: 'checking_questions_catalog_server_modified_at'
+                };
+                let values = new ContentValues();
+                for (let key in apiProps) {
+                    if (apiProps.hasOwnProperty(key) && typeof dbFields[key] !== 'undefined') {
+                        values.set(dbFields[key], _.get(item, apiProps[key]));
+                    }
+                }
+                values.set(dbFields.sourceLanguageId, sourceLanguageDbId);
+                let dateFields = [
+                    'source',
+                    'translationNotes',
+                    'translationWords',
+                    'translationWordAssignments',
+                    'checkingQuestions'
+                ];
+                for (let dateField of dateFields) {
+                    let catalogUrl = values.get(dbFields[dateField + 'Catalog']);
+                    let dateValue = null;
+                    if (typeof catalogUrl !== 'undefined') {
+                        let queryItems = url.parse(catalogUrl, true).query;
+                        dateValue = queryItems[apiProps.dateModified] || null;
+                    } else {
+                        values.set(dbFields[dateField + 'Catalog'], '');
+                    }
+                    if (dateValue !== null) {
+                        values.set(dbFields[dateField + 'DateModified'], dateValue);
+                    }
+                }
+                if (itemId === null) {
+                    itemId = db.insert(table, values);
+                    existingItems[itemSlug] = itemId;
+                } else {
+                    db.update(table, values, '`id`=?', [itemId]);
+                }
+            }
+            db.saveToDisk();
+            return true;
         };
 
-        _this.indexTerms = function (projectId, sourceLanguageId, resourceId, catalogJson, metaObj) {
-            let catalogApiUrl = getUrlFromObj(
-                _this.getResource(projectId, sourceLanguageId, resourceId),
-                'terms'
-            );
-            let md5Hash = md5(catalogApiUrl);
-            let catalogLinkFile = path.join(sourceDirPath, projectId, sourceLanguageId, resourceId, 'terms.link');
-            let catalogType = 'advanced';
-            let returnData = indexItems(md5Hash, catalogLinkFile, catalogType, catalogJson, metaObj);
-            saveDb();
-            return returnData;
+        _this.indexSource = function (projectId, sourceLanguageId, resourceId, catalogJson) {
+
+            if (typeof projectId === 'undefined' || typeof sourceLanguageId === 'undefined' || typeof resourceId === 'undefined') {
+                return null;
+            }
+
+            //get id
+            let resourceDbId = getResourceDbId(projectId, sourceLanguageId, resourceId);
+            if (resourceDbId === null) {
+                return null;
+            }
+
+            //set table
+            let table = 'chapter';
+
+            //set variable mapping
+            let apiPropLists = {
+                2: {
+                    slug: 'number',
+                    reference: 'ref',
+                    title: 'title'
+                },
+                3: {
+                    slug: 'slug',
+                    reference: 'ref',
+                    title: 'title'
+                }
+            };
+            let apiProps = apiPropLists[apiVersion];
+
+            //parse JSON
+            let parentItems = JSON.parse(catalogJson);
+            let items = parentItems.chapters;
+
+            if (typeof items === 'undefined') {
+                return false;
+            }
+
+            //get existing slug: id list
+            let existingItems = {};
+            let results = db.select(table, ['slug', 'id'], '`resource_id`=?', [resourceDbId]);
+            if (results !== null) {
+                for (let result of results) {
+                    existingItems[result[0]] = result[1];
+                }
+            }
+
+            //insert items into db
+            for (let item of items) {
+
+                //save item
+                let itemSlug = _.get(item, apiProps.slug);
+                let itemId = existingItems[itemSlug] || null;
+                let dbFields = {
+                    resourceId: 'resource_id',
+                    slug: 'slug',
+                    reference: 'reference',
+                    title: 'title',
+                    sort: 'sort'
+                };
+                let values = new ContentValues();
+                for (let key in apiProps) {
+                    if (apiProps.hasOwnProperty(key) && typeof dbFields[key] !== 'undefined') {
+                        values.set(dbFields[key], _.get(item, apiProps[key]));
+                    }
+                }
+                values.set(dbFields.resourceId, resourceDbId);
+                let chapterSlug = values.get(dbFields.slug);
+                let sortValue = null;
+                if (typeof chapterSlug !== 'undefined') {
+                    sortValue = parseInt(chapterSlug, 10) || null;
+                }
+                if (sortValue !== null) {
+                    values.set(dbFields.sort, sortValue);
+                }
+                if (itemId === null) {
+                    itemId = db.insert(table, values);
+                    existingItems[itemSlug] = itemId;
+                } else {
+                    db.update(table, values, '`id`=?', [itemId]);
+                }
+
+                addFrames(itemId, item.frames);
+            }
+            db.saveToDisk();
+            return true;
         };
 
-        _this.indexQuestions = function (projectId, sourceLanguageId, resourceId, catalogJson, metaObj) {
-            let catalogApiUrl = getUrlFromObj(
-                _this.getResource(projectId, sourceLanguageId, resourceId),
-                'checking_questions'
-            );
-            let md5Hash = md5(catalogApiUrl);
-            let catalogLinkFile = path.join(sourceDirPath, projectId, sourceLanguageId, resourceId, 'checking_questions.link');
-            let catalogType = 'advanced';
-            let returnData = indexItems(md5Hash, catalogLinkFile, catalogType, catalogJson, metaObj);
-            saveDb();
-            return returnData;
+        function addFrames (chapterDbId, items) {
+
+            //set table
+            let table = 'frame';
+
+            //set variable mapping
+            let apiPropLists = {
+                2: {
+                    slug: 'id',
+                    body: 'text',
+                    imageUrl: 'img'
+                },
+                3: {
+                    slug: 'slug',
+                    body: 'body',
+                    imageUrl: 'img'
+                }
+            };
+            let apiProps = apiPropLists[apiVersion];
+
+            //get existing slug: id list
+            let existingItems = {};
+            let results = db.select(table, ['slug', 'id'], '`chapter_id`=?', [chapterDbId]);
+            if (results !== null) {
+                for (let result of results) {
+                    existingItems[result[0]] = result[1];
+                }
+            }
+
+            //insert items into db
+            for (let item of items) {
+
+                //save item
+                if (apiVersion === 2) {
+                    let itemSlug = _.get(item, apiProps.slug);
+                    itemSlug = itemSlug.replace(/[0-9]{2}\-/, '');
+                    _.set(item, apiProps.slug, itemSlug);
+                }
+                let itemSlug = _.get(item, apiProps.slug);
+                let itemId = existingItems[itemSlug] || null;
+                let dbFields = {
+                    chapterId: 'chapter_id',
+                    slug: 'slug',
+                    body: 'body',
+                    imageUrl: 'image_url',
+                    sort: 'sort'
+                };
+                let values = new ContentValues();
+                for (let key in apiProps) {
+                    if (apiProps.hasOwnProperty(key) && typeof dbFields[key] !== 'undefined') {
+                        values.set(dbFields[key], _.get(item, apiProps[key]));
+                    }
+                }
+                values.set(dbFields.chapterId, chapterDbId);
+                let frameSlug = values.get(dbFields.slug);
+                let sortValue = null;
+                if (typeof frameSlug !== 'undefined') {
+                    sortValue = parseInt(frameSlug, 10) || null;
+                }
+                if (sortValue !== null) {
+                    values.set(dbFields.sort, sortValue);
+                }
+                if (itemId === null) {
+                    itemId = db.insert(table, values);
+                    existingItems[itemSlug] = itemId;
+                } else {
+                    db.update(table, values, '`id`=?', [itemId]);
+                }
+            }
+            return true;
+        }
+        /** /
+
+        _this.indexNotes = function (projectId, sourceLanguageId, resourceId, catalogJson) {
         };
 
+        _this.indexTerms = function (projectId, sourceLanguageId, resourceId, catalogJson) {
+        };
+
+        _this.indexQuestions = function (projectId, sourceLanguageId, resourceId, catalogJson) {
+        };
+        /**/
         //public string retrieval functions
         _this.getProjects = function () {
-            let catalogArray = getItemsArray(
-                _this.getCatalog(),
-                'proj_catalog'
-            );
+            let items = db.select('project', 'slug');
+            let catalogArray = [];
+            if (items !== null) {
+                for (let item of items) {
+                    catalogArray.push(item[0]);
+                }
+            }
             return catalogArray;
         };
 
         _this.getSourceLanguages = function (projectId) {
-            let catalogArray = getItemsArray(
-                _this.getProject(projectId),
-                'lang_catalog'
-            );
+            let itemId = getProjectDbId(projectId);
+            if (itemId === null) {
+                return false;
+            }
+            let items = db.select('source_language', 'slug', '`project_id`=?', [itemId]);
+            let catalogArray = [];
+            if (items !== null) {
+                for (let item of items) {
+                    catalogArray.push(item[0]);
+                }
+            }
             return catalogArray;
         };
 
         _this.getResources = function (projectId, sourceLanguageId) {
-            let catalogArray =  getItemsArray(
-                _this.getSourceLanguage(projectId, sourceLanguageId),
-                'res_catalog'
-            );
+            let itemId = getSourceLanguageDbId(projectId, sourceLanguageId);
+            if (itemId === null) {
+                return false;
+            }
+            let items = db.select('resource', 'slug', '`source_language_id`=?', [itemId]);
+            let catalogArray = [];
+            if (items !== null) {
+                for (let item of items) {
+                    catalogArray.push(item[0]);
+                }
+            }
             return catalogArray;
         };
 
         _this.getChapters = function (projectId, sourceLanguageId, resourceId) {
-            let catalogArray =  getItemsArray(
-                _this.getResource(projectId, sourceLanguageId, resourceId),
-                'source'
-            );
+            let itemId = getResourceDbId(projectId, sourceLanguageId, resourceId);
+            if (itemId === null) {
+                return false;
+            }
+            let items = db.select('chapter', 'slug', '`resource_id`=?', [itemId]);
+            let catalogArray = [];
+            if (items !== null) {
+                for (let item of items) {
+                    catalogArray.push(item[0]);
+                }
+            }
             return catalogArray;
         };
 
         _this.getFrames = function (projectId, sourceLanguageId, resourceId, chapterId) {
-            let catalogArray =  getItemsArray(
-                _this.getResource(projectId, sourceLanguageId, resourceId),
-                'source',
-                chapterId
-            );
+            let itemId = getChapterDbId(projectId, sourceLanguageId, resourceId, chapterId);
+            if (itemId === null) {
+                return false;
+            }
+            let items = db.select('frame', 'slug', '`chapter_id`=?', [itemId]);
+            let catalogArray = [];
+            if (items !== null) {
+                for (let item of items) {
+                    catalogArray.push(item[0]);
+                }
+            }
             return catalogArray;
         };
 
@@ -602,113 +677,168 @@
         };
 
         _this.getProject = function (projectId) {
-            let md5Hash = openFile(path.join(sourceDirPath, 'projects_catalog.link'));
-            if (md5Hash === null) {
-                return null;
+            let itemId = getProjectDbId(projectId);
+            if (itemId === null) {
+                return false;
             }
-            let catalogJson = openJson(path.join(dataDirPath, md5Hash, projectId));
-            return catalogJson;
-        };
-
-        _this.getProjectMeta = function (projectId, metaProp) {
-            let md5Hash = openFile(path.join(sourceDirPath, projectId, 'languages_catalog.link'));
-            if (md5Hash === null) {
-                return null;
-            }
-            let catalogJson = openJson(path.join(dataDirPath, md5Hash, 'meta.json'));
-            if (typeof metaProp !== 'undefined') {
-                return catalogJson[metaProp];
-            }
-            return catalogJson;
+            let dbFields = [
+                'modified_at',
+                'slug',
+                'source_language_catalog_url',
+                'sort'
+            ];
+            let item = db.selectOne('project', dbFields, '`id`=?', [itemId]);
+            let catalogObj = {
+                dateModified: _.get(item, 'modified_at'),
+                slug: _.get(item, 'slug'),
+                description: '',
+                sourceLanguageCatalog: _.get(item, 'source_language_catalog_url'),
+                sort: _.get(item, 'sort')
+            };
+            return catalogObj;
         };
 
         _this.getSourceLanguage = function (projectId, sourceLanguageId) {
-            let md5Hash = openFile(path.join(sourceDirPath, projectId, 'languages_catalog.link'));
-            if (md5Hash === null) {
-                return null;
+            let itemId = getSourceLanguageDbId(projectId, sourceLanguageId);
+            if (itemId === null) {
+                return false;
             }
-            let catalogJson = openJson(path.join(dataDirPath, md5Hash, sourceLanguageId));
-            return catalogJson;
-        };
-
-        _this.getSourceLanguageMeta = function (projectId, sourceLanguageId, metaProp) {
-            let md5Hash = openFile(path.join(sourceDirPath, projectId, sourceLanguageId, 'resources_catalog.link'));
-            if (md5Hash === null) {
-                return null;
-            }
-            let catalogJson = openJson(path.join(dataDirPath, md5Hash, 'meta.json'));
-            if (typeof metaProp !== 'undefined') {
-                return catalogJson[metaProp];
-            }
-            return catalogJson;
+            let dbFields = [
+                'modified_at',
+                'project_id',
+                'slug',
+                'name',
+                'direction',
+                'project_name',
+                'project_description',
+                'resource_catalog_url'
+            ];
+            let item = db.selectOne('source_language', dbFields, '`id`=?', [itemId]);
+            let catalogObj = {
+                dateModified: _.get(item, 'modified_at'),
+                projectId: projectId,
+                slug: _.get(item, 'slug'),
+                name: _.get(item, 'name'),
+                projectName: _.get(item, 'project_name'),
+                projectDescription: _.get(item, 'project_description'),
+                resourceCatalog: _.get(item, 'resource_catalog_url')
+            };
+            return catalogObj;
         };
 
         _this.getResource = function (projectId, sourceLanguageId, resourceId) {
-            let linkPath = path.join(sourceDirPath, projectId, sourceLanguageId, 'resources_catalog.link');
-            let md5Hash = openFile(linkPath);
-            if (md5Hash === null) {
-                return null;
+            let itemId = getResourceDbId(projectId, sourceLanguageId, resourceId);
+            if (itemId === null) {
+                return false;
             }
-            let catalogJson = openJson(path.join(dataDirPath, md5Hash, resourceId));
-            return catalogJson;
-        };
-
-        _this.getResourceMeta = function (projectId, sourceLanguageId, resourceId, metaProp) {
-            let md5Hash = openFile(path.join(sourceDirPath, projectId, sourceLanguageId, resourceId, 'source.link'));
-            if (md5Hash === null) {
-                return null;
-            }
-            let catalogJson = openJson(path.join(dataDirPath, md5Hash, 'meta.json'));
-            if (typeof metaProp !== 'undefined') {
-                return catalogJson[metaProp];
-            }
-            return catalogJson;
+            let dbFields = [
+                'modified_at',
+                'source_language_id',
+                'slug',
+                'name',
+                'checking_level',
+                'version',
+                'source_catalog_url',
+                'source_catalog_server_modified_at',
+                'translation_notes_catalog_url',
+                'translation_notes_catalog_server_modified_at',
+                'translation_words_catalog_url',
+                'translation_words_catalog_server_modified_at',
+                'translation_word_assignments_catalog_url',
+                'translation_word_assignments_catalog_server_modified_at',
+                'checking_questions_catalog_url',
+                'checking_questions_catalog_server_modified_at'
+            ];
+            let item = db.selectOne('resource', dbFields, '`id`=?', [itemId]);
+            let catalogObj = {
+                dateModified: _.get(item, 'modified_at'),
+                projectId: projectId,
+                sourceLanguageId: sourceLanguageId,
+                slug: _.get(item, 'slug'),
+                name: _.get(item, 'name'),
+                checkingLevel: _.get(item, 'checking_level'),
+                version: _.get(item, 'version'),
+                sourceCatalog: _.get(item, 'source_catalog_url'),
+                sourceDateModified: _.get(item, 'source_catalog_server_modified_at'),
+                translationNotesCatalog: _.get(item, 'translation_notes_catalog_url'),
+                translationNotesDateModified: _.get(item, 'translation_notes_catalog_server_modified_at'),
+                translationWordsCatalog: _.get(item, 'translation_words_catalog_url'),
+                translationWordsDateModified: _.get(item, 'translation_words_catalog_server_modified_at'),
+                translationWordAssignmentsCatalog: _.get(item, 'translation_word_assignments_catalog_url'),
+                translationWordAssignmentsDateModified: _.get(item, 'translation_word_assignments_catalog_server_modified_at'),
+                checkingQuestionsCatalog: _.get(item, 'checking_questions_catalog_url'),
+                checkingQuestionsDateModified: _.get(item, 'checking_questions_catalog_server_modified_at')
+            };
+            return catalogObj;
         };
 
         _this.getChapter = function (projectId, sourceLanguageId, resourceId, chapterId) {
-            let md5Hash = openFile(path.join(sourceDirPath, projectId, sourceLanguageId, resourceId, 'source.link'));
-            if (md5Hash === null) {
-                return null;
+            let itemId = getChapterDbId(projectId, sourceLanguageId, resourceId, chapterId);
+            if (itemId === null) {
+                return false;
             }
-            let catalogJson = openJson(path.join(dataDirPath, md5Hash, chapterId, 'chapter.json'));
-            return catalogJson;
+            let dbFields = [
+                'resource_id',
+                'slug',
+                'reference',
+                'title',
+                'sort'
+            ];
+            let item = db.selectOne('chapter', dbFields, '`id`=?', [itemId]);
+            let catalogObj = {
+                projectId: projectId,
+                sourceLanguageId: sourceLanguageId,
+                resourceId: resourceId,
+                slug: _.get(item, 'slug'),
+                reference: _.get(item, 'reference'),
+                title: _.get(item, 'title'),
+                sort: _.get(item, 'sort')
+            };
+            return catalogObj;
         };
 
         _this.getFrame = function (projectId, sourceLanguageId, resourceId, chapterId, frameId) {
-            let md5Hash = openFile(path.join(sourceDirPath, projectId, sourceLanguageId, resourceId, 'source.link'));
-            if (md5Hash === null) {
-                return null;
+            let itemId = getFrameDbId(projectId, sourceLanguageId, resourceId, chapterId, frameId);
+            if (itemId === null) {
+                return false;
             }
-            let catalogJson = openJson(path.join(dataDirPath, md5Hash, chapterId, frameId));
-            return catalogJson;
+            let dbFields = [
+                'chapter_id',
+                'slug',
+                'body',
+                'image_url',
+                'sort'
+            ];
+            let item = db.selectOne('frame', dbFields, '`id`=?', [itemId]);
+            let catalogObj = {
+                projectId: projectId,
+                sourceLanguageId: sourceLanguageId,
+                resourceId: resourceId,
+                chapterId: chapterId,
+                slug: _.get(item, 'slug'),
+                body: _.get(item, 'body'),
+                imageUrl: _.get(item, 'image_url'),
+                sort: _.get(item, 'sort')
+            };
+            return catalogObj;
         };
+        /** /
 
         _this.getNotes = function (projectId, sourceLanguageId, resourceId, chapterId, frameId) {
-            let md5Hash = openFile(path.join(sourceDirPath, projectId, sourceLanguageId, resourceId, 'notes.link'));
-            if (md5Hash === null) {
-                return null;
-            }
-            let catalogJson = openJson(path.join(dataDirPath, md5Hash, chapterId, frameId));
+            let catalogJson = {};
             return catalogJson;
         };
 
         _this.getTerms = function (projectId, sourceLanguageId, resourceId) {
-            let md5Hash = openFile(path.join(sourceDirPath, projectId, sourceLanguageId, resourceId, 'terms.link'));
-            if (md5Hash === null) {
-                return null;
-            }
-            let catalogJson = openJson(path.join(dataDirPath, md5Hash, 'term.json'));
+            let catalogJson = {};
             return catalogJson;
         };
 
         _this.getQuestions = function (projectId, sourceLanguageId, resourceId, chapterId, frameId) {
-            let md5Hash = openFile(path.join(sourceDirPath, projectId, sourceLanguageId, resourceId, 'checking_questions.link'));
-            if (md5Hash === null) {
-                return null;
-            }
-            let catalogJson = openJson(path.join(dataDirPath, md5Hash, chapterId, frameId));
+            let catalogJson = {};
             return catalogJson;
         };
+        /**/
 
         return _this;
     }

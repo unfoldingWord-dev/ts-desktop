@@ -23,7 +23,7 @@
 
     <template>
 
-        <ts-translate-sidebar route="{{route}}" selected="{{selected}}"></ts-translate-sidebar>
+        <ts-translate-sidebar route="{{route}}" selected="{{selected}}" backto="{{backto}}"></ts-translate-sidebar>
 
         <div id="pages">
             <ts-read-mode id="readmode" project="{{project}}" chapters="[[chapters]]" modestatus="{{modestatus}}"></ts-read-mode>
@@ -65,6 +65,11 @@
             modestatus: {
                 type: Object,
                 value: {}
+            },
+            backto: {
+                type: String,
+                value: "",
+                notify: true
             },
             chapters: {
                 type: Object,

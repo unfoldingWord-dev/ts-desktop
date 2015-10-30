@@ -224,7 +224,8 @@
             //         settings.push({name: key, value: getValue(key), type: getMetaValue(key, type)});
             //     });
             //     return settings;
-                return settings;
+                console.log(storage);
+                return [];
             }
 
         };

@@ -12,6 +12,7 @@ testdata
 resources
 results.txt
 unit_tests/report.txt
+ssh
 acceptance_tests/report.txt
 app/config/private.json
 app/logs/

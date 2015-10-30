@@ -1,0 +1,220 @@
+
+<link rel="import" href="../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
+
+<dom-module id="ts-terms">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+            flex: auto;
+        }
+
+        #header {
+            background-color: var(--primary-color);
+        }
+
+        #title {
+            font-size: 125%;
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 45px;
+        }
+
+        #body {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            margin: 15px;
+            padding: 15px 15px 5px 15px;
+        }
+
+        #main {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        #main p {
+            text-align: center;
+            margin: 0 10px;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-around;
+            color: var(--greyed-out-dark);
+        }
+
+        .buttons paper-button:hover {
+            color: var(--highlight-primary);
+        }
+
+        #main paper-button {
+            background: var(--highlight-primary);
+            color: var(--text-color);
+            text-transform: uppercase;
+            margin-top: 15px;
+        }
+
+        .popup {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+            width: 95%;
+            height: 95%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content {
+            flex: auto;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        .popup .buttons {
+            display: flex;
+            justify-content: center;
+        }
+
+    </style>
+
+    <template>
+
+        <div id="header">
+            <div id="title">
+                <span>Terms of Use</span>
+            </div>
+        </div>
+
+        <div id="body">
+            <div id="main">
+                <p>By using this app you agree with the statement of faith and translation guidelines and to release your work under
+                the terms of the Creative Commons Attribution-ShareAlike 4.0 International License.</p>
+                <paper-button raised on-tap="openlicense">License Agreement</paper-button>
+                <paper-button raised on-tap="openguidelines">Translation Guidelines</paper-button>
+                <paper-button raised on-tap="openstatement">Statement of Faith</paper-button>
+            </div>
+            <div class="buttons">
+                <paper-button dialog-dismiss on-tap="close">No Thanks</paper-button>
+                <paper-button dialog-confirm on-tap="accept">I Agree</paper-button>
+            </div>
+        </div>
+
+        <paper-dialog id="license" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <div class="content">
+                <h2>You are free to:</h2>
+                <p>Share, copy, and redistribute the material in any medium or format; Adapt, remix, transform, and build upon the material for any
+                purpose, even commercially. The licensor cannot revoke these freedoms as long as you follow the license terms.</p>
+                <h2>Under the following terms:</h2>
+                <p><span class="bold">Attribution</span> - You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so
+                in any reasonable manner, but not in any way that suggests the licensor endorses you or your use;</p>
+                <p><span class="bold">ShareAlike</span> - If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original;</p>
+                <p><span class="bold">No additional restrictions</span> - You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.</p>
+                <h2>Notices:</h2>
+                <p>You do not have to comply with the license for elements of the material in the public domain or where your use is permitted by an applicable exception
+                or limitation; No warranties are given. The license may not give you all of the permissions necessary for your intended use. For example,
+                other rights such as publicity, privacy, or moral rights may limit how you use the material.</p>
+            </div>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Close</paper-button>
+            </div>
+        </paper-dialog>
+
+        <paper-dialog id="guidelines" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <div class="content">
+                <h2>This is a placeholder for the guidelines:</h2>
+                <p>Share, copy, and redistribute the material in any medium or format; Adapt, remix, transform, and build upon the material for any
+                    purpose, even commercially. The licensor cannot revoke these freedoms as long as you follow the license terms.</p>
+                <h2>Under the following terms:</h2>
+                <p><span class="bold">Attribution</span> - You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so
+                    in any reasonable manner, but not in any way that suggests the licensor endorses you or your use;</p>
+                <p><span class="bold">ShareAlike</span> - If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original;</p>
+                <p><span class="bold">No additional restrictions</span> - You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.</p>
+                <h2>Notices:</h2>
+                <p>You do not have to comply with the license for elements of the material in the public domain or where your use is permitted by an applicable exception
+                    or limitation; No warranties are given. The license may not give you all of the permissions necessary for your intended use. For example,
+                    other rights such as publicity, privacy, or moral rights may limit how you use the material.</p>
+            </div>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Close</paper-button>
+            </div>
+        </paper-dialog>
+
+        <paper-dialog id="statement" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <div class="content">
+                <h2>This is a placeholder for the statement of faith:</h2>
+                <p>Share, copy, and redistribute the material in any medium or format; Adapt, remix, transform, and build upon the material for any
+                    purpose, even commercially. The licensor cannot revoke these freedoms as long as you follow the license terms.</p>
+                <h2>Under the following terms:</h2>
+                <p><span class="bold">Attribution</span> - You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so
+                    in any reasonable manner, but not in any way that suggests the licensor endorses you or your use;</p>
+                <p><span class="bold">ShareAlike</span> - If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original;</p>
+                <p><span class="bold">No additional restrictions</span> - You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.</p>
+                <h2>Notices:</h2>
+                <p>You do not have to comply with the license for elements of the material in the public domain or where your use is permitted by an applicable exception
+                    or limitation; No warranties are given. The license may not give you all of the permissions necessary for your intended use. For example,
+                    other rights such as publicity, privacy, or moral rights may limit how you use the material.</p>
+            </div>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Close</paper-button>
+            </div>
+        </paper-dialog>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+        is: 'ts-terms',
+
+        properties: {
+            accepted: {
+                type: Boolean,
+                value: false,
+                notify: true
+            }
+        },
+
+        accept: function () {
+            this.accepted = true;
+        },
+
+        close: function () {
+            App.close();
+        },
+
+        openlicense: function () {
+            this.$.license.open();
+        },
+
+        openguidelines: function () {
+            this.$.guidelines.open();
+        },
+
+        openstatement: function () {
+            this.$.statement.open();
+        },
+
+        ready: function() {
+
+        }
+
+    });
+
+</script>

@@ -5,6 +5,7 @@
 <link rel="import" href="../ts-new/ts-new.html">
 <link rel="import" href="../ts-publish/ts-publish.html">
 <link rel="import" href="../ts-translate/ts-translate.html">
+<link rel="import" href="./ts-terms.html">
 
 <dom-module id="ts-dashboard">
 
@@ -28,12 +29,17 @@
 
   <template>
 
-      <neon-animated-pages attr-for-selected="data-route" selected="{{route}}" exit-animation="slide-left-animation" entry-animation="slide-from-right-animation">
-          <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]" project="{{project}}"></ts-home>
-          <ts-new data-route="new" route="{{route}}" projectlist="{{projectlist}}" project="{{project}}"></ts-new>
-          <ts-translate data-route="translate" route="{{route}}" project="{{project}}"></ts-translate>
-          <ts-publish data-route="publish" route="{{route}}" project="[[project]]"></ts-publish>
-      </neon-animated-pages>
+      <template is="dom-if" if="{{accepted}}">
+          <neon-animated-pages attr-for-selected="data-route" selected="{{route}}" exit-animation="slide-left-animation" entry-animation="slide-from-right-animation">
+              <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]" project="{{project}}"></ts-home>
+              <ts-new data-route="new" route="{{route}}" projectlist="{{projectlist}}" project="{{project}}"></ts-new>
+              <ts-translate data-route="translate" route="{{route}}" project="{{project}}"></ts-translate>
+              <ts-publish data-route="publish" route="{{route}}" project="[[project]]"></ts-publish>
+          </neon-animated-pages>
+      </template>
+      <template is="dom-if" if="{{!accepted}}">
+          <ts-terms accepted="{{accepted}}"></ts-terms>
+      </template>
 
   </template>
 
@@ -56,6 +62,10 @@
           project: {
               type: Object,
               value: {}
+          },
+          accepted: {
+              type: Boolean,
+              value: false
           }
       },
 

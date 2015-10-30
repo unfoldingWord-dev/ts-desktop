@@ -1,5 +1,8 @@
 
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="./ts-select-modal.html">
+<link rel="import" href="./ts-edit-modal.html">
 
 <dom-module id="ts-settings">
 
@@ -7,22 +10,102 @@
 
         :host {
             display: flex;
+            flex-direction: column;
         }
 
         neon-animated-pages {
-            flex: auto;
+            flex: none;
             display: flex;
+            transform: translateY(-60px);
+            height: calc(100% - 45px);
         }
 
         neon-animated-pages > * {
             flex: auto;
         }
 
+        .header {
+            background-color: var(--primary-color);
+            min-height: 50px;
+        }
+
+        .title {
+            font-size: 125%;
+            color: var(--text-color);
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 45px;
+        }
+
+        [icon="arrow-back"] {
+            margin: 0 1em 0 .2em;
+        }
+
+        .body {
+            padding: 0 4rem;
+            overflow-y: auto;
+            background-color: white; /* change to var */
+        }
+
+        .setting-group-header {
+            color: var(--primary-color);
+            margin: 1.5rem 0 1rem;
+            font-size: 105%;
+        }
+
+        .setting-group-item {
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--greyed-out-light);
+            display: flex;
+            cursor: pointer;
+        }
+
+        .setting-text {
+            flex: 1 1 auto;
+        }
+
+        .help-text {
+            color: var(--greyed-out-dark);
+            line-height: 1.6;
+        }
+
+        .setting-checkbox {
+            flex: 0 0 48px;
+        }
     </style>
 
     <template>
 
-        <div>hello</div>
+        <div class="header">
+            <div class="title">
+                <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
+                <span>Settings</span>
+            </div>
+        </div>
+
+        <div class="body">
+
+            <template is="dom-repeat" items="{{settings}}">
+                <div class="setting-group-header">{{_capitalize(item.group)}}</div>
+                <div class="setting-group-body">
+                    <template is="dom-repeat" items="{{item.list}}" as="setting">
+                        <div id="{{setting.name}}" class="setting-group-item" on-tap="_runTapHandler">
+                            <div class="setting-text">
+                                <div class="main-text">{{setting.mainText}}</div>
+                                <div class="help-text">{{_computeHelpText(setting)}}</div>
+                            </div>
+                            <template is="dom-if" if="{{_checkBoolean(setting.value)}}">
+                                <div class="setting-checkbox">
+                                    <paper-checkbox class="right" checked$="{{setting.value}}"></paper-checkbox>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+            </template>
+
+        </div>
 
     </template>
 
@@ -39,15 +122,278 @@
         ],
 
         properties: {
-
+            route: {
+                type: String,
+                notify: true
+            },
+            backto: {
+                type: String
+            },
+            settings: {
+                type: Array,
+                value: []
+            },
+            settingsObj: {
+                type: Object,
+                value: {}
+            }
         },
 
-        attached: function() {
+        _capitalize: function(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        },
 
+        _computeHelpText: function(setting) {
+            var text;
+            if (typeof(setting.value) === "number" && setting.helpText) {
+                text = setting.helpText.replace("<int>", setting.value);
+            }
+            else {
+                text = setting.helpText || setting.value || setting.nullText;
+            }
+            return text;
+        },
+
+        _checkBoolean: function(value) {
+            return typeof(value) == "boolean" ? true : false;
+        },
+
+        _runTapHandler: function(event) {
+            this[event.model.setting.name](event);
         },
 
         ready: function() {
+            var general = ['remembermyplace', 'highlightkeyterms', 'font', 'fontsize'];
+            var share = ['exportformat'];
+            var upload = ['autosavechanges', 'authserver', 'authserverport', 'dataserver', 'dataserverport', 'mediaserver'];
+            var advanced = ['backupinterval', 'logginglevel'];
+            // this.settings = App.configurator.getSettings({'general': general, 'share': share, 'upload': upload, 'advanced': advanced});
+            this.settings = [
+                {
+                    group: "General",
+                    list: [
+                        {
+                            "name": "remembermyplace",
+                            "mainText": "Remember My Place",
+                            "helpText": "Display the last viewed screen when starting the app",
+                            "value": false
+                        },
+                        {
+                            "name": "highlightkeyterms",
+                            "mainText": "Highlight Key Terms",
+                            "helpText": "Make key terms clickable in the source text",
+                            "value": true
+                        },
+                        {
+                            "name": "font",
+                            "mainText": "Font",
+                            "value": "Tahoma"
+                        },
+                        {
+                            "name": "fontsize",
+                            "mainText": "Font Size",
+                            "value": "Normal"
+                        }
+                    ]
+                },
+                {
+                    group: "Share",
+                    list: [
+                        {
+                            "name": "exportformat",
+                            "mainText": "Export Format",
+                            "value": "DokuWiki"
+                        }
+                    ]
+                },
+                {
+                    group: "Upload",
+                    list: [
+                        {
+                            name: "autosavechanges",
+                            mainText: "Auto Save Changes",
+                            helpText: "Every <int> seconds",
+                            nullText: "Never",
+                            value: 5
+                        },
+                        {
+                            name: "authserver",
+                            mainText: "Authentication Server",
+                            value: "ts.door43.org"
+                        },
+                        {
+                            name: "authserverport",
+                            mainText: "Authentication Server Port",
+                            value: "9095"
+                        },
+                        {
+                            name: "dataserver",
+                            mainText: "Data Server",
+                            value: "gitolite3@ts.door43.org"
+                        },
+                        {
+                            name: "dataserverport",
+                            mainText: "Data Server Port",
+                            value: "9299"
+                        },
+                        {
+                            name: "mediaserver",
+                            mainText: "Media Server",
+                            value: "https://api.unfoldingword.org"
+                        }
+                    ]
+                },
+                {
+                    group: "Advanced",
+                    list: [
+                        {
+                            name: "backupinterval",
+                            mainText: "Backup Interval",
+                            helpText: "<int> minutes",
+                            nullText: "Disable Backup",
+                            value: 5
+                        },
+                        {
+                            name: "logginglevel",
+                            mainText: "Logging Level",
+                            value: "Warnings"
+                        },
+                        {
+                            name: "developertools",
+                            mainText: "Developer Tools",
+                            helpText: "Opens the developer tools"
+                        }
+                    ]
+                }
+            ];
+        },
 
+        back: function() {
+            this.route = this.backto;
+        },
+
+        onSelectConfirm: function() {
+            this.onSettingCancel();
+        },
+
+        onSelectCancel: function() {
+            var modal = document.querySelector('ts-select-modal');
+            this.removeChild(modal);
+        },
+
+        onEditConfirm: function() {
+            this.onEditCancel();
+        },
+
+        onEditCancel: function() {
+            var modal = document.querySelector('ts-edit-modal');
+            this.removeChild(modal);
+        },
+
+        remembermyplace: function(event) {
+            event.model.setting.value = !event.model.setting.value;
+        },
+        
+        highlightkeyterms: function(event) {
+             event.model.setting.value = !event.model.setting.value;
+        },
+
+        font: function(event) {
+            modal = this.openSelectModal(event);
+            modal.title = event.model.setting.mainText;
+            modal.options = ['Arial', 'Times New Roman', 'Calibri', 'Tahoma'];
+            modal.selected = event.model.setting.value;
+        },
+
+        fontsize: function(event) {
+            modal = this.openSelectModal(event);
+            modal.title = event.model.setting.mainText;
+            modal.options = ['Small', 'Normal', 'Medium', 'Large'];
+            modal.selected = event.model.setting.value;
+        },
+
+        exportformat: function(event) {
+            modal = this.openSelectModal(event);
+            modal.title = event.model.setting.mainText;
+            modal.options = ['DokuWiki', 'translationStudio'];
+            modal.selected = event.model.setting.value;
+        },
+
+        autosavechanges: function(event) {
+            modal = this.openSelectModal(event);
+            modal.title = event.model.setting.mainText;
+            modal.options = ['1', '5', '10', '15'];
+            modal.selected = event.model.setting.value;
+        },
+
+        authserver: function(event) {
+            modal = this.openEditModal(event);
+            modal.title = event.model.setting.mainText;
+            modal.text = event.model.setting.value;
+        },
+
+        authserverport: function(event) {
+            modal = this.openEditModal(event);
+            modal.title = event.model.setting.mainText;
+            modal.text = event.model.setting.value;
+        },
+
+        dataserver: function(event) {
+            modal = this.openEditModal(event);
+            modal.title = event.model.setting.mainText;
+            modal.text = event.model.setting.value;
+        },
+
+        dataserverport: function(event) {
+            modal = this.openEditModal(event);
+            modal.title = event.model.setting.mainText;
+            modal.text = event.model.setting.value;
+        },
+
+        mediaserver: function(event) {
+            modal = this.openEditModal(event);
+            modal.title = event.model.setting.mainText;
+            modal.text = event.model.setting.value;
+        },
+
+        backupinterval: function(event) {
+            modal = this.openSelectModal(event);
+            modal.title = event.model.setting.mainText;
+            modal.options = ['1', '2', '3', '4', '5', '10', '15'];
+            modal.selected = event.model.setting.value;
+        },
+
+        logginglevel: function(event) {
+            modal = this.openSelectModal(event);
+            modal.title = event.model.setting.mainText;
+            modal.options = ['Information', 'Warnings', 'Errors'];
+            modal.selected = event.model.setting.value;
+        },
+
+        developertools: function(event) {
+            console.log('open dev tools');
+        },
+
+        openSelectModal: function(event) {
+            var modal = document.createElement('ts-select-modal');
+            modal.id = "select-setting-modal";
+            modal.style.display = 'block';
+            this.appendChild(modal);
+            modal.fire('open');
+            modal.addEventListener('select-confirm', this.onSelectConfirm.bind(this));
+            modal.addEventListener('select-cancel', this.onSelectCancel.bind(this));
+            return modal
+        },
+
+        openEditModal: function(event) {
+            var modal = document.createElement('ts-edit-modal');
+            modal.id = "edit-setting-modal";
+            modal.style.display = 'block';
+            this.appendChild(modal);
+            modal.fire('open');
+            modal.addEventListener('edit-confirm', this.onEditConfirm.bind(this));
+            modal.addEventListener('edit-cancel', this.onEditCancel.bind(this));
+            return modal
         }
 
     });

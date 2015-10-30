@@ -178,8 +178,8 @@
                 transchunk = {
                     meta: {
                         chapter: i,
-                        startverse: i,
-                        endverse: i
+                        startverse: 1,
+                        endverse: 1
                     },
                     content: '',
                     status: 'Incomplete'
@@ -187,8 +187,8 @@
                 srcchunk = {
                     meta: {
                         chapter: i,
-                        startverse: i,
-                        endverse: i
+                        startverse: 1,
+                        endverse: 1
                     },
                     content: 'This is blank source content for ' + name + ' chunk ' + i,
                     notes: 'Notes for ' + name + ' chunk ' + i,
@@ -198,7 +198,7 @@
                 source.push(srcchunk);
             }
 
-            var newproj = {"name": name, "language": language, "icon": icon, "sources": [], "completion": 0, "currentsource": 0, "translation": translation, "source": source};
+            var newproj = {"name": name, "language": language, "icon": icon, "sources": [], "completion": 0, "currentsource": null, "translation": translation, "source": source};
             this.push('projectlist', newproj);
             this.set('project', newproj);
             this.route = "translate";

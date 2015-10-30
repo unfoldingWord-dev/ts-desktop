@@ -1,0 +1,183 @@
+
+<link rel="import" href="../../components/paper-material/paper-material.html">
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+
+<link rel="import" href="./ts-source/ts-source-tab.html">
+
+<dom-module id="ts-nosource-mode">
+
+    <style>
+
+        :host {
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            display: flex;
+        }
+
+        #contain {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        :host(.preview) {
+            opacity: 0;
+        }
+
+        :host(.hide) {
+            visibility: hidden;
+        }
+
+        .movein {
+            -webkit-animation: moveinto .5s;
+        }
+
+        .moveout {
+            -webkit-animation: moveout .5s;
+        }
+
+        @-webkit-keyframes moveinto {
+            0% {transform: scale(0,0); opacity: 0}
+            100% {transform: scale(1,1); opacity: 1}
+        }
+
+        @-webkit-keyframes moveout {
+            0% {transform: scale(1,1); opacity: 1}
+            100% {transform: scale(0,0); opacity: 0}
+        }
+
+        paper-material {
+            background: white;
+        }
+
+        #heading {
+            padding: 5px 1em;
+            color: var(--greyed-out-dark);
+            display: flex;
+            justify-content: space-between;
+            min-height: 75px;
+            align-items: center;
+            font-size: 125%;
+        }
+
+        #topbox {
+            margin: 15px 40px 15px 15px;
+            position: relative;
+        }
+
+        #bottombox {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--greyed-out-dark);
+            font-style: italic;
+            font-size: 110%;
+        }
+
+        #bottomcard {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            top: 25px;
+            left: 25px;
+            background-size: 100% 32px;
+            background-image: -webkit-linear-gradient(white 27px, var(--greyed-out-light) 27px, var(--greyed-out-light) 28px, white 28px);
+        }
+
+        #topcard {
+            z-index: 2;
+        }
+
+        .bigicon {
+            --iron-icon-height: 100px;
+            --iron-icon-width: 100px;
+        }
+
+    </style>
+
+    <template>
+
+        <div id="contain">
+            <div id="topbox">
+                <paper-material id="topcard" elevation="1">
+                    <div id="heading">
+                        <div>
+                            Project: <span>[[project.name]]</span> - <span>[[project.language]]</span>
+                        </div>
+                        <ts-source-tab id="sourcetab" sources="{{project.sources}}" selected-source="{{project.currentsource}}"></ts-source-tab>
+                    </div>
+                </paper-material>
+                <paper-material id="bottomcard" elevation="1">
+                </paper-material>
+            </div>
+            <div id="bottombox">
+                <p>Choose source translation(s) to begin reading and translating</p>
+                <paper-icon-button icon="tab" class="bigicon" on-tap="openmodal"></paper-icon-button>
+            </div>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-nosource-mode',
+
+        behaviors: [
+            Polymer.IronResizableBehavior
+        ],
+
+        properties: {
+            project: {
+                type: Object,
+                value: {},
+                notify: true
+            }
+        },
+
+        frommode: function () {
+            var mythis = this;
+            var contain = this.$.contain;
+
+            contain.classList.add("moveout");
+            setTimeout(function() {
+                contain.classList.remove("moveout");
+                mythis.classList.add("hide");
+            }, 500);
+        },
+
+        tomode: function () {
+            var mythis = this;
+            var contain = this.$.contain;
+
+            mythis.classList.add("preview");
+            mythis.classList.remove("hide");
+            setTimeout(function() {
+                mythis.classList.remove("preview");
+                contain.classList.add("movein");
+                setTimeout(function() {
+                    contain.classList.remove("movein");
+                }, 500);
+            }, 500);
+        },
+
+        openmodal: function () {
+            this.$.sourcetab.openModal();
+        },
+
+        ready: function() {
+
+        }
+
+    });
+
+</script>

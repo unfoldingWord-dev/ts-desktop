@@ -106,7 +106,9 @@
 
         let getText = function (key) {
             console.log('getting text for', key);
-            if (!key) return;
+            if (!key) {
+                return;
+            }
             key = key.toLowerCase();
 
             let valueObjStr = storage[key] || '{}';
@@ -119,7 +121,9 @@
         };
 
         let getType = function (key) {
-            if (!key) return;
+            if (!key) {
+                return;
+            }
             key = key.toLowerCase();
 
             let valueObjStr = storage[key] || '{}';
@@ -160,7 +164,7 @@
 
 
             // getText: function (key) {
-            //     let 
+            //     let
             // },
 
             /**
@@ -204,20 +208,22 @@
             getSettings: function (config) {
                 var settings = [];
                 for (var group in config) {
-                    var keyArrays = config[group];
-                    var list = [];
-                    for (var i = 0; i < keyArrays.length; i++) {
-                        var key = keyArrays[i];
-                        list.push({
-                            "name": key,
-                            "text": getText(key),
-                            "value": getValue(key),
-                            "type": getType(key),
-                            "handler": key + 'Tap'
-                        });
-                        console.log(keyArrays[i]);
+                    if (config.hasOwnProperty(group)) {
+                        var keyArrays = config[group];
+                        var list = [];
+                        for (var i = 0; i < keyArrays.length; i++) {
+                            var key = keyArrays[i];
+                            list.push({
+                                "name": key,
+                                "text": getText(key),
+                                "value": getValue(key),
+                                "type": getType(key),
+                                "handler": key + 'Tap'
+                            });
+                            console.log(keyArrays[i]);
+                        }
+                        settings.push({'group': group, 'list': list});
                     }
-                    settings.push({'group': group, 'list': list});
                 }
             //     var settings = [];
             //     keys.forEach(function(key) {

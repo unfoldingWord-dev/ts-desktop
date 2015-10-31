@@ -1,0 +1,167 @@
+
+<link rel="import" href="../../components/paper-radio-button/paper-radio-button.html">
+
+<dom-module id="ts-select-modal">
+
+    <style>
+
+        :host {
+            box-sizing: border-box;
+            position: fixed;
+            top: 40px;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        .container {
+            display: block;
+            width: 40%;
+            height: 40%;
+            min-height: 320px;
+            max-height: 800px;
+            position: fixed;
+            left: 0;
+            right: 0;
+            top: calc(50% + 18px);
+            transform: translateY(-50%);
+            margin-left: auto;
+            margin-right: auto;
+            overflow: hidden;
+            background: white;
+            box-shadow: -4px 0 30px rgba(22, 22, 22, 0.3);
+        }
+        .header {
+            min-height: 56px;
+            border-bottom: 1px solid #EEE;
+            color: #888;
+            font-style: italic;
+            font-family: 'Roboto';
+            font-size: 110%;
+            display: flex;
+        }
+        .body {
+            height: calc(100% - 56px - 56px);
+            overflow-y: auto;
+        }
+        .selected-list {
+            font-family: 'Roboto';
+            font-size: 110%;
+        }
+        .row {
+            display: block;
+            margin: 0;
+            padding: 1em;
+            border-bottom: 1px solid #EEE;
+        }
+        .row:hover {
+            background: var(--accent-color-dark);
+            box-shadow: inset 0 -1px rgba(0,0,0,0);
+            color: #fff;
+        }
+        .right {
+            float: right;
+        }
+        .clickable {
+            cursor: pointer;
+        }
+        .footer {
+            width: 100%;
+            height: 56px;
+            position: absolute;
+            bottom: 0;
+            border-top: 1px solid #EEE;
+        }
+        paper-button {
+            margin-top: 0.6rem;
+            color: #00C5E8;
+        }
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+    </style>
+
+    <template>
+
+        <div id="container" class="container">
+            <div class="header">{{title}}</div>
+
+            <div class="body">
+            	<paper-radio-group selected="[[selected]]">
+	                <template is="dom-repeat" items="[[options]]" as="option">
+                        <paper-radio-button name$="[[option]]" data-value$="{{option}}" class="row clickable" on-tap="selectOption" checked$="{{_checkSelected(selected,option)}}">[[option]]</paper-radio-button>
+	                </template>
+                </paper-radio-group>
+            </div>
+
+            <div class="footer">
+                <paper-button class="right" on-tap="confirm">Confirm</paper-button>
+                <paper-button class="right" on-tap="cancel">Cancel</paper-button>
+            </div>
+
+        </div>
+
+   </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-select-modal',
+
+        listeners: {
+            'open': 'onOpen'
+        },
+
+        behaviors: [
+            Polymer.IronResizableBehavior
+        ],
+
+        properties: {
+            title: {
+            	type: String
+            },
+            options: {
+            	type: Array
+            },
+            selected: {
+            	type: String
+            }
+        },
+
+        _checkSelected: function(selected,option) {
+        	console.log('checkSelected()', selected, option);
+        	return option == selected ? true : false;
+        },
+
+        selectOption: function(event) {
+        	this.selected = event.model.option;
+        	console.log('selecting', this.selected);
+        },
+
+        ready: function() {
+        	console.log('selected is', this.selected);
+        	console.log('options are', this.options);
+        	console.log('title is', this.title);
+        },
+
+        onOpen: function() {
+            console.log('Setting Select Modal is opened');
+        },
+
+        cancel: function() {
+        	console.log('firing setting-cancel');
+            this.fire('select-cancel');
+        },
+
+        confirm: function() {
+        	console.log('firing setting-confirm');
+            this.fire('select-confirm');
+        }
+    });
+
+</script>

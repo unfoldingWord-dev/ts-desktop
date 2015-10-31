@@ -39,7 +39,7 @@
             <paper-menu class="dropdown-content">
                 <paper-item>Update Library</paper-item>
                 <paper-item>Feedback</paper-item>
-                <paper-item>Settings</paper-item>
+                <paper-item on-tap="settings">Settings</paper-item>
             </paper-menu>
         </paper-menu-button>
     </template>
@@ -62,7 +62,17 @@
                 type: String,
                 value: '',
                 notify: true
+            },
+            backto: {
+                type: String,
+                value: '',
+                notify: true
             }
+        },
+
+        settings: function () {
+            this.backto = this.route;
+            this.route = 'settings';
         },
 
         ready: function() {

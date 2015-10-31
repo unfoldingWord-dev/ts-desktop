@@ -84,14 +84,14 @@
 		<div class="tabs">
 			<paper-tabs no-bar hide-scroll-buttons scrollable selected="{{ selectedSource }}">
 				<template is="dom-repeat" items="[[ sources ]]" as="source">
-                   <paper-tab class="tab" on-tap="onResize">{{ source }}</paper-tab>
+                   <paper-tab class="tab" on-tap="choosesource">{{ source }}</paper-tab>
                 </template>
             	<div class="selection-bar"></div>
 			</paper-tabs>
 		</div>
 		<div class="modal-btn-container">
 			<div class="modal-btn-inner-container">
-				<paper-icon-button icon="icons:tab" class="icon24 icon" on-click="openModal"></paper-icon-button>
+				<paper-icon-button icon="tab" class="icon24 icon" on-tap="openModal"></paper-icon-button>
 			</div>
 		</div>
 	</template>
@@ -109,7 +109,7 @@
         ],
 
         listeners: {
-            'iron-resize': 'onResize'
+            'iron-resize': '_adjustSelectionBar'
         },
 
         properties: {
@@ -126,8 +126,11 @@
         	}
         },
 
-        ready: function() {
+        observers: [
+            '_adjustSelectionBar(selectedSource)'
+        ],
 
+        ready: function() {
         	if (this.lefty) {
         		this.classList.add('lefty');
         	}
@@ -167,8 +170,8 @@
         	this.removeModal();
         },
 
-        onResize: function() {
-        	this._adjustSelectionBar();
+        choosesource: function(e) {
+            this.selectedSource = e.index;
         },
 
         // This function adjust the position and the width of the custom selection bar based on the position and
@@ -181,7 +184,7 @@
 	        		var selectedTab = this.querySelector('paper-tab.iron-selected');
 		    		var offsetLeft = selectedTab.offsetLeft;
 		    		var tabWidth = selectedTab.clientWidth;
-		    		var bars = document.querySelectorAll('.selection-bar');
+		    		var bars = this.querySelectorAll('.selection-bar');
 		    		Array.prototype.forEach.call(bars, function(bar, index) {
 		    			bar.style.width = tabWidth+'px';
 		    			bar.style.left = offsetLeft+'px';

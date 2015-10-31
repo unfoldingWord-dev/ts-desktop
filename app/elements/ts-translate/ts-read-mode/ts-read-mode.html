@@ -6,13 +6,45 @@
     <style>
 
         :host {
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
             display: flex;
-            flex: auto;
         }
 
         #contain {
             flex: auto;
-            overflow: auto;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-bottom: 100px;
+        }
+
+        :host(.preview) {
+            opacity: 0;
+        }
+
+        :host(.hide) {
+            visibility: hidden;
+        }
+
+        .movein {
+            -webkit-animation: moveinto .5s;
+        }
+
+        .moveout {
+            -webkit-animation: moveout .5s;
+        }
+
+        @-webkit-keyframes moveinto {
+            0% {transform: scale(0,0); opacity: 0}
+            100% {transform: scale(1,1); opacity: 1}
+        }
+
+        @-webkit-keyframes moveout {
+            0% {transform: scale(1,1); opacity: 1}
+            100% {transform: scale(0,0); opacity: 0}
         }
 
     </style>
@@ -21,7 +53,7 @@
 
         <div id="contain">
             <template is="dom-repeat" items="{{chapters.data}}" as="chunk">
-                <ts-read-card project="{{project}}" chunk="[[chunk]]"></ts-read-card>
+                <ts-read-card id="{{createid(index)}}" project="{{project}}" chunk="[[chunk]]"></ts-read-card>
             </template>
         </div>
 
@@ -48,7 +80,75 @@
             chapters: {
                 type: Object,
                 value: {}
+            },
+            modestatus: {
+                type: Object,
+                value: {},
+                notify: true
+            },
+            modename: {
+                type: String,
+                value: "read"
             }
+        },
+
+        frommode: function () {
+            var mythis = this;
+            var contain = this.$.contain;
+            var num = contain.children.length - 1;
+            var card;
+            var found = false;
+            var i = 0;
+
+            contain.classList.add("moveout");
+            setTimeout(function() {
+                contain.classList.remove("moveout");
+                mythis.classList.add("hide");
+            }, 500);
+            while (i < num && !found) {
+                card = document.getElementById(mythis.modename + i);
+                if (card.getBoundingClientRect().top > 0 - (card.getBoundingClientRect().height / 2) ) {
+                    mythis.set('modestatus.chapter', card.chunk.chapter);
+                    mythis.set('modestatus.verse', 1);
+                    found = true;
+                }
+                i++;
+            }
+        },
+
+        tomode: function () {
+            var mythis = this;
+            var contain = this.$.contain;
+            var num = contain.children.length - 1;
+            var card;
+            var pagescroll;
+            var cardscroll;
+            var found = false;
+            var i = 0;
+
+            mythis.classList.add("preview");
+            mythis.classList.remove("hide");
+            pagescroll = contain.scrollTop;
+            while (i < num && !found) {
+                card = document.getElementById(mythis.modename + i);
+                if (card.chunk.chapter === mythis.modestatus.chapter) {
+                    cardscroll = card.getBoundingClientRect().top;
+                    found = true;
+                }
+                i++;
+            }
+            contain.scrollTop = pagescroll + cardscroll - 60;
+            setTimeout(function() {
+                mythis.classList.remove("preview");
+                contain.classList.add("movein");
+                setTimeout(function() {
+                    contain.classList.remove("movein");
+                }, 500);
+            }, 500);
+        },
+
+        createid: function (index) {
+            return this.modename + index;
         },
 
         ready: function() {

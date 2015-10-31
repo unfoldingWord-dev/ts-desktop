@@ -101,7 +101,7 @@
 
             describe('@IndexSource', function () {
                 it('should index 1ch ar avd source catalog', function () {
-                    this.timeout(3500);
+                    this.timeout(5000);
                     assert.equal(
                         testIndexer.indexSource(
                             '1ch',

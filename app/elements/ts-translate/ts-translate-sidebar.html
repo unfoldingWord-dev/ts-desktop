@@ -50,7 +50,7 @@
 
     <template>
         <div id="top">
-            <paper-icon-button id="read" class="current" icon="assignment" title="Read Mode" on-tap="read"></paper-icon-button>
+            <paper-icon-button id="read" icon="assignment" title="Read Mode" on-tap="read"></paper-icon-button>
             <paper-icon-button id="chunk" icon="flip-to-front" title="Chunk Mode" on-tap="chunk"></paper-icon-button>
             <paper-icon-button id="review" icon="assignment-turned-in" title="Review Mode" on-tap="review"></paper-icon-button>
         </div>
@@ -60,7 +60,7 @@
                 <paper-item on-tap="home">Home</paper-item>
                 <paper-item on-tap="publish">Publish</paper-item>
                 <paper-item>Feedback</paper-item>
-                <paper-item>Settings</paper-item>
+                <paper-item on-tap="settings">Settings</paper-item>
             </paper-menu>
         </paper-menu-button>
     </template>
@@ -83,6 +83,11 @@
                 type: String,
                 value: '',
                 notify: true
+            },
+            backto: {
+                type: String,
+                value: "",
+                notify: true
             }
         },
 
@@ -91,31 +96,50 @@
         ],
 
         modechange: function (selected) {
-            if (selected === 0) {
-                this.$.read.classList.add("current");
-                this.$.chunk.classList.remove("current");
-                this.$.review.classList.remove("current");
-            } else if (selected === 1) {
-                this.$.read.classList.remove("current");
-                this.$.chunk.classList.add("current");
-                this.$.review.classList.remove("current");
+            var read = this.$.read;
+            var chunk = this.$.chunk;
+            var review = this.$.review;
+            if (selected === 1) {
+                read.classList.add("current");
+                chunk.classList.remove("current");
+                review.classList.remove("current");
+                read.disabled = false;
+                chunk.disabled = false;
+                review.disabled = false;
             } else if (selected === 2) {
-                this.$.read.classList.remove("current");
-                this.$.chunk.classList.remove("current");
-                this.$.review.classList.add("current");
+                read.classList.remove("current");
+                chunk.classList.add("current");
+                review.classList.remove("current");
+                read.disabled = false;
+                chunk.disabled = false;
+                review.disabled = false;
+            } else if (selected === 3) {
+                read.classList.remove("current");
+                chunk.classList.remove("current");
+                review.classList.add("current");
+                read.disabled = false;
+                chunk.disabled = false;
+                review.disabled = false;
+            } else if (selected === 4 || selected === 0) {
+                read.classList.remove("current");
+                chunk.classList.remove("current");
+                review.classList.remove("current");
+                read.disabled = true;
+                chunk.disabled = true;
+                review.disabled = true;
             }
         },
 
         read: function () {
-            this.selected = 0;
-        },
-
-        chunk: function () {
             this.selected = 1;
         },
 
-        review: function () {
+        chunk: function () {
             this.selected = 2;
+        },
+
+        review: function () {
+            this.selected = 3;
         },
 
         publish: function () {
@@ -124,6 +148,11 @@
 
         home: function () {
             this.route = "home";
+        },
+
+        settings: function() {
+            this.backto = this.route;
+            this.route = "settings";
         },
 
         ready: function() {

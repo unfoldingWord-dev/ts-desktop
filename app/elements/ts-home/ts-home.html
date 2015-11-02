@@ -138,10 +138,10 @@
             color: var(--greyed-out-dark);
         }
 
-        .trashcan {
+        .info {
             --iron-icon-height: 22px;
             --iron-icon-width: 22px;
-            color: var(--greyed-out-dark);
+            color: var(--greyed-out-light);
         }
 
         .smalltext {
@@ -156,6 +156,27 @@
             left: 0;
             right: 0;
             margin: auto;
+        }
+
+        #info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 350px;
+            height: 400px;
+            padding: 20px;
+        }
+
+        #border {
+            border-bottom: 1px solid var(--greyed-out-light);
+            border-top: 1px solid var(--greyed-out-light);
+            align-self: stretch;
+            display: flex;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        #confirm {
             width: 320px;
             height: 220px;
             text-align: center;
@@ -163,11 +184,20 @@
 
         .popup .buttons {
             display: flex;
+            align-items: center;
             justify-content: center;
             color: var(--greyed-out-dark);
         }
 
         .buttons paper-button:hover {
+            color: var(--highlight-primary);
+        }
+
+        #border paper-button:hover {
+            color: var(--highlight-primary);
+        }
+
+        #border paper-button:hover iron-icon {
             color: var(--highlight-primary);
         }
 
@@ -203,14 +233,14 @@
                         <iron-list items="[[projectlist]]" as="proj">
                             <template>
                                 <div class="row">
-                                    <div class="left" on-tap="open">
+                                    <div class="left" on-tap="openproject">
                                         <span class="smallspan"><iron-icon class="smallicon" icon="[[proj.icon]]"></iron-icon></span>
                                         <span class="bigspan">[[proj.name]]</span>
                                         <span class="smalltext bigspan">[[proj.language]]</span>
                                         <span class="smallspan">[[proj.completion]]</span>
                                     </div>
                                     <div>
-                                        <span><paper-icon-button class="smallicon" icon="info" on-tap="openinfo" title="details"></paper-icon-button></span>
+                                        <span><paper-icon-button class="info" icon="info" on-tap="openinfo" title="details"></paper-icon-button></span>
                                     </div>
                                 </div>
                             </template>
@@ -223,12 +253,16 @@
         <paper-dialog id="info" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <h2>Project Details</h2>
             <div>
-                <p>Name</p>
-                <p>Language</p>
+                <p>Project: <span>[[project.name]]</span></p>
+                <p>Target Language: <span>[[project.language]]</span></p>
+                <p>Progress: <span>[[project.completion]]</span>%</p>
+                <p>Translators</p>
+            </div>
+            <div id="border">
+                <paper-button dialog-confirm on-tap="openconfirm"><iron-icon class="smallicon" icon="delete"></iron-icon> Delete</paper-button>
             </div>
             <div class="buttons">
-                <paper-button dialog-dismiss>Cancel</paper-button>
-                <paper-button dialog-confirm on-tap="deleteproject">Confirm</paper-button>
+                <paper-button dialog-dismiss>Dismiss</paper-button>
             </div>
         </paper-dialog>
 
@@ -287,15 +321,20 @@
             this.route = "new";
         },
 
-        open: function (e) {
+        openproject: function (e) {
             this.project = e.model.proj;
             this.route = "translate";
         },
 
         openinfo: function (e) {
+            this.project = e.model.proj;
             var target = e.model.proj;
             this.index = this.projectlist.indexOf(target);
             this.$.info.open();
+        },
+
+        openconfirm: function () {
+            this.$.confirm.open();
         },
 
         deleteproject: function () {

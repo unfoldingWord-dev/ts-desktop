@@ -1,14 +1,14 @@
 'use strict';
 
-function allowDrop(ev) {
+function allowDrop(ev) { // jshint ignore:line
     ev.preventDefault();
 }
 
-function drag(ev) {
+function drag(ev) { // jshint ignore:line
     ev.dataTransfer.setData("text", ev.target.id);
 }
 
-function drop(ev) {
+function drop(ev) { // jshint ignore:line
     ev.preventDefault();
     var dragid = ev.dataTransfer.getData("text");
     var dragelement = document.getElementById(dragid);

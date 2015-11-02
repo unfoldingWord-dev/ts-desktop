@@ -1,13 +1,9 @@
 
-<link rel="import" href="../../components/neon-animation/neon-animation.html">
-<link rel="import" href="../../components/paper-material/paper-material.html">
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
-
-<link rel="import" href="./ts-source/ts-source-tab.html">
 <link rel="import" href="./ts-read-mode/ts-read-mode.html">
 <link rel="import" href="./ts-chunk-mode/ts-chunk-mode.html">
 <link rel="import" href="./ts-review-mode/ts-review-mode.html">
 <link rel="import" href="./ts-translate-sidebar.html">
+<link rel="import" href="./ts-nosource-mode.html">
 
 <dom-module id="ts-translate">
 
@@ -17,108 +13,23 @@
             display: flex;
         }
 
-        neon-animated-pages {
+        #pages {
             flex: auto;
             display: flex;
-        }
-
-        neon-animated-pages > * {
-            flex: auto;
-        }
-
-        .hide {
-            display: none;
-        }
-
-        paper-material {
-            background: white;
-        }
-
-        #heading {
-            padding: 5px 1em;
-            color: var(--greyed-out-dark);
-            display: flex;
-            justify-content: space-between;
-            min-height: 75px;
-            align-items: center;
-            font-size: 125%;
-        }
-
-        #newpage {
-            flex: auto;
-            display: flex;
-            flex-direction: column;
-        }
-
-        #newpage.hide {
-            display: none;
-        }
-
-        #topbox {
-            margin: 15px 40px 15px 15px;
             position: relative;
-        }
-
-        #bottombox {
-            flex: auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: var(--greyed-out-dark);
-            font-style: italic;
-            font-size: 110%;
-        }
-
-        #bottomcard {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            top: 25px;
-            left: 25px;
-            background-size: 100% 32px;
-            background-image: -webkit-linear-gradient(white 27px, var(--greyed-out-light) 27px, var(--greyed-out-light) 28px, white 28px);
-        }
-
-        #topcard {
-            z-index: 2;
-        }
-
-        .big {
-            --iron-icon-height: 100px;
-            --iron-icon-width: 100px;
         }
 
     </style>
 
     <template>
 
-        <ts-translate-sidebar route="{{route}}" selected="{{selected}}"></ts-translate-sidebar>
+        <ts-translate-sidebar route="{{route}}" selected="{{selected}}" backto="{{backto}}"></ts-translate-sidebar>
 
-        <neon-animated-pages id="pages" selected="[[selected]]" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
-            <ts-read-mode project="{{project}}" chapters="[[chapters]]"></ts-read-mode>
-            <ts-chunk-mode project="{{project}}" chunks="{{chunks}}" on-modetrigger="upload"></ts-chunk-mode>
-            <ts-review-mode project="{{project}}" chunks="{{chunks}}" on-modetrigger="upload"></ts-review-mode>
-        </neon-animated-pages>
-
-        <div id="newpage">
-            <div id="topbox">
-                <paper-material id="topcard" elevation="1">
-                    <div id="heading">
-                        <div>
-                            Project: <span>[[project.name]]</span> - <span>[[project.language]]</span>
-                        </div>
-                        <ts-source-tab id="sourcetab" sources="{{project.sources}}" selected-source="{{project.currentsource}}"></ts-source-tab>
-                    </div>
-                </paper-material>
-                <paper-material id="bottomcard" elevation="1">
-                </paper-material>
-            </div>
-            <div id="bottombox">
-                <p>Choose source translation(s) to begin reading and translating</p>
-                <paper-icon-button icon="tab" class="big" on-tap="openmodal"></paper-icon-button>
-            </div>
+        <div id="pages">
+            <ts-read-mode id="readmode" project="{{project}}" chapters="[[chapters]]" modestatus="{{modestatus}}"></ts-read-mode>
+            <ts-chunk-mode id="chunkmode" project="{{project}}" chunks="{{chunks}}" modestatus="{{modestatus}}" on-modetrigger="upload"></ts-chunk-mode>
+            <ts-review-mode id="reviewmode" project="{{project}}" chunks="{{chunks}}" modestatus="{{modestatus}}" on-modetrigger="upload"></ts-review-mode>
+            <ts-nosource-mode id="nosourcemode" project="{{project}}"></ts-nosource-mode>
         </div>
 
     </template>
@@ -138,7 +49,8 @@
         properties: {
             selected: {
                 type: Number,
-                value: 0
+                value: 0,
+                observer: 'modechange'
             },
             route: {
                 type: String,
@@ -148,6 +60,15 @@
             project: {
                 type: Object,
                 value: {},
+                notify: true
+            },
+            modestatus: {
+                type: Object,
+                value: {}
+            },
+            backto: {
+                type: String,
+                value: "",
                 notify: true
             },
             chapters: {
@@ -163,29 +84,79 @@
         },
 
         observers: [
-            'onSelectedSourceChanged(project.currentsource)',
             'reset(project.name)',
             'checksources(project.sources)'
         ],
 
-        openmodal: function () {
-            this.$.sourcetab.openModal();
+        modechange: function (tomode, frommode) {
+            var read = this.$.readmode;
+            var chunk = this.$.chunkmode;
+            var review = this.$.reviewmode;
+            var nosource = this.$.nosourcemode;
+
+            if (frommode > 0) {
+                this.set('modestatus.lastmode', frommode);
+            }
+
+            if (frommode === 1) {
+                read.frommode();
+            } else if (frommode === 2) {
+                chunk.frommode();
+            } else if (frommode === 3) {
+                review.frommode();
+            } else if (frommode === 4) {
+                nosource.frommode();
+            }
+
+            if (tomode === 1) {
+                read.tomode();
+            } else if (tomode === 2) {
+                chunk.tomode();
+            } else if (tomode === 3) {
+                review.tomode();
+            } else if (tomode === 4) {
+                nosource.tomode();
+            }
         },
 
         reset: function () {
-            this.selected = 0;
+            var mythis = this;
+            var read = this.$.readmode;
+            var chunk = this.$.chunkmode;
+            var review = this.$.reviewmode;
+            var nosource = this.$.nosourcemode;
+            var sources = this.project.sources;
+
+            mythis.set('selected', 0);
+            mythis.set('modestatus', {"chapter": 1, "verse": 1, "lastmode": 1});
+            read.classList.add("hide");
+            chunk.classList.add("hide");
+            review.classList.add("hide");
+            nosource.classList.add("hide");
+
+            if (sources !== undefined && sources.length !== 0) {
+                setTimeout(function() {
+                    mythis.set('selected', 1);
+                }, 500);
+            }
         },
 
         checksources: function () {
-            var array = this.project.sources;
-            var pages = this.$.pages;
-            var newpage = this.$.newpage;
-            if (array === undefined || array.length === 0) {
-                pages.classList.add("hide");
-                newpage.classList.remove("hide");
+            var mythis = this;
+            var sources = this.project.sources;
+            var lastmode = this.modestatus.lastmode;
+            var selected = this.selected;
+
+            if (selected === 4) {
+                if (sources !== undefined && sources.length !== 0) {
+                    this.set('selected', lastmode);
+                }
             } else {
-                pages.classList.remove("hide");
-                newpage.classList.add("hide");
+                if (sources === undefined || sources.length === 0) {
+                    setTimeout(function() {
+                        mythis.set('selected', 4);
+                    }, 500);
+                }
             }
         },
 
@@ -193,15 +164,12 @@
              var update = this.chunks.data.map(function(chunk){
              return {meta: chunk.meta, content: chunk.transcontent, status: chunk.status};
              });
-
             var count = 0;
-
             for (var i = 0; i < update.length; i++) {
                 if (update[i].status === "Complete") {
                     count++;
                 }
             }
-
             var completion = Math.round((count / update.length) * 100);
             this.set('project.completion', completion);
             this.set('project.translation', update);
@@ -216,11 +184,9 @@
             transdata.data = translation.map(function(chunk){
                 return {transcontent: chunk.content, status: chunk.status};
             });
-
             srcdata.data = source.map(function(chunk){
                 return {srccontent: chunk.content, meta: chunk.meta, notes: chunk.notes, words: chunk.words};
             });
-
             return _.merge(srcdata, transdata);
         },
 
@@ -251,16 +217,16 @@
                 return chunks.meta.chapter;
             }), function (data, chap) {
                 var chapcontent = "";
+                var chapter = parseInt(chap);
 
                 _.forEach(data, function (chunk) {
                     chapcontent += chunk.content + " ";
                 });
-                srcchapters.push({chapter: chap, srccontent: chapcontent});
+                srcchapters.push({chapter: chapter, srccontent: chapcontent});
             });
 
             transdata.data = transchapters;
             srcdata.data = srcchapters;
-
             return _.merge(srcdata, transdata);
         },
 

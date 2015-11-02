@@ -47,10 +47,10 @@
             //build return object
             let returnObj = {
                 getNumber: function () {
-                    return chapterData.number;
+                    return chapterData.slug;
                 },
                 getReference: function () {
-                    return chapterData.ref;
+                    return chapterData.reference;
                 },
                 getTitle: function () {
                     return chapterData.title;
@@ -116,7 +116,7 @@
                 let resourceData = appIndex.getResource(projectId, sourceLanguageId, resourceId);
 
                 //verify data
-                if (projectData === null || sourceLanguageData === null || resourceData === null) {
+                if (projectData === false || sourceLanguageData === false || resourceData === false) {
                     return null;
                 }
 
@@ -140,10 +140,10 @@
                         return resourceId;
                     },
                     getTitle: function () {
-                        return sourceLanguageData.project.name;
+                        return sourceLanguageData.projectName;
                     },
                     getDescription: function () {
-                        return sourceLanguageData.project.desc;
+                        return sourceLanguageData.projectDescription;
                     },
                     getImage: function () {
                         return '';//TODO: where do we get this???

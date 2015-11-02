@@ -56,6 +56,46 @@
         }
     },
     {
+        "name": "dataServer",
+        "value": "gitolite@ts.door43.org",
+        "meta":{
+            "mutable": false,
+            "type": "string"
+        }
+    },
+    {
+        "name": "dataServerPort",
+        "value": "9299",
+        "meta":{
+            "mutable": false,
+            "type": "string"
+        }
+    },
+    {
+        "name": "mediaServer",
+        "value": "https://api.unfoldingword.org",
+        "meta":{
+            "mutable": false,
+            "type": "string"
+        }
+    },
+    {
+        "name": "backupInterval",
+        "value": 5,
+        "meta":{
+            "mutable": false,
+            "type": "int"
+        }
+    },
+    {
+        "name": "loggingLevel",
+        "value": "warnings",
+        "meta":{
+            "mutable": false,
+            "type": "string"
+        }
+    },
+    {
         "name": "apiUrl",
         "value": "https://api.unfoldingword.org/ts/txt/2/catalog.json",
         "meta":{

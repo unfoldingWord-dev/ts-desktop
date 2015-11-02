@@ -104,6 +104,35 @@
             return Object.keys(storage);
         };
 
+        let getText = function (key) {
+            console.log('getting text for', key);
+            if (!key) {
+                return;
+            }
+            key = key.toLowerCase();
+
+            let valueObjStr = storage[key] || '{}';
+            console.log('valobjstr', valueObjStr);
+            let valueObj = JSON.parse(valueObjStr);
+            let text = valueObj.text;
+
+            console.log('returning', text);
+            return text;
+        };
+
+        let getType = function (key) {
+            if (!key) {
+                return;
+            }
+            key = key.toLowerCase();
+
+            let valueObjStr = storage[key] || '{}';
+            let valueObj = JSON.parse(valueObjStr);
+            let type = valueObj.meta.type;
+
+            return type;
+        };
+
         let configurator = {
             setStorage: function (storeObject) {
                 storage = storeObject;
@@ -132,6 +161,11 @@
             setValue: function (key, value, meta) {
                 setValue(key, value, meta);
             },
+
+
+            // getText: function (key) {
+            //     let
+            // },
 
             /**
              * Loads a configuration object into the configurator
@@ -169,7 +203,37 @@
                 for (let i = 0; i < keys.length; i++) {
                     unsetValue(keys[i]);
                 }
+            },
+
+            getSettings: function (config) {
+                var settings = [];
+                for (var group in config) {
+                    if (config.hasOwnProperty(group)) {
+                        var keyArrays = config[group];
+                        var list = [];
+                        for (var i = 0; i < keyArrays.length; i++) {
+                            var key = keyArrays[i];
+                            list.push({
+                                "name": key,
+                                "text": getText(key),
+                                "value": getValue(key),
+                                "type": getType(key),
+                                "handler": key + 'Tap'
+                            });
+                            console.log(keyArrays[i]);
+                        }
+                        settings.push({'group': group, 'list': list});
+                    }
+                }
+            //     var settings = [];
+            //     keys.forEach(function(key) {
+            //         settings.push({name: key, value: getValue(key), type: getMetaValue(key, type)});
+            //     });
+            //     return settings;
+                console.log(storage);
+                return [];
             }
+
         };
 
         return configurator;

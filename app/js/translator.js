@@ -4,8 +4,8 @@
 
     let fs = require('fs');
     let path = require('path');
-    let mkdirp = require('mkdirp');
-    let rimraf = require('rimraf');
+    //let mkdirp = require('mkdirp');
+    //let rimraf = require('rimraf');
 
     function Translator (context, rootPath) {
 
@@ -19,7 +19,7 @@
         }
 
         function getProjectIdFromId (targetTranslationId) {
-            let idParts = split('-');
+            let idParts = targetTranslationId.split('-', 3);
             if (idParts.length === 3) {
                 return idParts[1];
             }
@@ -27,7 +27,7 @@
         }
 
         function getTargetLanguageIdFromId (targetTranslationId) {
-            let idParts = split('-');
+            let idParts = targetTranslationId.split('-', 3);
             if (idParts.length === 3) {
                 return idParts[2].replace(/\_/g, '-');
             }
@@ -38,9 +38,11 @@
             return path.join(_this.rootPath, targetTranslationId);
         }
 
+        /** /
         function getLocalCacheDir () {
             return path.join(_this.rootPath, 'cache');
         }
+        /**/
 
         let translator = {
 
@@ -48,7 +50,7 @@
                 let translations = [];
                 let filenames = fs.readdirSync(_this.rootPath);
                 for (let filename of filenames) {
-                    let translation = getTargetTranslation(filename);
+                    let translation = this.getTargetTranslation(filename);
                     if (translation !== null) {
                         translations.push(translation);
                     }
@@ -78,7 +80,7 @@
                     let manifestJson = {
                         generator: {
                             name: 'ts-desktop',
-                            build: '???'
+                            build: build
                         },
                         package_version: packageVersion,
                         target_language: {
@@ -103,7 +105,7 @@
                     fs.writeFileSync(path.join(_this.rootPath, 'translations.json'), JSON.stringify(translations));
                 }
 
-                return getTargetTranslation(targetTranslationId);
+                return this.getTargetTranslation(targetTranslationId);
             },
 
             getTargetTranslation: function (targetTranslationId) {
@@ -136,7 +138,7 @@
                     },
                     getTargetLanguageName: function () {
                         return targetLanguageName;
-                    }
+                    },
                     getProjectId: function () {
                         return projectId;
                     },
@@ -144,11 +146,13 @@
                         return targetLanguageId;
                     },
                     getFrameTranslation: function (chapterId, frameId, format) {
-                        let file = path.join(targetTranslationDirectory, chapterId, frameId + '.txt');
+                        let file = path.join(targetTranslationDir, chapterId, frameId + '.txt');
                         if (!fs.existsSync(file)) {
                             return null;
                         }
                         let body = fs.readFileSync(file);
+                        body;
+                        format;
                         //return ???
                     },
                     getChapterTranslation: function (chapterSlug) {

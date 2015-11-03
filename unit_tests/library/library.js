@@ -19,7 +19,7 @@
 
         describe('@GetProjects', function () {
             it('should retrieve the catalog object', function () {
-                assert.equal(library.getProjects().length > 0, true);
+                assert.equal(library.getProjects('en').length > 0, true);
             });
         });
 
@@ -43,7 +43,19 @@
                    library.getTargetLanguages().length > 0,
                    true
                );
-           }) ;
+            });
+
+            it('should return a single target language de', function () {
+                let targetLanguage = library.getTargetLanguage('de');
+                assert.notEqual(
+                    targetLanguage,
+                    null
+                );
+                assert.equal(
+                    targetLanguage.getSlug(),
+                    'de'
+                );
+            });
         });
 
         describe('@GetSourceLanguages', function () {
@@ -164,9 +176,10 @@
         });
 
         describe('@GetChapterBody', function () {
+            let sourceTranslation = SourceTranslation.simpleInstance('1ch', 'en', 'ulb');
+            let chapterSlug = '01';
             it('should return the body of the chapter 1ch en ulb 01', function () {
-                let sourceTranslation = SourceTranslation.simpleInstance('1ch', 'en', 'ulb');
-                let body = library.getChapterBody(sourceTranslation, '01');
+                let body = library.getChapterBody(sourceTranslation, chapterSlug);
                 assert.notEqual(
                     body,
                     null
@@ -174,6 +187,13 @@
                 assert.equal(
                     body.length > 0,
                     true
+                );
+            });
+
+            it('should have a usx translation format', function () {
+                assert.equal(
+                    library.getChapterBodyFormat(sourceTranslation, chapterSlug),
+                    'usx'
                 );
             });
         });
@@ -184,6 +204,42 @@
                 assert.notEqual(
                     sourceTranslation,
                     null
+                );
+            });
+
+            it('should return the default source translation', function() {
+                assert.notEqual(
+                    library.getDefaultSourceTranslation('1ch', 'en'),
+                    null
+                );
+            });
+        });
+
+        describe('@GetCheckingQuestions', function () {
+            let sourceTranslation = SourceTranslation.simpleInstance('obs', 'en', 'obs');
+            let checkingQuestions = library.getCheckingQuestions(sourceTranslation, '01', '01');
+
+            it('should return the checking questions for obs en obs 01 01', function () {
+                assert.equal(
+                    checkingQuestions.length > 0,
+                    true
+                );
+            });
+
+            it('should return the first checking question for obs en obs 01 01 ', function () {
+               let checkingQuestion = library.getCheckingQuestion(sourceTranslation, '01', '01', checkingQuestions[0].getSlug());
+                assert.notEqual(
+                    checkingQuestion,
+                    null
+                );
+            });
+        });
+
+        describe('@GetProjectCategories', function () {
+            it('should return an array of project categories', function () {
+                assert.equal(
+                    library.getProjectCategories('en').length > 0,
+                    true
                 );
             });
         });

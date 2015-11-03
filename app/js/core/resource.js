@@ -23,6 +23,7 @@
         let questionsCatalog = parameters.questionsCatalog;
         let questionsDateModified = parameters.questionsDateModified;
         let questionsServerDateModified = parameters.questionsServerDateModified;
+        let dbId = -1;
         let _this = this;
 
         _this.getName = function() {
@@ -87,6 +88,9 @@
         };
         _this.getQuestionsServerDateModified = function() {
             return questionsServerDateModified;
+        };
+        _this.setDBId = function(id) {
+            dbId = id;
         };
 
         return _this;

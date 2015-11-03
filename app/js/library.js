@@ -3,108 +3,61 @@
 
 ;(function () {
 
-    let Project = require('../js/core/project');
+    let ProjectCategory = require('../js/core/projectcategory');
     let SourceTranslation = require('../js/core/sourcetranslation');
     let Indexer = require('../js/indexer').Indexer;
-    let path = require('path');
 
     function Library (indexPath, rootApiUrl) {
+        const DEFAULT_RESOURCE_SLUG = 'ulb';
+        const MIN_CHECKING_LEVEL = 3;
         rootApiUrl = rootApiUrl; // fix lit errors temporarily
         let indexer = new Indexer(indexPath);
 
         // TODO: the library should contain the downloader
 
-        function getFrame (sourceTranslation, chapterId, frameId) {
-
-            //build return object
-            let returnObj = {
-                getSource: function () {
-                    return indexer.getFrame(sourceTranslation.projectId, sourceTranslation.sourceLanguageId, sourceTranslation.resourceId, chapterId, frameId);
-                }
-            };
-
-            //return object
-            return returnObj;
-        }
-
-        function getFrames (sourceTranslation, chapterId) {
-
-            //get data
-            let frames = indexer.getFrames(sourceTranslation.projectId, sourceTranslation.sourceLanguageId, sourceTranslation.resourceId, chapterId);
-
-            //build return object
-            let returnObj = {};
-            for (let frameId of frames) {
-                returnObj[frameId] = getFrame(sourceTranslation, chapterId, frameId);
-            }
-
-            //return object
-            return returnObj;
-        }
-
-        function getChapter (sourceTranslation, chapterId) {
-
-            //get data
-            let chapterData = indexer.getChapter(sourceTranslation.projectId, sourceTranslation.sourceLanguageId, sourceTranslation.resourceId, chapterId);
-
-            //build return object
-            let returnObj = {
-                getNumber: function () {
-                    return chapterData.slug;
-                },
-                getReference: function () {
-                    return chapterData.reference;
-                },
-                getTitle: function () {
-                    return chapterData.title;
-                },
-                getFrames: function () {
-                    return getFrames(sourceTranslation, chapterId);
-                },
-                getFrame: function (frameId) {
-                    return getFrame(sourceTranslation, chapterId, frameId);
-                }
-            };
-
-            //return object
-            return returnObj;
-        }
-
-        function getChapters (sourceTranslation) {
-
-            //get data
-            let chapters = indexer.getChapters(sourceTranslation.projectId, sourceTranslation.sourceLanguageId, sourceTranslation.resourceId);
-
-            //build return object
-            let returnObj = {};
-            for (let chapterId of chapters) {
-                returnObj[chapterId] = getChapter(sourceTranslation, chapterId);
-            }
-
-            //return object
-            return returnObj;
-        }
-
-        function getProjects () {
-
-            //get data
-            let projects = indexer.getProjects();
-
-            //build return object
-            let returnObj = projects || {};
-
-            //return object
-            return returnObj;
-        }
-
         let library = {
 
-            getProjects: function () {
-                return getProjects();
+            /**
+             * Returns an array of projects
+             * @param sourceLanguageSlug
+             * @returns {Project[]}
+             */
+            getProjects: function (sourceLanguageSlug) {
+                return indexer.getProjects(sourceLanguageSlug);
             },
 
+            /**
+             * Returns a project
+             * @param projectSlug
+             * @param sourceLanguageSlug
+             * @returns {Project}
+             */
             getProject: function (projectSlug, sourceLanguageSlug) {
                 return  indexer.getProject(projectSlug, sourceLanguageSlug);
+            },
+
+            /**
+             * Returns an array of project categories at the root of the list
+             * @param sourceLanguageSlug
+             * @return {ProjectCategory[]}
+             */
+            getProjectCategories: function(sourceLanguageSlug) {
+                return this.getProjectCategoryChildren(ProjectCategory.newInstance({
+                    title:'',
+                    categorySlug: '',
+                    projectId: null,
+                    sourceLanguageSlug:sourceLanguageSlug,
+                    parentCategoryId:0
+                }));
+            },
+
+            /**
+             * Returns an array of project categories that are children of the given category
+             * @param parentCategory {ProjectCategory}
+             * @return {ProjectCategory[]}
+             */
+            getProjectCategoryChildren: function(parentCategory) {
+                return indexer.getCategoryBranch(parentCategory.getSourceLanguageSlug(), parentCategory.getParentCategoryId());
             },
 
             /**
@@ -127,6 +80,22 @@
             //    // todo connect to db
             //},
 
+            /**
+             * Checks if the index exists
+             * @returns {boolean}
+             */
+            exists: function() {
+                return indexer.getProjectSlugs().length > 0;
+            },
+
+            /**
+             * Returns a single target language
+             * @param targetLanguageSlug
+             * @returns {TargetLanguage}
+             */
+            getTargetLanguage: function(targetLanguageSlug) {
+                return indexer.getTargetLanguage(targetLanguageSlug);
+            },
 
             /**
              * Returns an array of target languages
@@ -165,7 +134,7 @@
                 // preferred
                 let sourceLanguage = indexer.getSourceLanguage(projectSlug, sourceLanguageSlug);
                 // default (en)
-                if(sourceLanguage === null || (sourceLanguage.code !== sourceLanguageSlug && sourceLanguageSlug !== 'en')) {
+                if(sourceLanguage === null || sourceLanguage.code !== sourceLanguageSlug && sourceLanguageSlug !== 'en') {
                     sourceLanguage = indexer.getSourceLanguage(projectSlug, 'en');
                 }
                 return sourceLanguage;
@@ -210,6 +179,49 @@
             },
 
             /**
+             * Returns a checking question
+             * @param sourceTranslation
+             * @param chapterSlug
+             * @param frameSlug
+             * @param questionSlug
+             * @returns {CheckingQuestion}
+             */
+            getCheckingQuestion: function(sourceTranslation, chapterSlug, frameSlug, questionSlug) {
+                return indexer.getCheckingQuestion(sourceTranslation.getProjectSlug(), sourceTranslation.getSourceLanguageSlug(), sourceTranslation.getResourceSlug(), chapterSlug, frameSlug, questionSlug);
+            },
+
+            /**
+             * Returns the checking questions in a frame
+             * @param sourceTranslation
+             * @param chapterSlug
+             * @param frameSlug
+             * @returns {CheckingQuestion[]}
+             */
+            getCheckingQuestions: function(sourceTranslation, chapterSlug, frameSlug) {
+                return indexer.getCheckingQuestions(sourceTranslation.getProjectSlug(), sourceTranslation.getSourceLanguageSlug(), sourceTranslation.getResourceSlug(), chapterSlug, frameSlug);
+            },
+
+            /**
+             * Returns the source translation with the default resource.
+             * If the default resource does not exist it will use the first available resource
+             * @param projectSlug
+             * @param sourceLanguageSlug
+             * @return {SourceTranslation}
+             */
+            getDefaultSourceTranslation: function(projectSlug, sourceLanguageSlug) {
+                let sourceTranslation = indexer.getSourceTranslation(projectSlug, sourceLanguageSlug, DEFAULT_RESOURCE_SLUG);
+                if(sourceTranslation === null) {
+                    let resourceSlugs = indexer.getResourceSlugs(projectSlug, sourceLanguageSlug);
+                    if(resourceSlugs.length > 0) {
+                        return indexer.getSourceTranslation(projectSlug, sourceLanguageSlug, resourceSlugs[0]);
+                    }
+                } else {
+                    return sourceTranslation;
+                }
+                return null;
+            },
+
+            /**
              * Returns an array of frames
              * @param sourceTranslation
              * @param chapterSlug
@@ -231,13 +243,44 @@
             },
 
             /**
-             * Returns the body of a chapter
+             * Returns an array of frame slugs
              * @param sourceTranslation
              * @param chapterSlug
              * @returns {*}
              */
+            getFrameSlugs: function(sourceTranslation, chapterSlug) {
+                let slugs = indexer.getFrameSlugs(sourceTranslation, chapterSlug);
+                if(slugs.length > 0) {
+                    // TRICKY: a bug in the v2 api gives the last frame in the last chapter and id of 00 which messes up the sorting
+                    let firstSlug = slugs[0];
+                    if(parseInt(firstSlug) === 0) {
+                        slugs.shift();
+                        slugs.push(firstSlug);
+                    }
+                    return slugs;
+                } else {
+                    return [];
+                }
+            },
+
+            /**
+             * Returns the body of a chapter
+             * @param sourceTranslation
+             * @param chapterSlug
+             * @returns {string}
+             */
             getChapterBody: function(sourceTranslation, chapterSlug) {
                 return indexer.getChapterBody(sourceTranslation.getProjectSlug(), sourceTranslation.getSourceLanguageSlug(), sourceTranslation.getResourceSlug(), chapterSlug);
+            },
+
+            /**
+             * Returns the translation format of the chapter body
+             * @param sourceTranslation
+             * @param chapterSlug
+             * @returns {*}
+             */
+            getChapterBodyFormat: function(sourceTranslation, chapterSlug) {
+                return indexer.getChapterBodyFormat(sourceTranslation.getProjectSlug(), sourceTranslation.getSourceLanguageSlug(), sourceTranslation.getResourceSlug(), chapterSlug);
             },
 
             /**
@@ -264,6 +307,16 @@
              */
             getSourceTranslation: function (projectSlug, sourceLanguageSlug, resourceSlug) {
                 return indexer.getSourceTranslation(projectSlug, sourceLanguageSlug, resourceSlug);
+            },
+
+            /**
+             * Returns an array of source translations in a project that have met the minimum checking level
+             * @param projectSlug
+             */
+            getSourceTranslations: function(projectSlug) {
+                projectSlug = projectSlug;
+                // todo: write query for this
+                return [];
             }
         };
 

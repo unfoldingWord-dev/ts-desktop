@@ -17,6 +17,8 @@
   },
   "chromium-args": "--child-clean-exit",
     "dependencies": {
-        "lodash": "latest"
+        "lodash": "latest",
+        "mkdirp": "latest",
+        "sql.js": "latest"
     }
 }

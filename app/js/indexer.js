@@ -17,6 +17,7 @@
     let TranslationNote = require('./core/translationnote');
     let TranslationWord = require('./core/translationword');
     let CheckingQuestion = require('./core/checkingquestion');
+    let ProjectCategory = require('./core/projectcategory');
     let ContentValues = require('./lib/content-values').ContentValues;
 
     let apiVersion = 2;
@@ -675,7 +676,24 @@
         /**/
 
         /**
-         * Returns an array of projects in the index
+         * Returns an array of project slugs
+         * @returns {string[]}
+         */
+        _this.getProjectSlugs = function() {
+            let items = db.selectRaw('SELECT `slug` FROM `project` ORDER BY `sort` ASC', []);
+            let slugs = [];
+            if(items !== null) {
+                for(let item of items) {
+                    slugs.push(item[0]);
+                }
+            }
+            return slugs;
+        };
+
+        /**
+         * Returns an array of projects in the index.
+         * If the provided source language cannot be found it will default first to english then to the first available language
+         * @param sourceLanguageSlug the source language that will be used to retrieve the project name and description
          * @returns {Project[]}
          */
         _this.getProjects = function (sourceLanguageSlug) {
@@ -695,15 +713,15 @@
             if (items !== null) {
                 for (let item of items) {
                     projects.push(Project.newInstance({
-                        slug: _.get(item, 'slug'),
-                        sourceLanguageSlug: _.get(item, 'source_language_slug'),
-                        name: _.get(item, 'name'),
-                        description: _.get(item, 'description'),
-                        dateModified: _.get(item, 'modified_at'),
-                        sort: _.get(item, 'sort'),
-                        sourceLanguageCatalog: _.get(item, 'source_language_catalog_url'),
-                        sourceLanguageCatalogLocalModifiedAt: _.get(item, 'source_language_catalog_local_modified_at'),
-                        sourceLanguageCatalogServerModifiedAt: _.get(item, 'source_language_catalog_server_modified_at')
+                        slug: item[0],
+                        sort: item[1],
+                        dateModified: item[2],
+                        sourceLanguageCatalog: item[3],
+                        sourceLanguageSlug: item[4],
+                        name: item[5],
+                        description: item[6],
+                        sourceLanguageCatalogLocalModifiedAt: item[7],
+                        sourceLanguageCatalogServerModifiedAt: item[8]
                     }));
                 }
             }
@@ -712,7 +730,7 @@
 
         /**
          * Returns an array of source languages
-         * @deprecated
+         *
          * @param projectSlug
          * @returns {SourceLanguage[]}
          */
@@ -732,19 +750,41 @@
             if (items !== null) {
                 for (let item of items) {
                     sourceLanguages.push(SourceLanguage.newInstance({
-                        code: _.get(item, 'slug'),
-                        name: _.get(item, 'name'),
-                        projectName: _.get(item, 'project_name'),
-                        projectDescription: _.get(item, 'project_description'),
-                        dateModified: _.get(item, 'modified_at'),
-                        resourceCatalogUrl: _.get(item, 'resource_catalog_url'),
-                        resourceCatalogLocalDateModified: _.get(item, 'resource_catalog_local_modified_at'),
-                        resourceCatalogServerDateModified: _.get(item, 'resource_catalog_server_modified_at'),
-                        direction: _.get(item, 'direction')
+                        code: item[0],
+                        name: item[1],
+                        projectName: item[2],
+                        projectDescription: item[3],
+                        direction: item[4],
+                        dateModified: item[5],
+                        resourceCatalogUrl: item[6],
+                        resourceCatalogLocalDateModified: item[7],
+                        resourceCatalogServerDateModified: item[8]
                     }));
                 }
             }
             return sourceLanguages;
+        };
+
+        /**
+         * Returns an array of resource slugs
+         * @param projectSlug
+         * @param sourceLanguageSlug
+         * @returns {string[]}
+         */
+        _this.getResourceSlugs = function (projectSlug, sourceLanguageSlug) {
+            let sourceLanguageId = getSourceLanguageDbId(projectSlug, sourceLanguageSlug);
+            if(sourceLanguageId === null) {
+                return [];
+            }
+            let query = "SELECT `slug` FROM `resource` WHERE `source_language_id`=? ORDER BY `slug` ASC";
+            let items = db.selectRaw(query, [sourceLanguageId]);
+            let slugs = [];
+            if(items !== null && items.length > 0) {
+                for(let item of items) {
+                    slugs.put(item[0]);
+                }
+            }
+            return slugs;
         };
 
         /**
@@ -774,29 +814,31 @@
             let resources = [];
             if (items !== null) {
                 for (let item of items) {
-                    resources.push(Resource.newInstance({
-                        name: _.get(item, 'name'),
-                        slug: _.get(item, 'slug'),
-                        checkingLevel: _.get(item, 'checking_level'),
-                        version: _.get(item, 'version'),
-                        isDownloaded: _.get(item, 'is_downloaded'),
-                        dateModified: _.get(item, 'modified_at'),
-                        sourceCatalog: _.get(item, 'source_catalog_url'),
-                        sourceDateModified: _.get(item, 'source_catalog_local_modified_at'),
-                        sourceServerDateModified: _.get(item, 'source_catalog_server_modified_at'),
-                        notesCatalog: _.get(item, 'translation_notes_catalog_url'),
-                        notesDateModified: _.get(item, 'translation_notes_catalog_local_modified_at'),
-                        notesServerDateModified: _.get(item, 'translation_notes_catalog_server_modified_at'),
-                        wordsCatalog: _.get(item, 'translation_words_catalog_url'),
-                        wordsDateModified: _.get(item, 'translation_words_catalog_local_modified_at'),
-                        wordsServerDateModified: _.get(item, 'translation_words_catalog_server_modified_at'),
-                        wordAssignmentsCatalog: _.get(item, 'translation_word_assignments_catalog_url'),
-                        wordAssignmentsDateModified: _.get(item, 'translation_word_assignments_catalog_local_modified_at'),
-                        wordAssignmentsServerDateModified: _.get(item, 'translation_word_assignments_catalog_server_modified_at'),
-                        questionsCatalog: _.get(item, 'checking_questions_catalog_url'),
-                        questionsDateModified: _.get(item, 'checking_questions_catalog_local_modified_at'),
-                        questionsServerDateModified: _.get(item, 'checking_questions_catalog_server_modified_at')
-                    }));
+                    let resource = Resource.newInstance({
+                        name: item[0],
+                        checkingLevel: item[1],
+                        version: item[2],
+                        dateModified: item[3],
+                        sourceCatalog: item[4],
+                        sourceDateModified: item[5],
+                        sourceServerDateModified: item[6],
+                        notesCatalog: item[7],
+                        notesDateModified: item[8],
+                        notesServerDateModified: item[9],
+                        wordsCatalog: item[10],
+                        wordsDateModified: item[11],
+                        wordsServerDateModified: item[12],
+                        wordAssignmentsCatalog: item[13],
+                        wordAssignmentsDateModified: item[14],
+                        wordAssignmentsServerDateModified: item[15],
+                        questionsCatalog: item[16],
+                        questionsDateModified: item[17],
+                        questionsServerDateModified: item[18],
+                        isDownloaded: item[20],
+                        slug: item[21]
+                    });
+                    resource.setDBId(item[19]);
+                    resources.push(resource);
                 }
             }
             return resources;
@@ -826,13 +868,37 @@
             if (items !== null) {
                 for (let item of items) {
                     chapters.push(Chapter.newInstance({
-                        slug: _.get(item, 'slug'),
-                        title: _.get(item, 'title'),
-                        reference: _.get(item, 'reference')
+                        slug: item[0],
+                        reference: item[1],
+                        title: item[2]
                     }));
                 }
             }
             return chapters;
+        };
+
+        /**
+         * Returns an array of frame slugs
+         * @param projectSlug
+         * @param sourceLanguageSlug
+         * @param resourceSlug
+         * @param chapterSlug
+         * @returns {Array}
+         */
+        _this.getFrameSlugs = function(projectSlug, sourceLanguageSlug, resourceSlug, chapterSlug) {
+            let chapterId = getChapterDbId(projectSlug, sourceLanguageSlug, resourceSlug, chapterSlug);
+            if(chapterId === null) {
+                return [];
+            }
+            let query = "SELECT `slug` FROM `frame` WHERE `chapter_id`=? ORDER BY `sort` ASC";
+            let items = db.selectRaw(query, [chapterId]);
+            let slugs = [];
+            if(items !== null && items.length > 0) {
+                for(let item of items) {
+                    slugs.push(item[0]);
+                }
+            }
+            return slugs;
         };
 
         /**
@@ -858,17 +924,75 @@
             if (items !== null) {
                 for (let item of items) {
                     let frame = Frame.newInstance({
-                        slug: _.get(item, 'slug'),
+                        slug: item[1],
                         chapterSlug: chapterSlug,
-                        body: _.get(item, 'body'),
-                        translationFormat: _.get(item, 'format'),
-                        imageUrl: _.get(item, 'image_url')
+                        body: item[2],
+                        translationFormat: item[3],
+                        imageUrl: item[4]
                     });
-                    frame.setDBId(_.get(item, 'id'));
+                    frame.setDBId(item[0]);
                     frames.push(frame);
                 }
             }
             return frames;
+        };
+
+        /**
+         * Returns an array of project categories underneath the parent category id
+         * @param sourceLanguageSlug
+         * @param parentCategoryId
+         * @return {ProjectCategory[]}
+         */
+        _this.getCategoryBranch = function(sourceLanguageSlug, parentCategoryId) {
+            let query = "SELECT * FROM (" +
+                " SELECT `c`.`slug` AS `category_slug`, `slc`.`category_name` AS `title`, NULL AS `project_slug`, 0 AS `sort`, `c`.`id` AS `category_id` FROM `category` AS `c`" +
+                " LEFT JOIN `source_language__category` AS `slc` ON `slc`.`category_id`=`c`.`id`" +
+                " LEFT JOIN `source_language` AS `sl` ON `sl`.`id`=`slc`.`source_language_id`" +
+                " WHERE `sl`.`slug`=? AND `c`.`parent_id`=" + parentCategoryId +
+                " UNION" +
+                " SELECT `c`.`slug` AS `category_slug`, `sl`.`project_name` AS `title`, `p`.`slug` AS `project_id`, `p`.`sort` AS `sort`, " + parentCategoryId + " AS `category_id` FROM `project` AS `p`" +
+                " LEFT JOIN `project__category` AS `pc` ON `pc`.`project_id`=`p`.`id`" +
+                " LEFT JOIN `category` AS `c` ON `c`.`id`=`pc`.`category_id`" +
+                " LEFT JOIN `source_language` AS `sl` ON `sl`.`project_id`=`p`.`id`" +
+                " WHERE CASE WHEN " + parentCategoryId + "=0 THEN `pc`.`category_id` IS NULL ELSE `pc`.`category_id`=" + parentCategoryId + " END AND `sl`.`slug`=?" +
+                ") ORDER BY `sort` ASC";
+            let items = db.selectRaw(query, [sourceLanguageSlug, sourceLanguageSlug]);
+            let projectCategories = [];
+            if(items !== null && items.length > 0) {
+                for(let item of items) {
+                    projectCategories.push(ProjectCategory.newInstance({
+                        categorySlug:item[0],
+                        title:item[1],
+                        projectSlug:item[2],
+                        parentCategoryId:item[4]
+                    }));
+                }
+            }
+            return projectCategories;
+        };
+
+        /**
+         * Returns a singel target language
+         * @param targetLanguageSlug
+         * @returns {TargetLanguage}
+         */
+        _this.getTargetLanguage = function(targetLanguageSlug) {
+            let dbFields = [
+                'name',
+                'direction',
+                'region'
+            ];
+            let item = db.selectOne('target_language', dbFields, 'slug=?', [targetLanguageSlug]);
+            let targetLanguage = null;
+            if(item !== null) {
+                targetLanguage = TargetLanguage.newInstance({
+                    code:targetLanguageSlug,
+                    name:_.get(item, 'name'),
+                    region:_.get(item, 'region'),
+                    direction:_.get(item, 'direction')
+                });
+            }
+            return targetLanguage;
         };
 
         /**
@@ -882,10 +1006,10 @@
             if (items !== null) {
                 for (let item of items) {
                     targetLanguages.push(TargetLanguage.newInstance({
-                        code: _.get(item, 'slug'),
-                        name: _.get(item, 'name'),
-                        direction: _.get(item, 'direction'),
-                        region: _.get(item, 'region')
+                        code: item[0],
+                        name: item[1],
+                        direction: item[2],
+                        region: item[3]
                     }));
                 }
             }
@@ -1083,6 +1207,30 @@
         };
 
         /**
+         * Returns the translation format of the chapter body
+         * @param projectSlug
+         * @param sourceLanguageSlug
+         * @param resourceSlug
+         * @param chapterSlug
+         * @returns {string}
+         */
+        _this.getChapterBodyFormat = function (projectSlug, sourceLanguageSlug, resourceSlug, chapterSlug) {
+            let query = "SELECT `f`.`format` FROM `frame` AS `f`" +
+                " WHERE `f`.`chapter_id` IN (" +
+                "   SELECT `c`.`id` FROM `chapter` AS `c`" +
+                "   LEFT JOIN `resource` AS `r` ON `r`.`id`=`c`.`resource_id`" +
+                "   LEFT JOIN `source_language` AS `sl` ON `sl`.`id`=`r`.`source_language_id`" +
+                "   LEFT JOIN `project` AS `p` ON `p`.`id`=`sl`.`project_id`" +
+                "   WHERE `p`.`slug`=? AND `sl`.`slug`=? AND `r`.`slug`=? AND `c`.`slug`=?" +
+                " ) AND `f`.`format` IS NOT NULL LIMIT 1";
+            let result = db.selectRaw(query, [projectSlug, sourceLanguageSlug, resourceSlug, chapterSlug]);
+            if(result !== null && result.length > 0) {
+                return result[0][0];
+            }
+            return 'default';
+        };
+
+        /**
          * Returns a single frame from a resource
          * @param projectSlug
          * @param sourceLanguageSlug
@@ -1131,9 +1279,9 @@
             if(items !== null) {
                 for (let item of items) {
                     let note = TranslationNote.newInstance({
-                        slug: _.get(item, 'slug'),
-                        title: _.get(item, 'title'),
-                        body: _.get(item, 'body')
+                        slug: item[0],
+                        title: item[1],
+                        body: item[2]
                     });
                     translationNotes.push(note);
                 }
@@ -1163,10 +1311,10 @@
                 for (let item of items) {
                     // NOTE: we purposely do not retrieve the related terms, aliases and example passages for better performance
                     let word = TranslationWord.newInstance({
-                        slug: _.get(item, 'slug'),
-                        term: _.get(item, 'term'),
-                        definition: _.get(item, 'definition'),
-                        definitionTitle: _.get(item, 'definition_title'),
+                        slug: item[1],
+                        term: item[2],
+                        definition: item[3],
+                        definitionTitle: item[4],
                         seeAlso: [],
                         aliases: [],
                         examples: []
@@ -1175,6 +1323,58 @@
                 }
             }
             return translationWords;
+        };
+
+        /**
+         * Returns a checking question
+         * @param projectSlug
+         * @param sourceLanguageSlug
+         * @param resourceSlug
+         * @param chapterSlug
+         * @param frameSlug
+         * @param questionSlug
+         * @returns {CheckingQuestion}
+         */
+        _this.getCheckingQuestion = function(projectSlug, sourceLanguageSlug, resourceSlug, chapterSlug, frameSlug, questionSlug) {
+            let chapterId = getChapterDbId(projectSlug, sourceLanguageSlug, resourceSlug, chapterSlug);
+            if (chapterId === null) {
+                return null;
+            }
+
+            let query = "SELECT `c`.`slug`, `cq`.`question`, `cq`.`answer`, `ref`.`references` FROM `checking_question` AS `cq`" +
+                " LEFT JOIN (" +
+                "   SELECT `checking_question_id`, GROUP_CONCAT(`chapter_slug` || '-' || `frame_slug`, ',') AS `references` FROM `frame__checking_question`" +
+                "   GROUP BY `checking_question_id`" +
+                " ) AS `ref` ON `ref`.`checking_question_id`=`cq`.`id`" +
+                " LEFT JOIN `frame__checking_question` AS `fcq` ON `fcq`.`checking_question_id`=`cq`.`id`" +
+                " LEFT JOIN `frame` AS `f` ON `f`.`id`=`fcq`.`frame_id`" +
+                " LEFT JOIN `chapter` AS `c` ON `c`.`id`=`f`.`chapter_id`" +
+                " WHERE `f`.`slug`=? AND `cq`.`slug`=? AND `c`.`id`=?";
+            let result = db.selectRaw(query, [frameSlug, questionSlug, chapterId]);
+            let question = null;
+            if(result !== null && result.length > 0) {
+                let item = result[0];
+                let questionText = item[1];
+                let answer = item[2];
+                let referenceStrings = item[3].split(',');
+                let references = [];
+                for(let reference of referenceStrings) {
+                    try {
+                        references.push(CheckingQuestion.generateReference(reference));
+                    } catch (e) {
+                        // todo: log the error
+                    }
+                }
+                question = CheckingQuestion.newInstance({
+                    slug:questionSlug,
+                    chapterSlug:chapterSlug,
+                    frameSlug:frameSlug,
+                    question:questionText,
+                    answer:answer,
+                    references:references
+                });
+            }
+            return question;
         };
 
         /**
@@ -1198,11 +1398,11 @@
                 for (let item of items) {
                     // NOTE: we purposely do not retrieve references in the above query for better performance
                     let question = CheckingQuestion.newInstance({
-                        slug: _.get(item, 'slug'),
+                        slug: item[0],
                         chapterSlug: chapterSlug,
                         frameSlug: frameSlug,
-                        question: _.get(item, 'question'),
-                        answer: _.get(item, 'answer'),
+                        question: item[1],
+                        answer:item[2],
                         references: []
                     });
                     checkingQuestions.push(question);

@@ -51,7 +51,7 @@
 
             it('should have projects', function() {
                 assert.equal(
-                    index.getProjects().length > 0,
+                    index.getProjects('en').length > 0,
                     true
                 );
             });
@@ -73,7 +73,7 @@
                         true
                     );
                     assert.equal(
-                        testIndexer.getProjects().length > 0,
+                        testIndexer.getProjects('en').length > 0,
                         true
                     );
                 });
@@ -177,7 +177,7 @@
             describe('@GetProjects', function () {
                 it('should get projects slug array', function () {
                     assert.equal(
-                        testIndexer.getProjects().length > 0,
+                        testIndexer.getProjects('en').length > 0,
                         true
                     );
                 });

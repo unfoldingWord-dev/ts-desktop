@@ -1,6 +1,9 @@
 
 <link rel="import" href="../../components/iron-icons/iron-icons.html">
 <link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../components/paper-dialog/paper-dialog.html">
 
 <dom-module id="ts-publish-review">
 
@@ -45,7 +48,8 @@
 
         ul li {
             margin: 0;
-            padding: 1em;
+            padding: 0 1em;
+            height: 60px;
             color: var(--greyed-out-dark);
             border-bottom: 1px solid var(--greyed-out-light);
             transition: background .3s, color .3s;
@@ -61,7 +65,23 @@
 
         .right {
             float: right;
+        }
+
+        .done {
             color: var(--completed-color);
+            margin-left: 10px;
+        }
+
+        .popup {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+            width: 95%;
+            height: 95%;
+            overflow-y: auto;
         }
 
     </style>
@@ -71,15 +91,27 @@
         <div id="contain">
             <div id="list">
                 <ul>
-                    <li><div>Project: <span>[[project.name]]</span> - <span>[[project.language]]</span></div><iron-icon class="right" icon="done"></iron-icon></li>
-                    <li>Profile<iron-icon class="right" icon="done"></iron-icon></li>
-                    <li>License Agreement<iron-icon class="right" icon="done"></iron-icon></li>
-                    <li>Translation Guidelines<iron-icon class="right" icon="done"></iron-icon></li>
-                    <li>Statement of Faith<iron-icon class="right" icon="done"></iron-icon></li>
+                    <li><div>Project: <span>[[project.name]]</span> - <span>[[project.language]]</span></div><span class="right"><iron-icon class="done" icon="done"></iron-icon></span></li>
+                    <li>Profile<span class="right"><iron-icon class="done" icon="done"></iron-icon></span></li>
+                    <li>License Agreement<span class="right"><paper-icon-button icon="visibility" on-tap="openlicense"></paper-icon-button><iron-icon class="done" icon="done"></iron-icon></span></li>
+                    <li>Translation Guidelines<span class="right"><paper-icon-button icon="visibility" on-tap="openguidelines"></paper-icon-button><iron-icon class="done" icon="done"></iron-icon></span></li>
+                    <li>Statement of Faith<span class="right"><paper-icon-button icon="visibility" on-tap="openstatement"></paper-icon-button><iron-icon class="done" icon="done"></iron-icon></span></li>
                 </ul>
             </div>
             <paper-button raised id="next" on-tap="next">Next Step</paper-button>
         </div>
+
+        <paper-dialog id="license" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <ts-license></ts-license>
+        </paper-dialog>
+
+        <paper-dialog id="guidelines" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <ts-guidelines></ts-guidelines>
+        </paper-dialog>
+
+        <paper-dialog id="statement" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <ts-statement></ts-statement>
+        </paper-dialog>
 
     </template>
 
@@ -105,6 +137,18 @@
 
         next: function () {
             this.selected = this.selected + 1;
+        },
+
+        openlicense: function () {
+            this.$.license.open();
+        },
+
+        openguidelines: function () {
+            this.$.guidelines.open();
+        },
+
+        openstatement: function () {
+            this.$.statement.open();
         },
 
         ready: function() {

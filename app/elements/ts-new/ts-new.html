@@ -136,14 +136,30 @@
                 type: Object,
                 value: {},
                 notify: true
+            },
+            animationConfig: {
+                value: function () {
+                    return {
+                        'entry': {
+                            name: 'slide-from-right-animation',
+                            node: this
+                        },
+                        'exit': {
+                            name: 'slide-right-animation',
+                            node: this
+                        }
+                    }
+                }
             }
         },
 
         behaviors: [
-            Polymer.IronResizableBehavior
+            Polymer.IronResizableBehavior,
+            Polymer.NeonAnimatableBehavior
         ],
 
         back: function () {
+            this.animationConfig.exit.name = 'slide-right-animation';
             this.selected === 0 ? this.route = "home" : this.selected = this.selected - 1;
         },
 
@@ -206,11 +222,13 @@
             var newproj = {"name": name, "language": language, "icon": icon, "sources": [], "completion": 0, "currentsource": null, "translation": translation, "source": source};
             this.push('projectlist', newproj);
             this.set('project', newproj);
+            this.animationConfig.exit.name = 'slide-left-animation';
             this.route = "translate";
             this.selected = 0;
         },
 
         gohome: function () {
+            this.animationConfig.exit.name = 'slide-right-animation';
             this.route = "home";
             this.selected = 0;
         },

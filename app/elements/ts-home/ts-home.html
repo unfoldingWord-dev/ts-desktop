@@ -289,7 +289,8 @@
         is: 'ts-home',
 
         behaviors: [
-            Polymer.IronResizableBehavior
+            Polymer.IronResizableBehavior,
+            Polymer.NeonAnimatableBehavior
         ],
 
         properties: {
@@ -314,6 +315,20 @@
             backto: {
                 type: String,
                 notify: true
+            },
+            animationConfig: {
+                value: function () {
+                    return {
+                        'entry': {
+                            name: 'slide-from-left-animation',
+                            node: this
+                        },
+                        'exit': {
+                            name: 'slide-left-animation',
+                            node: this
+                        }
+                    }
+                }
             }
         },
 

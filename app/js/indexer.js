@@ -900,7 +900,7 @@
          */
         _this.getProject = function (projectSlug, sourceLanguageSlug) {
             if(projectSlug === null || projectSlug === undefined || sourceLanguageSlug === null || sourceLanguageSlug === undefined) {
-                return null;
+                throw new Error('Incorrect or missing parameters');
             }
             let query = "SELECT `p`.`sort`, `p`.`modified_at`, `p`.`source_language_catalog_url`," +
                 " COALESCE(`sl1`.`slug`, `sl2`.`slug`, `sl3`.`slug`) AS `source_language_slug`," +
@@ -921,14 +921,14 @@
             let item = results[0];
             let project = Project.newInstance({
                 slug: projectSlug,
-                sourceLanguageSlug: _.get(item, 'source_language_slug'),
-                name: _.get(item, 'name'),
-                description: _.get(item, 'description'),
-                dateModified: _.get(item, 'modified_at'),
-                sort: _.get(item, 'sort'),
-                sourceLanguageCatalog: _.get(item, 'source_language_catalog_url'),
-                sourceLanguageCatalogLocalModifiedAt: _.get(item, 'source_language_catalog_local_modified_at'),
-                sourceLanguageCatalogServerModifiedAt: _.get(item, 'source_language_catalog_server_modified_at')
+                sort: item[0],
+                dateModified: item[1],
+                sourceLanguageCatalog: item[2],
+                sourceLanguageSlug: item[3],
+                name: item[4],
+                description: item[5],
+                sourceLanguageCatalogLocalModifiedAt: item[6],
+                sourceLanguageCatalogServerModifiedAt: item[7]
             });
             return project;
         };
@@ -1058,6 +1058,28 @@
                 title: _.get(item, 'title')
             });
             return chapter;
+        };
+
+        /**
+         * Returns the body of a chapter
+         * @param projectSlug
+         * @param sourceLanguageSlug
+         * @param resourceSlug
+         * @param chapterSlug
+         * @returns {string}
+         */
+        _this.getChapterBody = function (projectSlug, sourceLanguageSlug, resourceSlug, chapterSlug) {
+            let query = "SELECT GROUP_CONCAT(`f`.`body`, ' ') AS `body` FROM `frame` AS `f`" +
+            " LEFT JOIN `chapter` AS `c` ON `c`.`id`=`f`.`chapter_id`" +
+            " LEFT JOIN `resource` AS `r` ON `r`.`id`=`c`.`resource_id`" +
+            " LEFT JOIN `source_language` AS `sl` ON `sl`.`id`=`r`.`source_language_id`" +
+            " LEFT JOIN `project` AS `p` ON `p`.`id`=`sl`.`project_id`" +
+            " WHERE `p`.`slug`=? AND `sl`.`slug`=? AND `r`.`slug`=? AND `c`.`slug`=? ORDER BY `c`.`sort`, `f`.`sort` ASC";
+            let item = db.selectRaw(query, [projectSlug, sourceLanguageSlug, resourceSlug, chapterSlug]);
+            if(item === null || item.length === 0 || item[0] == null) {
+                return '';
+            }
+            return item[0];
         };
 
         /**

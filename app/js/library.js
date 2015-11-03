@@ -103,34 +103,7 @@
             },
 
             getProject: function (projectSlug, sourceLanguageSlug) {
-
-                //verify parameters
-                if (projectSlug === null || sourceLanguageSlug === null) {
-                    return null;
-                }
-
-                //get data
-                let projectData = indexer.getProject(projectSlug);
-                let sourceLanguageData = indexer.getSourceLanguage(projectSlug, sourceLanguageSlug);
-
-                //verify data
-                if (projectData === null || sourceLanguageData === null) {
-                    return null;
-                }
-
-                let project = Project.newInstance({
-                    slug:projectSlug,
-                    sourceLanguageSlug:sourceLanguageSlug,
-                    name: sourceLanguageData.projectName,
-                    description: sourceLanguageData.projectDescription,
-                    sort: projectData.sort,
-                    dateModified: projectData.dateModified,
-                    sourceLanguageCatalog: projectData.sourceLanguageCatalog,
-                    sourceLanguageCatalogLocalDateModified: projectData.sourceLanguageCatalogLocalModifiedAt,
-                    sourceLangaugeCatalogServerDateModified: projectData.sourceLanguageCatalogServerModifiedAt
-                });
-
-                return project;
+                return  indexer.getProject(projectSlug, sourceLanguageSlug);
             },
 
             /**
@@ -153,24 +126,6 @@
             //    // todo connect to db
             //},
 
-            //getLastProject: function () {
-            //
-            //    //get last used values
-            //    let projectId = configurator.getValue('lastProjectId');
-            //    let sourceLanguageId = configurator.getValue(projectId + 'SourceLanguageId');
-            //    let resourceId = configurator.getValue(projectId + 'ResourceId');
-            //
-            //    //return object
-            //    return this.getProject(projectId, sourceLanguageId, resourceId);
-            //},
-            //
-            //getTargetLanguages: function () {
-            //
-            //},
-            //
-            //getTargetLanguage: function () {
-            //
-            //}
 
             /**
              * Returns an array of target languages
@@ -232,6 +187,56 @@
              */
             getResource: function(sourceTranslation) {
                 return indexer.getResource(sourceTranslation.getProjectSlug(), sourceTranslation.getSourceLanguageSlug(), sourceTranslation.getResourceSlug());
+            },
+
+            /**
+             * Returns an array of chapters
+             * @param sourceTranslation
+             * @returns {Chapter[]}
+             */
+            getChapters: function(sourceTranslation) {
+                return indexer.getChapters(sourceTranslation.getProjectSlug(), sourceTranslation.getSourceLanguageSlug(), sourceTranslation.getResourceSlug());
+            },
+
+            /**
+             * Returns a single chapter
+             * @param sourceTranslation
+             * @param chapterSlug
+             * @returns {Chapter}
+             */
+            getChapter: function(sourceTranslation, chapterSlug) {
+                return indexer.getChapter(sourceTranslation.getProjectSlug(), sourceTranslation.getSourceLanguageSlug(), sourceTranslation.getResourceSlug(), chapterSlug);
+            },
+
+            /**
+             * Returns an array of frames
+             * @param sourceTranslation
+             * @param chapterSlug
+             * @returns {Frame[]}
+             */
+            getFrames: function(sourceTranslation, chapterSlug) {
+                return indexer.getFrames(sourceTranslation.getProjectSlug(), sourceTranslation.getSourceLanguageSlug(), sourceTranslation.getResourceSlug(), chapterSlug);
+            },
+
+            /**
+             * Returns a single frame
+             * @param sourceTranslation
+             * @param chapterSlug
+             * @param frameSlug
+             * @returns {Frame}
+             */
+            getFrame: function(sourceTranslation, chapterSlug, frameSlug) {
+                return indexer.getFrame(sourceTranslation.getProjectSlug(), sourceTranslation.getSourceLanguageSlug(), sourceTranslation.getResourceSlug(), chapterSlug, frameSlug);
+            },
+
+            /**
+             * Returns the body of a chapter
+             * @param sourceTranslation
+             * @param chapterSlug
+             * @returns {*}
+             */
+            getChapterBody: function(sourceTranslation, chapterSlug) {
+                return indexer.getChapterBody(sourceTranslation.getProjectSlug(), sourceTranslation.getSourceLanguageSlug(), sourceTranslation.getResourceSlug(), chapterSlug);
             }
         };
 

@@ -107,7 +107,7 @@
                     null
                 );
                 assert.equal(
-                    resource.slug,
+                    resource.getSlug(),
                     'ulb'
                 );
             });
@@ -115,34 +115,67 @@
 
         describe('@GetChapters', function () {
             it('should return the chapters for 1ch en ulb', function () {
+                let sourceTranslation = SourceTranslation.simpleInstance('1ch', 'en', 'ulb');
+                assert.equal(
+                    library.getChapters(sourceTranslation).length > 0,
+                    true
+                );
+            });
+        });
 
-                let resource = library.getChapters('1ch', 'en', 'ulb');
+        describe('@GetChapter', function () {
+            it('should return a single chapter 1ch en ulb 01', function () {
+                let sourceTranslation = SourceTranslation.simpleInstance('1ch', 'en', 'ulb');
+                let chapter = library.getChapter(sourceTranslation, '01');
                 assert.notEqual(
-                    resource,
+                    chapter,
                     null
                 );
                 assert.equal(
-                    resource.slug,
-                    'ulb'
+                    chapter.getSlug(),
+                    '01'
                 );
             });
         });
 
         describe('@GetFrames', function () {
             it('should return the frames for 1ch en ulb 01', function () {
-
-                let resource = library.getFrames('1ch', 'en', 'ulb', '01');
-                assert.notEqual(
-                    resource,
-                    null
-                );
+                let sourceTranslation = SourceTranslation.simpleInstance('1ch', 'en', 'ulb');
                 assert.equal(
-                    resource.slug,
-                    'ulb'
+                    library.getFrames(sourceTranslation, '01').length > 0,
+                    true
                 );
             });
         });
 
+        describe('@GetFrame', function () {
+            it('should return a single frame for 1ch en ulb 01 01', function () {
+                let sourceTranslation = SourceTranslation.simpleInstance('1ch', 'en', 'ulb');
+                let frame = library.getFrame(sourceTranslation, '01', '01');
+                assert.notEqual(
+                    frame,
+                    null
+                );
+                assert.equal(
+                    frame.getSlug(),
+                    '01'
+                );
+            });
+        });
 
+        describe('@GetChapterBody', function () {
+            it('should return the body of the chapter 1ch en ulb 01', function () {
+                let sourceTranslation = SourceTranslation.simpleInstance('1ch', 'en', 'ulb');
+                let body = library.getChapterBody(sourceTranslation, '01');
+                assert.notEqual(
+                    body,
+                    null
+                );
+                assert.equal(
+                    body.length > 0,
+                    true
+                );
+            });
+        });
     });
 })();

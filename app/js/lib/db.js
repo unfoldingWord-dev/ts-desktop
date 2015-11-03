@@ -23,7 +23,7 @@
                 return false;
             }
             let sql = new SQL.Database();
-            let schema = fs.readFileSync(path.resolve('../', path.join('app', 'config', 'schema.sql')));
+            let schema = fs.readFileSync('./app/config/schema.sql');
             sql.exec(schema);
             let data = sql.export();
             let buffer = new Buffer(data);

@@ -150,13 +150,18 @@
         #popup .buttons {
             display: flex;
             justify-content: center;
+            color: var(--greyed-out-dark);
+        }
+
+        .buttons paper-button:hover {
+            color: var(--highlight-primary);
         }
 
     </style>
 
     <template>
 
-        <ts-home-sidebar route="{{route}}" selected="{{selected}}"></ts-home-sidebar>
+        <ts-home-sidebar route="{{route}}" selected="{{selected}}" backto="{{backto}}"></ts-home-sidebar>
 
         <div id="main">
             <div id="header">
@@ -236,6 +241,10 @@
             index: {
                 type: Number,
                 value: null
+            },
+            backto: {
+                type: String,
+                notify: true
             }
         },
 

@@ -145,13 +145,22 @@
       searchfilter: function (query, languagelist) {
           let search = App.util.startsWithBase.bind(null, query);
 
-          return languagelist.filter(function (lang) {
-              return search(lang.ln) || search(lang.lc);
+          var bycode = languagelist.filter(function (lang) {
+              return search(lang.lc);
+          });
+          var byname = languagelist.filter(function (lang) {
+              return search(lang.ln);
+          });
+          var combined = bycode.concat(byname);
+
+          return combined.filter(function(item, index) {
+              return combined.indexOf(item) === index;
           });
       },
 
       store: function (e) {
           this.language = e.model.lang;
+          this.query = "";
           this.selected = this.selected + 1;
       },
 

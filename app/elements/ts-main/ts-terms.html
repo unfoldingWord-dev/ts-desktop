@@ -1,0 +1,222 @@
+
+<link rel="import" href="../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
+
+<dom-module id="ts-terms">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+            flex: auto;
+        }
+
+        #header {
+            background-color: var(--primary-color);
+        }
+
+        #title {
+            font-size: 125%;
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 45px;
+        }
+
+        #body {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            margin: 15px;
+            padding: 15px 15px 5px 15px;
+        }
+
+        #main {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        #main p {
+            text-align: center;
+            margin: 0 10px;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-around;
+            color: var(--greyed-out-dark);
+        }
+
+        .buttons paper-button:hover {
+            color: var(--highlight-primary);
+        }
+
+        #main paper-button {
+            background: var(--highlight-primary);
+            color: var(--text-color);
+            text-transform: uppercase;
+            margin-top: 15px;
+        }
+
+        .popup {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+            width: 95%;
+            height: 95%;
+            overflow-y: auto;
+        }
+
+        .popup .buttons {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+        }
+
+    </style>
+
+    <template>
+
+        <div id="header">
+            <div id="title">
+                <span>Terms of Use</span>
+            </div>
+        </div>
+
+        <div id="body">
+            <div id="main">
+                <p>By using this app you agree with the statement of faith and translation guidelines and to release your work under
+                the terms of the Creative Commons Attribution-ShareAlike 4.0 International License.</p>
+                <paper-button raised on-tap="openlicense">License Agreement</paper-button>
+                <paper-button raised on-tap="openguidelines">Translation Guidelines</paper-button>
+                <paper-button raised on-tap="openstatement">Statement of Faith</paper-button>
+            </div>
+            <div class="buttons">
+                <paper-button dialog-dismiss on-tap="close">No Thanks</paper-button>
+                <paper-button dialog-confirm on-tap="accept">I Agree</paper-button>
+            </div>
+        </div>
+
+        <paper-dialog id="license" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <div class="content">
+                <h2>You are free to:</h2>
+                <p>Share, copy, and redistribute the material in any medium or format; Adapt, remix, transform, and build upon the material for any purpose, even commercially. The licensor cannot revoke these freedoms as long as you follow the license terms.</p>
+                <h2>Under the following terms:</h2>
+                <p><strong>Attribution</strong> - You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use;</p>
+                <p><strong>ShareAlike</strong> - If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original;</p>
+                <p><strong>No additional restrictions</strong> - You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.</p>
+                <h2>Notices:</h2>
+                <p>You do not have to comply with the license for elements of the material in the public domain or where your use is permitted by an applicable exception or limitation; No warranties are given. The license may not give you all of the permissions necessary for your intended use. For example, other rights such as publicity, privacy, or moral rights may limit how you use the material.</p>
+            </div>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Close</paper-button>
+            </div>
+        </paper-dialog>
+
+        <paper-dialog id="guidelines" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <div class="content">
+                <h1>Translation Guidelines</h1>
+                <p><em>The following statement on the principles and procedures used in translation is subscribed to by all member organizations of and contributors to the <strong>unfoldingWord</strong> project. All translation activities are carried out according to these common guidelines.</em></p>
+                <p><strong>Accurate</strong> - Translate accurately, without detracting from, changing, or adding to the meaning of the original text. Translated content should faithfully communicate as precisely as possible the meaning of the original text as it would have been understood by the original audience.</p>
+                <p><strong>Clear</strong> - Use whatever language structures are necessary to achieve the highest level of comprehension. This includes rearranging the form of a text and using as many or as few terms as necessary to communicate the original meaning as accurately as possible.</p>
+                <p><strong>Faithful</strong> - Use key terms that are faithful to the vocabulary of the original biblical languages. Terms addressing the relationship between God the Father and God the Son should be retained in translated content and clarified, as needed, in footnotes or other supplemental resources.</p>
+                <p><strong>Authoritative</strong> - Use the original language biblical texts as the highest authority for translation of biblical content. Reliable biblical content in other languages may be used for clarification and as intermediary source texts.</p>
+                <p><strong>Pure</strong> - Avoid any political, denominational, ideological, social, cultural, or theological bias in your translation.</p>
+                <p><strong>Expressive</strong> - Communicate the feelings and attitudes of the original text. As much as possible, maintain the literary forms in the original text, including narrative, poetry, exhortation, and prophecy, representing them with corresponding forms that communicate in a similar way in your language.</p>
+                <p><strong>Historical</strong> - Communicate historical events and facts accurately, providing additional information as needed in order to accurately communicate the intended message to people who do not share the same context and culture as the original recipients of the original content.</p>
+                <p><strong>Natural</strong> - Use language forms that are effective and that reflect the way your language is used in corresponding contexts.</p>
+                <p><strong>Collaborative</strong> - Where possible, work together with other believers who speak your language to translate, check, and distribute the translated content, ensuring that it is of the highest quality and available to as many people as possible.</p>
+                <p><strong>Ongoing</strong> - Encourage the periodic review of translations to ascertain when revision or a new translation is needed.</p>
+                <h1>Managing and Identifying Translation Quality</h1>
+                <p>The quality of a translation generally refers to the fidelity of the translation to the meaning of the original, and the degree to which the translation is understandable and effective for the speakers of the receptor language. The strategy we suggest involves checking the forms and communicative quality of the translation with the language community, and checking the fidelity of the translation with the Church in that people group.</p>
+                <p>The specific steps involved may vary significantly, depending on the language and context of the translation project. Generally, we consider a good translation to be one that is:</p>
+                <p><strong>Accurate</strong> - Faithful to the intended meaning of the original, as determined by the Church in that people group and in alignment with the Church global and historical, and consequently:</p>
+                <p><strong>Affirmed by the Church</strong> - Endorsed and used by the Church.</p>
+                <p>In addition, a good translation is reviewed by the speakers of the language community and is found to be:</p>
+                <p><strong>Natural</strong> - Using current forms of the language, and</p>
+                <p><strong>Clear</strong> - Strives for the highest level of comprehension by hearers.</p>
+            </div>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Close</paper-button>
+            </div>
+        </paper-dialog>
+
+        <paper-dialog id="statement" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <div class="content">
+                <h1>Statement of Faith</h1>
+                <p><em>The following statement of faith is subscribed to by all member organizations of and contributors to the <strong>unfoldingWord</strong> project. It is in agreement with the <strong>Lausanne Covenant</strong>.</em></p>
+                <p>We believe that Christian belief can and should be divided into <strong>essential beliefs</strong> and <strong>peripheral beliefs</strong>.</p>
+                <h3>Essential beliefs</h3>
+                <p>Essential beliefs are what define a follower of Jesus Christ and can never be compromised or ignored.</p>
+                <p>We believe the Bible to be the only inspired, inerrant, sufficient, authoritative Word of God.</p>
+                <p>We believe that there is one God, eternally existent in three persons: God the Father, Jesus Christ the Son and the Holy Spirit.</p>
+                <p>We believe in the deity of Jesus Christ.</p>
+                <p>We believe in the humanity of Jesus Christ, in His virgin birth, in His sinless life, in His miracles, in His vicarious and atoning death through His shed blood, in His bodily resurrection, in His ascension to the right hand of the Father.</p>
+                <p>We believe that every person is inherently sinful and so is deserving of eternal hell.</p>
+                <p>We believe that salvation from sin is a gift of God, provided through the sacrificial death and resurrection of Jesus Christ, attained by grace through faith, not by works.</p>
+                <p>We believe that true faith is always accompanied by repentance and regeneration by the Holy Spirit.</p>
+                <p>We believe in the present ministry of the Holy Spirit by whose indwelling the follower of Jesus Christ is enabled to live a godly life.</p>
+                <p>We believe in the spiritual unity of all believers in the Lord Jesus Christ, from all nations and languages and people groups.</p>
+                <p>We believe in the personal and physical return of Jesus Christ.</p>
+                <p>We believe in the resurrection of both the saved and the lost; the unsaved will be resurrected to eternal damnation in hell and the saved will be resurrected to eternal blessing in heaven with God.</p>
+                <h3>Peripheral beliefs</h3>
+                <p>Peripheral beliefs are everything else that is in Scripture but about which sincere followers of Christ may disagree (e.g. Baptism, Lord\'s Supper, the Rapture, etc.). We choose to agree to disagree agreeably on these topics and press on together toward a common goal of making disciples of every people group (Matthew 28:18-20).</p>
+            </div>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Close</paper-button>
+            </div>
+        </paper-dialog>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+        is: 'ts-terms',
+
+        properties: {
+            accepted: {
+                type: Boolean,
+                value: false,
+                notify: true
+            }
+        },
+
+        accept: function () {
+            this.accepted = true;
+        },
+
+        close: function () {
+            App.close();
+        },
+
+        openlicense: function () {
+            this.$.license.open();
+        },
+
+        openguidelines: function () {
+            this.$.guidelines.open();
+        },
+
+        openstatement: function () {
+            this.$.statement.open();
+        },
+
+        ready: function() {
+
+        }
+
+    });
+
+</script>

@@ -1,5 +1,43 @@
 [
     {
+        "name": "highlightkeyterms",
+        "text": "Highlight Key Terms",
+        "helpText": "Make key terms clickable in the source text",
+        "value": "true",
+        "meta": {
+            "mutable": true,
+            "type": "bool"
+        }
+    },
+    {
+        "name": "remembermyplace",
+        "text": "Remember My Place",
+        "helpText": "Display the last viewed screen when starting the app",
+        "value": "true",
+        "meta": {
+            "mutable": true,
+            "type": "bool"
+        }
+    },
+    {
+        "name": "exportformat",
+        "text": "Export Format",
+        "value": "DokuWiki",
+        "meta": {
+            "mutable": true,
+            "type": "string"
+        }
+    },
+    {
+        "name": "autosavechanges",
+        "text": "Auto Save Changes",
+        "value": 5,
+        "meta": {
+            "mutable": true,
+            "type": "int"
+        }
+    },
+    {
         "name": "Setting 1",
         "value": 1,
         "meta": {
@@ -42,6 +80,14 @@
     {
         "name": "Font",
         "value": "Tahoma",
+        "meta": {
+            "mutable": true,
+            "type": "string"
+        }
+    },
+    {
+        "name": "Font Size",
+        "value": "normal",
         "meta": {
             "mutable": true,
             "type": "string"

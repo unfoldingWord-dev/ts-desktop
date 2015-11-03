@@ -118,13 +118,27 @@
         is: 'ts-settings',
 
         behaviors: [
-            Polymer.IronResizableBehavior
+            Polymer.NeonAnimatableBehavior
         ],
 
         properties: {
             route: {
                 type: String,
                 notify: true
+            },
+            animationConfig: {
+                value: function () {
+                    return {
+                        'entry': {
+                            name: 'slide-from-right-animation',
+                            node: this
+                        },
+                        'exit': {
+                            name: 'slide-right-animation',
+                            node: this
+                        }
+                    }
+                }
             },
             backto: {
                 type: String
@@ -293,7 +307,7 @@
         remembermyplace: function(event) {
             event.model.setting.value = !event.model.setting.value;
         },
-        
+
         highlightkeyterms: function(event) {
              event.model.setting.value = !event.model.setting.value;
         },

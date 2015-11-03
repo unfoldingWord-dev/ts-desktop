@@ -78,16 +78,6 @@
                 type: Number,
                 value: 0,
                 notify: true
-            },
-            route: {
-                type: String,
-                value: '',
-                notify: true
-            },
-            backto: {
-                type: String,
-                value: "",
-                notify: true
             }
         },
 
@@ -143,16 +133,15 @@
         },
 
         publish: function () {
-            this.route = "publish";
+            this.fire('gopublish');
         },
 
         home: function () {
-            this.route = "home";
+            this.fire('gohome');
         },
 
         settings: function() {
-            this.backto = this.route;
-            this.route = "settings";
+            this.fire('gosettings');
         },
 
         ready: function() {

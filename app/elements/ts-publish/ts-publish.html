@@ -134,6 +134,11 @@
     Polymer({
         is: 'ts-publish',
 
+        behaviors: [
+            Polymer.IronResizableBehavior,
+            Polymer.NeonAnimatableBehavior
+        ],
+
         properties: {
             selected: {
                 type: Number,
@@ -152,6 +157,20 @@
                 type: Array,
                 value: [],
                 computed: 'createlist(selected)'
+            },
+            animationConfig: {
+                value: function () {
+                    return {
+                        'entry': {
+                            name: 'slide-from-right-animation',
+                            node: this
+                        },
+                        'exit': {
+                            name: 'slide-right-animation',
+                            node: this
+                        }
+                    }
+                }
             }
         },
 

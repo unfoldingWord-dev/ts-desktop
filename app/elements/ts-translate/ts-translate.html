@@ -23,7 +23,7 @@
 
     <template>
 
-        <ts-translate-sidebar route="{{route}}" selected="{{selected}}" backto="{{backto}}"></ts-translate-sidebar>
+        <ts-translate-sidebar selected="{{selected}}" on-gohome="gohome" on-gopublish="gopublish" on-gosettings="gosettings"></ts-translate-sidebar>
 
         <div id="pages">
             <ts-read-mode id="readmode" project="{{project}}" chapters="[[chapters]]" modestatus="{{modestatus}}"></ts-read-mode>
@@ -43,7 +43,8 @@
         is: 'ts-translate',
 
         behaviors: [
-            Polymer.IronResizableBehavior
+            Polymer.IronResizableBehavior,
+            Polymer.NeonAnimatableBehavior
         ],
 
         properties: {
@@ -80,6 +81,20 @@
                 type: Object,
                 value: {},
                 computed: 'createchunks(project.source.*, project.translation.*)'
+            },
+            animationConfig: {
+                value: function () {
+                    return {
+                        'entry': {
+                            name: 'slide-from-right-animation',
+                            node: this
+                        },
+                        'exit': {
+                            name: 'slide-right-animation',
+                            node: this
+                        }
+                    }
+                }
             }
         },
 
@@ -87,6 +102,25 @@
             'reset(project.name)',
             'checksources(project.sources)'
         ],
+
+        gohome: function () {
+            this.animationConfig.exit.name = 'slide-right-animation';
+            this.animationConfig.entry.name = 'slide-from-right-animation';
+            this.route = "home";
+        },
+
+        gopublish: function () {
+            this.animationConfig.exit.name = 'slide-left-animation';
+            this.animationConfig.entry.name = 'slide-from-left-animation';
+            this.route = "publish";
+        },
+
+        gosettings: function () {
+            this.animationConfig.exit.name = 'slide-left-animation';
+            this.animationConfig.entry.name = 'slide-from-left-animation';
+            this.backto = this.route;
+            this.route = "settings";
+        },
 
         modechange: function (tomode, frommode) {
             var read = this.$.readmode;

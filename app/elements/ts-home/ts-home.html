@@ -1,9 +1,11 @@
 
+<link rel="import" href="../../components/iron-resizable-behavior/iron-resizable-behavior.html">
 <link rel="import" href="../../components/iron-icons/iron-icons.html">
 <link rel="import" href="../../components/paper-button/paper-button.html">
 <link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../components/iron-list/iron-list.html">
 
 <link rel="import" href="../ts-icons/ts-icons.html">
 <link rel="import" href="./ts-new-project-button.html">
@@ -23,20 +25,11 @@
             flex-direction: column;
         }
 
-        iron-pages {
-            flex: auto;
-            display: flex;
-        }
-
-        iron-pages > * {
-            flex: auto;
-        }
-
         #header {
             background: var(--greyed-out-light);
             color: black;
             width: 100%;
-            height: 50px;
+            flex: 0 0 50px;
             display: flex;
             align-items: center;
             justify-content: flex-start;
@@ -55,12 +48,10 @@
             top: 20px;
         }
 
-        #contain1, #contain2 {
-            width: 100%;
+        .contain {
             flex: auto;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
             align-items: center;
         }
 
@@ -81,41 +72,64 @@
             padding: 0 1.5em;
         }
 
-        table {
-            min-width: 450px;
-            border-collapse: collapse;
-        }
-
-        tbody {
-            background: white;
+        iron-list {
             font-size: 110%;
+            max-height: 90vh;
+            width: 450px;
+            background: white;
+            box-shadow: 0 2px 3px 2px var(--greyed-out-light);
         }
 
-        tbody tr {
+        .row {
+            display: flex;
             border-bottom: 1px solid var(--greyed-out-light);
             transition: background .3s, color .3s;
+            cursor: pointer;
+            min-height: 60px;
+            justify-content: flex-start;
+            align-items: center;
         }
 
-        tbody tr:hover {
+        #headings {
+            flex: 0 0 50px;
+            width: 450px;
+            display: flex;
+            align-items: center;
+        }
+
+        #list {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .row:hover {
             background: var(--accent-color-dark);
             color: var(--text-color);
-            cursor: pointer;
         }
 
-        tr:hover .trashcan {
+        .left {
+            display: flex;
+            align-items: center;
+        }
+
+        .smallspan {
+            width: 50px;
+            display: inline-flex;
+            justify-content: center;
+        }
+
+        .bigspan {
+            width: 150px;
+            display: inline-block;
+        }
+
+        .row:hover .smallicon {
             color: white;
         }
 
-        tr:hover .smallicon {
+        .row:hover .smalltext {
             color: white;
-        }
-
-        tr:hover .smalltext {
-            color: white;
-        }
-
-        td {
-            padding: 15px;
         }
 
         .smallicon {
@@ -124,10 +138,10 @@
             color: var(--greyed-out-dark);
         }
 
-        .trashcan {
+        .info {
             --iron-icon-height: 22px;
             --iron-icon-width: 22px;
-            color: var(--greyed-out-dark);
+            color: var(--greyed-out-light);
         }
 
         .smalltext {
@@ -135,25 +149,55 @@
             color: var(--greyed-out-dark);
         }
 
-        #popup {
+        .popup {
             position: fixed;
             top: 0;
             bottom: 0;
             left: 0;
             right: 0;
             margin: auto;
+        }
+
+        #info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 350px;
+            height: 400px;
+            padding: 20px;
+        }
+
+        #border {
+            border-bottom: 1px solid var(--greyed-out-light);
+            border-top: 1px solid var(--greyed-out-light);
+            align-self: stretch;
+            display: flex;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        #confirm {
             width: 320px;
             height: 220px;
             text-align: center;
         }
 
-        #popup .buttons {
+        .popup .buttons {
             display: flex;
+            align-items: center;
             justify-content: center;
             color: var(--greyed-out-dark);
         }
 
         .buttons paper-button:hover {
+            color: var(--highlight-primary);
+        }
+
+        #border paper-button:hover {
+            color: var(--highlight-primary);
+        }
+
+        #border paper-button:hover iron-icon {
             color: var(--highlight-primary);
         }
 
@@ -168,7 +212,7 @@
                 <div id="title">Your Translation Projects</div>
             </div>
             <template is="dom-if" if="{{!projectlist.length}}">
-                <div id="contain1">
+                <div class="contain">
                     <div id="welcome">
                         <p>Welcome!</p>
                         <p>This is your Home Screen. When you have translation projects on this device, they will appear here.</p>
@@ -178,30 +222,51 @@
                 </div>
             </template>
             <template is="dom-if" if="{{projectlist.length}}">
-                <div id="contain2">
-                    <table>
-                        <thead>
-                        <tr class="smalltext">
-                            <td></td><td>Project</td><td>Language</td><td>Progress</td><td></td>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <template is="dom-repeat" items="[[projectlist]]" as="project">
-                            <tr>
-                                <td on-tap="open"><iron-icon class="smallicon" icon="[[project.icon]]"></iron-icon></td>
-                                <td on-tap="open"><span>[[project.name]]</span></td>
-                                <td on-tap="open"><span class="smalltext">[[project.language]]</span></td>
-                                <td on-tap="open"><span>[[project.completion]]</span></td>
-                                <td><paper-icon-button class="trashcan" icon="delete" on-tap="checkdelete" title="delete"></paper-icon-button></td>
-                            </tr>
-                        </template>
-                        </tbody>
-                    </table>
+                <div class="contain">
+                    <div id="headings" class="smalltext">
+                        <span class="smallspan"></span>
+                        <span class="bigspan">Project</span>
+                        <span class="bigspan">Language</span>
+                        <span>Progress</span>
+                    </div>
+                    <div id="list">
+                        <iron-list items="[[projectlist]]" as="proj">
+                            <template>
+                                <div class="row">
+                                    <div class="left" on-tap="openproject">
+                                        <span class="smallspan"><iron-icon class="smallicon" icon="[[proj.icon]]"></iron-icon></span>
+                                        <span class="bigspan">[[proj.name]]</span>
+                                        <span class="smalltext bigspan">[[proj.language]]</span>
+                                        <span class="smallspan">[[proj.completion]]</span>
+                                    </div>
+                                    <div>
+                                        <span><paper-icon-button class="info" icon="info" on-tap="openinfo" title="details"></paper-icon-button></span>
+                                    </div>
+                                </div>
+                            </template>
+                        </iron-list>
+                    </div>
                 </div>
             </template>
         </div>
 
-        <paper-dialog id="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+        <paper-dialog id="info" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <h2>Project Details</h2>
+            <div>
+                <p>Project: <span>[[project.name]]</span></p>
+                <p>Target Language: <span>[[project.language]]</span></p>
+                <p>Progress: <span>[[project.completion]]</span>%</p>
+                <p>Translators</p>
+            </div>
+            <div id="border">
+                <paper-button dialog-confirm on-tap="openconfirm"><iron-icon class="smallicon" icon="delete"></iron-icon> Delete</paper-button>
+            </div>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Dismiss</paper-button>
+            </div>
+        </paper-dialog>
+
+        <paper-dialog id="confirm" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <h2>Delete Project</h2>
             <div>
                 <p>Are you sure you want to delete this project permanently?</p>
@@ -222,6 +287,11 @@
 
     Polymer({
         is: 'ts-home',
+
+        behaviors: [
+            Polymer.IronResizableBehavior,
+            Polymer.NeonAnimatableBehavior
+        ],
 
         properties: {
             route: {
@@ -245,6 +315,20 @@
             backto: {
                 type: String,
                 notify: true
+            },
+            animationConfig: {
+                value: function () {
+                    return {
+                        'entry': {
+                            name: 'slide-from-left-animation',
+                            node: this
+                        },
+                        'exit': {
+                            name: 'slide-left-animation',
+                            node: this
+                        }
+                    }
+                }
             }
         },
 
@@ -252,15 +336,20 @@
             this.route = "new";
         },
 
-        open: function (e) {
-            this.project = e.model.project;
+        openproject: function (e) {
+            this.project = e.model.proj;
             this.route = "translate";
         },
 
-        checkdelete: function (e) {
-            var target = e.model.project;
+        openinfo: function (e) {
+            this.project = e.model.proj;
+            var target = e.model.proj;
             this.index = this.projectlist.indexOf(target);
-            this.$.popup.open();
+            this.$.info.open();
+        },
+
+        openconfirm: function () {
+            this.$.confirm.open();
         },
 
         deleteproject: function () {

@@ -108,6 +108,7 @@
             /**
              * Returns an array of source langauges for the project
              * @param projectSlug
+             * @return {SourceLanguage[]}
              */
             getSourceLanguages: function(projectSlug) {
                 return indexer.getSourceLanguages(projectSlug);
@@ -246,7 +247,7 @@
              * Returns an array of frame slugs
              * @param sourceTranslation
              * @param chapterSlug
-             * @returns {*}
+             * @returns {string}
              */
             getFrameSlugs: function(sourceTranslation, chapterSlug) {
                 let slugs = indexer.getFrameSlugs(sourceTranslation, chapterSlug);
@@ -277,7 +278,7 @@
              * Returns the translation format of the chapter body
              * @param sourceTranslation
              * @param chapterSlug
-             * @returns {*}
+             * @returns {string}
              */
             getChapterBodyFormat: function(sourceTranslation, chapterSlug) {
                 return indexer.getChapterBodyFormat(sourceTranslation.getProjectSlug(), sourceTranslation.getSourceLanguageSlug(), sourceTranslation.getResourceSlug(), chapterSlug);

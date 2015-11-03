@@ -13,16 +13,10 @@
     let mainWindow = gui.Window.get();
     let Reporter = require('../js/reporter').Reporter;
     let uploader = require('../js/uploader');
-
     let Translator = require('../js/translator').Translator;
-    let Indexer = require('../js/indexer').Indexer;
-    let indexer = new Indexer('app', {
-        apiUrl: configurator.getValue('apiUrl'),
-        indexDir: './index/'
-    });
-    let translator = new Translator(indexer);
+    let translator = new Translator({}); // TODO: this needs to be updated
     let Library = require('../js/library').Library;
-    let library = new Library(indexer);
+    let library = new Library('../index/app.sqlite', configurator.getValue('apiUrl'));
 
     let util = require('../js/lib/util');
 
@@ -52,8 +46,6 @@
         translator: translator,
 
         library: library,
-
-        indexer: indexer,
 
         util: util,
 

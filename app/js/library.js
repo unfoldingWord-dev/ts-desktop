@@ -9,7 +9,7 @@
 
     function Library (indexPath, rootApiUrl) {
         const DEFAULT_RESOURCE_SLUG = 'ulb';
-        const MIN_CHECKING_LEVEL = 3;
+        //const MIN_CHECKING_LEVEL = 3;
         rootApiUrl = rootApiUrl; // fix lit errors temporarily
         let indexer = new Indexer(indexPath);
 

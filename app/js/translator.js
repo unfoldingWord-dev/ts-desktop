@@ -4,12 +4,18 @@
 
     let fs = require('fs');
     let path = require('path');
-    let TargetTranslation = require('../core/targettranslation');
+    let TargetTranslation = require('./core/targettranslation');
     //let mkdirp = require('mkdirp');
     //let rimraf = require('rimraf');
 
+    /**
+     *
+     * @param context
+     * @param rootPath (string)
+     * @returns {Translator}
+     * @constructor
+     */
     function Translator (context, rootPath) {
-
         //reassign this to _this, set indexId and rootPath
         //let _this = this;
 

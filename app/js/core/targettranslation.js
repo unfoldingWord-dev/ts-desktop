@@ -1,6 +1,7 @@
 ;(function () {
     "use strict";
 
+    let mkdirp = require('mkdirp');
     let path = require('path');
     let fs = require('fs');
     let FrameTranslation = require('./frametranslation');
@@ -88,7 +89,7 @@
      * @returns {TargetTranslation}
      */
     function newInstance(parameters) {
-        return new TargetTranslation({targetLanguageSlug: parameters});
+        return new TargetTranslation(parameters);
     }
 
     /**
@@ -157,7 +158,7 @@
         let targetTranslationDir = generateTargetTranslationDir(generateTargetTranslationSlug(targetLanguage.getSlug(), projectSlug), rootDir);
         if(!fs.existsSync(targetTranslationDir)) {
             // build new target translation
-            fs.mkdirSync(targetTranslationDir);
+            mkdirp.sync(targetTranslationDir);
             let manifestJson = {
                 generator: {
                     name: 'ts-desktop',
@@ -175,7 +176,7 @@
             fs.writeFileSync(path.join(targetTranslationDir, 'manifest.json'), JSON.stringify(manifestJson));
         }
         // load the target translation (new or otherwise)
-        return TargetTranslation.newInstance({
+        return newInstance({
             targetLanguageSlug:targetLanguage.getSlug(),
             projectSlug:projectSlug,
             rootDir:rootDir
@@ -183,6 +184,7 @@
     }
 
     exports.create = create;
+    exports.generateTargetTranslationSlug = generateTargetTranslationSlug;
     exports.generateTargetTranslationDir = generateTargetTranslationDir;
     exports.getProjectSlugFromSlug = getProjectSlugFromSlug;
     exports.getTargetLanguageSlugFromSlug = getTargetLanguageSlugFromSlug;

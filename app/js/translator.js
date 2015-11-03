@@ -3,7 +3,7 @@
 ;(function () {
 
     let fs = require('fs');
-    let path = require('path');
+    //let path = require('path');
     let rimraf = require('rimraf');
     let TargetTranslation = require('./core/targettranslation');
     //let mkdirp = require('mkdirp');

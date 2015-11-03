@@ -14,7 +14,6 @@
     let Reporter = require('../js/reporter').Reporter;
     let uploader = require('../js/uploader');
     let Translator = require('../js/translator').Translator;
-    let translator = new Translator({}); // TODO: this needs to be updated
     let Library = require('../js/library').Library;
     let library = new Library('../index/app.sqlite', configurator.getValue('apiUrl'));
 
@@ -43,7 +42,7 @@
 
         uploader: uploader,
 
-        translator: translator,
+        translator: null,
 
         library: library,
 
@@ -165,6 +164,14 @@
         },
 
         /**
+         * Loads the translator
+         */
+        initializeTranslator: function () {
+            // TODO: the translator needs some information about the context (first parameter)
+            this.translator = new Translator({}, this.configurator.getValue('targetTranslationsDir'));
+        },
+
+        /**
          * Toggles the application maximize state
          */
         toggleMaximize: function () {
@@ -230,6 +237,7 @@
             _this.registerEvents();
             _this.registerShortcuts();
             _this.initializeConfig();
+            _this.initializeTranslator();
             _this.initializeReporter();
             _this.registerErrorReporter();
 

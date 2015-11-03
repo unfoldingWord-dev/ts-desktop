@@ -37,7 +37,7 @@
         /**
          * Returns the database id of the project
          * @param projectSlug
-         * @returns 0 if no record was found
+         * @returns {int} 0 if no record was found
          */
         function getProjectDbId (projectSlug) {
             let results = db.selectOne('project', 'id', '`slug`=?', [projectSlug]);

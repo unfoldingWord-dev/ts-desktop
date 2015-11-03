@@ -30,6 +30,8 @@ CREATE TABLE `project` (
   `sort` INTEGER NOT NULL DEFAULT 0,
   `modified_at` INTEGER NOT NULL,
   `source_language_catalog_url` TEXT NOT NULL,
+  `source_language_catalog_local_modified_at` INTEGER NOT NULL DEFAULT 0,
+  `source_language_catalog_server_modified_at` INTEGER NOT NULL DEFAULT 0,
   UNIQUE (`slug`)
 );
 
@@ -127,6 +129,8 @@ CREATE TABLE `source_language` (
   `direction` TEXT NOT NULL,
   `modified_at` INTEGER(10) NOT NULL,
   `resource_catalog_url` TEXT NOT NULL,
+  `resource_catalog_local_modified_at` INTEGER NOT NULL DEFAULT 0,
+  `resource_catalog_server_modified_at` INTEGER NOT NULL DEFAULT 0,
   UNIQUE (`slug`, `project_id`),
   FOREIGN KEY (project_id) REFERENCES `project` (`id`)
 );

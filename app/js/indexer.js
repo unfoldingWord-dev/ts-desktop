@@ -6,53 +6,69 @@
     //let md5 = require('md5');
     let url = require('url');
     let _ = require('lodash');
-    //let raiseWithContext = require('./lib/util').raiseWithContext;
-    //let dataDirPath = 'data';
-    //let linksJsonPath = path.join(dataDirPath, 'links.json');
-    //let sourceDirPath = 'source';
     let Db = require('./lib/db').Db;
+    let TargetLanguage = require('./core/targetlanguage');
+    let SourceLanguage = require('./core/sourcelanguage');
+    let SourceTranslation = require('./core/sourcetranslation');
+    let Resource = require('./core/resource');
+    let Project = require('./core/project');
+    let Chapter = require('./core/chapter');
+    let Frame = require('./core/frame');
+    let TranslationNote = require('./core/translationnote');
+    let TranslationWord = require('./core/translationword');
+    let CheckingQuestion = require('./core/checkingquestion');
     let ContentValues = require('./lib/content-values').ContentValues;
 
     let apiVersion = 2;
 
     /**
      *
-     * @param indexName the name of of the index. This will become a directory
-     * @param configJson the index configuration. Requires an indexDir and apiUrl.
+     * @param databasePath the path to the database used by the indexer
      * @returns {Indexer}
      * @constructor
      */
-    function Indexer (indexName, configJson) {
-        if (typeof configJson === 'undefined') {
-            throw new Error('missing the indexer configuration parameter');
-        }
+    function Indexer (databasePath) {
 
-        //reassign this to _this, set indexId and rootPath
         let _this = this;
-        _this.config = _.merge({indexDir: ''}, configJson);
-        _this.indexId = indexName;
-        //_this.rootPath = path.join(_this.config.indexDir, indexName);
         _this.needsDbSave = 0;
-        let db = new Db(_this.config.indexDir);
+        let db = new Db(databasePath);
 
-        //private db id lookup functions
-        function getProjectDbId (projectId) {
-            let results = db.selectOne('project', 'id', '`slug`=?', [projectId]);
+        /**
+         * Returns the database id of the project
+         * @param projectSlug
+         * @returns 0 if no record was found
+         */
+        function getProjectDbId (projectSlug) {
+            let results = db.selectOne('project', 'id', '`slug`=?', [projectSlug]);
+            if (typeof results.id === 'undefined') {
+                return 0;
+            }
+            return results.id;
+        }
+
+        /**
+         * Returns the database id of the source language
+         * @param projectSlug
+         * @param sourceLanguageSlug
+         * @returns 0 if no record was found
+         */
+        function getSourceLanguageDbId (projectSlug, sourceLanguageSlug) {
+            let projectDbId = getProjectDbId(projectSlug);
+            let results = db.selectOne('source_language', 'id', '`slug`=? AND `project_id`=?', [sourceLanguageSlug, projectDbId]);
             if (typeof results.id === 'undefined') {
                 return null;
             }
             return results.id;
         }
 
-        function getSourceLanguageDbId (projectId, sourceLanguageId) {
-            let projectDbId = getProjectDbId(projectId);
-            let results = db.selectOne('source_language', 'id', '`slug`=? AND `project_id`=?', [sourceLanguageId, projectDbId]);
-            if (typeof results.id === 'undefined') {
-                return null;
-            }
-            return results.id;
-        }
-
+        /**
+         * Returns the database id of a resource
+         *
+         * @param projectId
+         * @param sourceLanguageId
+         * @param resourceId
+         * @returns 0 if no record was found
+         */
         function getResourceDbId (projectId, sourceLanguageId, resourceId) {
             let sourceLanguageDbId = getSourceLanguageDbId(projectId, sourceLanguageId);
             let results = db.selectOne('resource', 'id', '`slug`=? AND `source_language_id`=?', [resourceId, sourceLanguageDbId]);
@@ -62,6 +78,15 @@
             return results.id;
         }
 
+        /**
+         * Returns the database id of a chapter
+         *
+         * @param projectId
+         * @param sourceLanguageId
+         * @param resourceId
+         * @param chapterId
+         * @returns 0 if no record was found
+         */
         function getChapterDbId (projectId, sourceLanguageId, resourceId, chapterId) {
             let resourceDbId = getResourceDbId(projectId, sourceLanguageId, resourceId);
             let results = db.selectOne('chapter', 'id', '`slug`=? AND `resource_id`=?', [chapterId, resourceDbId]);
@@ -71,6 +96,16 @@
             return results.id;
         }
 
+        /**
+         * Returns the database id of a frame
+         *
+         * @param projectId
+         * @param sourceLanguageId
+         * @param resourceId
+         * @param chapterId
+         * @param frameId
+         * @returns 0 if no record was found
+         */
         function getFrameDbId (projectId, sourceLanguageId, resourceId, chapterId, frameId) {
             let chapterDbId = getChapterDbId(projectId, sourceLanguageId, resourceId, chapterId);
             let results = db.selectOne('frame', 'id', '`slug`=? AND `chapter_id`=?', [frameId, chapterDbId]);
@@ -80,12 +115,23 @@
             return results.id;
         }
 
-        //public utility functions
-        _this.getIndexId = function () {
-            return _this.indexId;
+        /**
+         * Destroys the entire index
+         */
+        _this.destroy = function () {
+            // todo close the database
+            // todo delete the database
         };
+
+        /**
+         * Rebuilds the index database
+         */
+        _this.rebuild = function () {
+            // todo rebuild the database
+        };
+
         _this.getIndexPath = function () {
-            return _this.config.indexDir;
+            return databasePath;
         };
 
         //public indexing functions
@@ -305,6 +351,39 @@
             }
             return true;
         }
+
+        /**
+         *
+         * @param sourceTranslation {SourceTranslation}
+         * @param catalog
+         */
+        _this.indexTranslationNotes = function(sourceTranslation, catalog) {
+            // avoid linting errors temporarily
+            sourceTranslation = sourceTranslation;
+            catalog = catalog;
+
+            // todo format object and index
+            return true;
+        };
+
+        _this.indexCheckingQuestions = function(sourceTranslation, catalog) {
+            // avoid linting errors temporarily
+            sourceTranslation = sourceTranslation;
+            catalog = catalog;
+
+            // todo format object and index
+            return true;
+        };
+
+        _this.indexTranslationWords = function(sourceTranslation, catalog) {
+            // avoid linting errors temporarily
+            sourceTranslation = sourceTranslation;
+            catalog = catalog;
+
+            // todo format object and index
+            return true;
+        };
+
 
         _this.indexResources = function (projectId, sourceLanguageId, catalogJson) {
 
@@ -594,142 +673,314 @@
         _this.indexQuestions = function (projectId, sourceLanguageId, resourceId, catalogJson) {
         };
         /**/
-        //public string retrieval functions
-        _this.getProjects = function () {
-            let items = db.select('project', 'slug');
-            let catalogArray = [];
+
+        /**
+         * Returns an array of projects in the index
+         * @returns {Project[]}
+         */
+        _this.getProjects = function (sourceLanguageSlug) {
+            let query = "SELECT `p`.`slug`, `p`.`sort`, `p`.`modified_at`, `p`.`source_language_catalog_url`," +
+                " COALESCE(`sl1`.`slug`, `sl2`.`slug`, `sl3`.`slug`) AS `source_language_slug`," +
+                " COALESCE(`sl1`.`project_name`, `sl2`.`project_name`, `sl3`.`project_name`) AS `name`," +
+                " COALESCE(`sl1`.`project_description`, `sl2`.`project_description`, `sl3`.`project_description`) AS `description`," +
+                " `p`.`source_language_catalog_local_modified_at`, `p`.`source_language_catalog_server_modified_at`" +
+                " FROM `project` AS `p`" +
+                " LEFT JOIN `source_language` AS `sl1` ON `sl1`.`project_id`=`p`.`id`AND `sl1`.`slug`=?" +
+                " LEFT JOIN `source_language` AS `sl2` ON `sl2`.`project_id`=`p`.`id` AND `sl2`.`slug`='en'" +
+                " LEFT JOIN `source_language` AS `sl3` ON `sl3`.`project_id`=`p`.`id`" +
+                " GROUP BY `p`.`id`" +
+                " ORDER BY `p`.`sort` ASC";
+            let items = db.selectRaw(query, [sourceLanguageSlug]);
+            let projects = [];
             if (items !== null) {
                 for (let item of items) {
-                    catalogArray.push(item[0]);
+                    projects.push(Project.newInstance({
+                        slug: _.get(item, 'slug'),
+                        sourceLanguageSlug: _.get(item, 'source_language_slug'),
+                        name: _.get(item, 'name'),
+                        description: _.get(item, 'description'),
+                        dateModified: _.get(item, 'modified_at'),
+                        sort: _.get(item, 'sort'),
+                        sourceLanguageCatalog: _.get(item, 'source_language_catalog_url'),
+                        sourceLanguageCatalogLocalModifiedAt: _.get(item, 'source_language_catalog_local_modified_at'),
+                        sourceLanguageCatalogServerModifiedAt: _.get(item, 'source_language_catalog_server_modified_at')
+                    }));
                 }
             }
-            return catalogArray;
+            return projects;
         };
 
-        _this.getSourceLanguages = function (projectId) {
-            let itemId = getProjectDbId(projectId);
-            if (itemId === null) {
-                return false;
+        /**
+         * Returns an array of source languages
+         * @deprecated
+         * @param projectSlug
+         * @returns {SourceLanguage[]}
+         */
+        _this.getSourceLanguages = function (projectSlug) {
+            if(projectSlug === null || projectSlug === undefined) {
+                return [];
             }
-            let items = db.select('source_language', 'slug', '`project_id`=?', [itemId]);
-            let catalogArray = [];
+            let query = "SELECT `sl`.`slug`, `sl`.`name`, `sl`.`project_name`, `sl`.`project_description`," +
+                " `sl`.`direction`, `sl`.`modified_at`, `sl`.`resource_catalog_url`," +
+                " `sl`.`resource_catalog_local_modified_at`, `sl`.`resource_catalog_server_modified_at`" +
+                " FROM `source_language` AS `sl`" +
+                " LEFT JOIN `project` AS `p` ON `p`.`id` = `sl`.`project_id`" +
+                " WHERE `p`.`slug`=?";
+
+            let items = db.selectRaw(query, [projectSlug]);
+            let sourceLanguages = [];
             if (items !== null) {
                 for (let item of items) {
-                    catalogArray.push(item[0]);
+                    sourceLanguages.push(SourceLanguage.newInstance({
+                        code: _.get(item, 'slug'),
+                        name: _.get(item, 'name'),
+                        projectName: _.get(item, 'project_name'),
+                        projectDescription: _.get(item, 'project_description'),
+                        dateModified: _.get(item, 'modified_at'),
+                        resourceCatalogUrl: _.get(item, 'resource_catalog_url'),
+                        resourceCatalogLocalDateModified: _.get(item, 'resource_catalog_local_modified_at'),
+                        resourceCatalogServerDateModified: _.get(item, 'resource_catalog_server_modified_at'),
+                        direction: _.get(item, 'direction')
+                    }));
                 }
             }
-            return catalogArray;
+            return sourceLanguages;
         };
 
-        _this.getResources = function (projectId, sourceLanguageId) {
-            let itemId = getSourceLanguageDbId(projectId, sourceLanguageId);
-            if (itemId === null) {
-                return false;
-            }
-            let items = db.select('resource', 'slug', '`source_language_id`=?', [itemId]);
-            let catalogArray = [];
+        /**
+         * Returns the resources in a source language
+         * @param projectSlug
+         * @param sourceLanguageSlug
+         * @returns {Resource[]}
+         */
+        _this.getResources = function (projectSlug, sourceLanguageSlug) {
+            let query = "SELECT `r`.`name`, `r`.`checking_level`, `r`.`version`, `r`.`modified_at`," +
+            " `r`.`source_catalog_url`, `r`.`source_catalog_local_modified_at`, `r`.`source_catalog_server_modified_at`," +
+            " `r`.`translation_notes_catalog_url`, `r`.`translation_notes_catalog_local_modified_at`, `r`.`translation_notes_catalog_server_modified_at`," +
+            " `r`.`translation_words_catalog_url`, `r`.`translation_words_catalog_local_modified_at`, `r`.`translation_words_catalog_server_modified_at`," +
+            " `r`.`translation_word_assignments_catalog_url`, `r`.`translation_word_assignments_catalog_local_modified_at`, `r`.`translation_word_assignments_catalog_server_modified_at`," +
+            " `r`.`checking_questions_catalog_url`, `r`.`checking_questions_catalog_local_modified_at`, `r`.`checking_questions_catalog_server_modified_at`," +
+            " `r`.`id`, CASE WHEN `content`.`count` > 0 THEN 1 ELSE 0 END AS `is_downloaded`, `r`.`slug` FROM `resource` AS `r`" +
+            " LEFT JOIN `source_language` AS `sl` ON `sl`.`id`=`r`.`source_language_id`" +
+            " LEFT JOIN `project` AS `p` ON `p`.`id` = `sl`.`project_id`" +
+            " LEFT JOIN (" +
+            "   SELECT `r`.`id` AS `resource_id`, COUNT(*) AS `count` FROM `chapter` AS `c`" +
+            "   LEFT JOIN `resource` AS `r` ON `r`.`id`=`c`.`resource_id`" +
+            "   GROUP BY `r`.`id`" +
+            " ) AS `content` ON `content`.`resource_id`=`r`.`id`" +
+            " WHERE `p`.`slug`=? AND `sl`.`slug`=?";
+
+            let items = db.selectRaw(query, [projectSlug, sourceLanguageSlug]);
+            let resources = [];
             if (items !== null) {
                 for (let item of items) {
-                    catalogArray.push(item[0]);
+                    resources.push(Resource.newInstance({
+                        name: _.get(item, 'name'),
+                        slug: _.get(item, 'slug'),
+                        checkingLevel: _.get(item, 'checking_level'),
+                        version: _.get(item, 'version'),
+                        isDownloaded: _.get(item, 'is_downloaded'),
+                        dateModified: _.get(item, 'modified_at'),
+                        sourceCatalog: _.get(item, 'source_catalog_url'),
+                        sourceDateModified: _.get(item, 'source_catalog_local_modified_at'),
+                        sourceServerDateModified: _.get(item, 'source_catalog_server_modified_at'),
+                        notesCatalog: _.get(item, 'translation_notes_catalog_url'),
+                        notesDateModified: _.get(item, 'translation_notes_catalog_local_modified_at'),
+                        notesServerDateModified: _.get(item, 'translation_notes_catalog_server_modified_at'),
+                        wordsCatalog: _.get(item, 'translation_words_catalog_url'),
+                        wordsDateModified: _.get(item, 'translation_words_catalog_local_modified_at'),
+                        wordsServerDateModified: _.get(item, 'translation_words_catalog_server_modified_at'),
+                        wordAssignmentsCatalog: _.get(item, 'translation_word_assignments_catalog_url'),
+                        wordAssignmentsDateModified: _.get(item, 'translation_word_assignments_catalog_local_modified_at'),
+                        wordAssignmentsServerDateModified: _.get(item, 'translation_word_assignments_catalog_server_modified_at'),
+                        questionsCatalog: _.get(item, 'checking_questions_catalog_url'),
+                        questionsDateModified: _.get(item, 'checking_questions_catalog_local_modified_at'),
+                        questionsServerDateModified: _.get(item, 'checking_questions_catalog_server_modified_at')
+                    }));
                 }
             }
-            return catalogArray;
+            return resources;
         };
 
-        _this.getChapters = function (projectId, sourceLanguageId, resourceId) {
-            let itemId = getResourceDbId(projectId, sourceLanguageId, resourceId);
+        /**
+         * Returns an array of chapters
+         * @param projectSlug
+         * @param sourceLanguageSlug
+         * @param resourceSlug
+         * @returns {Chapter[]}
+         */
+        _this.getChapters = function (projectSlug, sourceLanguageSlug, resourceSlug) {
+            // TODO: this should all be in one query.. we need to update the schema to place the slugs in the chapter table.
+            let itemId = getResourceDbId(projectSlug, sourceLanguageSlug, resourceSlug);
             if (itemId === null) {
-                return false;
+                return [];
             }
-            let items = db.select('chapter', 'slug', '`resource_id`=?', [itemId]);
-            let catalogArray = [];
-            if (items !== null) {
-                for (let item of items) {
-                    catalogArray.push(item[0]);
-                }
-            }
-            return catalogArray;
-        };
 
-        _this.getFrames = function (projectId, sourceLanguageId, resourceId, chapterId) {
-            let itemId = getChapterDbId(projectId, sourceLanguageId, resourceId, chapterId);
-            if (itemId === null) {
-                return false;
-            }
-            let items = db.select('frame', 'slug', '`chapter_id`=?', [itemId]);
-            let catalogArray = [];
-            if (items !== null) {
-                for (let item of items) {
-                    catalogArray.push(item[0]);
-                }
-            }
-            return catalogArray;
-        };
-
-        //public json retrieval functions
-        // TODO: the indexer should not know anything about the api root.
-        // It would be better to place this in the downloader module.
-        _this.getCatalog = function () {
-            let catalogJson = {
-                'proj_catalog': '_'
-            };
-            return catalogJson;
-        };
-
-        _this.getProject = function (projectId) {
-            let itemId = getProjectDbId(projectId);
-            if (itemId === null) {
-                return false;
-            }
             let dbFields = [
-                'modified_at',
                 'slug',
-                'source_language_catalog_url',
-                'sort'
+                'reference',
+                'title'
             ];
-            let item = db.selectOne('project', dbFields, '`id`=?', [itemId]);
-            let catalogObj = {
-                dateModified: _.get(item, 'modified_at'),
-                slug: _.get(item, 'slug'),
-                description: '',
-                sourceLanguageCatalog: _.get(item, 'source_language_catalog_url'),
-                sort: _.get(item, 'sort')
-            };
-            return catalogObj;
+            let items = db.select('chapter', dbFields, '`resource_id`=?', [itemId]);
+            let chapters = [];
+            if (items !== null) {
+                for (let item of items) {
+                    chapters.push(Chapter.newInstance({
+                        slug: _.get(item, 'slug'),
+                        title: _.get(item, 'title'),
+                        reference: _.get(item, 'reference')
+                    }));
+                }
+            }
+            return chapters;
         };
 
+        /**
+         * Returns an array of frames
+         * @param projectSlug
+         * @param sourceLanguageSlug
+         * @param resourceSlug
+         * @param chapterSlug
+         * @returns {Frame[]}
+         */
+        _this.getFrames = function (projectSlug, sourceLanguageSlug, resourceSlug, chapterSlug) {
+            let query = "SELECT `f`.`id`, `f`.`slug`, `f`.`body`, `f`.`format`, `f`.`image_url` FROM `frame` AS `f`" +
+            " WHERE `f`.`chapter_id` IN (" +
+            "   SELECT `c`.`id` FROM `chapter` AS `c`" +
+            "   LEFT JOIN `resource` AS `r` ON `r`.`id`=`c`.`resource_id`" +
+            "   LEFT JOIN `source_language` AS `sl` ON `sl`.`id`=`r`.`source_language_id`" +
+            "   LEFT JOIN `project` AS `p` ON `p`.`id`=`sl`.`project_id`" +
+            "   WHERE `p`.`slug`=? AND `sl`.`slug`=? AND `r`.`slug`=? AND `c`.`slug`=?" +
+            " ) ORDER BY `f`.`sort` ASC";
+
+            let items = db.selectRaw(query, [projectSlug, sourceLanguageSlug, resourceSlug, chapterSlug]);
+            let frames = [];
+            if (items !== null) {
+                for (let item of items) {
+                    let frame = Frame.newInstance({
+                        slug: _.get(item, 'slug'),
+                        chapterSlug: chapterSlug,
+                        body: _.get(item, 'body'),
+                        translationFormat: _.get(item, 'format'),
+                        imageUrl: _.get(item, 'image_url')
+                    });
+                    frame.setDBId(_.get(item, 'id'));
+                    frames.push(frame);
+                }
+            }
+            return frames;
+        };
+
+        /**
+         * Returns an array of target languages
+         * @returns {TargetLanguage[]}
+         */
+        _this.getTargetLanguages = function() {
+            let fields = ['slug', 'name', 'direction', 'region'];
+            let items = db.select('target_language', fields);
+            let targetLanguages = [];
+            if (items !== null) {
+                for (let item of items) {
+                    targetLanguages.push(TargetLanguage.newInstance({
+                        code: _.get(item, 'slug'),
+                        name: _.get(item, 'name'),
+                        direction: _.get(item, 'direction'),
+                        region: _.get(item, 'region')
+                    }));
+                }
+            }
+            return targetLanguages;
+        };
+
+        /**
+         * Returns a project
+         * @param projectSlug
+         * @param sourceLanguageSlug
+         * @returns {Project}
+         */
+        _this.getProject = function (projectSlug, sourceLanguageSlug) {
+            if(projectSlug === null || projectSlug === undefined || sourceLanguageSlug === null || sourceLanguageSlug === undefined) {
+                return null;
+            }
+            let query = "SELECT `p`.`sort`, `p`.`modified_at`, `p`.`source_language_catalog_url`," +
+                " COALESCE(`sl1`.`slug`, `sl2`.`slug`, `sl3`.`slug`) AS `source_language_slug`," +
+                " COALESCE(`sl1`.`project_name`, `sl2`.`project_name`, `sl3`.`project_name`) AS `name`," +
+                " COALESCE(`sl1`.`project_description`, `sl2`.`project_description`, `sl3`.`project_description`) AS `description`," +
+                " `p`.`source_language_catalog_local_modified_at`, `p`.`source_language_catalog_server_modified_at`" +
+                " FROM `project` AS `p`" +
+                " LEFT JOIN `source_language` AS `sl1` ON `sl1`.`project_id`=`p`.`id`AND `sl1`.`slug`=?" +
+                " LEFT JOIN `source_language` AS `sl2` ON `sl2`.`project_id`=`p`.`id` AND `sl2`.`slug`='en'" +
+                " LEFT JOIN `source_language` AS `sl3` ON `sl3`.`project_id`=`p`.`id`" +
+                " WHERE `p`.`slug`=?" +
+                " GROUP BY `p`.`id`";
+
+            let results = db.selectRaw(query, [sourceLanguageSlug, projectSlug]);
+            if(results === null || results.length === 0) {
+                return null;
+            }
+            let item = results[0];
+            let project = Project.newInstance({
+                slug: projectSlug,
+                sourceLanguageSlug: _.get(item, 'source_language_slug'),
+                name: _.get(item, 'name'),
+                description: _.get(item, 'description'),
+                dateModified: _.get(item, 'modified_at'),
+                sort: _.get(item, 'sort'),
+                sourceLanguageCatalog: _.get(item, 'source_language_catalog_url'),
+                sourceLanguageCatalogLocalModifiedAt: _.get(item, 'source_language_catalog_local_modified_at'),
+                sourceLanguageCatalogServerModifiedAt: _.get(item, 'source_language_catalog_server_modified_at')
+            });
+            return project;
+        };
+
+        /**
+         * Returns a source language
+         * @param projectId
+         * @param sourceLanguageId
+         * @returns {SourceLanguage}
+         */
         _this.getSourceLanguage = function (projectId, sourceLanguageId) {
             let itemId = getSourceLanguageDbId(projectId, sourceLanguageId);
             if (itemId === null) {
-                return false;
+                return null;
             }
             let dbFields = [
-                'modified_at',
-                'project_id',
                 'slug',
                 'name',
-                'direction',
                 'project_name',
                 'project_description',
-                'resource_catalog_url'
+                'direction',
+                'modified_at',
+                'resource_catalog_url',
+                'resource_catalog_local_modified_at',
+                'resource_catalog_server_modified_at'
             ];
             let item = db.selectOne('source_language', dbFields, '`id`=?', [itemId]);
-            let catalogObj = {
-                dateModified: _.get(item, 'modified_at'),
-                projectId: projectId,
-                slug: _.get(item, 'slug'),
+            let sourceLanguage = SourceLanguage.newInstance({
+                code: _.get(item, 'slug'),
                 name: _.get(item, 'name'),
                 projectName: _.get(item, 'project_name'),
                 projectDescription: _.get(item, 'project_description'),
-                resourceCatalog: _.get(item, 'resource_catalog_url')
-            };
-            return catalogObj;
+                dateModified: _.get(item, 'modified_at'),
+                resourceCatalogUrl: _.get(item, 'resource_catalog_url'),
+                resourceCatalogLocalDateModified: _.get(item, 'resource_catalog_local_modified_at'),
+                resourceCatalogServerDateModified: _.get(item, 'resource_catalog_server_modified_at'),
+                direction: _.get(item, 'direction')
+            });
+            return sourceLanguage;
         };
 
+        /**
+         * Returns a single resource
+         * @param projectId
+         * @param sourceLanguageId
+         * @param resourceId
+         * @returns {Resource}
+         */
         _this.getResource = function (projectId, sourceLanguageId, resourceId) {
             let itemId = getResourceDbId(projectId, sourceLanguageId, resourceId);
             if (itemId === null) {
-                return false;
+                return null;
             }
             let dbFields = [
                 'modified_at',
@@ -739,18 +990,23 @@
                 'checking_level',
                 'version',
                 'source_catalog_url',
+                'source_catalog_local_modified_at',
                 'source_catalog_server_modified_at',
                 'translation_notes_catalog_url',
+                'translation_notes_catalog_local_modified_at',
                 'translation_notes_catalog_server_modified_at',
                 'translation_words_catalog_url',
+                'translation_words_catalog_local_modified_at',
                 'translation_words_catalog_server_modified_at',
                 'translation_word_assignments_catalog_url',
+                'translation_word_assignments_catalog_local_modified_at',
                 'translation_word_assignments_catalog_server_modified_at',
                 'checking_questions_catalog_url',
+                'checking_questions_catalog_local_modified_at',
                 'checking_questions_catalog_server_modified_at'
             ];
             let item = db.selectOne('resource', dbFields, '`id`=?', [itemId]);
-            let catalogObj = {
+            let resource = Resource.newInstance({
                 dateModified: _.get(item, 'modified_at'),
                 projectId: projectId,
                 sourceLanguageId: sourceLanguageId,
@@ -759,86 +1015,179 @@
                 checkingLevel: _.get(item, 'checking_level'),
                 version: _.get(item, 'version'),
                 sourceCatalog: _.get(item, 'source_catalog_url'),
-                sourceDateModified: _.get(item, 'source_catalog_server_modified_at'),
-                translationNotesCatalog: _.get(item, 'translation_notes_catalog_url'),
-                translationNotesDateModified: _.get(item, 'translation_notes_catalog_server_modified_at'),
-                translationWordsCatalog: _.get(item, 'translation_words_catalog_url'),
-                translationWordsDateModified: _.get(item, 'translation_words_catalog_server_modified_at'),
-                translationWordAssignmentsCatalog: _.get(item, 'translation_word_assignments_catalog_url'),
-                translationWordAssignmentsDateModified: _.get(item, 'translation_word_assignments_catalog_server_modified_at'),
-                checkingQuestionsCatalog: _.get(item, 'checking_questions_catalog_url'),
-                checkingQuestionsDateModified: _.get(item, 'checking_questions_catalog_server_modified_at')
-            };
-            return catalogObj;
+                sourceDateModified: _.get(item, 'source_catalog_local_modified_at'),
+                sourceServerDateModified: _.get(item, 'source_catalog_server_modified_at'),
+                notesCatalog: _.get(item, 'translation_notes_catalog_url'),
+                notesDateModified: _.get(item, 'translation_notes_catalog_local_modified_at'),
+                notesServerDateModified: _.get(item, 'translation_notes_catalog_server_modified_at'),
+                wordsCatalog: _.get(item, 'translation_words_catalog_url'),
+                wordsDateModified: _.get(item, 'translation_words_catalog_local_modified_at'),
+                wordsServerDateModified: _.get(item, 'translation_words_catalog_server_modified_at'),
+                wordAssignmentsCatalog: _.get(item, 'translation_word_assignments_catalog_url'),
+                wordAssignmentsDateModified: _.get(item, 'translation_word_assignments_catalog_local_modified_at'),
+                wordAssignmentsServerDateModified: _.get(item, 'translation_word_assignments_catalog_server_modified_at'),
+                questionsCatalog: _.get(item, 'checking_questions_catalog_url'),
+                questionsDateModified: _.get(item, 'checking_questions_catalog_local_modified_at'),
+                questionsServerDateModified: _.get(item, 'checking_questions_catalog_server_modified_at')
+            });
+            return resource;
         };
 
+        /**
+         * Returns a single chapter from a resource
+         * @param projectId
+         * @param sourceLanguageId
+         * @param resourceId
+         * @param chapterId
+         * @returns {Chapter}
+         */
         _this.getChapter = function (projectId, sourceLanguageId, resourceId, chapterId) {
             let itemId = getChapterDbId(projectId, sourceLanguageId, resourceId, chapterId);
             if (itemId === null) {
-                return false;
+                return null;
             }
             let dbFields = [
-                'resource_id',
                 'slug',
                 'reference',
-                'title',
-                'sort'
+                'title'
             ];
             let item = db.selectOne('chapter', dbFields, '`id`=?', [itemId]);
-            let catalogObj = {
-                projectId: projectId,
-                sourceLanguageId: sourceLanguageId,
-                resourceId: resourceId,
+            let chapter = Chapter.newInstance({
                 slug: _.get(item, 'slug'),
                 reference: _.get(item, 'reference'),
-                title: _.get(item, 'title'),
-                sort: _.get(item, 'sort')
-            };
-            return catalogObj;
+                title: _.get(item, 'title')
+            });
+            return chapter;
         };
 
-        _this.getFrame = function (projectId, sourceLanguageId, resourceId, chapterId, frameId) {
-            let itemId = getFrameDbId(projectId, sourceLanguageId, resourceId, chapterId, frameId);
+        /**
+         * Returns a single frame from a resource
+         * @param projectSlug
+         * @param sourceLanguageSlug
+         * @param resourceSlug
+         * @param chapterSlug
+         * @param frameSlug
+         * @returns {Frame}
+         */
+        _this.getFrame = function (projectSlug, sourceLanguageSlug, resourceSlug, chapterSlug, frameSlug) {
+            let itemId = getFrameDbId(projectSlug, sourceLanguageSlug, resourceSlug, chapterSlug, frameSlug);
             if (itemId === null) {
-                return false;
+                return null;
             }
             let dbFields = [
-                'chapter_id',
-                'slug',
                 'body',
                 'image_url',
-                'sort'
+                'format'
             ];
             let item = db.selectOne('frame', dbFields, '`id`=?', [itemId]);
-            let catalogObj = {
-                projectId: projectId,
-                sourceLanguageId: sourceLanguageId,
-                resourceId: resourceId,
-                chapterId: chapterId,
-                slug: _.get(item, 'slug'),
+            let frame = Frame.newInstance({
+                slug: frameSlug,
+                chapterSlug: chapterSlug,
                 body: _.get(item, 'body'),
                 imageUrl: _.get(item, 'image_url'),
-                sort: _.get(item, 'sort')
-            };
-            return catalogObj;
-        };
-        /** /
-
-        _this.getNotes = function (projectId, sourceLanguageId, resourceId, chapterId, frameId) {
-            let catalogJson = {};
-            return catalogJson;
+                translationFormat: _.get(item, 'format')
+            });
+            frame.setDBId(itemId);
+            return frame;
         };
 
-        _this.getTerms = function (projectId, sourceLanguageId, resourceId) {
-            let catalogJson = {};
-            return catalogJson;
+        /**
+         * Returns an array of translation notes
+         * @param projectSlug
+         * @param sourceLanguageSlug
+         * @param resourceSlug
+         * @param chapterSlug
+         * @param frameSlug
+         * @returns {TranslationNote[]}
+         */
+        _this.getTranslationNotes = function (projectSlug, sourceLanguageSlug, resourceSlug, chapterSlug, frameSlug) {
+            let query = "SELECT `slug`, `title`, `body` FROM `translation_note`" +
+                " WHERE `project_slug`=? AND `source_language_slug`=?" +
+                " AND `resource_slug`=? AND `chapter_slug`=? AND `frame_slug`=?";
+            let items = db.selectRaw(query, [projectSlug, sourceLanguageSlug, resourceSlug, chapterSlug, frameSlug]);
+            let translationNotes = [];
+            if(items !== null) {
+                for (let item of items) {
+                    let note = TranslationNote.newInstance({
+                        slug: _.get(item, 'slug'),
+                        title: _.get(item, 'title'),
+                        body: _.get(item, 'body')
+                    });
+                    translationNotes.push(note);
+                }
+            }
+            return translationNotes;
         };
 
-        _this.getQuestions = function (projectId, sourceLanguageId, resourceId, chapterId, frameId) {
-            let catalogJson = {};
-            return catalogJson;
+
+        /**
+         * Returns an array of translation words
+         * @param projectSlug
+         * @param sourceLanguageSlug
+         * @param resourceSlug
+         * @param chapterSlug
+         * @param frameSlug
+         * @returns {TranslationWord[]}
+         */
+        _this.getTranslationWordsForFrame = function (projectSlug, sourceLanguageSlug, resourceSlug, chapterSlug, frameSlug) {
+            let query = "SELECT `id`, `slug`, `term`, `definition`, `definition_title` FROM `translation_word`" +
+            " WHERE `id` IN (" +
+            "   SELECT `translation_word_id` FROM `frame__translation_word`" +
+            "   WHERE `project_slug`=? AND `source_language_slug`=? AND `resource_slug`=? AND `chapter_slug`=? AND `frame_slug`=?" +
+            " ) ORDER BY `slug` DESC";
+            let items = db.selectRaw(query, [projectSlug, sourceLanguageSlug, resourceSlug, chapterSlug, frameSlug]);
+            let translationWords = [];
+            if(items !== null) {
+                for (let item of items) {
+                    // NOTE: we purposely do not retrieve the related terms, aliases and example passages for better performance
+                    let word = TranslationWord.newInstance({
+                        slug: _.get(item, 'slug'),
+                        term: _.get(item, 'term'),
+                        definition: _.get(item, 'definition'),
+                        definitionTitle: _.get(item, 'definition_title'),
+                        seeAlso: [],
+                        aliases: [],
+                        examples: []
+                    });
+                    translationWords.push(word);
+                }
+            }
+            return translationWords;
         };
-        /**/
+
+        /**
+         * Returns an array of checking questions
+         * @param projectSlug
+         * @param sourceLanguageSlug
+         * @param resourceSlug
+         * @param chapterSlug
+         * @param frameSlug
+         * @returns {CheckingQuestion[]}
+         */
+        _this.getCheckingQuestions = function (projectSlug, sourceLanguageSlug, resourceSlug, chapterSlug, frameSlug) {
+            let query = "SELECT `slug`, `question`, `answer` FROM `checking_question`" +
+            " WHERE `id` IN (" +
+            "   SELECT `checking_question_id` FROM `frame__checking_question`" +
+            "   WHERE `project_slug`=? AND `source_language_slug`=? AND `resource_slug`=? AND `chapter_slug`=? AND `frame_slug`=?" +
+            ")";
+            let items = db.selectRaw(query, [projectSlug, sourceLanguageSlug, resourceSlug, chapterSlug, frameSlug]);
+            let checkingQuestions = [];
+            if(items !== null) {
+                for (let item of items) {
+                    // NOTE: we purposely do not retrieve references in the above query for better performance
+                    let question = CheckingQuestion.newInstance({
+                        slug: _.get(item, 'slug'),
+                        chapterSlug: chapterSlug,
+                        frameSlug: frameSlug,
+                        question: _.get(item, 'question'),
+                        answer: _.get(item, 'answer'),
+                        references: []
+                    });
+                    checkingQuestions.push(question);
+                }
+            }
+            return checkingQuestions;
+        };
 
         return _this;
     }

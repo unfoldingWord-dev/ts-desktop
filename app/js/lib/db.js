@@ -10,7 +10,7 @@
     function Db (dbPath) {
 
         let needsDbSave = 0;
-        let dbFilePath = path.resolve('./', path.join(dbPath, 'index.sqlite'));
+        let dbFilePath = path.resolve('./', dbPath);
         let dbDirPath = path.dirname(dbFilePath);
         let debug = 0;
 

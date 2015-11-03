@@ -2,6 +2,7 @@
 
 ;(function () {
 
+    let path = require('path');
     let assert = require('assert');
     let rimraf = require('rimraf');
     let Indexer = require('../../app/js/indexer').Indexer;
@@ -28,37 +29,38 @@
     configurator.setStorage({});
     configurator.loadConfig(config);
 
-    let indexConfig = {
-        apiUrl: configurator.getValue('apiUrl'),
-        indexDir: './unit_tests/indexer/index/'
-    };
-    let testIndexer = new Indexer('test', indexConfig);
+    let indexDir = './unit_tests/indexer/index/';
+    let testIndexer = new Indexer(path.join(indexDir, 'app.sqlite'));
 
     describe('@Indexer', function () {
 
         before(function (done) {
-            rimraf(indexConfig.indexDir, function () {
+            rimraf(indexDir, function () {
                 done();
             });
         });
 
         after(function (done) {
-            rimraf(indexConfig.indexDir, function () {
+            rimraf(indexDir, function () {
                 done();
             });
         });
 
-        describe('@Utils', function () {
+        describe('@DataTools', function() {
+            let index = new Indexer('./app/index/app.sqlite');
 
-            describe('@GetIndexId', function () {
-                it('should get correct index id', function () {
-                    assert.equal(
-                        testIndexer.getIndexId(),
-                        'test'
-                    );
-                });
+            it('should have projects', function() {
+                assert.equal(
+                    index.getProjects().length > 0,
+                    true
+                );
             });
-
+            it('should have target languages', function() {
+               assert.equal(
+                   index.getTargetLanguages().length > 0,
+                   true
+               );
+            });
         });
 
         describe('@IndexingTools', function () {
@@ -68,6 +70,10 @@
                     this.timeout(3500);
                     assert.equal(
                         testIndexer.indexProjects(projectsCatalogJson),
+                        true
+                    );
+                    assert.equal(
+                        testIndexer.getProjects().length > 0,
                         true
                     );
                 });
@@ -82,6 +88,10 @@
                         ),
                         true
                     );
+                    assert.equal(
+                        testIndexer.getSourceLanguages('1ch').length > 0,
+                        true
+                    );
                 });
             });
 
@@ -94,6 +104,10 @@
                             resourcesCatalogJson,
                             {'date_modified':'20150801'}
                         ),
+                        true
+                    );
+                    assert.equal(
+                        testIndexer.getResources('1ch', 'ar').length > 0,
                         true
                     );
                 });
@@ -112,33 +126,47 @@
                         ),
                         true
                     );
+                    assert.equal(
+                        testIndexer.getChapters('1ch', 'ar', 'avd').length > 0,
+                        true
+                    );
+                    assert.equal(
+                        testIndexer.getFrames('1ch', 'ar', 'avd', '01').length > 0,
+                        true
+                    );
                 });
             });
 
             describe('@IndexNotes', function () {
-                it('feature not fully designed', function () {
-                    assert.equal(
-                        true,
-                        true
-                    );
+                it('should index notes', function () {
+                    this.timeout(5000);
+                    // todo index
+                    //assert.equal(
+                    //    testIndexer.getTranslationNotes('1ch', 'en', 'ulb', '01', '01').length > 0,
+                    //    true
+                    //);
                 });
             });
 
-            describe('@IndexTerms', function () {
-                it('feature not fully designed', function () {
-                    assert.equal(
-                        true,
-                        true
-                    );
+            describe('@IndexWords', function () {
+                it('should index words', function () {
+                    this.timeout(5000);
+                    // todo index
+                    //assert.equal(
+                    //    testIndexer.getTranslationWordsForFrame('1ch', 'en', 'ulb', '01', '01').length > 0,
+                    //    true
+                    //);
                 });
             });
 
             describe('@IndexQuestions', function () {
-                it('feature not fully designed', function () {
-                    assert.equal(
-                        true,
-                        true
-                    );
+                it('should index questions', function () {
+                    this.timeout(5000);
+                    // todo index
+                    //assert.equal(
+                    //    testIndexer.getCheckingQuestions('1ch', 'en', 'ulb', '01', '01').length > 0,
+                    //    true
+                    //);
                 });
             });
 
@@ -149,10 +177,8 @@
             describe('@GetProjects', function () {
                 it('should get projects slug array', function () {
                     assert.equal(
-                        JSON.stringify(
-                            testIndexer.getProjects()
-                        ),
-                        projectsSlugArray
+                        testIndexer.getProjects().length > 0,
+                        true
                     );
                 });
             });
@@ -160,12 +186,8 @@
             describe('@GetSourceLanguages', function () {
                 it('should get 1ch source languages slug array', function () {
                     assert.equal(
-                        JSON.stringify(
-                            testIndexer.getSourceLanguages(
-                                '1ch'
-                            )
-                        ),
-                        sourceLanguagesSlugArray
+                        testIndexer.getSourceLanguages('1ch').length > 0,
+                        true
                     );
                 });
             });
@@ -173,13 +195,8 @@
             describe('@GetResources', function () {
                 it('should get 1ch ar resource slug array', function () {
                     assert.equal(
-                        JSON.stringify(
-                            testIndexer.getResources(
-                                '1ch',
-                                'ar'
-                            )
-                        ),
-                        resourcesSlugArray
+                        testIndexer.getResources('1ch', 'ar').length > 0,
+                        true
                     );
                 });
             });
@@ -187,14 +204,8 @@
             describe('@GetChapters', function () {
                 it('should get 1ch ar avd chapters slug array', function () {
                     assert.equal(
-                        JSON.stringify(
-                            testIndexer.getChapters(
-                                '1ch',
-                                'ar',
-                                'avd'
-                            )
-                        ),
-                        chaptersSlugArray
+                        testIndexer.getChapters('1ch', 'ar', 'avd').length > 0,
+                        true
                     );
                 });
             });
@@ -202,15 +213,13 @@
             describe('@GetFrames', function () {
                 it('should get 1ch ar avd chapter 01 frames slug array', function () {
                     assert.equal(
-                        JSON.stringify(
-                            testIndexer.getFrames(
-                                '1ch',
-                                'ar',
-                                'avd',
-                                '01'
-                            )
-                        ),
-                        framesSlugArray
+                        testIndexer.getFrames(
+                            '1ch',
+                            'ar',
+                            'avd',
+                            '01'
+                        ).length > 0,
+                        true
                     );
                 });
             });
@@ -221,103 +230,109 @@
 
             describe('@GetProject', function () {
                 it('should get 1ch project', function () {
-                    assert.equal(
-                        JSON.stringify(
-                            testIndexer.getProject(
-                                '1ch'
-                            )
-                        ),
-                        projectCatalogJson
+                    let project = testIndexer.getProject('1ch', 'en');
+                    assert.notEqual(
+                        project,
+                        null
                     );
+                    assert.equal(project.getSlug(), '1ch');
                 });
             });
 
             describe('@GetSourceLanguage', function () {
                 it('should get 1ch ar source language', function () {
+                    let sourceLanguage = testIndexer.getSourceLanguage('1ch', 'ar');
+                    assert.notEqual(
+                        sourceLanguage,
+                        null
+                    );
                     assert.equal(
-                        JSON.stringify(
-                            testIndexer.getSourceLanguage(
-                                '1ch',
-                                'ar'
-                            )
-                        ),
-                        sourceLanguageCatalogJson
+                        sourceLanguage.getSlug(),
+                        'ar'
                     );
                 });
             });
 
             describe('@GetResource', function () {
                 it('should get 1ch ar avd resource', function () {
-                    assert.equal(
-                        JSON.stringify(
-                            testIndexer.getResource(
-                                '1ch',
-                                'ar',
-                                'avd'
-                            )
-                        ),
-                        resourceCatalogJson
+                    let resource = testIndexer.getResource(
+                            '1ch',
+                            'ar',
+                            'avd');
+                    assert.notEqual(resource,
+                        null
                     );
+                    assert.equal(resource.getSlug(), 'avd');
                 });
             });
 
             describe('@GetChapter', function () {
                 it('should get 1ch ar avd chapter 01', function () {
+                    let chapter = testIndexer.getChapter(
+                        '1ch',
+                        'ar',
+                        'avd',
+                        '01'
+                    );
+                    assert.notEqual(
+                        chapter,
+                        null
+                    );
                     assert.equal(
-                        JSON.stringify(
-                            testIndexer.getChapter(
-                                '1ch',
-                                'ar',
-                                'avd',
-                                '01'
-                            )
-                        ),
-                        chapterCatalogJson
+                        chapter.getSlug(),
+                        '01'
                     );
                 });
             });
 
             describe('@GetFrame', function () {
                 it('should get 1ch ar avd chapter 01 frame 01', function () {
+                    let frame = testIndexer.getFrame(
+                        '1ch',
+                        'ar',
+                        'avd',
+                        '01',
+                        '01'
+                    );
+                    assert.notEqual(
+                        frame,
+                        null
+                    );
                     assert.equal(
-                        JSON.stringify(
-                            testIndexer.getFrame(
-                                '1ch',
-                                'ar',
-                                'avd',
-                                '01',
-                                '01'
-                            )
-                        ),
-                        frameCatalogJson
+                        frame.getSlug(),
+                        '01'
+                    );
+                    assert.equal(
+                        frame.getChapterSlug(),
+                        '01'
                     );
                 });
             });
 
             describe('@GetNotes', function () {
-                it('feature not fully designed', function () {
-                    assert.equal(
-                        true,
-                        true
-                    );
+                it('should return the translation notes', function () {
+                    //assert.equal(
+                    //    testIndexer.getTranslationNotes('1ch', 'en', 'ulb', '01', '01').length > 0,
+                    //    true
+                    //);
                 });
             });
 
-            describe('@GetTerms', function () {
-                it('feature not fully designed', function () {
-                    assert.equal(
-                        true,
-                        true
-                    );
+            describe('@GetWords', function () {
+                it('should return the translation words', function () {
+                    //assert.equal(
+                    //    testIndexer.getTranslationWordsForFrame('1ch', 'en', 'ulb', '01', '01').length > 0,
+                    //    true
+                    //);
                 });
             });
 
             describe('@GetQuestions', function () {
-                it('feature not fully designed', function () {
-                    assert.equal(
-                        true,
-                        true
-                    );
+                it('should return the checking questions', function () {
+                    //assert.equal(
+                    //    testIndexer.getCheckingQuestions('1ch', 'en', 'ulb', '01', '01').length > 0,
+                    //    true
+                    //);
                 });
             });
 

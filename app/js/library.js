@@ -3,20 +3,22 @@
 
 ;(function () {
 
-    let Configurator = require('./configurator').Configurator;
-    let configurator = new Configurator();
+    let Project = require('../js/core/project');
+    let Indexer = require('../js/indexer').Indexer;
+    let path = require('path');
 
-    function Library (appIndex) {
+    function Library (indexPath, rootApiUrl) {
+        rootApiUrl = rootApiUrl; // fix lit errors temporarily
+        let indexer = new Indexer(indexPath);
 
-        //reassign this to _this, set indexId and rootPath
-        //let _this = this;
+        // TODO: the library should contain the downloader
 
         function getFrame (sourceTranslation, chapterId, frameId) {
 
             //build return object
             let returnObj = {
                 getSource: function () {
-                    return appIndex.getFrame(sourceTranslation.projectId, sourceTranslation.sourceLanguageId, sourceTranslation.resourceId, chapterId, frameId);
+                    return indexer.getFrame(sourceTranslation.projectId, sourceTranslation.sourceLanguageId, sourceTranslation.resourceId, chapterId, frameId);
                 }
             };
 
@@ -27,7 +29,7 @@
         function getFrames (sourceTranslation, chapterId) {
 
             //get data
-            let frames = appIndex.getFrames(sourceTranslation.projectId, sourceTranslation.sourceLanguageId, sourceTranslation.resourceId, chapterId);
+            let frames = indexer.getFrames(sourceTranslation.projectId, sourceTranslation.sourceLanguageId, sourceTranslation.resourceId, chapterId);
 
             //build return object
             let returnObj = {};
@@ -42,7 +44,7 @@
         function getChapter (sourceTranslation, chapterId) {
 
             //get data
-            let chapterData = appIndex.getChapter(sourceTranslation.projectId, sourceTranslation.sourceLanguageId, sourceTranslation.resourceId, chapterId);
+            let chapterData = indexer.getChapter(sourceTranslation.projectId, sourceTranslation.sourceLanguageId, sourceTranslation.resourceId, chapterId);
 
             //build return object
             let returnObj = {
@@ -70,7 +72,7 @@
         function getChapters (sourceTranslation) {
 
             //get data
-            let chapters = appIndex.getChapters(sourceTranslation.projectId, sourceTranslation.sourceLanguageId, sourceTranslation.resourceId);
+            let chapters = indexer.getChapters(sourceTranslation.projectId, sourceTranslation.sourceLanguageId, sourceTranslation.resourceId);
 
             //build return object
             let returnObj = {};
@@ -85,7 +87,7 @@
         function getProjects () {
 
             //get data
-            let projects = appIndex.getProjects();
+            let projects = indexer.getProjects();
 
             //build return object
             let returnObj = projects || {};
@@ -95,102 +97,141 @@
         }
 
         let library = {
-            getIndexId: function () {
-                return appIndex.getIndexId();
-            },
 
             getProjects: function () {
                 return getProjects();
             },
 
-            getProject: function (projectId, sourceLanguageId, resourceId) {
+            getProject: function (projectSlug, sourceLanguageSlug) {
 
-                //verify lets
-                if (projectId === null || sourceLanguageId === null || resourceId === null) {
+                //verify parameters
+                if (projectSlug === null || sourceLanguageSlug === null) {
                     return null;
                 }
 
                 //get data
-                let projectData = appIndex.getProject(projectId);
-                let sourceLanguageData = appIndex.getSourceLanguage(projectId, sourceLanguageId);
-                let resourceData = appIndex.getResource(projectId, sourceLanguageId, resourceId);
+                let projectData = indexer.getProject(projectSlug);
+                let sourceLanguageData = indexer.getSourceLanguage(projectSlug, sourceLanguageSlug);
 
                 //verify data
-                if (projectData === false || sourceLanguageData === false || resourceData === false) {
+                if (projectData === null || sourceLanguageData === null) {
                     return null;
                 }
 
-                //build sourceTranslation object
-                //TODO: eventually this will be what is passed into this method
-                let sourceTranslation = {
-                    projectId: projectId,
-                    sourceLanguageId: sourceLanguageId,
-                    resourceId: resourceId
-                };
+                let project = Project.newInstance({
+                    slug:projectSlug,
+                    sourceLanguageSlug:sourceLanguageSlug,
+                    name: sourceLanguageData.projectName,
+                    description: sourceLanguageData.projectDescription,
+                    sort: projectData.sort,
+                    dateModified: projectData.dateModified,
+                    sourceLanguageCatalog: projectData.sourceLanguageCatalog,
+                    sourceLanguageCatalogLocalDateModified: projectData.sourceLanguageCatalogLocalModifiedAt,
+                    sourceLangaugeCatalogServerDateModified: projectData.sourceLanguageCatalogServerModifiedAt
+                });
 
-                //build return object
-                let returnObj = {
-                    getProjectId: function () {
-                        return projectId;
-                    },
-                    getSourceLanguageId: function () {
-                        return sourceLanguageId;
-                    },
-                    getResourceId: function () {
-                        return resourceId;
-                    },
-                    getTitle: function () {
-                        return sourceLanguageData.projectName;
-                    },
-                    getDescription: function () {
-                        return sourceLanguageData.projectDescription;
-                    },
-                    getImage: function () {
-                        return '';//TODO: where do we get this???
-                    },
-                    getSortKey: function () {
-                        return projectData.sort;
-                    },
-                    getChapters: function () {
-                        return getChapters(sourceTranslation);
-                    },
-                    getChapter: function (chapterId) {
-                        return getChapter(sourceTranslation, chapterId);
-                    },
-                    getFrames: function (chapterId) {
-                        return getFrames(sourceTranslation, chapterId);
-                    },
-                    getFrame: function (chapterId, frameId) {
-                        return getFrame(sourceTranslation, chapterId, frameId);
-                    }
-                };
-
-                //save last used values
-                configurator.setValue('lastProjectId', projectId);
-                configurator.setValue(projectId + 'SourceLanguageId', sourceLanguageId);
-                configurator.setValue(projectId + 'ResourceId', resourceId);
-
-                //return object
-                return returnObj;
+                return project;
             },
 
-            getLastProject: function () {
-
-                //get last used values
-                let projectId = configurator.getValue('lastProjectId');
-                let sourceLanguageId = configurator.getValue(projectId + 'SourceLanguageId');
-                let resourceId = configurator.getValue(projectId + 'ResourceId');
-
-                //return object
-                return this.getProject(projectId, sourceLanguageId, resourceId);
+            /**
+             * Deletes the index and rebuilds it from scratch.
+             * This will result in a completely empty index
+             */
+            delete: function () {
+                indexer.destroy();
+                indexer.rebuild();
             },
 
-            getTargetLanguages: function () {
+            /**
+             * Imports the default index into the library
+             * @param seedIndexPath the default index
+             */
+            //deploy: function(seedIndexPath) {
+            //    indexer.destroy();
+            //
+            //    // todo copy seed index into the correct location
+            //    // todo connect to db
+            //},
 
+            //getLastProject: function () {
+            //
+            //    //get last used values
+            //    let projectId = configurator.getValue('lastProjectId');
+            //    let sourceLanguageId = configurator.getValue(projectId + 'SourceLanguageId');
+            //    let resourceId = configurator.getValue(projectId + 'ResourceId');
+            //
+            //    //return object
+            //    return this.getProject(projectId, sourceLanguageId, resourceId);
+            //},
+            //
+            //getTargetLanguages: function () {
+            //
+            //},
+            //
+            //getTargetLanguage: function () {
+            //
+            //}
+
+            /**
+             * Returns an array of target languages
+             * @returns {TargetLanguage[]}
+             */
+            getTargetLanguages: function() {
+                return indexer.getTargetLanguages();
             },
 
-            getTargetLanguage: function () {
+            /**
+             * Returns an array of source langauges for the project
+             * @param projectSlug
+             */
+            getSourceLanguages: function(projectSlug) {
+                return indexer.getSourceLanguages(projectSlug);
+            },
 
+            /**
+             * Returns a single source language in a project
+             * @param projectSlug
+             * @param sourceLanguageSlug
+             */
+            getSourceLanguage: function(projectSlug, sourceLanguageSlug) {
+                return indexer.getSourceLanguage(projectSlug, sourceLanguageSlug);
+            },
+
+            /**
+             * Returns a single source language for a project if it exists otherwise the default will be returned
+             * The default language is english, or the first available language.
+             * If no language is found it will return null
+             * @param projectSlug
+             * @param
+             * @return {SourceLanguage}
+             */
+            getPreferredSourceLanguage: function(projectSlug, sourceLanguageSlug) {
+                // preferred
+                let sourceLanguage = indexer.getSourceLanguage(projectSlug, sourceLanguageSlug);
+                // default (en)
+                if(sourceLanguage === null || (sourceLanguage.code !== sourceLanguageSlug && sourceLanguageSlug !== 'en')) {
+                    sourceLanguage = indexer.getSourceLanguage(projectSlug, 'en');
+                }
+                return sourceLanguage;
+            },
+
+            /**
+             * Returns the resources in a source language
+             * @param projectSlug
+             * @param sourceLanguageSlug
+             * @return {Resource[]}
+             */
+            getResources: function(projectSlug, sourceLanguageSlug) {
+                return indexer.getResources(projectSlug, sourceLanguageSlug);
+            },
+
+            /**
+             * Returns a single resource
+             * @param sourceTranslation {SourceTranslation}
+             * @returns {Resource}
+             */
+            getResource: function(sourceTranslation) {
+                return indexer.getResource(sourceTranslation.getProjectSlug(), sourceTranslation.getSourceLanguageSlug(), sourceTranslation.getResourceSlug());
             }
         };
 

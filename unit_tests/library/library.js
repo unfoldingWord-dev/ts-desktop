@@ -177,5 +177,15 @@
                 );
             });
         });
+
+        describe('@GetSourceTranslation', function () {
+            it('should return the source translation 1ch en ulb', function () {
+                let sourceTranslation = library.getSourceTranslation('1ch', 'en', 'ulb');
+                assert.notEqual(
+                    sourceTranslation,
+                    null
+                );
+            });
+        });
     });
 })();

@@ -4,6 +4,7 @@
 ;(function () {
 
     let Project = require('../js/core/project');
+    let SourceTranslation = require('../js/core/sourcetranslation');
     let Indexer = require('../js/indexer').Indexer;
     let path = require('path');
 
@@ -237,6 +238,32 @@
              */
             getChapterBody: function(sourceTranslation, chapterSlug) {
                 return indexer.getChapterBody(sourceTranslation.getProjectSlug(), sourceTranslation.getSourceLanguageSlug(), sourceTranslation.getResourceSlug(), chapterSlug);
+            },
+
+            /**
+             * Returns the source translation by it's id
+             * @param sourceTranslationSlug
+             * @returns {SourceTranslation}
+             */
+            getSourceTranslationById: function (sourceTranslationSlug) {
+                if(sourceTranslationSlug !== null && sourceTranslationSlug !== undefined) {
+                    let projectSlug = SourceTranslation.getProjectSlugFromSlug(sourceTranslationSlug);
+                    let sourceLanguageSlug = SourceTranslation.getSourceLanguageSlugFromSlug(sourceTranslationSlug);
+                    let resourceSlug = SourceTranslation.getResourceSlugFromSlug(sourceTranslationSlug);
+                    return this.getSourceTranslation(projectSlug, sourceLanguageSlug, resourceSlug);
+                }
+                return null;
+            },
+
+            /**
+             * Returns the source translation
+             * @param projectSlug
+             * @param sourceLanguageSlug
+             * @param resourceSlug
+             * @returns {SourceTranslation}
+             */
+            getSourceTranslation: function (projectSlug, sourceLanguageSlug, resourceSlug) {
+                return indexer.getSourceTranslation(projectSlug, sourceLanguageSlug, resourceSlug);
             }
         };
 

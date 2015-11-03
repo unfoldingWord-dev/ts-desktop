@@ -66,5 +66,65 @@
         });
     }
 
+    /**
+     * Returns the project slug
+     * @param sourceTranslationId
+     * @returns {*}
+     */
+    function getProjectIdFromId (sourceTranslationId) {
+        let complexId = sourceTranslationId.split('-', 3);
+        if(complexId.length === 3) {
+            return complexId[0];
+        } else {
+            throw new Error('malformed source translation id ' + sourceTranslationId);
+        }
+    }
+
+    /**
+     * Returns the source language slug
+     * @param sourceTranslationId
+     * @returns {*}
+     */
+    function getSourceLanguageIdFromId (sourceTranslationId) {
+        let complexId = sourceTranslationId.split('-');
+        if(complexId.length >= 3) {
+            // TRICKY: source language id's can have dashes in them
+            let sourceLanguageId = complexId[1];
+            for(var i = 2; i < complexId.length - 1; i ++) {
+                sourceLanguageId += "-" + complexId[i];
+            }
+            return sourceLanguageId;
+        } else {
+            throw new Error('malformed source translation id ' + sourceTranslationId);
+        }
+    }
+
+    /**
+     * Returns the resource slug
+     * @param sourceTranslationId
+     * @returns {*}
+     */
+    function getResourceIdFromId (sourceTranslationId) {
+        let complexId = sourceTranslationId.split('-');
+        if(complexId >= 3) {
+            return complexId[complexId.length - 1];
+        } else {
+            throw new Error('malformed source translation id ' + sourceTranslationId);
+        }
+    }
+
+    /**
+     * Returns a new source translation
+     * @param parameters
+     * @returns {SourceTranslation}
+     */
+    function newInstance(parameters) {
+        return new SourceTranslation(parameters);
+    }
+
+    exports.newInstance = newInstance;
     exports.simpleInstance = simpleInstance;
+    exports.getProjectSlugFromSlug = getProjectIdFromId;
+    exports.getSourceLanguageSlugFromSlug = getSourceLanguageIdFromId;
+    exports.getResourceSlugFromSlug = getResourceIdFromId;
 }());

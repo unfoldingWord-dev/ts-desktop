@@ -1076,7 +1076,7 @@
             " LEFT JOIN `project` AS `p` ON `p`.`id`=`sl`.`project_id`" +
             " WHERE `p`.`slug`=? AND `sl`.`slug`=? AND `r`.`slug`=? AND `c`.`slug`=? ORDER BY `c`.`sort`, `f`.`sort` ASC";
             let item = db.selectRaw(query, [projectSlug, sourceLanguageSlug, resourceSlug, chapterSlug]);
-            if(item === null || item.length === 0 || item[0] == null) {
+            if(item === null || item.length === 0 || item[0] === null) {
                 return '';
             }
             return item[0];
@@ -1209,6 +1209,38 @@
                 }
             }
             return checkingQuestions;
+        };
+
+        /**
+         * Returns a source translation
+         * @param projectSlug
+         * @param sourceLanguageSlug
+         * @param resourceSlug
+         * @returns {SourceTranslation}
+         */
+        _this.getSourceTranslation = function(projectSlug, sourceLanguageSlug, resourceSlug) {
+            let sourceTranslation = null;
+            let query = "SELECT `sl`.`project_name`, `sl`.`name`, `r`.`name`, `r`.`checking_level`, `r`.`modified_at`, `r`.`version`" +
+            " FROM `resource` AS `r`" +
+            " LEFT JOIN `source_language` AS `sl` ON `sl`.`id`=`r`.`source_language_id`" +
+            " LEFT JOIN `project` AS `p` ON `p`.`id` = `sl`.`project_id`" +
+            " WHERE `p`.`slug`=? AND `sl`.`slug`=? AND `r`.`slug`=?";
+            let result = db.selectRaw(query, [projectSlug, sourceLanguageSlug, resourceSlug]);
+            if(result !== null && result.length > 0) {
+                let item = result[0];
+                sourceTranslation = SourceTranslation.newInstance({
+                    projectSlug:projectSlug,
+                    sourceLanguageSlug:sourceLanguageSlug,
+                    resourceSlug:resourceSlug,
+                    projectTitle:item[0],
+                    sourceLanguageTitle:item[1],
+                    resourceTitle:item[2],
+                    checkingLevel:item[3],
+                    dateModified:item[4],
+                    version:item[5]
+                });
+            }
+            return sourceTranslation;
         };
 
         return _this;

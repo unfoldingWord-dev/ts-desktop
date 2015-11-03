@@ -4,17 +4,10 @@
 
     let fs = require('fs');
     let path = require('path');
+    let rimraf = require('rimraf');
     let TargetTranslation = require('./core/targettranslation');
     //let mkdirp = require('mkdirp');
-    //let rimraf = require('rimraf');
 
-    /**
-     *
-     * @param context
-     * @param rootPath (string)
-     * @returns {Translator}
-     * @constructor
-     */
     function Translator (context, rootPath) {
         //reassign this to _this, set indexId and rootPath
         //let _this = this;
@@ -55,6 +48,19 @@
                     return null;
                 }
                 return TargetTranslation.create(targetLanguage, projectSlug, rootPath);
+            },
+
+            /**
+             * Deletes a target translation from the disk
+             * @param targetTranslationSlug
+             */
+            deleteTargetTranslation: function(targetTranslationSlug) {
+                if(targetTranslationSlug !== null && targetTranslationSlug !== undefined) {
+                    let file = TargetTranslation.generateTargetTranslationDir(targetTranslationSlug, rootPath);
+                    if(fs.existsSync(file)) {
+                        rimraf.sync(file);
+                    }
+                }
             },
 
             /**

@@ -70,11 +70,19 @@
 
         describe('@DeleteTargetTranslation', function() {
             it('should delete a target translation', function() {
-                //translator.deleteTargetTranslation(tt1);
+                translator.deleteTargetTranslation(ttSlug1);
             });
 
             it('should not return a deleted target translation', function() {
+                let tt1 = translator.getTargetTranslation(ttSlug1);
+                assert.equal(tt1, null);
+            });
 
+            it('should return target translation that was not deleted', function() {
+                let tt2 = translator.getTargetTranslation(ttSlug2);
+                assert.notEqual(tt2, null);
+                assert.equal(tt2.getTargetLanguageSlug(), 'de');
+                assert.equal(tt2.getProjectSlug(), 'gen');
             });
         });
     });

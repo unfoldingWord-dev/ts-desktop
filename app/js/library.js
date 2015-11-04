@@ -1,4 +1,3 @@
-
 'use strict';
 
 ;(function () {
@@ -7,11 +6,15 @@
     let SourceTranslation = require('../js/core/sourcetranslation');
     let Indexer = require('../js/indexer').Indexer;
 
-    function Library (indexPath, rootApiUrl) {
+    function Library (schemaPath, databasePath, rootApiUrl) {
+        if(schemaPath === undefined || databasePath === undefined || rootApiUrl === undefined) {
+            throw new Error('Invalid parameters');
+        }
+
         const DEFAULT_RESOURCE_SLUG = 'ulb';
         //const MIN_CHECKING_LEVEL = 3;
         rootApiUrl = rootApiUrl; // fix lit errors temporarily
-        let indexer = new Indexer(indexPath);
+        let indexer = new Indexer(schemaPath, databasePath);
 
         // TODO: the library should contain the downloader
 
@@ -108,6 +111,7 @@
             /**
              * Returns an array of source langauges for the project
              * @param projectSlug
+             * @return {SourceLanguage[]}
              */
             getSourceLanguages: function(projectSlug) {
                 return indexer.getSourceLanguages(projectSlug);
@@ -246,7 +250,7 @@
              * Returns an array of frame slugs
              * @param sourceTranslation
              * @param chapterSlug
-             * @returns {*}
+             * @returns {string}
              */
             getFrameSlugs: function(sourceTranslation, chapterSlug) {
                 let slugs = indexer.getFrameSlugs(sourceTranslation, chapterSlug);
@@ -277,7 +281,7 @@
              * Returns the translation format of the chapter body
              * @param sourceTranslation
              * @param chapterSlug
-             * @returns {*}
+             * @returns {string}
              */
             getChapterBodyFormat: function(sourceTranslation, chapterSlug) {
                 return indexer.getChapterBodyFormat(sourceTranslation.getProjectSlug(), sourceTranslation.getSourceLanguageSlug(), sourceTranslation.getResourceSlug(), chapterSlug);

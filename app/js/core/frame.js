@@ -36,7 +36,6 @@
         return _this;
     }
 
-
     /**
      * Returns a new frame
      * @param parameters

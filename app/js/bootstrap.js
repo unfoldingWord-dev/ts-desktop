@@ -24,6 +24,9 @@
     let Library = require('../js/library').Library;
     let library = new Library(indexer);
 
+    let ProjectsManager = require('../js/projects').ProjectsManager;
+    let projectsManager = ProjectsManager(indexer.db);
+
     let util = require('../js/lib/util');
 
     /**
@@ -54,6 +57,8 @@
         library: library,
 
         indexer: indexer,
+
+        projectsManager: projectsManager,
 
         util: util,
 

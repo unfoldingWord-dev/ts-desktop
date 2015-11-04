@@ -34,6 +34,7 @@
         //_this.rootPath = path.join(_this.config.indexDir, indexName);
         _this.needsDbSave = 0;
         let db = new Db(_this.config.indexDir);
+        _this.db = db;
 
         //private db id lookup functions
         function getProjectDbId (projectId) {

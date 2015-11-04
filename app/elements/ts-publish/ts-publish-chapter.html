@@ -1,0 +1,81 @@
+
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../components/paper-material/paper-material.html">
+
+<dom-module id="ts-publish-chapter">
+
+    <style>
+
+        :host {
+
+        }
+
+        .card {
+            background: white;
+            width: 450px;
+            height: 60px;
+            margin: 15px auto 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 110%;
+        }
+
+        .ref {
+            padding-left: 20px;
+        }
+
+        .icon {
+            padding-right: 20px;
+        }
+
+        .done {
+            color: var(--completed-color);
+        }
+
+        .review {
+            color: var(--review-color);
+        }
+
+    </style>
+
+    <template>
+
+        <paper-material class="card" elevation="1">
+            <div class="ref">
+                <span>[[chapter.name]]</span> <span>[[chapter.chapter]]</span>
+            </div>
+            <div class="icon">
+                <template is="dom-if" if="{{chapter.complete}}">
+                    <iron-icon class="done" icon="done"></iron-icon>
+                </template>
+                <template is="dom-if" if="{{!chapter.complete}}">
+                    <iron-icon class="review" icon="report"></iron-icon>
+                </template>
+            </div>
+        </paper-material>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-publish-chapter',
+
+        properties: {
+            chapter: {
+                type: Object,
+                value: {}
+            }
+        },
+
+        ready: function() {
+
+        }
+
+    });
+
+</script>

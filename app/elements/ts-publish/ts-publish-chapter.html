@@ -2,6 +2,8 @@
 <link rel="import" href="../../components/iron-icons/iron-icons.html">
 <link rel="import" href="../../components/paper-material/paper-material.html">
 
+<link rel="import" href="./ts-publish-chunk.html">
+
 <dom-module id="ts-publish-chapter">
 
     <style>
@@ -54,6 +56,12 @@
                 </template>
             </div>
         </paper-material>
+
+        <template is="dom-if" if="{{!chapter.complete}}">
+            <template is="dom-repeat" items="{{chapter.chunks}}" as="chunk">
+                <ts-publish-chunk chapter="[[chapter]]" chunk="[[chunk]]"></ts-publish-chunk>
+            </template>
+        </template>
 
     </template>
 

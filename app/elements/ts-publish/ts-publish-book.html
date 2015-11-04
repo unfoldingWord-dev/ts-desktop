@@ -1,6 +1,7 @@
 
 <link rel="import" href="../../components/iron-icons/iron-icons.html">
 <link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/paper-material/paper-material.html">
 
 <dom-module id="ts-publish-book">
 
@@ -12,48 +13,42 @@
 
         #contain {
             flex: auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            overflow-y: auto;
+            padding-bottom: 100px;
         }
 
-        #list {
+        .card {
             background: white;
             width: 450px;
-            box-shadow: 0 2px 3px 2px var(--greyed-out-light);
-            margin-top: 30px;
+            height: 60px;
+            margin: 15px auto 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 110%;
+        }
+
+        .ref {
+            padding-left: 20px;
+        }
+
+        .icon {
+            padding-right: 20px;
         }
 
         #next {
             background: var(--highlight-primary);
             color: var(--text-color);
             text-transform: uppercase;
-            margin-top: 20px;
+            margin: 20px auto;
         }
 
-        ul {
-            margin: 0;
-            padding: 0;
-            list-style-type: none;
-            font-size: 110%;
-        }
-
-        ul li {
-            display: block;
-            margin: 0;
-            padding: 1em;
-            border-bottom: 1px solid var(--greyed-out-light);
-            transition: background .3s, color .3s;
-        }
-
-        ul li:hover {
-            background: var(--accent-color-dark);
-            color: var(--text-color);
-        }
-
-        .right {
-            float: right;
+        .done {
             color: var(--completed-color);
+        }
+
+        .review {
+            color: orange;
         }
 
     </style>
@@ -61,11 +56,18 @@
     <template>
 
         <div id="contain">
-            <div id="list">
-                <ul>
-                    <li><span>[[project.name]]</span><iron-icon class="right" icon="done"></iron-icon></li>
-                </ul>
-            </div>
+
+            <template is="dom-repeat" items="{{project.translation}}" as="chunk">
+                <paper-material class="card" elevation="1">
+                    <div class="ref">
+                        <span>[[project.name]]</span> <span>[[chunk.meta.chapter]]</span>: <span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span>
+                    </div>
+                    <div class="icon">
+                        <iron-icon class="done" icon="done"></iron-icon>
+                    </div>
+                </paper-material>
+            </template>
+
             <paper-button raised id="next" on-tap="next">Next Step</paper-button>
         </div>
 

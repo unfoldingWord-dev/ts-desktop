@@ -28,11 +28,14 @@
      * @returns {Indexer}
      * @constructor
      */
-    function Indexer (databasePath) {
+    function Indexer (schemaPath, databasePath) {
+        if(schemaPath === undefined || databasePath === undefined) {
+            throw new Error('Invalid parameters');
+        }
 
         let _this = this;
         _this.needsDbSave = 0;
-        let db = new Db(databasePath);
+        let db = new Db(schemaPath, databasePath);
 
         /**
          * Returns the database id of the project

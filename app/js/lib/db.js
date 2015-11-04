@@ -7,7 +7,7 @@
     let mkdirp = require('mkdirp');
     let SQL = require('sql.js');
 
-    function Db (dbPath) {
+    function Db (schemaPath, dbPath) {
 
         let needsDbSave = 0;
         let dbFilePath = path.resolve('./', dbPath);
@@ -23,7 +23,7 @@
                 return false;
             }
             let sql = new SQL.Database();
-            let schema = fs.readFileSync('./app/config/schema.sql');
+            let schema = fs.readFileSync(schemaPath);//fs.readFileSync(path.resolve('./', path.join('config', 'schema.sql')));
             sql.exec(schema);
             let data = sql.export();
             let buffer = new Buffer(data);

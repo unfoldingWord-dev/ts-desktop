@@ -6,11 +6,15 @@
     let SourceTranslation = require('../js/core/sourcetranslation');
     let Indexer = require('../js/indexer').Indexer;
 
-    function Library (indexPath, rootApiUrl) {
+    function Library (schemaPath, databasePath, rootApiUrl) {
+        if(schemaPath === undefined || databasePath === undefined || rootApiUrl === undefined) {
+            throw new Error('Invalid parameters');
+        }
+
         const DEFAULT_RESOURCE_SLUG = 'ulb';
         //const MIN_CHECKING_LEVEL = 3;
         rootApiUrl = rootApiUrl; // fix lit errors temporarily
-        let indexer = new Indexer(indexPath);
+        let indexer = new Indexer(schemaPath, databasePath);
 
         // TODO: the library should contain the downloader
 

@@ -15,8 +15,6 @@
     let uploader = require('../js/uploader');
     let Translator = require('../js/translator').Translator;
     let Library = require('../js/library').Library;
-    let library = new Library('../index/app.sqlite', configurator.getValue('apiUrl'));
-
     let util = require('../js/lib/util');
 
     /**
@@ -44,7 +42,7 @@
 
         translator: null,
 
-        library: library,
+        library: null,
 
         util: util,
 
@@ -164,11 +162,19 @@
         },
 
         /**
-         * Loads the translator
+         * Initializes the translator
          */
         initializeTranslator: function () {
             // TODO: the translator needs some information about the context (first parameter)
             this.translator = new Translator({}, this.configurator.getValue('targetTranslationsDir'));
+        },
+
+        /**
+         * Initializes the library
+         */
+        initializeLibrary: function () {
+            // TODO: we probably want to place the index some where in the users's data directory. see the configurator
+            this.library = new Library(path.join('config', 'schema.sql'), '../index/app.sqlite', configurator.getValue('apiUrl'));
         },
 
         /**
@@ -238,6 +244,7 @@
             _this.registerShortcuts();
             _this.initializeConfig();
             _this.initializeTranslator();
+            _this.initializeLibrary();
             _this.initializeReporter();
             _this.registerErrorReporter();
 

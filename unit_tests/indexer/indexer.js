@@ -30,7 +30,7 @@
     configurator.loadConfig(config);
 
     let indexDir = './unit_tests/indexer/index/';
-    let testIndexer = new Indexer(path.join(indexDir, 'app.sqlite'));
+    let testIndexer = new Indexer(path.resolve('./app/config/schema.sql'), path.join(indexDir, 'app.sqlite'));
 
     describe('@Indexer', function () {
 
@@ -47,7 +47,8 @@
         });
 
         describe('@DataTools', function() {
-            let index = new Indexer('./app/index/app.sqlite');
+            this.timeout(4000);
+            let index = new Indexer(path.resolve('./app/config/schema.sql'), './app/index/app.sqlite');
 
             it('should have projects', function() {
                 assert.equal(

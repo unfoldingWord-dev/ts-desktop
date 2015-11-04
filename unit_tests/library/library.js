@@ -3,6 +3,7 @@
 ;(function () {
 
     let assert = require('assert');
+    let path = require('path');
     //let rimraf = require('rimraf');
     let SourceTranslation = require('../../app/js/core/sourcetranslation');
     let Configurator = require('../../app/js/configurator').Configurator;
@@ -13,7 +14,7 @@
 
     let Library = require('../../app/js/library').Library;
     let indexPath = './app/index/app.sqlite';
-    let library = new Library(indexPath, configurator.getValue('apiUrl'));
+    let library = new Library(path.resolve('./app/config/schema.sql'), indexPath, configurator.getValue('apiUrl'));
 
     describe('@Library', function () {
 
@@ -39,6 +40,7 @@
 
         describe('@GetTargetLanguages', function () {
             it('should return all the target languages', function () {
+                this.timeout(4000);
                assert.equal(
                    library.getTargetLanguages().length > 0,
                    true

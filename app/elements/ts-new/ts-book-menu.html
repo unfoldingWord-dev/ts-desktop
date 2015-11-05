@@ -79,18 +79,18 @@
 
       <div id="header">
           <div>
-              <span class="click" on-tap="togroup">[[group.name]]</span>
+              <span class="click" on-tap="togroup">[[group.category]]</span>
               <iron-icon icon="chevron-right"></iron-icon>
               <em>Choose a book</em>
           </div>
       </div>
 
       <div id="contain">
-          <iron-list items="[[group.list]]" as="bk">
+          <iron-list items="[[group.list]]" as="book">
               <template>
                   <div class="row" on-tap="store">
                       <div>
-                          <span>[[bk.name]]</span>
+                          <span>[[book.name]]</span>
                       </div>
                   </div>
               </template>
@@ -128,7 +128,7 @@
       ],
 
       store: function(e) {
-          this.book = e.model.bk;
+          this.book = e.model.book;
           this.fire('create');
       },
 

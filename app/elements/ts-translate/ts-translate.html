@@ -1,4 +1,6 @@
 
+<link rel="import" href="../../components/iron-signals/iron-signals.html">
+
 <link rel="import" href="./ts-read-mode/ts-read-mode.html">
 <link rel="import" href="./ts-chunk-mode/ts-chunk-mode.html">
 <link rel="import" href="./ts-review-mode/ts-review-mode.html">
@@ -31,6 +33,8 @@
             <ts-review-mode id="reviewmode" project="{{project}}" chunks="{{chunks}}" modestatus="{{modestatus}}" on-modetrigger="upload"></ts-review-mode>
             <ts-nosource-mode id="nosourcemode" project="{{project}}"></ts-nosource-mode>
         </div>
+
+        <iron-signals on-iron-signal-frompublish="reviewpublish"></iron-signals>
 
     </template>
 
@@ -103,6 +107,14 @@
             'checksources(project.sources)'
         ],
 
+        reviewpublish: function (event, data) {
+            this.selected = 0;
+            this.set('modestatus.chapter', data.chapter);
+            this.set('modestatus.verse', data.verse);
+            this.route = "translate";
+            this.selected = 3;
+        },
+
         gohome: function () {
             this.animationConfig.exit.name = 'slide-right-animation';
             this.animationConfig.entry.name = 'slide-from-right-animation';
@@ -113,6 +125,7 @@
             this.animationConfig.exit.name = 'slide-left-animation';
             this.animationConfig.entry.name = 'slide-from-left-animation';
             this.route = "publish";
+            this.selected = 1;
         },
 
         gosettings: function () {

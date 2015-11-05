@@ -72,11 +72,11 @@
                     </template>
                 </div>
             </div>
-            <div class="body">
-                <template is="dom-if" if="{{!status}}">
+            <template is="dom-if" if="{{!status}}">
+                <div class="body">
                     <p>[[chunk.content]]</p>
-                </template>
-            </div>
+                </div>
+            </template>
         </paper-material>
 
     </template>
@@ -110,7 +110,9 @@
         },
 
         gotochunk: function () {
-
+            var chapter = this.chunk.meta.chapter;
+            var verse = this.chunk.meta.startverse;
+            this.fire('iron-signal', {name: 'frompublish', data: {chapter: chapter, verse: verse}});
         },
 
         ready: function() {

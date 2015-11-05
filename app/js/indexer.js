@@ -35,7 +35,9 @@
 
         let _this = this;
         _this.needsDbSave = 0;
+
         let db = new Db(schemaPath, databasePath);
+        _this.db = db;
 
         /**
          * Returns the database id of the project

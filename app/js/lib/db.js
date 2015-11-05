@@ -23,10 +23,13 @@
                 return false;
             }
             let sql = new SQL.Database();
-            let schema = fs.readFileSync(schemaPath);//fs.readFileSync(path.resolve('./', path.join('config', 'schema.sql')));
+            let schema = fs.readFileSync(schemaPath);
+
             sql.exec(schema);
+
             let data = sql.export();
             let buffer = new Buffer(data);
+            
             fs.writeFileSync(dbFilePath, buffer);
         }
         let buffer = fs.readFileSync(dbFilePath);
@@ -46,6 +49,8 @@
         }
 
         return {
+            exec: sql.exec.bind(sql),
+
             debug: function (on) {
                 if (on === true || on === 1 || on === '1') {
                     debug = 1;

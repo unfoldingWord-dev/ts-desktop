@@ -164,15 +164,18 @@
         },
 
         createproject: function () {
-            var name = "";
-            var num;
-            if (this.group.name === "Open Bible Stories") {
+
+            var frames = App.projectsManager.getSourceFrames(this.book.slug, 'udb');
+
+            var name = this.book.name;
+            var num = frames.length;
+            /*if (this.group.name === "Open Bible Stories") {
                 name = this.group.name;
                 num = 12;
             } else {
                 name = this.book.name;
                 num = this.book.chapters;
-            }
+            }*/
             var language = this.language;
             var projectarray = this.projectlist;
             var icon = this.group.lefticon;
@@ -183,37 +186,63 @@
             var srcchunk = {};
             var duplicate = false;
             var i;
+            var chap;
+            var sourcedata;
+            var startstr = '<verse number="';
+            var endstr = '" style="v" />';
+            var test = new RegExp(startstr);
+            var verse;
+            var lowest;
+            var highest;
 
-            for (i = 0; i < projectarray.length; i++) {
+            /*for (i = 0; i < projectarray.length; i++) {
                 if (projectarray[i].name === name && projectarray[i].language === language) {
                     duplicate = true;
                 }
-            }
+            }*/
 
             if (duplicate) {
                 popup.open();
                 return;
             }
 
-            for (i = 1; i <= num; i++) {
+            for (i = 0; i < num; i++) {
+
+                chap = parseInt(frames[i].chapter);
+                sourcedata = frames[i].chunk;
+                lowest = 0;
+                highest = 0;
+
+                while (test.test(sourcedata)) {
+                    verse = parseInt(sourcedata.substring(sourcedata.search(startstr) + 15, sourcedata.search(endstr)));
+                    if (lowest === 0) {
+                        lowest = verse;
+                    }
+                    if (highest < verse) {
+                        highest = verse;
+                    }
+                    sourcedata = sourcedata.replace(startstr, " /v");
+                    sourcedata = sourcedata.replace(endstr, " ");
+                }
+
                 transchunk = {
                     meta: {
-                        chapter: i,
-                        startverse: 1,
-                        endverse: 1
+                        chapter: chap,
+                        startverse: lowest,
+                        endverse: highest
                     },
                     content: '',
                     status: 'Incomplete'
                 };
                 srcchunk = {
                     meta: {
-                        chapter: i,
-                        startverse: 1,
-                        endverse: 1
+                        chapter: chap,
+                        startverse: lowest,
+                        endverse: highest
                     },
-                    content: 'This is blank source content for ' + name + ' chunk ' + i,
-                    notes: 'Notes for ' + name + ' chunk ' + i,
-                    words: 'Words for ' + name + ' chunk ' + i
+                    content: sourcedata,
+                    notes: 'Notes for ' + name + ' chapter ' + chap + ' verse ' + lowest,
+                    words: 'Words for ' + name + ' chapter ' + chap + ' verse ' + lowest
                 };
                 translation.push(transchunk);
                 source.push(srcchunk);

@@ -7,10 +7,10 @@
     let mkdirp = require('mkdirp');
     let SQL = require('sql.js');
 
-    function Db (dbPath) {
+    function Db (schemaPath, dbPath) {
 
         let needsDbSave = 0;
-        let dbFilePath = path.resolve('./', path.join(dbPath, 'index.sqlite'));
+        let dbFilePath = path.resolve('./', dbPath);
         let dbDirPath = path.dirname(dbFilePath);
         let debug = 0;
 
@@ -23,10 +23,13 @@
                 return false;
             }
             let sql = new SQL.Database();
-            let schema = fs.readFileSync(path.resolve('./', path.join('config', 'schema.sql')));
+            let schema = fs.readFileSync(schemaPath);
+
             sql.exec(schema);
+
             let data = sql.export();
             let buffer = new Buffer(data);
+            
             fs.writeFileSync(dbFilePath, buffer);
         }
         let buffer = fs.readFileSync(dbFilePath);

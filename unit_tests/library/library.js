@@ -3,194 +3,247 @@
 ;(function () {
 
     let assert = require('assert');
-    let rimraf = require('rimraf');
-    let Indexer = require('../../app/js/indexer').Indexer;
+    let path = require('path');
+    //let rimraf = require('rimraf');
+    let SourceTranslation = require('../../app/js/core/sourcetranslation');
     let Configurator = require('../../app/js/configurator').Configurator;
     let configurator = new Configurator();
     let config = require('../../app/config/defaults');
     configurator.setStorage({});
     configurator.loadConfig(config);
-    let indexConfig = {
-        apiUrl: configurator.getValue('apiUrl'),
-        indexDir: './unit_tests/library/index/'
-    };
-    let testIndexer = new Indexer('test', indexConfig);
-    let Library = require('../../app/js/library').Library;
-    let library = new Library(testIndexer);
 
-    //import comparison data
-    let projectsJson = JSON.stringify(require('./data/projects.json'));
-    let projectsCatalogJson = JSON.stringify(require('../indexer/data/ts/txt/2/catalog.json'));
-    let sourceLanguagesCatalogJson = JSON.stringify(require('../indexer/data/ts/txt/2/1ch/languages.json'));
-    let resourcesCatalogJson = JSON.stringify(require('../indexer/data/ts/txt/2/1ch/ar/resources.json'));
-    let sourceCatalogJson = JSON.stringify(require('../indexer/data/ts/txt/2/1ch/ar/avd/source.json'));
-    let project = JSON.parse(sourceLanguagesCatalogJson)[1].project;
-    let titleStr = project.name;
-    let descriptionStr = project.desc;
-    let imageStr = '';//TODO: where do we get this???
-    let sortKeyStr = project.sort;
+    let Library = require('../../app/js/library').Library;
+    let indexPath = './app/index/app.sqlite';
+    let library = new Library(path.resolve('./app/config/schema.sql'), indexPath, configurator.getValue('apiUrl'));
 
     describe('@Library', function () {
 
-        before(function (done) {
-            this.timeout(15000);
-            let setupIndex = function () {
-                testIndexer.indexProjects(projectsCatalogJson);
-                testIndexer.indexSourceLanguages(
-                    '1ch',
-                    sourceLanguagesCatalogJson,
-                    {'date_modified':'20150801'}
-                );
-                testIndexer.indexResources(
-                    '1ch',
-                    'ar',
-                    resourcesCatalogJson,
-                    {'date_modified':'20150801'}
-                );
-                testIndexer.indexSource(
-                    '1ch',
-                    'ar',
-                    'avd',
-                    sourceCatalogJson,
-                    {'date_modified':'20150801'}
-                );
-            };
-            rimraf(indexConfig.indexDir, function () {
-                setupIndex();
-                done();
-            });
-        });
-
-        after(function (done) {
-            rimraf(indexConfig.indexDir, function () {
-                done();
-            });
-        });
-
-        describe('@CheckIndex', function () {
-            it('should be using the correct index', function () {
-                assert.equal(library.getIndexId(), 'test');
-            });
-        });
-
         describe('@GetProjects', function () {
             it('should retrieve the catalog object', function () {
-                let projects = JSON.stringify(library.getProjects());
-                assert.equal(projects, projectsJson);
+                assert.equal(library.getProjects('en').length > 0, true);
             });
         });
 
         describe('@GetProject', function () {
             it('should retrieve the 1ch ar avd project object', function () {
-                let project = library.getProject('1ch', 'ar', 'avd');
-                assert.equal(project.getProjectId(), '1ch');
-                assert.equal(project.getSourceLanguageId(), 'ar');
-                assert.equal(project.getResourceId(), 'avd');
+                let project = library.getProject('1ch', 'ar');
+                assert.equal(project.getSlug(), '1ch');
+                assert.equal(project.getSourceLanguageSlug(), 'ar');
             });
         });
 
         describe('@DoNotGetBadProject', function () {
-            it('should not retrieve the nonexistent 7ch en ulb source', function () {
-                assert.equal(library.getProject('7ch', 'en', 'ulb'), null);
+            it('should not retrieve the nonexistent 7ch en source', function () {
+                assert.equal(library.getProject('7ch', 'en'), null);
             });
         });
 
-        describe('@GetLastProject', function () {
-            it('should retrieve the 1ch ar avd (last used & valid) project object', function () {
-                let project = library.getLastProject();
-                assert.equal(project.getProjectId(), '1ch');
-                assert.equal(project.getSourceLanguageId(), 'ar');
-                assert.equal(project.getResourceId(), 'avd');
+        describe('@GetTargetLanguages', function () {
+            it('should return all the target languages', function () {
+                this.timeout(4000);
+               assert.equal(
+                   library.getTargetLanguages().length > 0,
+                   true
+               );
+            });
+
+            it('should return a single target language de', function () {
+                let targetLanguage = library.getTargetLanguage('de');
+                assert.notEqual(
+                    targetLanguage,
+                    null
+                );
+                assert.equal(
+                    targetLanguage.getSlug(),
+                    'de'
+                );
             });
         });
 
-        describe('@Project', function () {
-
-            describe('@GetTitle', function () {
-                it('should retrieve the 1ch ar avd title', function () {
-                    let project = library.getLastProject();
-                    assert.equal(project.getTitle(), titleStr);
-                });
-            });
-
-            describe('@GetDescription', function () {
-                it('should retrieve the 1ch ar avd description', function () {
-                    let project = library.getLastProject();
-                    assert.equal(project.getDescription(), descriptionStr);
-                });
-            });
-
-            describe('@GetImage', function () {
-                it('feature not fully designed', function () {
-                    let project = library.getLastProject();
-                    assert.equal(project.getImage(), imageStr);
-                });
-            });
-
-            describe('@GetSortKey', function () {
-                it('should retrieve the 1ch ar avd sort key', function () {
-                    let project = library.getLastProject();
-                    assert.equal(project.getSortKey(), sortKeyStr);
-                });
-            });
-
-            describe('@GetChapters', function () {
-                it('should retrieve an array of the 1ch ar avd chapter objects', function () {
-                    let project = library.getLastProject();
-                    let chapters = project.getChapters();
-                    assert.equal(Object.keys(chapters).length, 29);
-                });
-            });
-
-            describe('@GetChapter', function () {
-                it('should retrieve the 1ch ar avd chapter 01 object', function () {
-                    let project = library.getLastProject();
-                    let chapter = project.getChapter('01');
-                    assert.equal(chapter.getNumber(), '01');
-                    assert.equal(chapter.getReference(), '');
-                    assert.equal(chapter.getTitle(), '');
-                });
-            });
-
-            describe('@GetFrames', function () {
-                it('should retrieve an array of the 1ch ar avd chapter 01 frame objects from the project object', function () {
-                    let project = library.getLastProject();
-                    let frames = project.getFrames('01');
-                    assert.equal(Object.keys(frames).length, 17);
-                });
-            });
-
-            describe('@GetFrame', function () {
-                it('should retrieve an array of the 1ch ar avd chapter 01 frame 01 object from the project object', function () {
-                    let project = library.getLastProject();
-                    let frame = project.getFrame('01', '01');
-                    assert.equal(frame.hasOwnProperty('getSource'), true);
-                });
-            });
-
+        describe('@GetSourceLanguages', function () {
+           it('should return the source languages for 1ch', function () {
+               assert.equal(
+                   library.getSourceLanguages('1ch').length > 0,
+                   true
+               );
+           });
         });
 
-        describe('@Chapter', function () {
-
-            describe('@GetFrames', function () {
-                it('should retrieve an array of the 1ch ar avd chapter 01 frame objects from the chapter object', function () {
-                    let project = library.getLastProject();
-                    let chapter = project.getChapter('01');
-                    let frames = chapter.getFrames();
-                    assert.equal(Object.keys(frames).length, 17);
-                });
+        describe('@GetSourceLanguage', function () {
+            it('should return the source en for 1ch', function () {
+                let sourceLanguage = library.getSourceLanguage('1ch', 'en');
+                assert.notEqual(
+                    sourceLanguage,
+                    null
+                );
+                assert.equal(
+                    sourceLanguage.getSlug(),
+                    'en'
+                );
             });
-
-            describe('@GetFrame', function () {
-                it('should retrieve an array of the 1ch ar avd chapter 01 frame 01 object from the chapter object', function () {
-                    let project = library.getLastProject();
-                    let chapter = project.getChapter('01');
-                    let frame = chapter.getFrame('01');
-                    assert.equal(frame.hasOwnProperty('getSource'), true);
-                });
-            });
-
         });
 
+        describe('@GetPreferredSourceLanguage', function () {
+            it('should return the en language for 1ch', function () {
+                assert.notEqual(
+                    library.getPreferredSourceLanguage('1ch', 'en'),
+                    null
+                );
+            });
+            it('should return the default language', function () {
+                let sourceLanguage = library.getPreferredSourceLanguage('1ch', 'fakelanguage');
+                assert.notEqual(
+                    sourceLanguage,
+                    null
+                );
+                assert.notEqual(
+                    sourceLanguage,
+                    'fakelanguage'
+                );
+            });
+        });
+
+        describe('@GetResources', function () {
+            it('should return the resources for 1ch en', function () {
+                assert.equal(
+                    library.getResources('1ch', 'en').length > 0,
+                    true
+                );
+            });
+        });
+
+        describe('@GetResource', function () {
+            it('should return the resource for 1ch en ulb', function () {
+                let sourceTranslation = SourceTranslation.simpleInstance('1ch', 'en', 'ulb');
+                let resource = library.getResource(sourceTranslation);
+                assert.notEqual(
+                    resource,
+                    null
+                );
+                assert.equal(
+                    resource.getSlug(),
+                    'ulb'
+                );
+            });
+        });
+
+        describe('@GetChapters', function () {
+            it('should return the chapters for 1ch en ulb', function () {
+                let sourceTranslation = SourceTranslation.simpleInstance('1ch', 'en', 'ulb');
+                assert.equal(
+                    library.getChapters(sourceTranslation).length > 0,
+                    true
+                );
+            });
+        });
+
+        describe('@GetChapter', function () {
+            it('should return a single chapter 1ch en ulb 01', function () {
+                let sourceTranslation = SourceTranslation.simpleInstance('1ch', 'en', 'ulb');
+                let chapter = library.getChapter(sourceTranslation, '01');
+                assert.notEqual(
+                    chapter,
+                    null
+                );
+                assert.equal(
+                    chapter.getSlug(),
+                    '01'
+                );
+            });
+        });
+
+        describe('@GetFrames', function () {
+            it('should return the frames for 1ch en ulb 01', function () {
+                let sourceTranslation = SourceTranslation.simpleInstance('1ch', 'en', 'ulb');
+                assert.equal(
+                    library.getFrames(sourceTranslation, '01').length > 0,
+                    true
+                );
+            });
+        });
+
+        describe('@GetFrame', function () {
+            it('should return a single frame for 1ch en ulb 01 01', function () {
+                let sourceTranslation = SourceTranslation.simpleInstance('1ch', 'en', 'ulb');
+                let frame = library.getFrame(sourceTranslation, '01', '01');
+                assert.notEqual(
+                    frame,
+                    null
+                );
+                assert.equal(
+                    frame.getSlug(),
+                    '01'
+                );
+            });
+        });
+
+        describe('@GetChapterBody', function () {
+            let sourceTranslation = SourceTranslation.simpleInstance('1ch', 'en', 'ulb');
+            let chapterSlug = '01';
+            it('should return the body of the chapter 1ch en ulb 01', function () {
+                let body = library.getChapterBody(sourceTranslation, chapterSlug);
+                assert.notEqual(
+                    body,
+                    null
+                );
+                assert.equal(
+                    body.length > 0,
+                    true
+                );
+            });
+
+            it('should have a usx translation format', function () {
+                assert.equal(
+                    library.getChapterBodyFormat(sourceTranslation, chapterSlug),
+                    'usx'
+                );
+            });
+        });
+
+        describe('@GetSourceTranslation', function () {
+            it('should return the source translation 1ch en ulb', function () {
+                let sourceTranslation = library.getSourceTranslation('1ch', 'en', 'ulb');
+                assert.notEqual(
+                    sourceTranslation,
+                    null
+                );
+            });
+
+            it('should return the default source translation', function() {
+                assert.notEqual(
+                    library.getDefaultSourceTranslation('1ch', 'en'),
+                    null
+                );
+            });
+        });
+
+        describe('@GetCheckingQuestions', function () {
+            let sourceTranslation = SourceTranslation.simpleInstance('obs', 'en', 'obs');
+            let checkingQuestions = library.getCheckingQuestions(sourceTranslation, '01', '01');
+
+            it('should return the checking questions for obs en obs 01 01', function () {
+                assert.equal(
+                    checkingQuestions.length > 0,
+                    true
+                );
+            });
+
+            it('should return the first checking question for obs en obs 01 01 ', function () {
+               let checkingQuestion = library.getCheckingQuestion(sourceTranslation, '01', '01', checkingQuestions[0].getSlug());
+                assert.notEqual(
+                    checkingQuestion,
+                    null
+                );
+            });
+        });
+
+        describe('@GetProjectCategories', function () {
+            it('should return an array of project categories', function () {
+                assert.equal(
+                    library.getProjectCategories('en').length > 0,
+                    true
+                );
+            });
+        });
     });
 })();

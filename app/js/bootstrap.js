@@ -13,19 +13,9 @@
     let mainWindow = gui.Window.get();
     let Reporter = require('../js/reporter').Reporter;
     let uploader = require('../js/uploader');
-
     let Translator = require('../js/translator').Translator;
-    let Indexer = require('../js/indexer').Indexer;
-    let indexer = new Indexer('app', {
-        apiUrl: configurator.getValue('apiUrl'),
-        indexDir: './index/'
-    });
-    let translator = new Translator(indexer);
     let Library = require('../js/library').Library;
-    let library = new Library(indexer);
-
     let ProjectsManager = require('../js/projects').ProjectsManager;
-    let projectsManager = ProjectsManager(indexer.db);
 
     let util = require('../js/lib/util');
 
@@ -51,14 +41,6 @@
         window: mainWindow,
 
         uploader: uploader,
-
-        translator: translator,
-
-        library: library,
-
-        indexer: indexer,
-
-        projectsManager: projectsManager,
 
         util: util,
 
@@ -178,6 +160,26 @@
         },
 
         /**
+         * Initializes the translator
+         */
+        initializeTranslator: function () {
+            // TODO: the translator needs some information about the context (first parameter)
+            this.translator = new Translator({}, this.configurator.getValue('targetTranslationsDir'));
+        },
+
+        /**
+         * Initializes the library
+         */
+        initializeLibrary: function () {
+            // TODO: we probably want to place the index some where in the users's data directory. see the configurator
+            this.library = new Library(path.join('./', 'config', 'schema.sql'), './index/index.sqlite', configurator.getValue('apiUrl'));
+        },
+
+        initializeProjectsManager: function () {
+            this.projectsManager = ProjectsManager(this.library.indexer.db);
+        },
+
+        /**
          * Toggles the application maximize state
          */
         toggleMaximize: function () {
@@ -243,6 +245,9 @@
             _this.registerEvents();
             _this.registerShortcuts();
             _this.initializeConfig();
+            _this.initializeTranslator();
+            _this.initializeLibrary();
+            _this.initializeProjectsManager();
             _this.initializeReporter();
             _this.registerErrorReporter();
 

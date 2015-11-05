@@ -31,7 +31,7 @@
   <template>
 
       <template is="dom-if" if="{{accepted}}">
-          <neon-animated-pages attr-for-selected="data-route" selected="{{route}}" exit-animation="slide-left-animation" entry-animation="slide-from-right-animation">
+          <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
               <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]" project="{{project}}" backto="{{backto}}"></ts-home>
               <ts-new data-route="new" route="{{route}}" projectlist="{{projectlist}}" project="{{project}}"></ts-new>
               <ts-translate data-route="translate" route="{{route}}" project="{{project}}" backto="{{backto}}"></ts-translate>

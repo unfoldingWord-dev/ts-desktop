@@ -26,8 +26,6 @@
         reporter: reporter
     };
 
-    let navigator = new Navigator();
-
     describe('@Navigator', function () {
         this.timeout(600000); // 10 min
 
@@ -45,6 +43,8 @@
         });
 
         if (enableTests) {
+            let navigator = new Navigator();
+
             describe('@GetServerLibraryIndex', function () {
                 navigator = navigator; // TODO: remove this after we use it
                 let index = null;

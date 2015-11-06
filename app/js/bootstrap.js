@@ -176,7 +176,7 @@
         },
 
         initializeProjectsManager: function () {
-            this.projectsManager = ProjectsManager(this.library.indexer.db);
+            this.projectsManager = ProjectsManager(this.library.indexer.db, this.configurator);
         },
 
         /**

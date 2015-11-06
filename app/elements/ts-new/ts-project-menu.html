@@ -130,6 +130,11 @@
               value: {},
               notify: true
           },
+          book: {
+              type: Object,
+              value: {},
+              notify: true
+          },
           grouplist: {
               type: Array,
               value: []
@@ -143,6 +148,7 @@
       store: function(e) {
           this.group = e.model.group;
           if (this.group.category === "Open Bible Stories") {
+              this.book = this.group.list[0];
               this.fire('create');
           } else {
               this.selected = this.selected + 1;

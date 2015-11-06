@@ -1,10 +1,22 @@
 ;(function () {
     'use strict';
 
-    var _ = require('lodash');
+    var _ = require('lodash'),
+        puts = console.log.bind(console);
 
     function zipper (r) {
-        return _.map(r[0].values, _.zipObject.bind(_, r[0].columns));
+        return r.length ? _.map(r[0].values, _.zipObject.bind(_, r[0].columns)) : [];
+    }
+
+    function go (module, fn) {
+        var args = [].slice.call(arguments, 2),
+            f = module ? module[fn] : fn;
+
+        return new Promise(function (resolve, reject) {
+          f.apply(module, args.concat(function (err, data) {
+            return err ? reject(err) : resolve(data);
+          }));
+        });
     }
 
     /**
@@ -86,6 +98,24 @@
                     ].join(' '));
 
                 return zipper(r);
+            },
+
+            saveTargetTranslation: function (translation) {
+                return go(null, 'mkdirp', 'dirpath').then(function () {
+                    return go(fs, 'writeFile', 'filepath', JSON.stringify(translation));
+                }).catch(puts);
+            },
+
+            loadTargetTranslationsList: function () {
+                var isUW = _.partialRight(_.startsWith, 'uw-', 0);
+
+                return go(fs, 'readDir', 'dirpath').then(function (files) {
+                    return _.filter(files, isUW);
+                }).catch(puts);
+            },
+
+            loadTargetTranslation: function (translation) {
+                return go(fs, 'readFile', 'filepath').then(puts).catch(puts);
             }
         };
     }

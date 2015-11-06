@@ -2,6 +2,8 @@
     'use strict';
 
     var _ = require('lodash'),
+        fs = require('fs'),
+        mkdirp = require('mkdirp'),
         puts = console.log.bind(console);
 
     function zipper (r) {
@@ -72,7 +74,7 @@
 
             get sources () {
                 var r = query([
-                        "select r.id, r.slug, r.name, sl.name 'ln', sl.slug 'lc', p.slug 'project', r.checking_level, r.version from resource r",
+                        "select r.id, r.slug 'source', r.name, sl.name 'ln', sl.slug 'lc', p.slug 'project', r.checking_level, r.version from resource r",
                         "join source_language sl on sl.id=r.source_language_id",
                         "join project p on p.id=sl.project_id",
                         "order by r.name"
@@ -81,21 +83,22 @@
             },
 
             /**
-             *  var frames = pm.getSourceFrames('1ch', 'udb'),
+             *  var frames = pm.getSourceFrames(source),
              *      groupedByChapter = _(frames).groupBy('chapter').values().sortBy('0.chapter').value();
              *
-             *  var getFrames = pm.getSourceFrames.bind(null, '1ch'),
+             *  var getFrames = pm.getSourceFrames.bind(null, source),
              *      s1 = getFrames('udb'),
              *      s2 = getFrames('ulb');
              */
 
-            getSourceFrames: function (project, source) {
-                var r = query([
-                        "select f.id, f.body 'chunk', c.slug 'chapter' from frame f",
+            getSourceFrames: function (source) {
+                var s = typeof source === 'object' ? source.id : source,
+                    r = query([
+                        "select f.id, f.body 'chunk', c.slug 'chapter', c.title from frame f",
                         "join chapter c on c.id=f.chapter_id",
                         "join resource r on r.id=c.resource_id",
                         "join source_language sl on sl.id=r.source_language_id",
-                        "join project p on p.id=sl.project_id where p.slug='" + project + "' and r.slug='" + source + "'",
+                        "join project p on p.id=sl.project_id where r.id='" + s + "'",
                         "order by f.id, f.sort"
                     ].join(' '));
 

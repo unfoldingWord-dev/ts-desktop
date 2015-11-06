@@ -104,8 +104,69 @@
 
         observers: [
             'reset(project.name)',
-            'checksources(project.sources)'
+            'checksources(project.sources)',
+            'changesource(project.currentsource)'
         ],
+
+        changesource: function (current) {
+            if (current === null || current === undefined) {
+                return;
+            }
+
+            console.log(current);
+
+            var currentsource = this.project.sources[current];
+            var frames = App.projectsManager.getSourceFrames(currentsource);
+            var name = this.project.name;
+            var num = frames.length;
+            var source = [];
+            var srcchunk = {};
+            var i;
+            var chap;
+            var sourcedata;
+            var startstr = '<verse number="';
+            var endstr = '" style="v" />';
+            var test = new RegExp(startstr);
+            var verse;
+            var lowest;
+            var highest;
+
+            console.log(frames, num);
+/*
+            for (i = 0; i < num; i++) {
+
+                chap = parseInt(frames[i].chapter);
+                sourcedata = frames[i].chunk;
+                lowest = 0;
+                highest = 0;
+
+                while (test.test(sourcedata)) {
+                    verse = parseInt(sourcedata.substring(sourcedata.search(startstr) + 15, sourcedata.search(endstr)));
+                    if (lowest === 0) {
+                        lowest = verse;
+                    }
+                    if (highest < verse) {
+                        highest = verse;
+                    }
+                    sourcedata = sourcedata.replace(startstr, " /v");
+                    sourcedata = sourcedata.replace(endstr, " ");
+                }
+
+                srcchunk = {
+                    meta: {
+                        chapter: chap,
+                        startverse: lowest,
+                        endverse: highest
+                    },
+                    content: sourcedata,
+                    notes: 'Notes for ' + name + ' chapter ' + chap + ' verse ' + lowest,
+                    words: 'Words for ' + name + ' chapter ' + chap + ' verse ' + lowest
+                };
+                source.push(srcchunk);
+            }
+            this.set('project.source', source);
+            */
+        },
 
         reviewpublish: function (event, data) {
             this.selected = 0;

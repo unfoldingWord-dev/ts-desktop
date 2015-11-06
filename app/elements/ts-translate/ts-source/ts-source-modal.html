@@ -140,7 +140,7 @@
                 <div id="selected-sources-header" class="row-header">Selected</div>
                 <template is="dom-repeat" items="[[sources]]" as="source">
                     <div class="row clickable" data-element="[[source]]" data-index="[[index]]" on-tap="removeSelected">
-                        <span>[[ source ]]</span>
+                        <span>[[ source.name ]]</span>
                         <paper-checkbox class="right" disabled checked style="opacity: 1;"></paper-checkbox>
                     </div>
                 </template>
@@ -148,7 +148,7 @@
                 <div id="available-sources-header" class="row-header">Available</div>
                 <template is="dom-repeat" items="{{searchfilter(query, available)}}" as="source">
                     <div class="row clickable" data-element="[[source]]" data-index="[[index]]" on-tap="selectAvailable">
-                        <span>[[ source ]]</span>
+                        <span>[[ source.name ]]</span>
                         <paper-checkbox class="right" disabled style="opacity: 1;"></paper-checkbox>
                     </div>
                 </template>
@@ -273,13 +273,8 @@
 
             var sources = App.projectsManager.sources;
 
-            var newarray = sources.map(function(lang) {
-                return lang.name;
-            });
+            this.allSources = _.filter(sources, 'project', 'gen');
 
-            this.allSources = newarray.filter(function(item, index) {
-                return newarray.indexOf(item) === index;
-            });
 
 
             //this.allSources = ['English ULB', 'English UDB', 'Arabic', 'German', 'Old Chinese', 'Klingon'];

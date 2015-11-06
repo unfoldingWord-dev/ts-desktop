@@ -72,7 +72,7 @@
         createchapters: function () {
             var transchapters = [];
             var translation = this.project.translation;
-            var name = this.project.name;
+            var name = this.project.project.name;
 
             _.forEach(_.groupBy(translation, function(chunks) {
                 return chunks.meta.chapter;

@@ -270,7 +270,19 @@
 
         created: function () {
             // NOTE: Replace with real data
-            this.allSources = ['English ULB', 'English UDB', 'Arabic', 'German', 'Old Chinese', 'Klingon'];
+
+            var sources = App.projectsManager.sources;
+
+            var newarray = sources.map(function(lang) {
+                return lang.name;
+            });
+
+            this.allSources = newarray.filter(function(item, index) {
+                return newarray.indexOf(item) === index;
+            });
+
+
+            //this.allSources = ['English ULB', 'English UDB', 'Arabic', 'German', 'Old Chinese', 'Klingon'];
         }
     });
 

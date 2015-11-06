@@ -66,13 +66,15 @@
             /**
              *  var sources = pm.sources,
              *      englishSources = _.filter(sources, 'lc', 'en'),
-             *      arabicSources = _.filter(sources, 'lc', 'ar');
+             *      genesisSources = _.filter(sources, 'project', 'gen'),
+             *      enGenSources = _.filter(sources, {'lc': 'en', 'project': 'gen'});
              */
 
             get sources () {
                 var r = query([
-                        "select r.id, r.slug, r.name, sl.name 'ln', sl.slug 'lc', r.checking_level, r.version from resource r",
+                        "select r.id, r.slug, r.name, sl.name 'ln', sl.slug 'lc', p.slug 'project', r.checking_level, r.version from resource r",
                         "join source_language sl on sl.id=r.source_language_id",
+                        "join project p on p.id=sl.project_id",
                         "order by r.name"
                     ].join(' '));
                 return zipper(r);

@@ -103,7 +103,7 @@
         },
 
         observers: [
-            'reset(project.name)',
+            'reset(project.project)',
             'checksources(project.sources)',
             'changesource(project.currentsource)'
         ],
@@ -117,7 +117,7 @@
 
             var currentsource = this.project.sources[current];
             var frames = App.projectsManager.getSourceFrames(currentsource);
-            var name = this.project.name;
+            var name = this.project.project.name;
             var num = frames.length;
             var source = [];
             var srcchunk = {};

@@ -235,7 +235,7 @@
                                 <div class="row">
                                     <div class="left" on-tap="openproject">
                                         <span class="smallspan"><iron-icon class="smallicon" icon="[[proj.icon]]"></iron-icon></span>
-                                        <span class="bigspan">[[proj.name]]</span>
+                                        <span class="bigspan">[[proj.project.name]]</span>
                                         <span class="smalltext bigspan">[[proj.language.ln]]</span>
                                         <span class="smallspan">[[proj.completion]]</span>
                                     </div>
@@ -253,7 +253,7 @@
         <paper-dialog id="info" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <h2>Project Details</h2>
             <div>
-                <p>Project: <span>[[project.name]]</span></p>
+                <p>Project: <span>[[project.project.name]]</span></p>
                 <p>Target Language: <span>[[project.language.ln]]</span> (<span>[[project.language.lc]]</span>)</p>
                 <p>Progress: <span>[[project.completion]]</span>%</p>
                 <p>Translators</p>

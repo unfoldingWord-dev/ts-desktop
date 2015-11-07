@@ -112,9 +112,6 @@
             if (current === null || current === undefined) {
                 return;
             }
-
-            console.log(current);
-
             var currentsource = this.project.sources[current];
             var frames = App.projectsManager.getSourceFrames(currentsource);
             var name = this.project.project.name;
@@ -131,15 +128,11 @@
             var lowest;
             var highest;
 
-            console.log(frames, num);
-/*
             for (i = 0; i < num; i++) {
-
                 chap = parseInt(frames[i].chapter);
                 sourcedata = frames[i].chunk;
                 lowest = 0;
                 highest = 0;
-
                 while (test.test(sourcedata)) {
                     verse = parseInt(sourcedata.substring(sourcedata.search(startstr) + 15, sourcedata.search(endstr)));
                     if (lowest === 0) {
@@ -165,7 +158,6 @@
                 source.push(srcchunk);
             }
             this.set('project.source', source);
-            */
         },
 
         reviewpublish: function (event, data) {

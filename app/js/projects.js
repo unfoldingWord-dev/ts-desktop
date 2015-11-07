@@ -33,11 +33,13 @@ function ProjectsManager(db, configurator) {
         write = go.bind(null, fs, 'writeFile'),
         read = go.bind(null, fs, 'readFile'),
         mkdirp = go.bind(null, null, mkdirP),
-        readDir = go.bind(null, fs, 'readDir'),
+        readdir = go.bind(null, fs, 'readdir'),
         toJSON = _.partialRight(JSON.stringify, null, '\t'),
         config = (function (prefix) {
+            var isUW = _.partial(_.startsWith, _, prefix, 0);
+
             return {
-                isUW: _.partialRight(_.startsWith, prefix, 0),
+                filterDirs: _.partial(_.filter, _, isUW),
 
                 get targetDir () {
                     return configurator.getValue('targetTranslationsDir');
@@ -136,9 +138,7 @@ function ProjectsManager(db, configurator) {
         },
 
         loadTargetTranslationsList: function () {
-            return readDir(config.targetDir).then(function (files) {
-                return _.filter(files, config.isUW);
-            });
+            return readdir(config.targetDir).then(config.filterDirs);
         },
 
         loadTargetTranslation: function (targetTranslation) {

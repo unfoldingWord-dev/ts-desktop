@@ -166,9 +166,7 @@
         createproject: function () {
             var allsources = App.projectsManager.sources;
             var mysources = _.filter(allsources, {'lc': 'en', 'project': this.book.slug});
-
             var frames = App.projectsManager.getSourceFrames(mysources[0]);
-
             var name = this.book.name;
             var project = this.book;
             var num = frames.length;
@@ -191,11 +189,11 @@
             var lowest;
             var highest;
 
-            /*for (i = 0; i < projectarray.length; i++) {
-                if (projectarray[i].name === name && projectarray[i].language === language) {
+            for (i = 0; i < projectarray.length; i++) {
+                if (projectarray[i].project.name === name && projectarray[i].language === language) {
                     duplicate = true;
                 }
-            }*/
+            }
 
             if (duplicate) {
                 popup.open();
@@ -203,12 +201,10 @@
             }
 
             for (i = 0; i < num; i++) {
-
                 chap = parseInt(frames[i].chapter);
                 sourcedata = frames[i].chunk;
                 lowest = 0;
                 highest = 0;
-
                 while (test.test(sourcedata)) {
                     verse = parseInt(sourcedata.substring(sourcedata.search(startstr) + 15, sourcedata.search(endstr)));
                     if (lowest === 0) {

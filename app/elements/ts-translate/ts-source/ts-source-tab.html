@@ -121,6 +121,10 @@
         		type: Number,
         		notify: true
         	},
+            project: {
+                type: Object,
+                value: {}
+            },
         	lefty: {
         		type: Boolean
         	}
@@ -142,6 +146,7 @@
 			modal.style.display = 'block';
 			modal.sources = this.sources.slice();
 			modal.selectedSource = this.selectedSource;
+            modal.project = this.project;
 			modal.addEventListener('confirm', this.onConfirm.bind(this));
 			modal.addEventListener('cancel', this.onCancel.bind(this));
 			document.querySelector('ts-translate').appendChild(modal);

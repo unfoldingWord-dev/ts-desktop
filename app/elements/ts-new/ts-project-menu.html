@@ -96,13 +96,13 @@
       </div>
 
       <div id="contain">
-          <iron-list items="[[grouplist]]" as="grp">
+          <iron-list items="[[grouplist]]" as="group">
               <template>
                   <div class="row" on-tap="store">
                       <div>
-                          <iron-icon class="small" icon="[[grp.lefticon]]"></iron-icon>
-                          <span>[[grp.name]]</span>
-                          <iron-icon class="right" icon="[[grp.righticon]]"></iron-icon>
+                          <iron-icon class="small" icon="[[group.lefticon]]"></iron-icon>
+                          <span>[[group.category]]</span>
+                          <iron-icon class="right" icon="[[group.righticon]]"></iron-icon>
                       </div>
                   </div>
               </template>
@@ -130,6 +130,11 @@
               value: {},
               notify: true
           },
+          book: {
+              type: Object,
+              value: {},
+              notify: true
+          },
           grouplist: {
               type: Array,
               value: []
@@ -141,8 +146,9 @@
       ],
 
       store: function(e) {
-          this.group = e.model.grp;
-          if (this.group.name === "Open Bible Stories") {
+          this.group = e.model.group;
+          if (this.group.category === "Open Bible Stories") {
+              this.book = this.group.list[0];
               this.fire('create');
           } else {
               this.selected = this.selected + 1;
@@ -150,91 +156,20 @@
       },
 
       ready: function() {
-          this.grouplist = [
-              {"name": "Open Bible Stories", "lefticon": "uw-icon:uw-icon-small", "righticon": "", "list": [
-                  {"name": "Adam and Eve"},
-                  {"name": "Noah and the Flood"},
-                  {"name": "Moses"},
-                  {"name": "The Wall of Jericho"},
-                  {"name": "Jonah and the Whale"},
-                  {"name": "Jesus' Birth"},
-                  {"name": "Feeding of the 5000"},
-                  {"name": "Palm Sunday"},
-                  {"name": "Jesus' Crucifixion"},
-                  {"name": "Jesus' Resurrection"},
-                  {"name": "Day of Pentecost"}
-              ]},
-              {"name": "Old Testament", "lefticon": "project:project", "righticon": "chevron-right", "list": [
-                  {"name": "Genesis", "chapters": 50},
-                  {"name": "Exodus", "chapters": 40},
-                  {"name": "Leviticus", "chapters": 27},
-                  {"name": "Numbers", "chapters": 36},
-                  {"name": "Deutoronomy", "chapters": 34},
-                  {"name": "Joshua", "chapters": 24},
-                  {"name": "Judges", "chapters": 21},
-                  {"name": "Ruth", "chapters": 4},
-                  {"name": "1 Samuel", "chapters": 31},
-                  {"name": "2 Samuel", "chapters": 24},
-                  {"name": "1 Kings", "chapters": 22},
-                  {"name": "2 Kings", "chapters": 25},
-                  {"name": "1 Chronicles", "chapters": 29},
-                  {"name": "2 Chronicles", "chapters": 36},
-                  {"name": "Ezra", "chapters": 10},
-                  {"name": "Nehemiah", "chapters": 13},
-                  {"name": "Esther", "chapters": 10},
-                  {"name": "Job", "chapters": 42},
-                  {"name": "Psalms", "chapters": 150},
-                  {"name": "Proverbs", "chapters": 31},
-                  {"name": "Ecclesiastes", "chapters": 12},
-                  {"name": "Song of Songs", "chapters": 8},
-                  {"name": "Isaiah", "chapters": 66},
-                  {"name": "Jeremiah", "chapters": 52},
-                  {"name": "Lamentations", "chapters": 5},
-                  {"name": "Ezekiel", "chapters": 48},
-                  {"name": "Daniel", "chapters": 12},
-                  {"name": "Hosea", "chapters": 14},
-                  {"name": "Joel", "chapters": 3},
-                  {"name": "Amos", "chapters": 9},
-                  {"name": "Obadiah", "chapters": 1},
-                  {"name": "Jonah", "chapters": 4},
-                  {"name": "Micah", "chapters": 7},
-                  {"name": "Nahum", "chapters": 3},
-                  {"name": "Habakkuk", "chapters": 3},
-                  {"name": "Zephaniah", "chapters": 3},
-                  {"name": "Haggai", "chapters": 2},
-                  {"name": "Zechariah", "chapters": 14},
-                  {"name": "Malachi", "chapters": 4}
-              ]},
-              {"name": "New Testament", "lefticon": "project:project", "righticon": "chevron-right", "list": [
-                  {"name": "Matthew", "chapters": 28},
-                  {"name": "Mark", "chapters": 16},
-                  {"name": "Luke", "chapters": 24},
-                  {"name": "John", "chapters": 21},
-                  {"name": "Acts", "chapters": 28},
-                  {"name": "Romans", "chapters": 16},
-                  {"name": "1 Corinthians", "chapters": 16},
-                  {"name": "2 Corinthians", "chapters": 13},
-                  {"name": "Galatians", "chapters": 6},
-                  {"name": "Ephesians", "chapters": 6},
-                  {"name": "Philippians", "chapters": 4},
-                  {"name": "Colossians", "chapters": 4},
-                  {"name": "1 Thessalonians", "chapters": 5},
-                  {"name": "2 Thessalonians", "chapters": 3},
-                  {"name": "1 Timothy", "chapters": 6},
-                  {"name": "2 Timothy", "chapters": 4},
-                  {"name": "Titus", "chapters": 3},
-                  {"name": "Philemon", "chapters": 1},
-                  {"name": "Hebrews", "chapters": 13},
-                  {"name": "James", "chapters": 5},
-                  {"name": "1 Peter", "chapters": 5},
-                  {"name": "2 Peter", "chapters": 3},
-                  {"name": "1 John", "chapters": 5},
-                  {"name": "2 John", "chapters": 1},
-                  {"name": "3 John", "chapters": 1},
-                  {"name": "Jude", "chapters": 1},
-                  {"name": "Revelation", "chapters": 22}
-              ]}
-          ]
+          var projects = App.projectsManager.getProjects();
+          var tempobject = {};
+          var temparrary = [];
+          _.forEach(_.groupBy(projects, 'category'), function (data, category) {
+              if (category === 'null') {
+                  tempobject = {"category": "Open Bible Stories", "lefticon": "uw-icon:uw-icon-small", "righticon": "", "list": data};
+              } else if (category === 'Bible: OT') {
+                  tempobject = {"category": "Old Testament", "lefticon": "project:project", "righticon": "chevron-right", "list": data};
+              } else if (category === 'Bible: NT') {
+                  tempobject = {"category": "New Testament", "lefticon": "project:project", "righticon": "chevron-right", "list": data};
+              }
+              temparrary.push(tempobject);
+          });
+          this.grouplist = temparrary;
       }
 
   });

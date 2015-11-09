@@ -15,6 +15,8 @@
     let uploader = require('../js/uploader');
     let Translator = require('../js/translator').Translator;
     let Library = require('../js/library').Library;
+    let ProjectsManager = require('../js/projects').ProjectsManager;
+
     let util = require('../js/lib/util');
 
     /**
@@ -39,10 +41,6 @@
         window: mainWindow,
 
         uploader: uploader,
-
-        translator: null,
-
-        library: null,
 
         util: util,
 
@@ -174,7 +172,11 @@
          */
         initializeLibrary: function () {
             // TODO: we probably want to place the index some where in the users's data directory. see the configurator
-            this.library = new Library(path.join('config', 'schema.sql'), '../index/app.sqlite', configurator.getValue('apiUrl'));
+            this.library = new Library(path.join('./', 'config', 'schema.sql'), './index/index.sqlite', configurator.getValue('apiUrl'));
+        },
+
+        initializeProjectsManager: function () {
+            this.projectsManager = ProjectsManager(this.library.indexer.db);
         },
 
         /**
@@ -245,6 +247,7 @@
             _this.initializeConfig();
             _this.initializeTranslator();
             _this.initializeLibrary();
+            _this.initializeProjectsManager();
             _this.initializeReporter();
             _this.registerErrorReporter();
 

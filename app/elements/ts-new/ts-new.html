@@ -82,7 +82,7 @@
 
         <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
             <ts-language-menu selected="{{selected}}" language="{{language}}"></ts-language-menu>
-            <ts-project-menu selected="{{selected}}" group="{{group}}" on-create="createproject"></ts-project-menu>
+            <ts-project-menu selected="{{selected}}" group="{{group}}" book="{{book}}" on-create="createproject"></ts-project-menu>
             <ts-book-menu selected="{{selected}}" group="[[group]]" book="{{book}}" on-create="createproject"></ts-book-menu>
         </neon-animated-pages>
 
@@ -164,16 +164,13 @@
         },
 
         createproject: function () {
-            var name = "";
-            var num;
-            if (this.group.name === "Open Bible Stories") {
-                name = this.group.name;
-                num = 12;
-            } else {
-                name = this.book.name;
-                num = this.book.chapters;
-            }
-            var language = this.language.ln;
+            var allsources = App.projectsManager.sources;
+            var mysources = _.filter(allsources, {'lc': 'en', 'project': this.book.slug});
+            var frames = App.projectsManager.getSourceFrames(mysources[0]);
+            var name = this.book.name;
+            var project = this.book;
+            var num = frames.length;
+            var language = this.language;
             var projectarray = this.projectlist;
             var icon = this.group.lefticon;
             var popup = this.$.popup;
@@ -183,9 +180,17 @@
             var srcchunk = {};
             var duplicate = false;
             var i;
+            var chap;
+            var sourcedata;
+            var startstr = '<verse number="';
+            var endstr = '" style="v" />';
+            var test = new RegExp(startstr);
+            var verse;
+            var lowest;
+            var highest;
 
             for (i = 0; i < projectarray.length; i++) {
-                if (projectarray[i].name === name && projectarray[i].language === language) {
+                if (projectarray[i].project.name === name && projectarray[i].language === language) {
                     duplicate = true;
                 }
             }
@@ -195,31 +200,47 @@
                 return;
             }
 
-            for (i = 1; i <= num; i++) {
+            for (i = 0; i < num; i++) {
+                chap = parseInt(frames[i].chapter);
+                sourcedata = frames[i].chunk;
+                lowest = 0;
+                highest = 0;
+                while (test.test(sourcedata)) {
+                    verse = parseInt(sourcedata.substring(sourcedata.search(startstr) + 15, sourcedata.search(endstr)));
+                    if (lowest === 0) {
+                        lowest = verse;
+                    }
+                    if (highest < verse) {
+                        highest = verse;
+                    }
+                    sourcedata = sourcedata.replace(startstr, " /v");
+                    sourcedata = sourcedata.replace(endstr, " ");
+                }
+
                 transchunk = {
                     meta: {
-                        chapter: i,
-                        startverse: 1,
-                        endverse: 1
+                        chapter: chap,
+                        startverse: lowest,
+                        endverse: highest
                     },
                     content: '',
                     status: 'Incomplete'
                 };
                 srcchunk = {
                     meta: {
-                        chapter: i,
-                        startverse: 1,
-                        endverse: 1
+                        chapter: chap,
+                        startverse: lowest,
+                        endverse: highest
                     },
-                    content: 'This is blank source content for ' + name + ' chunk ' + i,
-                    notes: 'Notes for ' + name + ' chunk ' + i,
-                    words: 'Words for ' + name + ' chunk ' + i
+                    content: sourcedata,
+                    notes: 'Notes for ' + name + ' chapter ' + chap + ' verse ' + lowest,
+                    words: 'Words for ' + name + ' chapter ' + chap + ' verse ' + lowest
                 };
                 translation.push(transchunk);
                 source.push(srcchunk);
             }
 
-            var newproj = {"name": name, "language": language, "icon": icon, "sources": [], "completion": 0, "currentsource": null, "translation": translation, "source": source};
+            var newproj = {"project": project, "language": language, "icon": icon, "sources": [], "completion": 0, "currentsource": null, "translation": translation, "source": source};
             this.push('projectlist', newproj);
             this.set('project', newproj);
             this.animationConfig.exit.name = 'slide-left-animation';

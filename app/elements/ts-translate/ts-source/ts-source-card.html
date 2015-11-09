@@ -49,11 +49,11 @@
 
         <paper-material elevation="1">
             <div id="tabs">
-                <ts-source-tab sources="{{project.sources}}" selected-source="{{project.currentsource}}"></ts-source-tab>
+                <ts-source-tab project="[[project.project]]" sources="{{project.sources}}" selected-source="{{project.currentsource}}"></ts-source-tab>
             </div>
             <div id="heading">
                 <div>
-                    <span>[[project.name]]</span> <span>[[chunk.chapter]]</span>
+                    <span>[[project.project.name]]</span> <span>[[chunk.chapter]]</span>
                 </div>
             </div>
             <div id="content">

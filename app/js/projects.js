@@ -22,12 +22,12 @@ function go (module, fn) {
 }
 
 /**
- *  var pm = createProjectsManager(db);
+ *  var pm = ProjectsManager(db);
  *
  *  e.g. var pm = App.projectsManager;
  */
 
-function createProjectsManager(db, configurator) {
+function ProjectsManager(db, configurator) {
 
     var query = db.exec.bind(db),
         write = go.bind(null, fs, 'writeFile'),
@@ -147,4 +147,4 @@ function createProjectsManager(db, configurator) {
     };
 }
 
-module.exports.createProjectsManager = createProjectsManager;
+module.exports.ProjectsManager = ProjectsManager;

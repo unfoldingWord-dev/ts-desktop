@@ -126,7 +126,7 @@
         <paper-material id="toggle" class="notdone" elevation="1">
             <div id="heading">
                 <div>
-                    <span>[[project.project.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[project.language.ln]]</span>
+                    <span>[[chunk.data.project.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[chunk.data.language.ln]]</span>
                 </div>
                 <paper-icon-button icon="create" title="edit" on-tap="edit"></paper-icon-button>
             </div>
@@ -163,10 +163,6 @@
 		is: 'ts-target-review',
 
         properties: {
-            project: {
-                type: Object,
-                value: {}
-            },
             chunk: {
                 type: Object,
                 value: {},

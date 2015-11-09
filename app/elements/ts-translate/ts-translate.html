@@ -28,13 +28,14 @@
         <ts-translate-sidebar selected="{{selected}}" on-gohome="gohome" on-gopublish="gopublish" on-gosettings="gosettings"></ts-translate-sidebar>
 
         <div id="pages">
-            <ts-read-mode id="readmode" project="{{project}}" chapters="[[chapters]]" modestatus="{{modestatus}}"></ts-read-mode>
-            <ts-chunk-mode id="chunkmode" project="{{project}}" chunks="{{chunks}}" modestatus="{{modestatus}}" on-modetrigger="upload"></ts-chunk-mode>
-            <ts-review-mode id="reviewmode" project="{{project}}" chunks="{{chunks}}" modestatus="{{modestatus}}" on-modetrigger="upload"></ts-review-mode>
-            <ts-nosource-mode id="nosourcemode" project="{{project}}"></ts-nosource-mode>
+            <ts-read-mode id="readmode" chapters="[[chapters]]" modestatus="{{modestatus}}"></ts-read-mode>
+            <ts-chunk-mode id="chunkmode" chunks="{{chunks}}" modestatus="{{modestatus}}" on-modetrigger="upload"></ts-chunk-mode>
+            <ts-review-mode id="reviewmode" chunks="{{chunks}}" modestatus="{{modestatus}}" on-modetrigger="upload"></ts-review-mode>
+            <ts-nosource-mode id="nosourcemode" projectdata="{{currentproject.data}}"></ts-nosource-mode>
         </div>
 
         <iron-signals on-iron-signal-frompublish="reviewpublish"></iron-signals>
+        <iron-signals on-iron-signal-fromsourcetab="updatesources"></iron-signals>
 
     </template>
 
@@ -62,7 +63,7 @@
                 value: '',
                 notify: true
             },
-            project: {
+            currentproject: {
                 type: Object,
                 value: {},
                 notify: true
@@ -79,12 +80,12 @@
             chapters: {
                 type: Object,
                 value: {},
-                computed: 'createchapters(project.source.*, project.translation.*)'
+                computed: 'createchapters(currentproject.*)'
             },
             chunks: {
                 type: Object,
                 value: {},
-                computed: 'createchunks(project.source.*, project.translation.*)'
+                computed: 'createchunks(currentproject.*)'
             },
             animationConfig: {
                 value: function () {
@@ -103,18 +104,18 @@
         },
 
         observers: [
-            'reset(project.project)',
-            'checksources(project.sources)',
-            'changesource(project.currentsource)'
+            'reset(currentproject.data.project)',
+            'checksources(currentproject.data.sources)',
+            'changesource(currentproject.data.currentsource)'
         ],
 
         changesource: function (current) {
             if (current === null || current === undefined) {
                 return;
             }
-            var currentsource = this.project.sources[current];
+            var currentsource = this.currentproject.data.sources[current];
             var frames = App.projectsManager.getSourceFrames(currentsource);
-            var name = this.project.project.name;
+            var name = this.currentproject.data.project.name;
             var num = frames.length;
             var source = [];
             var srcchunk = {};
@@ -157,7 +158,7 @@
                 };
                 source.push(srcchunk);
             }
-            this.set('project.source', source);
+            this.set('currentproject.source', source);
         },
 
         reviewpublish: function (event, data) {
@@ -166,6 +167,13 @@
             this.set('modestatus.verse', data.verse);
             this.route = "translate";
             this.selected = 3;
+        },
+
+        updatesources: function (event, data) {
+
+            this.set('currentproject.data.sources', data.sources);
+            this.set('currentproject.data.currentsource', data.selected);
+
         },
 
         gohome: function () {
@@ -225,7 +233,7 @@
             var chunk = this.$.chunkmode;
             var review = this.$.reviewmode;
             var nosource = this.$.nosourcemode;
-            var sources = this.project.sources;
+            var sources = this.currentproject.data.sources;
 
             mythis.set('selected', 0);
             mythis.set('modestatus', {"chapter": 1, "verse": 1, "lastmode": 1});
@@ -243,7 +251,7 @@
 
         checksources: function () {
             var mythis = this;
-            var sources = this.project.sources;
+            var sources = this.currentproject.data.sources;
             var lastmode = this.modestatus.lastmode;
             var selected = this.selected;
 
@@ -261,9 +269,9 @@
         },
 
         upload: function () {
-             var update = this.chunks.data.map(function(chunk){
-             return {meta: chunk.meta, content: chunk.transcontent, status: chunk.status};
-             });
+            var update = this.chunks.data.map(function(chunk){
+                return {meta: chunk.meta, content: chunk.transcontent, status: chunk.status};
+            });
             var count = 0;
             for (var i = 0; i < update.length; i++) {
                 if (update[i].status === "Complete") {
@@ -271,18 +279,19 @@
                 }
             }
             var completion = Math.round((count / update.length) * 100);
-            this.set('project.completion', completion);
-            this.set('project.translation', update);
+            this.set('currentproject.data.completion', completion);
+            this.set('currentproject.translation', update);
         },
 
         createchunks: function () {
             var transdata = {};
             var srcdata = {};
-            var translation = this.project.translation;
-            var source = this.project.source;
+            var translation = this.currentproject.translation;
+            var source = this.currentproject.source;
+            var projectdata = this.currentproject.data;
 
             transdata.data = translation.map(function(chunk){
-                return {transcontent: chunk.content, status: chunk.status};
+                return {transcontent: chunk.content, status: chunk.status, data: projectdata};
             });
             srcdata.data = source.map(function(chunk){
                 return {srccontent: chunk.content, meta: chunk.meta, notes: chunk.notes, words: chunk.words};
@@ -295,8 +304,9 @@
             var srcdata = {};
             var transchapters = [];
             var srcchapters = [];
-            var translation = this.project.translation;
-            var source = this.project.source;
+            var translation = this.currentproject.translation;
+            var source = this.currentproject.source;
+            var projectdata = this.currentproject.data;
 
             _.forEach(_.groupBy(translation, function(chunks) {
                 return chunks.meta.chapter;
@@ -310,7 +320,7 @@
                     }
                     chapcontent += chunk.content + " ";
                 });
-                transchapters.push({status: chapstatus, transcontent: chapcontent});
+                transchapters.push({status: chapstatus, transcontent: chapcontent, data: projectdata});
             });
 
             _.forEach(_.groupBy(source, function(chunks) {
@@ -328,21 +338,6 @@
             transdata.data = transchapters;
             srcdata.data = srcchapters;
             return _.merge(srcdata, transdata);
-        },
-
-        onSelectedSourceChanged: function(newValue) {
-
-            if (newValue != null && newValue >= 0) {
-                // The paper-tab won't get programmatically selected until after 30ms
-                this.async(function() {
-                    var source = document.querySelector('paper-tab.iron-selected').innerText;
-
-                    //
-                    // Write code to get new data based on source tab selection here...
-                    //
-
-                }, 30);
-            }
         },
 
         ready: function() {

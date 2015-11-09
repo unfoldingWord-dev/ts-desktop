@@ -88,8 +88,8 @@
     <template>
 
         <div id="contain">
-            <ts-source-card id="srccard" on-tap="srctop" project="{{project}}" chunk="[[chunk]]"></ts-source-card>
-            <ts-target-view id="transcard" on-tap="transtop" project="[[project]]" chunk="[[chunk]]"></ts-target-view>
+            <ts-source-card id="srccard" on-tap="srctop" chunk="[[chunk]]"></ts-source-card>
+            <ts-target-view id="transcard" on-tap="transtop" chunk="[[chunk]]"></ts-target-view>
         </div>
 
     </template>
@@ -103,11 +103,6 @@
 		is: 'ts-read-card',
 
         properties: {
-            project: {
-                type: Object,
-                value: {},
-                notify: true
-            },
             chunk: {
                 type: Object,
                 value: {}
@@ -115,7 +110,7 @@
         },
 
         observers: [
-            'reset(project.project)'
+            'reset(chunk.data.project.name)'
         ],
 
         reset: function () {

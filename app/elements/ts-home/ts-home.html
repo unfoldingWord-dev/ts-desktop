@@ -253,9 +253,9 @@
         <paper-dialog id="info" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <h2>Project Details</h2>
             <div>
-                <p>Project: <span>[[project.project.name]]</span></p>
-                <p>Target Language: <span>[[project.language.ln]]</span> (<span>[[project.language.lc]]</span>)</p>
-                <p>Progress: <span>[[project.completion]]</span>%</p>
+                <p>Project: <span>[[currentinfo.project.name]]</span> (<span>[[currentinfo.project.slug]]</span>)</p>
+                <p>Target Language: <span>[[currentinfo.language.ln]]</span> (<span>[[currentinfo.language.lc]]</span>)</p>
+                <p>Progress: <span>[[currentinfo.completion]]</span>%</p>
                 <p>Translators</p>
             </div>
             <div id="border">
@@ -299,10 +299,14 @@
                 value: '',
                 notify: true
             },
-            project: {
+            currentproject: {
                 type: Object,
                 value: {},
                 notify: true
+            },
+            currentinfo: {
+                type: Object,
+                value: {}
             },
             projectlist: {
                 type: Array,
@@ -337,12 +341,12 @@
         },
 
         openproject: function (e) {
-            this.project = e.model.proj;
+            this.currentproject = e.model.proj;
             this.route = "translate";
         },
 
         openinfo: function (e) {
-            this.project = e.model.proj;
+            this.currentinfo = e.model.proj;
             var target = e.model.proj;
             this.index = this.projectlist.indexOf(target);
             this.$.info.open();

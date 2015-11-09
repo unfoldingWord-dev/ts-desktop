@@ -49,11 +49,11 @@
 
         <paper-material elevation="1">
             <div id="tabs">
-                <ts-source-tab project="[[project.project]]" sources="{{project.sources}}" selected-source="{{project.currentsource}}"></ts-source-tab>
+                <ts-source-tab project="[[chunk.data.project]]" sources="{{chunk.data.sources}}" selected-source="{{chunk.data.currentsource}}"></ts-source-tab>
             </div>
             <div id="heading">
                 <div>
-                    <span>[[project.project.name]]</span> <span>[[chunk.chapter]]</span>
+                    <span>[[chunk.data.project.name]]</span> <span>[[chunk.chapter]]</span>
                 </div>
             </div>
             <div id="content">
@@ -76,11 +76,6 @@
         ],
 
         properties: {
-            project: {
-                type: Object,
-                value: {},
-                notify: true
-            },
             chunk: {
                 type: Object,
                 value: {}

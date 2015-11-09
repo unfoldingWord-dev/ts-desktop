@@ -58,21 +58,21 @@
                 value: 0,
                 notify: true
             },
-            project: {
+            currentproject: {
                 type: Object,
                 value: {}
             },
             chapters: {
                 type: Array,
                 value: [],
-                computed: 'createchapters(project.translation.*)'
+                computed: 'createchapters(currentproject.translation.*)'
             }
         },
 
         createchapters: function () {
             var transchapters = [];
-            var translation = this.project.translation;
-            var name = this.project.project.name;
+            var translation = this.currentproject.translation;
+            var name = this.currentproject.data.project.name;
 
             _.forEach(_.groupBy(translation, function(chunks) {
                 return chunks.meta.chapter;

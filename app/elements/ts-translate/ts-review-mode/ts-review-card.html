@@ -41,10 +41,10 @@
 	<template>
 
         <div id="contain">
-            <ts-source-chunk noref project="{{project}}" chunk="[[chunk]]"></ts-source-chunk>
+            <ts-source-chunk noref chunk="[[chunk]]"></ts-source-chunk>
             <iron-pages selected="{{selected}}">
-                <ts-target-review on-edittrigger="edittrigger" selected="{{selected}}" project="[[project]]" chunk="{{chunk}}"></ts-target-review>
-                <ts-target-edit on-edittrigger="edittrigger" selected="{{selected}}" project="[[project]]" chunk="{{chunk}}"></ts-target-edit>
+                <ts-target-review on-edittrigger="edittrigger" selected="{{selected}}" chunk="{{chunk}}"></ts-target-review>
+                <ts-target-edit on-edittrigger="edittrigger" selected="{{selected}}" chunk="{{chunk}}"></ts-target-edit>
             </iron-pages>
             <ts-resource-card chunk="[[chunk]]"></ts-resource-card>
         </div>
@@ -64,11 +64,6 @@
         ],
 
 		properties: {
-            project: {
-                type: Object,
-                value: {},
-                notify: true
-            },
             chunk: {
                 type: Object,
                 value: {},
@@ -81,7 +76,7 @@
 		},
 
         observers: [
-            'reset(project.project)'
+            'reset(chunk.data.project.name)'
         ],
 
         reset: function () {

@@ -88,8 +88,8 @@
     <template>
 
         <div id="contain">
-            <ts-source-chunk id="srccard" on-tap="srctop" project="{{project}}" chunk="[[chunk]]"></ts-source-chunk>
-            <ts-target-edit noicon id="transcard" on-tap="transtop" on-edittrigger="edittrigger" project="[[project]]" chunk="{{chunk}}"></ts-target-edit>
+            <ts-source-chunk id="srccard" on-tap="srctop" chunk="[[chunk]]"></ts-source-chunk>
+            <ts-target-edit noicon id="transcard" on-tap="transtop" on-edittrigger="edittrigger" chunk="{{chunk}}"></ts-target-edit>
         </div>
 
     </template>
@@ -107,11 +107,6 @@
         ],
 
         properties: {
-            project: {
-                type: Object,
-                value: {},
-                notify: true
-            },
             chunk: {
                 type: Object,
                 value: {},
@@ -120,7 +115,7 @@
         },
 
         observers: [
-            'reset(project.project)'
+            'reset(chunk.data.project.name)'
         ],
 
         reset: function () {

@@ -140,7 +140,7 @@
                 <div id="selected-sources-header" class="row-header">Selected</div>
                 <template is="dom-repeat" items="[[sources]]" as="source">
                     <div class="row clickable" data-element="[[source]]" data-index="[[index]]" on-tap="removeSelected">
-                        <span>[[ source ]]</span>
+                        <span>[[ source.ln ]]</span> - <span>[[ source.name ]]</span>
                         <paper-checkbox class="right" disabled checked style="opacity: 1;"></paper-checkbox>
                     </div>
                 </template>
@@ -148,7 +148,7 @@
                 <div id="available-sources-header" class="row-header">Available</div>
                 <template is="dom-repeat" items="{{searchfilter(query, available)}}" as="source">
                     <div class="row clickable" data-element="[[source]]" data-index="[[index]]" on-tap="selectAvailable">
-                        <span>[[ source ]]</span>
+                        <span>[[ source.ln ]]</span> - <span>[[ source.name ]]</span>
                         <paper-checkbox class="right" disabled style="opacity: 1;"></paper-checkbox>
                     </div>
                 </template>
@@ -199,13 +199,17 @@
             query: {
                 type: String,
                 value: ""
+            },
+            project: {
+                type: Object,
+                value: {}
             }
         },
 
-        ready: function() {
-        },
-
         onOpen: function() {
+            var sources = App.projectsManager.sources;
+            var projectid = this.project.slug;
+            this.allSources = _.filter(sources, 'project', projectid);
             this.available = this._getAvailable();
         },
 
@@ -228,10 +232,23 @@
         },
 
         _getAvailable: function() {
-            var that = this;
-            return this.allSources.filter(function(source) {
-                return that.sources.indexOf(source) < 0;
-            });
+            var all = this.allSources;
+            var selected = this.sources;
+            var available = [];
+            var check;
+
+            for (var i = 0; i < all.length; i++) {
+                check = false;
+                for (var j = 0; j < selected.length; j++) {
+                    if (all[i].id === selected[j].id) {
+                        check = true;
+                    }
+                }
+                if (!check) {
+                    available.push(all[i]);
+                }
+            }
+            return available;
         },
 
         cancel: function() {
@@ -268,9 +285,8 @@
             }
         },
 
-        created: function () {
-            // NOTE: Replace with real data
-            this.allSources = ['English ULB', 'English UDB', 'Arabic', 'German', 'Old Chinese', 'Klingon'];
+        ready: function () {
+
         }
     });
 

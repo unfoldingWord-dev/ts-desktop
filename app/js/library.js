@@ -19,6 +19,7 @@
         // TODO: the library should contain the downloader
 
         let library = {
+            indexer: indexer,
 
             /**
              * Returns an array of projects

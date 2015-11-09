@@ -15,7 +15,7 @@
     let uploader = require('../js/uploader');
     let Translator = require('../js/translator').Translator;
     let Library = require('../js/library').Library;
-    let ProjectsManager = require('../js/projects').ProjectsManager;
+    let createProjectsManager = require('../js/projects').createProjectsManager;
 
     let util = require('../js/lib/util');
 
@@ -176,7 +176,7 @@
         },
 
         initializeProjectsManager: function () {
-            this.projectsManager = ProjectsManager(this.library.indexer.db, this.configurator);
+            this.projectsManager = createProjectsManager(this.library.indexer.db, this.configurator);
         },
 
         /**

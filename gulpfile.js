@@ -25,12 +25,8 @@ gulp.task('test', function () {
 gulp.task('jscs', function () {
     return gulp.src([JS_FILES, UNIT_TEST_FILES])
         .pipe(jscs({
-            fix: !!argv.fix,
             esnext: true,
             configPath: '.jscsrc'
-        }))
-        .pipe(gulp.dest(function (data) {
-            return data.base;
         }));
 });
 

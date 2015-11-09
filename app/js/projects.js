@@ -3,7 +3,7 @@
 
     var _ = require('lodash'),
         fs = require('fs'),
-        mkdirp = require('mkdirp'),
+        //mkdirp = require('mkdirp'),
         puts = console.log.bind(console);
 
     function zipper (r) {
@@ -120,6 +120,7 @@
             },
 
             loadTargetTranslation: function (translation) {
+                translation = translation;
                 return go(fs, 'readFile', 'filepath').then(puts).catch(puts);
             }
         };

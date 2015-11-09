@@ -22,12 +22,12 @@ function go (module, fn) {
 }
 
 /**
- *  var pm = ProjectsManager(db);
+ *  var pm = createProjectsManager(db);
  *
  *  e.g. var pm = App.projectsManager;
  */
 
-function ProjectsManager(db, configurator) {
+function createProjectsManager(db, configurator) {
 
     var query = db.exec.bind(db),
         write = go.bind(null, fs, 'writeFile'),
@@ -142,9 +142,9 @@ function ProjectsManager(db, configurator) {
         },
 
         loadTargetTranslation: function (targetTranslation) {
-            return read('filepath').then(puts);
+            return read(targetTranslation).then(puts);
         }
     };
 }
 
-module.exports.ProjectsManager = ProjectsManager;
+module.exports.createProjectsManager = createProjectsManager;

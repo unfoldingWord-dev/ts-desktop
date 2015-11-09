@@ -160,8 +160,8 @@
 
         onConfirm: function() {
         	var modal = document.querySelector('ts-source-modal');
-        	this.sources = modal.sources;
-        	this.selectedSource = modal.selectedSource;
+
+            this.fire('iron-signal', {name: 'fromsourcetab', data: {sources: modal.sources, selected: modal.selectedSource}});
         	// Execute these AFTER the state has changed and the values reflect that change.
         	this.async(function() {
 	        	if (this.selectedSource != null) {
@@ -176,7 +176,8 @@
         },
 
         choosesource: function(e) {
-            this.selectedSource = e.index;
+
+            this.fire('iron-signal', {name: 'fromsourcetab', data: {sources: this.sources, selected: e.index}});
         },
 
         // This function adjust the position and the width of the custom selection bar based on the position and

@@ -54,7 +54,7 @@
         <paper-material elevation="1">
             <div id="heading">
                 <div>
-                    <span>[[project.project.name]]</span> <span>[[chunk.chapter]]</span> &mdash; <span>[[project.language.ln]]</span>
+                    <span>[[chunk.data.project.name]]</span> <span>[[chunk.chapter]]</span> &mdash; <span>[[chunk.data.language.ln]]</span>
                 </div>
             </div>
             <div id="content" class="editmode">
@@ -73,10 +73,6 @@
 		is: 'ts-target-view',
 
 		properties: {
-            project: {
-                type: Object,
-                value: {}
-            },
             chunk: {
                 type: Object,
                 value: {}

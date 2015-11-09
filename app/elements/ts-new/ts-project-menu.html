@@ -96,13 +96,13 @@
       </div>
 
       <div id="contain">
-          <iron-list items="[[grouplist]]" as="group">
+          <iron-list items="[[categorylist]]" as="category">
               <template>
                   <div class="row" on-tap="store">
                       <div>
-                          <iron-icon class="small" icon="[[group.lefticon]]"></iron-icon>
-                          <span>[[group.category]]</span>
-                          <iron-icon class="right" icon="[[group.righticon]]"></iron-icon>
+                          <iron-icon class="small" icon="[[category.lefticon]]"></iron-icon>
+                          <span>[[category.name]]</span>
+                          <iron-icon class="right" icon="[[category.righticon]]"></iron-icon>
                       </div>
                   </div>
               </template>
@@ -125,17 +125,17 @@
               value: 0,
               notify: true
           },
-          group: {
+          category: {
               type: Object,
               value: {},
               notify: true
           },
-          book: {
+          project: {
               type: Object,
               value: {},
               notify: true
           },
-          grouplist: {
+          categorylist: {
               type: Array,
               value: []
           }
@@ -146,9 +146,9 @@
       ],
 
       store: function(e) {
-          this.group = e.model.group;
-          if (this.group.category === "Open Bible Stories") {
-              this.book = this.group.list[0];
+          this.category = e.model.category;
+          if (this.category.name === "Open Bible Stories") {
+              this.project = this.category.data[0];
               this.fire('create');
           } else {
               this.selected = this.selected + 1;
@@ -161,15 +161,15 @@
           var temparrary = [];
           _.forEach(_.groupBy(projects, 'category'), function (data, category) {
               if (category === 'null') {
-                  tempobject = {"category": "Open Bible Stories", "lefticon": "uw-icon:uw-icon-small", "righticon": "", "list": data};
+                  tempobject = {"name": "Open Bible Stories", "lefticon": "uw-icon:uw-icon-small", "righticon": "", "data": data};
               } else if (category === 'Bible: OT') {
-                  tempobject = {"category": "Old Testament", "lefticon": "project:project", "righticon": "chevron-right", "list": data};
+                  tempobject = {"name": "Old Testament", "lefticon": "project:project", "righticon": "chevron-right", "data": data};
               } else if (category === 'Bible: NT') {
-                  tempobject = {"category": "New Testament", "lefticon": "project:project", "righticon": "chevron-right", "list": data};
+                  tempobject = {"name": "New Testament", "lefticon": "project:project", "righticon": "chevron-right", "data": data};
               }
               temparrary.push(tempobject);
           });
-          this.grouplist = temparrary;
+          this.categorylist = temparrary;
       }
 
   });

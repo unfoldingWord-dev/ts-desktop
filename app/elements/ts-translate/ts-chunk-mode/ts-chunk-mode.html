@@ -53,7 +53,7 @@
 
         <div id="contain">
             <template is="dom-repeat" items="{{chunks.data}}" as="chunk">
-                <ts-chunk-card id="{{createid(index)}}" on-cardtrigger="cardtrigger" project="{{project}}" chunk="{{chunk}}"></ts-chunk-card>
+                <ts-chunk-card id="{{createid(index)}}" on-cardtrigger="cardtrigger" chunk="{{chunk}}"></ts-chunk-card>
             </template>
         </div>
 
@@ -72,11 +72,6 @@
         ],
 
         properties: {
-            project: {
-                type: Object,
-                value: {},
-                notify: true
-            },
             chunks: {
                 type: Object,
                 value: {},

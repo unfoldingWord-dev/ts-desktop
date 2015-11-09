@@ -54,11 +54,12 @@ gulp.task('lint', [
     'jshint'
 ]);
 
-gulp.task('build', ['lint', 'test'], function () {
+gulp.task('build', [], function () {
 
     var nw = new NwBuilder({
         files: './app/**/**', // use the glob format
-        platforms: ['osx64', 'win64'],
+        platforms: ['osx64', 'win64', 'linux64'],
+        version: 'v0.12.0',
         appName: APP_NAME
     });
 

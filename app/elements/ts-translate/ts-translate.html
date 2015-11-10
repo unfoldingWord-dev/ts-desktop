@@ -35,7 +35,8 @@
         </div>
 
         <iron-signals on-iron-signal-frompublish="reviewpublish"></iron-signals>
-        <iron-signals on-iron-signal-fromsourcetab="updatesources"></iron-signals>
+        <iron-signals on-iron-signal-changesources="updatesources"></iron-signals>
+        <iron-signals on-iron-signal-changeselected="updateselected"></iron-signals>
 
     </template>
 
@@ -110,9 +111,16 @@
         ],
 
         changesource: function (current) {
+            if(this.currentproject.data.project.name === undefined) {
+                return;
+            }
+
+
             if (current === null || current === undefined) {
                 return;
             }
+
+            console.log("changesource translate");
             var currentsource = this.currentproject.data.sources[current];
             var frames = App.projectsManager.getSourceFrames(currentsource);
             var name = this.currentproject.data.project.name;
@@ -159,6 +167,7 @@
                 source.push(srcchunk);
             }
             this.set('currentproject.source', source);
+            App.projectsManager.saveTargetTranslation(this.currentproject.translation, this.currentproject.data);
         },
 
         reviewpublish: function (event, data) {
@@ -171,7 +180,17 @@
 
         updatesources: function (event, data) {
 
+            console.log("updatesources translate");
+
             this.set('currentproject.data.sources', data.sources);
+
+
+        },
+
+        updateselected: function (event, data) {
+
+            console.log("updateselected translate");
+
             this.set('currentproject.data.currentsource', data.selected);
 
         },
@@ -228,6 +247,11 @@
         },
 
         reset: function () {
+            if(this.currentproject.data.project.name === undefined) {
+                return;
+            }
+
+            console.log("reset translate");
             var mythis = this;
             var read = this.$.readmode;
             var chunk = this.$.chunkmode;
@@ -250,6 +274,10 @@
         },
 
         checksources: function () {
+            if(this.currentproject.data.project.name === undefined) {
+                return;
+            }
+            console.log("checksources translate");
             var mythis = this;
             var sources = this.currentproject.data.sources;
             var lastmode = this.modestatus.lastmode;
@@ -266,6 +294,7 @@
                     }, 500);
                 }
             }
+            App.projectsManager.saveTargetTranslation(this.currentproject.translation, this.currentproject.data);
         },
 
         upload: function () {
@@ -281,6 +310,7 @@
             var completion = Math.round((count / update.length) * 100);
             this.set('currentproject.data.completion', completion);
             this.set('currentproject.translation', update);
+            App.projectsManager.saveTargetTranslation(this.currentproject.translation, this.currentproject.data);
         },
 
         createchunks: function () {

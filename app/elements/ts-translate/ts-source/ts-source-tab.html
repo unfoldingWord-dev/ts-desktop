@@ -161,13 +161,17 @@
         onConfirm: function() {
         	var modal = document.querySelector('ts-source-modal');
 
-            this.fire('iron-signal', {name: 'fromsourcetab', data: {sources: modal.sources, selected: modal.selectedSource}});
+            console.log("onConfirm sourcetab");
+
+            this.fire('iron-signal', {name: 'changesources', data: {sources: modal.sources}});
+            this.fire('iron-signal', {name: 'changeselected', data: {selected: modal.selectedSource}});
+
         	// Execute these AFTER the state has changed and the values reflect that change.
-        	this.async(function() {
+        	/*this.async(function() {
 	        	if (this.selectedSource != null) {
 	        		this.querySelector('paper-tab.iron-selected').fire('tap');
 	        	}
-        	}, 30);
+        	}, 50);*/
         	this.removeModal();
         },
 
@@ -176,18 +180,24 @@
         },
 
         choosesource: function(e) {
+            var selected = e.model.index;
+            console.log(selected);
 
-            this.fire('iron-signal', {name: 'fromsourcetab', data: {sources: this.sources, selected: e.index}});
+            console.log("choosesource sourcetab");
+
+            this.fire('iron-signal', {name: 'changeselected', data: {selected: selected}});
         },
 
         // This function adjust the position and the width of the custom selection bar based on the position and
         //    the width of the selected tab.
         _adjustSelectionBar: function() {
+            console.log("adjustselectionbar");
         	// Checks against null first when selecting the selected paper-tab.
         	if (this.querySelector('paper-tab.iron-selected')) {
 	        	// Execute these AFTER the state has changed and the values reflect that change.
 	        	this.async(function() {
 	        		var selectedTab = this.querySelector('paper-tab.iron-selected');
+                    console.log("changing bars");
 		    		var offsetLeft = selectedTab.offsetLeft;
 		    		var tabWidth = selectedTab.clientWidth;
 		    		var bars = this.querySelectorAll('.selection-bar');
@@ -195,7 +205,7 @@
 		    			bar.style.width = tabWidth+'px';
 		    			bar.style.left = offsetLeft+'px';
 		    		});
-	        	}, 30);
+	        	}, 200);
         	}
         }
 

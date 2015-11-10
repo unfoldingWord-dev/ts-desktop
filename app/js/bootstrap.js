@@ -52,6 +52,7 @@
             if (!win.shown) {
                 win.show();
                 win.shown = true;
+                this.reporter.logNotice("Starting GUI");
                 // NOTE: needs to be in a setTimeout, otherwise doesn't work properly
                 setTimeout(win.focus.bind(win), 1);
             }
@@ -176,7 +177,7 @@
         },
 
         initializeProjectsManager: function () {
-            this.projectsManager = ProjectsManager(this.library.indexer.db, this.configurator);
+            this.projectsManager = new ProjectsManager(this.library.indexer.db, this.configurator);
         },
 
         /**
@@ -206,13 +207,17 @@
         initializeReporter: function () {
             let _this = this;
 
+            let logPath = path.join(configurator.getValue('rootDir'), 'log.txt');
+
             _this.reporter = new Reporter({
-                logPath: configurator.getValue('logPath'),
+                logPath: logPath,
                 repoOwner: configurator.getValue('repoOwner'),
                 repo: configurator.getValue('repo'),
                 maxLogFileKb: configurator.getValue('maxLogFileKb'),
                 appVersion: require('../package.json').version
             });
+
+            _this.reporter.logNotice("Logs are being written to " + logPath);
 
             return _this.reporter;
         },

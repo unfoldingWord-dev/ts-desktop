@@ -35,6 +35,7 @@ function ProjectsManager(db, configurator) {
         mkdirp = go.bind(null, null, mkdirP),
         readdir = go.bind(null, fs, 'readdir'),
         toJSON = _.partialRight(JSON.stringify, null, '\t'),
+        fromJSON = JSON.parse.bind(JSON),
         config = (function (prefix) {
             var isUW = _.partial(_.startsWith, _, prefix, 0);
 
@@ -138,11 +139,22 @@ function ProjectsManager(db, configurator) {
         },
 
         loadTargetTranslationsList: function () {
-            return readdir(config.targetDir).then(config.filterDirs);
+            var targetDir = config.targetDir,
+                readManifest = function (dir) {
+                    return read(path.join(targetDir, dir, 'manifest.json'));
+                };
+
+            return readdir(targetDir).then(config.filterDirs).then(function (dirs) {
+                return _.map(dirs, readManifest);
+            }).then(function (files) {
+                return Promise.all(files);
+            }).then(function (manifests) {
+                return _.map(manifests, fromJSON);
+            });
         },
 
         loadTargetTranslation: function (targetTranslation) {
-            return read('filepath').then(puts);
+            return read(targetTranslation).then(puts);
         }
     };
 }

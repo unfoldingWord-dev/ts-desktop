@@ -244,6 +244,9 @@
             var newproj = {"data": newprojdata, "translation": translation, "source": source};
             this.push('projectlist', newprojdata);
             this.set('currentproject', newproj);
+
+            App.projectsManager.saveTargetTranslation(newproj.translation, newproj.data);
+
             this.animationConfig.exit.name = 'slide-left-animation';
             this.route = "translate";
             this.selected = 0;

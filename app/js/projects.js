@@ -46,7 +46,7 @@ function ProjectsManager(db, configurator) {
                 },
 
                 makeProjectPath: function (proj, lang) {
-                    return path.join(this.targetDir, prefix + proj.code + '-' + lang.lc);
+                    return path.join(this.targetDir, prefix + proj.slug + '-' + lang.lc);
                 }
             };
         })('uw-');

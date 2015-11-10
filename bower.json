@@ -6,7 +6,7 @@
     "iron-elements": "PolymerElements/iron-elements#~1.0.4",
     "neon-animation": "PolymerElements/neon-animation#~1.0.6",
     "paper-elements": "PolymerElements/paper-elements#~1.0.5",
-    "polymer": "Polymer/polymer#~1.1.5",
+    "polymer": "Polymer/polymer#~1.2.0",
     "lodash": "~3.10.1"
   }
 }

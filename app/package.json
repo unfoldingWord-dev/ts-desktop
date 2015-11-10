@@ -15,10 +15,5 @@
     "show": false,
     "icon": "icon.png"
   },
-  "chromium-args": "--child-clean-exit",
-    "dependencies": {
-        "lodash": "latest",
-        "mkdirp": "latest",
-        "sql.js": "latest"
-    }
+  "chromium-args": "--child-clean-exit"
 }

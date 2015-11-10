@@ -153,8 +153,11 @@ function ProjectsManager(db, configurator) {
             });
         },
 
-        loadTargetTranslation: function (targetTranslation) {
-            return read(targetTranslation).then(puts);
+        loadTargetTranslation: function (meta) {
+            var projectPath = config.makeProjectPath(meta.project, meta.language),
+                translationPath = path.join(projectPath, 'translation.json');
+
+            return read(translationPath).then(fromJSON);
         }
     };
 }

@@ -95,6 +95,8 @@
 
             let dir = path.dirname(logPath);
 
+            console.log(message);
+
             mkdirp(dir, function (e) {
                 if (e) {
                     throw new Error(e);

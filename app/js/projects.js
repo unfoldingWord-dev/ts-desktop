@@ -32,15 +32,14 @@ function map (cb) {
 }
 
 /**
- *  var pm = ProjectsManager(db);
+ *  var pm = ProjectsManager(query);
  *
  *  e.g. var pm = App.projectsManager;
  */
 
-function ProjectsManager(db, configurator) {
+function ProjectsManager(query, configurator) {
 
-    var query = db.exec.bind(db),
-        puts = console.log.bind(console),
+    var puts = console.log.bind(console),
         write = wrap(fs, 'writeFile'),
         read = wrap(fs, 'readFile'),
         mkdirp = wrap(null, mkdirP),

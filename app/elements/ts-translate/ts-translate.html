@@ -377,10 +377,13 @@
         },
 
         gopublish: function () {
-            this.animationConfig.exit.name = 'slide-left-animation';
-            this.animationConfig.entry.name = 'slide-from-left-animation';
-            this.route = "publish";
-            this.selected = 1;
+            if(this.currentproject.data.sources.length && this.currentproject.translation[0].meta.startverse > 0) {
+                this.animationConfig.exit.name = 'slide-left-animation';
+                this.animationConfig.entry.name = 'slide-from-left-animation';
+                this.fire('iron-signal', {name: 'updatepublish'});
+                this.route = "publish";
+                this.selected = 1;
+            }
         },
 
         gosettings: function () {

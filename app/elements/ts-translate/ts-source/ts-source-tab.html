@@ -109,7 +109,7 @@
         ],
 
         listeners: {
-            'iron-resize': '_adjustSelectionBar'
+            //'iron-resize': '_adjustSelectionBar'
         },
 
         properties: {
@@ -131,7 +131,7 @@
         },
 
         observers: [
-            '_adjustSelectionBar(selectedSource)'
+            //'_adjustSelectionBar(selectedSource)'
         ],
 
         ready: function() {
@@ -163,8 +163,7 @@
 
             console.log("onConfirm sourcetab");
 
-            this.fire('iron-signal', {name: 'changesources', data: {sources: modal.sources}});
-            this.fire('iron-signal', {name: 'changeselected', data: {selected: modal.selectedSource}});
+            this.fire('iron-signal', {name: 'updatesources', data: {sources: modal.sources, selected: modal.selectedSource}});
 
         	// Execute these AFTER the state has changed and the values reflect that change.
         	/*this.async(function() {
@@ -185,7 +184,7 @@
 
             console.log("choosesource sourcetab");
 
-            this.fire('iron-signal', {name: 'changeselected', data: {selected: selected}});
+            this.fire('iron-signal', {name: 'updateselected', data: {selected: selected}});
         },
 
         // This function adjust the position and the width of the custom selection bar based on the position and

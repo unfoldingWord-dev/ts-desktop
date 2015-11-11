@@ -43,8 +43,8 @@
         <div id="contain">
             <ts-source-chunk noref chunk="[[chunk]]"></ts-source-chunk>
             <iron-pages selected="{{selected}}">
-                <ts-target-review on-edittrigger="edittrigger" selected="{{selected}}" chunk="{{chunk}}"></ts-target-review>
-                <ts-target-edit on-edittrigger="edittrigger" selected="{{selected}}" chunk="{{chunk}}"></ts-target-edit>
+                <ts-target-review selected="{{selected}}" chunk="{{chunk}}"></ts-target-review>
+                <ts-target-edit selected="{{selected}}" chunk="{{chunk}}"></ts-target-edit>
             </iron-pages>
             <ts-resource-card chunk="[[chunk]]"></ts-resource-card>
         </div>
@@ -81,10 +81,6 @@
 
         reset: function () {
             this.selected = 0;
-        },
-
-        edittrigger: function () {
-            this.fire('cardtrigger');
         },
 
 		ready: function() {

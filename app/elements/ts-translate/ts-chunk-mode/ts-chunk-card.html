@@ -89,7 +89,7 @@
 
         <div id="contain">
             <ts-source-chunk id="srccard" on-tap="srctop" chunk="[[chunk]]"></ts-source-chunk>
-            <ts-target-edit noicon id="transcard" on-tap="transtop" on-edittrigger="edittrigger" chunk="{{chunk}}"></ts-target-edit>
+            <ts-target-edit noicon id="transcard" on-tap="transtop" chunk="{{chunk}}"></ts-target-edit>
         </div>
 
     </template>
@@ -161,10 +161,6 @@
                     src.classList.remove("bottom");
                 }, 1000);
             }
-        },
-
-        edittrigger: function () {
-            this.fire('cardtrigger');
         },
 
 		ready: function() {

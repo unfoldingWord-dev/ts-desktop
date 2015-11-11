@@ -250,7 +250,7 @@
 
             this.set('chunk.transcontent', returnstr);
             this.set('chunk.status', "Complete");
-            this.fire('edittrigger');
+            this.fire('iron-signal', {name: 'updatetranslation'});
         },
 
         checkdone: function () {
@@ -270,7 +270,7 @@
 
                 this.set('chunk.transcontent', returnstr);
                 this.set('chunk.status', "Incomplete");
-                this.fire('edittrigger');
+                this.fire('iron-signal', {name: 'updatetranslation'});
             }
         },
 

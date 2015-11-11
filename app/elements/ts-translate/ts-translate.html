@@ -116,27 +116,39 @@
 
         loadproject: function (event, data) {
             console.log("loadproject translate");
+            var mythis = this;
             this.set('currentproject.translation', data.translation);
             this.set('currentproject.data', data.projdata);
             this.reset();
             this.changesource();
             this.checksources();
+            setTimeout(function() {
+                mythis.fire('iron-signal', {name: 'adjustbar'});
+            }, 500);
         },
 
         updatesources: function (event, data) {
             console.log("updatesources translate");
+            var mythis = this;
             this.set('currentproject.data.sources', data.sources);
             this.set('currentproject.data.currentsource', data.selected);
             this.savetofile();
             this.changesource();
             this.checksources();
+            setTimeout(function() {
+                mythis.fire('iron-signal', {name: 'adjustbar'});
+            }, 50);
         },
 
         updateselected: function (event, data) {
+            var mythis = this;
             console.log("updateselected translate");
             this.set('currentproject.data.currentsource', data.selected);
             this.savetofile();
             this.changesource();
+            setTimeout(function() {
+                mythis.fire('iron-signal', {name: 'adjustbar'});
+            }, 50);
         },
 
         updatetranslation: function () {

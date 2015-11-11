@@ -52,7 +52,7 @@
 
         <div id="contain">
             <template is="dom-repeat" items="{{chunks.data}}" as="chunk">
-                <ts-review-card id="{{createid(index)}}" chunk="{{chunk}}" on-cardtrigger="cardtrigger"></ts-review-card>
+                <ts-review-card id="{{createid(index)}}" chunk="{{chunk}}"></ts-review-card>
             </template>
         </div>
 
@@ -144,10 +144,6 @@
 
         createid: function (index) {
             return this.modename + index;
-        },
-
-        cardtrigger: function () {
-            this.fire('modetrigger');
         },
 
 		ready: function() {

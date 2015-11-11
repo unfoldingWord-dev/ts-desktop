@@ -29,14 +29,16 @@
 
         <div id="pages">
             <ts-read-mode id="readmode" chapters="[[chapters]]" modestatus="{{modestatus}}"></ts-read-mode>
-            <ts-chunk-mode id="chunkmode" chunks="{{chunks}}" modestatus="{{modestatus}}" on-modetrigger="upload"></ts-chunk-mode>
-            <ts-review-mode id="reviewmode" chunks="{{chunks}}" modestatus="{{modestatus}}" on-modetrigger="upload"></ts-review-mode>
+            <ts-chunk-mode id="chunkmode" chunks="{{chunks}}" modestatus="{{modestatus}}"></ts-chunk-mode>
+            <ts-review-mode id="reviewmode" chunks="{{chunks}}" modestatus="{{modestatus}}"></ts-review-mode>
             <ts-nosource-mode id="nosourcemode" projectdata="{{currentproject.data}}"></ts-nosource-mode>
         </div>
 
         <iron-signals on-iron-signal-frompublish="reviewpublish"></iron-signals>
-        <iron-signals on-iron-signal-changesources="updatesources"></iron-signals>
-        <iron-signals on-iron-signal-changeselected="updateselected"></iron-signals>
+        <iron-signals on-iron-signal-updatesources="updatesources"></iron-signals>
+        <iron-signals on-iron-signal-updateselected="updateselected"></iron-signals>
+        <iron-signals on-iron-signal-loadnewproject="loadnewproject"></iron-signals>
+        <iron-signals on-iron-signal-updatetranslation="updatetranslation"></iron-signals>
 
     </template>
 
@@ -66,8 +68,7 @@
             },
             currentproject: {
                 type: Object,
-                value: {},
-                notify: true
+                value: {}
             },
             modestatus: {
                 type: Object,
@@ -80,13 +81,11 @@
             },
             chapters: {
                 type: Object,
-                value: {},
-                computed: 'createchapters(currentproject.*)'
+                value: {}
             },
             chunks: {
                 type: Object,
-                value: {},
-                computed: 'createchunks(currentproject.*)'
+                value: {}
             },
             animationConfig: {
                 value: function () {
@@ -104,27 +103,56 @@
             }
         },
 
-        observers: [
-            'reset(currentproject.data.project)',
-            'checksources(currentproject.data.sources)',
-            'changesource(currentproject.data.currentsource)'
-        ],
+        loadnewproject: function (event, data) {
+            console.log("loadnewproject translate");
+            this.set('currentproject.translation', data.translation);
+            this.set('currentproject.data', data.projdata);
+            this.savetofile();
+            this.reset();
+            this.checksources();
+        },
 
-        changesource: function (current) {
-            if(this.currentproject.data.project.name === undefined) {
-                return;
-            }
+        updatesources: function (event, data) {
+            console.log("updatesources translate");
+            this.set('currentproject.data.sources', data.sources);
+            this.set('currentproject.data.currentsource', data.selected);
+            this.createdata();
+            this.checksources();
+        },
 
+        updateselected: function (event, data) {
+            console.log("updateselected translate");
+            this.set('currentproject.data.currentsource', data.selected);
+            this.createdata();
+        },
 
+        updatetranslation: function () {
+            console.log("updatetranslation translate");
+            this.upload();
+            this.createdata();
+        },
+
+        createdata: function () {
+            this.savetofile();
+            this.changesource();
+            this.createchunks();
+            this.createchapters();
+        },
+
+        savetofile: function () {
+            console.log("savetofile translate");
+            App.projectsManager.saveTargetTranslation(this.currentproject.translation, this.currentproject.data);
+        },
+
+        changesource: function () {
+            var current = this.currentproject.data.currentsource;
             if (current === null || current === undefined) {
                 return;
             }
-
             console.log("changesource translate");
             var currentsource = this.currentproject.data.sources[current];
             var frames = App.projectsManager.getSourceFrames(currentsource);
             var name = this.currentproject.data.project.name;
-            var num = frames.length;
             var source = [];
             var srcchunk = {};
             var i;
@@ -137,7 +165,7 @@
             var lowest;
             var highest;
 
-            for (i = 0; i < num; i++) {
+            for (i = 0; i < frames.length; i++) {
                 chap = parseInt(frames[i].chapter);
                 sourcedata = frames[i].chunk;
                 lowest = 0;
@@ -167,7 +195,6 @@
                 source.push(srcchunk);
             }
             this.set('currentproject.source', source);
-            App.projectsManager.saveTargetTranslation(this.currentproject.translation, this.currentproject.data);
         },
 
         reviewpublish: function (event, data) {
@@ -176,23 +203,6 @@
             this.set('modestatus.verse', data.verse);
             this.route = "translate";
             this.selected = 3;
-        },
-
-        updatesources: function (event, data) {
-
-            console.log("updatesources translate");
-
-            this.set('currentproject.data.sources', data.sources);
-
-
-        },
-
-        updateselected: function (event, data) {
-
-            console.log("updateselected translate");
-
-            this.set('currentproject.data.currentsource', data.selected);
-
         },
 
         gohome: function () {
@@ -216,6 +226,7 @@
         },
 
         modechange: function (tomode, frommode) {
+            console.log("modechange translate", tomode, frommode);
             var read = this.$.readmode;
             var chunk = this.$.chunkmode;
             var review = this.$.reviewmode;
@@ -247,10 +258,6 @@
         },
 
         reset: function () {
-            if(this.currentproject.data.project.name === undefined) {
-                return;
-            }
-
             console.log("reset translate");
             var mythis = this;
             var read = this.$.readmode;
@@ -274,9 +281,6 @@
         },
 
         checksources: function () {
-            if(this.currentproject.data.project.name === undefined) {
-                return;
-            }
             console.log("checksources translate");
             var mythis = this;
             var sources = this.currentproject.data.sources;
@@ -285,7 +289,7 @@
 
             if (selected === 4) {
                 if (sources !== undefined && sources.length !== 0) {
-                    this.set('selected', lastmode);
+                    mythis.set('selected', lastmode);
                 }
             } else {
                 if (sources === undefined || sources.length === 0) {
@@ -294,10 +298,10 @@
                     }, 500);
                 }
             }
-            App.projectsManager.saveTargetTranslation(this.currentproject.translation, this.currentproject.data);
         },
 
         upload: function () {
+            console.log("upload translate");
             var update = this.chunks.data.map(function(chunk){
                 return {meta: chunk.meta, content: chunk.transcontent, status: chunk.status};
             });
@@ -310,10 +314,10 @@
             var completion = Math.round((count / update.length) * 100);
             this.set('currentproject.data.completion', completion);
             this.set('currentproject.translation', update);
-            App.projectsManager.saveTargetTranslation(this.currentproject.translation, this.currentproject.data);
         },
 
         createchunks: function () {
+            console.log("createchunks translate");
             var transdata = {};
             var srcdata = {};
             var translation = this.currentproject.translation;
@@ -326,10 +330,12 @@
             srcdata.data = source.map(function(chunk){
                 return {srccontent: chunk.content, meta: chunk.meta, notes: chunk.notes, words: chunk.words};
             });
-            return _.merge(srcdata, transdata);
+            var merged = _.merge(srcdata, transdata);
+            this.set('chunks', merged);
         },
 
         createchapters: function () {
+            console.log("createchapters translate");
             var transdata = {};
             var srcdata = {};
             var transchapters = [];
@@ -367,7 +373,8 @@
 
             transdata.data = transchapters;
             srcdata.data = srcchapters;
-            return _.merge(srcdata, transdata);
+            var merged = _.merge(srcdata, transdata);
+            this.set('chapters', merged);
         },
 
         ready: function() {

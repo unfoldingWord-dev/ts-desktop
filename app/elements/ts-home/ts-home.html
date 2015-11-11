@@ -341,8 +341,17 @@
         },
 
         openproject: function (e) {
-            this.currentproject = e.model.proj;
-            this.route = "translate";
+            var projectdata = e.model.proj;
+            this.set('currentproject.data', projectdata);
+            var mythis = this;
+
+            App.projectsManager.loadTargetTranslation(projectdata).then(function (translation) {
+                mythis.set('currentproject.translation', translation);
+                mythis.route = "translate";
+            });
+
+
+
         },
 
         openinfo: function (e) {

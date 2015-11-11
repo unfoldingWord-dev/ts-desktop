@@ -34,7 +34,7 @@
           <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
               <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" backto="{{backto}}"></ts-home>
               <ts-new data-route="new" route="{{route}}" projectlist="{{projectlist}}" currentproject="{{currentproject}}"></ts-new>
-              <ts-translate data-route="translate" route="{{route}}" currentproject="{{currentproject}}" backto="{{backto}}"></ts-translate>
+              <ts-translate data-route="translate" route="{{route}}" backto="{{backto}}"></ts-translate>
               <ts-publish data-route="publish" route="{{route}}" currentproject="[[currentproject]]"></ts-publish>
               <ts-settings data-route="settings" route="{{route}}" backto="[[backto]]"></ts-settings>
           </neon-animated-pages>
@@ -76,6 +76,13 @@
       },
 
       ready: function() {
+
+          var mythis = this;
+
+          App.projectsManager.loadTargetTranslationsList().then(function(list) {
+              mythis.projectlist = list;
+          });
+
           this.currentproject = {"data": {"project": {}, "language": {}, "icon": '', "sources": [], "completion": 0, "currentsource": null}, "translation": [
               {
                   meta: {

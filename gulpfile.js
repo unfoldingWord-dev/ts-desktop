@@ -54,7 +54,18 @@ gulp.task('lint', [
     'jshint'
 ]);
 
+// pass parameters like: gulp build --win --osx --linux
 gulp.task('build', [], function () {
+    var platforms = [];
+    if(argv.win !== undefined) {
+        platforms = ['win64', 'win32'];
+    } else if(argv.osx !== undefined) {
+        platforms = ['osx64'];
+    } else if(argv.linux !== undefined) {
+        platforms = ['linux64', 'linux32'];
+    } else {
+        platforms = ['osx64', 'win64', 'linux64'];
+    }
 
     var nw = new NwBuilder({
         files: [
@@ -271,7 +282,7 @@ gulp.task('build', [], function () {
             './node_modules/y18n/**',
             './node_modules/yargs/**',
             './node_modules/yauzl/**'], // use the glob format
-        platforms: ['osx64', 'win64', 'linux64'],
+        platforms: platforms,
         version: 'v0.12.3',
         appName: APP_NAME
     });

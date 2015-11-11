@@ -1,5 +1,6 @@
 
 <link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/iron-signals/iron-signals.html">
 
 <link rel="import" href="./ts-publish-chapter.html">
 
@@ -42,6 +43,8 @@
             </div>
         </div>
 
+        <iron-signals on-iron-signal-updatepublish="updatepublish"></iron-signals>
+
     </template>
 
 </dom-module>
@@ -64,9 +67,12 @@
             },
             chapters: {
                 type: Array,
-                value: [],
-                computed: 'createchapters(currentproject.translation.*)'
+                value: []
             }
+        },
+
+        updatepublish: function () {
+            this.createchapters();
         },
 
         createchapters: function () {
@@ -87,8 +93,7 @@
                 });
                 transchapters.push({name: name, chapter: chapter, complete: chapstatus, chunks: data});
             });
-
-            return transchapters;
+            this.set('chapters', transchapters);
         },
 
         next: function () {

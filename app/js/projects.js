@@ -4,37 +4,49 @@ var _ = require('lodash'),
     fs = require('fs'),
     path = require('path'),
     mkdirP = require('mkdirp'),
-    puts = console.log.bind(console);
+    rimraf = require('rimraf');
 
 function zipper (r) {
     return r.length ? _.map(r[0].values, _.zipObject.bind(_, r[0].columns)) : [];
 }
 
-function go (module, fn) {
-    var args = [].slice.call(arguments, 2),
-        f = module ? module[fn] : fn;
+function wrap (module, fn) {
+    var f = module ? module[fn] : fn;
 
-    return new Promise(function (resolve, reject) {
-      f.apply(module, args.concat(function (err, data) {
-        return err ? reject(err) : resolve(data);
-      }));
-    });
+    return function (arg1, arg2) {
+        var args = typeof arg2 === 'undefined' ? [arg1] : [arg1, arg2];
+
+        return new Promise(function (resolve, reject) {
+            f.apply(module, args.concat(function (err, data) {
+                return err ? reject(err) : resolve(data);
+            }));
+        });
+    };
+}
+
+function map (cb) {
+    var visit = typeof cb === 'function' ? function (v) { return cb(v); } : cb;
+    return function (collection) {
+        return _.map(collection, visit);
+    };
 }
 
 /**
- *  var pm = ProjectsManager(db);
+ *  var pm = ProjectsManager(query);
  *
  *  e.g. var pm = App.projectsManager;
  */
 
-function ProjectsManager(db, configurator) {
+function ProjectsManager(query, configurator) {
 
-    var query = db.exec.bind(db),
-        write = go.bind(null, fs, 'writeFile'),
-        read = go.bind(null, fs, 'readFile'),
-        mkdirp = go.bind(null, null, mkdirP),
-        readdir = go.bind(null, fs, 'readdir'),
+    var puts = console.log.bind(console),
+        write = wrap(fs, 'writeFile'),
+        read = wrap(fs, 'readFile'),
+        mkdirp = wrap(null, mkdirP),
+        rm = wrap(null, rimraf),
+        readdir = wrap(fs, 'readdir'),
         toJSON = _.partialRight(JSON.stringify, null, '\t'),
+        fromJSON = JSON.parse.bind(JSON),
         config = (function (prefix) {
             var isUW = _.partial(_.startsWith, _, prefix, 0);
 
@@ -45,13 +57,26 @@ function ProjectsManager(db, configurator) {
                     return configurator.getValue('targetTranslationsDir');
                 },
 
-                makeProjectPath: function (proj, lang) {
-                    return path.join(this.targetDir, prefix + proj.code + '-' + lang.lc);
+                makeProjectPaths: function (meta) {
+                    return this.makeProjectPathsForProject(prefix + meta.project.code + '-' + meta.language.lc);
+                },
+
+                makeProjectPathsForProject: function (project) {
+                    var targetDir = this.targetDir,
+                        projectDir = path.join(targetDir, project);
+
+                    return {
+                        parentDir: targetDir,
+                        projectDir: projectDir,
+                        manifest: path.join(projectDir, 'manifest.json'),
+                        translation: path.join(projectDir, 'translation.json')
+                    };
                 }
             };
         })('uw-');
 
     return {
+
         /**
          *  var l = pm.targetLanguages,
          *      africanLangs = _.filter(l, 'region', 'Africa'),
@@ -126,23 +151,40 @@ function ProjectsManager(db, configurator) {
         },
 
         saveTargetTranslation: function (translation, meta) {
-            var projectPath = config.makeProjectPath(meta.project, meta.language),
-                manifestPath = path.join(projectPath, 'manifest.json'),
-                translationPath = path.join(projectPath, 'translation.json');
+            var paths = config.makeProjectPaths(meta);
 
-            return mkdirp(projectPath).then(function () {
-                return write(manifestPath, toJSON(meta));
+            return mkdirp(paths.projectDir).then(function () {
+                return write(paths.manifest, toJSON(meta));
             }).then(function () {
-                return write(translationPath, toJSON(translation));
+                return write(paths.translation, toJSON(translation));
             });
         },
 
-        loadTargetTranslationsList: function () {
+        loadProjectsList: function () {
             return readdir(config.targetDir).then(config.filterDirs);
         },
 
-        loadTargetTranslation: function (targetTranslation) {
-            return read(targetTranslation).then(puts);
+        loadTargetTranslationsList: function () {
+            var makePaths = config.makeProjectPathsForProject.bind(config);
+
+            return this.loadProjectsList()
+                       .then(map(makePaths))
+                       .then(map('manifest'))
+                       .then(map(read))
+                       .then(Promise.all.bind(Promise))
+                       .then(map(fromJSON));
+        },
+
+        loadTargetTranslation: function (meta) {
+            var paths = config.makeProjectPaths(meta);
+
+            return read(paths.translation).then(fromJSON);
+        },
+
+        deleteTargetTranslation: function (meta) {
+            var paths = config.makeProjectPaths(meta);
+
+            return rm(paths.projectDir);
         }
     };
 }

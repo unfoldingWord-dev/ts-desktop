@@ -105,6 +105,11 @@
     Polymer({
         is: 'ts-new',
 
+        behaviors: [
+            Polymer.IronResizableBehavior,
+            Polymer.NeonAnimatableBehavior
+        ],
+
         properties: {
             selected: {
                 type: Number,
@@ -132,11 +137,6 @@
                 value: [],
                 notify: true
             },
-            currentproject: {
-                type: Object,
-                value: {},
-                notify: true
-            },
             animationConfig: {
                 value: function () {
                     return {
@@ -151,16 +151,6 @@
                     }
                 }
             }
-        },
-
-        behaviors: [
-            Polymer.IronResizableBehavior,
-            Polymer.NeonAnimatableBehavior
-        ],
-
-        back: function () {
-            this.animationConfig.exit.name = 'slide-right-animation';
-            this.selected === 0 ? this.route = "home" : this.selected = this.selected - 1;
         },
 
         createproject: function () {
@@ -202,13 +192,15 @@
             }
 
             var newprojdata = {"project": project, "language": language, "icon": icon, "sources": [], "completion": 0, "currentsource": null};
-            this.push('projectlist', newprojdata);
-
             this.fire('iron-signal', {name: 'loadnewproject', data: {projdata: newprojdata, translation: translation}});
-
             this.animationConfig.exit.name = 'slide-left-animation';
             this.route = "translate";
             this.selected = 0;
+        },
+
+        back: function () {
+            this.animationConfig.exit.name = 'slide-right-animation';
+            this.selected === 0 ? this.route = "home" : this.selected = this.selected - 1;
         },
 
         gohome: function () {

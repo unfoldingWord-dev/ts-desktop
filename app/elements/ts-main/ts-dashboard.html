@@ -1,5 +1,6 @@
 
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../components/iron-signals/iron-signals.html">
 
 <link rel="import" href="../ts-home/ts-home.html">
 <link rel="import" href="../ts-new/ts-new.html">
@@ -32,9 +33,9 @@
 
       <template is="dom-if" if="{{accepted}}">
           <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
-              <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" backto="{{backto}}"></ts-home>
-              <ts-new data-route="new" route="{{route}}" projectlist="{{projectlist}}" currentproject="{{currentproject}}"></ts-new>
-              <ts-translate data-route="translate" route="{{route}}" backto="{{backto}}"></ts-translate>
+              <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]" backto="{{backto}}"></ts-home>
+              <ts-new data-route="new" route="{{route}}" projectlist="{{projectlist}}"></ts-new>
+              <ts-translate data-route="translate" route="{{route}}" currentproject="{{currentproject}}" backto="{{backto}}"></ts-translate>
               <ts-publish data-route="publish" route="{{route}}" currentproject="[[currentproject]]"></ts-publish>
               <ts-settings data-route="settings" route="{{route}}" backto="[[backto]]"></ts-settings>
           </neon-animated-pages>
@@ -42,6 +43,9 @@
       <template is="dom-if" if="{{!accepted}}">
           <ts-terms accepted="{{accepted}}"></ts-terms>
       </template>
+
+      <iron-signals on-iron-signal-updatelist="updatelist"></iron-signals>
+      <iron-signals on-iron-signal-setdefault="setdefault"></iron-signals>
 
   </template>
 
@@ -75,14 +79,16 @@
           }
       },
 
-      ready: function() {
-
+      updatelist: function () {
+          console.log("updatelist dashboard");
           var mythis = this;
-
           App.projectsManager.loadTargetTranslationsList().then(function(list) {
-              mythis.projectlist = list;
+              mythis.set('projectlist', list);
           });
+      },
 
+      setdefault: function () {
+          console.log("setdefault dashboard");
           this.currentproject = {"data": {"project": {}, "language": {}, "icon": '', "sources": [], "completion": 0, "currentsource": null}, "translation": [
               {
                   meta: {
@@ -105,7 +111,11 @@
                   words: ''
               }
           ]};
+      },
 
+      ready: function() {
+          this.updatelist();
+          this.setdefault();
       }
 
   });

@@ -79,18 +79,18 @@
 
       <div id="header">
           <div>
-              <span class="click" on-tap="togroup">[[group.category]]</span>
+              <span class="click" on-tap="togroup">[[category.name]]</span>
               <iron-icon icon="chevron-right"></iron-icon>
               <em>Choose a book</em>
           </div>
       </div>
 
       <div id="contain">
-          <iron-list items="[[group.list]]" as="book">
+          <iron-list items="[[category.data]]" as="project">
               <template>
                   <div class="row" on-tap="store">
                       <div>
-                          <span>[[book.name]]</span>
+                          <span>[[project.name]]</span>
                       </div>
                   </div>
               </template>
@@ -112,11 +112,11 @@
               value: 0,
               notify: true
           },
-          group: {
+          category: {
               type: Object,
               value: {}
           },
-          book: {
+          project: {
               type: Object,
               value: {},
               notify: true
@@ -128,7 +128,7 @@
       ],
 
       store: function(e) {
-          this.book = e.model.book;
+          this.project = e.model.project;
           this.fire('create');
       },
 

@@ -2,6 +2,7 @@
 <link rel="import" href="../../../components/paper-material/paper-material.html">
 <link rel="import" href="../../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../../components/iron-autogrow-textarea/iron-autogrow-textarea.html">
+<link rel="import" href="../../../components/iron-signals/iron-signals.html">
 
 <dom-module id="ts-target-edit">
 
@@ -75,15 +76,17 @@
         <paper-material elevation="1">
             <div id="heading">
                 <div>
-                    <span>[[project.project.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[project.language.ln]]</span>
+                    <span>[[chunk.data.project.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[chunk.data.language.ln]]</span>
                 </div>
                 <paper-icon-button icon="clear" on-tap="review"></paper-icon-button>
             </div>
             <div id="content" class="editmode">
-                <iron-autogrow-textarea id="textbox" on-change="changetrigger" bind-value="{{chunk.transcontent}}"></iron-autogrow-textarea>
+                <iron-autogrow-textarea id="textbox" on-change="change" bind-value="{{chunk.transcontent}}"></iron-autogrow-textarea>
                 <p id="textholder"></p>
             </div>
         </paper-material>
+
+        <iron-signals on-iron-signal-rendertext="rendertext"></iron-signals>
 
 	</template>
 
@@ -96,10 +99,6 @@
 		is: 'ts-target-edit',
 
 		properties: {
-            project: {
-                type: Object,
-                value: {}
-            },
             chunk: {
                 type: Object,
                 value: {},
@@ -111,10 +110,6 @@
                 notify: true
             }
 		},
-
-        observers: [
-            'rendertext(chunk.*)'
-        ],
 
         rendertext: function () {
             var status = this.chunk.status;
@@ -149,8 +144,8 @@
             }
         },
 
-        changetrigger: function () {
-            this.fire('edittrigger');
+        change: function () {
+            this.fire('iron-signal', {name: 'updatetranslation'});
         },
 
         review: function () {

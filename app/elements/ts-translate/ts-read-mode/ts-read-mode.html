@@ -53,7 +53,7 @@
 
         <div id="contain">
             <template is="dom-repeat" items="{{chapters.data}}" as="chunk">
-                <ts-read-card id="{{createid(index)}}" project="{{project}}" chunk="[[chunk]]"></ts-read-card>
+                <ts-read-card id="{{createid(index)}}" chunk="[[chunk]]"></ts-read-card>
             </template>
         </div>
 
@@ -72,11 +72,6 @@
         ],
 
         properties: {
-            project: {
-                type: Object,
-                value: {},
-                notify: true
-            },
             chapters: {
                 type: Object,
                 value: {}

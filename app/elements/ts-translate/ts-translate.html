@@ -38,6 +38,7 @@
         <iron-signals on-iron-signal-updatesources="updatesources"></iron-signals>
         <iron-signals on-iron-signal-updateselected="updateselected"></iron-signals>
         <iron-signals on-iron-signal-loadnewproject="loadnewproject"></iron-signals>
+        <iron-signals on-iron-signal-loadproject="loadproject"></iron-signals>
         <iron-signals on-iron-signal-updatetranslation="updatetranslation"></iron-signals>
 
     </template>
@@ -68,7 +69,8 @@
             },
             currentproject: {
                 type: Object,
-                value: {}
+                value: {},
+                notify: true
             },
             modestatus: {
                 type: Object,
@@ -112,36 +114,44 @@
             this.checksources();
         },
 
+        loadproject: function (event, data) {
+            console.log("loadproject translate");
+            this.set('currentproject.translation', data.translation);
+            this.set('currentproject.data', data.projdata);
+            this.reset();
+            this.changesource();
+            this.checksources();
+        },
+
         updatesources: function (event, data) {
             console.log("updatesources translate");
             this.set('currentproject.data.sources', data.sources);
             this.set('currentproject.data.currentsource', data.selected);
-            this.createdata();
+            this.savetofile();
+            this.changesource();
             this.checksources();
         },
 
         updateselected: function (event, data) {
             console.log("updateselected translate");
             this.set('currentproject.data.currentsource', data.selected);
-            this.createdata();
+            this.savetofile();
+            this.changesource();
         },
 
         updatetranslation: function () {
             console.log("updatetranslation translate");
             this.upload();
-            this.createdata();
-        },
-
-        createdata: function () {
             this.savetofile();
             this.changesource();
-            this.createchunks();
-            this.createchapters();
         },
 
         savetofile: function () {
             console.log("savetofile translate");
-            App.projectsManager.saveTargetTranslation(this.currentproject.translation, this.currentproject.data);
+            var mythis = this;
+            App.projectsManager.saveTargetTranslation(this.currentproject.translation, this.currentproject.data).then(function() {
+                mythis.fire('iron-signal', {name: 'updatelist'});
+            });
         },
 
         changesource: function () {
@@ -195,34 +205,8 @@
                 source.push(srcchunk);
             }
             this.set('currentproject.source', source);
-        },
-
-        reviewpublish: function (event, data) {
-            this.selected = 0;
-            this.set('modestatus.chapter', data.chapter);
-            this.set('modestatus.verse', data.verse);
-            this.route = "translate";
-            this.selected = 3;
-        },
-
-        gohome: function () {
-            this.animationConfig.exit.name = 'slide-right-animation';
-            this.animationConfig.entry.name = 'slide-from-right-animation';
-            this.route = "home";
-        },
-
-        gopublish: function () {
-            this.animationConfig.exit.name = 'slide-left-animation';
-            this.animationConfig.entry.name = 'slide-from-left-animation';
-            this.route = "publish";
-            this.selected = 1;
-        },
-
-        gosettings: function () {
-            this.animationConfig.exit.name = 'slide-left-animation';
-            this.animationConfig.entry.name = 'slide-from-left-animation';
-            this.backto = this.route;
-            this.route = "settings";
+            this.createchunks();
+            this.createchapters();
         },
 
         modechange: function (tomode, frommode) {
@@ -375,6 +359,35 @@
             srcdata.data = srcchapters;
             var merged = _.merge(srcdata, transdata);
             this.set('chapters', merged);
+        },
+
+        reviewpublish: function (event, data) {
+            this.selected = 0;
+            this.set('modestatus.chapter', data.chapter);
+            this.set('modestatus.verse', data.verse);
+            this.route = "translate";
+            this.selected = 3;
+        },
+
+        gohome: function () {
+            this.animationConfig.exit.name = 'slide-right-animation';
+            this.animationConfig.entry.name = 'slide-from-right-animation';
+            this.fire('iron-signal', {name: 'setdefault'});
+            this.route = "home";
+        },
+
+        gopublish: function () {
+            this.animationConfig.exit.name = 'slide-left-animation';
+            this.animationConfig.entry.name = 'slide-from-left-animation';
+            this.route = "publish";
+            this.selected = 1;
+        },
+
+        gosettings: function () {
+            this.animationConfig.exit.name = 'slide-left-animation';
+            this.animationConfig.entry.name = 'slide-from-left-animation';
+            this.backto = this.route;
+            this.route = "settings";
         },
 
         ready: function() {

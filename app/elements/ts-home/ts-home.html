@@ -75,7 +75,7 @@
         iron-list {
             font-size: 110%;
             max-height: 90vh;
-            width: 450px;
+            width: 470px;
             background: white;
             box-shadow: 0 2px 3px 2px var(--greyed-out-light);
         }
@@ -92,7 +92,7 @@
 
         #headings {
             flex: 0 0 50px;
-            width: 450px;
+            width: 470px;
             display: flex;
             align-items: center;
         }
@@ -237,7 +237,7 @@
                                         <span class="smallspan"><iron-icon class="smallicon" icon="[[proj.icon]]"></iron-icon></span>
                                         <span class="bigspan">[[proj.project.name]]</span>
                                         <span class="smalltext bigspan">[[proj.language.ln]]</span>
-                                        <span class="smallspan">[[proj.completion]]</span>
+                                        <span class="smallspan"><span>[[proj.completion]]</span>%</span>
                                     </div>
                                     <div>
                                         <span><paper-icon-button class="info" icon="info" on-tap="openinfo" title="details"></paper-icon-button></span>
@@ -299,11 +299,6 @@
                 value: '',
                 notify: true
             },
-            currentproject: {
-                type: Object,
-                value: {},
-                notify: true
-            },
             currentinfo: {
                 type: Object,
                 value: {}
@@ -336,22 +331,14 @@
             }
         },
 
-        start: function () {
-            this.route = "new";
-        },
-
         openproject: function (e) {
             var projectdata = e.model.proj;
-            this.set('currentproject.data', projectdata);
             var mythis = this;
 
             App.projectsManager.loadTargetTranslation(projectdata).then(function (translation) {
-                mythis.set('currentproject.translation', translation);
+                mythis.fire('iron-signal', {name: 'loadproject', data: {projdata: projectdata, translation: translation}});
                 mythis.route = "translate";
             });
-
-
-
         },
 
         openinfo: function (e) {
@@ -366,7 +353,12 @@
         },
 
         deleteproject: function () {
-            this.splice('projectlist', this.index, 1);
+            //this.splice('projectlist', this.index, 1);
+            //need new code here to delete from filesystem
+        },
+
+        start: function () {
+            this.route = "new";
         },
 
         ready: function() {

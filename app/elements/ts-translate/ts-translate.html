@@ -219,6 +219,11 @@
             this.set('currentproject.source', source);
             this.createchunks();
             this.createchapters();
+            var mythis = this;
+            setTimeout(function() {
+                mythis.fire('iron-signal', {name: 'rendertext'});
+            }, 100);
+
         },
 
         modechange: function (tomode, frommode) {

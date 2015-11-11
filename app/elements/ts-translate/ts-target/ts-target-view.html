@@ -1,5 +1,6 @@
 
 <link rel="import" href="../../../components/paper-material/paper-material.html">
+<link rel="import" href="../../../components/iron-signals/iron-signals.html">
 
 <dom-module id="ts-target-view">
 
@@ -62,6 +63,8 @@
             </div>
         </paper-material>
 
+        <iron-signals on-iron-signal-rendertext="rendertext"></iron-signals>
+
 	</template>
 
 </dom-module>
@@ -78,10 +81,6 @@
                 value: {}
             }
 		},
-
-        observers: [
-            'rendertext(chunk.*)'
-        ],
 
         rendertext: function () {
             var status = this.chunk.status;

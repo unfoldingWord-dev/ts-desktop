@@ -1,5 +1,7 @@
 
 <link rel="import" href="../../../components/paper-material/paper-material.html">
+<link rel="import" href="../../../components/iron-signals/iron-signals.html">
+
 <link rel="import" href="./ts-source-tab.html">
 
 <dom-module id="ts-source-card">
@@ -61,6 +63,8 @@
             </div>
         </paper-material>
 
+        <iron-signals on-iron-signal-rendertext="rendertext"></iron-signals>
+
     </template>
 
 </dom-module>
@@ -81,10 +85,6 @@
                 value: {}
             }
         },
-
-        observers: [
-            'rendertext(chunk.*)'
-        ],
 
         rendertext: function () {
             var textarray = this.chunk.srccontent.split(" ");

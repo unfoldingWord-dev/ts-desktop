@@ -2,6 +2,7 @@
 <link rel="import" href="../../../components/paper-material/paper-material.html">
 <link rel="import" href="../../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../../components/iron-autogrow-textarea/iron-autogrow-textarea.html">
+<link rel="import" href="../../../components/iron-signals/iron-signals.html">
 
 <dom-module id="ts-target-edit">
 
@@ -85,6 +86,8 @@
             </div>
         </paper-material>
 
+        <iron-signals on-iron-signal-rendertext="rendertext"></iron-signals>
+
 	</template>
 
 </dom-module>
@@ -107,10 +110,6 @@
                 notify: true
             }
 		},
-
-        observers: [
-            'rendertext(chunk.*)'
-        ],
 
         rendertext: function () {
             var status = this.chunk.status;

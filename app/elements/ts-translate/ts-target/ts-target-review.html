@@ -5,6 +5,7 @@
 <link rel="import" href="../../../components/iron-icons/iron-icons.html">
 <link rel="import" href="../../../components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../../components/iron-signals/iron-signals.html">
 
 <link rel="import" href="./ts-verse-marker.html">
 
@@ -152,6 +153,8 @@
             </div>
         </paper-dialog>
 
+        <iron-signals on-iron-signal-rendertext="rendertext"></iron-signals>
+
 	</template>
 
 </dom-module>
@@ -173,14 +176,6 @@
                 value: 0,
                 notify: true
             }
-        },
-
-        observers: [
-            'rendertext(chunk.*)'
-        ],
-
-        edit: function () {
-            this.selected = 1;
         },
 
         rendertext: function () {
@@ -272,6 +267,10 @@
                 this.set('chunk.status', "Incomplete");
                 this.fire('iron-signal', {name: 'updatetranslation'});
             }
+        },
+
+        edit: function () {
+            this.selected = 1;
         },
 
 		ready: function() {

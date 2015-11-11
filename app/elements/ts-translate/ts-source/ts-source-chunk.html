@@ -1,5 +1,7 @@
 
 <link rel="import" href="../../../components/paper-material/paper-material.html">
+<link rel="import" href="../../../components/iron-signals/iron-signals.html">
+
 <link rel="import" href="./ts-source-tab.html">
 
 <dom-module id="ts-source-chunk">
@@ -48,15 +50,17 @@
 
         <paper-material elevation="1">
             <div id="heading">
-                <ts-source-tab project="[[project.project]]" sources="{{project.sources}}" selected-source="{{project.currentsource}}" lefty></ts-source-tab>
+                <ts-source-tab project="[[chunk.data.project]]" sources="{{chunk.data.sources}}" selected-source="{{chunk.data.currentsource}}" lefty></ts-source-tab>
                 <div class="ref">
-                    <span>[[project.project.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[project.language.ln]]</span>
+                    <span>[[chunk.data.project.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[chunk.data.language.ln]]</span>
                 </div>
             </div>
             <div id="content">
                 <p id="textholder"></p>
             </div>
         </paper-material>
+
+        <iron-signals on-iron-signal-rendertext="rendertext"></iron-signals>
 
 	</template>
 
@@ -73,20 +77,11 @@
         ],
 
 		properties: {
-            project: {
-                type: Object,
-                value: {},
-                notify: true
-            },
             chunk: {
                 type: Object,
                 value: {}
             }
 		},
-
-        observers: [
-            'rendertext(chunk.*)'
-        ],
 
         rendertext: function () {
             var textarray = this.chunk.srccontent.split(" ");

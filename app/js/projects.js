@@ -57,6 +57,7 @@ function ProjectsManager(query, configurator) {
                     return configurator.getValue('targetTranslationsDir');
                 },
 
+
                 makeProjectPaths: function (meta) {
                     return this.makeProjectPathsForProject(prefix + meta.project.code + '-' + meta.language.lc);
                 },
@@ -71,6 +72,7 @@ function ProjectsManager(query, configurator) {
                         manifest: path.join(projectDir, 'manifest.json'),
                         translation: path.join(projectDir, 'translation.json')
                     };
+
                 }
             };
         })('uw-');

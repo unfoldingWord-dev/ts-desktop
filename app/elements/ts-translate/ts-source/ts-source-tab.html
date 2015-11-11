@@ -1,6 +1,7 @@
 
 <link rel="import" href="../../../components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../../components/iron-signals/iron-signals.html">
 
 <link rel="import" href="./ts-source-modal.html">
 
@@ -37,7 +38,6 @@
 			position: relative;
 		}
 
-		/* This is like the selection bar on paper-tab but without the bugginess */
         .selection-bar {
         	width: 100%;
         	height: 2px !important;
@@ -81,12 +81,13 @@
 	</style>
 
 	<template>
+
 		<div class="tabs">
 			<paper-tabs no-bar hide-scroll-buttons scrollable selected="{{ selectedSource }}">
 				<template is="dom-repeat" items="[[ sources ]]" as="source">
                    <paper-tab class="tab" on-tap="choosesource">{{ source.name }}</paper-tab>
                 </template>
-            	<div class="selection-bar"></div>
+            	<div id="bar" class="selection-bar"></div>
 			</paper-tabs>
 		</div>
 		<div class="modal-btn-container">
@@ -94,6 +95,9 @@
 				<paper-icon-button icon="tab" class="icon24 icon" on-tap="openModal"></paper-icon-button>
 			</div>
 		</div>
+
+        <iron-signals on-iron-signal-adjustbar="adjustbar"></iron-signals>
+
 	</template>
 
 </dom-module>
@@ -107,10 +111,6 @@
         behaviors: [
             Polymer.IronResizableBehavior
         ],
-
-        listeners: {
-            'iron-resize': '_adjustSelectionBar'
-        },
 
         properties: {
         	sources: {
@@ -129,10 +129,6 @@
         		type: Boolean
         	}
         },
-
-        observers: [
-            '_adjustSelectionBar(selectedSource)'
-        ],
 
         ready: function() {
         	if (this.lefty) {
@@ -160,14 +156,8 @@
 
         onConfirm: function() {
         	var modal = document.querySelector('ts-source-modal');
-        	this.sources = modal.sources;
-        	this.selectedSource = modal.selectedSource;
-        	// Execute these AFTER the state has changed and the values reflect that change.
-        	this.async(function() {
-	        	if (this.selectedSource != null) {
-	        		this.querySelector('paper-tab.iron-selected').fire('tap');
-	        	}
-        	}, 30);
+            console.log("onConfirm sourcetab");
+            this.fire('iron-signal', {name: 'updatesources', data: {sources: modal.sources, selected: modal.selectedSource}});
         	this.removeModal();
         },
 
@@ -176,26 +166,19 @@
         },
 
         choosesource: function(e) {
-            this.selectedSource = e.index;
+            var selected = e.model.index;
+            console.log("choosesource sourcetab");
+            this.fire('iron-signal', {name: 'updateselected', data: {selected: selected}});
         },
 
-        // This function adjust the position and the width of the custom selection bar based on the position and
-        //    the width of the selected tab.
-        _adjustSelectionBar: function() {
-        	// Checks against null first when selecting the selected paper-tab.
-        	if (this.querySelector('paper-tab.iron-selected')) {
-	        	// Execute these AFTER the state has changed and the values reflect that change.
-	        	this.async(function() {
-	        		var selectedTab = this.querySelector('paper-tab.iron-selected');
-		    		var offsetLeft = selectedTab.offsetLeft;
-		    		var tabWidth = selectedTab.clientWidth;
-		    		var bars = this.querySelectorAll('.selection-bar');
-		    		Array.prototype.forEach.call(bars, function(bar, index) {
-		    			bar.style.width = tabWidth+'px';
-		    			bar.style.left = offsetLeft+'px';
-		    		});
-	        	}, 30);
-        	}
+        adjustbar: function() {
+            console.log("adjustbar sourcetab");
+            var selectedTab = this.querySelector('paper-tab.iron-selected');
+            var offsetLeft = selectedTab.offsetLeft;
+            var tabWidth = selectedTab.clientWidth;
+            var bar = this.$.bar;
+            bar.style.width = tabWidth+'px';
+            bar.style.left = offsetLeft+'px';
         }
 
     });

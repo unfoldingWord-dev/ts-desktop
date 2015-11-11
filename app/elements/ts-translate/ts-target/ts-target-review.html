@@ -5,6 +5,7 @@
 <link rel="import" href="../../../components/iron-icons/iron-icons.html">
 <link rel="import" href="../../../components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../../components/iron-signals/iron-signals.html">
 
 <link rel="import" href="./ts-verse-marker.html">
 
@@ -126,7 +127,7 @@
         <paper-material id="toggle" class="notdone" elevation="1">
             <div id="heading">
                 <div>
-                    <span>[[project.project.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[project.language.ln]]</span>
+                    <span>[[chunk.data.project.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[chunk.data.language.ln]]</span>
                 </div>
                 <paper-icon-button icon="create" title="edit" on-tap="edit"></paper-icon-button>
             </div>
@@ -152,6 +153,8 @@
             </div>
         </paper-dialog>
 
+        <iron-signals on-iron-signal-rendertext="rendertext"></iron-signals>
+
 	</template>
 
 </dom-module>
@@ -163,10 +166,6 @@
 		is: 'ts-target-review',
 
         properties: {
-            project: {
-                type: Object,
-                value: {}
-            },
             chunk: {
                 type: Object,
                 value: {},
@@ -177,14 +176,6 @@
                 value: 0,
                 notify: true
             }
-        },
-
-        observers: [
-            'rendertext(chunk.*)'
-        ],
-
-        edit: function () {
-            this.selected = 1;
         },
 
         rendertext: function () {
@@ -254,7 +245,7 @@
 
             this.set('chunk.transcontent', returnstr);
             this.set('chunk.status', "Complete");
-            this.fire('edittrigger');
+            this.fire('iron-signal', {name: 'updatetranslation'});
         },
 
         checkdone: function () {
@@ -274,8 +265,12 @@
 
                 this.set('chunk.transcontent', returnstr);
                 this.set('chunk.status', "Incomplete");
-                this.fire('edittrigger');
+                this.fire('iron-signal', {name: 'updatetranslation'});
             }
+        },
+
+        edit: function () {
+            this.selected = 1;
         },
 
 		ready: function() {

@@ -1,5 +1,6 @@
 
 <link rel="import" href="../../../components/paper-material/paper-material.html">
+<link rel="import" href="../../../components/iron-signals/iron-signals.html">
 
 <dom-module id="ts-target-view">
 
@@ -54,13 +55,15 @@
         <paper-material elevation="1">
             <div id="heading">
                 <div>
-                    <span>[[project.project.name]]</span> <span>[[chunk.chapter]]</span> &mdash; <span>[[project.language.ln]]</span>
+                    <span>[[chunk.data.project.name]]</span> <span>[[chunk.chapter]]</span> &mdash; <span>[[chunk.data.language.ln]]</span>
                 </div>
             </div>
             <div id="content" class="editmode">
                 <p id="textholder"></p>
             </div>
         </paper-material>
+
+        <iron-signals on-iron-signal-rendertext="rendertext"></iron-signals>
 
 	</template>
 
@@ -73,19 +76,11 @@
 		is: 'ts-target-view',
 
 		properties: {
-            project: {
-                type: Object,
-                value: {}
-            },
             chunk: {
                 type: Object,
                 value: {}
             }
 		},
-
-        observers: [
-            'rendertext(chunk.*)'
-        ],
 
         rendertext: function () {
             var status = this.chunk.status;

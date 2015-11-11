@@ -1,5 +1,6 @@
 
 <link rel="import" href="../../../components/iron-pages/iron-pages.html">
+<link rel="import" href="../../../components/iron-signals/iron-signals.html">
 
 <link rel="import" href="../ts-target/ts-target-review.html">
 <link rel="import" href="../ts-target/ts-target-edit.html">
@@ -41,13 +42,15 @@
 	<template>
 
         <div id="contain">
-            <ts-source-chunk noref project="{{project}}" chunk="[[chunk]]"></ts-source-chunk>
+            <ts-source-chunk noref chunk="[[chunk]]"></ts-source-chunk>
             <iron-pages selected="{{selected}}">
-                <ts-target-review on-edittrigger="edittrigger" selected="{{selected}}" project="[[project]]" chunk="{{chunk}}"></ts-target-review>
-                <ts-target-edit on-edittrigger="edittrigger" selected="{{selected}}" project="[[project]]" chunk="{{chunk}}"></ts-target-edit>
+                <ts-target-review selected="{{selected}}" chunk="{{chunk}}"></ts-target-review>
+                <ts-target-edit selected="{{selected}}" chunk="{{chunk}}"></ts-target-edit>
             </iron-pages>
             <ts-resource-card chunk="[[chunk]]"></ts-resource-card>
         </div>
+
+        <iron-signals on-iron-signal-reset="reset"></iron-signals>
 
 	</template>
 
@@ -64,11 +67,6 @@
         ],
 
 		properties: {
-            project: {
-                type: Object,
-                value: {},
-                notify: true
-            },
             chunk: {
                 type: Object,
                 value: {},
@@ -80,16 +78,8 @@
             }
 		},
 
-        observers: [
-            'reset(project.project)'
-        ],
-
         reset: function () {
             this.selected = 0;
-        },
-
-        edittrigger: function () {
-            this.fire('cardtrigger');
         },
 
 		ready: function() {

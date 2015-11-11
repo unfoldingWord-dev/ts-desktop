@@ -6,12 +6,44 @@
 ;(function (root) {
     'use strict';
 
-    let path = require('path');
-    let Configurator = require('../js/configurator').Configurator;
-    let configurator = new Configurator();
     let gui = require('nw.gui');
     let mainWindow = gui.Window.get();
+    let path = require('path');
     let Reporter = require('../js/reporter').Reporter;
+
+    // hook up global exception handler
+    process.removeAllListeners('uncaughtException');
+    process.on('uncaughtException', function (err) {
+        let date = new Date();
+        date = date.getFullYear() + '_' + date.getMonth() + '_' + date.getDay();
+        let crashPath = path.join(gui.App.dataPath, 'logs', date + '.crash');
+        let crashReporter = new Reporter({logPath: crashPath});
+        crashReporter.logError(err.message + '\n' + err.stack, function () {
+            /**
+             * TODO: Hook in a UI
+             * Currently the code quits quietly without notifying the user
+             * This should probably be the time when the user chooses to submit what happened or not
+             * then we restart the application
+             */
+            //var body = document.getElementsByName('body')[0];
+            //while (body.firstChild) {
+            //    body.removeChild(body.firstChild);
+            //}
+            //body.className = 'crash';
+            //body.innerHTML = '<h1>' + err.message + '</h1><code>' + err.stack + '</code>';
+            //
+            //if (!mainWindow.shown) {
+            //    mainWindow.show();
+            //    mainWindow.shown = true;
+            //    // NOTE: needs to be in a setTimeout, otherwise doesn't work properly
+            //    setTimeout(mainWindow.focus.bind(mainWindow), 1);
+            //}
+            gui.App.quit();
+        });
+    });
+
+    let Configurator = require('../js/configurator').Configurator;
+    let configurator = new Configurator();
     let uploader = require('../js/uploader');
     let Translator = require('../js/translator').Translator;
     let Library = require('../js/library').Library;
@@ -222,28 +254,6 @@
             return _this.reporter;
         },
 
-        /**
-         * A hook for global error catching
-         */
-        registerErrorReporter: function () {
-            process.removeAllListeners('uncaughtException');
-            process.on('uncaughtException', function (err) {
-                let date = new Date();
-                date = date.getFullYear() + '_' + date.getMonth() + '_' + date.getDay();
-                let path = configurator.getValue('crashDir') + '/' +  date + '.crash';
-                let crashReporter = new Reporter({logPath: path});
-                crashReporter.logError(err.message + '\n' + err.stack, function () {
-                    /**
-                     * TODO: Hook in a UI
-                     * Currently the code quits quietly without notifying the user
-                     * This should probably be the time when the user chooses to submit what happened or not
-                     * then we restart the application
-                     */
-                    gui.App.quit();
-                });
-            });
-        },
-
         init: function () {
             let _this = this;
 
@@ -254,7 +264,6 @@
             _this.initializeLibrary();
             _this.initializeProjectsManager();
             _this.initializeReporter();
-            _this.registerErrorReporter();
 
             let platformInit = _this.platformInit[process.platform];
             platformInit && platformInit.call(_this);

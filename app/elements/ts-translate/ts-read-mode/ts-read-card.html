@@ -1,4 +1,6 @@
 
+<link rel="import" href="../../../components/iron-signals/iron-signals.html">
+
 <link rel="import" href="../ts-target/ts-target-view.html">
 <link rel="import" href="../ts-source/ts-source-card.html">
 
@@ -88,9 +90,11 @@
     <template>
 
         <div id="contain">
-            <ts-source-card id="srccard" on-tap="srctop" chunk="[[chunk]]"></ts-source-card>
-            <ts-target-view id="transcard" on-tap="transtop" chunk="[[chunk]]"></ts-target-view>
+            <ts-source-card id="srccard" class="top" on-tap="srctop" chunk="[[chunk]]"></ts-source-card>
+            <ts-target-view id="transcard" class="bottom" on-tap="transtop" chunk="[[chunk]]"></ts-target-view>
         </div>
+
+        <iron-signals on-iron-signal-reset="reset"></iron-signals>
 
     </template>
 
@@ -108,10 +112,6 @@
                 value: {}
             }
         },
-
-        observers: [
-            'reset(chunk.data.project.name)'
-        ],
 
         reset: function () {
             var trans = this.$.transcard;

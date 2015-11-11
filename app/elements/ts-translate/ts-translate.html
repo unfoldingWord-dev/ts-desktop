@@ -34,7 +34,7 @@
             <ts-nosource-mode id="nosourcemode" projectdata="{{currentproject.data}}"></ts-nosource-mode>
         </div>
 
-        <iron-signals on-iron-signal-frompublish="reviewpublish"></iron-signals>
+        <iron-signals on-iron-signal-frompublish="frompublish"></iron-signals>
         <iron-signals on-iron-signal-updatesources="updatesources"></iron-signals>
         <iron-signals on-iron-signal-updateselected="updateselected"></iron-signals>
         <iron-signals on-iron-signal-loadnewproject="loadnewproject"></iron-signals>
@@ -268,6 +268,7 @@
             chunk.classList.add("hide");
             review.classList.add("hide");
             nosource.classList.add("hide");
+            mythis.fire('iron-signal', {name: 'reset'});
 
             if (sources !== undefined && sources.length !== 0) {
                 setTimeout(function() {
@@ -373,7 +374,7 @@
             this.set('chapters', merged);
         },
 
-        reviewpublish: function (event, data) {
+        frompublish: function (event, data) {
             this.selected = 0;
             this.set('modestatus.chapter', data.chapter);
             this.set('modestatus.verse', data.verse);

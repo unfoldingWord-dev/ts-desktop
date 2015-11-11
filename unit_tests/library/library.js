@@ -13,7 +13,7 @@
     configurator.loadConfig(config);
 
     let Library = require('../../app/js/library').Library;
-    let indexPath = './app/index/app.sqlite';
+    let indexPath = './app/index/index.sqlite';
     let library = new Library(path.resolve('./app/config/schema.sql'), indexPath, configurator.getValue('apiUrl'));
 
     describe('@Library', function () {

@@ -1,4 +1,6 @@
 
+<link rel="import" href="../../../components/iron-signals/iron-signals.html">
+
 <link rel="import" href="../ts-target/ts-target-edit.html">
 <link rel="import" href="../ts-source/ts-source-chunk.html">
 
@@ -88,9 +90,11 @@
     <template>
 
         <div id="contain">
-            <ts-source-chunk id="srccard" on-tap="srctop" chunk="[[chunk]]"></ts-source-chunk>
-            <ts-target-edit noicon id="transcard" on-tap="transtop" chunk="{{chunk}}"></ts-target-edit>
+            <ts-source-chunk id="srccard" class="top" on-tap="srctop" chunk="[[chunk]]"></ts-source-chunk>
+            <ts-target-edit noicon id="transcard" class="bottom" on-tap="transtop" chunk="{{chunk}}"></ts-target-edit>
         </div>
+
+        <iron-signals on-iron-signal-reset="reset"></iron-signals>
 
     </template>
 
@@ -113,10 +117,6 @@
                 notify: true
             }
         },
-
-        observers: [
-            'reset(chunk.data.project.name)'
-        ],
 
         reset: function () {
             var trans = this.$.transcard;

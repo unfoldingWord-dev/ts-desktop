@@ -1,5 +1,6 @@
 
 <link rel="import" href="../../../components/iron-pages/iron-pages.html">
+<link rel="import" href="../../../components/iron-signals/iron-signals.html">
 
 <link rel="import" href="../ts-target/ts-target-review.html">
 <link rel="import" href="../ts-target/ts-target-edit.html">
@@ -49,6 +50,8 @@
             <ts-resource-card chunk="[[chunk]]"></ts-resource-card>
         </div>
 
+        <iron-signals on-iron-signal-reset="reset"></iron-signals>
+
 	</template>
 
 </dom-module>
@@ -74,10 +77,6 @@
                 value: 0
             }
 		},
-
-        observers: [
-            'reset(chunk.data.project.name)'
-        ],
 
         reset: function () {
             this.selected = 0;

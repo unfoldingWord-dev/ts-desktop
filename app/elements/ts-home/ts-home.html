@@ -307,10 +307,6 @@
                 type: Array,
                 value: []
             },
-            index: {
-                type: Number,
-                value: null
-            },
             backto: {
                 type: String,
                 notify: true
@@ -342,9 +338,7 @@
         },
 
         openinfo: function (e) {
-            this.currentinfo = e.model.proj;
-            var target = e.model.proj;
-            this.index = this.projectlist.indexOf(target);
+            this.set('currentinfo', e.model.proj);
             this.$.info.open();
         },
 
@@ -353,8 +347,11 @@
         },
 
         deleteproject: function () {
-            //this.splice('projectlist', this.index, 1);
-            //need new code here to delete from filesystem
+            var mythis = this;
+            var projectdata = this.currentinfo;
+            App.projectsManager.deleteTargetTranslation(projectdata).then(function() {
+                mythis.fire('iron-signal', {name: 'updatelist'});
+            });
         },
 
         start: function () {

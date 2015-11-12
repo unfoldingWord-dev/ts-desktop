@@ -148,7 +148,7 @@
                 <p>I have reviewed the translationQuestions</p>
             </div>
             <div class="buttons">
-                <paper-button dialog-dismiss>Cancel</paper-button>
+                <paper-button dialog-dismiss on-tap="closepopup">Cancel</paper-button>
                 <paper-button dialog-confirm on-tap="completechunk">Confirm</paper-button>
             </div>
         </paper-dialog>
@@ -178,7 +178,7 @@
         },
 
         rendertext: function () {
-            if(this.chunk && this.chunk.transcontent) {
+            if(this.chunk && this.chunk.srccontent) {
                 var start = this.chunk.meta.startverse;
                 var end = this.chunk.meta.endverse;
                 var chap = this.chunk.meta.chapter;
@@ -243,9 +243,19 @@
                 }
             }
 
+            this.closepopup();
             this.set('chunk.transcontent', returnstr);
             this.set('chunk.status', "Complete");
             this.fire('iron-signal', {name: 'updatetranslation'});
+        },
+
+        closepopup: function () {
+            var popup = this.$.popup;
+            var mythis = this;
+            popup.close();
+            setTimeout(function() {
+                mythis.appendChild(popup);
+            }, 500);
         },
 
         checkdone: function () {
@@ -255,6 +265,8 @@
             var returnstr = "";
 
             if (status === "Incomplete") {
+                var host = document.querySelector("ts-translate");
+                host.appendChild(popup);
                 popup.open();
             } else {
                 for (var i = 0; i < textarray.length; i++) {

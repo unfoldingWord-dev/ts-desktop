@@ -55,7 +55,7 @@
 	<template>
 
         <div id="contain">
-            <iron-list items="{{chunks.data}}" as="chunk">
+            <iron-list id="reviewlist" items="{{chunks.data}}" as="chunk">
                 <template>
                     <ts-review-card id="{{createid(index)}}" chunk="{{chunk}}"></ts-review-card>
                 </template>
@@ -96,25 +96,18 @@
         frommode: function () {
             var mythis = this;
             var contain = this.$.contain;
-            var num = contain.children.length - 1;
-            var card;
-            var found = false;
-            var i = 0;
+            var list = this.$.reviewlist;
+            var index = list.firstVisibleIndex;
+            var card = document.getElementById(mythis.modename + index);
 
             contain.classList.add("moveout");
             setTimeout(function() {
                 contain.classList.remove("moveout");
                 mythis.classList.add("hide");
             }, 500);
-            while (i < num && !found) {
-                card = document.getElementById(mythis.modename + i);
-                if (card.getBoundingClientRect().top >= 0) {
-                    mythis.set('modestatus.chapter', card.chunk.meta.chapter);
-                    mythis.set('modestatus.verse', card.chunk.meta.startverse);
-                    found = true;
-                }
-                i++;
-            }
+
+            mythis.set('modestatus.chapter', card.chunk.meta.chapter);
+            mythis.set('modestatus.verse', card.chunk.meta.startverse);
         },
 
         tomode: function () {

@@ -29,7 +29,7 @@
 
             let data = sql.export();
             let buffer = new Buffer(data);
-            
+
             fs.writeFileSync(dbFilePath, buffer);
         }
         let buffer = fs.readFileSync(dbFilePath);

@@ -153,8 +153,6 @@
             </div>
         </paper-dialog>
 
-        <iron-signals on-iron-signal-rendertext="rendertext"></iron-signals>
-
 	</template>
 
 </dom-module>
@@ -169,7 +167,8 @@
             chunk: {
                 type: Object,
                 value: {},
-                notify: true
+                notify: true,
+                observer: 'rendertext'
             },
             selected: {
                 type: Number,
@@ -179,48 +178,49 @@
         },
 
         rendertext: function () {
-            var start = this.chunk.meta.startverse;
-            var end = this.chunk.meta.endverse;
-            var chap = this.chunk.meta.chapter;
-            var status = this.chunk.status;
-            var textholder = this.$.textholder;
-            var textarray = this.chunk.transcontent.split(" ");
-            var vmstr1 = "\<ts-verse-marker id='c";
-            var vmstr2 = "v";
-            var vmstr3 = "' draggable='true' ondragstart='drag(event)' verse='";
-            var vmstr4 = "'\>\<\/ts-verse-marker\>";
-            var textstr1 = "\<span ondrop='drop(event)' ondragover='allowDrop(event)'\>";
-            var textstr2 = "\<\/span\> ";
-            var numstr1 = "\<sup\>";
-            var numstr2 = "\<\/sup\>";
-            var toggle = this.$.toggle;
-            var returnstr = "";
-            var verse = 0;
-            var i = 0;
+            if(this.chunk && this.chunk.transcontent) {
+                var start = this.chunk.meta.startverse;
+                var end = this.chunk.meta.endverse;
+                var chap = this.chunk.meta.chapter;
+                var status = this.chunk.status;
+                var textholder = this.$.textholder;
+                var textarray = this.chunk.transcontent.split(" ");
+                var vmstr1 = "\<ts-verse-marker id='c";
+                var vmstr2 = "v";
+                var vmstr3 = "' draggable='true' ondragstart='drag(event)' verse='";
+                var vmstr4 = "'\>\<\/ts-verse-marker\>";
+                var textstr1 = "\<span ondrop='drop(event)' ondragover='allowDrop(event)'\>";
+                var textstr2 = "\<\/span\> ";
+                var numstr1 = "\<sup\>";
+                var numstr2 = "\<\/sup\>";
+                var toggle = this.$.toggle;
+                var returnstr = "";
+                var verse = 0;
+                var i = 0;
 
-            if(status === "Incomplete") {
-                for (i = start; i <= end; i++) {
-                    returnstr += vmstr1 + chap + vmstr2 + i + vmstr3 + i + vmstr4;
-                }
-                for (i = 0; i < textarray.length; i++) {
-                    returnstr += textstr1 + textarray[i] + textstr2;
-                }
-                toggle.classList.remove("done");
-                toggle.classList.add("notdone");
-            } else {
-                for (i = 0; i < textarray.length; i++) {
-                    if (textarray[i].substring(0, 2) === "/v") {
-                        verse = textarray[i].substring(2);
-                        returnstr += numstr1 + verse + numstr2;
-                    } else {
-                        returnstr += textarray[i] + " ";
+                if(status === "Incomplete") {
+                    for (i = start; i <= end; i++) {
+                        returnstr += vmstr1 + chap + vmstr2 + i + vmstr3 + i + vmstr4;
                     }
+                    for (i = 0; i < textarray.length; i++) {
+                        returnstr += textstr1 + textarray[i] + textstr2;
+                    }
+                    toggle.classList.remove("done");
+                    toggle.classList.add("notdone");
+                } else {
+                    for (i = 0; i < textarray.length; i++) {
+                        if (textarray[i].substring(0, 2) === "/v") {
+                            verse = textarray[i].substring(2);
+                            returnstr += numstr1 + verse + numstr2;
+                        } else {
+                            returnstr += textarray[i] + " ";
+                        }
+                    }
+                    toggle.classList.remove("notdone");
+                    toggle.classList.add("done");
                 }
-                toggle.classList.remove("notdone");
-                toggle.classList.add("done");
+                textholder.innerHTML = returnstr;
             }
-
-            textholder.innerHTML = returnstr;
         },
 
         completechunk: function () {

@@ -81,7 +81,7 @@
         </div>
 
         <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
-            <ts-language-menu selected="{{selected}}" language="{{language}}"></ts-language-menu>
+            <ts-language-menu id="languages" selected="{{selected}}" language="{{language}}"></ts-language-menu>
             <ts-project-menu selected="{{selected}}" category="{{category}}" project="{{project}}" on-create="createproject"></ts-project-menu>
             <ts-book-menu selected="{{selected}}" category="[[category]]" project="{{project}}" on-create="createproject"></ts-book-menu>
         </neon-animated-pages>
@@ -150,6 +150,10 @@
                     }
                 }
             }
+        },
+
+        forceResize: function (event) {
+            this.$.languages.notifyResize();
         },
 
         createproject: function () {

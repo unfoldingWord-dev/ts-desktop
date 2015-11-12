@@ -48,7 +48,7 @@
 
         describe('@DataTools', function() {
             this.timeout(4000);
-            let index = new Indexer(path.resolve('./app/config/schema.sql'), './app/index/app.sqlite');
+            let index = new Indexer(path.resolve('./app/config/schema.sql'), './app/index/index.sqlite');
 
             it('should have projects', function() {
                 assert.equal(

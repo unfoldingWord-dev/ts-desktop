@@ -59,7 +59,8 @@
       properties: {
           route: {
               type: String,
-              value: 'home'
+              value: 'home',
+              observer: '_routeChanged'
           },
           projectlist: {
               type: Array,
@@ -77,6 +78,12 @@
             type: String,
             value: ""
           }
+      },
+
+      _routeChanged: function (event) {
+          var el = this.querySelector('[data-route="' + this.route + '"]');
+          // The async delay prevents a flicker. It's a UI thing, not a logic thing.
+          el && el.forceResize && this.async(el.forceResize.bind(el), 30);
       },
 
       updatelist: function () {

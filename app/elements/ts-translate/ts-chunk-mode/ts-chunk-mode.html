@@ -1,4 +1,6 @@
 
+<link rel="import" href="../../../components/iron-list/iron-list.html">
+
 <link rel="import" href="./ts-chunk-card.html">
 
 <dom-module id="ts-chunk-mode">
@@ -16,9 +18,12 @@
 
         #contain {
             flex: auto;
-            overflow-y: auto;
+            overflow: hidden;
+        }
+
+        iron-list {
+            max-height: calc(100vh - 40px);
             overflow-x: hidden;
-            padding-bottom: 100px;
         }
 
         :host(.preview) {
@@ -52,9 +57,11 @@
     <template>
 
         <div id="contain">
-            <template is="dom-repeat" items="{{chunks.data}}" as="chunk">
-                <ts-chunk-card id="{{createid(index)}}" chunk="{{chunk}}"></ts-chunk-card>
-            </template>
+            <iron-list items="{{chunks.data}}" as="chunk">
+                <template>
+                    <ts-chunk-card id="{{createid(index)}}" chunk="{{chunk}}"></ts-chunk-card>
+                </template>
+            </iron-list>
         </div>
 
     </template>

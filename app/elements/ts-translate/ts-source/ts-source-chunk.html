@@ -77,10 +77,13 @@
 		properties: {
             chunk: {
                 type: Object,
-                value: {},
-                observer: 'rendertext'
+                value: {}
             }
 		},
+
+        observers: [
+            'rendertext(chunk.*)'
+        ],
 
         rendertext: function () {
             if(this.chunk && this.chunk.srccontent) {

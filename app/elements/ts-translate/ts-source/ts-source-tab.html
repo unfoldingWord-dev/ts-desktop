@@ -173,6 +173,10 @@
 
         adjustbar: function() {
             console.log("adjustbar sourcetab");
+            var current = this.selectedSource;
+            if (current === null || current === undefined) {
+                return;
+            }
             var selectedTab = this.querySelector('paper-tab.iron-selected');
             var offsetLeft = selectedTab.offsetLeft;
             var tabWidth = selectedTab.clientWidth;

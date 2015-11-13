@@ -60,8 +60,6 @@
             </div>
         </paper-material>
 
-        <iron-signals on-iron-signal-rendertext="rendertext"></iron-signals>
-
 	</template>
 
 </dom-module>
@@ -83,23 +81,28 @@
             }
 		},
 
+        observers: [
+            'rendertext(chunk.*)'
+        ],
+
         rendertext: function () {
-            var textarray = this.chunk.srccontent.split(" ");
-            var numstr1 = "\<sup\>";
-            var numstr2 = "\<\/sup\>";
-            var returnstr = "";
-            var verse = 0;
+            if(this.chunk && this.chunk.srccontent) {
+                var textarray = this.chunk.srccontent.split(" ");
+                var numstr1 = "\<sup\>";
+                var numstr2 = "\<\/sup\>";
+                var returnstr = "";
+                var verse = 0;
 
-            for (var i = 0; i < textarray.length; i++) {
-                if (textarray[i].substring(0, 2) === "/v") {
-                    verse = textarray[i].substring(2);
-                    returnstr += numstr1 + verse + numstr2;
-                } else {
-                    returnstr += textarray[i] + " ";
+                for (var i = 0; i < textarray.length; i++) {
+                    if (textarray[i].substring(0, 2) === "/v") {
+                        verse = textarray[i].substring(2);
+                        returnstr += numstr1 + verse + numstr2;
+                    } else {
+                        returnstr += textarray[i] + " ";
+                    }
                 }
+                this.$.textholder.innerHTML = returnstr;
             }
-
-            this.$.textholder.innerHTML = returnstr;
         },
 
 		ready: function() {

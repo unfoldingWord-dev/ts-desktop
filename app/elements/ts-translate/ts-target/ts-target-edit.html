@@ -86,8 +86,6 @@
             </div>
         </paper-material>
 
-        <iron-signals on-iron-signal-rendertext="rendertext"></iron-signals>
-
 	</template>
 
 </dom-module>
@@ -111,36 +109,40 @@
             }
 		},
 
+        observers: [
+            'rendertext(chunk.*)'
+        ],
+
         rendertext: function () {
-            var status = this.chunk.status;
-            var contentbox = this.$.content;
-            var textbox = this.$.textbox;
-            var textholder = this.$.textholder;
-            var textarray = this.chunk.transcontent.split(" ");
-            var numstr1 = "\<sup\>";
-            var numstr2 = "\<\/sup\>";
-            var returnstr = "";
-            var verse = 0;
+            if(this.chunk && this.chunk.srccontent) {
+                var status = this.chunk.status;
+                var contentbox = this.$.content;
+                var textbox = this.$.textbox;
+                var textholder = this.$.textholder;
+                var textarray = this.chunk.transcontent.split(" ");
+                var numstr1 = "\<sup\>";
+                var numstr2 = "\<\/sup\>";
+                var returnstr = "";
+                var verse = 0;
 
-            if (status === "Complete") {
-
-                for (var i = 0; i < textarray.length; i++) {
-                    if (textarray[i].substring(0, 2) === "/v") {
-                        verse = textarray[i].substring(2);
-                        returnstr += numstr1 + verse + numstr2;
-                    } else {
-                        returnstr += textarray[i] + " ";
+                if (status === "Complete") {
+                    for (var i = 0; i < textarray.length; i++) {
+                        if (textarray[i].substring(0, 2) === "/v") {
+                            verse = textarray[i].substring(2);
+                            returnstr += numstr1 + verse + numstr2;
+                        } else {
+                            returnstr += textarray[i] + " ";
+                        }
                     }
+                    textholder.innerHTML = returnstr;
+                    textholder.classList.remove("hide");
+                    textbox.classList.add("hide");
+                    contentbox.classList.remove("editmode");
+                } else {
+                    textholder.classList.add("hide");
+                    textbox.classList.remove("hide");
+                    contentbox.classList.add("editmode");
                 }
-
-                textholder.innerHTML = returnstr;
-                textholder.classList.remove("hide");
-                textbox.classList.add("hide");
-                contentbox.classList.remove("editmode");
-            } else {
-                textholder.classList.add("hide");
-                textbox.classList.remove("hide");
-                contentbox.classList.add("editmode");
             }
         },
 

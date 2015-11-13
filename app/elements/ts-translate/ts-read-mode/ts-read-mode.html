@@ -95,45 +95,30 @@
         },
 
         frommode: function () {
+            this.getlocation();
+            this.moveout();
+        },
+
+        tomode: function () {
+            this.setpreview();
+            this.setlocation();
+            this.movein();
+        },
+
+        moveout: function () {
             var mythis = this;
             var contain = this.$.contain;
-            var list = this.$.readlist;
-            var index = list.firstVisibleIndex;
-            var card = document.getElementById(mythis.modename + index);
-
-            console.log("from read");
 
             contain.classList.add("moveout");
             setTimeout(function() {
                 contain.classList.remove("moveout");
                 mythis.classList.add("hide");
             }, 500);
-
-            mythis.set('modestatus.chapter', card.chunk.chapter);
-            mythis.set('modestatus.verse', 1);
         },
 
-        tomode: function () {
+        movein: function () {
             var mythis = this;
             var contain = this.$.contain;
-            var list = this.$.readlist;
-            var card;
-            var found = false;
-            var i = 0;
-
-            console.log("to read");
-
-            mythis.classList.add("preview");
-            mythis.classList.remove("hide");
-
-            while (i < 10000 && !found) {
-                list.scrollToIndex(i);
-                card = document.getElementById(mythis.modename + i);
-                if (card.chunk.chapter === mythis.modestatus.chapter) {
-                    found = true;
-                }
-                i++;
-            }
 
             setTimeout(function() {
                 mythis.classList.remove("preview");
@@ -142,6 +127,36 @@
                     contain.classList.remove("movein");
                 }, 500);
             }, 500);
+        },
+
+        setpreview: function () {
+            this.classList.add("preview");
+            this.classList.remove("hide");
+        },
+
+        getlocation: function () {
+            var list = this.$.readlist;
+            var index = list.firstVisibleIndex;
+            var card = document.getElementById(this.modename + index);
+
+            this.set('modestatus.chapter', card.chunk.chapter);
+            this.set('modestatus.verse', 1);
+        },
+
+        setlocation: function () {
+            var list = this.$.readlist;
+            var card;
+            var found = false;
+            var i = 0;
+
+            while (i < 10000 && !found) {
+                list.scrollToIndex(i);
+                card = document.getElementById(this.modename + i);
+                if (card.chunk.chapter === this.modestatus.chapter) {
+                    found = true;
+                }
+                i++;
+            }
         },
 
         createid: function (index) {

@@ -126,6 +126,8 @@
             this.set('currentproject.translation', data.translation);
             this.set('currentproject.data', data.projdata);
             this.changesource();
+            this.createchunks();
+            this.createchapters();
             this.reset();
             this.checksources();
             setTimeout(function() {
@@ -139,7 +141,12 @@
             this.set('currentproject.data.sources', data.sources);
             this.set('currentproject.data.currentsource', data.selected);
             this.savetofile();
+            this.getlocation();
             this.changesource();
+            this.createchunks();
+            this.createchapters();
+            this.forceResize();
+            this.setlocation();
             this.checksources();
             setTimeout(function() {
                 mythis.fire('iron-signal', {name: 'adjustbar'});
@@ -151,7 +158,12 @@
             console.log("updateselected translate");
             this.set('currentproject.data.currentsource', data.selected);
             this.savetofile();
+            this.getlocation();
             this.changesource();
+            this.createchunks();
+            this.createchapters();
+            this.forceResize();
+            this.setlocation();
             setTimeout(function() {
                 mythis.fire('iron-signal', {name: 'adjustbar'});
             }, 250);
@@ -161,7 +173,7 @@
             console.log("updatetranslation translate");
             this.upload();
             this.savetofile();
-            this.changesource();
+            this.createchapters();
         },
 
         savetofile: function () {
@@ -223,12 +235,36 @@
                 source.push(srcchunk);
             }
             this.set('currentproject.source', source);
-            this.createchunks();
-            this.createchapters();
-            var mythis = this;
-            setTimeout(function() {
-                mythis.forceResize();
-            }, 200);
+        },
+
+        getlocation: function () {
+            var selected = this.selected;
+            var read = this.$.readmode;
+            var chunk = this.$.chunkmode;
+            var review = this.$.reviewmode;
+
+            if (selected === 1) {
+                read.getlocation();
+            } else if (selected === 2) {
+                chunk.getlocation();
+            } else if (selected === 3) {
+                review.getlocation();
+            }
+        },
+
+        setlocation: function () {
+            var selected = this.selected;
+            var read = this.$.readmode;
+            var chunk = this.$.chunkmode;
+            var review = this.$.reviewmode;
+
+            if (selected === 1) {
+                read.setlocation();
+            } else if (selected === 2) {
+                chunk.setlocation();
+            } else if (selected === 3) {
+                review.setlocation();
+            }
         },
 
         modechange: function (tomode, frommode) {

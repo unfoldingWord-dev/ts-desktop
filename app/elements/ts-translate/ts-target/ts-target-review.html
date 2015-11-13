@@ -167,8 +167,7 @@
             chunk: {
                 type: Object,
                 value: {},
-                notify: true,
-                observer: 'rendertext'
+                notify: true
             },
             selected: {
                 type: Number,
@@ -176,6 +175,10 @@
                 notify: true
             }
         },
+
+        observers: [
+            'rendertext(chunk.*)'
+        ],
 
         rendertext: function () {
             if(this.chunk && this.chunk.srccontent) {

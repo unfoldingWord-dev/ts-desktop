@@ -105,8 +105,13 @@
             }
         },
 
+        forceResize: function () {
+            this.$.readmode.notifyResize();
+            this.$.chunkmode.notifyResize();
+            this.$.reviewmode.notifyResize();
+        },
+
         loadnewproject: function (event, data) {
-            console.log("loadnewproject translate");
             this.set('currentproject.translation', data.translation);
             this.set('currentproject.data', data.projdata);
             this.savetofile();
@@ -115,12 +120,13 @@
         },
 
         loadproject: function (event, data) {
-            console.log("loadproject translate");
             var mythis = this;
             this.set('currentproject.translation', data.translation);
             this.set('currentproject.data', data.projdata);
-            this.reset();
             this.changesource();
+            this.createchunks();
+            this.createchapters();
+            this.reset();
             this.checksources();
             setTimeout(function() {
                 mythis.fire('iron-signal', {name: 'adjustbar'});
@@ -128,38 +134,44 @@
         },
 
         updatesources: function (event, data) {
-            console.log("updatesources translate");
             var mythis = this;
             this.set('currentproject.data.sources', data.sources);
             this.set('currentproject.data.currentsource', data.selected);
             this.savetofile();
+            this.getlocation();
             this.changesource();
+            this.createchunks();
+            this.createchapters();
+            this.forceResize();
+            this.setlocation();
             this.checksources();
             setTimeout(function() {
                 mythis.fire('iron-signal', {name: 'adjustbar'});
-            }, 50);
+            }, 250);
         },
 
         updateselected: function (event, data) {
             var mythis = this;
-            console.log("updateselected translate");
             this.set('currentproject.data.currentsource', data.selected);
             this.savetofile();
+            this.getlocation();
             this.changesource();
+            this.createchunks();
+            this.createchapters();
+            this.forceResize();
+            this.setlocation();
             setTimeout(function() {
                 mythis.fire('iron-signal', {name: 'adjustbar'});
-            }, 50);
+            }, 250);
         },
 
         updatetranslation: function () {
-            console.log("updatetranslation translate");
             this.upload();
             this.savetofile();
-            this.changesource();
+            this.createchapters();
         },
 
         savetofile: function () {
-            console.log("savetofile translate");
             var mythis = this;
             App.projectsManager.saveTargetTranslation(this.currentproject.translation, this.currentproject.data).then(function() {
                 mythis.fire('iron-signal', {name: 'updatelist'});
@@ -171,7 +183,6 @@
             if (current === null || current === undefined) {
                 return;
             }
-            console.log("changesource translate");
             var currentsource = this.currentproject.data.sources[current];
             var frames = App.projectsManager.getSourceFrames(currentsource);
             var name = this.currentproject.data.project.name;
@@ -217,17 +228,39 @@
                 source.push(srcchunk);
             }
             this.set('currentproject.source', source);
-            this.createchunks();
-            this.createchapters();
-            var mythis = this;
-            setTimeout(function() {
-                mythis.fire('iron-signal', {name: 'rendertext'});
-            }, 100);
+        },
 
+        getlocation: function () {
+            var selected = this.selected;
+            var read = this.$.readmode;
+            var chunk = this.$.chunkmode;
+            var review = this.$.reviewmode;
+
+            if (selected === 1) {
+                read.getlocation();
+            } else if (selected === 2) {
+                chunk.getlocation();
+            } else if (selected === 3) {
+                review.getlocation();
+            }
+        },
+
+        setlocation: function () {
+            var selected = this.selected;
+            var read = this.$.readmode;
+            var chunk = this.$.chunkmode;
+            var review = this.$.reviewmode;
+
+            if (selected === 1) {
+                read.setlocation();
+            } else if (selected === 2) {
+                chunk.setlocation();
+            } else if (selected === 3) {
+                review.setlocation();
+            }
         },
 
         modechange: function (tomode, frommode) {
-            console.log("modechange translate", tomode, frommode);
             var read = this.$.readmode;
             var chunk = this.$.chunkmode;
             var review = this.$.reviewmode;
@@ -259,7 +292,6 @@
         },
 
         reset: function () {
-            console.log("reset translate");
             var mythis = this;
             var read = this.$.readmode;
             var chunk = this.$.chunkmode;
@@ -283,7 +315,6 @@
         },
 
         checksources: function () {
-            console.log("checksources translate");
             var mythis = this;
             var sources = this.currentproject.data.sources;
             var lastmode = this.modestatus.lastmode;
@@ -303,7 +334,6 @@
         },
 
         upload: function () {
-            console.log("upload translate");
             var update = this.chunks.data.map(function(chunk){
                 return {meta: chunk.meta, content: chunk.transcontent, status: chunk.status};
             });
@@ -319,7 +349,10 @@
         },
 
         createchunks: function () {
-            console.log("createchunks translate");
+            var current = this.currentproject.data.currentsource;
+            if (current === null || current === undefined) {
+                return;
+            }
             var transdata = {};
             var srcdata = {};
             var translation = this.currentproject.translation;
@@ -337,7 +370,10 @@
         },
 
         createchapters: function () {
-            console.log("createchapters translate");
+            var current = this.currentproject.data.currentsource;
+            if (current === null || current === undefined) {
+                return;
+            }
             var transdata = {};
             var srcdata = {};
             var transchapters = [];

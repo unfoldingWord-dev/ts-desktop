@@ -81,7 +81,7 @@
         </div>
 
         <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
-            <ts-language-menu selected="{{selected}}" language="{{language}}"></ts-language-menu>
+            <ts-language-menu id="languages" selected="{{selected}}" language="{{language}}"></ts-language-menu>
             <ts-project-menu selected="{{selected}}" category="{{category}}" project="{{project}}" on-create="createproject"></ts-project-menu>
             <ts-book-menu selected="{{selected}}" category="[[category]]" project="{{project}}" on-create="createproject"></ts-book-menu>
         </neon-animated-pages>
@@ -152,6 +152,10 @@
             }
         },
 
+        forceResize: function (event) {
+            this.$.languages.notifyResize();
+        },
+
         createproject: function () {
             var allsources = App.projectsManager.sources;
             var mysources = _.filter(allsources, {'lc': 'en', 'project': this.project.slug});
@@ -166,8 +170,6 @@
             var transchunk = {};
             var chap;
             var i;
-
-            console.log("createproject new");
 
             for (i = 0; i < projectarray.length; i++) {
                 if (projectarray[i].project.name === name && projectarray[i].language === language) {

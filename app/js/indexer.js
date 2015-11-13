@@ -372,7 +372,7 @@
             return true;
         };
 
-        _this.indexCheckingQuestions = function(sourceTranslation, catalog) {
+        _this.indexTranslationWords = function(sourceTranslation, catalog) {
             // avoid linting errors temporarily
             sourceTranslation = sourceTranslation;
             catalog = catalog;
@@ -381,7 +381,16 @@
             return true;
         };
 
-        _this.indexTranslationWords = function(sourceTranslation, catalog) {
+        _this.indexTranslationWordAssignments = function(sourceTranslation, catalog) {
+            // avoid linting errors temporarily
+            sourceTranslation = sourceTranslation;
+            catalog = catalog;
+
+            // todo format object and index
+            return true;
+        };
+
+        _this.indexCheckingQuestions = function(sourceTranslation, catalog) {
             // avoid linting errors temporarily
             sourceTranslation = sourceTranslation;
             catalog = catalog;
@@ -461,15 +470,15 @@
                     checkingLevel: 'checking_level',
                     version: 'version',
                     sourceCatalog: 'source_catalog_url',
-                    sourceDateModified: 'source_catalog_server_modified_at',
+                    sourceServerDateModified: 'source_catalog_server_modified_at',
                     translationNotesCatalog: 'translation_notes_catalog_url',
-                    translationNotesDateModified: 'translation_notes_catalog_server_modified_at',
+                    translationNotesServerDateModified: 'translation_notes_catalog_server_modified_at',
                     translationWordsCatalog: 'translation_words_catalog_url',
-                    translationWordsDateModified: 'translation_words_catalog_server_modified_at',
+                    translationWordsServerDateModified: 'translation_words_catalog_server_modified_at',
                     translationWordAssignmentsCatalog: 'translation_word_assignments_catalog_url',
-                    translationWordAssignmentsDateModified: 'translation_word_assignments_catalog_server_modified_at',
+                    translationWordAssignmentsServerDateModified: 'translation_word_assignments_catalog_server_modified_at',
                     checkingQuestionsCatalog: 'checking_questions_catalog_url',
-                    checkingQuestionsDateModified: 'checking_questions_catalog_server_modified_at'
+                    checkingQuestionsServerDateModified: 'checking_questions_catalog_server_modified_at'
                 };
                 let values = new ContentValues();
                 for (let key in apiProps) {
@@ -495,7 +504,7 @@
                         values.set(dbFields[dateField + 'Catalog'], '');
                     }
                     if (dateValue !== null) {
-                        values.set(dbFields[dateField + 'DateModified'], dateValue);
+                        values.set(dbFields[dateField + 'ServerDateModified'], dateValue);
                     }
                 }
                 if (itemId === null) {
@@ -670,13 +679,16 @@
         }
         /** /
 
-        _this.indexNotes = function (projectId, sourceLanguageId, resourceId, catalogJson) {
+        _this.indexTranslationNotes = function (projectId, sourceLanguageId, resourceId, catalogJson) {
         };
 
-        _this.indexTerms = function (projectId, sourceLanguageId, resourceId, catalogJson) {
+        _this.indexTranslationWords = function (projectId, sourceLanguageId, resourceId, catalogJson) {
         };
 
-        _this.indexQuestions = function (projectId, sourceLanguageId, resourceId, catalogJson) {
+        _this.indexTranslationWordAssignments = function (projectId, sourceLanguageId, resourceId, catalogJson) {
+        };
+
+        _this.indexCheckinggit statusQuestions = function (projectId, sourceLanguageId, resourceId, catalogJson) {
         };
         /**/
 
@@ -708,7 +720,7 @@
                 " COALESCE(`sl1`.`project_description`, `sl2`.`project_description`, `sl3`.`project_description`) AS `description`," +
                 " `p`.`source_language_catalog_local_modified_at`, `p`.`source_language_catalog_server_modified_at`" +
                 " FROM `project` AS `p`" +
-                " LEFT JOIN `source_language` AS `sl1` ON `sl1`.`project_id`=`p`.`id`AND `sl1`.`slug`=?" +
+                " LEFT JOIN `source_language` AS `sl1` ON `sl1`.`project_id`=`p`.`id` AND `sl1`.`slug`=?" +
                 " LEFT JOIN `source_language` AS `sl2` ON `sl2`.`project_id`=`p`.`id` AND `sl2`.`slug`='en'" +
                 " LEFT JOIN `source_language` AS `sl3` ON `sl3`.`project_id`=`p`.`id`" +
                 " GROUP BY `p`.`id`" +
@@ -725,8 +737,8 @@
                         sourceLanguageSlug: item[4],
                         name: item[5],
                         description: item[6],
-                        sourceLanguageCatalogLocalModifiedAt: item[7],
-                        sourceLanguageCatalogServerModifiedAt: item[8]
+                        sourceLanguageCatalogLocalDateModified: item[7],
+                        sourceLanguageCatalogServerDateModified: item[8]
                     }));
                 }
             }
@@ -761,7 +773,7 @@
                         projectDescription: item[3],
                         direction: item[4],
                         dateModified: item[5],
-                        resourceCatalogUrl: item[6],
+                        resourceCatalog: item[6],
                         resourceCatalogLocalDateModified: item[7],
                         resourceCatalogServerDateModified: item[8]
                     }));
@@ -825,19 +837,19 @@
                         version: item[2],
                         dateModified: item[3],
                         sourceCatalog: item[4],
-                        sourceDateModified: item[5],
+                        sourceLocalDateModified: item[5],
                         sourceServerDateModified: item[6],
                         notesCatalog: item[7],
-                        notesDateModified: item[8],
+                        notesLocalDateModified: item[8],
                         notesServerDateModified: item[9],
                         wordsCatalog: item[10],
-                        wordsDateModified: item[11],
+                        wordsLocalDateModified: item[11],
                         wordsServerDateModified: item[12],
                         wordAssignmentsCatalog: item[13],
-                        wordAssignmentsDateModified: item[14],
+                        wordAssignmentsLocalDateModified: item[14],
                         wordAssignmentsServerDateModified: item[15],
                         questionsCatalog: item[16],
-                        questionsDateModified: item[17],
+                        questionsLocalDateModified: item[17],
                         questionsServerDateModified: item[18],
                         isDownloaded: item[20],
                         slug: item[21]
@@ -1056,8 +1068,8 @@
                 sourceLanguageSlug: item[3],
                 name: item[4],
                 description: item[5],
-                sourceLanguageCatalogLocalModifiedAt: item[6],
-                sourceLanguageCatalogServerModifiedAt: item[7]
+                sourceLanguageCatalogLocalDateModified: item[6],
+                sourceLanguageCatalogServerDateModified: item[7]
             });
             return project;
         };
@@ -1144,20 +1156,20 @@
                 checkingLevel: _.get(item, 'checking_level'),
                 version: _.get(item, 'version'),
                 sourceCatalog: _.get(item, 'source_catalog_url'),
-                sourceDateModified: _.get(item, 'source_catalog_local_modified_at'),
+                sourceLocalDateModified: _.get(item, 'source_catalog_local_modified_at'),
                 sourceServerDateModified: _.get(item, 'source_catalog_server_modified_at'),
-                notesCatalog: _.get(item, 'translation_notes_catalog_url'),
-                notesDateModified: _.get(item, 'translation_notes_catalog_local_modified_at'),
-                notesServerDateModified: _.get(item, 'translation_notes_catalog_server_modified_at'),
-                wordsCatalog: _.get(item, 'translation_words_catalog_url'),
-                wordsDateModified: _.get(item, 'translation_words_catalog_local_modified_at'),
-                wordsServerDateModified: _.get(item, 'translation_words_catalog_server_modified_at'),
-                wordAssignmentsCatalog: _.get(item, 'translation_word_assignments_catalog_url'),
-                wordAssignmentsDateModified: _.get(item, 'translation_word_assignments_catalog_local_modified_at'),
-                wordAssignmentsServerDateModified: _.get(item, 'translation_word_assignments_catalog_server_modified_at'),
-                questionsCatalog: _.get(item, 'checking_questions_catalog_url'),
-                questionsDateModified: _.get(item, 'checking_questions_catalog_local_modified_at'),
-                questionsServerDateModified: _.get(item, 'checking_questions_catalog_server_modified_at')
+                translationNotesCatalog: _.get(item, 'translation_notes_catalog_url'),
+                translationNotesLocalDateModified: _.get(item, 'translation_notes_catalog_local_modified_at'),
+                translationNotesServerDateModified: _.get(item, 'translation_notes_catalog_server_modified_at'),
+                translationWordsCatalog: _.get(item, 'translation_words_catalog_url'),
+                translationWordsLocalDateModified: _.get(item, 'translation_words_catalog_local_modified_at'),
+                translationWordsServerDateModified: _.get(item, 'translation_words_catalog_server_modified_at'),
+                translationWordAssignmentsCatalog: _.get(item, 'translation_word_assignments_catalog_url'),
+                translationWordAssignmentsLocalDateModified: _.get(item, 'translation_word_assignments_catalog_local_modified_at'),
+                translationWordAssignmentsServerDateModified: _.get(item, 'translation_word_assignments_catalog_server_modified_at'),
+                checkingQuestionsCatalog: _.get(item, 'checking_questions_catalog_url'),
+                checkingQuestionsLocalDateModified: _.get(item, 'checking_questions_catalog_local_modified_at'),
+                checkingQuestionsServerDateModified: _.get(item, 'checking_questions_catalog_server_modified_at')
             });
             return resource;
         };

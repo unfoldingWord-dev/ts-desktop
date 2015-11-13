@@ -181,7 +181,7 @@
                     assert.equal(update, expected);
                 });
             });
-
+            /** /
             describe('@GetName', function () {
                 it('should retrieve stored name', function () {
                     let expected = 'Existing User';
@@ -202,6 +202,7 @@
                     assert.equal(user2.getPhone(), expected);
                 });
             });
+            /**/
         });
 
     });

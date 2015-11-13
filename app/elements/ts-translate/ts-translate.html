@@ -364,6 +364,10 @@
 
         createchunks: function () {
             console.log("createchunks translate");
+            var current = this.currentproject.data.currentsource;
+            if (current === null || current === undefined) {
+                return;
+            }
             var transdata = {};
             var srcdata = {};
             var translation = this.currentproject.translation;
@@ -382,6 +386,10 @@
 
         createchapters: function () {
             console.log("createchapters translate");
+            var current = this.currentproject.data.currentsource;
+            if (current === null || current === undefined) {
+                return;
+            }
             var transdata = {};
             var srcdata = {};
             var transchapters = [];

@@ -112,7 +112,6 @@
         },
 
         loadnewproject: function (event, data) {
-            console.log("loadnewproject translate");
             this.set('currentproject.translation', data.translation);
             this.set('currentproject.data', data.projdata);
             this.savetofile();
@@ -121,7 +120,6 @@
         },
 
         loadproject: function (event, data) {
-            console.log("loadproject translate");
             var mythis = this;
             this.set('currentproject.translation', data.translation);
             this.set('currentproject.data', data.projdata);
@@ -136,7 +134,6 @@
         },
 
         updatesources: function (event, data) {
-            console.log("updatesources translate");
             var mythis = this;
             this.set('currentproject.data.sources', data.sources);
             this.set('currentproject.data.currentsource', data.selected);
@@ -155,7 +152,6 @@
 
         updateselected: function (event, data) {
             var mythis = this;
-            console.log("updateselected translate");
             this.set('currentproject.data.currentsource', data.selected);
             this.savetofile();
             this.getlocation();
@@ -170,14 +166,12 @@
         },
 
         updatetranslation: function () {
-            console.log("updatetranslation translate");
             this.upload();
             this.savetofile();
             this.createchapters();
         },
 
         savetofile: function () {
-            console.log("savetofile translate");
             var mythis = this;
             App.projectsManager.saveTargetTranslation(this.currentproject.translation, this.currentproject.data).then(function() {
                 mythis.fire('iron-signal', {name: 'updatelist'});
@@ -189,7 +183,6 @@
             if (current === null || current === undefined) {
                 return;
             }
-            console.log("changesource translate");
             var currentsource = this.currentproject.data.sources[current];
             var frames = App.projectsManager.getSourceFrames(currentsource);
             var name = this.currentproject.data.project.name;
@@ -268,8 +261,6 @@
         },
 
         modechange: function (tomode, frommode) {
-            console.log("modechange translate", tomode, frommode);
-
             var read = this.$.readmode;
             var chunk = this.$.chunkmode;
             var review = this.$.reviewmode;
@@ -289,8 +280,6 @@
                 nosource.frommode();
             }
 
-            console.log(this.modestatus);
-
             if (tomode === 1) {
                 read.tomode();
             } else if (tomode === 2) {
@@ -303,7 +292,6 @@
         },
 
         reset: function () {
-            console.log("reset translate");
             var mythis = this;
             var read = this.$.readmode;
             var chunk = this.$.chunkmode;
@@ -327,7 +315,6 @@
         },
 
         checksources: function () {
-            console.log("checksources translate");
             var mythis = this;
             var sources = this.currentproject.data.sources;
             var lastmode = this.modestatus.lastmode;
@@ -347,7 +334,6 @@
         },
 
         upload: function () {
-            console.log("upload translate");
             var update = this.chunks.data.map(function(chunk){
                 return {meta: chunk.meta, content: chunk.transcontent, status: chunk.status};
             });
@@ -363,7 +349,6 @@
         },
 
         createchunks: function () {
-            console.log("createchunks translate");
             var current = this.currentproject.data.currentsource;
             if (current === null || current === undefined) {
                 return;
@@ -385,7 +370,6 @@
         },
 
         createchapters: function () {
-            console.log("createchapters translate");
             var current = this.currentproject.data.currentsource;
             if (current === null || current === undefined) {
                 return;

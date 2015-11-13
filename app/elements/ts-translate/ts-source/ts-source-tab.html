@@ -78,6 +78,14 @@
 			color: var(--greyed-out-light);
 		}
 
+        :host {
+            --paper-tab-ink: var(--highlight-primary);
+        }
+
+        paper-tabs {
+            --paper-tabs-selection-bar-color: var(--highlight-primary);
+        }
+
 	</style>
 
 	<template>
@@ -156,7 +164,6 @@
 
         onConfirm: function() {
         	var modal = document.querySelector('ts-source-modal');
-            console.log("onConfirm sourcetab");
             this.fire('iron-signal', {name: 'updatesources', data: {sources: modal.sources, selected: modal.selectedSource}});
         	this.removeModal();
         },
@@ -167,12 +174,10 @@
 
         choosesource: function(e) {
             var selected = e.model.index;
-            console.log("choosesource sourcetab");
             this.fire('iron-signal', {name: 'updateselected', data: {selected: selected}});
         },
 
         adjustbar: function() {
-            console.log("adjustbar sourcetab");
             var current = this.selectedSource;
             if (current === null || current === undefined) {
                 return;

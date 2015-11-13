@@ -5,7 +5,6 @@
 
     let request = require('request');
     let _ = require('lodash');
-    let url = require('url');
 
     /**
      *
@@ -23,11 +22,6 @@
         //reassign this to _this, set config
         let _this = this;
         _this.config = _.merge({apiUrl: ''}, configJson);
-
-        //internal functions
-        function getUrlFromObj (itemObj, urlProp) {
-            return itemObj[urlProp];
-        }
 
         /**
          * Downloads the list of available projects from the server
@@ -55,16 +49,10 @@
          */
         _this.downloadSourceLanguageList = function (projectId) {
             return new Promise(function (resolve, reject) {
-                let catalogApiUrl = getUrlFromObj(
-                    downloadIndex.getProject(projectId),
-                    'lang_catalog'
-                );
-                let metaObj = {
-                    'date_modified': url.parse(catalogApiUrl, true).query
-                };
+                let catalogApiUrl = downloadIndex.getProject(projectId).sourceLanguageCatalog;
                 request(catalogApiUrl, function (error, response, catalogJson) {
                     if (!error && response.statusCode === 200) {
-                        if (downloadIndex.indexSourceLanguages(projectId, catalogJson, metaObj)) {
+                        if (downloadIndex.indexSourceLanguages(projectId, catalogJson)) {
                             resolve();
                         } else {
                             reject(new Error('could not index the source languages'));
@@ -83,16 +71,10 @@
          */
         _this.downloadResourceList = function (projectId, sourceLanguageId) {
             return new Promise(function (resolve, reject) {
-                let catalogApiUrl = getUrlFromObj(
-                    downloadIndex.getSourceLanguage(projectId, sourceLanguageId),
-                    'res_catalog'
-                );
-                let metaObj = {
-                    'date_modified': url.parse(catalogApiUrl, true).query
-                };
+                let catalogApiUrl = downloadIndex.getSourceLanguage(projectId, sourceLanguageId).resourceCatalog;
                 request(catalogApiUrl, function (error, response, catalogJson) {
                     if (!error && response.statusCode === 200) {
-                        if (downloadIndex.indexResources(projectId, sourceLanguageId, catalogJson, metaObj)) {
+                        if (downloadIndex.indexResources(projectId, sourceLanguageId, catalogJson)) {
                             resolve();
                         } else {
                             reject(new Error('could not index the resources'));
@@ -112,10 +94,7 @@
          */
         _this.downloadSource = function (projectId, sourceLanguageId, resourceId) {
             return new Promise(function (resolve, reject) {
-                let catalogApiUrl = getUrlFromObj(
-                    downloadIndex.getResource(projectId, sourceLanguageId, resourceId),
-                    'source'
-                );
+                let catalogApiUrl = downloadIndex.getResource(projectId, sourceLanguageId, resourceId).sourceCatalog;
                 request(catalogApiUrl, function (error, response, catalogJson) {
                     if (!error && response.statusCode === 200) {
                         if (downloadIndex.indexSource(projectId, sourceLanguageId, resourceId, catalogJson)) {
@@ -131,23 +110,20 @@
         };
 
         /**
-         * Downloads the translationWords from the server
+         * Downloads the translationNotes from the server
          * @param projectId
          * @param sourceLanguageId
          * @param resourceId
          */
-        _this.downloadTerms = function (projectId, sourceLanguageId, resourceId) {
+        _this.downloadTranslationNotes = function (projectId, sourceLanguageId, resourceId) {
             return new Promise(function (resolve, reject) {
-                let catalogApiUrl = getUrlFromObj(
-                    downloadIndex.getResource(projectId, sourceLanguageId, resourceId),
-                    'terms'
-                );
+                let catalogApiUrl = downloadIndex.getResource(projectId, sourceLanguageId, resourceId).translationNotesCatalog;
                 request(catalogApiUrl, function (error, response, catalogJson) {
                     if (!error && response.statusCode === 200) {
-                        if (downloadIndex.indexTerms(projectId, sourceLanguageId, resourceId, catalogJson)) {
+                        if (downloadIndex.indexTranslationNotes(projectId, sourceLanguageId, resourceId, catalogJson)) {
                             resolve();
                         } else {
-                            reject(new Error('could not index the terms'));
+                            reject(new Error('could not index the notes'));
                         }
                     } else {
                         reject(error, response);
@@ -157,23 +133,43 @@
         };
 
         /**
-         * Downloads the translationNotes from the server
+         * Downloads the translationWords from the server
          * @param projectId
          * @param sourceLanguageId
          * @param resourceId
          */
-        _this.downloadNotes = function (projectId, sourceLanguageId, resourceId) {
+        _this.downloadTranslationWords = function (projectId, sourceLanguageId, resourceId) {
             return new Promise(function (resolve, reject) {
-                let catalogApiUrl = getUrlFromObj(
-                    downloadIndex.getResource(projectId, sourceLanguageId, resourceId),
-                    'notes'
-                );
+                let catalogApiUrl = downloadIndex.getResource(projectId, sourceLanguageId, resourceId).translationWordsCatalog;
                 request(catalogApiUrl, function (error, response, catalogJson) {
                     if (!error && response.statusCode === 200) {
-                        if (downloadIndex.indexNotes(projectId, sourceLanguageId, resourceId, catalogJson)) {
+                        if (downloadIndex.indexTranslationWords(projectId, sourceLanguageId, resourceId, catalogJson)) {
                             resolve();
                         } else {
-                            reject(new Error('could not index the notes'));
+                            reject(new Error('could not index the words'));
+                        }
+                    } else {
+                        reject(error, response);
+                    }
+                });
+            });
+        };
+
+        /**
+         * Downloads the translationWordAssignments from the server
+         * @param projectId
+         * @param sourceLanguageId
+         * @param resourceId
+         */
+        _this.downloadTranslationWordAssignments = function (projectId, sourceLanguageId, resourceId) {
+            return new Promise(function (resolve, reject) {
+                let catalogApiUrl = downloadIndex.getResource(projectId, sourceLanguageId, resourceId).translationWordAssignmentsCatalog;
+                request(catalogApiUrl, function (error, response, catalogJson) {
+                    if (!error && response.statusCode === 200) {
+                        if (downloadIndex.indexTerms(projectId, sourceLanguageId, resourceId, catalogJson)) {
+                            resolve();
+                        } else {
+                            reject(new Error('could not index the words'));
                         }
                     } else {
                         reject(error, response);
@@ -190,13 +186,10 @@
          */
         _this.downloadCheckingQuestions = function (projectId, sourceLanguageId, resourceId) {
             return new Promise(function (resolve, reject) {
-                let catalogApiUrl = getUrlFromObj(
-                    downloadIndex.getResource(projectId, sourceLanguageId, resourceId),
-                    'checking_questions'
-                );
+                let catalogApiUrl = downloadIndex.getResource(projectId, sourceLanguageId, resourceId).checkingQuestionsCatalog;
                 request(catalogApiUrl, function (error, response, catalogJson) {
                     if (!error && response.statusCode === 200) {
-                        if (downloadIndex.indexQuestions(projectId, sourceLanguageId, resourceId, catalogJson)) {
+                        if (downloadIndex.indexCheckingQuestions(projectId, sourceLanguageId, resourceId, catalogJson)) {
                             resolve();
                         } else {
                             reject(new Error('could not index the questions'));

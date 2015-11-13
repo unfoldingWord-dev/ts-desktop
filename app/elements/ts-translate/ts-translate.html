@@ -125,8 +125,8 @@
             var mythis = this;
             this.set('currentproject.translation', data.translation);
             this.set('currentproject.data', data.projdata);
-            this.reset();
             this.changesource();
+            this.reset();
             this.checksources();
             setTimeout(function() {
                 mythis.fire('iron-signal', {name: 'adjustbar'});
@@ -233,6 +233,7 @@
 
         modechange: function (tomode, frommode) {
             console.log("modechange translate", tomode, frommode);
+
             var read = this.$.readmode;
             var chunk = this.$.chunkmode;
             var review = this.$.reviewmode;
@@ -251,6 +252,8 @@
             } else if (frommode === 4) {
                 nosource.frommode();
             }
+
+            console.log(this.modestatus);
 
             if (tomode === 1) {
                 read.tomode();

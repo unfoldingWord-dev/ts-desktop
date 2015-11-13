@@ -102,6 +102,8 @@
             var index = list.firstVisibleIndex;
             var card = document.getElementById(mythis.modename + index);
 
+            console.log("from chunk");
+
             contain.classList.add("moveout");
             setTimeout(function() {
                 contain.classList.remove("moveout");
@@ -115,25 +117,25 @@
         tomode: function () {
             var mythis = this;
             var contain = this.$.contain;
-            var num = contain.children.length - 1;
+            var list = this.$.chunklist;
             var card;
-            var pagescroll;
-            var cardscroll;
             var found = false;
             var i = 0;
 
+            console.log("to chunk");
+
             mythis.classList.add("preview");
             mythis.classList.remove("hide");
-            pagescroll = contain.scrollTop;
-            while (i < num && !found) {
+
+            while (i < 10000 && !found) {
+                list.scrollToIndex(i);
                 card = document.getElementById(mythis.modename + i);
                 if (card.chunk.meta.chapter === mythis.modestatus.chapter && card.chunk.meta.startverse === mythis.modestatus.verse) {
-                    cardscroll = card.getBoundingClientRect().top;
                     found = true;
                 }
                 i++;
             }
-            contain.scrollTop = pagescroll + cardscroll - 60;
+
             setTimeout(function() {
                 mythis.classList.remove("preview");
                 contain.classList.add("movein");

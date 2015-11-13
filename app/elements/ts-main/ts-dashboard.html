@@ -87,7 +87,6 @@
       },
 
       updatelist: function () {
-          console.log("updatelist dashboard");
           var mythis = this;
           App.projectsManager.loadTargetTranslationsList().then(function(list) {
               mythis.set('projectlist', list);
@@ -95,7 +94,6 @@
       },
 
       setdefault: function () {
-          console.log("setdefault dashboard");
           this.currentproject = {"data": {"project": {}, "language": {}, "icon": '', "sources": [], "completion": 0, "currentsource": null}, "translation": [
               {
                   meta: {

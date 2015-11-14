@@ -151,7 +151,7 @@
             while (i < 10000 && !found) {
                 list.scrollToIndex(i);
                 card = document.getElementById(this.modename + i);
-                if (card.chunk.meta.chapter === this.modestatus.chapter && card.chunk.meta.startverse === this.modestatus.verse) {
+                if (card.chunk.meta.chapter === this.modestatus.chapter && (card.chunk.meta.startverse === this.modestatus.verse || card.chunk.meta.startverse === 0)) {
                     found = true;
                 }
                 i++;

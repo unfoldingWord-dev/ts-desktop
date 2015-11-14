@@ -75,7 +75,7 @@
         iron-list {
             font-size: 110%;
             max-height: 90vh;
-            width: 450px;
+            width: 470px;
             background: white;
             box-shadow: 0 2px 3px 2px var(--greyed-out-light);
         }
@@ -92,7 +92,7 @@
 
         #headings {
             flex: 0 0 50px;
-            width: 450px;
+            width: 470px;
             display: flex;
             align-items: center;
         }
@@ -237,7 +237,7 @@
                                         <span class="smallspan"><iron-icon class="smallicon" icon="[[proj.icon]]"></iron-icon></span>
                                         <span class="bigspan">[[proj.project.name]]</span>
                                         <span class="smalltext bigspan">[[proj.language.ln]]</span>
-                                        <span class="smallspan">[[proj.completion]]</span>
+                                        <span class="smallspan"><span>[[proj.completion]]</span>%</span>
                                     </div>
                                     <div>
                                         <span><paper-icon-button class="info" icon="info" on-tap="openinfo" title="details"></paper-icon-button></span>
@@ -253,9 +253,9 @@
         <paper-dialog id="info" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <h2>Project Details</h2>
             <div>
-                <p>Project: <span>[[project.project.name]]</span></p>
-                <p>Target Language: <span>[[project.language.ln]]</span> (<span>[[project.language.lc]]</span>)</p>
-                <p>Progress: <span>[[project.completion]]</span>%</p>
+                <p>Project: <span>[[currentinfo.project.name]]</span> (<span>[[currentinfo.project.slug]]</span>)</p>
+                <p>Target Language: <span>[[currentinfo.language.ln]]</span> (<span>[[currentinfo.language.lc]]</span>)</p>
+                <p>Progress: <span>[[currentinfo.completion]]</span>%</p>
                 <p>Translators</p>
             </div>
             <div id="border">
@@ -299,18 +299,13 @@
                 value: '',
                 notify: true
             },
-            project: {
+            currentinfo: {
                 type: Object,
-                value: {},
-                notify: true
+                value: {}
             },
             projectlist: {
                 type: Array,
                 value: []
-            },
-            index: {
-                type: Number,
-                value: null
             },
             backto: {
                 type: String,
@@ -332,19 +327,18 @@
             }
         },
 
-        start: function () {
-            this.route = "new";
-        },
-
         openproject: function (e) {
-            this.project = e.model.proj;
-            this.route = "translate";
+            var projectdata = e.model.proj;
+            var mythis = this;
+
+            App.projectsManager.loadTargetTranslation(projectdata).then(function (translation) {
+                mythis.fire('iron-signal', {name: 'loadproject', data: {projdata: projectdata, translation: translation}});
+                mythis.route = "translate";
+            });
         },
 
         openinfo: function (e) {
-            this.project = e.model.proj;
-            var target = e.model.proj;
-            this.index = this.projectlist.indexOf(target);
+            this.set('currentinfo', e.model.proj);
             this.$.info.open();
         },
 
@@ -353,7 +347,15 @@
         },
 
         deleteproject: function () {
-            this.splice('projectlist', this.index, 1);
+            var mythis = this;
+            var projectdata = this.currentinfo;
+            App.projectsManager.deleteTargetTranslation(projectdata).then(function() {
+                mythis.fire('iron-signal', {name: 'updatelist'});
+            });
+        },
+
+        start: function () {
+            this.route = "new";
         },
 
         ready: function() {

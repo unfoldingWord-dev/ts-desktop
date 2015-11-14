@@ -5,6 +5,7 @@
 <link rel="import" href="../../../components/iron-icons/iron-icons.html">
 <link rel="import" href="../../../components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../../components/iron-signals/iron-signals.html">
 
 <link rel="import" href="./ts-verse-marker.html">
 
@@ -126,7 +127,7 @@
         <paper-material id="toggle" class="notdone" elevation="1">
             <div id="heading">
                 <div>
-                    <span>[[project.project.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[project.language.ln]]</span>
+                    <span>[[chunk.data.project.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[chunk.data.language.ln]]</span>
                 </div>
                 <paper-icon-button icon="create" title="edit" on-tap="edit"></paper-icon-button>
             </div>
@@ -147,7 +148,7 @@
                 <p>I have reviewed the translationQuestions</p>
             </div>
             <div class="buttons">
-                <paper-button dialog-dismiss>Cancel</paper-button>
+                <paper-button dialog-dismiss on-tap="closepopup">Cancel</paper-button>
                 <paper-button dialog-confirm on-tap="completechunk">Confirm</paper-button>
             </div>
         </paper-dialog>
@@ -163,10 +164,6 @@
 		is: 'ts-target-review',
 
         properties: {
-            project: {
-                type: Object,
-                value: {}
-            },
             chunk: {
                 type: Object,
                 value: {},
@@ -183,53 +180,50 @@
             'rendertext(chunk.*)'
         ],
 
-        edit: function () {
-            this.selected = 1;
-        },
-
         rendertext: function () {
-            var start = this.chunk.meta.startverse;
-            var end = this.chunk.meta.endverse;
-            var chap = this.chunk.meta.chapter;
-            var status = this.chunk.status;
-            var textholder = this.$.textholder;
-            var textarray = this.chunk.transcontent.split(" ");
-            var vmstr1 = "\<ts-verse-marker id='c";
-            var vmstr2 = "v";
-            var vmstr3 = "' draggable='true' ondragstart='drag(event)' verse='";
-            var vmstr4 = "'\>\<\/ts-verse-marker\>";
-            var textstr1 = "\<span ondrop='drop(event)' ondragover='allowDrop(event)'\>";
-            var textstr2 = "\<\/span\> ";
-            var numstr1 = "\<sup\>";
-            var numstr2 = "\<\/sup\>";
-            var toggle = this.$.toggle;
-            var returnstr = "";
-            var verse = 0;
-            var i = 0;
+            if(this.chunk && this.chunk.srccontent) {
+                var start = this.chunk.meta.startverse;
+                var end = this.chunk.meta.endverse;
+                var chap = this.chunk.meta.chapter;
+                var status = this.chunk.status;
+                var textholder = this.$.textholder;
+                var textarray = this.chunk.transcontent.split(" ");
+                var vmstr1 = "\<ts-verse-marker id='c";
+                var vmstr2 = "v";
+                var vmstr3 = "' draggable='true' ondragstart='drag(event)' verse='";
+                var vmstr4 = "'\>\<\/ts-verse-marker\>";
+                var textstr1 = "\<span ondrop='drop(event)' ondragover='allowDrop(event)'\>";
+                var textstr2 = "\<\/span\> ";
+                var numstr1 = "\<sup\>";
+                var numstr2 = "\<\/sup\>";
+                var toggle = this.$.toggle;
+                var returnstr = "";
+                var verse = 0;
+                var i = 0;
 
-            if(status === "Incomplete") {
-                for (i = start; i <= end; i++) {
-                    returnstr += vmstr1 + chap + vmstr2 + i + vmstr3 + i + vmstr4;
-                }
-                for (i = 0; i < textarray.length; i++) {
-                    returnstr += textstr1 + textarray[i] + textstr2;
-                }
-                toggle.classList.remove("done");
-                toggle.classList.add("notdone");
-            } else {
-                for (i = 0; i < textarray.length; i++) {
-                    if (textarray[i].substring(0, 2) === "/v") {
-                        verse = textarray[i].substring(2);
-                        returnstr += numstr1 + verse + numstr2;
-                    } else {
-                        returnstr += textarray[i] + " ";
+                if(status === "Incomplete") {
+                    for (i = start; i <= end; i++) {
+                        returnstr += vmstr1 + chap + vmstr2 + i + vmstr3 + i + vmstr4;
                     }
+                    for (i = 0; i < textarray.length; i++) {
+                        returnstr += textstr1 + textarray[i] + textstr2;
+                    }
+                    toggle.classList.remove("done");
+                    toggle.classList.add("notdone");
+                } else {
+                    for (i = 0; i < textarray.length; i++) {
+                        if (textarray[i].substring(0, 2) === "/v") {
+                            verse = textarray[i].substring(2);
+                            returnstr += numstr1 + verse + numstr2;
+                        } else {
+                            returnstr += textarray[i] + " ";
+                        }
+                    }
+                    toggle.classList.remove("notdone");
+                    toggle.classList.add("done");
                 }
-                toggle.classList.remove("notdone");
-                toggle.classList.add("done");
+                textholder.innerHTML = returnstr;
             }
-
-            textholder.innerHTML = returnstr;
         },
 
         completechunk: function () {
@@ -252,9 +246,19 @@
                 }
             }
 
+            this.closepopup();
             this.set('chunk.transcontent', returnstr);
             this.set('chunk.status', "Complete");
-            this.fire('edittrigger');
+            this.fire('iron-signal', {name: 'updatetranslation'});
+        },
+
+        closepopup: function () {
+            var popup = this.$.popup;
+            var mythis = this;
+            popup.close();
+            setTimeout(function() {
+                mythis.appendChild(popup);
+            }, 500);
         },
 
         checkdone: function () {
@@ -264,6 +268,8 @@
             var returnstr = "";
 
             if (status === "Incomplete") {
+                var host = document.querySelector("ts-translate");
+                host.appendChild(popup);
                 popup.open();
             } else {
                 for (var i = 0; i < textarray.length; i++) {
@@ -274,8 +280,12 @@
 
                 this.set('chunk.transcontent', returnstr);
                 this.set('chunk.status', "Incomplete");
-                this.fire('edittrigger');
+                this.fire('iron-signal', {name: 'updatetranslation'});
             }
+        },
+
+        edit: function () {
+            this.selected = 1;
         },
 
 		ready: function() {

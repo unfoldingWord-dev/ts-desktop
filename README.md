@@ -33,7 +33,7 @@ For more information please read the [wiki](https://github.com/unfoldingWord-dev
 ###Commands
 The following commands are available from within the project directory:
 
-* `$ gulp build` builds a distribution package
+* `$ gulp build --win` builds a windows distribution (other available flags are `--osx` and `--linux`)
 * `$ gulp lint` runs the linter and the JS style checker
 * `$ gulp lint --fix` same as above, but attempts to fix the JS styles for you
 * `$ gulp test` runs all Mocha unit tests

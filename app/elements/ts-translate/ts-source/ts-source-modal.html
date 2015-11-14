@@ -41,10 +41,9 @@
         }
         .header {
             min-height: 56px;
-            border-bottom: 1px solid #EEE;
+            border-bottom: 1px solid var(--greyed-out-light);
             color: #888;
             font-style: italic;
-            font-family: 'Roboto';
             font-size: 110%;
             display: flex;
         }
@@ -53,7 +52,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 0 20px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--greyed-out-light);
             background: white;
             width: 100%;
         }
@@ -71,30 +70,29 @@
             overflow-y: auto;
         }
         .selected-list {
-            font-family: 'Roboto';
             font-size: 110%;
         }
         .row {
             display: block;
             margin: 0;
             padding: 1em;
-            border-bottom: 1px solid #EEE;
+            border-bottom: 1px solid var(--greyed-out-light);
         }
         .row:hover {
             background: var(--accent-color-dark);
             box-shadow: inset 0 -1px rgba(0,0,0,0);
-            color: #fff;
+            color: white;
         }
         .row-header {
             display: block;
             margin: 0;
             padding: 0.25em 1em;
-            border-bottom: 1px solid #E4E4E4;
-            background-color: #EEE;
+            border-bottom: 1px solid var(--greyed-out-light);
+            background-color: var(--greyed-out-light);
             text-transform: uppercase;
             font-size: 80%;
             font-weight: 500;
-            color: #888;
+            color: var(--greyed-out-dark);
         }
         .right {
             float: right;
@@ -107,18 +105,21 @@
             height: 56px;
             position: absolute;
             bottom: 0;
-            border-top: 1px solid #EEE;
+            border-top: 1px solid var(--greyed-out-light);
         }
         paper-button {
             margin-top: 0.6rem;
-            color: #00C5E8;
+            color: var(--greyed-out-dark);
+        }
+        paper-button:hover {
+            color: var(--highlight-primary);
         }
         ::-webkit-scrollbar {
             display: none;
         }
-        paper-checkbox[disabled][checked]::shadow #checkbox.paper-checkbox {
-            background-color: #00C5E8;
-            border-color: #00C5E8;
+        paper-checkbox {
+            --paper-checkbox-checked-color: var(--highlight-primary);
+            --paper-checkbox-unchecked-color: var(--highlight-primary);
         }
         paper-checkbox[disabled]::shadow #checkbox.paper-checkbox {
             opacity: 1;

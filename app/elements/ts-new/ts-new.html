@@ -81,9 +81,9 @@
         </div>
 
         <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
-            <ts-language-menu selected="{{selected}}" language="{{language}}"></ts-language-menu>
-            <ts-project-menu selected="{{selected}}" group="{{group}}" book="{{book}}" on-create="createproject"></ts-project-menu>
-            <ts-book-menu selected="{{selected}}" group="[[group]]" book="{{book}}" on-create="createproject"></ts-book-menu>
+            <ts-language-menu id="languages" selected="{{selected}}" language="{{language}}"></ts-language-menu>
+            <ts-project-menu selected="{{selected}}" category="{{category}}" project="{{project}}" on-create="createproject"></ts-project-menu>
+            <ts-book-menu selected="{{selected}}" category="[[category]]" project="{{project}}" on-create="createproject"></ts-book-menu>
         </neon-animated-pages>
 
         <paper-dialog id="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -105,6 +105,11 @@
     Polymer({
         is: 'ts-new',
 
+        behaviors: [
+            Polymer.IronResizableBehavior,
+            Polymer.NeonAnimatableBehavior
+        ],
+
         properties: {
             selected: {
                 type: Number,
@@ -119,23 +124,17 @@
                 type: Object,
                 value: {}
             },
-            group: {
+            category: {
                 type: Object,
                 value: {}
             },
-            book: {
+            project: {
                 type: Object,
                 value: {}
             },
             projectlist: {
                 type: Array,
-                value: [],
-                notify: true
-            },
-            project: {
-                type: Object,
-                value: {},
-                notify: true
+                value: []
             },
             animationConfig: {
                 value: function () {
@@ -153,99 +152,56 @@
             }
         },
 
-        behaviors: [
-            Polymer.IronResizableBehavior,
-            Polymer.NeonAnimatableBehavior
-        ],
-
-        back: function () {
-            this.animationConfig.exit.name = 'slide-right-animation';
-            this.selected === 0 ? this.route = "home" : this.selected = this.selected - 1;
+        forceResize: function (event) {
+            this.$.languages.notifyResize();
         },
 
         createproject: function () {
             var allsources = App.projectsManager.sources;
-            var mysources = _.filter(allsources, {'lc': 'en', 'project': this.book.slug});
+            var mysources = _.filter(allsources, {'lc': 'en', 'project': this.project.slug});
             var frames = App.projectsManager.getSourceFrames(mysources[0]);
-            var name = this.book.name;
-            var project = this.book;
-            var num = frames.length;
+            var name = this.project.name;
+            var project = this.project;
             var language = this.language;
             var projectarray = this.projectlist;
-            var icon = this.group.lefticon;
+            var icon = this.category.lefticon;
             var popup = this.$.popup;
             var translation = [];
-            var source = [];
             var transchunk = {};
-            var srcchunk = {};
-            var duplicate = false;
-            var i;
             var chap;
-            var sourcedata;
-            var startstr = '<verse number="';
-            var endstr = '" style="v" />';
-            var test = new RegExp(startstr);
-            var verse;
-            var lowest;
-            var highest;
+            var i;
 
             for (i = 0; i < projectarray.length; i++) {
                 if (projectarray[i].project.name === name && projectarray[i].language === language) {
-                    duplicate = true;
+                    popup.open();
+                    return;
                 }
             }
 
-            if (duplicate) {
-                popup.open();
-                return;
-            }
-
-            for (i = 0; i < num; i++) {
+            for (i = 0; i < frames.length; i++) {
                 chap = parseInt(frames[i].chapter);
-                sourcedata = frames[i].chunk;
-                lowest = 0;
-                highest = 0;
-                while (test.test(sourcedata)) {
-                    verse = parseInt(sourcedata.substring(sourcedata.search(startstr) + 15, sourcedata.search(endstr)));
-                    if (lowest === 0) {
-                        lowest = verse;
-                    }
-                    if (highest < verse) {
-                        highest = verse;
-                    }
-                    sourcedata = sourcedata.replace(startstr, " /v");
-                    sourcedata = sourcedata.replace(endstr, " ");
-                }
-
                 transchunk = {
                     meta: {
                         chapter: chap,
-                        startverse: lowest,
-                        endverse: highest
+                        startverse: 0,
+                        endverse: 0
                     },
                     content: '',
                     status: 'Incomplete'
                 };
-                srcchunk = {
-                    meta: {
-                        chapter: chap,
-                        startverse: lowest,
-                        endverse: highest
-                    },
-                    content: sourcedata,
-                    notes: 'Notes for ' + name + ' chapter ' + chap + ' verse ' + lowest,
-                    words: 'Words for ' + name + ' chapter ' + chap + ' verse ' + lowest
-                };
                 translation.push(transchunk);
-                source.push(srcchunk);
             }
 
-            var newproj = {"project": project, "language": language, "icon": icon, "sources": [], "completion": 0, "currentsource": null, "translation": translation, "source": source};
-            this.push('projectlist', newproj);
-            this.set('project', newproj);
+            var newprojdata = {"project": project, "language": language, "icon": icon, "sources": [], "completion": 0, "currentsource": null};
+            this.fire('iron-signal', {name: 'loadnewproject', data: {projdata: newprojdata, translation: translation}});
             this.animationConfig.exit.name = 'slide-left-animation';
             this.route = "translate";
             this.selected = 0;
+        },
+
+        back: function () {
+            this.animationConfig.exit.name = 'slide-right-animation';
+            this.selected === 0 ? this.route = "home" : this.selected = this.selected - 1;
         },
 
         gohome: function () {

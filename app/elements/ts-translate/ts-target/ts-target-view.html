@@ -1,5 +1,6 @@
 
 <link rel="import" href="../../../components/paper-material/paper-material.html">
+<link rel="import" href="../../../components/iron-signals/iron-signals.html">
 
 <dom-module id="ts-target-view">
 
@@ -54,7 +55,7 @@
         <paper-material elevation="1">
             <div id="heading">
                 <div>
-                    <span>[[project.project.name]]</span> <span>[[chunk.chapter]]</span> &mdash; <span>[[project.language.ln]]</span>
+                    <span>[[chunk.data.project.name]]</span> <span>[[chunk.chapter]]</span> &mdash; <span>[[chunk.data.language.ln]]</span>
                 </div>
             </div>
             <div id="content" class="editmode">
@@ -73,10 +74,6 @@
 		is: 'ts-target-view',
 
 		properties: {
-            project: {
-                type: Object,
-                value: {}
-            },
             chunk: {
                 type: Object,
                 value: {}
@@ -88,39 +85,37 @@
         ],
 
         rendertext: function () {
-            var status = this.chunk.status;
-            var contentbox = this.$.content;
-            var textholder = this.$.textholder;
-            var textarray = this.chunk.transcontent.split(" ");
-            var numstr1 = "\<sup\>";
-            var numstr2 = "\<\/sup\>";
-            var returnstr = "";
-            var verse = 0;
-            var i = 0;
+            if(this.chunk && this.chunk.srccontent) {
+                var status = this.chunk.status;
+                var contentbox = this.$.content;
+                var textholder = this.$.textholder;
+                var textarray = this.chunk.transcontent.split(" ");
+                var numstr1 = "\<sup\>";
+                var numstr2 = "\<\/sup\>";
+                var returnstr = "";
+                var verse = 0;
+                var i = 0;
 
-            if (status === "Complete") {
-
-                for (i = 0; i < textarray.length; i++) {
-                    if (textarray[i].substring(0, 2) === "/v") {
-                        verse = textarray[i].substring(2);
-                        returnstr += numstr1 + verse + numstr2;
-                    } else {
-                        returnstr += textarray[i] + " ";
+                if (status === "Complete") {
+                    for (i = 0; i < textarray.length; i++) {
+                        if (textarray[i].substring(0, 2) === "/v") {
+                            verse = textarray[i].substring(2);
+                            returnstr += numstr1 + verse + numstr2;
+                        } else {
+                            returnstr += textarray[i] + " ";
+                        }
                     }
-                }
-
-                textholder.innerHTML = returnstr;
-                contentbox.classList.remove("editmode");
-            } else {
-
-                for (i = 0; i < textarray.length; i++) {
-                    if (textarray[i].substring(0, 2) !== "/v") {
-                        returnstr += textarray[i] + " ";
+                    textholder.innerHTML = returnstr;
+                    contentbox.classList.remove("editmode");
+                } else {
+                    for (i = 0; i < textarray.length; i++) {
+                        if (textarray[i].substring(0, 2) !== "/v") {
+                            returnstr += textarray[i] + " ";
+                        }
                     }
+                    textholder.innerHTML = returnstr;
+                    contentbox.classList.add("editmode");
                 }
-
-                textholder.innerHTML = returnstr;
-                contentbox.classList.add("editmode");
             }
         },
 

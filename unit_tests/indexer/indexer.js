@@ -30,7 +30,7 @@
     configurator.loadConfig(config);
 
     let indexDir = './unit_tests/indexer/index/';
-    let testIndexer = new Indexer(path.resolve('./app/config/schema.sql'), path.join(indexDir, 'app.sqlite'));
+    let testIndexer = new Indexer(path.resolve('./app/config/schema.sql'), path.join(indexDir, 'index.sqlite'));
 
     describe('@Indexer', function () {
 

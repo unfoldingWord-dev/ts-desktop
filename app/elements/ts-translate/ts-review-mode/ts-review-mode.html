@@ -1,4 +1,6 @@
 
+<link rel="import" href="../../../components/iron-list/iron-list.html">
+
 <link rel="import" href="./ts-review-card.html">
 
 <dom-module id="ts-review-mode">
@@ -16,8 +18,10 @@
 
         #contain {
             flex: auto;
-            overflow: auto;
-            padding-bottom: 100px;
+        }
+
+        iron-list {
+            max-height: calc(100vh - 40px);
         }
 
         :host(.preview) {
@@ -51,9 +55,11 @@
 	<template>
 
         <div id="contain">
-            <template is="dom-repeat" items="{{chunks.data}}" as="chunk">
-                <ts-review-card id="{{createid(index)}}" project="{{project}}" chunk="{{chunk}}" on-cardtrigger="cardtrigger"></ts-review-card>
-            </template>
+            <iron-list id="reviewlist" items="{{chunks.data}}" as="chunk">
+                <template>
+                    <ts-review-card id="{{createid(index)}}" chunk="{{chunk}}"></ts-review-card>
+                </template>
+            </iron-list>
         </div>
 
 	</template>
@@ -71,11 +77,6 @@
         ],
 
         properties: {
-            project: {
-                type: Object,
-                value: {},
-                notify: true
-            },
             chunks: {
                 type: Object,
                 value: {},
@@ -93,51 +94,31 @@
         },
 
         frommode: function () {
+            this.getlocation();
+            this.moveout();
+        },
+
+        tomode: function () {
+            this.setpreview();
+            this.setlocation();
+            this.movein();
+        },
+
+        moveout: function () {
             var mythis = this;
             var contain = this.$.contain;
-            var num = contain.children.length - 1;
-            var card;
-            var found = false;
-            var i = 0;
 
             contain.classList.add("moveout");
             setTimeout(function() {
                 contain.classList.remove("moveout");
                 mythis.classList.add("hide");
             }, 500);
-            while (i < num && !found) {
-                card = document.getElementById(mythis.modename + i);
-                if (card.getBoundingClientRect().top >= 0) {
-                    mythis.set('modestatus.chapter', card.chunk.meta.chapter);
-                    mythis.set('modestatus.verse', card.chunk.meta.startverse);
-                    found = true;
-                }
-                i++;
-            }
         },
 
-        tomode: function () {
+        movein: function () {
             var mythis = this;
             var contain = this.$.contain;
-            var num = contain.children.length - 1;
-            var card;
-            var pagescroll;
-            var cardscroll;
-            var found = false;
-            var i = 0;
 
-            mythis.classList.add("preview");
-            mythis.classList.remove("hide");
-            pagescroll = contain.scrollTop;
-            while (i < num && !found) {
-                card = document.getElementById(mythis.modename + i);
-                if (card.chunk.meta.chapter === mythis.modestatus.chapter && card.chunk.meta.startverse === mythis.modestatus.verse) {
-                    cardscroll = card.getBoundingClientRect().top;
-                    found = true;
-                }
-                i++;
-            }
-            contain.scrollTop = pagescroll + cardscroll - 60;
             setTimeout(function() {
                 mythis.classList.remove("preview");
                 contain.classList.add("movein");
@@ -147,12 +128,38 @@
             }, 500);
         },
 
-        createid: function (index) {
-            return this.modename + index;
+        setpreview: function () {
+            this.classList.add("preview");
+            this.classList.remove("hide");
         },
 
-        cardtrigger: function () {
-            this.fire('modetrigger');
+        getlocation: function () {
+            var list = this.$.reviewlist;
+            var index = list.firstVisibleIndex;
+            var card = document.getElementById(this.modename + index);
+
+            this.set('modestatus.chapter', card.chunk.meta.chapter);
+            this.set('modestatus.verse', card.chunk.meta.startverse);
+        },
+
+        setlocation: function () {
+            var list = this.$.reviewlist;
+            var card;
+            var found = false;
+            var i = 0;
+
+            while (i < 10000 && !found) {
+                list.scrollToIndex(i);
+                card = document.getElementById(this.modename + i);
+                if (card.chunk.meta.chapter === this.modestatus.chapter && (card.chunk.meta.startverse === this.modestatus.verse || card.chunk.meta.startverse === 0)) {
+                    found = true;
+                }
+                i++;
+            }
+        },
+
+        createid: function (index) {
+            return this.modename + index;
         },
 
 		ready: function() {

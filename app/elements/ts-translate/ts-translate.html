@@ -28,13 +28,18 @@
         <ts-translate-sidebar selected="{{selected}}" on-gohome="gohome" on-gopublish="gopublish" on-gosettings="gosettings"></ts-translate-sidebar>
 
         <div id="pages">
-            <ts-read-mode id="readmode" project="{{project}}" chapters="[[chapters]]" modestatus="{{modestatus}}"></ts-read-mode>
-            <ts-chunk-mode id="chunkmode" project="{{project}}" chunks="{{chunks}}" modestatus="{{modestatus}}" on-modetrigger="upload"></ts-chunk-mode>
-            <ts-review-mode id="reviewmode" project="{{project}}" chunks="{{chunks}}" modestatus="{{modestatus}}" on-modetrigger="upload"></ts-review-mode>
-            <ts-nosource-mode id="nosourcemode" project="{{project}}"></ts-nosource-mode>
+            <ts-read-mode id="readmode" chapters="[[chapters]]" modestatus="{{modestatus}}"></ts-read-mode>
+            <ts-chunk-mode id="chunkmode" chunks="{{chunks}}" modestatus="{{modestatus}}"></ts-chunk-mode>
+            <ts-review-mode id="reviewmode" chunks="{{chunks}}" modestatus="{{modestatus}}"></ts-review-mode>
+            <ts-nosource-mode id="nosourcemode" projectdata="{{currentproject.data}}"></ts-nosource-mode>
         </div>
 
-        <iron-signals on-iron-signal-frompublish="reviewpublish"></iron-signals>
+        <iron-signals on-iron-signal-frompublish="frompublish"></iron-signals>
+        <iron-signals on-iron-signal-updatesources="updatesources"></iron-signals>
+        <iron-signals on-iron-signal-updateselected="updateselected"></iron-signals>
+        <iron-signals on-iron-signal-loadnewproject="loadnewproject"></iron-signals>
+        <iron-signals on-iron-signal-loadproject="loadproject"></iron-signals>
+        <iron-signals on-iron-signal-updatetranslation="updatetranslation"></iron-signals>
 
     </template>
 
@@ -62,7 +67,7 @@
                 value: '',
                 notify: true
             },
-            project: {
+            currentproject: {
                 type: Object,
                 value: {},
                 notify: true
@@ -78,13 +83,11 @@
             },
             chapters: {
                 type: Object,
-                value: {},
-                computed: 'createchapters(project.source.*, project.translation.*)'
+                value: {}
             },
             chunks: {
                 type: Object,
-                value: {},
-                computed: 'createchunks(project.source.*, project.translation.*)'
+                value: {}
             },
             animationConfig: {
                 value: function () {
@@ -102,20 +105,87 @@
             }
         },
 
-        observers: [
-            'reset(project.project)',
-            'checksources(project.sources)',
-            'changesource(project.currentsource)'
-        ],
+        forceResize: function () {
+            this.$.readmode.notifyResize();
+            this.$.chunkmode.notifyResize();
+            this.$.reviewmode.notifyResize();
+        },
 
-        changesource: function (current) {
+        loadnewproject: function (event, data) {
+            this.set('currentproject.translation', data.translation);
+            this.set('currentproject.data', data.projdata);
+            this.savetofile();
+            this.reset();
+            this.checksources();
+        },
+
+        loadproject: function (event, data) {
+            var mythis = this;
+            this.set('currentproject.translation', data.translation);
+            this.set('currentproject.data', data.projdata);
+            this.changesource();
+            this.createchunks();
+            this.createchapters();
+            this.reset();
+            this.checksources();
+            setTimeout(function() {
+                mythis.fire('iron-signal', {name: 'adjustbar'});
+            }, 500);
+        },
+
+        updatesources: function (event, data) {
+            var mythis = this;
+            this.set('currentproject.data.sources', data.sources);
+            this.set('currentproject.data.currentsource', data.selected);
+            this.savetofile();
+            this.getlocation();
+            this.changesource();
+            this.createchunks();
+            this.createchapters();
+            this.forceResize();
+            this.setlocation();
+            this.checksources();
+            setTimeout(function() {
+                mythis.fire('iron-signal', {name: 'adjustbar'});
+            }, 250);
+        },
+
+        updateselected: function (event, data) {
+            var mythis = this;
+            this.set('currentproject.data.currentsource', data.selected);
+            this.savetofile();
+            this.getlocation();
+            this.changesource();
+            this.createchunks();
+            this.createchapters();
+            this.forceResize();
+            this.setlocation();
+            setTimeout(function() {
+                mythis.fire('iron-signal', {name: 'adjustbar'});
+            }, 250);
+        },
+
+        updatetranslation: function () {
+            this.upload();
+            this.savetofile();
+            this.createchapters();
+        },
+
+        savetofile: function () {
+            var mythis = this;
+            App.projectsManager.saveTargetTranslation(this.currentproject.translation, this.currentproject.data).then(function() {
+                mythis.fire('iron-signal', {name: 'updatelist'});
+            });
+        },
+
+        changesource: function () {
+            var current = this.currentproject.data.currentsource;
             if (current === null || current === undefined) {
                 return;
             }
-            var currentsource = this.project.sources[current];
+            var currentsource = this.currentproject.data.sources[current];
             var frames = App.projectsManager.getSourceFrames(currentsource);
-            var name = this.project.project.name;
-            var num = frames.length;
+            var name = this.currentproject.data.project.name;
             var source = [];
             var srcchunk = {};
             var i;
@@ -128,7 +198,7 @@
             var lowest;
             var highest;
 
-            for (i = 0; i < num; i++) {
+            for (i = 0; i < frames.length; i++) {
                 chap = parseInt(frames[i].chapter);
                 sourcedata = frames[i].chunk;
                 lowest = 0;
@@ -157,35 +227,37 @@
                 };
                 source.push(srcchunk);
             }
-            this.set('project.source', source);
+            this.set('currentproject.source', source);
         },
 
-        reviewpublish: function (event, data) {
-            this.selected = 0;
-            this.set('modestatus.chapter', data.chapter);
-            this.set('modestatus.verse', data.verse);
-            this.route = "translate";
-            this.selected = 3;
+        getlocation: function () {
+            var selected = this.selected;
+            var read = this.$.readmode;
+            var chunk = this.$.chunkmode;
+            var review = this.$.reviewmode;
+
+            if (selected === 1) {
+                read.getlocation();
+            } else if (selected === 2) {
+                chunk.getlocation();
+            } else if (selected === 3) {
+                review.getlocation();
+            }
         },
 
-        gohome: function () {
-            this.animationConfig.exit.name = 'slide-right-animation';
-            this.animationConfig.entry.name = 'slide-from-right-animation';
-            this.route = "home";
-        },
+        setlocation: function () {
+            var selected = this.selected;
+            var read = this.$.readmode;
+            var chunk = this.$.chunkmode;
+            var review = this.$.reviewmode;
 
-        gopublish: function () {
-            this.animationConfig.exit.name = 'slide-left-animation';
-            this.animationConfig.entry.name = 'slide-from-left-animation';
-            this.route = "publish";
-            this.selected = 1;
-        },
-
-        gosettings: function () {
-            this.animationConfig.exit.name = 'slide-left-animation';
-            this.animationConfig.entry.name = 'slide-from-left-animation';
-            this.backto = this.route;
-            this.route = "settings";
+            if (selected === 1) {
+                read.setlocation();
+            } else if (selected === 2) {
+                chunk.setlocation();
+            } else if (selected === 3) {
+                review.setlocation();
+            }
         },
 
         modechange: function (tomode, frommode) {
@@ -225,7 +297,7 @@
             var chunk = this.$.chunkmode;
             var review = this.$.reviewmode;
             var nosource = this.$.nosourcemode;
-            var sources = this.project.sources;
+            var sources = this.currentproject.data.sources;
 
             mythis.set('selected', 0);
             mythis.set('modestatus', {"chapter": 1, "verse": 1, "lastmode": 1});
@@ -233,6 +305,7 @@
             chunk.classList.add("hide");
             review.classList.add("hide");
             nosource.classList.add("hide");
+            mythis.fire('iron-signal', {name: 'reset'});
 
             if (sources !== undefined && sources.length !== 0) {
                 setTimeout(function() {
@@ -243,13 +316,13 @@
 
         checksources: function () {
             var mythis = this;
-            var sources = this.project.sources;
+            var sources = this.currentproject.data.sources;
             var lastmode = this.modestatus.lastmode;
             var selected = this.selected;
 
             if (selected === 4) {
                 if (sources !== undefined && sources.length !== 0) {
-                    this.set('selected', lastmode);
+                    mythis.set('selected', lastmode);
                 }
             } else {
                 if (sources === undefined || sources.length === 0) {
@@ -261,9 +334,9 @@
         },
 
         upload: function () {
-             var update = this.chunks.data.map(function(chunk){
-             return {meta: chunk.meta, content: chunk.transcontent, status: chunk.status};
-             });
+            var update = this.chunks.data.map(function(chunk){
+                return {meta: chunk.meta, content: chunk.transcontent, status: chunk.status};
+            });
             var count = 0;
             for (var i = 0; i < update.length; i++) {
                 if (update[i].status === "Complete") {
@@ -271,32 +344,43 @@
                 }
             }
             var completion = Math.round((count / update.length) * 100);
-            this.set('project.completion', completion);
-            this.set('project.translation', update);
+            this.set('currentproject.data.completion', completion);
+            this.set('currentproject.translation', update);
         },
 
         createchunks: function () {
+            var current = this.currentproject.data.currentsource;
+            if (current === null || current === undefined) {
+                return;
+            }
             var transdata = {};
             var srcdata = {};
-            var translation = this.project.translation;
-            var source = this.project.source;
+            var translation = this.currentproject.translation;
+            var source = this.currentproject.source;
+            var projectdata = this.currentproject.data;
 
             transdata.data = translation.map(function(chunk){
-                return {transcontent: chunk.content, status: chunk.status};
+                return {transcontent: chunk.content, status: chunk.status, data: projectdata};
             });
             srcdata.data = source.map(function(chunk){
                 return {srccontent: chunk.content, meta: chunk.meta, notes: chunk.notes, words: chunk.words};
             });
-            return _.merge(srcdata, transdata);
+            var merged = _.merge(srcdata, transdata);
+            this.set('chunks', merged);
         },
 
         createchapters: function () {
+            var current = this.currentproject.data.currentsource;
+            if (current === null || current === undefined) {
+                return;
+            }
             var transdata = {};
             var srcdata = {};
             var transchapters = [];
             var srcchapters = [];
-            var translation = this.project.translation;
-            var source = this.project.source;
+            var translation = this.currentproject.translation;
+            var source = this.currentproject.source;
+            var projectdata = this.currentproject.data;
 
             _.forEach(_.groupBy(translation, function(chunks) {
                 return chunks.meta.chapter;
@@ -310,7 +394,7 @@
                     }
                     chapcontent += chunk.content + " ";
                 });
-                transchapters.push({status: chapstatus, transcontent: chapcontent});
+                transchapters.push({status: chapstatus, transcontent: chapcontent, data: projectdata});
             });
 
             _.forEach(_.groupBy(source, function(chunks) {
@@ -327,22 +411,40 @@
 
             transdata.data = transchapters;
             srcdata.data = srcchapters;
-            return _.merge(srcdata, transdata);
+            var merged = _.merge(srcdata, transdata);
+            this.set('chapters', merged);
         },
 
-        onSelectedSourceChanged: function(newValue) {
+        frompublish: function (event, data) {
+            this.selected = 0;
+            this.set('modestatus.chapter', data.chapter);
+            this.set('modestatus.verse', data.verse);
+            this.route = "translate";
+            this.selected = 3;
+        },
 
-            if (newValue != null && newValue >= 0) {
-                // The paper-tab won't get programmatically selected until after 30ms
-                this.async(function() {
-                    var source = document.querySelector('paper-tab.iron-selected').innerText;
+        gohome: function () {
+            this.animationConfig.exit.name = 'slide-right-animation';
+            this.animationConfig.entry.name = 'slide-from-right-animation';
+            this.fire('iron-signal', {name: 'setdefault'});
+            this.route = "home";
+        },
 
-                    //
-                    // Write code to get new data based on source tab selection here...
-                    //
-
-                }, 30);
+        gopublish: function () {
+            if(this.currentproject.data.sources.length && this.currentproject.translation[0].meta.startverse > 0) {
+                this.animationConfig.exit.name = 'slide-left-animation';
+                this.animationConfig.entry.name = 'slide-from-left-animation';
+                this.fire('iron-signal', {name: 'updatepublish'});
+                this.route = "publish";
+                this.selected = 1;
             }
+        },
+
+        gosettings: function () {
+            this.animationConfig.exit.name = 'slide-left-animation';
+            this.animationConfig.entry.name = 'slide-from-left-animation';
+            this.backto = this.route;
+            this.route = "settings";
         },
 
         ready: function() {

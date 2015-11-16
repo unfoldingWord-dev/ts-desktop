@@ -23,7 +23,7 @@
 
         #title {
             font-size: 125%;
-            color: var(--text-color);
+            color: var(--reverse-text-color);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -34,7 +34,7 @@
             flex: auto;
             display: flex;
             flex-direction: column;
-            background: white;
+            background: var(--card-background-color);
             margin: 15px;
             padding: 15px 15px 5px 15px;
         }
@@ -49,21 +49,22 @@
         #main p {
             text-align: center;
             margin: 0 10px;
+            color: var(--primary-text-color);
         }
 
         .buttons {
             display: flex;
             justify-content: space-around;
-            color: var(--greyed-out-dark);
+            color: var(--secondary-text-color);
         }
 
         .buttons paper-button:hover {
-            color: var(--highlight-primary);
+            color: var(--accent-color);
         }
 
         #main paper-button {
-            background: var(--highlight-primary);
-            color: var(--text-color);
+            background: var(--accent-color);
+            color: var(--reverse-text-color);
             text-transform: uppercase;
             margin-top: 15px;
         }

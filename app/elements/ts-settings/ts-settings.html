@@ -30,7 +30,7 @@
 
         .heading {
             font-size: 125%;
-            color: var(--text-color);
+            color: var(--reverse-text-color);
             display: flex;
             justify-content: flex-start;
             align-items: center;
@@ -44,7 +44,7 @@
         .body {
             padding: 0 4rem;
             overflow-y: auto;
-            background-color: white; /* change to var */
+            background-color: var(--card-background-color);
         }
 
         .setting-group-header {
@@ -55,7 +55,7 @@
 
         .setting-group-item {
             padding: 1rem 0;
-            border-bottom: 1px solid var(--greyed-out-light);
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             cursor: pointer;
         }
@@ -64,8 +64,12 @@
             flex: 1 1 auto;
         }
 
+        .main-text {
+            color: var(--primary-text-color);
+        }
+
         .help-text {
-            color: var(--greyed-out-dark);
+            color: var(--secondary-text-color);
             line-height: 1.6;
         }
 
@@ -76,8 +80,8 @@
             pointer-events: none;
         }
         paper-checkbox {
-            --paper-checkbox-checked-color: var(--highlight-primary);
-            --paper-checkbox-unchecked-color: var(--highlight-primary);
+            --paper-checkbox-checked-color: var(--accent-color);
+            --paper-checkbox-unchecked-color: var(--accent-color);
         }
 
     </style>

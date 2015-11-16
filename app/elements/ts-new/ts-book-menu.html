@@ -20,7 +20,7 @@
         }
 
         #header {
-            color: var(--greyed-out-dark);
+            color: var(--secondary-text-color);
             font-size: 110%;
             width: 100%;
             display: flex;
@@ -33,8 +33,8 @@
             justify-content: flex-start;
             align-items: center;
             padding-left: 20px;
-            border-bottom: 1px solid var(--greyed-out-light);
-            background: white;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--card-background-color);
             width: 430px;
             box-shadow: 0 -1px 2px 1px var(--primary-color-dark);
         }
@@ -43,22 +43,23 @@
             font-size: 110%;
             max-height: 90vh;
             width: 450px;
-            background: white;
-            box-shadow: 0 2px 3px 2px var(--greyed-out-light);
+            color: var(--primary-text-color);
+            background: var(--card-background-color);
+            box-shadow: 0 2px 3px 2px var(--border-color);
         }
 
         .row {
             display: block;
             margin: 0;
             padding: 1em;
-            border-bottom: 1px solid var(--greyed-out-light);
+            border-bottom: 1px solid var(--border-color);
             transition: background .3s, color .3s;
             cursor: pointer;
         }
 
         .row:hover {
             background: var(--accent-color-dark);
-            color: var(--text-color);
+            color: var(--reverse-text-color);
         }
 
         ::-webkit-scrollbar {

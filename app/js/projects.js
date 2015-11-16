@@ -121,7 +121,7 @@ function ProjectsManager(query, configurator) {
 
         get sources () {
             var r = query([
-                    "select r.id, r.slug 'source', r.name, sl.name 'ln', sl.slug 'lc', p.slug 'project', r.checking_level, r.version from resource r",
+                    "select r.id, r.slug 'source', r.name, sl.name 'ln', sl.slug 'lc', p.slug 'project', r.checking_level 'level', r.version from resource r",
                     "join source_language sl on sl.id=r.source_language_id",
                     "join project p on p.id=sl.project_id",
                     "order by r.name"

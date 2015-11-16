@@ -211,7 +211,7 @@
         onOpen: function() {
             var sources = App.projectsManager.sources;
             var projectid = this.project.slug;
-            this.allSources = _.filter(sources, 'project', projectid);
+            this.allSources = _.filter(sources, {'project': projectid, 'level': 3});
             this.available = this._getAvailable();
         },
 

@@ -183,6 +183,7 @@
 
         rendertext: function () {
             if(this.chunk && this.chunk.srccontent) {
+                var name = this.chunk.data.project.name;
                 var start = this.chunk.meta.startverse;
                 var end = this.chunk.meta.endverse;
                 var chap = this.chunk.meta.chapter;
@@ -203,8 +204,10 @@
                 var i = 0;
 
                 if(status === "Incomplete") {
-                    for (i = start; i <= end; i++) {
-                        returnstr += vmstr1 + chap + vmstr2 + i + vmstr3 + i + vmstr4;
+                    if (name !== "Open Bible Stories") {
+                        for (i = start; i <= end; i++) {
+                            returnstr += vmstr1 + chap + vmstr2 + i + vmstr3 + i + vmstr4;
+                        }
                     }
                     for (i = 0; i < textarray.length; i++) {
                         returnstr += textstr1 + textarray[i] + textstr2;

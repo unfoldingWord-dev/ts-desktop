@@ -10,7 +10,7 @@
 
         :host {
             background: var(--primary-color);
-            color: var(--text-color);
+            color: var(--reverse-text-color);
             min-width: 50px;
             align-self: stretch;
             display: flex;
@@ -31,12 +31,16 @@
         }
 
         .current {
-            color: var(--text-color);
+            color: var(--reverse-text-color);
+        }
+
+        paper-item {
+            color: var(--primary-text-color)
         }
 
         paper-item:hover {
             background: var(--accent-color-dark);
-            color: var(--text-color);
+            color: var(--reverse-text-color);
             cursor: pointer;
         }
 

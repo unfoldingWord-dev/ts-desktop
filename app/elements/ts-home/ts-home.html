@@ -17,6 +17,7 @@
 
         :host {
             display: flex;
+            color: var(--primary-text-color);
         }
 
         #main {
@@ -26,14 +27,13 @@
         }
 
         #header {
-            background: var(--greyed-out-light);
-            color: black;
+            background: var(--border-color);
             width: 100%;
             flex: 0 0 50px;
             display: flex;
             align-items: center;
             justify-content: flex-start;
-            box-shadow: 0 1px 2px 0 #ccc;
+            box-shadow: 0 1px 5px -2px var(--secondary-text-color);
         }
 
         #title {
@@ -56,15 +56,15 @@
         }
 
         #welcome {
-            background: white;
-            box-shadow: 0 2px 3px 2px var(--greyed-out-light);
+            background: var(--card-background-color);
+            box-shadow: 0 2px 3px 2px var(--border-color);
             width: 450px;
             margin: 30px 0;
         }
 
         #start {
             background: var(--primary-color);
-            color: var(--text-color);
+            color: var(--reverse-text-color);
         }
 
         p {
@@ -76,13 +76,13 @@
             font-size: 110%;
             max-height: 90vh;
             width: 470px;
-            background: white;
-            box-shadow: 0 2px 3px 2px var(--greyed-out-light);
+            background: var(--card-background-color);
+            box-shadow: 0 2px 3px 2px var(--border-color);
         }
 
         .row {
             display: flex;
-            border-bottom: 1px solid var(--greyed-out-light);
+            border-bottom: 1px solid var(--border-color);
             transition: background .3s, color .3s;
             cursor: pointer;
             min-height: 60px;
@@ -105,7 +105,7 @@
 
         .row:hover {
             background: var(--accent-color-dark);
-            color: var(--text-color);
+            color: var(--reverse-text-color);
         }
 
         .left {
@@ -125,28 +125,28 @@
         }
 
         .row:hover .smallicon {
-            color: white;
+            color: var(--reverse-text-color);
         }
 
         .row:hover .smalltext {
-            color: white;
+            color: var(--reverse-text-color);
         }
 
         .smallicon {
             --iron-icon-height: 18px;
             --iron-icon-width: 18px;
-            color: var(--greyed-out-dark);
+            color: var(--secondary-text-color);
         }
 
         .info {
             --iron-icon-height: 22px;
             --iron-icon-width: 22px;
-            color: var(--greyed-out-light);
+            color: var(--border-color);
         }
 
         .smalltext {
             font-size: 75%;
-            color: var(--greyed-out-dark);
+            color: var(--secondary-text-color);
         }
 
         .popup {
@@ -168,8 +168,8 @@
         }
 
         #border {
-            border-bottom: 1px solid var(--greyed-out-light);
-            border-top: 1px solid var(--greyed-out-light);
+            border-bottom: 1px solid var(--border-color);
+            border-top: 1px solid var(--border-color);
             align-self: stretch;
             display: flex;
             justify-content: center;
@@ -186,19 +186,19 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--greyed-out-dark);
+            color: var(--secondary-text-color);
         }
 
         .buttons paper-button:hover {
-            color: var(--highlight-primary);
+            color: var(--accent-color);
         }
 
         #border paper-button:hover {
-            color: var(--highlight-primary);
+            color: var(--accent-color);
         }
 
         #border paper-button:hover iron-icon {
-            color: var(--highlight-primary);
+            color: var(--accent-color);
         }
 
     </style>

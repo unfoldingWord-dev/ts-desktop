@@ -50,12 +50,12 @@
         }
 
         paper-material {
-            background: white;
+            background: var(--card-background-color);
         }
 
         #heading {
             padding: 5px 1em;
-            color: var(--greyed-out-dark);
+            color: var(--secondary-text-color);
             display: flex;
             justify-content: space-between;
             min-height: 75px;
@@ -74,7 +74,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: var(--greyed-out-dark);
+            color: var(--secondary-text-color);
             font-style: italic;
             font-size: 110%;
         }
@@ -87,7 +87,7 @@
             top: 25px;
             left: 25px;
             background-size: 100% 32px;
-            background-image: -webkit-linear-gradient(white 27px, var(--greyed-out-light) 27px, var(--greyed-out-light) 28px, white 28px);
+            background-image: -webkit-linear-gradient(var(--card-background-color) 27px, var(--border-color) 27px, var(--border-color) 28px, var(--card-background-color) 28px);
         }
 
         #topcard {

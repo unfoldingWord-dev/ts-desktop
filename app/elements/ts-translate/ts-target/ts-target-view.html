@@ -14,12 +14,12 @@
         paper-material {
             flex: auto;
             display: flex;
-            background: white;
+            background: var(--card-background-color);
             flex-direction: column;
         }
 
 		#heading {
-            color: var(--greyed-out-dark);
+            color: var(--secondary-text-color);
             display: flex;
             justify-content: flex-start;
             min-height: 42px;
@@ -40,12 +40,13 @@
 
         #content.editmode {
             background-size: 100% 32px;
-            background-image: -webkit-linear-gradient(white 27px, var(--greyed-out-light) 27px, var(--greyed-out-light) 28px, white 28px);
+            background-image: -webkit-linear-gradient(var(--card-background-color) 27px, var(--border-color) 27px, var(--border-color) 28px, var(--card-background-color) 28px);
         }
 
         #content p {
 			line-height: 2;
             margin-top: 0;
+            color: var(--primary-text-color);
 		}
 
 	</style>

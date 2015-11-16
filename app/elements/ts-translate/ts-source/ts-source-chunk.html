@@ -16,13 +16,13 @@
         paper-material {
             flex: auto;
             display: flex;
-            background: white;
+            background: var(--card-background-color);
             flex-direction: column;
         }
 
         #heading {
             padding: 5px 1em;
-            color: var(--greyed-out-dark);
+            color: var(--secondary-text-color);
             display: flex;
             justify-content: flex-end;
             min-height: 50px;
@@ -37,7 +37,7 @@
         #content p {
             line-height: 2;
             margin-top: 0;
-            color: var(--text-read-color);
+            color: var(--primary-text-color);
         }
 
         :host([noref]) .ref {

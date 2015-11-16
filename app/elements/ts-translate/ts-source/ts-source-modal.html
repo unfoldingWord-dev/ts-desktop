@@ -18,6 +18,7 @@
         }
         .container {
             display: block;
+            color: var(--primary-text-color);
             width: 60%;
             height: 80%;
             min-height: 320px;
@@ -30,7 +31,7 @@
             margin-left: auto;
             margin-right: auto;
             overflow: hidden;
-            background: white;
+            background: var(--card-background-color);
             box-shadow: -4px 0 30px rgba(22, 22, 22, 0.3);
         }
         [icon="arrow-back"] {
@@ -41,8 +42,8 @@
         }
         .header {
             min-height: 56px;
-            border-bottom: 1px solid var(--greyed-out-light);
-            color: #888;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--secondary-text-color);
             font-style: italic;
             font-size: 110%;
             display: flex;
@@ -52,8 +53,8 @@
             justify-content: space-between;
             align-items: center;
             padding: 0 20px;
-            border-bottom: 1px solid var(--greyed-out-light);
-            background: white;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--card-background-color);
             width: 100%;
         }
         input {
@@ -76,23 +77,23 @@
             display: block;
             margin: 0;
             padding: 1em;
-            border-bottom: 1px solid var(--greyed-out-light);
+            border-bottom: 1px solid var(--border-color);
         }
         .row:hover {
             background: var(--accent-color-dark);
             box-shadow: inset 0 -1px rgba(0,0,0,0);
-            color: white;
+            color: var(--reverse-text-color);
         }
         .row-header {
             display: block;
             margin: 0;
             padding: 0.25em 1em;
-            border-bottom: 1px solid var(--greyed-out-light);
-            background-color: var(--greyed-out-light);
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--border-color);
             text-transform: uppercase;
             font-size: 80%;
             font-weight: 500;
-            color: var(--greyed-out-dark);
+            color: var(--secondary-text-color);
         }
         .right {
             float: right;
@@ -105,21 +106,21 @@
             height: 56px;
             position: absolute;
             bottom: 0;
-            border-top: 1px solid var(--greyed-out-light);
+            border-top: 1px solid var(--border-color);
         }
         paper-button {
             margin-top: 0.6rem;
-            color: var(--greyed-out-dark);
+            color: var(--secondary-text-color);
         }
         paper-button:hover {
-            color: var(--highlight-primary);
+            color: var(--accent-color);
         }
         ::-webkit-scrollbar {
             display: none;
         }
         paper-checkbox {
-            --paper-checkbox-checked-color: var(--highlight-primary);
-            --paper-checkbox-unchecked-color: var(--highlight-primary);
+            --paper-checkbox-checked-color: var(--accent-color);
+            --paper-checkbox-unchecked-color: var(--accent-color);
         }
         paper-checkbox[disabled]::shadow #checkbox.paper-checkbox {
             opacity: 1;

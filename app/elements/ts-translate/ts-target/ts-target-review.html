@@ -23,12 +23,12 @@
         paper-material {
             flex: auto;
             display: flex;
-            background: white;
+            background: var(--card-background-color);
             flex-direction: column;
         }
 
 		#heading {
-			color: var(--greyed-out-dark);
+			color: var(--secondary-text-color);
             border-bottom: 1px solid var(--note-card-pink);
             display: flex;
             justify-content: space-between;
@@ -50,11 +50,12 @@
         #content p {
 			line-height: 2;
 			margin: 0;
+            color: var(--primary-text-color);
 		}
 
         .notdone paper-button {
-            background: var(--highlight-primary);
-            color: var(--text-color);
+            background: var(--accent-color);
+            color: var(--reverse-text-color);
             margin: 10px 0;
         }
 
@@ -64,7 +65,7 @@
 
         .done paper-button {
             background: var(--completed-color);
-            color: var(--text-color);
+            color: var(--reverse-text-color);
             margin: 10px 0;
             width: 100%
         }
@@ -87,7 +88,7 @@
         }
 
         #content iron-icon {
-            color: var(--highlight-primary);
+            color: var(--accent-color);
         }
 
         #popup {
@@ -113,11 +114,11 @@
         #popup .buttons {
             display: flex;
             justify-content: center;
-            color: var(--greyed-out-dark);
+            color: var(--secondary-text-color);
         }
 
         .buttons paper-button:hover {
-            color: var(--highlight-primary);
+            color: var(--accent-color);
         }
 
 	</style>

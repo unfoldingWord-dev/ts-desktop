@@ -82,6 +82,11 @@
             --paper-tab-ink: var(--accent-color-light);
         }
 
+        .upper {
+            text-transform: uppercase;
+            padding-left: 5px;
+        }
+
 	</style>
 
 	<template>
@@ -89,7 +94,7 @@
 		<div class="tabs">
 			<paper-tabs no-bar hide-scroll-buttons scrollable selected="{{ selectedSource }}">
 				<template is="dom-repeat" items="[[ sources ]]" as="source">
-                   <paper-tab class="tab" on-tap="choosesource">{{ source.name }}</paper-tab>
+                   <paper-tab class="tab" on-tap="choosesource"><span>{{ source.ln }}</span><span class="upper">{{source.source}}</span></paper-tab>
                 </template>
             	<div id="bar" class="selection-bar"></div>
 			</paper-tabs>

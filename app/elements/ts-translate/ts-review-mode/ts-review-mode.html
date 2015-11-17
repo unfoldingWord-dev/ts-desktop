@@ -139,7 +139,7 @@
             var card = document.getElementById(this.modename + index);
 
             this.set('modestatus.chapter', card.chunk.meta.chapter);
-            this.set('modestatus.verse', card.chunk.meta.startverse);
+            this.set('modestatus.index', index);
         },
 
         setlocation: function () {
@@ -147,14 +147,19 @@
             var card;
             var found = false;
             var i = 0;
+            var index = this.modestatus.index;
 
-            while (i < 10000 && !found) {
-                list.scrollToIndex(i);
-                card = document.getElementById(this.modename + i);
-                if (card.chunk.meta.chapter === this.modestatus.chapter && (card.chunk.meta.startverse === this.modestatus.verse || card.chunk.meta.startverse === 0)) {
-                    found = true;
+            if (index >= 0) {
+                list.scrollToIndex(index);
+            } else {
+                while (i < 10000 && !found) {
+                    list.scrollToIndex(i);
+                    card = document.getElementById(this.modename + i);
+                    if (card.chunk.meta.chapter === this.modestatus.chapter) {
+                        found = true;
+                    }
+                    i++;
                 }
-                i++;
             }
         },
 

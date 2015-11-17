@@ -80,7 +80,11 @@
             var translation = this.currentproject.translation;
             var name = this.currentproject.data.project.name;
 
-            _.forEach(_.groupBy(translation, function(chunks) {
+            var transdata = translation.map(function(chunk, index){
+                return {content: chunk.content, status: chunk.status, meta: chunk.meta, index: index};
+            });
+
+            _.forEach(_.groupBy(transdata, function(chunks) {
                 return chunks.meta.chapter;
             }), function (data, chap) {
                 var chapstatus = true;

@@ -21,6 +21,37 @@
             position: relative;
         }
 
+        #popup {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 50px;
+            right: 15px;
+            margin: auto;
+            width: 350px;
+            height: 225px;
+            text-align: center;
+            color: var(--primary-text-color);
+        }
+
+        #popup p {
+            margin: 0;
+        }
+
+        #popup p#spaced {
+            margin-bottom: 15px;
+        }
+
+        #popup .buttons {
+            display: flex;
+            justify-content: center;
+            color: var(--secondary-text-color);
+        }
+
+        .buttons paper-button:hover {
+            color: var(--accent-color);
+        }
+
     </style>
 
     <template>
@@ -34,12 +65,27 @@
             <ts-nosource-mode id="nosourcemode" projectdata="{{currentproject.data}}"></ts-nosource-mode>
         </div>
 
+        <paper-dialog id="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <h2>Chunk Checklist</h2>
+            <div>
+                <p id="spaced">Are you sure you're Done with this chunk?</p>
+                <p>I have placed the verses correctly</p>
+                <p>I have reviewed the words and meanings</p>
+                <p>I have reviewed the translationQuestions</p>
+            </div>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Cancel</paper-button>
+                <paper-button dialog-confirm on-tap="closepopup">Confirm</paper-button>
+            </div>
+        </paper-dialog>
+
         <iron-signals on-iron-signal-frompublish="frompublish"></iron-signals>
         <iron-signals on-iron-signal-updatesources="updatesources"></iron-signals>
         <iron-signals on-iron-signal-updateselected="updateselected"></iron-signals>
         <iron-signals on-iron-signal-loadnewproject="loadnewproject"></iron-signals>
         <iron-signals on-iron-signal-loadproject="loadproject"></iron-signals>
         <iron-signals on-iron-signal-updatetranslation="updatetranslation"></iron-signals>
+        <iron-signals on-iron-signal-openpopup="openpopup"></iron-signals>
 
     </template>
 
@@ -103,6 +149,16 @@
                     }
                 }
             }
+        },
+
+        openpopup: function (event, data) {
+            this.modestatus.index = data.index;
+            this.$.popup.open();
+        },
+
+        closepopup: function () {
+            var index = this.modestatus.index;
+            this.fire('iron-signal', {name: 'completechunk', data: {index: index}});
         },
 
         forceResize: function () {
@@ -300,7 +356,7 @@
             var sources = this.currentproject.data.sources;
 
             mythis.set('selected', 0);
-            mythis.set('modestatus', {"chapter": 1, "verse": 1, "lastmode": 1});
+            mythis.set('modestatus', {"chapter": 1, "lastmode": 1, "index": -1});
             read.classList.add("hide");
             chunk.classList.add("hide");
             review.classList.add("hide");
@@ -359,8 +415,8 @@
             var source = this.currentproject.source;
             var projectdata = this.currentproject.data;
 
-            transdata.data = translation.map(function(chunk){
-                return {transcontent: chunk.content, status: chunk.status, data: projectdata};
+            transdata.data = translation.map(function(chunk, index){
+                return {transcontent: chunk.content, status: chunk.status, data: projectdata, index: index};
             });
             srcdata.data = source.map(function(chunk){
                 return {srccontent: chunk.content, meta: chunk.meta, notes: chunk.notes, words: chunk.words};
@@ -417,8 +473,7 @@
 
         frompublish: function (event, data) {
             this.selected = 0;
-            this.set('modestatus.chapter', data.chapter);
-            this.set('modestatus.verse', data.verse);
+            this.set('modestatus.index', data.index);
             this.route = "translate";
             this.selected = 3;
         },

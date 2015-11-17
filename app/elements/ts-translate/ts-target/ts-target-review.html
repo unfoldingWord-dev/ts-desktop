@@ -91,36 +91,6 @@
             color: var(--accent-color);
         }
 
-        #popup {
-            position: fixed;
-            top: 0;
-            bottom: 0;
-            left: 50px;
-            right: 15px;
-            margin: auto;
-            width: 350px;
-            height: 225px;
-            text-align: center;
-        }
-
-        #popup p {
-            margin: 0;
-        }
-
-        #popup p#spaced {
-            margin-bottom: 15px;
-        }
-
-        #popup .buttons {
-            display: flex;
-            justify-content: center;
-            color: var(--secondary-text-color);
-        }
-
-        .buttons paper-button:hover {
-            color: var(--accent-color);
-        }
-
 	</style>
 
 	<template>
@@ -140,19 +110,7 @@
             </div>
         </paper-material>
 
-        <paper-dialog id="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <h2>Chunk Checklist</h2>
-            <div>
-                <p id="spaced">Are you sure you're Done with this chunk?</p>
-                <p>I have placed the verses correctly</p>
-                <p>I have reviewed the words and meanings</p>
-                <p>I have reviewed the translationQuestions</p>
-            </div>
-            <div class="buttons">
-                <paper-button dialog-dismiss on-tap="closepopup">Cancel</paper-button>
-                <paper-button dialog-confirm on-tap="completechunk">Confirm</paper-button>
-            </div>
-        </paper-dialog>
+        <iron-signals on-iron-signal-completechunk="completechunk"></iron-signals>
 
 	</template>
 
@@ -230,51 +188,44 @@
             }
         },
 
-        completechunk: function () {
-            var textholder = this.$.textholder;
-            var children = textholder.children;
-            var type = "";
-            var text = "";
-            var versenum = 0;
-            var returnstr = "";
+        completechunk: function (event, data) {
+            var index = data.index;
 
-            for (var i = 0; i < children.length; i++) {
-                type = children[i].nodeName;
+            if (this.chunk.index === index) {
+                var textholder = this.$.textholder;
+                var children = textholder.children;
+                var type = "";
+                var text = "";
+                var versenum = 0;
+                var returnstr = "";
 
-                if (type === "TS-VERSE-MARKER") {
-                    versenum = children[i].verse;
-                    returnstr += "/v" + versenum + " ";
-                } else {
-                    text = children[i].textContent;
-                    returnstr += text + " ";
+                for (var i = 0; i < children.length; i++) {
+                    type = children[i].nodeName;
+
+                    if (type === "TS-VERSE-MARKER") {
+                        versenum = children[i].verse;
+                        returnstr += "/v" + versenum + " ";
+                    } else {
+                        text = children[i].textContent;
+                        returnstr += text + " ";
+                    }
                 }
+
+                this.set('chunk.transcontent', returnstr);
+                this.set('chunk.status', "Complete");
+                this.fire('iron-signal', {name: 'updatetranslation'});
             }
-
-            this.closepopup();
-            this.set('chunk.transcontent', returnstr);
-            this.set('chunk.status', "Complete");
-            this.fire('iron-signal', {name: 'updatetranslation'});
-        },
-
-        closepopup: function () {
-            var popup = this.$.popup;
-            var mythis = this;
-            popup.close();
-            setTimeout(function() {
-                mythis.appendChild(popup);
-            }, 500);
         },
 
         checkdone: function () {
             var popup = this.$.popup;
             var textarray = this.chunk.transcontent.split(" ");
             var status = this.chunk.status;
+            var index = this.chunk.index;
             var returnstr = "";
 
             if (status === "Incomplete") {
-                var host = document.querySelector("ts-translate");
-                host.appendChild(popup);
-                popup.open();
+                this.fire('iron-signal', {name: 'openpopup', data: {index: index}});
             } else {
                 for (var i = 0; i < textarray.length; i++) {
                     if (textarray[i].substring(0, 2) !== "/v") {

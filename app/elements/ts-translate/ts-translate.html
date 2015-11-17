@@ -300,7 +300,7 @@
             var sources = this.currentproject.data.sources;
 
             mythis.set('selected', 0);
-            mythis.set('modestatus', {"chapter": 1, "verse": 1, "lastmode": 1});
+            mythis.set('modestatus', {"chapter": 1, "lastmode": 1, "index": -1});
             read.classList.add("hide");
             chunk.classList.add("hide");
             review.classList.add("hide");
@@ -359,8 +359,8 @@
             var source = this.currentproject.source;
             var projectdata = this.currentproject.data;
 
-            transdata.data = translation.map(function(chunk){
-                return {transcontent: chunk.content, status: chunk.status, data: projectdata};
+            transdata.data = translation.map(function(chunk, index){
+                return {transcontent: chunk.content, status: chunk.status, data: projectdata, index: index};
             });
             srcdata.data = source.map(function(chunk){
                 return {srccontent: chunk.content, meta: chunk.meta, notes: chunk.notes, words: chunk.words};
@@ -417,8 +417,7 @@
 
         frompublish: function (event, data) {
             this.selected = 0;
-            this.set('modestatus.chapter', data.chapter);
-            this.set('modestatus.verse', data.verse);
+            this.set('modestatus.index', data.index);
             this.route = "translate";
             this.selected = 3;
         },

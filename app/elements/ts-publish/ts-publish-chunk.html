@@ -110,9 +110,8 @@
         },
 
         gotochunk: function () {
-            var chapter = this.chunk.meta.chapter;
-            var verse = this.chunk.meta.startverse;
-            this.fire('iron-signal', {name: 'frompublish', data: {chapter: chapter, verse: verse}});
+            var index = this.chunk.index;
+            this.fire('iron-signal', {name: 'frompublish', data: {index: index}});
         },
 
         ready: function() {

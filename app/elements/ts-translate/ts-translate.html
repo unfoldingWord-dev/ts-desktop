@@ -246,6 +246,7 @@
             var srcchunk = {};
             var i;
             var chapter;
+            var frame;
             var title;
             var chapterid;
             var verseid;
@@ -261,11 +262,14 @@
             var highest;
             var notes;
             var questions;
+            var chapterref;
+            var chunkref;
 
             for (i = 0; i < frames.length; i++) {
                 chapterid = frames[i].chapter;
                 chapter = parseInt(chapterid);
                 verseid = frames[i].verse;
+                frame = parseInt(verseid);
                 title = frames[i].title;
                 chunkid = chapterid + "-" + verseid;
                 frameid = frames[i].id;
@@ -288,12 +292,23 @@
                     sourcedata = sourcedata.replace(endstr, " ");
                 }
 
+                if (name === "Open Bible Stories") {
+                    chapterref = title;
+                    chunkref = title + ":" + frame;
+                } else {
+                    chapterref = name + " " + chapter;
+                    chunkref = name + " " + chapter + ":" + lowest + "-" + highest;
+                }
+
                 srcchunk = {
                     meta: {
                         chapter: chapter,
+                        frame: frame,
                         title: title,
                         chunkid: chunkid,
                         verses: verses,
+                        chapterref: chapterref,
+                        chunkref: chunkref,
                         startverse: lowest,
                         endverse: highest
                     },
@@ -479,11 +494,13 @@
             }), function (data, chap) {
                 var chapcontent = "";
                 var chapter = parseInt(chap);
+                var chapterref = "";
 
                 _.forEach(data, function (chunk) {
                     chapcontent += chunk.content + " ";
+                    chapterref = chunk.meta.chapterref;
                 });
-                srcchapters.push({chapter: chapter, srccontent: chapcontent});
+                srcchapters.push({chapter: chapter, srccontent: chapcontent, chapterref: chapterref});
             });
 
             transdata.data = transchapters;

@@ -141,13 +141,34 @@ function ProjectsManager(query, configurator) {
         getSourceFrames: function (source) {
             var s = typeof source === 'object' ? source.id : source,
                 r = query([
-                    "select f.id, f.body 'chunk', c.slug 'chapter', c.title from frame f",
+                    "select f.id, f.slug 'verse', f.body 'chunk', c.slug 'chapter', c.title from frame f",
                     "join chapter c on c.id=f.chapter_id",
                     "join resource r on r.id=c.resource_id",
                     "join source_language sl on sl.id=r.source_language_id",
                     "join project p on p.id=sl.project_id where r.id='" + s + "'",
                     "order by f.id, f.sort"
                 ].join(' '));
+
+            return zipper(r);
+        },
+
+        getFrameNotes: function (frameid) {
+
+                var r = query([
+                    "select title, body from translation_note",
+                    "where frame_id='" + frameid + "'"
+                ].join(' '));
+
+            return zipper(r);
+        },
+
+        getFrameQuestions: function (frameid) {
+
+            var r = query([
+                "select q.question, q.answer from checking_question q",
+                "join frame__checking_question f on q.id=f.checking_question_id",
+                "where f.frame_id='" + frameid + "'"
+            ].join(' '));
 
             return zipper(r);
         },

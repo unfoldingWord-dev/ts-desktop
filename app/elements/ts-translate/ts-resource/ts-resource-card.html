@@ -46,6 +46,15 @@
             --paper-tabs-selection-bar-color: var(--accent-color);
         }
 
+        paper-tab {
+            width: 60px;
+        }
+
+        .link {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
 	</style>
 
 	<template>
@@ -55,15 +64,23 @@
                 <paper-tabs selected="{{selected}}">
                     <paper-tab>Notes</paper-tab>
                     <paper-tab>Words</paper-tab>
+                    <paper-tab>Questions</paper-tab>
                 </paper-tabs>
             </div>
             <div id="content">
                 <iron-pages selected="{{selected}}">
                     <div>
-                        <p>{{chunk.notes}}</p>
+                        <template is="dom-repeat" items="{{chunk.notes}}" as="note">
+                            <p class="link">{{note.title}}</p>
+                        </template>
                     </div>
                     <div>
                         <p>{{chunk.words}}</p>
+                    </div>
+                    <div>
+                        <template is="dom-repeat" items="{{chunk.questions}}" as="question">
+                            <p class="link">{{question.question}}</p>
+                        </template>
                     </div>
                 </iron-pages>
             </div>

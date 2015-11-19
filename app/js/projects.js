@@ -48,10 +48,15 @@ function ProjectsManager(query, configurator) {
         toJSON = _.partialRight(JSON.stringify, null, '\t'),
         fromJSON = JSON.parse.bind(JSON),
         config = (function (prefix) {
-            var isUW = _.partial(_.startsWith, _, prefix, 0);
+            var isUW = _.partial(_.startsWith, _, prefix, 0),
+                isChunk = function (filename) {
+                    return _.endsWith(filename, '.txt');
+                };
 
             return {
                 filterDirs: _.partial(_.filter, _, isUW),
+
+                filterChunks: _.partial(_.filter, _, isChunk),
 
                 get targetDir () {
                     return configurator.getValue('targetTranslationsDir');
@@ -176,11 +181,20 @@ function ProjectsManager(query, configurator) {
         saveTargetTranslation: function (translation, meta) {
             var paths = config.makeProjectPaths(meta);
 
+            // save project.json and manifest.json
+
+            // translation is an array
+            // translation[0].meta.complexid 
+
             return mkdirp(paths.projectDir).then(function () {
                 return write(paths.manifest, toJSON(meta));
             }).then(function () {
-                return write(paths.translation, toJSON(translation));
-            });
+                return translation;
+            }).then(map(function (chunk) {
+                var filename = path.join(paths.projectDir, chunk.meta.complexid + '.txt');
+
+                return write(filename, chunk.content);
+            })).then(Promise.all.bind(Promise));
         },
 
         loadProjectsList: function () {
@@ -189,6 +203,8 @@ function ProjectsManager(query, configurator) {
 
         loadTargetTranslationsList: function () {
             var makePaths = config.makeProjectPathsForProject.bind(config);
+
+            // return the project.json, not the manifest.json
 
             return this.loadProjectsList()
                        .then(map(makePaths))
@@ -201,7 +217,23 @@ function ProjectsManager(query, configurator) {
         loadTargetTranslation: function (meta) {
             var paths = config.makeProjectPaths(meta);
 
-            return read(paths.translation).then(fromJSON);
+            // return an object with keys that are the complexid
+            return readdir(paths.projectDir)
+                    .then(config.filterChunks)
+                    .then(function (filenames) {
+                        return Promise.all(_.map(filenames, read))
+                                    .then(function (chunks) {
+                                        return _.zip(filenames, chunks);
+                                    });
+                    }).then(function (data) {
+                        return _.reduce(data, function (translation, data) {
+                            var filename = data[0],
+                                content = data[1];
+
+                            translation[filename] = content;
+                            return translation;
+                        }, {});
+                    });
         },
 
         deleteTargetTranslation: function (meta) {

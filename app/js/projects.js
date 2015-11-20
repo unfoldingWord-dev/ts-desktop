@@ -200,6 +200,10 @@ function ProjectsManager(query, configurator) {
             return readdir(paths.projectDir)
                     .then(config.filterChunks)
                     .then(function (filenames) {
+                        return _.map(filenames, function (f) {
+                            return path.join(paths.projectDir, f);
+                        });
+                    }).then(function (filenames) {
                         return Promise.all(_.map(filenames, read))
                                     .then(function (chunks) {
                                         return _.zip(filenames, chunks);

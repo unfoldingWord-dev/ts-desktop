@@ -329,12 +329,8 @@
 
         openproject: function (e) {
             var projectdata = e.model.proj;
-            var mythis = this;
-
-            App.projectsManager.loadTargetTranslation(projectdata).then(function (translation) {
-                mythis.fire('iron-signal', {name: 'loadproject', data: {projdata: projectdata, rawdata: translation}});
-                mythis.route = "translate";
-            });
+            this.fire('iron-signal', {name: 'loadproject', data: {projdata: projectdata}});
+            this.route = "translate";
         },
 
         openinfo: function (e) {

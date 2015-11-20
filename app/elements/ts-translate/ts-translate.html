@@ -210,7 +210,8 @@
         },
 
         loadnewproject: function (event, data) {
-            this.set('currentproject.translation', data.translation);
+            var blank = [];
+            this.set('currentproject.translation', blank);
             this.set('currentproject.data', data.projdata);
             this.savetofile();
             this.reset();
@@ -219,48 +220,58 @@
 
         loadproject: function (event, data) {
             var mythis = this;
-            this.set('rawdata', data.rawdata);
-            this.set('currentproject.data', data.projdata);
-            //this.updatesource();
-            //this.createchunks();
-            //this.createchapters();
-            //this.reset();
-            //this.checksources();
-            setTimeout(function() {
-                //mythis.fire('iron-signal', {name: 'adjustbar'});
-            }, 500);
+            mythis.set('currentproject.data', data.projdata);
+            App.projectsManager.loadTargetTranslation(data.projdata).then(function (translation) {
+                mythis.set('rawdata', translation);
+                mythis.pullsource();
+                mythis.createchunks();
+                mythis.createchapters();
+                mythis.reset();
+                mythis.checksources();
+                setTimeout(function() {
+                    mythis.fire('iron-signal', {name: 'adjustbar'});
+                }, 500);
+            });
         },
 
         updatesources: function (event, data) {
             var mythis = this;
-            this.set('currentproject.data.sources', data.sources);
-            this.set('currentproject.data.currentsource', data.selected);
-            this.savetofile();
-            this.getlocation();
-            this.updatesource();
-            this.createchunks();
-            this.createchapters();
-            this.forceResize();
-            this.setlocation();
-            this.checksources();
-            setTimeout(function() {
-                mythis.fire('iron-signal', {name: 'adjustbar'});
-            }, 250);
+            var meta = mythis.currentproject.data;
+            mythis.set('currentproject.data.sources', data.sources);
+            mythis.set('currentproject.data.currentsource', data.selected);
+            mythis.getlocation();
+            App.projectsManager.loadTargetTranslation(meta).then(function (translation) {
+                mythis.set('rawdata', translation);
+                mythis.pullsource();
+                mythis.createchunks();
+                mythis.createchapters();
+                mythis.savetofile();
+                mythis.forceResize();
+                mythis.setlocation();
+                mythis.checksources();
+                setTimeout(function() {
+                    mythis.fire('iron-signal', {name: 'adjustbar'});
+                }, 250);
+            });
         },
 
         updateselected: function (event, data) {
             var mythis = this;
-            this.set('currentproject.data.currentsource', data.selected);
-            this.savetofile();
-            this.getlocation();
-            this.updatesource();
-            this.createchunks();
-            this.createchapters();
-            this.forceResize();
-            this.setlocation();
-            setTimeout(function() {
-                mythis.fire('iron-signal', {name: 'adjustbar'});
-            }, 250);
+            var meta = mythis.currentproject.data;
+            mythis.set('currentproject.data.currentsource', data.selected);
+            mythis.getlocation();
+            App.projectsManager.loadTargetTranslation(meta).then(function (translation) {
+                mythis.set('rawdata', translation);
+                mythis.pullsource();
+                mythis.createchunks();
+                mythis.createchapters();
+                mythis.savetofile();
+                mythis.forceResize();
+                mythis.setlocation();
+                setTimeout(function() {
+                    mythis.fire('iron-signal', {name: 'adjustbar'});
+                }, 250);
+            });
         },
 
         updatetranslation: function () {
@@ -276,7 +287,7 @@
             });
         },
 
-        updatesource: function () {
+        pullsource: function () {
             var current = this.currentproject.data.currentsource;
             if (current === null || current === undefined) {
                 return;
@@ -286,43 +297,30 @@
             var name = this.currentproject.data.project.name;
             var source = [];
             var srcchunk = {};
-            var i;
-            var chapter;
-            var frame;
-            var title;
-            var chapterid;
-            var verseid;
-            var frameid;
-            var complexid;
-            var sourcedata;
+            var transchunk = {};
+            var translation = [];
             var startstr = '<verse number="';
             var endstr = '" style="v" />';
             var test = new RegExp(startstr);
-            var verse;
-            var verses;
-            var lowest;
-            var highest;
-            var notes;
-            var questions;
             var chapterref;
             var chunkref;
 
-            for (i = 0; i < frames.length; i++) {
-                chapterid = frames[i].chapter;
-                chapter = parseInt(chapterid);
-                verseid = frames[i].verse;
-                frame = parseInt(verseid);
-                title = frames[i].title;
-                complexid = chapterid + "-" + verseid;
-                frameid = frames[i].id;
-                sourcedata = frames[i].chunk;
-                notes = App.projectsManager.getFrameNotes(frameid);
-                questions = App.projectsManager.getFrameQuestions(frameid);
-                lowest = 0;
-                highest = 0;
-                verses = [];
+            for (var i = 0; i < frames.length; i++) {
+                var chapterid = frames[i].chapter;
+                var chapter = parseInt(chapterid);
+                var verseid = frames[i].verse;
+                var frame = parseInt(verseid);
+                var title = frames[i].title;
+                var complexid = chapterid + "-" + verseid;
+                var frameid = frames[i].id;
+                var sourcedata = frames[i].chunk;
+                var notes = App.projectsManager.getFrameNotes(frameid);
+                var questions = App.projectsManager.getFrameQuestions(frameid);
+                var lowest = 0;
+                var highest = 0;
+                var verses = [];
                 while (test.test(sourcedata)) {
-                    verse = parseInt(sourcedata.substring(sourcedata.search(startstr) + 15, sourcedata.search(endstr)));
+                    var verse = parseInt(sourcedata.substring(sourcedata.search(startstr) + 15, sourcedata.search(endstr)));
                     verses.push(verse);
                     if (lowest === 0) {
                         lowest = verse;
@@ -342,26 +340,37 @@
                     chunkref = name + " " + chapter + ":" + lowest + "-" + highest;
                 }
 
+                var meta = {
+                    chapter: chapter,
+                    frame: frame,
+                    title: title,
+                    complexid: complexid,
+                    verses: verses,
+                    chapterref: chapterref,
+                    chunkref: chunkref,
+                    startverse: lowest,
+                    endverse: highest
+                };
+
                 srcchunk = {
-                    meta: {
-                        chapter: chapter,
-                        frame: frame,
-                        title: title,
-                        complexid: complexid,
-                        verses: verses,
-                        chapterref: chapterref,
-                        chunkref: chunkref,
-                        startverse: lowest,
-                        endverse: highest
-                    },
+                    meta: meta,
                     content: sourcedata,
                     notes: notes,
                     words: [],
                     questions: questions
                 };
                 source.push(srcchunk);
+
+                var rawdata = this.rawdata[complexid];
+                if (rawdata === undefined) {
+                    transchunk = {content: "", status: "Incomplete", meta: meta};
+                } else {
+                    transchunk = {content: rawdata, status: "Incomplete", meta: meta};
+                }
+                translation.push(transchunk);
             }
             this.set('currentproject.source', source);
+            this.set('currentproject.translation', translation);
         },
 
         getlocation: function () {

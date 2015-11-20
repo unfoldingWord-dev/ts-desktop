@@ -184,7 +184,7 @@ function ProjectsManager(query, configurator) {
             // save project.json and manifest.json
 
             // translation is an array
-            // translation[0].meta.complexid 
+            // translation[0].meta.complexid
 
             return mkdirp(paths.projectDir).then(function () {
                 return write(paths.manifest, toJSON(meta));
@@ -216,6 +216,7 @@ function ProjectsManager(query, configurator) {
 
         loadTargetTranslation: function (meta) {
             var paths = config.makeProjectPaths(meta);
+            debugger;
 
             // return an object with keys that are the complexid
             return readdir(paths.projectDir)

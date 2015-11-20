@@ -167,6 +167,17 @@ function ProjectsManager(query, configurator) {
             return zipper(r);
         },
 
+        getFrameWords: function (frameid) {
+
+            var r = query([
+                "select w.term, w.definition from translation_word w",
+                "join frame__translation_word f on w.id=f.translation_word_id",
+                "where f.frame_id='" + frameid + "'"
+            ].join(' '));
+
+            return zipper(r);
+        },
+
         getFrameQuestions: function (frameid) {
 
             var r = query([

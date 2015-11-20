@@ -6,6 +6,10 @@ var _ = require('lodash'),
     mkdirP = require('mkdirp'),
     rimraf = require('rimraf');
 
+
+var Git = require('../js/git').Git;
+var git = new Git();
+
 function zipper (r) {
     return r.length ? _.map(r[0].values, _.zipObject.bind(_, r[0].columns)) : [];
 }
@@ -159,6 +163,13 @@ function ProjectsManager(query, configurator) {
                 return write(paths.manifest, toJSON(meta));
             }).then(function () {
                 return write(paths.translation, toJSON(translation));
+            }).then(function() {
+                // Initialize git repo if there isn't one already for the project
+                readdir(paths.projectDir, function(err, files) {
+                    if (files.indexOf('.git') < 0) {
+                        git.init(paths.projectDir);
+                    }
+                });
             });
         },
 

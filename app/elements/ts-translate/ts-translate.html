@@ -317,17 +317,18 @@
                 var notes = App.projectsManager.getFrameNotes(frameid);
                 var questions = App.projectsManager.getFrameQuestions(frameid);
                 var words = App.projectsManager.getFrameWords(frameid);
-                var lowest = 0;
-                var highest = 0;
                 var verses = [];
+
                 while (test.test(sourcedata)) {
-                    var verse = parseInt(sourcedata.substring(sourcedata.search(startstr) + 15, sourcedata.search(endstr)));
-                    verses.push(verse);
-                    if (lowest === 0) {
-                        lowest = verse;
-                    }
-                    if (highest < verse) {
-                        highest = verse;
+                    var versestr = sourcedata.substring(sourcedata.search(startstr) + 15, sourcedata.search(endstr));
+                    if (versestr.indexOf("-") < 0) {
+                        verses.push(parseInt(versestr));
+                    } else {
+                        var firstnum = parseInt(versestr.substring(0, versestr.search("-")));
+                        var lastnum = parseInt(versestr.substring(versestr.search("-") + 1));
+                        for (var j = firstnum; j <= lastnum; j++) {
+                            verses.push(j);
+                        }
                     }
                     sourcedata = sourcedata.replace(startstr, " /v");
                     sourcedata = sourcedata.replace(endstr, " ");
@@ -338,7 +339,7 @@
                     chunkref = title + ":" + frame;
                 } else {
                     chapterref = name + " " + chapter;
-                    chunkref = name + " " + chapter + ":" + lowest + "-" + highest;
+                    chunkref = name + " " + chapter + ":" + verses[0] + "-" + verses[verses.length-1];
                 }
 
                 var meta = {
@@ -348,9 +349,7 @@
                     complexid: complexid,
                     verses: verses,
                     chapterref: chapterref,
-                    chunkref: chunkref,
-                    startverse: lowest,
-                    endverse: highest
+                    chunkref: chunkref
                 };
 
                 srcchunk = {

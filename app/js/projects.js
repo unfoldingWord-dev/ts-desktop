@@ -164,12 +164,7 @@ function ProjectsManager(query, configurator) {
             }).then(function () {
                 return write(paths.translation, toJSON(translation));
             }).then(function() {
-                // Initialize git repo if there isn't one already for the project
-                readdir(paths.projectDir, function(err, files) {
-                    if (files.indexOf('.git') < 0) {
-                        git.init(paths.projectDir);
-                    }
-                });
+                git.init(paths.projectDir);
             });
         },
 

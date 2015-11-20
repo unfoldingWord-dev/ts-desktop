@@ -3,17 +3,22 @@
 'use strict';
 
 var path = require('path'),
+	fs = require('fs'),
 	exec = require('child_process').exec;
 
 function Git() {
 
 	return {
 
-		// Initialize folder as git repository
+		// Initialize folder as git repository if it's not a git repo already
 		init: function(dir) {
-			var cmd = 'cd ' + dir + ' && git init';
-			exec(cmd, function(err, stdout, stderr) {
-				console.log("Git is initialized:", stdout);
+			fs.readdir(dir, function(err, files) {
+				if (files.indexOf('.git') < 0) {
+					var cmd = 'cd ' + dir + ' && git init';
+					exec(cmd, function(err, stdout, stderr) {
+						console.log("Git is initialized:", stdout);
+					});
+				}
 			});
 		},
 

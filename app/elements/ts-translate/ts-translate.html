@@ -575,7 +575,7 @@
         },
 
         gopublish: function () {
-            if(this.currentproject.data.sources.length && this.currentproject.translation[0].meta.startverse > 0) {
+            if(this.currentproject.data.sources.length) {
                 this.animationConfig.exit.name = 'slide-left-animation';
                 this.animationConfig.entry.name = 'slide-from-left-animation';
                 this.fire('iron-signal', {name: 'updatepublish'});

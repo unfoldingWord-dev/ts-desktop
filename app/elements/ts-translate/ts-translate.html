@@ -316,6 +316,7 @@
                 var sourcedata = frames[i].chunk;
                 var notes = App.projectsManager.getFrameNotes(frameid);
                 var questions = App.projectsManager.getFrameQuestions(frameid);
+                var words = App.projectsManager.getFrameWords(frameid);
                 var lowest = 0;
                 var highest = 0;
                 var verses = [];
@@ -356,7 +357,7 @@
                     meta: meta,
                     content: sourcedata,
                     notes: notes,
-                    words: [],
+                    words: words,
                     questions: questions
                 };
                 source.push(srcchunk);

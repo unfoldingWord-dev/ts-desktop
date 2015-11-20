@@ -216,26 +216,31 @@ function ProjectsManager(query, configurator) {
 
         loadTargetTranslation: function (meta) {
             var paths = config.makeProjectPaths(meta);
-            debugger;
 
             // return an object with keys that are the complexid
             return readdir(paths.projectDir)
                     .then(config.filterChunks)
                     .then(function (filenames) {
                         return _.map(filenames, function (f) {
-                            return path.join(paths.projectDir, f);
+                            return {
+                                'path': path.join(paths.projectDir, f),
+                                'name': f.slice(0, -4) // get rid of extension
+                            };
                         });
-                    }).then(function (filenames) {
-                        return Promise.all(_.map(filenames, read))
-                                    .then(function (chunks) {
-                                        return _.zip(filenames, chunks);
-                                    });
+                    }).then(function (files) {
+                        var names = _.pluck(files, 'name');
+
+                        return Promise.all(_.map(files, function (f) {
+                            return read(f.path);
+                        })).then(function (chunks) {
+                            return _.zip(names, chunks);
+                        });
                     }).then(function (data) {
                         return _.reduce(data, function (translation, data) {
                             var filename = data[0],
                                 content = data[1];
 
-                            translation[filename] = content;
+                            translation[filename] = content.toString();
                             return translation;
                         }, {});
                     });

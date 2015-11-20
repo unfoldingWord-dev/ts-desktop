@@ -332,7 +332,7 @@
             var mythis = this;
 
             App.projectsManager.loadTargetTranslation(projectdata).then(function (translation) {
-                mythis.fire('iron-signal', {name: 'loadproject', data: {projdata: projectdata, translation: translation}});
+                mythis.fire('iron-signal', {name: 'loadproject', data: {projdata: projectdata, rawdata: translation}});
                 mythis.route = "translate";
             });
         },

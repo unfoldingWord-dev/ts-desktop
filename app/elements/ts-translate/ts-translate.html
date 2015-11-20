@@ -21,28 +21,36 @@
             position: relative;
         }
 
-        #popup {
+        .popup {
             position: fixed;
             top: 0;
             bottom: 0;
             left: 50px;
             right: 15px;
             margin: auto;
-            width: 350px;
-            height: 225px;
             text-align: center;
             color: var(--primary-text-color);
         }
 
-        #popup p {
+        #checklistpopup {
+            width: 350px;
+            height: 225px;
+        }
+
+        #resourcepopup {
+            width: 400px;
+            height: 300px;
+        }
+
+        .popup p {
             margin: 0;
         }
 
-        #popup p#spaced {
+        .popup p#spaced {
             margin-bottom: 15px;
         }
 
-        #popup .buttons {
+        .popup .buttons {
             display: flex;
             justify-content: center;
             color: var(--secondary-text-color);
@@ -50,6 +58,14 @@
 
         .buttons paper-button:hover {
             color: var(--accent-color);
+        }
+
+        #resourcepopup h2 {
+            color: var(--accent-color);
+        }
+
+        #resourcepopup p {
+            font-size: 120%;
         }
 
     </style>
@@ -65,7 +81,7 @@
             <ts-nosource-mode id="nosourcemode" projectdata="{{currentproject.data}}"></ts-nosource-mode>
         </div>
 
-        <paper-dialog id="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+        <paper-dialog id="checklistpopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <h2>Chunk Checklist</h2>
             <div>
                 <p id="spaced">Are you sure you're Done with this chunk?</p>
@@ -79,6 +95,16 @@
             </div>
         </paper-dialog>
 
+        <paper-dialog id="resourcepopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <h2>{{popupinfo.title}}</h2>
+            <div>
+                <p>{{popupinfo.body}}</p>
+            </div>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Close</paper-button>
+            </div>
+        </paper-dialog>
+
         <iron-signals on-iron-signal-frompublish="frompublish"></iron-signals>
         <iron-signals on-iron-signal-updatesources="updatesources"></iron-signals>
         <iron-signals on-iron-signal-updateselected="updateselected"></iron-signals>
@@ -86,6 +112,7 @@
         <iron-signals on-iron-signal-loadproject="loadproject"></iron-signals>
         <iron-signals on-iron-signal-updatetranslation="updatetranslation"></iron-signals>
         <iron-signals on-iron-signal-openpopup="openpopup"></iron-signals>
+        <iron-signals on-iron-signal-openresource="openresource"></iron-signals>
 
     </template>
 
@@ -118,7 +145,15 @@
                 value: {},
                 notify: true
             },
+            rawdata: {
+                type: Object,
+                value: {}
+            },
             modestatus: {
+                type: Object,
+                value: {}
+            },
+            popupinfo: {
                 type: Object,
                 value: {}
             },
@@ -153,12 +188,19 @@
 
         openpopup: function (event, data) {
             this.modestatus.index = data.index;
-            this.$.popup.open();
+            this.$.checklistpopup.open();
         },
 
         closepopup: function () {
             var index = this.modestatus.index;
             this.fire('iron-signal', {name: 'completechunk', data: {index: index}});
+        },
+
+        openresource: function (event, data) {
+            var object = {title: data.title, body: data.body};
+            console.log(object);
+            this.set('popupinfo', object);
+            this.$.resourcepopup.open();
         },
 
         forceResize: function () {
@@ -177,15 +219,15 @@
 
         loadproject: function (event, data) {
             var mythis = this;
-            this.set('currentproject.translation', data.translation);
+            this.set('rawdata', data.rawdata);
             this.set('currentproject.data', data.projdata);
-            this.updatesource();
-            this.createchunks();
-            this.createchapters();
-            this.reset();
-            this.checksources();
+            //this.updatesource();
+            //this.createchunks();
+            //this.createchapters();
+            //this.reset();
+            //this.checksources();
             setTimeout(function() {
-                mythis.fire('iron-signal', {name: 'adjustbar'});
+                //mythis.fire('iron-signal', {name: 'adjustbar'});
             }, 500);
         },
 
@@ -251,7 +293,7 @@
             var chapterid;
             var verseid;
             var frameid;
-            var chunkid;
+            var complexid;
             var sourcedata;
             var startstr = '<verse number="';
             var endstr = '" style="v" />';
@@ -271,7 +313,7 @@
                 verseid = frames[i].verse;
                 frame = parseInt(verseid);
                 title = frames[i].title;
-                chunkid = chapterid + "-" + verseid;
+                complexid = chapterid + "-" + verseid;
                 frameid = frames[i].id;
                 sourcedata = frames[i].chunk;
                 notes = App.projectsManager.getFrameNotes(frameid);
@@ -305,7 +347,7 @@
                         chapter: chapter,
                         frame: frame,
                         title: title,
-                        chunkid: chunkid,
+                        complexid: complexid,
                         verses: verses,
                         chapterref: chapterref,
                         chunkref: chunkref,
@@ -314,7 +356,7 @@
                     },
                     content: sourcedata,
                     notes: notes,
-                    words: 'Words for ' + name + ' chapter ' + chapter + ' verse ' + lowest,
+                    words: [],
                     questions: questions
                 };
                 source.push(srcchunk);

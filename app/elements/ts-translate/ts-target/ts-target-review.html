@@ -144,7 +144,7 @@
             if(this.chunk && this.chunk.srccontent) {
                 var verses = this.chunk.meta.verses;
                 var chap = this.chunk.meta.chapter;
-                var status = this.chunk.status;
+                var completed = this.chunk.completed;
                 var textholder = this.$.textholder;
                 var textarray = this.chunk.transcontent.split(" ");
                 var vmstr1 = "\<ts-verse-marker id='c";
@@ -160,7 +160,7 @@
                 var verse = 0;
                 var i = 0;
 
-                if(status === "Incomplete") {
+                if(!completed) {
                     for (i = 0; i < verses.length; i++) {
                         returnstr += vmstr1 + chap + vmstr2 + verses[i] + vmstr3 + verses[i] + vmstr4;
                     }
@@ -209,7 +209,7 @@
                 }
 
                 this.set('chunk.transcontent', returnstr);
-                this.set('chunk.status', "Complete");
+                this.set('chunk.completed', true);
                 this.fire('iron-signal', {name: 'updatetranslation'});
             }
         },
@@ -217,11 +217,11 @@
         checkdone: function () {
             var popup = this.$.popup;
             var textarray = this.chunk.transcontent.split(" ");
-            var status = this.chunk.status;
+            var completed = this.chunk.completed;
             var index = this.chunk.index;
             var returnstr = "";
 
-            if (status === "Incomplete") {
+            if (!completed) {
                 this.fire('iron-signal', {name: 'openpopup', data: {index: index}});
             } else {
                 for (var i = 0; i < textarray.length; i++) {
@@ -231,7 +231,7 @@
                 }
 
                 this.set('chunk.transcontent', returnstr);
-                this.set('chunk.status', "Incomplete");
+                this.set('chunk.completed', false);
                 this.fire('iron-signal', {name: 'updatetranslation'});
             }
         },

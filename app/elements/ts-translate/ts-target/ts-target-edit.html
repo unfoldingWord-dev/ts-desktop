@@ -118,7 +118,7 @@
 
         rendertext: function () {
             if(this.chunk && this.chunk.srccontent) {
-                var status = this.chunk.status;
+                var completed = this.chunk.completed;
                 var contentbox = this.$.content;
                 var textbox = this.$.textbox;
                 var textholder = this.$.textholder;
@@ -128,7 +128,7 @@
                 var returnstr = "";
                 var verse = 0;
 
-                if (status === "Complete") {
+                if (completed) {
                     for (var i = 0; i < textarray.length; i++) {
                         if (textarray[i].substring(0, 2) === "/v") {
                             verse = textarray[i].substring(2);

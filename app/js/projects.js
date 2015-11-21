@@ -253,7 +253,8 @@ function ProjectsManager(query, configurator) {
             // return an object with keys that are the complexid
             return read(paths.manifest)
                     .then(function (manifest) {
-                        finished = fromJSON(manifest).finished_frames;
+                        var finishedFrames = fromJSON(manifest).finished_frames;
+                        finished = _.indexBy(finishedFrames);
                     })
                     .then(function () {
                         return readdir(paths.projectDir);

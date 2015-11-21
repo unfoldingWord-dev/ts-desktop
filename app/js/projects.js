@@ -151,7 +151,7 @@ function ProjectsManager(query, configurator) {
                     "join resource r on r.id=c.resource_id",
                     "join source_language sl on sl.id=r.source_language_id",
                     "join project p on p.id=sl.project_id where r.id='" + s + "'",
-                    "order by f.id, f.sort"
+                    "order by c.sort, f.sort"
                 ].join(' '));
 
             return zipper(r);

@@ -46,7 +46,8 @@
     let configurator = new Configurator();
     let Git = require('../js/git').Git;
     let git = new Git();
-    let uploader = require('../js/uploader');
+    let Uploader = require('../js/uploader').Uploader;
+    let uploader = new Uploader();
     let Translator = require('../js/translator').Translator;
     let Library = require('../js/library').Library;
     let ProjectsManager = require('../js/projects').ProjectsManager;

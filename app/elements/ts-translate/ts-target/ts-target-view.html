@@ -89,7 +89,7 @@
 
         rendertext: function () {
             if(this.chunk && this.chunk.srccontent) {
-                var status = this.chunk.status;
+                var completed = this.chunk.completed;
                 var contentbox = this.$.content;
                 var textholder = this.$.textholder;
                 var textarray = this.chunk.transcontent.split(" ");
@@ -99,7 +99,7 @@
                 var verse = 0;
                 var i = 0;
 
-                if (status === "Complete") {
+                if (completed) {
                     for (i = 0; i < textarray.length; i++) {
                         if (textarray[i].substring(0, 2) === "/v") {
                             verse = textarray[i].substring(2);

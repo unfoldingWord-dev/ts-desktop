@@ -109,6 +109,18 @@
             console.log("Fake uploading...");
             var paths = App.projectsManager.getPaths(this.projectData);
             App.git.stage(paths.projectDir);
+            App.uploader.needToRegister().then(
+                function(err) {
+                    // User neends to register first
+                    console.log(err);
+                    // Then push commit
+                },
+                function(keypair) {
+                    // User neends to register first
+                    console.log(keypair);
+                    // Then push commit
+                }
+            );
             console.log("Fake uploaded");
         }
 

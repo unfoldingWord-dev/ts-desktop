@@ -24,15 +24,10 @@ function Git() {
 
 		// Add and commit all changed files with the given message
 		stage: function(dir) {
-			var cmd = 'cd ' + dir + ' && git add --all';
-			exec(cmd, function(err, stdout, stderr) {
-				console.log("Files are added:", stdout);
-			});
-
 			var msg = new Date();
-			cmd = 'git commit -am "' + msg + '"';
+			var cmd = 'cd ' + dir + ' && git add --all && git commit -am "' + msg + '"';
 			exec(cmd, function(err, stdout, stderr) {
-				console.log("Files are commited:", stdout);
+				console.log("Files are staged:", stdout);
 			});
 		},
 

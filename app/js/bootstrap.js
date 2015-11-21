@@ -44,6 +44,8 @@
 
     let Configurator = require('../js/configurator').Configurator;
     let configurator = new Configurator();
+    let Git = require('../js/git').Git;
+    let git = new Git();
     let uploader = require('../js/uploader');
     let Translator = require('../js/translator').Translator;
     let Library = require('../js/library').Library;
@@ -75,6 +77,8 @@
         uploader: uploader,
 
         util: util,
+
+        git: git,
 
         isMaximized: false,
 

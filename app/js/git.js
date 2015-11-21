@@ -10,7 +10,7 @@ function Git() {
 
 	return {
 
-		// Initialize folder as git repository if it's not a git repo already
+		// Initialize folder as git repository if it's not one already
 		init: function(dir) {
 			fs.readdir(dir, function(err, files) {
 				if (files.indexOf('.git') < 0) {
@@ -22,14 +22,15 @@ function Git() {
 			});
 		},
 
-		// Add and commit all changed files
-		stage: function(message) {
-			var cmd = 'git add --all';
+		// Add and commit all changed files with the given message
+		stage: function(dir) {
+			var cmd = 'cd ' + dir + ' && git add --all';
 			exec(cmd, function(err, stdout, stderr) {
 				console.log("Files are added:", stdout);
 			});
 
-			cmd = 'git commit -am "' + message + '"';
+			var msg = new Date();
+			cmd = 'git commit -am "' + msg + '"';
 			exec(cmd, function(err, stdout, stderr) {
 				console.log("Files are commited:", stdout);
 			});

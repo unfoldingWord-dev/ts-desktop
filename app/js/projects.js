@@ -156,8 +156,12 @@ function ProjectsManager(query, configurator) {
             return zipper(r);
         },
 
+        getPaths: function(meta) {
+            return config.makeProjectPaths(meta);
+        },
+
         saveTargetTranslation: function (translation, meta) {
-            var paths = config.makeProjectPaths(meta);
+            var paths = this.getPaths(meta);
 
             return mkdirp(paths.projectDir).then(function () {
                 return write(paths.manifest, toJSON(meta));
@@ -184,13 +188,13 @@ function ProjectsManager(query, configurator) {
         },
 
         loadTargetTranslation: function (meta) {
-            var paths = config.makeProjectPaths(meta);
+            var paths = this.getPaths(meta);
 
             return read(paths.translation).then(fromJSON);
         },
 
         deleteTargetTranslation: function (meta) {
-            var paths = config.makeProjectPaths(meta);
+            var paths = this.getPaths(meta);
 
             return rm(paths.projectDir);
         }

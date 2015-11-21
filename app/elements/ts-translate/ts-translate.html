@@ -363,9 +363,9 @@
 
                 var rawdata = this.rawdata[complexid];
                 if (rawdata === undefined) {
-                    transchunk = {content: "", status: "Incomplete", meta: meta};
+                    transchunk = {content: "", completed: false, meta: meta};
                 } else {
-                    transchunk = {content: rawdata, status: "Incomplete", meta: meta};
+                    transchunk = {content: rawdata.content, completed: rawdata.completed, meta: meta};
                 }
                 translation.push(transchunk);
             }
@@ -478,11 +478,11 @@
 
         upload: function () {
             var update = this.chunks.data.map(function(chunk){
-                return {meta: chunk.meta, content: chunk.transcontent, status: chunk.status};
+                return {meta: chunk.meta, content: chunk.transcontent, completed: chunk.completed};
             });
             var count = 0;
             for (var i = 0; i < update.length; i++) {
-                if (update[i].status === "Complete") {
+                if (update[i].completed) {
                     count++;
                 }
             }
@@ -503,7 +503,7 @@
             var projectdata = this.currentproject.data;
 
             transdata.data = translation.map(function(chunk, index){
-                return {transcontent: chunk.content, status: chunk.status, data: projectdata, index: index};
+                return {transcontent: chunk.content, completed: chunk.completed, data: projectdata, index: index};
             });
             srcdata.data = source.map(function(chunk){
                 return {srccontent: chunk.content, meta: chunk.meta, notes: chunk.notes, words: chunk.words, questions: chunk.questions};
@@ -528,16 +528,16 @@
             _.forEach(_.groupBy(translation, function(chunks) {
                 return chunks.meta.chapter;
             }), function (data, chap) {
-                var chapstatus = "Complete";
+                var chapcomplete = true;
                 var chapcontent = "";
 
                 _.forEach(data, function (chunk) {
-                    if (chunk.status === "Incomplete") {
-                        chapstatus = "Incomplete";
+                    if (!chunk.completed) {
+                        chapcomplete = false;
                     }
                     chapcontent += chunk.content + " ";
                 });
-                transchapters.push({status: chapstatus, transcontent: chapcontent, data: projectdata});
+                transchapters.push({completed: chapcomplete, transcontent: chapcontent, data: projectdata});
             });
 
             _.forEach(_.groupBy(source, function(chunks) {

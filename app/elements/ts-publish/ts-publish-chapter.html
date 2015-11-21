@@ -48,16 +48,16 @@
                 <span>[[chapter.name]]</span> <span>[[chapter.chapter]]</span>
             </div>
             <div class="icon">
-                <template is="dom-if" if="{{chapter.complete}}">
+                <template is="dom-if" if="{{chapter.completed}}">
                     <iron-icon class="done" icon="done"></iron-icon>
                 </template>
-                <template is="dom-if" if="{{!chapter.complete}}">
+                <template is="dom-if" if="{{!chapter.completed}}">
                     <iron-icon class="review" icon="report"></iron-icon>
                 </template>
             </div>
         </paper-material>
 
-        <template is="dom-if" if="{{!chapter.complete}}">
+        <template is="dom-if" if="{{!chapter.completed}}">
             <template is="dom-repeat" items="{{chapter.chunks}}" as="chunk">
                 <ts-publish-chunk chapter="[[chapter]]" chunk="[[chunk]]"></ts-publish-chunk>
             </template>

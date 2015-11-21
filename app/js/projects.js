@@ -75,7 +75,8 @@ function ProjectsManager(query, configurator) {
                         parentDir: targetDir,
                         projectDir: projectDir,
                         manifest: path.join(projectDir, 'manifest.json'),
-                        translation: path.join(projectDir, 'translation.json')
+                        translation: path.join(projectDir, 'translation.json'),
+                        project: path.join(projectDir, 'project.json')
                     };
 
                 }
@@ -197,10 +198,28 @@ function ProjectsManager(query, configurator) {
             // translation is an array
             // translation[0].meta.complexid
 
+            var finishedFrames = _.map(_.filter(translation, function (chunk) {
+                return !!chunk.completed;
+            }), function (chunk) {
+                return chunk.meta.complexid;
+            });
+
+            var manifest = {
+                generator: {
+                    name: 'ts-desktop'
+                },
+                package_version: 3,
+                finished_frames: finishedFrames
+            };
+
             return mkdirp(paths.projectDir).then(function () {
-                return write(paths.manifest, toJSON(meta));
+                return write(paths.manifest, toJSON(manifest));
             }).then(function () {
-                return translation;
+                return write(paths.project, toJSON(meta));
+            }).then(function () {
+                return _.filter(translation, function (chunk) {
+                    return chunk.meta && chunk.meta.complexid;
+                });
             }).then(map(function (chunk) {
                 var filename = path.join(paths.projectDir, chunk.meta.complexid + '.txt');
 
@@ -219,18 +238,26 @@ function ProjectsManager(query, configurator) {
 
             return this.loadProjectsList()
                        .then(map(makePaths))
-                       .then(map('manifest'))
+                       .then(map('project'))
                        .then(map(read))
                        .then(Promise.all.bind(Promise))
                        .then(map(fromJSON));
         },
 
         loadTargetTranslation: function (meta) {
-            var paths = config.makeProjectPaths(meta);
+            var paths = config.makeProjectPaths(meta),
+                finished;
+
+            // read manifest, get object with finished frames
 
             // return an object with keys that are the complexid
-            return readdir(paths.projectDir)
-                    .then(config.filterChunks)
+            return read(paths.manifest)
+                    .then(function (manifest) {
+                        finished = fromJSON(manifest).finished_frames;
+                    })
+                    .then(function () {
+                        return readdir(paths.projectDir);
+                    }).then(config.filterChunks)
                     .then(function (filenames) {
                         return _.map(filenames, function (f) {
                             return {
@@ -251,7 +278,10 @@ function ProjectsManager(query, configurator) {
                             var filename = data[0],
                                 content = data[1];
 
-                            translation[filename] = content.toString();
+                            translation[filename] = {
+                                content: content.toString(),
+                                completed: !!finished[filename]
+                            };
                             return translation;
                         }, {});
                     });

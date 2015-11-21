@@ -365,7 +365,7 @@
                 if (rawdata === undefined) {
                     transchunk = {content: "", completed: false, meta: meta};
                 } else {
-                    transchunk = {content: rawdata, completed: false, meta: meta};
+                    transchunk = {content: rawdata.content, completed: rawdata.completed, meta: meta};
                 }
                 translation.push(transchunk);
             }

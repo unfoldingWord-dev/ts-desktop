@@ -40,12 +40,15 @@
                 console.log('Disconnected from ' + host + ':' + port);
             });
         },
+
         verifyProfile: function (profile) {
             return profile.getName() !== '' && profile.getEmail() !== '';
         },
+
         disconnect: function () {
             client && client.destroy(), client = null;
         },
+
         writeKeyPairToFile: function (pair) {
             mkdirp(targetDir, function () {
                 try {
@@ -56,6 +59,7 @@
             });
 
         },
+        
         needToRegister: function (callback) {
             jsonfile.readFile(targetFile, function (err, keypair) {
                 if (err === null) {
@@ -71,6 +75,7 @@
                 }
             });
         },
+
         getDeviceId: function (callback) {
             getmac.getMac(function (err, mac) {
                 if (err) {

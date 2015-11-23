@@ -2,6 +2,7 @@
 <link rel="import" href="../../components/iron-icons/iron-icons.html">
 <link rel="import" href="../../components/iron-input/iron-input.html">
 <link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/paper-material/paper-material.html">
 
 <dom-module id="ts-publish-profile">
 
@@ -25,6 +26,13 @@
             margin-top: 20px;
         }
 
+        #add {
+            background: var(--card-background-color);
+            color: var(--accent-color);
+            text-transform: uppercase;
+            margin-top: 20px;
+        }
+
         input {
             width: 350px;
             height: 30px;
@@ -42,12 +50,34 @@
             margin-top: 20px;
             background: var(--card-background-color);
             width: 450px;
-            box-shadow: 0 2px 3px 2px var(--border-color);
+            height: 60px;
+        }
+
+        .users {
+            display: flex;
+            align-items: center;
+            margin-top: 20px;
+            background: var(--card-background-color);
+            width: 450px;
+            min-height: 60px;
+            font-size: 120%;
+            color: var(--secondary-text-color);
+        }
+
+        .users p {
+            margin: 5px 20px;
+        }
+
+        #usergroup {
+            margin: 10px 0;
         }
 
         .right {
-            float: right;
             color: var(--border-color);
+        }
+
+        #buttons {
+            display: flex;
         }
 
     </style>
@@ -55,19 +85,31 @@
     <template>
 
         <div id="contain">
-            <div class="input">
-                <input is="iron-input" bind-value="" placeholder="Your Name">
+            <template is="dom-if" if="{{translators.length}}">
+                <paper-material class="users" elevation="1">
+                    <div id="usergroup">
+                        <template is="dom-repeat" items="{{translators}}" as="user">
+                            <p>{{user.name}}</p>
+                        </template>
+                    </div>
+                </paper-material>
+            </template>
+            <paper-material class="input" elevation="1">
+                <input is="iron-input" bind-value="{{newinfo.name}}" placeholder="Your Name">
                 <iron-icon class="right" icon="info" title="Info"></iron-icon>
-            </div>
-            <div class="input">
-                <input is="iron-input" bind-value="" placeholder="Your Email Address">
+            </paper-material>
+            <paper-material class="input" elevation="1">
+                <input is="iron-input" bind-value="{{newinfo.email}}" placeholder="Your Email Address">
                 <iron-icon class="right" icon="info" title="Info"></iron-icon>
-            </div>
-            <div class="input">
-                <input is="iron-input" bind-value="" placeholder="Your Phone Number">
+            </paper-material>
+            <paper-material class="input" elevation="1">
+                <input is="iron-input" bind-value="{{newinfo.phone}}" placeholder="Your Phone Number">
                 <iron-icon class="right" icon="info" title="Info"></iron-icon>
+            </paper-material>
+            <div id="buttons">
+                <paper-button raised id="add" on-tap="add">Add Contributor</paper-button>
+                <paper-button raised id="next" on-tap="next">Next Step</paper-button>
             </div>
-            <paper-button raised id="next" on-tap="next">Next Step</paper-button>
         </div>
 
     </template>
@@ -85,7 +127,20 @@
                 type: Number,
                 value: 1,
                 notify: true
+            },
+            translators: {
+                type: Array,
+                value: []
+            },
+            newinfo: {
+                type: Object,
+                value: {}
             }
+        },
+
+        add: function () {
+            this.push('translators', this.newinfo);
+            this.set('newinfo', {});
         },
 
         next: function () {

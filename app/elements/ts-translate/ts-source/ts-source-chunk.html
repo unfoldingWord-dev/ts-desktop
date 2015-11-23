@@ -18,6 +18,7 @@
             display: flex;
             background: var(--card-background-color);
             flex-direction: column;
+            border-radius: 3px;
         }
 
         #heading {
@@ -52,7 +53,7 @@
             <div id="heading">
                 <ts-source-tab project="[[chunk.data.project]]" sources="{{chunk.data.sources}}" selected-source="{{chunk.data.currentsource}}" lefty></ts-source-tab>
                 <div class="ref">
-                    <span>[[chunk.data.project.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[chunk.data.language.ln]]</span>
+                    <span>[[chunk.meta.chunkref]]</span> - <span>[[chunk.data.language.ln]]</span>
                 </div>
             </div>
             <div id="content">

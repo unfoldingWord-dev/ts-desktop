@@ -4,6 +4,7 @@
 <link rel="import" href="../../../components/iron-signals/iron-signals.html">
 
 <link rel="import" href="./ts-source-modal.html">
+<link rel="import" href="../../ts-icons/ts-icons.html">
 
 <dom-module id="ts-source-tab">
 
@@ -74,7 +75,7 @@
 			cursor: pointer;
         }
 
-		.modal-btn-container .icon {
+		.modal-btn-container paper-icon-button {
 			color: var(--border-color);
 		}
 
@@ -101,7 +102,7 @@
 		</div>
 		<div class="modal-btn-container">
 			<div class="modal-btn-inner-container">
-				<paper-icon-button icon="tab" class="icon24 icon" on-tap="openModal"></paper-icon-button>
+				<paper-icon-button icon="uw-tab-small:uw-tab-small" on-tap="openModal"></paper-icon-button>
 			</div>
 		</div>
 

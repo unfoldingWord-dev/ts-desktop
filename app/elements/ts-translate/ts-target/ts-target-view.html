@@ -16,6 +16,7 @@
             display: flex;
             background: var(--card-background-color);
             flex-direction: column;
+            border-radius: 3px;
         }
 
 		#heading {
@@ -41,6 +42,7 @@
         #content.editmode {
             background-size: 100% 32px;
             background-image: -webkit-linear-gradient(var(--card-background-color) 27px, var(--border-color) 27px, var(--border-color) 28px, var(--card-background-color) 28px);
+            border-radius: 3px;
         }
 
         #content p {
@@ -56,7 +58,7 @@
         <paper-material elevation="1">
             <div id="heading">
                 <div>
-                    <span>[[chunk.data.project.name]]</span> <span>[[chunk.chapter]]</span> &mdash; <span>[[chunk.data.language.ln]]</span>
+                    <span>[[chunk.chapterref]]</span> &mdash; <span>[[chunk.data.language.ln]]</span>
                 </div>
             </div>
             <div id="content" class="editmode">
@@ -87,7 +89,7 @@
 
         rendertext: function () {
             if(this.chunk && this.chunk.srccontent) {
-                var status = this.chunk.status;
+                var completed = this.chunk.completed;
                 var contentbox = this.$.content;
                 var textholder = this.$.textholder;
                 var textarray = this.chunk.transcontent.split(" ");
@@ -97,7 +99,7 @@
                 var verse = 0;
                 var i = 0;
 
-                if (status === "Complete") {
+                if (completed) {
                     for (i = 0; i < textarray.length; i++) {
                         if (textarray[i].substring(0, 2) === "/v") {
                             verse = textarray[i].substring(2);

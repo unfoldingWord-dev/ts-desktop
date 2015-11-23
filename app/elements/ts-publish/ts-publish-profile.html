@@ -3,6 +3,7 @@
 <link rel="import" href="../../components/iron-input/iron-input.html">
 <link rel="import" href="../../components/paper-button/paper-button.html">
 <link rel="import" href="../../components/paper-material/paper-material.html">
+<link rel="import" href="../../components/paper-dialog/paper-dialog.html">
 
 <dom-module id="ts-publish-profile">
 
@@ -80,15 +81,38 @@
             display: flex;
         }
 
+        #popup {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+            width: 320px;
+            height: 220px;
+            text-align: center;
+            color: var(--primary-text-color);
+        }
+
+        #popup .buttons {
+            display: flex;
+            justify-content: center;
+            color: var(--secondary-text-color);
+        }
+
+        #popup .buttons paper-button:hover {
+            color: var(--accent-color);
+        }
+
     </style>
 
     <template>
 
         <div id="contain">
-            <template is="dom-if" if="{{translators.length}}">
+            <template is="dom-if" if="{{currentproject.data.translators.length}}">
                 <paper-material class="users" elevation="1">
                     <div id="usergroup">
-                        <template is="dom-repeat" items="{{translators}}" as="user">
+                        <template is="dom-repeat" items="{{currentproject.data.translators}}" as="user">
                             <p>{{user.name}}</p>
                         </template>
                     </div>
@@ -112,6 +136,16 @@
             </div>
         </div>
 
+        <paper-dialog id="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <h2>Invalid Data</h2>
+            <div>
+                <p>You must enter a name and email address for at least one translator before publishing.</p>
+            </div>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Close</paper-button>
+            </div>
+        </paper-dialog>
+
     </template>
 
 </dom-module>
@@ -128,9 +162,10 @@
                 value: 1,
                 notify: true
             },
-            translators: {
-                type: Array,
-                value: []
+            currentproject: {
+                type: Object,
+                value: {},
+                notify: true
             },
             newinfo: {
                 type: Object,
@@ -139,12 +174,17 @@
         },
 
         add: function () {
-            this.push('translators', this.newinfo);
+            this.push('currentproject.data.translators', this.newinfo);
+            this.fire('iron-signal', {name: 'savetofile'});
             this.set('newinfo', {});
         },
 
         next: function () {
-            this.selected = this.selected + 1;
+            if (this.currentproject.data.translators.length) {
+                this.selected = this.selected + 1;
+            } else {
+                this.$.popup.open();
+            }
         },
 
         ready: function() {

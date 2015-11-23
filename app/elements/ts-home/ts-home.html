@@ -104,8 +104,7 @@
         }
 
         .row:hover {
-            background: var(--accent-color-dark);
-            color: var(--reverse-text-color);
+            background: var(--accent-color-light);
         }
 
         .left {
@@ -124,14 +123,6 @@
             display: inline-block;
         }
 
-        .row:hover .smallicon {
-            color: var(--reverse-text-color);
-        }
-
-        .row:hover .smalltext {
-            color: var(--reverse-text-color);
-        }
-
         .smallicon {
             --iron-icon-height: 18px;
             --iron-icon-width: 18px;
@@ -141,7 +132,7 @@
         .info {
             --iron-icon-height: 22px;
             --iron-icon-width: 22px;
-            color: var(--border-color);
+            color: var(--secondary-text-color);
         }
 
         .smalltext {
@@ -329,12 +320,8 @@
 
         openproject: function (e) {
             var projectdata = e.model.proj;
-            var mythis = this;
-
-            App.projectsManager.loadTargetTranslation(projectdata).then(function (translation) {
-                mythis.fire('iron-signal', {name: 'loadproject', data: {projdata: projectdata, translation: translation}});
-                mythis.route = "translate";
-            });
+            this.fire('iron-signal', {name: 'loadproject', data: {projdata: projectdata}});
+            this.route = "translate";
         },
 
         openinfo: function (e) {

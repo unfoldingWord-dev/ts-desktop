@@ -48,10 +48,15 @@ function ProjectsManager(query, configurator) {
         toJSON = _.partialRight(JSON.stringify, null, '\t'),
         fromJSON = JSON.parse.bind(JSON),
         config = (function (prefix) {
-            var isUW = _.partial(_.startsWith, _, prefix, 0);
+            var isUW = _.partial(_.startsWith, _, prefix, 0),
+                isChunk = function (filename) {
+                    return _.endsWith(filename, '.txt');
+                };
 
             return {
                 filterDirs: _.partial(_.filter, _, isUW),
+
+                filterChunks: _.partial(_.filter, _, isChunk),
 
                 get targetDir () {
                     return configurator.getValue('targetTranslationsDir');
@@ -70,7 +75,8 @@ function ProjectsManager(query, configurator) {
                         parentDir: targetDir,
                         projectDir: projectDir,
                         manifest: path.join(projectDir, 'manifest.json'),
-                        translation: path.join(projectDir, 'translation.json')
+                        translation: path.join(projectDir, 'translation.json'),
+                        project: path.join(projectDir, 'project.json')
                     };
 
                 }
@@ -141,13 +147,45 @@ function ProjectsManager(query, configurator) {
         getSourceFrames: function (source) {
             var s = typeof source === 'object' ? source.id : source,
                 r = query([
-                    "select f.id, f.body 'chunk', c.slug 'chapter', c.title from frame f",
+                    "select f.id, f.slug 'verse', f.body 'chunk', c.slug 'chapter', c.title from frame f",
                     "join chapter c on c.id=f.chapter_id",
                     "join resource r on r.id=c.resource_id",
                     "join source_language sl on sl.id=r.source_language_id",
                     "join project p on p.id=sl.project_id where r.id='" + s + "'",
-                    "order by f.id, f.sort"
+                    "order by c.sort, f.sort"
                 ].join(' '));
+
+            return zipper(r);
+        },
+
+        getFrameNotes: function (frameid) {
+
+                var r = query([
+                    "select title, body from translation_note",
+                    "where frame_id='" + frameid + "'"
+                ].join(' '));
+
+            return zipper(r);
+        },
+
+        getFrameWords: function (frameid) {
+
+            var r = query([
+                "select w.term, w.definition from translation_word w",
+                "join frame__translation_word f on w.id=f.translation_word_id",
+                "where f.frame_id='" + frameid + "'"
+            ].join(' '));
+
+            return zipper(r);
+        },
+
+        getFrameQuestions: function (frameid) {
+
+            var r = query([
+                "select q.question, q.answer from checking_question q",
+                "join frame__checking_question f on q.id=f.checking_question_id",
+                "where f.frame_id='" + frameid + "'"
+            ].join(' '));
 
             return zipper(r);
         },
@@ -155,11 +193,38 @@ function ProjectsManager(query, configurator) {
         saveTargetTranslation: function (translation, meta) {
             var paths = config.makeProjectPaths(meta);
 
-            return mkdirp(paths.projectDir).then(function () {
-                return write(paths.manifest, toJSON(meta));
-            }).then(function () {
-                return write(paths.translation, toJSON(translation));
+            // save project.json and manifest.json
+
+            // translation is an array
+            // translation[0].meta.complexid
+
+            var finishedFrames = _.map(_.filter(translation, function (chunk) {
+                return !!chunk.completed;
+            }), function (chunk) {
+                return chunk.meta.complexid;
             });
+
+            var manifest = {
+                generator: {
+                    name: 'ts-desktop'
+                },
+                package_version: 3,
+                finished_frames: finishedFrames
+            };
+
+            return mkdirp(paths.projectDir).then(function () {
+                return write(paths.manifest, toJSON(manifest));
+            }).then(function () {
+                return write(paths.project, toJSON(meta));
+            }).then(function () {
+                return _.filter(translation, function (chunk) {
+                    return chunk.meta && chunk.meta.complexid;
+                });
+            }).then(map(function (chunk) {
+                var filename = path.join(paths.projectDir, chunk.meta.complexid + '.txt');
+
+                return write(filename, chunk.content);
+            })).then(Promise.all.bind(Promise));
         },
 
         loadProjectsList: function () {
@@ -169,18 +234,58 @@ function ProjectsManager(query, configurator) {
         loadTargetTranslationsList: function () {
             var makePaths = config.makeProjectPathsForProject.bind(config);
 
+            // return the project.json, not the manifest.json
+
             return this.loadProjectsList()
                        .then(map(makePaths))
-                       .then(map('manifest'))
+                       .then(map('project'))
                        .then(map(read))
                        .then(Promise.all.bind(Promise))
                        .then(map(fromJSON));
         },
 
         loadTargetTranslation: function (meta) {
-            var paths = config.makeProjectPaths(meta);
+            var paths = config.makeProjectPaths(meta),
+                finished;
 
-            return read(paths.translation).then(fromJSON);
+            // read manifest, get object with finished frames
+
+            // return an object with keys that are the complexid
+            return read(paths.manifest)
+                    .then(function (manifest) {
+                        var finishedFrames = fromJSON(manifest).finished_frames;
+                        finished = _.indexBy(finishedFrames);
+                    })
+                    .then(function () {
+                        return readdir(paths.projectDir);
+                    }).then(config.filterChunks)
+                    .then(function (filenames) {
+                        return _.map(filenames, function (f) {
+                            return {
+                                'path': path.join(paths.projectDir, f),
+                                'name': f.slice(0, -4) // get rid of extension
+                            };
+                        });
+                    }).then(function (files) {
+                        var names = _.pluck(files, 'name');
+
+                        return Promise.all(_.map(files, function (f) {
+                            return read(f.path);
+                        })).then(function (chunks) {
+                            return _.zip(names, chunks);
+                        });
+                    }).then(function (data) {
+                        return _.reduce(data, function (translation, data) {
+                            var filename = data[0],
+                                content = data[1];
+
+                            translation[filename] = {
+                                content: content.toString(),
+                                completed: !!finished[filename]
+                            };
+                            return translation;
+                        }, {});
+                    });
         },
 
         deleteTargetTranslation: function (meta) {

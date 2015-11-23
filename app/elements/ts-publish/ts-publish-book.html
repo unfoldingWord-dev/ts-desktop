@@ -81,21 +81,21 @@
             var name = this.currentproject.data.project.name;
 
             var transdata = translation.map(function(chunk, index){
-                return {content: chunk.content, status: chunk.status, meta: chunk.meta, index: index};
+                return {content: chunk.content, completed: chunk.completed, meta: chunk.meta, index: index};
             });
 
             _.forEach(_.groupBy(transdata, function(chunks) {
                 return chunks.meta.chapter;
             }), function (data, chap) {
-                var chapstatus = true;
+                var chapcomplete = true;
                 var chapter = parseInt(chap);
 
                 _.forEach(data, function (chunk) {
-                    if (chunk.status === "Incomplete") {
-                        chapstatus = false;
+                    if (!chunk.completed) {
+                        chapcomplete = false;
                     }
                 });
-                transchapters.push({name: name, chapter: chapter, complete: chapstatus, chunks: data});
+                transchapters.push({name: name, chapter: chapter, completed: chapcomplete, chunks: data});
             });
             this.set('chapters', transchapters);
         },

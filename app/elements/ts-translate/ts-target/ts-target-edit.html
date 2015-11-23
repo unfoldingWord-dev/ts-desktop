@@ -19,6 +19,7 @@
             background: var(--card-background-color);
             flex-direction: column;
             color: var(--primary-text-color);
+            border-radius: 3px;
         }
 
 		#heading {
@@ -44,6 +45,7 @@
         #content.editmode {
             background-size: 100% 32px;
             background-image: -webkit-linear-gradient(var(--card-background-color) 27px, var(--border-color) 27px, var(--border-color) 28px, var(--card-background-color) 28px);
+            border-radius: 3px;
         }
 
         #content iron-autogrow-textarea {
@@ -77,7 +79,7 @@
         <paper-material elevation="1">
             <div id="heading">
                 <div>
-                    <span>[[chunk.data.project.name]]</span> <span>[[chunk.meta.chapter]]</span>:<span>[[chunk.meta.startverse]]</span>-<span>[[chunk.meta.endverse]]</span> - <span>[[chunk.data.language.ln]]</span>
+                    <span>[[chunk.meta.chunkref]]</span> - <span>[[chunk.data.language.ln]]</span>
                 </div>
                 <paper-icon-button icon="clear" on-tap="review"></paper-icon-button>
             </div>
@@ -116,7 +118,7 @@
 
         rendertext: function () {
             if(this.chunk && this.chunk.srccontent) {
-                var status = this.chunk.status;
+                var completed = this.chunk.completed;
                 var contentbox = this.$.content;
                 var textbox = this.$.textbox;
                 var textholder = this.$.textholder;
@@ -126,7 +128,7 @@
                 var returnstr = "";
                 var verse = 0;
 
-                if (status === "Complete") {
+                if (completed) {
                     for (var i = 0; i < textarray.length; i++) {
                         if (textarray[i].substring(0, 2) === "/v") {
                             verse = textarray[i].substring(2);

@@ -17,6 +17,7 @@
             display: flex;
             background: var(--card-background-color);
             flex-direction: column;
+            border-radius: 3px;
         }
 
 		#heading {
@@ -46,6 +47,16 @@
             --paper-tabs-selection-bar-color: var(--accent-color);
         }
 
+        paper-tab {
+            width: 120px;
+        }
+
+        .link {
+            color: var(--accent-color);
+            font-weight: bold;
+            cursor: pointer;
+        }
+
 	</style>
 
 	<template>
@@ -55,15 +66,25 @@
                 <paper-tabs selected="{{selected}}">
                     <paper-tab>Notes</paper-tab>
                     <paper-tab>Words</paper-tab>
+                    <paper-tab>Questions</paper-tab>
                 </paper-tabs>
             </div>
             <div id="content">
                 <iron-pages selected="{{selected}}">
                     <div>
-                        <p>{{chunk.notes}}</p>
+                        <template is="dom-repeat" items="{{chunk.notes}}" as="note">
+                            <p class="link" on-tap="opennote">{{note.title}}</p>
+                        </template>
                     </div>
                     <div>
-                        <p>{{chunk.words}}</p>
+                        <template is="dom-repeat" items="{{chunk.words}}" as="word">
+                            <p class="link">{{word.term}}</p>
+                        </template>
+                    </div>
+                    <div>
+                        <template is="dom-repeat" items="{{chunk.questions}}" as="question">
+                            <p class="link" on-tap="openquestion">{{question.question}}</p>
+                        </template>
                     </div>
                 </iron-pages>
             </div>
@@ -89,6 +110,27 @@
                 value: {}
             }
 		},
+
+        opennote: function (e) {
+            var note = e.model.note;
+            var title = note.title;
+            var body = note.body;
+            this.fire('iron-signal', {name: 'openresource', data: {title: title, body: body}});
+        },
+
+        openword: function (e) {
+            var word = e.model.word;
+            var title = word.term;
+            var body = word.definition;
+            this.fire('iron-signal', {name: 'openresource', data: {title: title, body: body}});
+        },
+
+        openquestion: function (e) {
+            var question = e.model.question;
+            var title = question.question;
+            var body = question.answer;
+            this.fire('iron-signal', {name: 'openresource', data: {title: title, body: body}});
+        },
 
 		ready: function() {
 

@@ -209,7 +209,13 @@ function ProjectsManager(query, configurator) {
                     name: 'ts-desktop'
                 },
                 package_version: 3,
-                finished_frames: finishedFrames
+                target_language: meta.language,
+                project_id: meta.project.slug,
+                source_translations: meta.sources,
+                translators: meta.translators,
+                finished_frames: finishedFrames,
+                finished_titles: [],
+                finished_references: []
             };
 
             return mkdirp(paths.projectDir).then(function () {
@@ -221,7 +227,7 @@ function ProjectsManager(query, configurator) {
                     return chunk.meta && chunk.meta.complexid;
                 });
             }).then(map(function (chunk) {
-                var filename = path.join(paths.projectDir, chunk.meta.complexid + '.txt');
+                var filename = path.join(paths.projectDir, chunk.meta.frameid + '.txt');
 
                 return write(filename, chunk.content);
             })).then(Promise.all.bind(Promise));

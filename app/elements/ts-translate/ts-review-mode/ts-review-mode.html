@@ -1,5 +1,9 @@
 
 <link rel="import" href="../../../components/iron-list/iron-list.html">
+<link rel="import" href="../../../components/iron-signals/iron-signals.html">
+<link rel="import" href="../../../components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../../components/paper-button/paper-button.html">
+<link rel="import" href="../../../components/neon-animation/neon-animation.html">
 
 <link rel="import" href="./ts-review-card.html">
 
@@ -50,6 +54,43 @@
             100% {transform: scale(0,0); opacity: 0}
         }
 
+        :host::shadow #items {
+            margin-bottom: 300px;
+        }
+
+        #resourcepopup {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            text-align: center;
+            color: var(--primary-text-color);
+            width: 400px;
+            height: 100%;
+            right: 0;
+        }
+
+        #resourcepopup p {
+            margin: 0;
+        }
+
+        #resourcepopup .buttons {
+            display: flex;
+            justify-content: center;
+            color: var(--secondary-text-color);
+        }
+
+        #resourcepopup .buttons paper-button:hover {
+            color: var(--accent-color);
+        }
+
+        #resourcepopup h2 {
+            color: var(--accent-color);
+        }
+
+        #resourcepopup p {
+            font-size: 120%;
+        }
+
 	</style>
 
 	<template>
@@ -60,7 +101,18 @@
                     <ts-review-card id="{{createid(index)}}" chunk="{{chunk}}"></ts-review-card>
                 </template>
             </iron-list>
+            <paper-dialog id="resourcepopup" modal="false" entry-animation="slide-from-right-animation" exit-animation="slide-right-animation">
+                <h2>{{popupinfo.title}}</h2>
+                <div>
+                    <p>{{popupinfo.body}}</p>
+                </div>
+                <div class="buttons">
+                    <paper-button dialog-dismiss>Close</paper-button>
+                </div>
+            </paper-dialog>
         </div>
+
+        <iron-signals on-iron-signal-openresource="openresource"></iron-signals>
 
 	</template>
 
@@ -82,6 +134,10 @@
                 value: {},
                 notify: true
             },
+            popupinfo: {
+                type: Object,
+                value: {}
+            },
             modestatus: {
                 type: Object,
                 value: {},
@@ -91,6 +147,12 @@
                 type: String,
                 value: "review"
             }
+        },
+
+        openresource: function (event, data) {
+            var object = {title: data.title, body: data.body};
+            this.set('popupinfo', object);
+            this.$.resourcepopup.open();
         },
 
         frommode: function () {

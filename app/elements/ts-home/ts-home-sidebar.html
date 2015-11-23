@@ -25,9 +25,17 @@
             color: var(--primary-text-color);
         }
 
+        paper-item:focus:before {
+            background: transparent;
+        }
+
         paper-item:hover {
             background: var(--accent-color-light);
             cursor: pointer;
+        }
+
+        :host::shadow .selectable-content.paper-menu > *:focus:after {
+            background: transparent;
         }
 
         paper-menu {

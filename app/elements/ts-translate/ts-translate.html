@@ -274,15 +274,14 @@
             for (var i = 0; i < frames.length; i++) {
                 var chapterid = frames[i].chapter;
                 var chapter = parseInt(chapterid);
-                var verseid = frames[i].verse;
-                var frame = parseInt(verseid);
+                var frameid = frames[i].verse;
+                var frame = parseInt(frameid);
                 var title = frames[i].title;
-                var complexid = chapterid + "-" + verseid;
-                var frameid = frames[i].id;
+                var id = frames[i].id;
                 var sourcedata = frames[i].chunk;
-                var notes = App.projectsManager.getFrameNotes(frameid);
-                var questions = App.projectsManager.getFrameQuestions(frameid);
-                var words = App.projectsManager.getFrameWords(frameid);
+                var notes = App.projectsManager.getFrameNotes(id);
+                var questions = App.projectsManager.getFrameQuestions(id);
+                var words = App.projectsManager.getFrameWords(id);
                 var verses = [];
 
                 while (test.test(sourcedata)) {
@@ -312,7 +311,8 @@
                     chapter: chapter,
                     frame: frame,
                     title: title,
-                    complexid: complexid,
+                    chapterid: chapterid,
+                    frameid: frameid,
                     verses: verses,
                     chapterref: chapterref,
                     chunkref: chunkref

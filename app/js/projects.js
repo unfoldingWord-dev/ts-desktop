@@ -24,12 +24,26 @@ function wrap (module, fn) {
     };
 }
 
-function map (cb) {
-    var visit = typeof cb === 'function' ? function (v) { return cb(v); } : cb;
-    return function (collection) {
-        return _.map(collection, visit);
+/**
+ * NOTE: This is super meta.
+ *
+ * Reverses the order of arguments for a lodash (or equivalent) method,
+ *  and creates a curried function.
+ *
+ */
+
+function guard (method) {
+    return function (cb) {
+        var visit = typeof cb === 'function' ? function (v) { return cb(v); } : cb;
+        return function (collection) {
+            return _[method](collection, visit);
+        };
     };
 }
+
+var map = guard('map'),
+    indexBy = guard('indexBy'),
+    flatten = guard('flatten');
 
 /**
  *  var pm = ProjectsManager(query);
@@ -45,6 +59,28 @@ function ProjectsManager(query, configurator) {
         mkdirp = wrap(null, mkdirP),
         rm = wrap(null, rimraf),
         readdir = wrap(fs, 'readdir'),
+        stat = wrap(fs, 'stat'),
+        isDir = function (f) {
+            return stat(f).then(function (s) {
+                return s.isDirectory();
+            });
+        },
+        isVisibleDir = function (f) {
+            return isDir(f).then(function (dirStat) {
+                return dirStat && /^\..*/.test(f);
+            });
+        },
+        filterDirs = _.partial(_.filter, _, isVisibleDir),
+        readdirs = function(parentPath) {
+            return function (dirs) {
+                return Promise.all(_.map(dirs, function (d) {
+                    var p = path.join(parentPath, d);
+                    return readdir(p).then(map(function (f) {
+                        return path.join(p, f);
+                    }));
+                }));
+            };
+        },
         toJSON = _.partialRight(JSON.stringify, null, '\t'),
         fromJSON = JSON.parse.bind(JSON),
         config = (function (prefix) {
@@ -54,7 +90,9 @@ function ProjectsManager(query, configurator) {
                 };
 
             return {
-                filterDirs: _.partial(_.filter, _, isUW),
+                filterProjects: _.partial(_.filter, _, isUW),
+
+                filterChapters: filterDirs,
 
                 filterChunks: _.partial(_.filter, _, isChunk),
 
@@ -127,7 +165,7 @@ function ProjectsManager(query, configurator) {
 
         get sources () {
             var r = query([
-                    "select r.id, r.slug 'source', r.name, sl.name 'ln', sl.slug 'lc', p.slug 'project', r.checking_level 'level', r.version from resource r",
+                    "select r.id, r.slug 'source', r.name, sl.name 'ln', sl.slug 'lc', p.slug 'project', r.checking_level 'level', r.version, r.modified_at 'date_modified' from resource r",
                     "join source_language sl on sl.id=r.source_language_id",
                     "join project p on p.id=sl.project_id",
                     "order by r.name"
@@ -196,13 +234,30 @@ function ProjectsManager(query, configurator) {
             // save project.json and manifest.json
 
             // translation is an array
-            // translation[0].meta.complexid
+            // translation[0].meta.frameid
 
-            var finishedFrames = _.map(_.filter(translation, function (chunk) {
-                return !!chunk.completed;
-            }), function (chunk) {
-                return chunk.meta.complexid;
-            });
+            var makeComplexId = function (c) {
+                return c.meta.chapterid + '-' + c.meta.frameid;
+            };
+
+            var chunks = _.chain(translation)
+                .indexBy(makeComplexId)
+                .value();
+
+            var finishedFrames = _.keys(_.where(chunks, { completed: true }));
+
+            var sources = _.chain(meta.sources)
+                .map(function (r) {
+                    return {
+                        checking_level: r.level,
+                        date_modified: r.date_modified,
+                        version: r.version
+                    };
+                })
+                .indexBy(function (r) {
+                    return [r.project, r.lc, r.source].join('-');
+                })
+                .value();
 
             var manifest = {
                 generator: {
@@ -211,30 +266,49 @@ function ProjectsManager(query, configurator) {
                 package_version: 3,
                 target_language: meta.language,
                 project_id: meta.project.slug,
-                source_translations: meta.sources,
+                source_translations: sources,
                 translators: meta.translators,
                 finished_frames: finishedFrames,
                 finished_titles: [],
                 finished_references: []
             };
 
-            return mkdirp(paths.projectDir).then(function () {
-                return write(paths.manifest, toJSON(manifest));
-            }).then(function () {
-                return write(paths.project, toJSON(meta));
-            }).then(function () {
-                return _.filter(translation, function (chunk) {
-                    return chunk.meta && chunk.meta.complexid;
-                });
-            }).then(map(function (chunk) {
-                var filename = path.join(paths.projectDir, chunk.meta.frameid + '.txt');
+            var writeFile = function (name, data) {
+                return function () {
+                    return write(name, toJSON(data));
+                };
+            };
 
-                return write(filename, chunk.content);
-            })).then(Promise.all.bind(Promise));
+            var makeChapterDir = function (c) {
+                return mkdirp(path.join(paths.projectDir, c.meta.chapterid));
+            };
+
+            var makeChapterDirs = function (data) {
+                return function () {
+                    return Promise.all(_.map(data, makeChapterDir));
+                };
+            };
+
+            var writeChunk = function (c) {
+                var f = path.join(paths.projectDir, c.meta.frameid + '.txt');
+                return write(f, c.content);
+            };
+
+            var writeChunks = function (data) {
+                return function () {
+                    return Promise.all(_.map(data, writeChunk));
+                };
+            };
+
+            return mkdirp(paths.projectDir)
+                .then(writeFile(paths.manifest, manifest))
+                .then(writeFile(paths.project, meta))
+                .then(makeChapterDirs(chunks))
+                .then(writeChunks(chunks))
         },
 
         loadProjectsList: function () {
-            return readdir(config.targetDir).then(config.filterDirs);
+            return readdir(config.targetDir).then(config.filterProjects);
         },
 
         loadTargetTranslationsList: function () {
@@ -250,48 +324,57 @@ function ProjectsManager(query, configurator) {
                        .then(map(fromJSON));
         },
 
+        loadFinishedFramesList: function () {
+            return read(paths.manifest).then(function (manifest) {
+                var finishedFrames = fromJSON(manifest).finished_frames;
+                return _.indexBy(finishedFrames);
+            });
+        },
+
         loadTargetTranslation: function (meta) {
-            var paths = config.makeProjectPaths(meta),
-                finished;
+            var paths = config.makeProjectPaths(meta);
 
             // read manifest, get object with finished frames
 
             // return an object with keys that are the complexid
-            return read(paths.manifest)
-                    .then(function (manifest) {
-                        var finishedFrames = fromJSON(manifest).finished_frames;
-                        finished = _.indexBy(finishedFrames);
-                    })
-                    .then(function () {
-                        return readdir(paths.projectDir);
-                    }).then(config.filterChunks)
-                    .then(function (filenames) {
-                        return _.map(filenames, function (f) {
-                            return {
-                                'path': path.join(paths.projectDir, f),
-                                'name': f.slice(0, -4) // get rid of extension
-                            };
-                        });
-                    }).then(function (files) {
-                        var names = _.pluck(files, 'name');
 
-                        return Promise.all(_.map(files, function (f) {
-                            return read(f.path);
-                        })).then(function (chunks) {
-                            return _.zip(names, chunks);
-                        });
-                    }).then(function (data) {
-                        return _.reduce(data, function (translation, data) {
-                            var filename = data[0],
-                                content = data[1];
+            var parseChunkName = function (f) {
+                var p = path.parse(f),
+                    ch = p.dir.split(path.sep).slice(-1);
 
-                            translation[filename] = {
-                                content: content.toString(),
-                                completed: !!finished[filename]
-                            };
-                            return translation;
-                        }, {});
+                return ch + '-' + p.name;
+            };
+
+            var readChunk = function (f) {
+                return read(f).then(function (c) {
+                    return {
+                        content: c.toString(),
+                        name: parseChunkName(f)
+                    };
+                })
+            };
+
+            var markFinished = function (chunks) {
+                return function (finished) {
+                    return _.mapValues(chunks, function (c, name) {
+                        return {
+                            content: c.content,
+                            completed: !!finished[name]
+                        }
                     });
+                };
+            };
+
+            return readdir(paths.projectDir)
+                .then(config.filterChapters)
+                .then(readdirs(paths.projectDir))
+                .then(flatten())
+                .then(map(readChunk))
+                .then(Promise.all.bind(Promise))
+                .then(indexBy('name'))
+                .then(function (chunks) {
+                    return this.loadFinishedFramesList().then(markFinished(chunks));
+                }.bind(this));
         },
 
         deleteTargetTranslation: function (meta) {

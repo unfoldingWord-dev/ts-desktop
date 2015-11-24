@@ -241,11 +241,17 @@ function ProjectsManager(query, configurator) {
                 return c.meta.chapterid + '-' + c.meta.frameid;
             };
 
+            var prop = function (prop) {
+                return function (v, k) {
+                    return v[prop] ? k : false
+                };
+            };
+
             var chunks = _.chain(translation)
                 .indexBy(makeComplexId)
                 .value();
 
-            var finishedFrames = _.keys(_.where(chunks, { completed: true }));
+            var finishedFrames = _.compact(_.map(chunks, prop('completed')));
 
             var sources = _.chain(meta.sources)
                 .indexBy(function (r) {

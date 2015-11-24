@@ -299,6 +299,14 @@
                     sourcedata = sourcedata.replace(endstr, " ");
                 }
 
+                if (frame === 0) {
+                    frame = verses[0];
+                    frameid = frame.toString();
+                    if (frameid.length === 1) {
+                        frameid = "0" + frameid;
+                    }
+                }
+
                 if (name === "Open Bible Stories") {
                     chapterref = title;
                     chunkref = title + ":" + frame;
@@ -335,6 +343,51 @@
                 }
                 translation.push(transchunk);
             }
+
+            source.sort(function (a, b) {
+                var achap = a.meta.chapterid;
+                var aframe = a.meta.frameid;
+                var bchap = b.meta.chapterid;
+                var bframe = b.meta.frameid;
+                if (achap.length === 2) {
+                    achap = "0" + achap;
+                }
+                if (aframe.length === 2) {
+                    aframe = "0" + aframe;
+                }
+                if (bchap.length === 2) {
+                    bchap = "0" + bchap;
+                }
+                if (bframe.length === 2) {
+                    bframe = "0" + bframe;
+                }
+                var first = achap + aframe;
+                var second = bchap + bframe;
+                return first - second;
+            });
+
+            translation.sort(function (a, b) {
+                var achap = a.meta.chapterid;
+                var aframe = a.meta.frameid;
+                var bchap = b.meta.chapterid;
+                var bframe = b.meta.frameid;
+                if (achap.length === 2) {
+                    achap = "0" + achap;
+                }
+                if (aframe.length === 2) {
+                    aframe = "0" + aframe;
+                }
+                if (bchap.length === 2) {
+                    bchap = "0" + bchap;
+                }
+                if (bframe.length === 2) {
+                    bframe = "0" + bframe;
+                }
+                var first = achap + aframe;
+                var second = bchap + bframe;
+                return first - second;
+            });
+
             this.set('currentproject.source', source);
             this.set('currentproject.translation', translation);
         },

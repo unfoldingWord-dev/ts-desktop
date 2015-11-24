@@ -78,7 +78,7 @@
                     </div>
                     <div>
                         <template is="dom-repeat" items="{{chunk.words}}" as="word">
-                            <p class="link">{{word.term}}</p>
+                            <p class="link" on-tap="openword">{{word.term}}</p>
                         </template>
                     </div>
                     <div>
@@ -115,21 +115,24 @@
             var note = e.model.note;
             var title = note.title;
             var body = note.body;
-            this.fire('iron-signal', {name: 'openresource', data: {title: title, body: body}});
+            var content = "\<h2 class='style-scope ts-review-mode'\>" + title + "\<\/h2\>\<p class='style-scope ts-review-mode'\>" + body + "\<\/p\>";
+            this.fire('iron-signal', {name: 'openresource', data: {content: content}});
         },
 
         openword: function (e) {
             var word = e.model.word;
             var title = word.term;
             var body = word.definition;
-            this.fire('iron-signal', {name: 'openresource', data: {title: title, body: body}});
+            var content = "\<h2 class='style-scope ts-review-mode'\>" + title + "\<\/h2\>" + body;
+            this.fire('iron-signal', {name: 'openresource', data: {content: content}});
         },
 
         openquestion: function (e) {
             var question = e.model.question;
             var title = question.question;
             var body = question.answer;
-            this.fire('iron-signal', {name: 'openresource', data: {title: title, body: body}});
+            var content = "\<h2 class='style-scope ts-review-mode'\>" + title + "\<\/h2\>\<p class='style-scope ts-review-mode'\>" + body + "\<\/p\>";
+            this.fire('iron-signal', {name: 'openresource', data: {content: content}});
         },
 
 		ready: function() {

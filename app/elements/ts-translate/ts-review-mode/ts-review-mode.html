@@ -4,6 +4,7 @@
 <link rel="import" href="../../../components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../../components/paper-button/paper-button.html">
 <link rel="import" href="../../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../../components/paper-material/paper-material.html">
 
 <link rel="import" href="./ts-review-card.html">
 
@@ -60,13 +61,36 @@
 
         #resourcepopup {
             position: fixed;
-            top: 0;
+            top: 40px;
             bottom: 0;
             text-align: center;
+            background: var(--card-background-color);
             color: var(--primary-text-color);
-            width: 400px;
-            height: 100%;
+            width: 440px;
+            height: calc(100% - 40px);
             right: 0;
+        }
+
+        .slidein {
+            -webkit-animation: slidein .5s;
+        }
+
+        .slideout {
+            -webkit-animation: slideout .5s;
+        }
+
+        @-webkit-keyframes slidein {
+            0% {transform: translateX(400px)}
+            100% {transform: translateX(0)}
+        }
+
+        @-webkit-keyframes slideout {
+            0% {transform: translateX(0)}
+            100% {transform: translateX(400px)}
+        }
+
+        #resourcepopup.hide {
+            visibility: hidden;
         }
 
         #resourcepopup p {
@@ -101,15 +125,15 @@
                     <ts-review-card id="{{createid(index)}}" chunk="{{chunk}}"></ts-review-card>
                 </template>
             </iron-list>
-            <paper-dialog id="resourcepopup" modal="false" entry-animation="slide-from-right-animation" exit-animation="slide-right-animation">
+            <paper-material id="resourcepopup" class="hide">
                 <h2>{{popupinfo.title}}</h2>
                 <div>
                     <p>{{popupinfo.body}}</p>
                 </div>
                 <div class="buttons">
-                    <paper-button dialog-dismiss>Close</paper-button>
+                    <paper-button on-tap="closeresource">Close</paper-button>
                 </div>
-            </paper-dialog>
+            </paper-material>
         </div>
 
         <iron-signals on-iron-signal-openresource="openresource"></iron-signals>
@@ -150,9 +174,23 @@
         },
 
         openresource: function (event, data) {
+            var popup = this.$.resourcepopup;
             var object = {title: data.title, body: data.body};
             this.set('popupinfo', object);
-            this.$.resourcepopup.open();
+            popup.classList.remove("hide");
+            popup.classList.add("slidein");
+            setTimeout(function() {
+                popup.classList.remove("slidein");
+            }, 500);
+        },
+
+        closeresource: function () {
+            var popup = this.$.resourcepopup;
+            popup.classList.add("slideout");
+            setTimeout(function() {
+                popup.classList.remove("slideout");
+                popup.classList.add("hide");
+            }, 500);
         },
 
         frommode: function () {

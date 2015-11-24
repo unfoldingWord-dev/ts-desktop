@@ -327,8 +327,8 @@
                 };
                 source.push(srcchunk);
 
-                var rawdata = this.rawdata[complexid];
-                if (rawdata === undefined) {
+                var rawdata = this.rawdata[chapterid + '-' + frameid];
+                if (!rawdata) {
                     transchunk = {content: "", completed: false, meta: meta};
                 } else {
                     transchunk = {content: rawdata.content, completed: rawdata.completed, meta: meta};

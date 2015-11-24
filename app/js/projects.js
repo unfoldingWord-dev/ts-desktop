@@ -43,7 +43,9 @@ function guard (method) {
 
 var map = guard('map'),
     indexBy = guard('indexBy'),
-    flatten = guard('flatten');
+    flatten = guard('flatten'),
+    filter = guard('filter'),
+    compact = guard('compact');
 
 /**
  *  var pm = ProjectsManager(query);
@@ -67,19 +69,18 @@ function ProjectsManager(query, configurator) {
         },
         isVisibleDir = function (f) {
             return isDir(f).then(function (dirStat) {
-                return dirStat && /^\..*/.test(f);
+                return (dirStat && !(/^\..*/.test(f))) ? f : false;
             });
         },
-        filterDirs = _.partial(_.filter, _, isVisibleDir),
-        readdirs = function(parentPath) {
-            return function (dirs) {
-                return Promise.all(_.map(dirs, function (d) {
-                    var p = path.join(parentPath, d);
-                    return readdir(p).then(map(function (f) {
-                        return path.join(p, f);
-                    }));
+        filterDirs = function (dirs) {
+            return Promise.all(_.map(dirs, isVisibleDir)).then(compact());
+        },
+        readdirs = function (dirs) {
+            return Promise.all(_.map(dirs, function (d) {
+                return readdir(d).then(map(function (f) {
+                    return path.join(d, f);
                 }));
-            };
+            }));
         },
         toJSON = _.partialRight(JSON.stringify, null, '\t'),
         fromJSON = JSON.parse.bind(JSON),
@@ -247,15 +248,15 @@ function ProjectsManager(query, configurator) {
             var finishedFrames = _.keys(_.where(chunks, { completed: true }));
 
             var sources = _.chain(meta.sources)
-                .map(function (r) {
+                .indexBy(function (r) {
+                    return [r.project, r.lc, r.source].join('-');
+                })
+                .mapValues(function (r) {
                     return {
                         checking_level: r.level,
                         date_modified: r.date_modified,
                         version: r.version
                     };
-                })
-                .indexBy(function (r) {
-                    return [r.project, r.lc, r.source].join('-');
                 })
                 .value();
 
@@ -290,7 +291,7 @@ function ProjectsManager(query, configurator) {
             };
 
             var writeChunk = function (c) {
-                var f = path.join(paths.projectDir, c.meta.frameid + '.txt');
+                var f = path.join(paths.projectDir, c.meta.chapterid, c.meta.frameid + '.txt');
                 return write(f, c.content);
             };
 
@@ -324,7 +325,9 @@ function ProjectsManager(query, configurator) {
                        .then(map(fromJSON));
         },
 
-        loadFinishedFramesList: function () {
+        loadFinishedFramesList: function (meta) {
+            var paths = config.makeProjectPaths(meta);
+
             return read(paths.manifest).then(function (manifest) {
                 var finishedFrames = fromJSON(manifest).finished_frames;
                 return _.indexBy(finishedFrames);
@@ -365,15 +368,23 @@ function ProjectsManager(query, configurator) {
                 };
             };
 
+            var makeFullPath = function (parent) {
+                return function (f) {
+                    return path.join(parent, f);
+                };
+            };
+
             return readdir(paths.projectDir)
+                .then(map(makeFullPath(paths.projectDir)))
                 .then(config.filterChapters)
-                .then(readdirs(paths.projectDir))
+                .then(flatten())
+                .then(readdirs)
                 .then(flatten())
                 .then(map(readChunk))
                 .then(Promise.all.bind(Promise))
                 .then(indexBy('name'))
                 .then(function (chunks) {
-                    return this.loadFinishedFramesList().then(markFinished(chunks));
+                    return this.loadFinishedFramesList(meta).then(markFinished(chunks));
                 }.bind(this));
         },
 

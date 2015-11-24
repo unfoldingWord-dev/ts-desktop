@@ -108,17 +108,25 @@
         upload: function() {
             console.log("Fake uploading...");
             var paths = App.projectsManager.getPaths(this.projectData);
+            var repo = 'uw-' + this.projectData.project.slug + '-' + this.projectData.language.lc;
+            
             App.git.stage(paths.projectDir);
             App.uploader.needToRegister().then(
                 function(err) {
                     // User neends to register first
-                    console.log(err);
+                    console.log(err, "Need to register first");
                     // Then push commit
                 },
                 function(keypair) {
-                    // User neends to register first
-                    console.log(keypair);
-                    // Then push commit
+                    // User is registered. Proceed with pushing commit.
+                    App.uploader.getDeviceId().then(
+                        function(id) {
+                            App.git.push(paths.projectDir, id, repo);
+                        },
+                        function(err) {
+                            console.log(err, "DeviceId errored out");
+                        }
+                    );
                 }
             );
             console.log("Fake uploaded");

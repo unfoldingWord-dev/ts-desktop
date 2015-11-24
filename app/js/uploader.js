@@ -24,7 +24,7 @@
                 defaultHost = host;
                 defaultPort = port;
                 var pair = keypair();
-                uploader.writeKeyPairToFile(pair);
+                this.writeKeyPairToFile(pair);
 
                 key = key + ' ' + pair.public + ' ' + deviceId;
                 client = net.createConnection({port: port, host: host}, function () {
@@ -60,22 +60,24 @@
                 });
 
             },
-            
-            // needToRegister: function (callback) {
-            //     jsonfile.readFile(targetFile, function (err, keypair) {
-            //         if (err === null) {
-            //             // No need to register if keypair exists
-            //             if (typeof callback === 'function') {
-            //                 callback(false, keypair);
-            //             }
-            //         } else {
-            //             // Need to register if keypair doesn't exist
-            //             if (typeof callback === 'function') {
-            //                 callback(true);
-            //             }
-            //         }
-            //     });
-            // },
+
+/*
+            needToRegister: function (callback) {
+                jsonfile.readFile(targetFile, function (err, keypair) {
+                    if (err === null) {
+                        // No need to register if keypair exists
+                        if (typeof callback === 'function') {
+                            callback(false, keypair);
+                        }
+                    } else {
+                        // Need to register if keypair doesn't exist
+                        if (typeof callback === 'function') {
+                            callback(true);
+                        }
+                    }
+                });
+            },
+*/
 
             needToRegister: function() {
                 return new Promise(function(resolve, reject) {
@@ -85,7 +87,8 @@
                 });
             },
 
-            getDeviceId: function (callback) {
+/*
+            getDeviceId: function(callback) {
                 getmac.getMac(function (err, mac) {
                     if (err) {
                         throw new Error('uploader.js could not get a mac address.');
@@ -94,7 +97,15 @@
                         callback(mac);
                     }
                 });
+            }
+*/
 
+            getDeviceId: function() {
+                return new Promise(function(resolve, reject) {
+                    getmac.getMac(function(err, mac) {
+                        err ? reject(mac) : resolve(mac);
+                    });
+                });
             }
         };
     }

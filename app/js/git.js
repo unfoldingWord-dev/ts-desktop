@@ -32,10 +32,12 @@ function Git() {
 		},
 
 		// Push staged files to remote repo
-		push: function(remote, branch) {
-			var cmd = 'git push ' + remote + ' ' + branch;
+		push: function(dir, deviceId, repo) {
+			var cmd = 'cd ' + dir + ' && git push gitolite3@ts.door43.org:tS/' + deviceId + '/' + repo;
 			exec(cmd, function(err, stdout, stderr) {
-				console.log("Files are being pushed:", stdout);
+				console.log("error:", err);
+				console.log("stdout:", stdout);
+				console.log("stderr:", stderr);
 			});
 		}
 	}

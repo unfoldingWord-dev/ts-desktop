@@ -6,6 +6,10 @@ var _ = require('lodash'),
     mkdirP = require('mkdirp'),
     rimraf = require('rimraf');
 
+
+var Git = require('../js/git').Git;
+var git = new Git();
+
 function zipper (r) {
     return r.length ? _.map(r[0].values, _.zipObject.bind(_, r[0].columns)) : [];
 }
@@ -229,8 +233,12 @@ function ProjectsManager(query, configurator) {
             return zipper(r);
         },
 
+        getPaths: function(meta) {
+            return config.makeProjectPaths(meta);
+        },
+
         saveTargetTranslation: function (translation, meta) {
-            var paths = config.makeProjectPaths(meta);
+            var paths = this.getPaths(meta);
 
             // save project.json and manifest.json
 
@@ -312,6 +320,7 @@ function ProjectsManager(query, configurator) {
                 .then(writeFile(paths.project, meta))
                 .then(makeChapterDirs(chunks))
                 .then(writeChunks(chunks))
+                .then(git.init.bind(git, paths.projectDir));
         },
 
         loadProjectsList: function () {
@@ -341,7 +350,7 @@ function ProjectsManager(query, configurator) {
         },
 
         loadTargetTranslation: function (meta) {
-            var paths = config.makeProjectPaths(meta);
+            var paths = this.getPaths(meta);
 
             // read manifest, get object with finished frames
 
@@ -395,7 +404,7 @@ function ProjectsManager(query, configurator) {
         },
 
         deleteTargetTranslation: function (meta) {
-            var paths = config.makeProjectPaths(meta);
+            var paths = this.getPaths(meta);
 
             return rm(paths.projectDir);
         }

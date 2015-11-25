@@ -74,7 +74,7 @@
             <div id="right">
                 <div>
                     <p>Publish your project directly to unfoldingWord</p>
-                    <paper-button raised id="publish" on-tap="">Upload</paper-button>
+                    <paper-button raised id="publish" on-tap="upload">Upload</paper-button>
                 </div>
                 <div id="lower">
                     <p>You may also share and distribute your project using these options.</p>
@@ -94,11 +94,41 @@
         is: 'ts-publish-publish',
 
         properties: {
-
+            projectData: {
+                type: Object
+            }
         },
 
         ready: function() {
 
+        },
+
+        upload: function() {
+            debugger;
+            
+            var paths = App.projectsManager.getPaths(this.projectData);
+            var repo = 'uw-' + this.projectData.project.slug + '-' + this.projectData.language.lc;
+            
+            return App.git.stage(paths.projectDir)
+                .then(App.uploader.needToRegister)
+                .then(
+                    function(err) {
+                        // User needs to register first
+                        console.log(err, "Need to register first");
+                        // Then push commit
+                    },
+                    function(keypair) {
+                        // User is registered. Proceed with pushing commit.
+                        return App.uploader.getDeviceId().then(
+                            function(id) {
+                                App.git.push(paths.projectDir, id, repo);
+                            },
+                            function(err) {
+                                console.log(err, "DeviceId errored out");
+                            }
+                        );
+                    }
+                );
         }
 
     });

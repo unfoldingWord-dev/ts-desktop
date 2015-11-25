@@ -207,10 +207,33 @@ function ProjectsManager(query, configurator) {
         checkProject: function (project) {
             var allsources = this.sources;
             var mysources = _.filter(allsources, 'project', project);
+            var combined = {};
+            var sources = [];
             for (var i = 0; i < mysources.length; i++) {
                 var source = mysources[i].source;
                 var frames = this.getSourceFrames(mysources[i]);
                 console.log(source, frames.length);
+                combined[source] = frames;
+                sources.push(source);
+            }
+            console.log(combined);
+            var match = true;
+            var j = 0;
+            while (match && j < combined[sources[0]].length) {
+                var testref = combined[sources[0]][j].chapter + combined[sources[0]][j].verse;
+                for (var k = 1; k < sources.length; k++) {
+                    var checkref = combined[sources[k]][j].chapter + combined[sources[k]][j].verse;
+                    if (testref !== checkref) {
+                        match = false;
+                        var firsterror = testref;
+                    }
+                }
+                j++;
+            }
+            if (match) {
+                console.log("All chunks line up!");
+            } else {
+                console.log("First error occurs at " + firsterror);
             }
 
         },

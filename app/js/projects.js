@@ -197,6 +197,17 @@ function ProjectsManager(query, configurator) {
             return zipper(r);
         },
 
+        checkProject: function (project) {
+            var allsources = this.sources;
+            var mysources = _.filter(allsources, 'project', project);
+            for (var i = 0; i < mysources.length; i++) {
+                var source = mysources[i].source;
+                var frames = this.getSourceFrames(mysources[i]);
+                console.log(source, frames.length);
+            }
+
+        },
+
         getFrameNotes: function (frameid) {
 
                 var r = query([

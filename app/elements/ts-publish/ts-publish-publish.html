@@ -104,30 +104,31 @@
         },
 
         upload: function() {
-            console.log("Fake uploading...");
+            debugger;
+            
             var paths = App.projectsManager.getPaths(this.projectData);
             var repo = 'uw-' + this.projectData.project.slug + '-' + this.projectData.language.lc;
             
-            App.git.stage(paths.projectDir);
-            App.uploader.needToRegister().then(
-                function(err) {
-                    // User neends to register first
-                    console.log(err, "Need to register first");
-                    // Then push commit
-                },
-                function(keypair) {
-                    // User is registered. Proceed with pushing commit.
-                    App.uploader.getDeviceId().then(
-                        function(id) {
-                            App.git.push(paths.projectDir, id, repo);
-                        },
-                        function(err) {
-                            console.log(err, "DeviceId errored out");
-                        }
-                    );
-                }
-            );
-            console.log("Fake uploaded");
+            return App.git.stage(paths.projectDir)
+                .then(App.uploader.needToRegister)
+                .then(
+                    function(err) {
+                        // User needs to register first
+                        console.log(err, "Need to register first");
+                        // Then push commit
+                    },
+                    function(keypair) {
+                        // User is registered. Proceed with pushing commit.
+                        return App.uploader.getDeviceId().then(
+                            function(id) {
+                                App.git.push(paths.projectDir, id, repo);
+                            },
+                            function(err) {
+                                console.log(err, "DeviceId errored out");
+                            }
+                        );
+                    }
+                );
         }
 
     });

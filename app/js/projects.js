@@ -72,8 +72,11 @@ function ProjectsManager(query, configurator) {
             });
         },
         isVisibleDir = function (f) {
-            return isDir(f).then(function (dirStat) {
-                return (dirStat && !(/^\..*/.test(f))) ? f : false;
+            return isDir(f).then(function (isFolder) {
+                var name = path.parse(f).name,
+                    isHidden = /^\..*/.test(name);
+
+                return (isFolder && !isHidden) ? f : false;
             });
         },
         filterDirs = function (dirs) {

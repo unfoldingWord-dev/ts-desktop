@@ -212,11 +212,10 @@ function ProjectsManager(query, configurator) {
             for (var i = 0; i < mysources.length; i++) {
                 var source = mysources[i].source;
                 var frames = this.getSourceFrames(mysources[i]);
-                console.log(source, frames.length);
+                console.log("source:", source, "chunks:", frames.length);
                 combined[source] = frames;
                 sources.push(source);
             }
-            console.log(combined);
             var match = true;
             var j = 0;
             while (match && j < combined[sources[0]].length) {
@@ -231,11 +230,22 @@ function ProjectsManager(query, configurator) {
                 j++;
             }
             if (match) {
-                console.log("All chunks line up!");
+                console.log("                             ALL CHUNKS LINE UP!");
             } else {
-                console.log("First error occurs at " + firsterror);
+                console.log("                             First error occurs at " + firsterror);
             }
+            console.log("Data:");
+            console.log(combined);
+        },
 
+        checkAllProjects: function () {
+            var allsources = this.sources;
+            var ulbsources = _.filter(allsources, 'source', 'ulb');
+            for (var i = 0; i < ulbsources.length; i++) {
+                console.log("Project Results              Name: " + ulbsources[i].project);
+                this.checkProject(ulbsources[i].project);
+                console.log("---------------------------------------------------------------");
+            }
         },
 
         getFrameNotes: function (frameid) {

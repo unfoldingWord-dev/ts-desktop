@@ -94,8 +94,9 @@
         is: 'ts-publish-publish',
 
         properties: {
-            projectData: {
-                type: Object
+            currentproject: {
+                type: Object,
+                value: {}
             }
         },
 
@@ -104,11 +105,9 @@
         },
 
         upload: function() {
-            debugger;
-            
-            var paths = App.projectsManager.getPaths(this.projectData);
-            var repo = 'uw-' + this.projectData.project.slug + '-' + this.projectData.language.lc;
-            
+            var paths = App.projectsManager.getPaths(this.currentproject.data);
+            var repo = 'uw-' + this.currentproject.data.project.slug + '-' + this.currentproject.data.language.lc;
+
             return App.git.stage(paths.projectDir)
                 .then(App.uploader.needToRegister)
                 .then(

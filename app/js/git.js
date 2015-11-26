@@ -85,8 +85,8 @@ function Git() {
 		// Push staged files to remote repo
 		push: function(dir, repo, reg) {
 			debugger;
-			
-			var push = cmd().cd(dir).and.do("GIT_SSH_COMMAND='ssh -i \"" + reg.paths.privateKeyPath + "\"' git push gitolite3@ts.door43.org:tS/" + reg.deviceId + '/' + repo);
+
+			var push = cmd().cd(dir).and.do("GIT_SSH_COMMAND='ssh -i \"" + reg.paths.privateKeyPath + "\"' git push -u gitolite3@ts.door43.org:tS/" + reg.deviceId + '/' + repo + ' master');
 
 			return push.run().then(console.log.bind(console, 'Files are pushed'));
 		}

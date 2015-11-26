@@ -105,30 +105,15 @@
 
         upload: function() {
             debugger;
-            
+
             var paths = App.projectsManager.getPaths(this.projectData);
             var repo = 'uw-' + this.projectData.project.slug + '-' + this.projectData.language.lc;
             
+            var gitPush = App.git.push.bind(App.git, paths.projectDir, repo);
+
             return App.git.stage(paths.projectDir)
-                .then(App.uploader.needToRegister)
-                .then(
-                    function(err) {
-                        // User needs to register first
-                        console.log(err, "Need to register first");
-                        // Then push commit
-                    },
-                    function(keypair) {
-                        // User is registered. Proceed with pushing commit.
-                        return App.uploader.getDeviceId().then(
-                            function(id) {
-                                App.git.push(paths.projectDir, id, repo);
-                            },
-                            function(err) {
-                                console.log(err, "DeviceId errored out");
-                            }
-                        );
-                    }
-                );
+                .then(App.uploader.register)
+                .then(gitPush);
         }
 
     });

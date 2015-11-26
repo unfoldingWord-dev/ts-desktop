@@ -118,6 +118,10 @@
                 })
                 .then(function (reg) {
                     return App.git.push(paths.projectDir, repo, reg)
+                })
+                .catch(function () {
+                    debugger;
+                    console.log('oh no!');
                 });
         }
 

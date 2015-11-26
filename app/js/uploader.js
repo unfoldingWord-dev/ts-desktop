@@ -66,8 +66,6 @@
 
         var readKeyPair = function () {
             return readdir(paths.sshPath).then(function (files) {
-                debugger;
-
                 var hasPubKey = _.includes(files, paths.publicKeyName),
                     hasPrivateKey = _.includes(files, paths.privateKeyName),
                     hasBoth = hasPubKey && hasPrivateKey;
@@ -92,6 +90,8 @@
 
             return new Promise(function (resolve, reject) {
 
+                debugger;
+
                 var client = net.createConnection({port: port, host: host}, function () {
                     var registrationString = generateRegisterRequestString(keys, deviceId);
 
@@ -99,6 +99,8 @@
                 });
 
                 client.on('data', function (data) {
+                    debugger;
+
                     resolve({
                         keys: keys,
                         deviceId: deviceId,
@@ -118,8 +120,6 @@
         return {
 
             register: function (host, port) {
-                debugger;
-
                 var opts = {
                     host: host || 'ts.door43.org',
                     port: port || 9095
@@ -128,21 +128,15 @@
                 return this.getDeviceId().then(function (deviceId) {
 
                     return readKeyPair().then(function (keys) {
-                        debugger;
-
                         return {
                             keys: keys,
                             deviceId: deviceId
                         };
                     }).catch(function () {
-                        debugger;
-
                         var sendReg = sendRegistrationRequest.bind(null, host, port, deviceId);
 
                         return createKeyPair().then(sendReg);
                     }).then(function (reg) {
-                        debugger;
-
                         reg.paths = paths;
                         return reg;
                     });
@@ -154,12 +148,8 @@
             },
 
             getDeviceId: function() {
-                debugger;
-
                 return new Promise(function(resolve, reject) {
                     getmac.getMac(function(err, mac) {
-                        debugger;
-
                         var m = mac.replace(/-|:/g, '');
 
                         err ? reject(err) : resolve(m);

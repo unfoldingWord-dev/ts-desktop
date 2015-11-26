@@ -46,8 +46,7 @@
 
             return JSON.stringify({
                 key: ['ssh-rsa', parsedPubKey, deviceId].join(' '),
-                udid: deviceId,
-                username: ''
+                udid: deviceId
             });
         };
 
@@ -101,10 +100,16 @@
                 client.on('data', function (data) {
                     debugger;
 
+                    var response = JSON.parse(data.toString());
+
+                    if (response.error) {
+                        throw response.error;
+                    }
+
                     resolve({
                         keys: keys,
                         deviceId: deviceId,
-                        response: JSON.parse(data.toString())
+                        response: response
                     });
 
                     client.end();
@@ -133,7 +138,7 @@
                             deviceId: deviceId
                         };
                     }).catch(function () {
-                        var sendReg = sendRegistrationRequest.bind(null, host, port, deviceId);
+                        var sendReg = sendRegistrationRequest.bind(null, opts.host, opts.port, deviceId);
 
                         return createKeyPair().then(sendReg);
                     }).then(function (reg) {

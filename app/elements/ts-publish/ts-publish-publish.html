@@ -119,9 +119,9 @@
                 .then(function (reg) {
                     return App.git.push(paths.projectDir, repo, reg)
                 })
-                .catch(function () {
+                .catch(function (err) {
                     debugger;
-                    console.log('oh no!');
+                    console.log('oh no!', err);
                 });
         }
 

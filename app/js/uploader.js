@@ -66,17 +66,23 @@
 
         var readKeyPair = function () {
             return readdir(paths.sshPath).then(function (files) {
+                debugger;
+
                 var hasPubKey = _.includes(files, paths.publicKeyName),
                     hasPrivateKey = _.includes(files, paths.privateKeyName),
                     hasBoth = hasPubKey && hasPrivateKey;
 
-                return hasBoth || Promise.reject('No keypair found');
+                if (!hasBoth) {
+                    throw 'No keypair found';
+                }
+
+                return hasBoth;
             })
             .then(function() {
                 var readPubKey = read(paths.publicKeyPath),
                     readSecKey = read(paths.privateKeyPath);
 
-                return Promise.all[readPubKey, readSecKey];
+                return Promise.all([readPubKey, readSecKey]);
             })
             .then(map(String))
             .then(_.zipObject.bind(_, ['public', 'private']));
@@ -112,23 +118,31 @@
         return {
 
             register: function (host, port) {
+                debugger;
+
                 var opts = {
                     host: host || 'ts.door43.org',
                     port: port || 9095
                 };
 
-                this.getDeviceId().then(function (deviceId) {
+                return this.getDeviceId().then(function (deviceId) {
 
                     return readKeyPair().then(function (keys) {
+                        debugger;
+
                         return {
                             keys: keys,
                             deviceId: deviceId
                         };
                     }).catch(function () {
+                        debugger;
+
                         var sendReg = sendRegistrationRequest.bind(null, host, port, deviceId);
 
                         return createKeyPair().then(sendReg);
                     }).then(function (reg) {
+                        debugger;
+
                         reg.paths = paths;
                         return reg;
                     });
@@ -140,9 +154,13 @@
             },
 
             getDeviceId: function() {
+                debugger;
+
                 return new Promise(function(resolve, reject) {
                     getmac.getMac(function(err, mac) {
-                        var m = mac.replace(/-/g, '');
+                        debugger;
+
+                        var m = mac.replace(/-|:/g, '');
 
                         err ? reject(err) : resolve(m);
                     });

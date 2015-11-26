@@ -109,11 +109,16 @@
             var paths = App.projectsManager.getPaths(this.projectData);
             var repo = 'uw-' + this.projectData.project.slug + '-' + this.projectData.language.lc;
             
-            var gitPush = App.git.push.bind(App.git, paths.projectDir, repo);
+            // var register = App.uploader.register.bind(App.uploader),
+            //     gitPush = App.git.push.bind(App.git, paths.projectDir, repo);
 
             return App.git.stage(paths.projectDir)
-                .then(App.uploader.register)
-                .then(gitPush);
+                .then(function () {
+                    return App.uploader.register();
+                })
+                .then(function (reg) {
+                    return App.git.push(paths.projectDir, repo, reg)
+                });
         }
 
     });

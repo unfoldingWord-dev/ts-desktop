@@ -4,45 +4,16 @@ var _ = require('lodash'),
     fs = require('fs'),
     path = require('path'),
     mkdirP = require('mkdirp'),
-    rimraf = require('rimraf');
-
+    rimraf = require('rimraf'),
+    utils = require('../js/lib/util'),
+    wrap = utils.promisify,
+    guard = utils.guard;
 
 var Git = require('../js/git').Git;
 var git = new Git();
 
 function zipper (r) {
     return r.length ? _.map(r[0].values, _.zipObject.bind(_, r[0].columns)) : [];
-}
-
-function wrap (module, fn) {
-    var f = module ? module[fn] : fn;
-
-    return function (arg1, arg2) {
-        var args = typeof arg2 === 'undefined' ? [arg1] : [arg1, arg2];
-
-        return new Promise(function (resolve, reject) {
-            f.apply(module, args.concat(function (err, data) {
-                return err ? reject(err) : resolve(data);
-            }));
-        });
-    };
-}
-
-/**
- * NOTE: This is super meta.
- *
- * Reverses the order of arguments for a lodash (or equivalent) method,
- *  and creates a curried function.
- *
- */
-
-function guard (method) {
-    return function (cb) {
-        var visit = typeof cb === 'function' ? function (v) { return cb(v); } : cb;
-        return function (collection) {
-            return _[method](collection, visit);
-        };
-    };
 }
 
 var map = guard('map'),

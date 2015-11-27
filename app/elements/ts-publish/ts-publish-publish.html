@@ -1,4 +1,6 @@
 
+<link rel="import" href="../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../components/paper-button/paper-button.html">
 
 <dom-module id="ts-publish-publish">
@@ -54,12 +56,36 @@
             color: var(--accent-color);
             font-weight: bold;
             text-transform: uppercase;
+            cursor: pointer;
         }
 
         #publish {
             background: var(--accent-color);
             color: var(--reverse-text-color);
             text-transform: uppercase;
+        }
+
+        #popup {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+            width: 320px;
+            height: 220px;
+            text-align: center;
+            color: var(--primary-text-color);
+        }
+
+        #popup .buttons {
+            display: flex;
+            justify-content: center;
+            color: var(--secondary-text-color);
+        }
+
+        #popup .buttons paper-button:hover {
+            color: var(--accent-color);
         }
 
     </style>
@@ -83,6 +109,16 @@
             </div>
         </div>
 
+        <paper-dialog id="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <h2>Project Published</h2>
+            <div>
+                <p>Your project has been successfully published to the server.  Thanks.</p>
+            </div>
+            <div class="buttons">
+                <paper-button dialog-confirm on-tap="gohome">Return Home</paper-button>
+            </div>
+        </paper-dialog>
+
     </template>
 
 </dom-module>
@@ -94,6 +130,16 @@
         is: 'ts-publish-publish',
 
         properties: {
+            selected: {
+                type: Number,
+                value: 0,
+                notify: true
+            },
+            route: {
+                type: String,
+                value: '',
+                notify: true
+            },
             currentproject: {
                 type: Object,
                 value: {}
@@ -104,7 +150,14 @@
 
         },
 
+        gohome: function () {
+            this.fire('iron-signal', {name: 'setdefault'});
+            this.route = "home";
+            this.selected = 0;
+        },
+
         upload: function() {
+            var popup = this.$.popup;
             var paths = App.projectsManager.getPaths(this.currentproject.data);
             var repo = 'uw-' + this.currentproject.data.project.slug + '-' + this.currentproject.data.language.lc;
 
@@ -121,6 +174,7 @@
                         return App.uploader.getDeviceId().then(
                             function(id) {
                                 App.git.push(paths.projectDir, id, repo);
+                                popup.open();
                             },
                             function(err) {
                                 console.log(err, "DeviceId errored out");

@@ -86,7 +86,7 @@ function Git() {
 		push: function(dir, repo, reg) {
 			debugger;
 
-			var push = cmd().cd(dir).and.do("GIT_SSH_COMMAND='ssh -i \"" + reg.paths.privateKeyPath + "\"' git push -u gitolite3@ts.door43.org:tS/" + reg.deviceId + '/' + repo + ' master');
+			var push = cmd().cd(dir).and.do("GIT_SSH_COMMAND='ssh -i \"" + reg.paths.privateKeyPath + "\"' git push -u ssh://gitolite3@ts.door43.org:9299/tS/" + reg.deviceId + '/' + repo + ' master');
 
 			return push.run().then(console.log.bind(console, 'Files are pushed'));
 		}

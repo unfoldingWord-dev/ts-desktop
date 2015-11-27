@@ -3,42 +3,148 @@
 ;(function () {
     'use strict';
 
-    let net = require('net');
-    let keypair = require('keypair');
-    let jsonfile = require('jsonfile');
-    let mkdirp = require('mkdirp');
-    let getmac = require('getmac');
-    //let sshClient = require('ssh2').Client;
-
-    let key = 'ssh-rsa';
-    let defaultHost = 'ts.door43.org';
-    let defaultPort = 9095;
-    let targetDir = 'ssh/';
-    let targetFile = targetDir + 'pair.json';
-    let username = '';
-    let client;
+    var net = require('net'),
+        keypair = require('keypair'),
+        jsonfile = require('jsonfile'),
+        mkdirP = require('mkdirp'),
+        getmac = require('getmac'),
+        path = require('path'),
+        fs = require('fs'),
+        _ = require('lodash'),
+        utils = require('../js/lib/util'),
+        wrap = utils.promisify,
+        guard = utils.guard,
+        mkdirp = wrap(null, mkdirP),
+        write = wrap(fs, 'writeFile'),
+        read = wrap(fs, 'readFile'),
+        readdir = wrap(fs, 'readdir'),
+        map = guard('map');
 
     function Uploader() {
-        return {
-            register: function (host, port, deviceId, callback) {
-                defaultHost = host;
-                defaultPort = port;
-                var pair = keypair();
-                this.writeKeyPairToFile(pair);
 
-                key = key + ' ' + pair.public + ' ' + deviceId;
-                client = net.createConnection({port: port, host: host}, function () {
-                    var connectionJson = {'key': key, 'udid': deviceId, 'username': username};
-                    client.write(JSON.stringify(connectionJson));
+        var paths = {
+            sshPath: path.resolve('ssh'),
+
+            publicKeyName: 'ts-pub',
+
+            privateKeyName: 'ts-key',
+
+            get publicKeyPath () {
+                return path.join(this.sshPath, this.publicKeyName);
+            },
+
+            get privateKeyPath () {
+                return path.join(this.sshPath, this.privateKeyName);
+            }
+        };
+
+        var generateRegisterRequestString = function (keyPair, deviceId) {
+            var pubKey = keyPair.public,
+                parsedPubKey = pubKey.replace(/\n/g, '')
+                                     .replace(/-----BEGIN RSA PUBLIC KEY-----/, '')
+                                     .replace(/-----END RSA PUBLIC KEY-----/, '');
+
+            return JSON.stringify({
+                key: ['ssh-rsa', parsedPubKey, deviceId].join(' '),
+                udid: deviceId
+            });
+        };
+
+        var createKeyPair = function () {
+            var keys = keypair();
+
+            return mkdirp(paths.sshPath).then(function () {
+                var writePublicKey = write(paths.publicKeyPath, keys.public),
+                    writePrivateKey = write(paths.privateKeyPath, keys.private);
+
+                return Promise.all[writePublicKey, writePrivateKey];
+            }).then(function() {
+                return keys;
+            });
+        };
+
+        var readKeyPair = function () {
+            return readdir(paths.sshPath).then(function (files) {
+                var hasPubKey = _.includes(files, paths.publicKeyName),
+                    hasPrivateKey = _.includes(files, paths.privateKeyName),
+                    hasBoth = hasPubKey && hasPrivateKey;
+
+                if (!hasBoth) {
+                    throw 'No keypair found';
+                }
+
+                return hasBoth;
+            })
+            .then(function() {
+                var readPubKey = read(paths.publicKeyPath),
+                    readSecKey = read(paths.privateKeyPath);
+
+                return Promise.all([readPubKey, readSecKey]);
+            })
+            .then(map(String))
+            .then(_.zipObject.bind(_, ['public', 'private']));
+        };
+
+        var sendRegistrationRequest = function(host, port, deviceId, keys) {
+
+            return new Promise(function (resolve, reject) {
+
+                debugger;
+
+                var client = net.createConnection({port: port, host: host}, function () {
+                    var registrationString = generateRegisterRequestString(keys, deviceId);
+
+                    client.write(registrationString);
                 });
+
                 client.on('data', function (data) {
-                    if (typeof callback === 'function') {
-                        callback(JSON.parse(data.toString()), pair);
+                    debugger;
+
+                    var response = JSON.parse(data.toString());
+
+                    if (response.error) {
+                        throw response.error;
                     }
+
+                    resolve({
+                        keys: keys,
+                        deviceId: deviceId,
+                        response: response
+                    });
+
                     client.end();
                 });
+
                 client.on('end', function () {
                     console.log('Disconnected from ' + host + ':' + port);
+                });
+
+            });
+        };
+
+        return {
+
+            register: function (host, port) {
+                var opts = {
+                    host: host || 'ts.door43.org',
+                    port: port || 9095
+                };
+
+                return this.getDeviceId().then(function (deviceId) {
+
+                    return readKeyPair().then(function (keys) {
+                        return {
+                            keys: keys,
+                            deviceId: deviceId
+                        };
+                    }).catch(function () {
+                        var sendReg = sendRegistrationRequest.bind(null, opts.host, opts.port, deviceId);
+
+                        return createKeyPair().then(sendReg);
+                    }).then(function (reg) {
+                        reg.paths = paths;
+                        return reg;
+                    });
                 });
             },
 
@@ -46,64 +152,12 @@
                 return profile.getName() !== '' && profile.getEmail() !== '';
             },
 
-            disconnect: function () {
-                client && client.destroy(), client = null;
-            },
-
-            writeKeyPairToFile: function (pair) {
-                mkdirp(targetDir, function () {
-                    try {
-                        jsonfile.writeFileSync(targetFile, pair);
-                    } catch (e) {
-                        throw new Error('uploader.js could not write keypair file');
-                    }
-                });
-
-            },
-
-/*
-            needToRegister: function (callback) {
-                jsonfile.readFile(targetFile, function (err, keypair) {
-                    if (err === null) {
-                        // No need to register if keypair exists
-                        if (typeof callback === 'function') {
-                            callback(false, keypair);
-                        }
-                    } else {
-                        // Need to register if keypair doesn't exist
-                        if (typeof callback === 'function') {
-                            callback(true);
-                        }
-                    }
-                });
-            },
-*/
-
-            needToRegister: function() {
-                return new Promise(function(resolve, reject) {
-                    jsonfile.readFile(targetFile, function(err, keypair) {
-                        err ? resolve(err) : reject(keypair);
-                    });
-                });
-            },
-
-/*
-            getDeviceId: function(callback) {
-                getmac.getMac(function (err, mac) {
-                    if (err) {
-                        throw new Error('uploader.js could not get a mac address.');
-                    }
-                    if (typeof callback === 'function') {
-                        callback(mac);
-                    }
-                });
-            }
-*/
-
             getDeviceId: function() {
                 return new Promise(function(resolve, reject) {
                     getmac.getMac(function(err, mac) {
-                        err ? reject(mac) : resolve(mac);
+                        var m = mac.replace(/-|:/g, '');
+
+                        err ? reject(err) : resolve(m);
                     });
                 });
             }

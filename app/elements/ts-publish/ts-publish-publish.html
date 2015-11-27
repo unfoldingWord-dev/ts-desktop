@@ -113,6 +113,7 @@
             <h2>Project Published</h2>
             <div>
                 <p>Your project has been successfully published to the server.  Thanks.</p>
+                <p>(Not really working yet)</p>
             </div>
             <div class="buttons">
                 <paper-button dialog-confirm on-tap="gohome">Return Home</paper-button>
@@ -161,27 +162,21 @@
             var paths = App.projectsManager.getPaths(this.currentproject.data);
             var repo = 'uw-' + this.currentproject.data.project.slug + '-' + this.currentproject.data.language.lc;
 
+            popup.open();
+
+            // var register = App.uploader.register.bind(App.uploader),
+            //     gitPush = App.git.push.bind(App.git, paths.projectDir, repo);
+/*
             return App.git.stage(paths.projectDir)
-                .then(App.uploader.needToRegister)
-                .then(
-                    function(err) {
-                        // User needs to register first
-                        console.log(err, "Need to register first");
-                        // Then push commit
-                    },
-                    function(keypair) {
-                        // User is registered. Proceed with pushing commit.
-                        return App.uploader.getDeviceId().then(
-                            function(id) {
-                                App.git.push(paths.projectDir, id, repo);
-                                popup.open();
-                            },
-                            function(err) {
-                                console.log(err, "DeviceId errored out");
-                            }
-                        );
-                    }
-                );
+                .then(function () {
+                    return App.uploader.register();
+                })
+                .then(function (reg) {
+                    return App.git.push(paths.projectDir, repo, reg)
+                })
+                .catch(function (err) {
+                    console.log('oh no!', err);
+                });*/
         }
 
     });

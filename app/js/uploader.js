@@ -17,6 +17,7 @@
         mkdirp = wrap(null, mkdirP),
         write = wrap(fs, 'writeFile'),
         read = wrap(fs, 'readFile'),
+        chmod = wrap(fs, 'chmod'),
         readdir = wrap(fs, 'readdir'),
         map = guard('map');
 
@@ -55,7 +56,9 @@
 
             return mkdirp(paths.sshPath).then(function () {
                 var writePublicKey = write(paths.publicKeyPath, keys.public),
-                    writePrivateKey = write(paths.privateKeyPath, keys.private);
+                    writePrivateKey = write(paths.privateKeyPath, keys.private).then(function () {
+                        return chmod(paths.privateKeyPath, '600');
+                    });
 
                 return Promise.all[writePublicKey, writePrivateKey];
             }).then(function() {
@@ -89,8 +92,6 @@
 
             return new Promise(function (resolve, reject) {
 
-                debugger;
-
                 var client = net.createConnection({port: port, host: host}, function () {
                     var registrationString = generateRegisterRequestString(keys, deviceId);
 
@@ -98,8 +99,6 @@
                 });
 
                 client.on('data', function (data) {
-                    debugger;
-
                     var response = JSON.parse(data.toString());
 
                     if (response.error) {

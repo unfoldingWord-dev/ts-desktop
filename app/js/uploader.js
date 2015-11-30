@@ -4,7 +4,7 @@
     'use strict';
 
     var net = require('net'),
-        keypair = require('keypair'),
+        keygen = require('ssh-keygen'),
         jsonfile = require('jsonfile'),
         mkdirP = require('mkdirp'),
         getmac = require('getmac'),
@@ -17,6 +17,7 @@
         mkdirp = wrap(null, mkdirP),
         write = wrap(fs, 'writeFile'),
         read = wrap(fs, 'readFile'),
+        chmod = wrap(fs, 'chmod'),
         readdir = wrap(fs, 'readdir'),
         map = guard('map');
 
@@ -25,9 +26,9 @@
         var paths = {
             sshPath: path.resolve('ssh'),
 
-            publicKeyName: 'ts-pub',
+            publicKeyName: 'ts.pub',
 
-            privateKeyName: 'ts-key',
+            privateKeyName: 'ts',
 
             get publicKeyPath () {
                 return path.join(this.sshPath, this.publicKeyName);
@@ -39,27 +40,43 @@
         };
 
         var generateRegisterRequestString = function (keyPair, deviceId) {
-            var pubKey = keyPair.public,
-                parsedPubKey = pubKey.replace(/\n/g, '')
-                                     .replace(/-----BEGIN RSA PUBLIC KEY-----/, '')
-                                     .replace(/-----END RSA PUBLIC KEY-----/, '');
-
             return JSON.stringify({
-                key: ['ssh-rsa', parsedPubKey, deviceId].join(' '),
+                key: keyPair.public,
                 udid: deviceId
             });
         };
 
-        var createKeyPair = function () {
-            var keys = keypair();
+        var createKeyPair = function (deviceId) {
+            return new Promise(function(resolve, reject) {
+                let keyPath = path.join(paths.sshPath, paths.privateKeyName);
+                mkdirp(paths.sshPath).then(function() {
+                    keygen({
+                        location: keyPath,
+                        comment: deviceId,
+                        read: true
+                    }, function(err, out){
+                        if(err) {
+                            console.log('Something went wrong: '+err);
+                            reject(err);
+                        } else {
+                            console.log('Keys created!');
 
-            return mkdirp(paths.sshPath).then(function () {
-                var writePublicKey = write(paths.publicKeyPath, keys.public),
-                    writePrivateKey = write(paths.privateKeyPath, keys.private);
+                            resolve(mkdirp(paths.sshPath).then(function () {
+                                var writePublicKey = write(paths.publicKeyPath, out.pubKey),
+                                    writePrivateKey = write(paths.privateKeyPath, out.key).then(function () {
+                                        return chmod(paths.privateKeyPath, '600');
+                                    });
 
-                return Promise.all[writePublicKey, writePrivateKey];
-            }).then(function() {
-                return keys;
+                                return Promise.all(writePublicKey, writePrivateKey);
+                            }).then(function () {
+                                return {
+                                    public: out.pubKey,
+                                    private: out.key
+                                };
+                            }));
+                        }
+                    });
+                });
             });
         };
 
@@ -89,17 +106,12 @@
 
             return new Promise(function (resolve, reject) {
 
-                debugger;
-
                 var client = net.createConnection({port: port, host: host}, function () {
                     var registrationString = generateRegisterRequestString(keys, deviceId);
-
                     client.write(registrationString);
                 });
 
                 client.on('data', function (data) {
-                    debugger;
-
                     var response = JSON.parse(data.toString());
 
                     if (response.error) {
@@ -124,23 +136,26 @@
 
         return {
 
+            setSshPath: function(path){
+                paths.sshPath = path;
+            },
+
             register: function (host, port) {
                 var opts = {
-                    host: host || 'ts.door43.org',
+                    host: host || 'test.door43.org',
                     port: port || 9095
                 };
 
                 return this.getDeviceId().then(function (deviceId) {
-
                     return readKeyPair().then(function (keys) {
                         return {
                             keys: keys,
                             deviceId: deviceId
                         };
-                    }).catch(function () {
-                        var sendReg = sendRegistrationRequest.bind(null, opts.host, opts.port, deviceId);
-
-                        return createKeyPair().then(sendReg);
+                    }).catch(function (err) {
+                        return createKeyPair(deviceId).then(function(keys){
+                            return sendRegistrationRequest(opts.host, opts.port, deviceId,keys);
+                        });
                     }).then(function (reg) {
                         reg.paths = paths;
                         return reg;

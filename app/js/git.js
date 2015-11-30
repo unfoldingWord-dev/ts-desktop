@@ -49,7 +49,7 @@ function Git() {
 			get _cmd () {
 				return str;
 			}
-		}
+		};
 	}
 
 	function readdir(dir) {
@@ -84,13 +84,16 @@ function Git() {
 
 		// Push staged files to remote repo
 		push: function(dir, repo, reg) {
-			debugger;
-
-			var push = cmd().cd(dir).and.do("GIT_SSH_COMMAND='ssh -i \"" + reg.paths.privateKeyPath + "\"' git push -u gitolite3@ts.door43.org:tS/" + reg.deviceId + '/' + repo + ' master');
-
-			return push.run().then(console.log.bind(console, 'Files are pushed'));
+            console.log('Starting push');
+            var command = "GIT_SSH_COMMAND='ssh -i \"" + reg.paths.privateKeyPath + "\"' git push -u ssh://gitolite3@test.door43.org:9299/tS/" + reg.deviceId + "/" + repo + " master";
+            var push = cmd().cd(dir).and.do(command);
+            return push.run().then(function(ret){
+                console.log('Files are pushed');
+                console.log(ret);
+                return ret;
+            });
 		}
-	}
+	};
 }
 
 module.exports.Git = Git;

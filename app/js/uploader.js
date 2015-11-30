@@ -47,34 +47,37 @@
         };
 
         var createKeyPair = function (deviceId) {
+            return new Promise(function(resolve, reject) {
+                let keyPath = path.join(paths.sshPath, paths.privateKeyName);
+                mkdirp(paths.sshPath).then(function() {
+                    keygen({
+                        location: keyPath,
+                        comment: deviceId,
+                        read: true
+                    }, function(err, out){
+                        if(err) {
+                            console.log('Something went wrong: '+err);
+                            reject(err);
+                        } else {
+                            console.log('Keys created!');
 
+                            resolve(mkdirp(paths.sshPath).then(function () {
+                                var writePublicKey = write(paths.publicKeyPath, out.pubKey),
+                                    writePrivateKey = write(paths.privateKeyPath, out.key).then(function () {
+                                        return chmod(paths.privateKeyPath, '600');
+                                    });
 
-            return new Promise(function(resolve, reject){
-                keygen({
-                    location: paths.sshPath + "/ts",
-                    comment: deviceId,
-                    read: true
-                }, function(err, out){
-                    if(err) return console.log('Something went wrong: '+err);
-                    console.log('Keys created!');
-
-                    resolve(mkdirp(paths.sshPath).then(function () {
-                        var writePublicKey = write(paths.publicKeyPath, out.pubKey),
-                            writePrivateKey = write(paths.privateKeyPath, out.key).then(function () {
-                                return chmod(paths.privateKeyPath, '600');
-                            });
-
-                        return Promise.all[writePublicKey, writePrivateKey];
-                    }).then(function() {
-                        return {
-                            public: out.pubKey,
-                            private: out.key
-                        };
-                    }));
+                                return Promise.all(writePublicKey, writePrivateKey);
+                            }).then(function () {
+                                return {
+                                    public: out.pubKey,
+                                    private: out.key
+                                };
+                            }));
+                        }
+                    });
                 });
-
             });
-
         };
 
         var readKeyPair = function () {

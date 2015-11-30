@@ -12,7 +12,7 @@
 
     describe('@Git', function () {
         describe('@gitPush', function (done) {
-            this.timeout(10000);
+            this.timeout(20000);
             var success = null;
             before(function(done){
                 let dir = path.resolve("unit_tests/git/data/testrepo");

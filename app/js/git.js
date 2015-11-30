@@ -74,7 +74,6 @@ function Git() {
 
 		// Add and commit all changed files with the given message
 		stage: function(dir) {
-            console.log("staging: " + dir);
 			var msg = new Date(),
 				stage = cmd().cd(dir)
 					.and.do('git add --all')
@@ -86,10 +85,10 @@ function Git() {
 		// Push staged files to remote repo
 		push: function(dir, repo, reg) {
             var command = "ssh-agent bash -c 'ssh-add \"" + reg.paths.privateKeyPath + "\"; git push -u ssh://gitolite3@test.door43.org:9299/tS/" + reg.deviceId + "/" + repo + " master'"
-            console.log(command);
             var push = cmd().cd(dir).and.do(command);
             return push.run().then(function(ret){
-                console.log.bind(console, 'Files are pushed');
+                console.log("Files are pushed");
+                console.log(ret);
                 return ret;
             });
 		}

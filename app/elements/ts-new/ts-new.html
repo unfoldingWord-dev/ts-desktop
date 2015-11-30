@@ -66,7 +66,7 @@
             color: var(--secondary-text-color);
         }
 
-        .buttons paper-button:hover {
+        #popup .buttons paper-button:hover {
             color: var(--accent-color);
         }
 
@@ -172,7 +172,7 @@
                 }
             }
 
-            var newprojdata = {"project": project, "language": language, "icon": icon, "sources": [], "completion": 0, "currentsource": null};
+            var newprojdata = {"project": project, "language": language, "icon": icon, "translators": [], "sources": [], "completion": 0, "currentsource": null};
             this.fire('iron-signal', {name: 'loadnewproject', data: {projdata: newprojdata}});
             this.animationConfig.exit.name = 'slide-left-animation';
             this.route = "translate";

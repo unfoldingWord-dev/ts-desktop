@@ -46,7 +46,13 @@
         var f = module ? module[fn] : fn;
 
         return function (arg1, arg2) {
-            var args = typeof arg2 === 'undefined' ? [arg1] : [arg1, arg2];
+            var args = (function () {
+                var narg = function (arg) { return typeof arg === 'undefined'; };
+
+                if (narg(arg1) && narg(arg2)) return [];
+                if (narg(arg2)) return [arg1];
+                return [arg1, arg2];
+            })();
 
             return new Promise(function (resolve, reject) {
                 f.apply(module, args.concat(function (err, data) {

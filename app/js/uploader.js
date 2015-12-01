@@ -4,9 +4,7 @@
     'use strict';
 
     var net = require('net'),
-        keypair = require('keypair'),
         jsonfile = require('jsonfile'),
-        mkdirP = require('mkdirp'),
         getmac = require('getmac'),
         path = require('path'),
         fs = require('fs'),
@@ -14,7 +12,9 @@
         utils = require('../js/lib/util'),
         wrap = utils.promisify,
         guard = utils.guard,
-        mkdirp = wrap(null, mkdirP),
+        mkdirp = wrap(null, require('mkdirp')),
+        keygen = wrap(null, require('ssh-keygen')),
+        getMac = wrap(getmac, 'getMac'),
         write = wrap(fs, 'writeFile'),
         read = wrap(fs, 'readFile'),
         chmod = wrap(fs, 'chmod'),
@@ -26,9 +26,9 @@
         var paths = {
             sshPath: path.resolve('ssh'),
 
-            publicKeyName: 'ts-pub',
+            publicKeyName: 'ts.pub',
 
-            privateKeyName: 'ts-key',
+            privateKeyName: 'ts',
 
             get publicKeyPath () {
                 return path.join(this.sshPath, this.publicKeyName);
@@ -40,29 +40,36 @@
         };
 
         var generateRegisterRequestString = function (keyPair, deviceId) {
-            var pubKey = keyPair.public,
-                parsedPubKey = pubKey.replace(/\n/g, '')
-                                     .replace(/-----BEGIN RSA PUBLIC KEY-----/, '')
-                                     .replace(/-----END RSA PUBLIC KEY-----/, '');
-
             return JSON.stringify({
-                key: ['ssh-rsa', parsedPubKey, deviceId].join(' '),
+                key: keyPair.public,
                 udid: deviceId
             });
         };
 
-        var createKeyPair = function () {
-            var keys = keypair();
+        var createKeyPair = function (deviceId) {
+
+            let keyPath = path.join(paths.sshPath, paths.privateKeyName);
 
             return mkdirp(paths.sshPath).then(function () {
-                var writePublicKey = write(paths.publicKeyPath, keys.public),
-                    writePrivateKey = write(paths.privateKeyPath, keys.private).then(function () {
+                return keygen({
+                    location: keyPath,
+                    comment: deviceId,
+                    read: true
+                });
+            }).then(function (keys) {
+                console.log('Keys created!');
+
+                var writePublicKey = write(paths.publicKeyPath, keys.pubKey),
+                    writePrivateKey = write(paths.privateKeyPath, keys.key).then(function () {
                         return chmod(paths.privateKeyPath, '600');
                     });
 
-                return Promise.all[writePublicKey, writePrivateKey];
-            }).then(function() {
-                return keys;
+                return Promise.all([writePublicKey, writePrivateKey]).then(function () {
+                    return {
+                        public: keys.pubKey,
+                        private: keys.key
+                    };
+                });
             });
         };
 
@@ -94,7 +101,6 @@
 
                 var client = net.createConnection({port: port, host: host}, function () {
                     var registrationString = generateRegisterRequestString(keys, deviceId);
-
                     client.write(registrationString);
                 });
 
@@ -123,6 +129,10 @@
 
         return {
 
+            setSshPath: function(path){
+                paths.sshPath = path;
+            },
+
             register: function (host, port) {
                 var opts = {
                     host: host || 'test.door43.org',
@@ -130,16 +140,15 @@
                 };
 
                 return this.getDeviceId().then(function (deviceId) {
-
                     return readKeyPair().then(function (keys) {
                         return {
                             keys: keys,
                             deviceId: deviceId
                         };
-                    }).catch(function () {
+                    }).catch(function (err) {
                         var sendReg = sendRegistrationRequest.bind(null, opts.host, opts.port, deviceId);
 
-                        return createKeyPair().then(sendReg);
+                        return createKeyPair(deviceId).then(sendReg);
                     }).then(function (reg) {
                         reg.paths = paths;
                         return reg;
@@ -152,12 +161,8 @@
             },
 
             getDeviceId: function() {
-                return new Promise(function(resolve, reject) {
-                    getmac.getMac(function(err, mac) {
-                        var m = mac.replace(/-|:/g, '');
-
-                        err ? reject(err) : resolve(m);
-                    });
+                return getMac().then(function (mac) {
+                    return mac.replace(/-|:/g, '');
                 });
             }
         };

@@ -4,9 +4,7 @@
     'use strict';
 
     var net = require('net'),
-        keygen = require('ssh-keygen'),
         jsonfile = require('jsonfile'),
-        mkdirP = require('mkdirp'),
         getmac = require('getmac'),
         path = require('path'),
         fs = require('fs'),
@@ -14,7 +12,9 @@
         utils = require('../js/lib/util'),
         wrap = utils.promisify,
         guard = utils.guard,
-        mkdirp = wrap(null, mkdirP),
+        mkdirp = wrap(null, require('mkdirp')),
+        keygen = wrap(null, require('ssh-keygen')),
+        getMac = wrap(getmac, 'getMac'),
         write = wrap(fs, 'writeFile'),
         read = wrap(fs, 'readFile'),
         chmod = wrap(fs, 'chmod'),
@@ -47,35 +47,28 @@
         };
 
         var createKeyPair = function (deviceId) {
-            return new Promise(function(resolve, reject) {
-                let keyPath = path.join(paths.sshPath, paths.privateKeyName);
-                mkdirp(paths.sshPath).then(function() {
-                    keygen({
-                        location: keyPath,
-                        comment: deviceId,
-                        read: true
-                    }, function(err, out){
-                        if(err) {
-                            console.log('Something went wrong: '+err);
-                            reject(err);
-                        } else {
-                            console.log('Keys created!');
 
-                            resolve(mkdirp(paths.sshPath).then(function () {
-                                var writePublicKey = write(paths.publicKeyPath, out.pubKey),
-                                    writePrivateKey = write(paths.privateKeyPath, out.key).then(function () {
-                                        return chmod(paths.privateKeyPath, '600');
-                                    });
+            let keyPath = path.join(paths.sshPath, paths.privateKeyName);
 
-                                return Promise.all(writePublicKey, writePrivateKey);
-                            }).then(function () {
-                                return {
-                                    public: out.pubKey,
-                                    private: out.key
-                                };
-                            }));
-                        }
+            return mkdirp(paths.sshPath).then(function () {
+                return keygen({
+                    location: keyPath,
+                    comment: deviceId,
+                    read: true
+                });
+            }).then(function (keys) {
+                console.log('Keys created!');
+
+                var writePublicKey = write(paths.publicKeyPath, keys.pubKey),
+                    writePrivateKey = write(paths.privateKeyPath, keys.key).then(function () {
+                        return chmod(paths.privateKeyPath, '600');
                     });
+
+                return Promise.all([writePublicKey, writePrivateKey]).then(function () {
+                    return {
+                        public: keys.pubKey,
+                        private: keys.key
+                    };
                 });
             });
         };
@@ -153,9 +146,9 @@
                             deviceId: deviceId
                         };
                     }).catch(function (err) {
-                        return createKeyPair(deviceId).then(function(keys){
-                            return sendRegistrationRequest(opts.host, opts.port, deviceId,keys);
-                        });
+                        var sendReg = sendRegistrationRequest.bind(null, opts.host, opts.port, deviceId);
+
+                        return createKeyPair(deviceId).then(sendReg);
                     }).then(function (reg) {
                         reg.paths = paths;
                         return reg;
@@ -168,12 +161,8 @@
             },
 
             getDeviceId: function() {
-                return new Promise(function(resolve, reject) {
-                    getmac.getMac(function(err, mac) {
-                        var m = mac.replace(/-|:/g, '');
-
-                        err ? reject(err) : resolve(m);
-                    });
+                return getMac().then(function (mac) {
+                    return mac.replace(/-|:/g, '');
                 });
             }
         };

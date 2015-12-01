@@ -10,6 +10,7 @@
 <link rel="import" href="../ts-icons/ts-icons.html">
 <link rel="import" href="./ts-new-project-button.html">
 <link rel="import" href="./ts-home-sidebar.html">
+<link rel="import" href="./ts-completion-icon.html">
 
 <dom-module id="ts-home">
 
@@ -132,7 +133,7 @@
         .info {
             --iron-icon-height: 22px;
             --iron-icon-width: 22px;
-            color: var(--secondary-text-color);
+            color: var(--border-color);
         }
 
         .smalltext {
@@ -156,6 +157,14 @@
             width: 350px;
             height: 400px;
             padding: 20px;
+        }
+
+        #info p {
+            margin: 0;
+        }
+
+        #info .offset {
+            transform: translateX(20px);
         }
 
         #border {
@@ -228,7 +237,7 @@
                                         <span class="smallspan"><iron-icon class="smallicon" icon="[[proj.icon]]"></iron-icon></span>
                                         <span class="bigspan">[[proj.project.name]]</span>
                                         <span class="smalltext bigspan">[[proj.language.ln]]</span>
-                                        <span class="smallspan"><span>[[proj.completion]]</span>%</span>
+                                        <span class="smallspan"><ts-completion-icon percent="[[proj.completion]]"></ts-completion-icon></span>
                                     </div>
                                     <div>
                                         <span><paper-icon-button class="info" icon="info" on-tap="openinfo" title="details"></paper-icon-button></span>
@@ -247,7 +256,12 @@
                 <p>Project: <span>[[currentinfo.project.name]]</span> (<span>[[currentinfo.project.slug]]</span>)</p>
                 <p>Target Language: <span>[[currentinfo.language.ln]]</span> (<span>[[currentinfo.language.lc]]</span>)</p>
                 <p>Progress: <span>[[currentinfo.completion]]</span>%</p>
-                <p>Translators</p>
+                <p>Translators:</p>
+                <template is="dom-if" if="{{currentinfo.translators.length}}">
+                    <template is="dom-repeat" items="{{currentinfo.translators}}" as="user">
+                        <p class="offset">{{user.name}}</p>
+                    </template>
+                </template>
             </div>
             <div id="border">
                 <paper-button dialog-confirm on-tap="openconfirm"><iron-icon class="smallicon" icon="delete"></iron-icon> Delete</paper-button>

@@ -3,7 +3,8 @@
 ;(function () {
     'use strict';
 
-    var diacritics = require('./diacritics');
+    var diacritics = require('./diacritics'),
+        _ = require('lodash');
 
     /**
      * Raises an exception along with some context to provide better debugging
@@ -41,9 +42,42 @@
         }).replace(/\s+/g, '');
     }
 
+    function promisify (module, fn) {
+        var f = module ? module[fn] : fn;
+
+        return function (arg1, arg2) {
+            var args = typeof arg2 === 'undefined' ? [arg1] : [arg1, arg2];
+
+            return new Promise(function (resolve, reject) {
+                f.apply(module, args.concat(function (err, data) {
+                    return err ? reject(err) : resolve(data);
+                }));
+            });
+        };
+    }
+
+    /**
+     * NOTE: This is super meta.
+     *
+     * Reverses the order of arguments for a lodash (or equivalent) method,
+     *  and creates a curried function.
+     *
+     */
+
+    function guard (method) {
+        return function (cb) {
+            var visit = typeof cb === 'function' ? function (v) { return cb(v); } : cb;
+            return function (collection) {
+                return _[method](collection, visit);
+            };
+        };
+    }
+
     exports.raiseWithContext = raiseWithContext;
     exports.removeDiacritics = diacritics.removeDiacritics;
     exports.startsWithBase = startsWithBase;
     exports.camelize = camelize;
+    exports.promisify = promisify;
+    exports.guard = guard;
 
 }());

@@ -3,89 +3,166 @@
 ;(function () {
     'use strict';
 
-    let net = require('net');
-    let keypair = require('keypair');
-    let jsonfile = require('jsonfile');
-    let mkdirp = require('mkdirp');
-    let getmac = require('getmac');
-    //let sshClient = require('ssh2').Client;
+    var net = require('net'),
+        keypair = require('keypair'),
+        jsonfile = require('jsonfile'),
+        mkdirP = require('mkdirp'),
+        getmac = require('getmac'),
+        path = require('path'),
+        fs = require('fs'),
+        _ = require('lodash'),
+        utils = require('../js/lib/util'),
+        wrap = utils.promisify,
+        guard = utils.guard,
+        mkdirp = wrap(null, mkdirP),
+        write = wrap(fs, 'writeFile'),
+        read = wrap(fs, 'readFile'),
+        readdir = wrap(fs, 'readdir'),
+        map = guard('map');
 
-    let key = 'ssh-rsa';
-    let defaultHost = 'ts.door43.org';
-    let defaultPort = 9095;
-    let targetDir = 'ssh/';
-    let targetFile = targetDir + 'pair.json';
-    let username = '';
-    let client;
+    function Uploader() {
 
-    let uploader = {
-        register: function (host, port, deviceId, callback) {
-            defaultHost = host;
-            defaultPort = port;
-            var pair = keypair();
-            uploader.writeKeyPairToFile(pair);
+        var paths = {
+            sshPath: path.resolve('ssh'),
 
-            key = key + ' ' + pair.public + ' ' + deviceId;
-            client = net.createConnection({port: port, host: host}, function () {
-                var connectionJson = {'key': key, 'udid': deviceId, 'username': username};
-                client.write(JSON.stringify(connectionJson));
+            publicKeyName: 'ts-pub',
+
+            privateKeyName: 'ts-key',
+
+            get publicKeyPath () {
+                return path.join(this.sshPath, this.publicKeyName);
+            },
+
+            get privateKeyPath () {
+                return path.join(this.sshPath, this.privateKeyName);
+            }
+        };
+
+        var generateRegisterRequestString = function (keyPair, deviceId) {
+            var pubKey = keyPair.public,
+                parsedPubKey = pubKey.replace(/\n/g, '')
+                                     .replace(/-----BEGIN RSA PUBLIC KEY-----/, '')
+                                     .replace(/-----END RSA PUBLIC KEY-----/, '');
+
+            return JSON.stringify({
+                key: ['ssh-rsa', parsedPubKey, deviceId].join(' '),
+                udid: deviceId
             });
-            client.on('data', function (data) {
-                if (typeof callback === 'function') {
-                    callback(JSON.parse(data.toString()), pair);
+        };
+
+        var createKeyPair = function () {
+            var keys = keypair();
+
+            return mkdirp(paths.sshPath).then(function () {
+                var writePublicKey = write(paths.publicKeyPath, keys.public),
+                    writePrivateKey = write(paths.privateKeyPath, keys.private);
+
+                return Promise.all[writePublicKey, writePrivateKey];
+            }).then(function() {
+                return keys;
+            });
+        };
+
+        var readKeyPair = function () {
+            return readdir(paths.sshPath).then(function (files) {
+                var hasPubKey = _.includes(files, paths.publicKeyName),
+                    hasPrivateKey = _.includes(files, paths.privateKeyName),
+                    hasBoth = hasPubKey && hasPrivateKey;
+
+                if (!hasBoth) {
+                    throw 'No keypair found';
                 }
-                client.end();
-            });
-            client.on('end', function () {
-                console.log('Disconnected from ' + host + ':' + port);
-            });
-        },
-        verifyProfile: function (profile) {
-            return profile.getName() !== '' && profile.getEmail() !== '';
-        },
-        disconnect: function () {
-            client && client.destroy(), client = null;
-        },
-        writeKeyPairToFile: function (pair) {
-            mkdirp(targetDir, function () {
-                try {
-                    jsonfile.writeFileSync(targetFile, pair);
-                } catch (e) {
-                    throw new Error('uploader.js could not write keypair file');
-                }
-            });
 
-        },
-        needToRegister: function (callback) {
-            jsonfile.readFile(targetFile, function (err, keypair) {
-                if (err === null) {
-                    //keypair file exists no need to register
-                    if (typeof callback === 'function') {
-                        callback(false, keypair);
+                return hasBoth;
+            })
+            .then(function() {
+                var readPubKey = read(paths.publicKeyPath),
+                    readSecKey = read(paths.privateKeyPath);
+
+                return Promise.all([readPubKey, readSecKey]);
+            })
+            .then(map(String))
+            .then(_.zipObject.bind(_, ['public', 'private']));
+        };
+
+        var sendRegistrationRequest = function(host, port, deviceId, keys) {
+
+            return new Promise(function (resolve, reject) {
+
+                debugger;
+
+                var client = net.createConnection({port: port, host: host}, function () {
+                    var registrationString = generateRegisterRequestString(keys, deviceId);
+
+                    client.write(registrationString);
+                });
+
+                client.on('data', function (data) {
+                    debugger;
+
+                    var response = JSON.parse(data.toString());
+
+                    if (response.error) {
+                        throw response.error;
                     }
-                } else {
-                    //keypair file doesn't exist register
-                    if (typeof callback === 'function') {
-                        callback(true);
-                    }
-                }
-            });
-        },
-        getDeviceId: function (callback) {
-            getmac.getMac(function (err, mac) {
-                if (err) {
-                    throw new Error('uploader.js could not get a mac address.');
-                }
-                if (typeof callback === 'function') {
-                    callback(mac);
-                }
-            });
 
-        }
-    };
+                    resolve({
+                        keys: keys,
+                        deviceId: deviceId,
+                        response: response
+                    });
 
-    exports.register = uploader.register;
-    exports.disconnect = uploader.disconnect;
-    exports.verifyProfile = uploader.verifyProfile;
-    exports.uploadProfile = uploader.uploadProfile;
+                    client.end();
+                });
+
+                client.on('end', function () {
+                    console.log('Disconnected from ' + host + ':' + port);
+                });
+
+            });
+        };
+
+        return {
+
+            register: function (host, port) {
+                var opts = {
+                    host: host || 'ts.door43.org',
+                    port: port || 9095
+                };
+
+                return this.getDeviceId().then(function (deviceId) {
+
+                    return readKeyPair().then(function (keys) {
+                        return {
+                            keys: keys,
+                            deviceId: deviceId
+                        };
+                    }).catch(function () {
+                        var sendReg = sendRegistrationRequest.bind(null, opts.host, opts.port, deviceId);
+
+                        return createKeyPair().then(sendReg);
+                    }).then(function (reg) {
+                        reg.paths = paths;
+                        return reg;
+                    });
+                });
+            },
+
+            verifyProfile: function (profile) {
+                return profile.getName() !== '' && profile.getEmail() !== '';
+            },
+
+            getDeviceId: function() {
+                return new Promise(function(resolve, reject) {
+                    getmac.getMac(function(err, mac) {
+                        var m = mac.replace(/-|:/g, '');
+
+                        err ? reject(err) : resolve(m);
+                    });
+                });
+            }
+        };
+    }
+
+    exports.Uploader = Uploader;
 })();

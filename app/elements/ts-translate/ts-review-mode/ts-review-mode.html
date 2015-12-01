@@ -1,5 +1,11 @@
 
 <link rel="import" href="../../../components/iron-list/iron-list.html">
+<link rel="import" href="../../../components/iron-signals/iron-signals.html">
+<link rel="import" href="../../../components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../../components/paper-button/paper-button.html">
+<link rel="import" href="../../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../../components/paper-material/paper-material.html">
+<link rel="import" href="../../../components/iron-icons/iron-icons.html">
 
 <link rel="import" href="./ts-review-card.html">
 
@@ -50,6 +56,72 @@
             100% {transform: scale(0,0); opacity: 0}
         }
 
+        :host::shadow #items {
+            margin-bottom: 300px;
+        }
+
+        #resourcepopup {
+            position: fixed;
+            top: 40px;
+            right: 17px;
+            background: var(--card-background-color);
+            color: var(--primary-text-color);
+            width: 416px;
+            height: calc(100% - 40px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #resourcepopup.hide {
+            visibility: hidden;
+        }
+
+        .slidein {
+            -webkit-animation: slidein .5s;
+        }
+
+        .slideout {
+            -webkit-animation: slideout .5s;
+        }
+
+        @-webkit-keyframes slidein {
+            0% {transform: translateX(450px)}
+            100% {transform: translateX(0)}
+        }
+
+        @-webkit-keyframes slideout {
+            0% {transform: translateX(0)}
+            100% {transform: translateX(450px)}
+        }
+
+        #resourcepopup .buttons {
+            flex: 0 0 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--secondary-text-color);
+            border-bottom: 1px solid var(--secondary-text-color);
+        }
+
+        #resourcepopup .buttons paper-button:hover {
+            color: var(--accent-color);
+        }
+
+        #resourcecontent {
+            padding: 0 40px 40px 40px;
+            overflow-y: auto;
+            flex: auto;
+        }
+
+        #resourcecontent h2 {
+            color: var(--accent-color);
+        }
+
+        #resourcecontent p {
+            margin: 0;
+            font-size: 120%;
+        }
+
 	</style>
 
 	<template>
@@ -60,7 +132,16 @@
                     <ts-review-card id="{{createid(index)}}" chunk="{{chunk}}"></ts-review-card>
                 </template>
             </iron-list>
+            <paper-material id="resourcepopup" class="hide">
+                <div class="buttons">
+                    <paper-button on-tap="closeresource"><iron-icon icon="clear"></iron-icon>Close</paper-button>
+                </div>
+                <div id="resourcecontent">
+                </div>
+            </paper-material>
         </div>
+
+        <iron-signals on-iron-signal-openresource="openresource"></iron-signals>
 
 	</template>
 
@@ -91,6 +172,26 @@
                 type: String,
                 value: "review"
             }
+        },
+
+        openresource: function (event, data) {
+            var popup = this.$.resourcepopup;
+            var textholder = this.$.resourcecontent;
+            textholder.innerHTML = data.content;
+            popup.classList.remove("hide");
+            popup.classList.add("slidein");
+            setTimeout(function() {
+                popup.classList.remove("slidein");
+            }, 500);
+        },
+
+        closeresource: function () {
+            var popup = this.$.resourcepopup;
+            popup.classList.add("slideout");
+            setTimeout(function() {
+                popup.classList.remove("slideout");
+                popup.classList.add("hide");
+            }, 500);
         },
 
         frommode: function () {

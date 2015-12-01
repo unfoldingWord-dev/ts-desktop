@@ -4,32 +4,23 @@ var _ = require('lodash'),
     fs = require('fs'),
     path = require('path'),
     mkdirP = require('mkdirp'),
-    rimraf = require('rimraf');
+    rimraf = require('rimraf'),
+    utils = require('../js/lib/util'),
+    wrap = utils.promisify,
+    guard = utils.guard;
+
+var Git = require('../js/git').Git;
+var git = new Git();
 
 function zipper (r) {
     return r.length ? _.map(r[0].values, _.zipObject.bind(_, r[0].columns)) : [];
 }
 
-function wrap (module, fn) {
-    var f = module ? module[fn] : fn;
-
-    return function (arg1, arg2) {
-        var args = typeof arg2 === 'undefined' ? [arg1] : [arg1, arg2];
-
-        return new Promise(function (resolve, reject) {
-            f.apply(module, args.concat(function (err, data) {
-                return err ? reject(err) : resolve(data);
-            }));
-        });
-    };
-}
-
-function map (cb) {
-    var visit = typeof cb === 'function' ? function (v) { return cb(v); } : cb;
-    return function (collection) {
-        return _.map(collection, visit);
-    };
-}
+var map = guard('map'),
+    indexBy = guard('indexBy'),
+    flatten = guard('flatten'),
+    filter = guard('filter'),
+    compact = guard('compact');
 
 /**
  *  var pm = ProjectsManager(query);
@@ -45,6 +36,30 @@ function ProjectsManager(query, configurator) {
         mkdirp = wrap(null, mkdirP),
         rm = wrap(null, rimraf),
         readdir = wrap(fs, 'readdir'),
+        stat = wrap(fs, 'stat'),
+        isDir = function (f) {
+            return stat(f).then(function (s) {
+                return s.isDirectory();
+            });
+        },
+        isVisibleDir = function (f) {
+            return isDir(f).then(function (isFolder) {
+                var name = path.parse(f).name,
+                    isHidden = /^\..*/.test(name);
+
+                return (isFolder && !isHidden) ? f : false;
+            });
+        },
+        filterDirs = function (dirs) {
+            return Promise.all(_.map(dirs, isVisibleDir)).then(compact());
+        },
+        readdirs = function (dirs) {
+            return Promise.all(_.map(dirs, function (d) {
+                return readdir(d).then(map(function (f) {
+                    return path.join(d, f);
+                }));
+            }));
+        },
         toJSON = _.partialRight(JSON.stringify, null, '\t'),
         fromJSON = JSON.parse.bind(JSON),
         config = (function (prefix) {
@@ -54,7 +69,9 @@ function ProjectsManager(query, configurator) {
                 };
 
             return {
-                filterDirs: _.partial(_.filter, _, isUW),
+                filterProjects: _.partial(_.filter, _, isUW),
+
+                filterChapters: filterDirs,
 
                 filterChunks: _.partial(_.filter, _, isChunk),
 
@@ -127,7 +144,7 @@ function ProjectsManager(query, configurator) {
 
         get sources () {
             var r = query([
-                    "select r.id, r.slug 'source', r.name, sl.name 'ln', sl.slug 'lc', p.slug 'project', r.checking_level 'level', r.version from resource r",
+                    "select r.id, r.slug 'source', r.name, sl.name 'ln', sl.slug 'lc', p.slug 'project', r.checking_level 'level', r.version, r.modified_at 'date_modified' from resource r",
                     "join source_language sl on sl.id=r.source_language_id",
                     "join project p on p.id=sl.project_id",
                     "order by r.name"
@@ -156,6 +173,50 @@ function ProjectsManager(query, configurator) {
                 ].join(' '));
 
             return zipper(r);
+        },
+
+        checkProject: function (project) {
+            var allsources = this.sources;
+            var mysources = _.filter(allsources, 'project', project);
+            var combined = {};
+            var sources = [];
+            for (var i = 0; i < mysources.length; i++) {
+                var source = mysources[i].source;
+                var frames = this.getSourceFrames(mysources[i]);
+                console.log("source:", source, "chunks:", frames.length);
+                combined[source] = frames;
+                sources.push(source);
+            }
+            var match = true;
+            var j = 0;
+            while (match && j < combined[sources[0]].length) {
+                var testref = combined[sources[0]][j].chapter + combined[sources[0]][j].verse;
+                for (var k = 1; k < sources.length; k++) {
+                    var checkref = combined[sources[k]][j].chapter + combined[sources[k]][j].verse;
+                    if (testref !== checkref) {
+                        match = false;
+                        var firsterror = testref;
+                    }
+                }
+                j++;
+            }
+            if (match) {
+                console.log("                             ALL CHUNKS LINE UP!");
+            } else {
+                console.log("                             First error occurs at " + firsterror);
+            }
+            console.log("Data:");
+            console.log(combined);
+        },
+
+        checkAllProjects: function () {
+            var allsources = this.sources;
+            var ulbsources = _.filter(allsources, 'source', 'ulb');
+            for (var i = 0; i < ulbsources.length; i++) {
+                console.log("Project Results              Name: " + ulbsources[i].project);
+                this.checkProject(ulbsources[i].project);
+                console.log("---------------------------------------------------------------");
+            }
         },
 
         getFrameNotes: function (frameid) {
@@ -190,45 +251,98 @@ function ProjectsManager(query, configurator) {
             return zipper(r);
         },
 
+        getPaths: function(meta) {
+            return config.makeProjectPaths(meta);
+        },
+
         saveTargetTranslation: function (translation, meta) {
-            var paths = config.makeProjectPaths(meta);
+            var paths = this.getPaths(meta);
 
             // save project.json and manifest.json
 
             // translation is an array
-            // translation[0].meta.complexid
+            // translation[0].meta.frameid
 
-            var finishedFrames = _.map(_.filter(translation, function (chunk) {
-                return !!chunk.completed;
-            }), function (chunk) {
-                return chunk.meta.complexid;
-            });
+            var makeComplexId = function (c) {
+                return c.meta.chapterid + '-' + c.meta.frameid;
+            };
+
+            var prop = function (prop) {
+                return function (v, k) {
+                    return v[prop] ? k : false
+                };
+            };
+
+            var chunks = _.chain(translation)
+                .indexBy(makeComplexId)
+                .value();
+
+            var finishedFrames = _.compact(_.map(chunks, prop('completed')));
+
+            var sources = _.chain(meta.sources)
+                .indexBy(function (r) {
+                    return [r.project, r.lc, r.source].join('-');
+                })
+                .mapValues(function (r) {
+                    return {
+                        checking_level: r.level,
+                        date_modified: r.date_modified,
+                        version: r.version
+                    };
+                })
+                .value();
 
             var manifest = {
                 generator: {
                     name: 'ts-desktop'
                 },
                 package_version: 3,
-                finished_frames: finishedFrames
+                target_language: meta.language,
+                project_id: meta.project.slug,
+                source_translations: sources,
+                translators: meta.translators,
+                finished_frames: finishedFrames,
+                finished_titles: [],
+                finished_references: []
             };
 
-            return mkdirp(paths.projectDir).then(function () {
-                return write(paths.manifest, toJSON(manifest));
-            }).then(function () {
-                return write(paths.project, toJSON(meta));
-            }).then(function () {
-                return _.filter(translation, function (chunk) {
-                    return chunk.meta && chunk.meta.complexid;
-                });
-            }).then(map(function (chunk) {
-                var filename = path.join(paths.projectDir, chunk.meta.complexid + '.txt');
+            var writeFile = function (name, data) {
+                return function () {
+                    return write(name, toJSON(data));
+                };
+            };
 
-                return write(filename, chunk.content);
-            })).then(Promise.all.bind(Promise));
+            var makeChapterDir = function (c) {
+                return mkdirp(path.join(paths.projectDir, c.meta.chapterid));
+            };
+
+            var makeChapterDirs = function (data) {
+                return function () {
+                    return Promise.all(_.map(data, makeChapterDir));
+                };
+            };
+
+            var writeChunk = function (c) {
+                var f = path.join(paths.projectDir, c.meta.chapterid, c.meta.frameid + '.txt');
+                return write(f, c.content);
+            };
+
+            var writeChunks = function (data) {
+                return function () {
+                    return Promise.all(_.map(data, writeChunk));
+                };
+            };
+
+            return mkdirp(paths.projectDir)
+                .then(writeFile(paths.manifest, manifest))
+                .then(writeFile(paths.project, meta))
+                .then(makeChapterDirs(chunks))
+                .then(writeChunks(chunks))
+                .then(git.init.bind(git, paths.projectDir));
         },
 
         loadProjectsList: function () {
-            return readdir(config.targetDir).then(config.filterDirs);
+            return readdir(config.targetDir).then(config.filterProjects);
         },
 
         loadTargetTranslationsList: function () {
@@ -244,52 +358,71 @@ function ProjectsManager(query, configurator) {
                        .then(map(fromJSON));
         },
 
+        loadFinishedFramesList: function (meta) {
+            var paths = config.makeProjectPaths(meta);
+
+            return read(paths.manifest).then(function (manifest) {
+                var finishedFrames = fromJSON(manifest).finished_frames;
+                return _.indexBy(finishedFrames);
+            });
+        },
+
         loadTargetTranslation: function (meta) {
-            var paths = config.makeProjectPaths(meta),
-                finished;
+            var paths = this.getPaths(meta);
 
             // read manifest, get object with finished frames
 
             // return an object with keys that are the complexid
-            return read(paths.manifest)
-                    .then(function (manifest) {
-                        var finishedFrames = fromJSON(manifest).finished_frames;
-                        finished = _.indexBy(finishedFrames);
-                    })
-                    .then(function () {
-                        return readdir(paths.projectDir);
-                    }).then(config.filterChunks)
-                    .then(function (filenames) {
-                        return _.map(filenames, function (f) {
-                            return {
-                                'path': path.join(paths.projectDir, f),
-                                'name': f.slice(0, -4) // get rid of extension
-                            };
-                        });
-                    }).then(function (files) {
-                        var names = _.pluck(files, 'name');
 
-                        return Promise.all(_.map(files, function (f) {
-                            return read(f.path);
-                        })).then(function (chunks) {
-                            return _.zip(names, chunks);
-                        });
-                    }).then(function (data) {
-                        return _.reduce(data, function (translation, data) {
-                            var filename = data[0],
-                                content = data[1];
+            var parseChunkName = function (f) {
+                var p = path.parse(f),
+                    ch = p.dir.split(path.sep).slice(-1);
 
-                            translation[filename] = {
-                                content: content.toString(),
-                                completed: !!finished[filename]
-                            };
-                            return translation;
-                        }, {});
+                return ch + '-' + p.name;
+            };
+
+            var readChunk = function (f) {
+                return read(f).then(function (c) {
+                    return {
+                        content: c.toString(),
+                        name: parseChunkName(f)
+                    };
+                })
+            };
+
+            var markFinished = function (chunks) {
+                return function (finished) {
+                    return _.mapValues(chunks, function (c, name) {
+                        return {
+                            content: c.content,
+                            completed: !!finished[name]
+                        }
                     });
+                };
+            };
+
+            var makeFullPath = function (parent) {
+                return function (f) {
+                    return path.join(parent, f);
+                };
+            };
+
+            return readdir(paths.projectDir)
+                .then(map(makeFullPath(paths.projectDir)))
+                .then(config.filterChapters)
+                .then(flatten())
+                .then(readdirs)
+                .then(flatten())
+                .then(map(readChunk))
+                .then(Promise.all.bind(Promise))
+                .then(indexBy('name'))
+                .then(function (chunks) {
+                    return this.loadFinishedFramesList(meta).then(markFinished(chunks));
+                }.bind(this));
         },
 
         deleteTargetTranslation: function (meta) {
-            var paths = config.makeProjectPaths(meta);
+            var paths = this.getPaths(meta);
 
             return rm(paths.projectDir);
         }

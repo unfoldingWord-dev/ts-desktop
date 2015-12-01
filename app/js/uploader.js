@@ -125,7 +125,7 @@
 
             register: function (host, port) {
                 var opts = {
-                    host: host || 'ts.door43.org',
+                    host: host || 'test.door43.org',
                     port: port || 9095
                 };
 

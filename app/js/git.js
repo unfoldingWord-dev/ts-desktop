@@ -86,7 +86,8 @@ function Git() {
 		push: function(dir, repo, reg) {
 			debugger;
 
-			var push = cmd().cd(dir).and.do("GIT_SSH_COMMAND='ssh -i \"" + reg.paths.privateKeyPath + "\"' git push -u ssh://gitolite3@ts.door43.org:9299/tS/" + reg.deviceId + '/' + repo + ' master');
+			var ssh = 'ssh -i "' + reg.paths.privateKeyPath + '" -o "StrictHostKeyChecking no" ',
+				push = cmd().cd(dir).and.do("GIT_SSH_COMMAND='" + ssh + "' git push -u ssh://gitolite3@ts.door43.org:9299/tS/" + reg.deviceId + '/' + repo + ' master');
 
 			return push.run().then(console.log.bind(console, 'Files are pushed'));
 		}

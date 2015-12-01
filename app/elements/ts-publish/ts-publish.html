@@ -120,9 +120,9 @@
 
         <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
             <ts-publish-book selected="{{selected}}" currentproject="[[currentproject]]"></ts-publish-book>
-            <ts-publish-profile selected="{{selected}}"></ts-publish-profile>
+            <ts-publish-profile selected="{{selected}}" currentproject="{{currentproject}}"></ts-publish-profile>
             <ts-publish-review selected="{{selected}}" currentproject="[[currentproject]]"></ts-publish-review>
-            <ts-publish-publish></ts-publish-publish>
+            <ts-publish-publish route="{{route}}" selected="{{selected}}" currentproject="[[currentproject]]"></ts-publish-publish>
         </neon-animated-pages>
 
     </template>
@@ -151,7 +151,8 @@
             },
             currentproject: {
                 type: Object,
-                value: {}
+                value: {},
+                notify: true
             },
             stepslist: {
                 type: Array,

@@ -46,7 +46,7 @@ function Git() {
 				});
 			},
 
-			get _cmd () {
+			toString: function () {
 				return str;
 			}
 		};
@@ -60,6 +60,13 @@ function Git() {
 		});
 	}
 
+	function logr(msg) {
+		return function (data) {
+			console.log(msg, data);
+			return data;
+		};
+	}
+
 	return {
 
 		// Initialize folder as git repository if it's not one already
@@ -69,7 +76,7 @@ function Git() {
 					hasGitFolder = (files.indexOf('.git') >= 0);
 
 				return !hasGitFolder && init.run();
-			}).then(console.log.bind(console, 'Git is initialized'));
+			}).then(logr('Git is initialized'));
 		},
 
 		// Add and commit all changed files with the given message
@@ -79,19 +86,18 @@ function Git() {
 					.and.do('git add --all')
 					.and.do('git commit -am "' + msg + '"');
 
-			return stage.run().then(console.log.bind(console, 'Files are staged'));
+			return stage.run().then(logr('Files are staged'));
 		},
 
 		// Push staged files to remote repo
 		push: function(dir, repo, reg) {
-            console.log('Starting push');
-            var command = "GIT_SSH_COMMAND='ssh -i \"" + reg.paths.privateKeyPath + "\"' git push -u ssh://gitolite3@test.door43.org:9299/tS/" + reg.deviceId + "/" + repo + " master";
-            var push = cmd().cd(dir).and.do(command);
-            return push.run().then(function(ret){
-                console.log('Files are pushed');
-                console.log(ret);
-                return ret;
-            });
+            var ssh = 'ssh -i "' + reg.paths.privateKeyPath + '" -o "StrictHostKeyChecking no"',
+            	gitSshPush = "GIT_SSH_COMMAND='" + ssh + "' git push -u ssh://gitolite3@test.door43.org:9299/tS/" + reg.deviceId + "/" + repo + " master",
+            	push = cmd().cd(dir).and.do(gitSshPush);
+
+            console.log('Starting push to server...\n' + push);
+
+            return push.run().then(logr('Files are pushed'));
 		}
 	};
 }

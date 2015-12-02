@@ -197,9 +197,6 @@
             this.loading = true;
             popup.open();
 
-            // var register = App.uploader.register.bind(App.uploader),
-            //     gitPush = App.git.push.bind(App.git, paths.projectDir, repo);
-/*
             return App.git.stage(paths.projectDir)
                 .then(function () {
                     return App.uploader.register();
@@ -207,14 +204,12 @@
                 .then(function (reg) {
                     return App.git.push(paths.projectDir, repo, reg)
                 })
+                .then(function () {
+                    mythis.loading = false;
+                })
                 .catch(function (err) {
-                    console.log('oh no!', err);
-                });*/
-
-            setTimeout(function() {
-                mythis.loading = false;
-            }, 10000);
-
+                    console.log(err);
+                });
         }
 
     });

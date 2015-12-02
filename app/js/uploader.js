@@ -129,7 +129,11 @@
 
         return {
 
-            setSshPath: function(path){
+            get sshPath () {
+                return paths.sshPath;
+            },
+
+            set sshPath (path) {
                 paths.sshPath = path;
             },
 

@@ -21,11 +21,21 @@ function Git() {
 			},
 
 			get then () {
-				return cmd(str + '; ');
+				var c = process.platform === 'win32' ? '& ' : '; ';
+
+				return cmd(str + c);
 			},
 
 			get or () {
 				return cmd(str + ' || ');
+			},
+
+			set: function (name, val) {
+				var c = process.platform === 'win32' ? 
+							`set ${name}=${val} & ` :
+							`${name}='${val}' `;
+
+				return cmd(str + c);
 			},
 
 			do: function (c) {
@@ -62,7 +72,9 @@ function Git() {
 
 	function logr(msg) {
 		return function (data) {
-			console.log(msg, data);
+			if (process.env.NODE_ENV !== 'test') {
+				console.log(msg, data);
+			}
 			return data;
 		};
 	}
@@ -84,16 +96,16 @@ function Git() {
 			var msg = new Date(),
 				stage = cmd().cd(dir)
 					.and.do('git add --all')
-					.and.do('git commit -am "' + msg + '"');
+					.and.do(`git commit -am "${msg}"`);
 
 			return stage.run().then(logr('Files are staged'));
 		},
 
 		// Push staged files to remote repo
 		push: function(dir, repo, reg) {
-            var ssh = 'ssh -i "' + reg.paths.privateKeyPath + '" -o "StrictHostKeyChecking no"',
-            	gitSshPush = "GIT_SSH_COMMAND='" + ssh + "' git push -u ssh://gitolite3@test.door43.org:9299/tS/" + reg.deviceId + "/" + repo + " master",
-            	push = cmd().cd(dir).and.do(gitSshPush);
+			var ssh = `ssh -i "${reg.paths.privateKeyPath}" -o "StrictHostKeyChecking no"`,
+				gitSshPush = `git push -u ssh://gitolite3@test.door43.org:9299/tS/${reg.deviceId}/${repo} master`,
+            	push = cmd().cd(dir).and.set('GIT_SSH_COMMAND', ssh).do(gitSshPush);
 
             console.log('Starting push to server...\n' + push);
 

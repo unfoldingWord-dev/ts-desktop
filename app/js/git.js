@@ -92,7 +92,7 @@ function Git() {
 		// Push staged files to remote repo
 		push: function(dir, repo, reg) {
             var ssh = 'ssh -i "' + reg.paths.privateKeyPath + '" -o "StrictHostKeyChecking no"',
-            	gitSshPush = "GIT_SSH_COMMAND='" + ssh + "' git push -u ssh://gitolite3@test.door43.org:9299/tS/" + reg.deviceId + "/" + repo + " master",
+            	gitSshPush = "set GIT_SSH_COMMAND=" + ssh + " & git push -u ssh://gitolite3@test.door43.org:9299/tS/" + reg.deviceId + "/" + repo + " master",
             	push = cmd().cd(dir).and.do(gitSshPush);
 
             console.log('Starting push to server...\n' + push);

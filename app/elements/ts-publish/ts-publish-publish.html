@@ -2,6 +2,7 @@
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
 <link rel="import" href="../../components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/paper-progress/paper-progress.html">
 
 <dom-module id="ts-publish-publish">
 
@@ -74,17 +75,40 @@
             margin: auto;
             width: 320px;
             height: 220px;
-            text-align: center;
             color: var(--primary-text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 110%;
         }
 
-        #popup .buttons {
+        #buttonbox {
             display: flex;
             justify-content: center;
             color: var(--secondary-text-color);
         }
 
-        #popup .buttons paper-button:hover {
+        #buttonbox paper-button:hover {
+            color: var(--accent-color);
+        }
+
+        paper-progress {
+            --paper-progress-active-color: var(--accent-color);
+            width: 250px;
+        }
+
+        #bar {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        #text {
+            text-align: center;
+        }
+
+        h2 {
             color: var(--accent-color);
         }
 
@@ -110,14 +134,21 @@
         </div>
 
         <paper-dialog id="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <h2>Project Published</h2>
-            <div>
-                <p>Your project has been successfully published to the server.  Thanks.</p>
-                <p>(Not really working yet)</p>
-            </div>
-            <div class="buttons">
-                <paper-button dialog-confirm on-tap="gohome">Return Home</paper-button>
-            </div>
+            <template is="dom-if" if="{{loading}}">
+                <p>Uploading Project.  Please wait...</p>
+                <div id="bar">
+                    <paper-progress indeterminate="true"></paper-progress>
+                </div>
+            </template>
+            <template is="dom-if" if="{{!loading}}">
+                <h2>Project Published</h2>
+                <div id="text">
+                    <p>Your project has been successfully published to the server.  Thanks.</p>
+                </div>
+                <div id="buttonbox">
+                    <paper-button dialog-confirm on-tap="gohome">Return Home</paper-button>
+                </div>
+            </template>
         </paper-dialog>
 
     </template>
@@ -144,6 +175,10 @@
             currentproject: {
                 type: Object,
                 value: {}
+            },
+            loading: {
+                type: Boolean,
+                value: false
             }
         },
 
@@ -159,14 +194,13 @@
 
         upload: function() {
             var popup = this.$.popup;
+            var mythis = this;
             var paths = App.projectsManager.getPaths(this.currentproject.data);
             var repo = 'uw-' + this.currentproject.data.project.slug + '-' + this.currentproject.data.language.lc;
 
+            this.loading = true;
             popup.open();
 
-            // var register = App.uploader.register.bind(App.uploader),
-            //     gitPush = App.git.push.bind(App.git, paths.projectDir, repo);
-/*
             return App.git.stage(paths.projectDir)
                 .then(function () {
                     return App.uploader.register();
@@ -174,9 +208,12 @@
                 .then(function (reg) {
                     return App.git.push(paths.projectDir, repo, reg)
                 })
+                .then(function () {
+                    mythis.loading = false;
+                })
                 .catch(function (err) {
-                    console.log('oh no!', err);
-                });*/
+                    console.log(err);
+                });
         }
 
     });

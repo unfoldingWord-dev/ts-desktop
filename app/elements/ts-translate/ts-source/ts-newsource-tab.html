@@ -2,13 +2,11 @@
 <link rel="import" href="../../../components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../../components/iron-signals/iron-signals.html">
-<link rel="import" href="../../../components/paper-dialog/paper-dialog.html">
-<link rel="import" href="../../../components/neon-animation/neon-animation.html">
 
 <link rel="import" href="./ts-source-modal.html">
 <link rel="import" href="../../ts-icons/ts-icons.html">
 
-<dom-module id="ts-source-tab">
+<dom-module id="ts-newsource-tab">
 
 	<style>
 
@@ -17,45 +15,69 @@
             display: flex;
         }
 
-        :host([readmode]) .tabs {
+        .tabs {
         	flex: auto;
         	display: flex;
-        	padding-left: 48px;
+        	padding-left: 48px; /* Counter-balance to the folder icon to the right */
         	justify-content: center;
-            color: var(--secondary-text-color);
+        	position: relative;
+        }
+
+        :host.lefty .tabs {
+        	flex: initial;
+        	padding-left: 0;
+        }
+
+        paper-tabs {
+			box-sizing: border-box;
+			padding: 0.5rem 0;
+			color: var(--secondary-text-color);
+			--paper-tabs-selection-bar-color: var(--accent-color);
         }
 
 		paper-tabs::shadow #tabsContent.scrollable.paper-tabs {
 			position: relative;
 		}
 
-        paper-tab:focus::shadow .tab-content.paper-tab{
-            font-weight: 500;
-        }
-
-        paper-tab {
-            padding: 0;
-            margin: 0 10px;
-        }
-
-        #bar {
+        .selection-bar {
         	width: 100%;
         	height: 2px !important;
         	position: absolute;
-        	bottom: 5px;
+        	bottom: 0;
         	left: 0;
 			background-color: var(--accent-color);
 			transition: width 333ms ease-out, left 155ms ease-out;
         }
 
-        .iconbutton {
+		paper-tab {
+			--paper-tab: {
+				padding: 0;
+				margin: 0 0.75rem;
+			}
+		}
+
+		:host.lefty paper-tab {
+			--paper-tab: {
+				padding: 0;
+				margin: 0 1rem 0 0;
+			}
+		}
+
+		paper-tab:focus::shadow .tab-content.paper-tab{
+			font-weight: 500;
+		}
+
+        .modal-btn-container {
         	display: flex;
 			flex: 0 0 48px;
 			justify-content: center;
 			align-items: center;
 			cursor: pointer;
-            color: var(--border-color);
         }
+
+		.modal-btn-container paper-icon-button {
+			color: var(--border-color);
+		}
 
         :host {
             --paper-tab-ink: var(--accent-color-light);
@@ -71,17 +93,20 @@
 	<template>
 
 		<div class="tabs">
-			<paper-tabs no-bar hide-scroll-buttons scrollable selected="{{projectdata.currentsource}}">
-				<template is="dom-repeat" items="[[projectdata.sources]]" as="source">
-                   <paper-tab on-tap="choosesource"><span>{{source.ln}}</span><span class="upper">{{source.source}}</span></paper-tab>
+			<paper-tabs no-bar hide-scroll-buttons scrollable selected="{{ selectedSource }}">
+				<template is="dom-repeat" items="[[ sources ]]" as="source">
+                   <paper-tab class="tab" on-tap="choosesource"><span>{{ source.ln }}</span><span class="upper">{{source.source}}</span></paper-tab>
                 </template>
-            	<div id="bar"></div>
+            	<div id="bar" class="selection-bar"></div>
 			</paper-tabs>
 		</div>
-        <iron-signals on-iron-signal-adjustbar="adjustbar"></iron-signals>
-		<div class="iconbutton">
-            <paper-icon-button icon="uw-tab-small:uw-tab-small" on-tap="openModal"></paper-icon-button>
+		<div class="modal-btn-container">
+			<div class="modal-btn-inner-container">
+				<paper-icon-button icon="uw-tab-small:uw-tab-small" on-tap="openModal"></paper-icon-button>
+			</div>
 		</div>
+
+        <iron-signals on-iron-signal-adjustbar="adjustbar"></iron-signals>
 
 	</template>
 
@@ -91,25 +116,38 @@
 
 	Polymer({
 
-        is: 'ts-source-tab',
+        is: 'ts-newsource-tab',
 
         behaviors: [
             Polymer.IronResizableBehavior
         ],
 
         properties: {
-            projectdata: {
+        	sources: {
+        		type: Array,
+        		notify: true
+        	},
+        	selectedSource: {
+        		type: Number,
+        		notify: true
+        	},
+            project: {
                 type: Object,
                 value: {}
-            }
+            },
+        	lefty: {
+        		type: Boolean
+        	}
         },
 
         ready: function() {
-
+        	if (this.lefty) {
+        		this.classList.add('lefty');
+        	}
         },
 
         openModal: function() {
-			/*var modal = document.createElement('ts-source-modal');
+			var modal = document.createElement('ts-source-modal');
 			modal.id = "source-tab-modal";
 			modal.style.display = 'block';
 			modal.sources = this.sources.slice();
@@ -118,13 +156,22 @@
 			modal.addEventListener('confirm', this.onConfirm.bind(this));
 			modal.addEventListener('cancel', this.onCancel.bind(this));
 			document.querySelector('ts-translate').appendChild(modal);
-			modal.fire('open');*/
+			modal.fire('open');
+        },
+
+        removeModal: function() {
+        	var modal = document.querySelector('ts-source-modal');
+			document.querySelector('ts-translate').removeChild(modal);
         },
 
         onConfirm: function() {
-        	/*var modal = document.querySelector('ts-source-modal');
+        	var modal = document.querySelector('ts-source-modal');
             this.fire('iron-signal', {name: 'updatesources', data: {sources: modal.sources, selected: modal.selectedSource}});
-        	this.removeModal();*/
+        	this.removeModal();
+        },
+
+        onCancel: function() {
+        	this.removeModal();
         },
 
         choosesource: function(e) {
@@ -133,7 +180,7 @@
         },
 
         adjustbar: function() {
-            var current = this.projectdata.currentsource;
+            var current = this.selectedSource;
             if (current === null || current === undefined) {
                 return;
             }

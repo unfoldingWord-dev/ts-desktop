@@ -25,7 +25,7 @@
             padding: 5px 1em;
             color: var(--secondary-text-color);
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
             min-height: 50px;
             align-items: center;
         }
@@ -41,8 +41,12 @@
             color: var(--primary-text-color);
         }
 
-        :host([noref]) .ref {
+        :host([reviewmode]) .ref {
             display: none;
+        }
+
+        :host([reviewmode]) ts-source-tab {
+            justify-content: space-between;
         }
 
 	</style>
@@ -51,7 +55,7 @@
 
         <paper-material elevation="1">
             <div id="heading">
-                <ts-source-tab project="[[chunk.data.project]]" sources="{{chunk.data.sources}}" selected-source="{{chunk.data.currentsource}}" lefty></ts-source-tab>
+                <ts-source-tab projectdata="[[chunk.data]]"></ts-source-tab>
                 <div class="ref">
                     <span>[[chunk.meta.chunkref]]</span> - <span>[[chunk.data.language.ln]]</span>
                 </div>

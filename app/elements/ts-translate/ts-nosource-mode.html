@@ -2,7 +2,6 @@
 <link rel="import" href="../../components/paper-material/paper-material.html">
 <link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 
-<link rel="import" href="./ts-source/ts-source-tab.html">
 <link rel="import" href="../ts-icons/ts-icons.html">
 
 <dom-module id="ts-nosource-mode">
@@ -95,9 +94,18 @@
             z-index: 2;
         }
 
-        paper-icon-button {
+        #bottombox paper-icon-button {
             height: 100px;
             width: 100px;
+        }
+
+        .iconbutton {
+            display: flex;
+            flex: 0 0 48px;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            color: var(--border-color);
         }
 
     </style>
@@ -111,7 +119,9 @@
                         <div>
                             Project: <span>[[projectdata.project.name]]</span> - <span>[[projectdata.language.ln]]</span>
                         </div>
-                        <ts-source-tab id="sourcetab" project="[[projectdata.project]]" sources="{{projectdata.sources}}" selected-source="{{projectdata.currentsource}}"></ts-source-tab>
+                        <div class="iconbutton">
+                            <paper-icon-button icon="uw-tab-small:uw-tab-small" on-tap="openmodal"></paper-icon-button>
+                        </div>
                     </div>
                 </paper-material>
                 <paper-material id="bottomcard" elevation="1">
@@ -140,8 +150,7 @@
         properties: {
             projectdata: {
                 type: Object,
-                value: {},
-                notify: true
+                value: {}
             }
         },
 
@@ -172,7 +181,7 @@
         },
 
         openmodal: function () {
-            this.$.sourcetab.openModal();
+            this.fire('iron-signal', {name: 'opensource'});
         },
 
         ready: function() {

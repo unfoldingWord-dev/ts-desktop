@@ -117,6 +117,10 @@
             justify-content: center;
         }
 
+        .hide {
+            display: none;
+        }
+
     </style>
 
     <template>
@@ -140,7 +144,8 @@
                 </div>
                 <div id="lower">
                     <p>You may also share and distribute your project using these options.</p>
-                    <div class="link">Export to File</div>
+                    <div class="link" on-tap="export">Export to File</div>
+                    <input class="hide" id="input" type="file" nwsaveas="project" />
                 </div>
             </div>
         </div>
@@ -202,6 +207,17 @@
             this.fire('iron-signal', {name: 'setdefault'});
             this.route = "home";
             this.selected = 0;
+        },
+
+        export: function () {
+            var meta = this.currentproject.data;
+            var input = this.$.input;
+            var filename;
+            input.addEventListener("change", function (evt) {
+                filename = this.value;
+                return App.projectsManager.exportTranslation(meta, filename);
+            }, false);
+            input.click();
         },
 
         upload: function() {

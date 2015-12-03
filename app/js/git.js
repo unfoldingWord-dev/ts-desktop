@@ -4,7 +4,10 @@
 
 var path = require('path'),
 	fs = require('fs'),
-	exec = require('child_process').exec;
+	exec = require('child_process').exec,
+	utils = require('../js/lib/util'),
+	log = utils.log,
+    logr = utils.logr;
 
 function Git() {
 
@@ -70,15 +73,6 @@ function Git() {
 		});
 	}
 
-	function logr(msg) {
-		return function (data) {
-			if (process.env.NODE_ENV !== 'test') {
-				console.log(msg, data);
-			}
-			return data;
-		};
-	}
-
 	return {
 
 		// Initialize folder as git repository if it's not one already
@@ -104,10 +98,10 @@ function Git() {
 		// Push staged files to remote repo
 		push: function(dir, repo, reg) {
 			var ssh = `ssh -i "${reg.paths.privateKeyPath}" -o "StrictHostKeyChecking no"`,
-				gitSshPush = `git push -u ssh://gitolite3@test.door43.org:9299/tS/${reg.deviceId}/${repo} master`,
+				gitSshPush = `git push -u -f ssh://gitolite3@test.door43.org:9299/tS/${reg.deviceId}/${repo} master`,
             	push = cmd().cd(dir).and.set('GIT_SSH_COMMAND', ssh).do(gitSshPush);
 
-            console.log('Starting push to server...\n' + push);
+            log('Starting push to server...\n' + push);
 
             return push.run().then(logr('Files are pushed'));
 		}

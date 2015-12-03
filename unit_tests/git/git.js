@@ -1,6 +1,6 @@
 'use strict';
 
-//process.env.NODE_ENV = 'test';
+process.env.NODE_ENV = 'test';
 
 let assert = require('assert');
 let rimraf = require('rimraf');
@@ -11,9 +11,12 @@ let fs = require('fs');
 let _ = require('lodash');
 let Git = require('../../app/js/git').Git;
 let git = new Git();
+let uploader = new Uploader();
+
+uploader.sshPath = path.resolve('unit_tests/git/ssh');
 
 describe('@Git', function () {
-    this.timeout(30000);
+    this.timeout(60000);
 
     let repoDir = path.resolve('unit_tests/git/testrepo'),
         testFileName = 'sample.txt',
@@ -51,33 +54,14 @@ describe('@Git', function () {
         })
     }
 
-    function stageProject (cb) {
-        createDummyProject(function (err) {
-            if (err) {
-                cb(err);
-            } else {
-                return git.init(repoDir).then(function () {
-                    return git.stage(repoDir);
-                }).then(function (ret) {
-                    cb();
-                    return ret;
-                }).catch(cb);
-            }
-        });
-    }
-
     function deleteProject (cb) {
         rimraf(repoDir, cb);
     }
 
     describe('@GitBasic', function () {
 
-        before(function (done) {
-            createDummyProject(done);
-        });
-        after(function (done) {
-            deleteProject(done);
-        });
+        before(createDummyProject);
+        after(deleteProject);
 
         it('should init a local git repo', function (done) {
             git.init(repoDir).then(function () {
@@ -95,12 +79,8 @@ describe('@Git', function () {
 
     describe('@GitLocal', function () {
 
-        before(function (done) {
-            initRepo(done);
-        });
-        after(function (done) {
-            deleteProject(done);
-        });
+        before(initRepo);
+        after(deleteProject);
 
         it('should stage the files', function (done) {
             git.stage(repoDir).then(function () {
@@ -117,12 +97,8 @@ describe('@Git', function () {
     });
 
     describe('@GitRemote', function () {
-        let uploader = new Uploader();
-        uploader.sshPath = path.resolve('unit_tests/git/ssh');
 
         before(function (done) {
-            //stageProject(done);
-
             rimraf(repoDir, function (err) {
                 mkdirp(repoDir, function (err) {
                     fs.writeFile(testFile, 'A line of text', function () {
@@ -144,24 +120,22 @@ describe('@Git', function () {
             });
         });
 
-        it('should register the ssh keys with the server', function (done) {
-            uploader.register().then(function (reg) {
-                var gotOkResponse = reg.response && !reg.response.error && reg.reponse.ok;
+        describe('@GitPush', function () {
 
-                assert(gotOkResponse, 'should get an ok from the server when registering');
-                done();
-            }, done);
+            it('should push to the server', function (done) {
+                var gitPush = git.push.bind(git, repoDir, repo);
+
+                uploader.register().then(gitPush).then(function (ret) {
+                    var success = ret.stdout.indexOf('Branch master set up to track') !== -1;
+
+                    assert(success, 'expected a good git push response');
+                    done();
+                }).catch(function (err) {
+                    done(new Error(err.stderr || err));
+                });
+            });
         });
 
-        it('should push to the server', function (done) {
-            var gitPush = git.push.bind(git, repoDir, repo);
-
-            uploader.register().then(gitPush).then(function (ret) {
-                var success = ret.stdout.indexOf('Branch master set up to track') !== -1;
-
-                assert(success, 'expected good git push response');
-                done();
-            }).catch(done);
-        });
+        
     });
 });

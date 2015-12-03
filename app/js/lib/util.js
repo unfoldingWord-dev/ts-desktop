@@ -79,11 +79,35 @@
         };
     }
 
+    function log () {
+        if (process.env.NODE_ENV !== 'test') {
+            console.log.apply(console, arguments);
+        }
+    }
+
+    /**
+     * A version of log for Promises.
+     * Logs a custom message along with the result of the promise.
+     * Will also return the result so that the chain is not broken.
+     *
+     * e.g. somePromise.then(logr('This is my message')).then(doSomethingElse);
+     */
+
+    function logr(msg) {
+        return function () {
+            var data = arguments.length === 1 ? arguments[0] : arguments;
+            log(msg, data);
+            return data;
+        }
+    }
+
     exports.raiseWithContext = raiseWithContext;
     exports.removeDiacritics = diacritics.removeDiacritics;
     exports.startsWithBase = startsWithBase;
     exports.camelize = camelize;
     exports.promisify = promisify;
     exports.guard = guard;
+    exports.log = log;
+    exports.logr = logr;
 
 }());

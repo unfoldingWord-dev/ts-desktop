@@ -10,6 +10,7 @@
         fs = require('fs'),
         _ = require('lodash'),
         utils = require('../js/lib/util'),
+        log = utils.log,
         wrap = utils.promisify,
         guard = utils.guard,
         mkdirp = wrap(null, require('mkdirp')),
@@ -57,7 +58,7 @@
                     read: true
                 });
             }).then(function (keys) {
-                console.log('Keys created!');
+                log('Keys created!');
 
                 var writePublicKey = write(paths.publicKeyPath, keys.pubKey),
                     writePrivateKey = write(paths.privateKeyPath, keys.key).then(function () {
@@ -121,7 +122,7 @@
                 });
 
                 client.on('end', function () {
-                    console.log('Disconnected from ' + host + ':' + port);
+                    log('Disconnected from ' + host + ':' + port);
                 });
 
             });

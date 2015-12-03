@@ -207,13 +207,14 @@
         upload: function() {
             var popup = this.$.popup;
             var mythis = this;
-            var paths = App.projectsManager.getPaths(this.currentproject.data);
-            var repo = 'uw-' + this.currentproject.data.project.slug + '-' + this.currentproject.data.language.lc;
+            var meta = this.currentproject.data;
+            var paths = App.projectsManager.getPaths(meta);
+            var repo = 'uw-' + meta.project.slug + '-' + meta.language.lc;
 
             this.loading = true;
             popup.open();
 
-            return App.git.stage(paths.projectDir)
+            return App.projectsManager.createReadyFile(meta)
                 .then(function () {
                     return App.uploader.register();
                 })

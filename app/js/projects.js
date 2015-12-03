@@ -93,6 +93,7 @@ function ProjectsManager(query, configurator) {
                         projectDir: projectDir,
                         manifest: path.join(projectDir, 'manifest.json'),
                         translation: path.join(projectDir, 'translation.json'),
+                        ready: path.join(projectDir, 'READY'),
                         project: path.join(projectDir, 'project.json')
                     };
 
@@ -255,6 +256,12 @@ function ProjectsManager(query, configurator) {
             return config.makeProjectPaths(meta);
         },
 
+        createReadyFile: function (meta) {
+            var paths = this.getPaths(meta);
+
+            return write(paths.ready, "");
+        },
+
         saveTargetTranslation: function (translation, meta) {
             var paths = this.getPaths(meta);
 
@@ -292,12 +299,14 @@ function ProjectsManager(query, configurator) {
                 })
                 .value();
 
+            var language = {id: meta.language.lc, name: meta.language.ln, direction: meta.language.direction};
+
             var manifest = {
                 generator: {
                     name: 'ts-desktop'
                 },
                 package_version: 3,
-                target_language: meta.language,
+                target_language: language,
                 project_id: meta.project.slug,
                 source_translations: sources,
                 translators: meta.translators,

@@ -175,6 +175,50 @@ function ProjectsManager(query, configurator) {
             return zipper(r);
         },
 
+        checkProject: function (project) {
+            var allsources = this.sources;
+            var mysources = _.filter(allsources, 'project', project);
+            var combined = {};
+            var sources = [];
+            for (var i = 0; i < mysources.length; i++) {
+                var source = mysources[i].source;
+                var frames = this.getSourceFrames(mysources[i]);
+                console.log("source:", source, "chunks:", frames.length);
+                combined[source] = frames;
+                sources.push(source);
+            }
+            var match = true;
+            var j = 0;
+            while (match && j < combined[sources[0]].length) {
+                var testref = combined[sources[0]][j].chapter + combined[sources[0]][j].verse;
+                for (var k = 1; k < sources.length; k++) {
+                    var checkref = combined[sources[k]][j].chapter + combined[sources[k]][j].verse;
+                    if (testref !== checkref) {
+                        match = false;
+                        var firsterror = testref;
+                    }
+                }
+                j++;
+            }
+            if (match) {
+                console.log("                             ALL CHUNKS LINE UP!");
+            } else {
+                console.log("                             First error occurs at " + firsterror);
+            }
+            console.log("Data:");
+            console.log(combined);
+        },
+
+        checkAllProjects: function () {
+            var allsources = this.sources;
+            var ulbsources = _.filter(allsources, 'source', 'ulb');
+            for (var i = 0; i < ulbsources.length; i++) {
+                console.log("Project Results              Name: " + ulbsources[i].project);
+                this.checkProject(ulbsources[i].project);
+                console.log("---------------------------------------------------------------");
+            }
+        },
+
         getFrameNotes: function (frameid) {
 
                 var r = query([

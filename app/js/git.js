@@ -34,7 +34,7 @@ function Git() {
 			},
 
 			set: function (name, val) {
-				var c = process.platform === 'win32' ? 
+				var c = process.platform === 'win32' ?
 							`set ${name}=${val} & ` :
 							`${name}='${val}' `;
 
@@ -97,6 +97,7 @@ function Git() {
 
 		// Push staged files to remote repo
 		push: function(dir, repo, reg) {
+
 			var ssh = `ssh -i "${reg.paths.privateKeyPath}" -o "StrictHostKeyChecking no"`,
 				gitSshPush = `git push -u -f ssh://gitolite3@test.door43.org:9299/tS/${reg.deviceId}/${repo} master`,
             	push = cmd().cd(dir).and.set('GIT_SSH_COMMAND', ssh).do(gitSshPush);

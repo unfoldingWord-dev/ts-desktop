@@ -109,7 +109,7 @@ describe('@Git', function () {
                         });
                     });
                 });
-            });      
+            });
         });
 
         after(function (done) {
@@ -135,7 +135,5 @@ describe('@Git', function () {
                 });
             });
         });
-
-        
     });
 });

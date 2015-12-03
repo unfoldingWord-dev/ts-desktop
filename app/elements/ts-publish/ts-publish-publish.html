@@ -206,7 +206,7 @@
                     return App.uploader.register();
                 })
                 .then(function (reg) {
-                    return App.git.push(paths.projectDir, repo, reg)
+                    return App.git.push(paths.projectDir, repo, reg);
                 })
                 .then(function () {
                     mythis.loading = false;

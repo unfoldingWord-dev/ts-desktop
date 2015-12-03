@@ -4,12 +4,42 @@
 'use strict';
 ;(function () {
 
-    let assert = require('assert');
-    let Uploader = require('../../app/js/uploader').Uploader;
-    let uploader = new Uploader();
-    let User = require('../../app/js/user').User;
+    let assert = require('assert'),
+        path = require('path'),
+        rimraf = require('rimraf'),
+        Uploader = require('../../app/js/uploader').Uploader,
+        uploader = new Uploader(),
+        User = require('../../app/js/user').User;
+
+    uploader.sshPath = path.resolve('unit_tests/uploader/ssh');
 
     describe('@Uploader', function () {
+
+        after(function (done) {
+            rimraf(uploader.sshPath, done);
+        });
+
+        describe('@register', function () {
+            this.timeout(20000);
+
+            it('should register the keys with the server', function (done) {
+                uploader.register({ deviceID: 'uploaderUnitTest' }).then(function (reg) {
+                    assert(!!reg.response, 'expected a response object');
+                    assert(!!reg.keys, 'expected keys');
+                    assert(!!reg.keys.public, 'expected public key to be generated');
+                    assert(!!reg.keys.private, 'expected private key to be generated');
+
+                    var response = JSON.stringify(reg.response);
+
+                    assert(!!reg.response.ok, 'expected an "ok" response but got ' + response);
+                    assert(!reg.response.error, 'did not expect an error response but got ' + response);
+                    done();
+                }).catch(function (err) {
+                    done(new Error(err));
+                });
+            });
+        });
+
         // TODO: this is broken
         //describe('@register', function () {
         //    this.timeout(10000);

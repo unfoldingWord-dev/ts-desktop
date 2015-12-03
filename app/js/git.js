@@ -105,7 +105,13 @@ function Git() {
             log('Starting push to server...\n' + push);
 
             return push.run().then(logr('Files are pushed'));
-		}
+		},
+
+		// Check for changes
+		diff: function(dir) {
+			var diff = cmd().cd(dir).and.do('git diff HEAD');
+			return diff.run().then(logr('Diff is run'));
+		},
 	};
 }
 

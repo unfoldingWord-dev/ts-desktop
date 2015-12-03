@@ -338,7 +338,9 @@ function ProjectsManager(query, configurator) {
                 .then(writeFile(paths.project, meta))
                 .then(makeChapterDirs(chunks))
                 .then(writeChunks(chunks))
-                .then(git.init.bind(git, paths.projectDir));
+                .then(git.init.bind(git, paths.projectDir))
+                // .then(git.diff.bind(git, paths.projectDir))
+                .then(git.stage.bind(git, paths.projectDir));
         },
 
         loadProjectsList: function () {

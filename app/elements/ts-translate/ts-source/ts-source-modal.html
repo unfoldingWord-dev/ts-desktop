@@ -113,7 +113,7 @@
             <div class="body">
                 <div class="row-header">Selected</div>
                 <template is="dom-repeat" items="[[sources]]" as="source">
-                    <div class="row" data-element="[[source]]" data-index="[[index]]" on-tap="removesource">
+                    <div class="row" on-tap="removesource">
                         <div>
                             <span>[[source.ln]]</span> - <span>[[source.name]]</span>
                         </div>
@@ -123,7 +123,7 @@
 
                 <div class="row-header">Available</div>
                 <template is="dom-repeat" items="{{searchfilter(query, available)}}" as="source">
-                    <div class="row" data-element="[[source]]" data-index="[[index]]" on-tap="addsource">
+                    <div class="row" on-tap="addsource">
                         <div>
                             <span>[[source.ln]]</span> - <span>[[source.name]]</span>
                         </div>
@@ -184,7 +184,7 @@
             if (query) {
                 var search = App.util.startsWithBase.bind(null, query);
                 return available.filter(function(source) {
-                    return search(source);
+                    return search(source.ln);
                 });
             } else {
                 return available;
@@ -212,24 +212,26 @@
         },
 
         cancel: function() {
+            this.query = "";
             this.fire('close');
         },
 
         confirm: function() {
             var sources = this.sources;
             var selected = this.selectedSource;
+            this.query = "";
             this.fire('iron-signal', {name: 'updatesources', data: {sources: sources, selected: selected}});
             this.fire('close');
         },
 
         addsource: function(event) {
-            var elem = event.target.dataElement;
-            this.push('sources', elem);
-            this.selectedSource = this.sources.indexOf(elem);
+            var source = event.model.source;
+            this.push('sources', source);
+            this.selectedSource = this.sources.indexOf(source);
         },
 
         removesource: function(event) {
-            var index = event.target.dataIndex;
+            var index = event.model.index;
             this.splice('sources', index, 1);
             if (this.selectedSource === index) {
                 if (this.sources.length === 0) {

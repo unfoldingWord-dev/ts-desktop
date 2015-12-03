@@ -1,5 +1,6 @@
 
-<link rel="import" href="../../../components/iron-list/iron-list.html">
+<link rel="import" href="../../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../../components/paper-button/paper-button.html">
 <link rel="import" href="../../../components/paper-checkbox/paper-checkbox.html">
 
 <dom-module id="ts-source-modal">
@@ -8,119 +9,93 @@
 
         :host {
             box-sizing: border-box;
-            position: fixed;
-            top: 40px;
-            bottom: 0;
-            left: 56px;
-            right: 0;
-            background-color: rgba(0,0,0,0.5);
-            z-index: 1000;
+            display: flex;
+            flex: auto;
         }
-        .container {
-            display: block;
+
+        #contain {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
             color: var(--primary-text-color);
-            width: 60%;
-            height: 80%;
-            min-height: 320px;
-            max-height: 800px;
-            position: fixed;
-            left: 0;
-            right: 0;
-            top: calc(50% + 18px);
-            transform: translateY(-50%);
-            margin-left: auto;
-            margin-right: auto;
             overflow: hidden;
             background: var(--card-background-color);
-            box-shadow: -4px 0 30px rgba(22, 22, 22, 0.3);
+            font-size: 110%;
         }
-        [icon="arrow-back"] {
-            margin: 0 .2em;
-        }
+
         [icon="search"] {
             padding: 0;
         }
+
         .header {
-            min-height: 56px;
-            border-bottom: 1px solid var(--border-color);
+            flex: 0 0 50px;
             color: var(--secondary-text-color);
-            font-style: italic;
-            font-size: 110%;
-            display: flex;
-        }
-        .header div {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 20px;
-            border-bottom: 1px solid var(--border-color);
-            background: var(--card-background-color);
-            width: 100%;
         }
+
         input {
             border: none;
             font-size: 110%;
             font-style: italic;
             width: 100%;
         }
+
         input:focus {
             outline: none;
         }
+
         .body {
-            height: calc(100% - 56px - 56px);
+            flex: auto;
             overflow-y: auto;
         }
-        .selected-list {
-            font-size: 110%;
-        }
+
         .row {
-            display: block;
+            display: flex;
+            justify-content: space-between;
             margin: 0;
             padding: 1em;
             border-bottom: 1px solid var(--border-color);
         }
+
         .row:hover {
             background: var(--accent-color-light);
-            box-shadow: inset 0 -1px rgba(0,0,0,0);
+            cursor: pointer;
         }
+
         .row-header {
-            display: block;
             margin: 0;
             padding: 0.25em 1em;
-            border-bottom: 1px solid var(--border-color);
             background-color: var(--border-color);
             text-transform: uppercase;
             font-size: 80%;
             font-weight: 500;
             color: var(--secondary-text-color);
         }
-        .right {
-            float: right;
-        }
-        .clickable {
-            cursor: pointer;
-        }
+
         .footer {
-            width: 100%;
-            height: 56px;
-            position: absolute;
-            bottom: 0;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            flex: 0 0 50px;
             border-top: 1px solid var(--border-color);
         }
+
         paper-button {
-            margin-top: 0.6rem;
             color: var(--secondary-text-color);
         }
+
         paper-button:hover {
             color: var(--accent-color);
         }
-        ::-webkit-scrollbar {
-            display: none;
-        }
+
         paper-checkbox {
             --paper-checkbox-checked-color: var(--accent-color-dark);
             --paper-checkbox-unchecked-color: var(--accent-color-dark);
         }
+
         paper-checkbox[disabled]::shadow #checkbox.paper-checkbox {
             opacity: 1;
         }
@@ -129,35 +104,37 @@
 
     <template>
 
-        <div id="container" class="container">
+        <div id="contain">
             <div class="header">
-                <div>
-                    <input is="iron-input" bind-value="{{query}}" name="source-search" placeholder="Choose a source translation" type="text" />
-                    <paper-icon-button class="right" icon="search" title="Search Languages"></paper-icon-button>
-                </div>
+                <input is="iron-input" bind-value="{{query}}" placeholder="Choose source translations">
+                <paper-icon-button icon="search" title="Search Languages"></paper-icon-button>
             </div>
 
             <div class="body">
-                <div id="selected-sources-header" class="row-header">Selected</div>
+                <div class="row-header">Selected</div>
                 <template is="dom-repeat" items="[[sources]]" as="source">
-                    <div class="row clickable" data-element="[[source]]" data-index="[[index]]" on-tap="removeSelected">
-                        <span>[[ source.ln ]]</span> - <span>[[ source.name ]]</span>
-                        <paper-checkbox class="right" disabled checked style="opacity: 1;"></paper-checkbox>
+                    <div class="row" on-tap="removesource">
+                        <div>
+                            <span>[[source.ln]]</span> - <span>[[source.name]]</span>
+                        </div>
+                        <paper-checkbox disabled checked></paper-checkbox>
                     </div>
                 </template>
 
-                <div id="available-sources-header" class="row-header">Available</div>
+                <div class="row-header">Available</div>
                 <template is="dom-repeat" items="{{searchfilter(query, available)}}" as="source">
-                    <div class="row clickable" data-element="[[source]]" data-index="[[index]]" on-tap="selectAvailable">
-                        <span>[[ source.ln ]]</span> - <span>[[ source.name ]]</span>
-                        <paper-checkbox class="right" disabled style="opacity: 1;"></paper-checkbox>
+                    <div class="row" on-tap="addsource">
+                        <div>
+                            <span>[[source.ln]]</span> - <span>[[source.name]]</span>
+                        </div>
+                        <paper-checkbox disabled></paper-checkbox>
                     </div>
                 </template>
             </div>
 
             <div class="footer">
-                <paper-button class="right" on-tap="confirm">Confirm</paper-button>
-                <paper-button class="right" on-tap="cancel">Cancel</paper-button>
+                <paper-button on-tap="cancel">Cancel</paper-button>
+                <paper-button on-tap="confirm">Confirm</paper-button>
             </div>
 
         </div>
@@ -172,10 +149,6 @@
 
         is: 'ts-source-modal',
 
-        listeners: {
-            'open': 'onOpen'
-        },
-
         behaviors: [
             Polymer.IronResizableBehavior
         ],
@@ -187,7 +160,7 @@
             },
             sources: {
                 type: Array,
-                observer: '_sourcesChanged'
+                value: []
             },
             available: {
                 type: Array,
@@ -200,39 +173,25 @@
             query: {
                 type: String,
                 value: ""
-            },
-            project: {
-                type: Object,
-                value: {}
             }
         },
 
-        onOpen: function() {
-            var sources = App.projectsManager.sources;
-            var projectid = this.project.slug;
-            this.allSources = _.filter(sources, {'project': projectid, 'level': 3});
-            this.available = this._getAvailable();
-        },
+        observers: [
+            'updateavailable(allSources.*, sources.*)'
+        ],
 
         searchfilter: function(query, available) {
-            // Check if there's a search term. If not, don't do the search.
-            // This is called unexpectedly when opening the modal and unexpectedly returns an empty array
-            //    because it thought the search term was "" and nothing matches "".
             if (query) {
                 var search = App.util.startsWithBase.bind(null, query);
                 return available.filter(function(source) {
-                    return search(source);
+                    return search(source.ln);
                 });
             } else {
                 return available;
             }
         },
 
-        _sourcesChanged: function() {
-            this.available = this._getAvailable();
-        },
-
-        _getAvailable: function() {
+        updateavailable: function() {
             var all = this.allSources;
             var selected = this.sources;
             var available = [];
@@ -249,32 +208,33 @@
                     available.push(all[i]);
                 }
             }
-            return available;
+            this.set('available', available);
         },
 
         cancel: function() {
-            this.fire('cancel');
+            this.query = "";
+            this.fire('close');
         },
 
         confirm: function() {
-            this.fire('confirm');
+            var sources = this.sources;
+            var selected = this.selectedSource;
+            this.query = "";
+            this.fire('iron-signal', {name: 'updatesources', data: {sources: sources, selected: selected}});
+            this.fire('close');
         },
 
-        selectAvailable: function(event) {
-            var elem = event.target.dataElement;
-            this.push('sources', elem);
-            this.available = this._getAvailable();
-            this.selectedSource = this.sources.indexOf(elem);
+        addsource: function(event) {
+            var source = event.model.source;
+            this.push('sources', source);
+            this.selectedSource = this.sources.indexOf(source);
         },
 
-        removeSelected: function(event) {
-            var elem = event.target.dataElement;
-            var index = event.target.dataIndex;
+        removesource: function(event) {
+            var index = event.model.index;
             this.splice('sources', index, 1);
-            this.available = this._getAvailable();
-            // Assign the selected tab
-            if (this.selectedSource == index) {
-                if (this.sources.length == 0) {
+            if (this.selectedSource === index) {
+                if (this.sources.length === 0) {
                     this.selectedSource = null;
                 }
                 else if (index >= this.sources.length - 1) {
@@ -289,6 +249,7 @@
         ready: function () {
 
         }
+
     });
 
 </script>

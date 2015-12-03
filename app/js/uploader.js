@@ -22,6 +22,8 @@
         readdir = wrap(fs, 'readdir'),
         map = guard('map');
 
+    // TODO: this module has diverged from it's original intent and how the name is misleading.
+    // All this module is doing is registering with the authentication server
     function Uploader() {
 
         var paths = {
@@ -139,8 +141,9 @@
             },
 
             register: function (config) {
+                // TODO: the host and port need to be retrieved from the configuration
                 var opts = _.merge({}, {
-                    host: 'test.door43.org',
+                    host: 'ts.door43.org',
                     port: 9095
                 }, config);
 

@@ -1,5 +1,6 @@
 
-<link rel="import" href="../../../components/iron-list/iron-list.html">
+<link rel="import" href="../../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../../components/paper-button/paper-button.html">
 <link rel="import" href="../../../components/paper-checkbox/paper-checkbox.html">
 
 <dom-module id="ts-source-modal">
@@ -19,6 +20,7 @@
             color: var(--primary-text-color);
             overflow: hidden;
             background: var(--card-background-color);
+            font-size: 110%;
         }
 
         [icon="search"] {
@@ -26,22 +28,12 @@
         }
 
         .header {
-            flex: 0 0 56px;
-            border-bottom: 1px solid var(--border-color);
+            flex: 0 0 50px;
             color: var(--secondary-text-color);
-            font-style: italic;
-            font-size: 110%;
-            display: flex;
-        }
-
-        .header div {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 20px;
-            border-bottom: 1px solid var(--border-color);
-            background: var(--card-background-color);
-            width: 100%;
         }
 
         input {
@@ -60,12 +52,9 @@
             overflow-y: auto;
         }
 
-        .selected-list {
-            font-size: 110%;
-        }
-
         .row {
-            display: block;
+            display: flex;
+            justify-content: space-between;
             margin: 0;
             padding: 1em;
             border-bottom: 1px solid var(--border-color);
@@ -73,14 +62,12 @@
 
         .row:hover {
             background: var(--accent-color-light);
-            box-shadow: inset 0 -1px rgba(0,0,0,0);
+            cursor: pointer;
         }
 
         .row-header {
-            display: block;
             margin: 0;
             padding: 0.25em 1em;
-            border-bottom: 1px solid var(--border-color);
             background-color: var(--border-color);
             text-transform: uppercase;
             font-size: 80%;
@@ -88,31 +75,20 @@
             color: var(--secondary-text-color);
         }
 
-        .right {
-            float: right;
-        }
-
-        .clickable {
-            cursor: pointer;
-        }
-
         .footer {
-            width: 100%;
-            flex: 0 0 56px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            flex: 0 0 50px;
             border-top: 1px solid var(--border-color);
         }
 
         paper-button {
-            margin-top: 0.6rem;
             color: var(--secondary-text-color);
         }
 
         paper-button:hover {
             color: var(--accent-color);
-        }
-
-        ::-webkit-scrollbar {
-            display: none;
         }
 
         paper-checkbox {
@@ -130,33 +106,35 @@
 
         <div id="contain">
             <div class="header">
-                <div>
-                    <input is="iron-input" bind-value="{{query}}" placeholder="Choose source translations">
-                    <paper-icon-button class="right" icon="search" title="Search Languages"></paper-icon-button>
-                </div>
+                <input is="iron-input" bind-value="{{query}}" placeholder="Choose source translations">
+                <paper-icon-button icon="search" title="Search Languages"></paper-icon-button>
             </div>
 
             <div class="body">
-                <div id="selected-sources-header" class="row-header">Selected</div>
+                <div class="row-header">Selected</div>
                 <template is="dom-repeat" items="[[sources]]" as="source">
-                    <div class="row clickable" data-element="[[source]]" data-index="[[index]]" on-tap="removesource">
-                        <span>[[source.ln]]</span> - <span>[[source.name]]</span>
-                        <paper-checkbox class="right" disabled checked style="opacity: 1;"></paper-checkbox>
+                    <div class="row" data-element="[[source]]" data-index="[[index]]" on-tap="removesource">
+                        <div>
+                            <span>[[source.ln]]</span> - <span>[[source.name]]</span>
+                        </div>
+                        <paper-checkbox disabled checked></paper-checkbox>
                     </div>
                 </template>
 
-                <div id="available-sources-header" class="row-header">Available</div>
+                <div class="row-header">Available</div>
                 <template is="dom-repeat" items="{{searchfilter(query, available)}}" as="source">
-                    <div class="row clickable" data-element="[[source]]" data-index="[[index]]" on-tap="addsource">
-                        <span>[[source.ln]]</span> - <span>[[source.name]]</span>
-                        <paper-checkbox class="right" disabled style="opacity: 1;"></paper-checkbox>
+                    <div class="row" data-element="[[source]]" data-index="[[index]]" on-tap="addsource">
+                        <div>
+                            <span>[[source.ln]]</span> - <span>[[source.name]]</span>
+                        </div>
+                        <paper-checkbox disabled></paper-checkbox>
                     </div>
                 </template>
             </div>
 
             <div class="footer">
-                <paper-button class="right" on-tap="confirm">Confirm</paper-button>
-                <paper-button class="right" on-tap="cancel">Cancel</paper-button>
+                <paper-button on-tap="cancel">Cancel</paper-button>
+                <paper-button on-tap="confirm">Confirm</paper-button>
             </div>
 
         </div>
@@ -269,6 +247,7 @@
         ready: function () {
 
         }
+
     });
 
 </script>

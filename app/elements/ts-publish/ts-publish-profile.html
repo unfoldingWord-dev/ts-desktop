@@ -139,7 +139,7 @@
         <paper-dialog id="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <h2>Invalid Data</h2>
             <div>
-                <p>You must enter a name and email address for at least one translator before publishing.</p>
+                <p>You must enter a name and email address (phone is optional).</p>
             </div>
             <div class="buttons">
                 <paper-button dialog-dismiss>Close</paper-button>
@@ -174,13 +174,25 @@
         },
 
         add: function () {
-            this.push('currentproject.data.translators', this.newinfo);
-            this.fire('iron-signal', {name: 'savetofile'});
-            this.set('newinfo', {});
+            var name = this.newinfo.name;
+            var email = this.newinfo.email;
+            if (name === undefined || name === "" || email === undefined || email === "") {
+                this.$.popup.open();
+            } else {
+                this.push('currentproject.data.translators', this.newinfo);
+                this.fire('iron-signal', {name: 'savetofile'});
+                this.set('newinfo', {});
+            }
         },
 
         next: function () {
-            if (this.currentproject.data.translators.length) {
+            var name = this.newinfo.name;
+            var email = this.newinfo.email;
+            var length = this.currentproject.data.translators.length;
+            if ((name === undefined || name === "") && (email === undefined || email === "") && length) {
+                this.selected = this.selected + 1;
+            } else if (name !== undefined && name !== "" && email !== undefined && email !== "") {
+                this.add();
                 this.selected = this.selected + 1;
             } else {
                 this.$.popup.open();

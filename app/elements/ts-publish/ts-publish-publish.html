@@ -112,14 +112,26 @@
             color: var(--accent-color);
         }
 
+        #imagebox {
+            display: flex;
+            justify-content: center;
+        }
+
     </style>
 
     <template>
 
         <div id="contain">
             <div id="left">
-                <img src="../ts-icons/uw-title-image.png" width="326" height="68">
-                <p>Explanation of the publishing process will appear here!</p>
+                <div id="imagebox">
+                    <img src="../ts-icons/uw-title-image.png" width="326" height="68">
+                </div>
+                <p>Publishing your work through unfoldingWord makes your content available:</p>
+                <ul>
+                    <li>Online at unfoldingword.org in multiple formats</li>
+                    <li>In the unfoldingWord Mobile App</li>
+                    <li>In a PDF suitable for printing</li>
+                </ul>
             </div>
             <div id="right">
                 <div>

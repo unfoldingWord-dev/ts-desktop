@@ -51,10 +51,14 @@
             padding-right: 15px;
         }
 
+        .hide {
+            display: none;
+        }
+
     </style>
 
     <template>
-        <paper-menu-button horizontal-offset="10" vertical-offset="10" vertical-align="bottom">
+        <paper-menu-button class="hide" horizontal-offset="10" vertical-offset="10" vertical-align="bottom">
             <paper-icon-button class="dropdown-trigger" icon="more-vert" title="options"></paper-icon-button>
             <paper-menu class="dropdown-content">
                 <paper-item><iron-icon class="smallicon" icon="maps:local-library"></iron-icon>Update</paper-item>

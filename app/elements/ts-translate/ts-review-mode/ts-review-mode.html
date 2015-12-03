@@ -4,6 +4,8 @@
 <link rel="import" href="../../../components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../../components/paper-button/paper-button.html">
 <link rel="import" href="../../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../../components/paper-material/paper-material.html">
+<link rel="import" href="../../../components/iron-icons/iron-icons.html">
 
 <link rel="import" href="./ts-review-card.html">
 
@@ -60,34 +62,63 @@
 
         #resourcepopup {
             position: fixed;
-            top: 0;
-            bottom: 0;
-            text-align: center;
+            top: 40px;
+            right: 17px;
+            background: var(--card-background-color);
             color: var(--primary-text-color);
-            width: 400px;
-            height: 100%;
-            right: 0;
+            width: 416px;
+            height: calc(100% - 40px);
+            display: flex;
+            flex-direction: column;
         }
 
-        #resourcepopup p {
-            margin: 0;
+        #resourcepopup.hide {
+            visibility: hidden;
+        }
+
+        .slidein {
+            -webkit-animation: slidein .5s;
+        }
+
+        .slideout {
+            -webkit-animation: slideout .5s;
+        }
+
+        @-webkit-keyframes slidein {
+            0% {transform: translateX(450px)}
+            100% {transform: translateX(0)}
+        }
+
+        @-webkit-keyframes slideout {
+            0% {transform: translateX(0)}
+            100% {transform: translateX(450px)}
         }
 
         #resourcepopup .buttons {
+            flex: 0 0 50px;
             display: flex;
             justify-content: center;
+            align-items: center;
             color: var(--secondary-text-color);
+            border-bottom: 1px solid var(--secondary-text-color);
         }
 
         #resourcepopup .buttons paper-button:hover {
             color: var(--accent-color);
         }
 
-        #resourcepopup h2 {
+        #resourcecontent {
+            padding: 0 40px 40px 40px;
+            overflow-y: auto;
+            flex: auto;
+        }
+
+        #resourcecontent h2 {
             color: var(--accent-color);
         }
 
-        #resourcepopup p {
+        #resourcecontent p {
+            margin: 0;
             font-size: 120%;
         }
 
@@ -101,15 +132,13 @@
                     <ts-review-card id="{{createid(index)}}" chunk="{{chunk}}"></ts-review-card>
                 </template>
             </iron-list>
-            <paper-dialog id="resourcepopup" modal="false" entry-animation="slide-from-right-animation" exit-animation="slide-right-animation">
-                <h2>{{popupinfo.title}}</h2>
-                <div>
-                    <p>{{popupinfo.body}}</p>
-                </div>
+            <paper-material id="resourcepopup" class="hide">
                 <div class="buttons">
-                    <paper-button dialog-dismiss>Close</paper-button>
+                    <paper-button on-tap="closeresource"><iron-icon icon="clear"></iron-icon>Close</paper-button>
                 </div>
-            </paper-dialog>
+                <div id="resourcecontent">
+                </div>
+            </paper-material>
         </div>
 
         <iron-signals on-iron-signal-openresource="openresource"></iron-signals>
@@ -134,10 +163,6 @@
                 value: {},
                 notify: true
             },
-            popupinfo: {
-                type: Object,
-                value: {}
-            },
             modestatus: {
                 type: Object,
                 value: {},
@@ -150,9 +175,23 @@
         },
 
         openresource: function (event, data) {
-            var object = {title: data.title, body: data.body};
-            this.set('popupinfo', object);
-            this.$.resourcepopup.open();
+            var popup = this.$.resourcepopup;
+            var textholder = this.$.resourcecontent;
+            textholder.innerHTML = data.content;
+            popup.classList.remove("hide");
+            popup.classList.add("slidein");
+            setTimeout(function() {
+                popup.classList.remove("slidein");
+            }, 500);
+        },
+
+        closeresource: function () {
+            var popup = this.$.resourcepopup;
+            popup.classList.add("slideout");
+            setTimeout(function() {
+                popup.classList.remove("slideout");
+                popup.classList.add("hide");
+            }, 500);
         },
 
         frommode: function () {

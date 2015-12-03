@@ -24,15 +24,15 @@
 
             it('should register the keys with the server', function (done) {
                 uploader.register({ deviceID: 'uploaderUnitTest' }).then(function (reg) {
-                    assert(!!reg.response, 'expected a response object');
                     assert(!!reg.keys, 'expected keys');
                     assert(!!reg.keys.public, 'expected public key to be generated');
                     assert(!!reg.keys.private, 'expected private key to be generated');
 
-                    var response = JSON.stringify(reg.response);
-
-                    assert(!!reg.response.ok, 'expected an "ok" response but got ' + response);
-                    assert(!reg.response.error, 'did not expect an error response but got ' + response);
+                    if(!!reg.response) {
+                        var response = JSON.stringify(reg.response);
+                        assert(!!reg.response.ok, 'expected an "ok" response but got ' + response);
+                        assert(!reg.response.error, 'did not expect an error response but got ' + response);
+                    }
                     done();
                 }).catch(function (err) {
                     done(new Error(err));

@@ -138,13 +138,15 @@
                 paths.sshPath = path;
             },
 
-            register: function (host, port) {
-                var opts = {
-                    host: host || 'test.door43.org',
-                    port: port || 9095
-                };
+            register: function (config) {
+                var opts = _.merge({}, {
+                    host: 'test.door43.org',
+                    port: 9095
+                }, config);
 
-                return this.getDeviceId().then(function (deviceId) {
+                var getDeviceId = opts.deviceId ? Promise.resolve(opts.deviceId) : this.getDeviceId();
+
+                return getDeviceId.then(function (deviceId) {
                     return readKeyPair().then(function (keys) {
                         return {
                             keys: keys,

@@ -5,14 +5,11 @@
 ;(function () {
 
     let assert = require('assert');
-    let uploader = require('../../app/js/uploader');
+    let Uploader = require('../../app/js/uploader').Uploader;
+    let uploader = new Uploader();
     let User = require('../../app/js/user').User;
 
     describe('@Uploader', function () {
-        after(function (done) {
-            uploader.disconnect();
-            done();
-        });
         // TODO: this is broken
         //describe('@register', function () {
         //    this.timeout(10000);

@@ -3,7 +3,7 @@
 -- ---
 
 DROP TABLE IF EXISTS `translation_note`;
-
+    
 CREATE TABLE `translation_note` (
   `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
   `slug` TEXT NOT NULL,
@@ -23,7 +23,7 @@ CREATE TABLE `translation_note` (
 -- ---
 
 DROP TABLE IF EXISTS `project`;
-
+    
 CREATE TABLE `project` (
   `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
   `slug` TEXT NOT NULL,
@@ -40,7 +40,7 @@ CREATE TABLE `project` (
 -- ---
 
 DROP TABLE IF EXISTS `resource`;
-
+    
 CREATE TABLE `resource` (
   `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
   `slug` TEXT NOT NULL,
@@ -73,7 +73,7 @@ CREATE TABLE `resource` (
 -- ---
 
 DROP TABLE IF EXISTS `resource__translation_word`;
-
+    
 CREATE TABLE `resource__translation_word` (
   `id` INTEGER NULL PRIMARY KEY AUTOINCREMENT,
   `resource_id` INTEGER NOT NULL,
@@ -88,7 +88,7 @@ CREATE TABLE `resource__translation_word` (
 -- ---
 
 DROP TABLE IF EXISTS `target_language`;
-
+    
 CREATE TABLE `target_language` (
   `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
   `slug` TEXT NOT NULL,
@@ -102,7 +102,7 @@ CREATE TABLE `target_language` (
 -- ---
 
 DROP TABLE IF EXISTS `translation_word`;
-
+    
 CREATE TABLE `translation_word` (
   `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
   `slug` TEXT NOT NULL,
@@ -118,7 +118,7 @@ CREATE TABLE `translation_word` (
 -- ---
 
 DROP TABLE IF EXISTS `source_language`;
-
+    
 CREATE TABLE `source_language` (
   `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
   `slug` TEXT NOT NULL,
@@ -140,7 +140,7 @@ CREATE TABLE `source_language` (
 -- ---
 
 DROP TABLE IF EXISTS `checking_question`;
-
+    
 CREATE TABLE `checking_question` (
   `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
   `slug` TEXT NOT NULL,
@@ -155,7 +155,7 @@ CREATE TABLE `checking_question` (
 -- ---
 
 DROP TABLE IF EXISTS `chapter`;
-
+    
 CREATE TABLE `chapter` (
   `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
   `slug` TEXT NOT NULL,
@@ -172,7 +172,7 @@ CREATE TABLE `chapter` (
 -- ---
 
 DROP TABLE IF EXISTS `frame`;
-
+    
 CREATE TABLE `frame` (
   `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
   `slug` TEXT NOT NULL,
@@ -190,7 +190,7 @@ CREATE TABLE `frame` (
 -- ---
 
 DROP TABLE IF EXISTS `category`;
-
+    
 CREATE TABLE `category` (
   `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
   `slug` TEXT NOT NULL,
@@ -203,7 +203,7 @@ CREATE TABLE `category` (
 -- ---
 
 DROP TABLE IF EXISTS `project__category`;
-
+    
 CREATE TABLE `project__category` (
   `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
   `project_id` INTEGER NOT NULL,
@@ -218,7 +218,7 @@ CREATE TABLE `project__category` (
 -- ---
 
 DROP TABLE IF EXISTS `source_language__category`;
-
+    
 CREATE TABLE `source_language__category` (
   `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
   `source_language_id` INTEGER(10) NOT NULL,
@@ -253,7 +253,7 @@ CREATE TABLE `frame__checking_question` (
 -- ---
 
 DROP TABLE IF EXISTS `translation_word_related`;
-
+    
 CREATE TABLE `translation_word_related` (
   `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
   `translation_word_id` INTEGER NOT NULL,
@@ -267,7 +267,7 @@ CREATE TABLE `translation_word_related` (
 -- ---
 
 DROP TABLE IF EXISTS `translation_word_example`;
-
+    
 CREATE TABLE `translation_word_example` (
   `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
   `translation_word_id` INTEGER NOT NULL,
@@ -297,7 +297,7 @@ CREATE TABLE `translation_word_alias` (
 -- ---
 
 DROP TABLE IF EXISTS `frame__translation_word`;
-
+    
 CREATE TABLE `frame__translation_word` (
   `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
   `frame_id` INTEGER NOT NULL,
@@ -317,7 +317,7 @@ CREATE TABLE `frame__translation_word` (
 -- ---
 
 DROP TABLE IF EXISTS `meta`;
-
+    
 CREATE TABLE `meta` (
   `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
   `key` TEXT NOT NULL,

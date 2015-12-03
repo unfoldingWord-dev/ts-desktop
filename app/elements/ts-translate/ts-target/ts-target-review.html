@@ -215,14 +215,13 @@
         },
 
         checkdone: function () {
-            var popup = this.$.popup;
             var textarray = this.chunk.transcontent.split(" ");
             var completed = this.chunk.completed;
             var index = this.chunk.index;
             var returnstr = "";
 
             if (!completed) {
-                this.fire('iron-signal', {name: 'openpopup', data: {index: index}});
+                this.fire('iron-signal', {name: 'openchecklist', data: {index: index}});
             } else {
                 for (var i = 0; i < textarray.length; i++) {
                     if (textarray[i].substring(0, 2) !== "/v") {

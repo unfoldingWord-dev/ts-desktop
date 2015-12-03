@@ -5,7 +5,6 @@
 <link rel="import" href="../../../components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../../components/neon-animation/neon-animation.html">
 
-<link rel="import" href="./ts-source-modal.html">
 <link rel="import" href="../../ts-icons/ts-icons.html">
 
 <dom-module id="ts-source-tab">
@@ -80,7 +79,7 @@
 		</div>
         <iron-signals on-iron-signal-adjustbar="adjustbar"></iron-signals>
 		<div class="iconbutton">
-            <paper-icon-button icon="uw-tab-small:uw-tab-small" on-tap="openModal"></paper-icon-button>
+            <paper-icon-button icon="uw-tab-small:uw-tab-small" on-tap="openmodal"></paper-icon-button>
 		</div>
 
 	</template>
@@ -104,27 +103,8 @@
             }
         },
 
-        ready: function() {
-
-        },
-
-        openModal: function() {
-			/*var modal = document.createElement('ts-source-modal');
-			modal.id = "source-tab-modal";
-			modal.style.display = 'block';
-			modal.sources = this.sources.slice();
-			modal.selectedSource = this.selectedSource;
-            modal.project = this.project;
-			modal.addEventListener('confirm', this.onConfirm.bind(this));
-			modal.addEventListener('cancel', this.onCancel.bind(this));
-			document.querySelector('ts-translate').appendChild(modal);
-			modal.fire('open');*/
-        },
-
-        onConfirm: function() {
-        	/*var modal = document.querySelector('ts-source-modal');
-            this.fire('iron-signal', {name: 'updatesources', data: {sources: modal.sources, selected: modal.selectedSource}});
-        	this.removeModal();*/
+        openmodal: function() {
+            this.fire('iron-signal', {name: 'opensource'});
         },
 
         choosesource: function(e) {
@@ -143,6 +123,10 @@
             var bar = this.$.bar;
             bar.style.width = tabWidth+'px';
             bar.style.left = offsetLeft+'px';
+        },
+
+        ready: function() {
+
         }
 
     });

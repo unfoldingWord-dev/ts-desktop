@@ -152,7 +152,7 @@
 
         <paper-dialog id="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <template is="dom-if" if="{{options.loading}}">
-                <p>Uploading Project.  Please wait...</p>
+                <p>{{options.body}}</p>
                 <div id="bar">
                     <paper-progress indeterminate="true"></paper-progress>
                 </div>
@@ -210,6 +210,8 @@
         },
 
         export: function () {
+            var mythis = this;
+            var popup = this.$.popup;
             var meta = this.currentproject.data;
             var translation = this.currentproject.translation;
             var name = 'uw-' + meta.project.slug + '-' + meta.language.lc;
@@ -218,8 +220,23 @@
             input.nwsaveas = name;
             //input.nwworkingdir = "C:";
             input.addEventListener("change", function (evt) {
-                filename = this.value;
-                return App.projectsManager.exportTranslation(translation, meta, filename);
+                var inputthis = this;
+                mythis.set('options.body', "Exporting Project.  Please wait...");
+                mythis.set('options.loading', true);
+                popup.open();
+                filename = inputthis.value;
+                inputthis.value = null;
+                return App.projectsManager.exportTranslation(translation, meta, filename)
+                    .then(function () {
+                        mythis.set('options.title', "Project Exported");
+                        mythis.set('options.body', "Your project has been successfully saved to a file.  Thanks.");
+                        mythis.set('options.loading', false);
+                    })
+                    .catch(function (err) {
+                        mythis.set('options.title', "Export Failed");
+                        mythis.set('options.body', "We're sorry.  An error occurred while trying to save your project");
+                        mythis.set('options.loading', false);
+                    });
             }, false);
             input.click();
         },
@@ -231,6 +248,7 @@
             var paths = App.projectsManager.getPaths(meta);
             var repo = 'uw-' + meta.project.slug + '-' + meta.language.lc;
 
+            this.set('options.body', "Uploading Project.  Please wait...");
             this.set('options.loading', true);
             popup.open();
 

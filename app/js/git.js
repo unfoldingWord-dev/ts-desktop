@@ -89,6 +89,8 @@ function Git() {
 		stage: function(dir) {
 			var msg = new Date(),
 				stage = cmd().cd(dir)
+					.and.do('git config user.name "tsDesktop"')
+					.and.do('git config user.email "you@example.com"')
 					.and.do('git add --all')
 					.and.do(`git commit -am "${msg}"`);
 

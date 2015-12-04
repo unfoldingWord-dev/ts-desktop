@@ -263,7 +263,8 @@ function ProjectsManager(query, configurator) {
         },
 
         exportTranslation: function (translation, meta, filename) {
-            console.log("Exporting File", meta, filename);
+            console.log("Exporting File", translation, meta, filename); //this is just here so you can view what's being passed in
+            return Promise.resolve(true);  //this is just here to simulate a successful file transfer until real code is added
             //Add code here to parse through translation of project and create data
             //Save data to filename passed in (passed in parameter includes path and filename but not file type extension)
         },
@@ -340,7 +341,7 @@ function ProjectsManager(query, configurator) {
 
             var writeChunk = function (c) {
                 var f = path.join(paths.projectDir, c.meta.chapterid, c.meta.frameid + '.txt');
-                return write(f, c.content);
+                return c.content !== '' ? write(f, c.content) : rm(f);
             };
 
             var writeChunks = function (data) {
@@ -349,11 +350,25 @@ function ProjectsManager(query, configurator) {
                 };
             };
 
+            var cleanupChapterDir = function(c){
+                var d = path.join(paths.projectDir, c.meta.chapterid);
+                return fs.readdir(d, function (err, files) {
+                    return files.length === 0 ? rm(d) : true;
+                });
+            };
+
+            var cleanupChapterDirs = function(data){
+                return function () {
+                    return Promise.all(_.map(data, cleanupChapterDir));
+                };
+            };
+
             return mkdirp(paths.projectDir)
                 .then(writeFile(paths.manifest, manifest))
                 .then(writeFile(paths.project, meta))
                 .then(makeChapterDirs(chunks))
                 .then(writeChunks(chunks))
+                .then(cleanupChapterDirs(chunks))
                 .then(git.init.bind(git, paths.projectDir))
                 // .then(git.diff.bind(git, paths.projectDir))
                 .then(git.stage.bind(git, paths.projectDir));

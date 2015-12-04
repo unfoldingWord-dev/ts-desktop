@@ -151,16 +151,16 @@
         </div>
 
         <paper-dialog id="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <template is="dom-if" if="{{loading}}">
+            <template is="dom-if" if="{{options.loading}}">
                 <p>Uploading Project.  Please wait...</p>
                 <div id="bar">
                     <paper-progress indeterminate="true"></paper-progress>
                 </div>
             </template>
-            <template is="dom-if" if="{{!loading}}">
-                <h2>Project Published</h2>
+            <template is="dom-if" if="{{!options.loading}}">
+                <h2>{{options.title}}</h2>
                 <div id="text">
-                    <p>Your project has been successfully published to the server.  Thanks.</p>
+                    <p>{{options.body}}</p>
                 </div>
                 <div id="buttonbox">
                     <paper-button dialog-confirm on-tap="gohome">Return Home</paper-button>
@@ -193,9 +193,9 @@
                 type: Object,
                 value: {}
             },
-            loading: {
-                type: Boolean,
-                value: false
+            options: {
+                type: Object,
+                value: {loading: false, title: "", body: ""}
             }
         },
 
@@ -231,7 +231,7 @@
             var paths = App.projectsManager.getPaths(meta);
             var repo = 'uw-' + meta.project.slug + '-' + meta.language.lc;
 
-            this.loading = true;
+            this.set('options.loading', true);
             popup.open();
 
             return App.projectsManager.createReadyFile(meta)
@@ -242,10 +242,14 @@
                     return App.git.push(paths.projectDir, repo, reg);
                 })
                 .then(function () {
-                    mythis.loading = false;
+                    mythis.set('options.title', "Project Published");
+                    mythis.set('options.body', "Your project has been successfully published to the server.  Thanks.");
+                    mythis.set('options.loading', false);
                 })
                 .catch(function (err) {
-                    console.log(err);
+                    mythis.set('options.title', "Publish Failed");
+                    mythis.set('options.body', "We're sorry.  An error occurred while trying to upload your project");
+                    mythis.set('options.loading', false);
                 });
         }
 

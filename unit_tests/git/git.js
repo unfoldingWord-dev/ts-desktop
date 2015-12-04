@@ -125,7 +125,7 @@ describe('@Git', function () {
             it('should push to the server', function (done) {
                 var gitPush = git.push.bind(git, repoDir, repo);
 
-                uploader.register().then(gitPush).then(function (ret) {
+                uploader.register({ deviceId: 'gitUnitTest' }).then(gitPush).then(function (ret) {
                     var success = ret.stdout.indexOf('Branch master set up to track') !== -1;
 
                     assert(success, 'expected a good git push response');

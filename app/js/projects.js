@@ -341,7 +341,7 @@ function ProjectsManager(query, configurator) {
 
             var writeChunk = function (c) {
                 var f = path.join(paths.projectDir, c.meta.chapterid, c.meta.frameid + '.txt');
-                return c.content !== '' ? write(f, c.content) : rm(f);
+                return write(f, c.content);
             };
 
             var writeChunks = function (data) {
@@ -350,25 +350,11 @@ function ProjectsManager(query, configurator) {
                 };
             };
 
-            var cleanupChapterDir = function(c){
-                var d = path.join(paths.projectDir, c.meta.chapterid);
-                return fs.readdir(d, function (err, files) {
-                    return files.length === 0 ? rm(d) : true;
-                });
-            };
-
-            var cleanupChapterDirs = function(data){
-                return function () {
-                    return Promise.all(_.map(data, cleanupChapterDir));
-                };
-            };
-
             return mkdirp(paths.projectDir)
                 .then(writeFile(paths.manifest, manifest))
                 .then(writeFile(paths.project, meta))
                 .then(makeChapterDirs(chunks))
                 .then(writeChunks(chunks))
-                .then(cleanupChapterDirs(chunks))
                 .then(git.init.bind(git, paths.projectDir))
                 // .then(git.diff.bind(git, paths.projectDir))
                 .then(git.stage.bind(git, paths.projectDir));

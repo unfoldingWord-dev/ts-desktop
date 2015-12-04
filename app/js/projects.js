@@ -263,7 +263,8 @@ function ProjectsManager(query, configurator) {
         },
 
         exportTranslation: function (translation, meta, filename) {
-            console.log("Exporting File", meta, filename);
+            console.log("Exporting File", translation, meta, filename); //this is just here so you can view what's being passed in
+            return Promise.resolve(true);  //this is just here to simulate a successful file transfer until real code is added
             //Add code here to parse through translation of project and create data
             //Save data to filename passed in (passed in parameter includes path and filename but not file type extension)
         },

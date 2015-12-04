@@ -287,6 +287,7 @@ function ProjectsManager(query, configurator) {
             };
 
             var chunks = _.chain(translation)
+                .filter('content')
                 .indexBy(makeComplexId)
                 .value();
 

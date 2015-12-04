@@ -23,7 +23,7 @@
             this.timeout(20000);
 
             it('should register the keys with the server', function (done) {
-                uploader.register({ deviceID: 'uploaderUnitTest' }).then(function (reg) {
+                uploader.register({ deviceId: 'uploaderUnitTest' }).then(function (reg) {
                     assert(!!reg.keys, 'expected keys');
                     assert(!!reg.keys.public, 'expected public key to be generated');
                     assert(!!reg.keys.private, 'expected private key to be generated');

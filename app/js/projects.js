@@ -262,7 +262,7 @@ function ProjectsManager(query, configurator) {
             return write(paths.ready, "");
         },
 
-        exportTranslation: function (meta, filename) {
+        exportTranslation: function (translation, meta, filename) {
             console.log("Exporting File", meta, filename);
             //Add code here to parse through translation of project and create data
             //Save data to filename passed in (passed in parameter includes path and filename but not file type extension)

@@ -145,7 +145,7 @@
                 <div id="lower">
                     <p>You may also share and distribute your project using these options.</p>
                     <div class="link" on-tap="export">Export to File</div>
-                    <input class="hide" id="input" type="file" nwsaveas="project" />
+                    <input class="hide" id="input" type="file" nwsaveas="" nwworkingdir="" />
                 </div>
             </div>
         </div>
@@ -211,11 +211,15 @@
 
         export: function () {
             var meta = this.currentproject.data;
+            var translation = this.currentproject.translation;
+            var name = 'uw-' + meta.project.slug + '-' + meta.language.lc;
             var input = this.$.input;
             var filename;
+            input.nwsaveas = name;
+            //input.nwworkingdir = "C:";
             input.addEventListener("change", function (evt) {
                 filename = this.value;
-                return App.projectsManager.exportTranslation(meta, filename);
+                return App.projectsManager.exportTranslation(translation, meta, filename);
             }, false);
             input.click();
         },

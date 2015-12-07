@@ -207,7 +207,7 @@
                     }
                 }
 
-                this.set('chunk.transcontent', returnstr);
+                this.set('chunk.transcontent', returnstr.trim());
                 this.set('chunk.completed', true);
                 this.fire('iron-signal', {name: 'updatetranslation'});
             }
@@ -220,7 +220,11 @@
             var returnstr = "";
 
             if (!completed) {
-                this.fire('iron-signal', {name: 'openchecklist', data: {index: index}});
+                if (this.chunk.transcontent === "") {
+                    this.fire('iron-signal', {name: 'opennodata'});
+                } else {
+                    this.fire('iron-signal', {name: 'openchecklist', data: {index: index}});
+                }
             } else {
                 for (var i = 0; i < textarray.length; i++) {
                     if (textarray[i].substring(0, 2) !== "/v") {
@@ -228,7 +232,7 @@
                     }
                 }
 
-                this.set('chunk.transcontent', returnstr);
+                this.set('chunk.transcontent', returnstr.trim());
                 this.set('chunk.completed', false);
                 this.fire('iron-signal', {name: 'updatetranslation'});
             }

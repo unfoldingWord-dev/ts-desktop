@@ -106,6 +106,8 @@
 
         tomode: function () {
             this.setpreview();
+            this.fire('iron-signal', {name: 'checkheight'});
+            this.fire('iron-signal', {name: 'forceresize'});
             this.setlocation();
             this.movein();
         },

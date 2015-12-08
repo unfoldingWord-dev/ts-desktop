@@ -84,7 +84,7 @@
                 <paper-icon-button icon="clear" on-tap="review"></paper-icon-button>
             </div>
             <div id="content" class="editmode">
-                <iron-autogrow-textarea id="textbox" on-change="change" bind-value="{{chunk.transcontent}}"></iron-autogrow-textarea>
+                <iron-autogrow-textarea id="textbox" on-change="change" bind-value="{{chunk.transcontent}}" on-input="resize"></iron-autogrow-textarea>
                 <p id="textholder"></p>
             </div>
         </paper-material>
@@ -155,6 +155,11 @@
 
         review: function () {
             this.selected = 0;
+        },
+
+        resize: function () {
+            this.fire('iron-signal', {name: 'checkheight'});
+            this.fire('iron-signal', {name: 'forceresize'});
         },
 
 		ready: function() {

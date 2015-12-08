@@ -73,6 +73,29 @@
             padding: 0;
         }
 
+        #nodatapopup {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 50px;
+            right: 15px;
+            margin: auto;
+            width: 300px;
+            height: 175px;
+            text-align: center;
+            color: var(--primary-text-color);
+        }
+
+        #nodatapopup .buttons {
+            display: flex;
+            justify-content: center;
+            color: var(--secondary-text-color);
+        }
+
+        #nodatapopup .buttons paper-button:hover {
+            color: var(--accent-color);
+        }
+
     </style>
 
     <template>
@@ -100,6 +123,16 @@
             </div>
         </paper-dialog>
 
+        <paper-dialog id="nodatapopup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <h2>No Translation</h2>
+            <div>
+                <p>You cannot complete a blank chunk!</p>
+            </div>
+            <div class="buttons">
+                <paper-button dialog-dismiss>OK</paper-button>
+            </div>
+        </paper-dialog>
+
         <paper-dialog id="sourcepopup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <ts-source-modal id="modal" on-close="closesource"></ts-source-modal>
         </paper-dialog>
@@ -111,6 +144,7 @@
         <iron-signals on-iron-signal-loadproject="loadproject"></iron-signals>
         <iron-signals on-iron-signal-updatetranslation="updatetranslation"></iron-signals>
         <iron-signals on-iron-signal-openchecklist="openchecklist"></iron-signals>
+        <iron-signals on-iron-signal-opennodata="opennodata"></iron-signals>
         <iron-signals on-iron-signal-opensource="opensource"></iron-signals>
         <iron-signals on-iron-signal-savetofile="savetofile"></iron-signals>
 
@@ -180,6 +214,10 @@
                     }
                 }
             }
+        },
+
+        opennodata: function () {
+            this.$.nodatapopup.open();
         },
 
         openchecklist: function (event, data) {

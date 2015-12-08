@@ -33,17 +33,16 @@
             border-bottom: 1px solid var(--note-card-pink);
             display: flex;
             justify-content: space-between;
-            align-items: flex-end;
-            min-height: 42px;
+            align-items: center;
+            min-height: 48px;
             font-size: 88%;
             font-weight: 300;
-            margin-bottom: 4px;
             letter-spacing: 1px;
-            padding: 0 0 0.25em 1.75em;
+            padding: 0 10px 0 16px;
 		}
 
         #content {
-			padding: 0 50px;
+			padding: 24px 16px;
             flex: auto;
             display: flex;
 		}
@@ -85,7 +84,7 @@
         }
 
         #heading paper-icon-button {
-            padding: 5px;
+            padding: 6px;
         }
 
         #content iron-icon {
@@ -208,7 +207,7 @@
                     }
                 }
 
-                this.set('chunk.transcontent', returnstr);
+                this.set('chunk.transcontent', returnstr.trim());
                 this.set('chunk.completed', true);
                 this.fire('iron-signal', {name: 'updatetranslation'});
             }
@@ -221,7 +220,11 @@
             var returnstr = "";
 
             if (!completed) {
-                this.fire('iron-signal', {name: 'openchecklist', data: {index: index}});
+                if (this.chunk.transcontent === "") {
+                    this.fire('iron-signal', {name: 'opennodata'});
+                } else {
+                    this.fire('iron-signal', {name: 'openchecklist', data: {index: index}});
+                }
             } else {
                 for (var i = 0; i < textarray.length; i++) {
                     if (textarray[i].substring(0, 2) !== "/v") {
@@ -229,7 +232,7 @@
                     }
                 }
 
-                this.set('chunk.transcontent', returnstr);
+                this.set('chunk.transcontent', returnstr.trim());
                 this.set('chunk.completed', false);
                 this.fire('iron-signal', {name: 'updatetranslation'});
             }

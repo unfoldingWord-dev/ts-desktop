@@ -84,11 +84,11 @@
 
         <div id="contain">
             <ts-source-chunk id="srccard" class="top" on-tap="srctop" chunk="[[chunk]]"></ts-source-chunk>
-            <ts-target-edit chunkmode id="transcard" class="bottom" on-tap="transtop" chunk="{{chunk}}"></ts-target-edit>
+            <ts-target-edit chunkmode id="transcard" class="bottom" on-tap="transtop" chunk="{{chunk}}" on-setheight="setheight"></ts-target-edit>
         </div>
 
         <iron-signals on-iron-signal-reset="reset"></iron-signals>
-        <iron-signals on-iron-signal-checkheight="checkheight"></iron-signals>
+        <iron-signals on-iron-signal-setheight="setheight"></iron-signals>
 
     </template>
 
@@ -121,13 +121,14 @@
             src.classList.remove("bottom");
         },
 
-        checkheight: function () {
+        setheight: function () {
             var trans = this.$.transcard;
             var src = this.$.srccard;
             trans.style.minHeight = 0;
             src.style.minHeight = 0;
             trans.style.minHeight = src.getBoundingClientRect().height + "px";
             src.style.minHeight = trans.getBoundingClientRect().height + "px";
+            this.fire('updateheight');
         },
 
         transtop: function () {

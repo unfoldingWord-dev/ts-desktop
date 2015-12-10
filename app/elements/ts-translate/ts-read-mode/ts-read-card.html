@@ -19,23 +19,16 @@
             margin: 16px 40px 24px 16px;
         }
 
-        ts-source-card {
-            position: relative;
-        }
-
-        ts-target-view {
+        .bottom {
             position: absolute;
             width: 100%;
-            height: 100%;
-        }
-
-        .bottom {
             z-index: 1;
             top: 24px;
             left: 24px;
         }
 
         .top {
+            position: relative;
             z-index: 2;
             top: 0;
             left: 0;
@@ -95,6 +88,7 @@
         </div>
 
         <iron-signals on-iron-signal-reset="reset"></iron-signals>
+        <iron-signals on-iron-signal-setheight="setheight"></iron-signals>
 
     </template>
 
@@ -111,6 +105,16 @@
                 type: Object,
                 value: {}
             }
+        },
+
+        setheight: function () {
+            var trans = this.$.transcard;
+            var src = this.$.srccard;
+            trans.style.minHeight = 0;
+            src.style.minHeight = 0;
+            trans.style.minHeight = src.getBoundingClientRect().height + "px";
+            src.style.minHeight = trans.getBoundingClientRect().height + "px";
+            this.fire('updateheight');
         },
 
         reset: function () {

@@ -261,7 +261,9 @@
 
         loadproject: function (event, data) {
             var mythis = this;
+            var blankstate = {};
             mythis.set('currentproject.data', data.projdata);
+            mythis.set('currentproject.state', blankstate);
             App.projectsManager.loadTargetTranslation(data.projdata).then(function (translation) {
                 mythis.set('rawdata', translation);
                 mythis.pullsource();
@@ -417,6 +419,14 @@
                 } else {
                     transchunk = {content: rawdata.content, completed: rawdata.completed, meta: meta};
                 }
+
+                var statedata = this.currentproject.state[chapterid + '-' + frameid];
+                if (!statedata) {
+                    transchunk.state = {chunk: true, review: true};
+                } else {
+                    transchunk.state = statedata;
+                }
+
                 translation.push(transchunk);
             }
 
@@ -598,7 +608,7 @@
             var projectdata = this.currentproject.data;
 
             transdata.data = translation.map(function(chunk, index){
-                return {transcontent: chunk.content, completed: chunk.completed, data: projectdata, index: index};
+                return {transcontent: chunk.content, completed: chunk.completed, data: projectdata, index: index, state: chunk.state};
             });
             srcdata.data = source.map(function(chunk){
                 return {srccontent: chunk.content, meta: chunk.meta, notes: chunk.notes, words: chunk.words, questions: chunk.questions};

@@ -160,18 +160,8 @@
 
         setlocation: function () {
             var list = this.$.readlist;
-            var card;
-            var found = false;
-            var i = 0;
-
-            while (i < 10000 && !found) {
-                list.scrollToIndex(i);
-                card = document.getElementById(this.modename + i);
-                if (card.chunk.chapter === this.modestatus.chapter) {
-                    found = true;
-                }
-                i++;
-            }
+            var index = parseInt(this.modestatus.chapter) - 1;
+            list.scrollToIndex(index);
         },
 
         createid: function (index) {

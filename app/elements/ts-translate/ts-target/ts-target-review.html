@@ -127,11 +127,6 @@
                 type: Object,
                 value: {},
                 notify: true
-            },
-            selected: {
-                type: Boolean,
-                value: true,
-                notify: true
             }
         },
 
@@ -239,7 +234,10 @@
         },
 
         edit: function () {
-            this.selected = false;
+            var id = this.chunk.meta.chapterid + "-" + this.chunk.meta.frameid;
+            this.set('chunk.state.review', false);
+            this.fire('setheight');
+            this.fire('iron-signal', {name: 'updatestate', data: {id: id, mode: "review", value: false}});
         },
 
 		ready: function() {

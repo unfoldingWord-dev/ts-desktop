@@ -423,20 +423,27 @@
                 source.push(srcchunk);
 
                 var rawdata = this.rawdata[chapterid + '-' + frameid];
-                if (!rawdata) {
+                if (rawdata === undefined) {
                     transchunk = {content: "", completed: false, meta: meta};
                 } else {
                     transchunk = {content: rawdata.content, completed: rawdata.completed, meta: meta};
                 }
 
                 var statedata = this.currentproject.state[chapterid + '-' + frameid];
-                if (!statedata) {
+                if (statedata === undefined) {
                     transchunk.state = {read: true, chunk: true, review: true};
-                    this.currentproject.state[chapterid + '-' + frameid] = {read: true, chunk: true, review: true};
+                    this.currentproject.state[chapterid + '-' + frameid] = {chunk: true, review: true};
                 } else {
                     transchunk.state = statedata;
                 }
 
+                var chapterstatedata = this.currentproject.state[chapterid];
+                if (chapterstatedata === undefined) {
+                    transchunk.state.read = true;
+                    this.currentproject.state[chapterid] = {read: true};
+                } else {
+                    transchunk.state.read = chapterstatedata.read;
+                }
                 translation.push(transchunk);
             }
 
@@ -563,7 +570,6 @@
             chunk.classList.add("hide");
             review.classList.add("hide");
             nosource.classList.add("hide");
-            mythis.fire('iron-signal', {name: 'reset'});
 
             if (sources !== undefined && sources.length !== 0) {
                 setTimeout(function() {
@@ -645,14 +651,18 @@
             }), function (data, chap) {
                 var chapcomplete = true;
                 var chapcontent = "";
+                var chapstate = true;
 
                 _.forEach(data, function (chunk) {
                     if (!chunk.completed) {
                         chapcomplete = false;
                     }
+                    if (!chunk.state.read) {
+                        chapstate = false;
+                    }
                     chapcontent += chunk.content + " ";
                 });
-                transchapters.push({completed: chapcomplete, transcontent: chapcontent, data: projectdata});
+                transchapters.push({completed: chapcomplete, transcontent: chapcontent, data: projectdata, state: chapstate});
             });
 
             _.forEach(_.groupBy(source, function(chunks) {
@@ -661,12 +671,14 @@
                 var chapcontent = "";
                 var chapter = parseInt(chap);
                 var chapterref = "";
+                var chapterid = "";
 
                 _.forEach(data, function (chunk) {
                     chapcontent += chunk.content + " ";
                     chapterref = chunk.meta.chapterref;
+                    chapterid = chunk.meta.chapterid;
                 });
-                srcchapters.push({chapter: chapter, srccontent: chapcontent, chapterref: chapterref});
+                srcchapters.push({chapter: chapter, srccontent: chapcontent, chapterref: chapterref, chapterid: chapterid});
             });
 
             transdata.data = transchapters;

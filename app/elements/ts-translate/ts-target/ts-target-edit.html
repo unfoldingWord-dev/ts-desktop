@@ -84,7 +84,7 @@
                 <paper-icon-button icon="clear" on-tap="review"></paper-icon-button>
             </div>
             <div id="content" class="editmode">
-                <iron-autogrow-textarea id="textbox" on-change="change" bind-value="{{chunk.transcontent}}"></iron-autogrow-textarea>
+                <iron-autogrow-textarea id="textbox" on-change="change" bind-value="{{chunk.transcontent}}" on-input="input"></iron-autogrow-textarea>
                 <p id="textholder"></p>
             </div>
         </paper-material>
@@ -106,8 +106,8 @@
                 notify: true
             },
             selected: {
-                type: Number,
-                value: 0,
+                type: Boolean,
+                value: true,
                 notify: true
             }
 		},
@@ -154,7 +154,11 @@
         },
 
         review: function () {
-            this.selected = 0;
+            this.selected = true;
+        },
+
+        input: function () {
+            this.fire('setheight');
         },
 
 		ready: function() {

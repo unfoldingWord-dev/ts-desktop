@@ -104,7 +104,7 @@
 
         <div id="pages">
             <ts-read-mode id="readmode" chapters="[[chapters]]" modestatus="{{modestatus}}"></ts-read-mode>
-            <ts-chunk-mode id="chunkmode" chunks="{{chunks}}" modestatus="{{modestatus}}"></ts-chunk-mode>
+            <ts-chunk-mode id="chunkmode" chunks="{{chunks}}" modestatus="{{modestatus}}" on-resize="resize"></ts-chunk-mode>
             <ts-review-mode id="reviewmode" chunks="{{chunks}}" modestatus="{{modestatus}}"></ts-review-mode>
             <ts-nosource-mode id="nosourcemode" projectdata="[[currentproject.data]]"></ts-nosource-mode>
         </div>
@@ -267,6 +267,7 @@
                 mythis.pullsource();
                 mythis.createchunks();
                 mythis.createchapters();
+                mythis.route = "translate";
                 mythis.reset();
                 mythis.checksources();
                 setTimeout(function() {
@@ -686,7 +687,10 @@
         },
 
         ready: function() {
-
+            var mythis = this;
+            window.addEventListener("resize", function () {
+                mythis.fire('iron-signal', {name: 'setheight'});
+            });
         }
 
     });

@@ -133,6 +133,7 @@
             var trans = this.$.transcard;
             var src = this.$.srccard;
             var mythis = this;
+            var id = this.chunk.meta.chapterid + "-" + this.chunk.meta.frameid;
 
             if(this.chunk.state.chunk) {
                 trans.classList.add("up");
@@ -141,6 +142,7 @@
                     trans.classList.remove("up");
                     src.classList.remove("down");
                     mythis.set('chunk.state.chunk', false);
+                    mythis.fire('iron-signal', {name: 'updatestate', data: {id: id, mode: "chunk", value: false}});
                 }, 1000);
             }
         },
@@ -149,6 +151,7 @@
             var trans = this.$.transcard;
             var src = this.$.srccard;
             var mythis = this;
+            var id = this.chunk.meta.chapterid + "-" + this.chunk.meta.frameid;
 
             if(!this.chunk.state.chunk) {
                 trans.classList.add("down");
@@ -157,6 +160,7 @@
                     trans.classList.remove("down");
                     src.classList.remove("up");
                     mythis.set('chunk.state.chunk', true);
+                    mythis.fire('iron-signal', {name: 'updatestate', data: {id: id, mode: "chunk", value: true}});
                 }, 1000);
             }
         },

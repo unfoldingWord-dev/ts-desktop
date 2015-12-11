@@ -428,22 +428,6 @@
                 } else {
                     transchunk = {content: rawdata.content, completed: rawdata.completed, meta: meta};
                 }
-
-                var statedata = this.currentproject.state[chapterid + '-' + frameid];
-                if (statedata === undefined) {
-                    transchunk.state = {read: true, chunk: true, review: true};
-                    this.currentproject.state[chapterid + '-' + frameid] = {chunk: true, review: true};
-                } else {
-                    transchunk.state = statedata;
-                }
-
-                var chapterstatedata = this.currentproject.state[chapterid];
-                if (chapterstatedata === undefined) {
-                    transchunk.state.read = true;
-                    this.currentproject.state[chapterid] = {read: true};
-                } else {
-                    transchunk.state.read = chapterstatedata.read;
-                }
                 translation.push(transchunk);
             }
 
@@ -623,6 +607,18 @@
             var source = this.currentproject.source;
             var projectdata = this.currentproject.data;
 
+            for (var i = 0; i < translation.length; i++) {
+                var chapterid = translation[i].meta.chapterid;
+                var frameid = translation[i].meta.frameid;
+                var statedata = this.currentproject.state[chapterid + '-' + frameid];
+                if (statedata === undefined) {
+                    translation[i].state = {chunk: true, review: true};
+                    this.currentproject.state[chapterid + '-' + frameid] = {chunk: true, review: true};
+                } else {
+                    translation[i].state = statedata;
+                }
+            }
+
             transdata.data = translation.map(function(chunk, index){
                 return {transcontent: chunk.content, completed: chunk.completed, data: projectdata, index: index, state: chunk.state};
             });
@@ -645,24 +641,21 @@
             var translation = this.currentproject.translation;
             var source = this.currentproject.source;
             var projectdata = this.currentproject.data;
+            var mythis = this;
 
             _.forEach(_.groupBy(translation, function(chunks) {
                 return chunks.meta.chapter;
             }), function (data, chap) {
                 var chapcomplete = true;
                 var chapcontent = "";
-                var chapstate = true;
 
                 _.forEach(data, function (chunk) {
                     if (!chunk.completed) {
                         chapcomplete = false;
                     }
-                    if (!chunk.state.read) {
-                        chapstate = false;
-                    }
                     chapcontent += chunk.content + " ";
                 });
-                transchapters.push({completed: chapcomplete, transcontent: chapcontent, data: projectdata, state: chapstate});
+                transchapters.push({completed: chapcomplete, transcontent: chapcontent, data: projectdata});
             });
 
             _.forEach(_.groupBy(source, function(chunks) {
@@ -672,13 +665,21 @@
                 var chapter = parseInt(chap);
                 var chapterref = "";
                 var chapterid = "";
+                var chapstate = true;
 
                 _.forEach(data, function (chunk) {
                     chapcontent += chunk.content + " ";
                     chapterref = chunk.meta.chapterref;
                     chapterid = chunk.meta.chapterid;
                 });
-                srcchapters.push({chapter: chapter, srccontent: chapcontent, chapterref: chapterref, chapterid: chapterid});
+
+                var chapterstatedata = mythis.currentproject.state[chapterid];
+                if (chapterstatedata === undefined) {
+                    mythis.currentproject.state[chapterid] = {read: true};
+                } else {
+                    chapstate = chapterstatedata.read;
+                }
+                srcchapters.push({chapter: chapter, srccontent: chapcontent, chapterref: chapterref, chapterid: chapterid, state: chapstate});
             });
 
             transdata.data = transchapters;

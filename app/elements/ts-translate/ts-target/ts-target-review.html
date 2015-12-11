@@ -129,8 +129,8 @@
                 notify: true
             },
             selected: {
-                type: Number,
-                value: 0,
+                type: Boolean,
+                value: true,
                 notify: true
             }
         },
@@ -239,7 +239,7 @@
         },
 
         edit: function () {
-            this.selected = 1;
+            this.selected = false;
         },
 
 		ready: function() {

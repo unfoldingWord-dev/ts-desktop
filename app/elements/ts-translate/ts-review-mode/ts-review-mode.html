@@ -129,7 +129,7 @@
         <div id="contain">
             <iron-list id="reviewlist" items="{{chunks.data}}" as="chunk">
                 <template>
-                    <ts-review-card id="{{createid(index)}}" chunk="{{chunk}}"></ts-review-card>
+                    <ts-review-card id="{{createid(index)}}" chunk="{{chunk}}" on-updateheight="updateheight"></ts-review-card>
                 </template>
             </iron-list>
             <paper-material id="resourcepopup" class="hide">
@@ -172,6 +172,12 @@
                 type: String,
                 value: "review"
             }
+        },
+
+        updateheight: function (e) {
+            var list = this.$.reviewlist;
+            var index = e.model.index;
+            list.updateSizeForItem(index);
         },
 
         openresource: function (event, data) {

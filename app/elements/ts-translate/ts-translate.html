@@ -147,6 +147,7 @@
         <iron-signals on-iron-signal-opennodata="opennodata"></iron-signals>
         <iron-signals on-iron-signal-opensource="opensource"></iron-signals>
         <iron-signals on-iron-signal-savetofile="savetofile"></iron-signals>
+        <iron-signals on-iron-signal-updatestate="updatestate"></iron-signals>
 
     </template>
 
@@ -250,8 +251,16 @@
             this.$.reviewmode.notifyResize();
         },
 
+        updatestate: function (event, data) {
+            var id = data.id;
+            var mode = data.mode;
+            this.currentproject.state[id][mode] = data.value;
+        },
+
         loadnewproject: function (event, data) {
             var blank = [];
+            var blankstate = {};
+            this.set('currentproject.state', blankstate);
             this.set('currentproject.translation', blank);
             this.set('currentproject.data', data.projdata);
             this.savetofile();
@@ -261,7 +270,9 @@
 
         loadproject: function (event, data) {
             var mythis = this;
+            var blankstate = {};
             mythis.set('currentproject.data', data.projdata);
+            mythis.set('currentproject.state', blankstate);
             App.projectsManager.loadTargetTranslation(data.projdata).then(function (translation) {
                 mythis.set('rawdata', translation);
                 mythis.pullsource();
@@ -412,7 +423,7 @@
                 source.push(srcchunk);
 
                 var rawdata = this.rawdata[chapterid + '-' + frameid];
-                if (!rawdata) {
+                if (rawdata === undefined) {
                     transchunk = {content: "", completed: false, meta: meta};
                 } else {
                     transchunk = {content: rawdata.content, completed: rawdata.completed, meta: meta};
@@ -543,7 +554,6 @@
             chunk.classList.add("hide");
             review.classList.add("hide");
             nosource.classList.add("hide");
-            mythis.fire('iron-signal', {name: 'reset'});
 
             if (sources !== undefined && sources.length !== 0) {
                 setTimeout(function() {
@@ -597,8 +607,20 @@
             var source = this.currentproject.source;
             var projectdata = this.currentproject.data;
 
+            for (var i = 0; i < translation.length; i++) {
+                var chapterid = translation[i].meta.chapterid;
+                var frameid = translation[i].meta.frameid;
+                var statedata = this.currentproject.state[chapterid + '-' + frameid];
+                if (statedata === undefined) {
+                    translation[i].state = {chunk: true, review: true};
+                    this.currentproject.state[chapterid + '-' + frameid] = {chunk: true, review: true};
+                } else {
+                    translation[i].state = statedata;
+                }
+            }
+
             transdata.data = translation.map(function(chunk, index){
-                return {transcontent: chunk.content, completed: chunk.completed, data: projectdata, index: index};
+                return {transcontent: chunk.content, completed: chunk.completed, data: projectdata, index: index, state: chunk.state};
             });
             srcdata.data = source.map(function(chunk){
                 return {srccontent: chunk.content, meta: chunk.meta, notes: chunk.notes, words: chunk.words, questions: chunk.questions};
@@ -619,6 +641,7 @@
             var translation = this.currentproject.translation;
             var source = this.currentproject.source;
             var projectdata = this.currentproject.data;
+            var mythis = this;
 
             _.forEach(_.groupBy(translation, function(chunks) {
                 return chunks.meta.chapter;
@@ -641,12 +664,22 @@
                 var chapcontent = "";
                 var chapter = parseInt(chap);
                 var chapterref = "";
+                var chapterid = "";
+                var chapstate = true;
 
                 _.forEach(data, function (chunk) {
                     chapcontent += chunk.content + " ";
                     chapterref = chunk.meta.chapterref;
+                    chapterid = chunk.meta.chapterid;
                 });
-                srcchapters.push({chapter: chapter, srccontent: chapcontent, chapterref: chapterref});
+
+                var chapterstatedata = mythis.currentproject.state[chapterid];
+                if (chapterstatedata === undefined) {
+                    mythis.currentproject.state[chapterid] = {read: true};
+                } else {
+                    chapstate = chapterstatedata.read;
+                }
+                srcchapters.push({chapter: chapter, srccontent: chapcontent, chapterref: chapterref, chapterid: chapterid, state: chapstate});
             });
 
             transdata.data = transchapters;

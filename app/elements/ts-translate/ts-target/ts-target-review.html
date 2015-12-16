@@ -1,6 +1,6 @@
 
 <link rel="import" href="../../../components/paper-material/paper-material.html">
-<link rel="import" href="../../../components/paper-button/paper-button.html">
+<link rel="import" href="../../../components/paper-toggle-button/paper-toggle-button.html">
 <link rel="import" href="../../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../../components/iron-icons/iron-icons.html">
 <link rel="import" href="../../../components/paper-dialog/paper-dialog.html">
@@ -20,7 +20,7 @@
             display: flex;
         }
 
-        paper-material {
+        #main {
             flex: auto;
             display: flex;
             background: var(--card-background-color);
@@ -41,6 +41,10 @@
             padding: 0 10px 0 16px;
 		}
 
+        #heading paper-icon-button {
+            padding: 6px;
+        }
+
         #content {
 			padding: 24px 16px;
             flex: auto;
@@ -53,60 +57,48 @@
             color: var(--primary-text-color);
 		}
 
-        .notdone paper-button {
-            background: var(--accent-color);
-            color: var(--reverse-text-color);
-            margin: 10px 0;
-        }
-
-        .notdone #button iron-icon {
-            display: none;
-        }
-
-        .done paper-button {
-            background: var(--completed-color);
-            color: var(--reverse-text-color);
-            margin: 10px 0;
-            width: 100%
-        }
-
-        #button iron-icon {
-            padding-right: 10px;
-        }
-
-        .done #heading paper-icon-button {
-            display: none;
-        }
-
-        #button {
-            text-align: center;
-            text-transform: uppercase;
-        }
-
-        #heading paper-icon-button {
-            padding: 6px;
-        }
-
         #content iron-icon {
             color: var(--accent-color);
+        }
+
+        #togglebox {
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid var(--border-color);
+            color: var(--secondary-text-color);
+            font-size: 88%;
+            padding: 0 16px;
+            align-items: center;
+        }
+
+        #toggle {
+            --paper-toggle-button-checked-bar-color: var(--primary-color);
+            --paper-toggle-button-checked-button-color: var(--primary-color-dark);
+        }
+
+        #toggle:hover {
+            cursor: pointer;
         }
 
 	</style>
 
 	<template>
 
-        <paper-material id="toggle" class="notdone" elevation="1">
+        <paper-material id="main" elevation="1">
             <div id="heading">
                 <div>
                     <span>[[chunk.meta.chunkref]]</span> - <span>[[chunk.data.language.ln]]</span>
                 </div>
-                <paper-icon-button icon="create" title="edit" on-tap="edit"></paper-icon-button>
+                <template is="dom-if" if="{{!chunk.completed}}">
+                    <paper-icon-button icon="create" title="edit" on-tap="edit"></paper-icon-button>
+                </template>
             </div>
             <div id="content">
                 <p id="textholder"></p>
             </div>
-            <div id="button">
-                <paper-button raised on-tap="checkdone"><iron-icon icon="done"></iron-icon>Done</paper-button>
+            <div id="togglebox">
+                <p>Mark chunk as done</p>
+                <paper-toggle-button id="toggle" on-tap="checkdone" toggles="false"></paper-toggle-button>
             </div>
         </paper-material>
 
@@ -149,7 +141,6 @@
                 var textstr2 = "\<\/span\> ";
                 var numstr1 = "\<sup\>";
                 var numstr2 = "\<\/sup\>";
-                var toggle = this.$.toggle;
                 var returnstr = "";
                 var verse = 0;
                 var i = 0;
@@ -161,8 +152,6 @@
                     for (i = 0; i < textarray.length; i++) {
                         returnstr += textstr1 + textarray[i] + textstr2;
                     }
-                    toggle.classList.remove("done");
-                    toggle.classList.add("notdone");
                 } else {
                     for (i = 0; i < textarray.length; i++) {
                         if (textarray[i].substring(0, 2) === "/v") {
@@ -172,8 +161,6 @@
                             returnstr += textarray[i] + " ";
                         }
                     }
-                    toggle.classList.remove("notdone");
-                    toggle.classList.add("done");
                 }
                 textholder.innerHTML = returnstr;
             }
@@ -204,6 +191,7 @@
 
                 this.set('chunk.transcontent', returnstr.trim());
                 this.set('chunk.completed', true);
+                this.$.toggle.checked = true;
                 this.fire('iron-signal', {name: 'updatetranslation'});
             }
         },
@@ -213,6 +201,7 @@
             var completed = this.chunk.completed;
             var index = this.chunk.index;
             var returnstr = "";
+            this.$.toggle.checked = false;
 
             if (!completed) {
                 if (this.chunk.transcontent === "") {

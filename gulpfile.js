@@ -13,6 +13,8 @@ var gulp = require('gulp'),
     argv = require('yargs').argv,
     NwBuilder = require('nw-builder');
 
+var fs = require('fs');
+
 var APP_NAME = 'translationStudio',
     JS_FILES = './app/js/**/*.js',
     UNIT_TEST_FILES = './unit_tests/**/*.js';
@@ -285,10 +287,30 @@ gulp.task('build', [], function () {
             './node_modules/yauzl/**'], // use the glob format
         platforms: platforms,
         version: 'v0.12.3',
-        appName: APP_NAME
+        appName: APP_NAME,
+        winIco: './icons/icon.ico',
+        macIcns: './icons/icon.icns'
     });
 
     nw.build().then(function () {
+        // Adding app icon for linux64
+        fs.stat('./build/translationStudio/linux64', function(err, stats) {
+            if (stats.isDirectory()) {
+                // Copy desktop entry to the build folder
+                var newFile = fs.createWriteStream('./build/translationStudio/linux64/.desktop'),
+                    oldFile = fs.createReadStream('./icons/.desktop');
+                oldFile.pipe(newFile);
+
+                // Copy icon.png file to the build folder
+                newFile = fs.createWriteStream('./build/translationStudio/linux64/icon.png');
+                oldFile = fs.createReadStream('./icons/icon.png');
+                oldFile.pipe(newFile);
+            }
+            else {
+                console.log('stats is not directory', err);
+            }
+        });
+
         console.log('all done! everything is in ./build');
     }).catch(console.error.bind(console, 'there was an error building...'));
 });

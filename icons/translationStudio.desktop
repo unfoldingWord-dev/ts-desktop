@@ -1,0 +1,11 @@
+[Desktop Entry]
+
+Type=Application
+Version=0.12.3
+Name=translationStudio
+Comment=Desktop version of translationStudio
+Path=/home/user/path/to/app/folder
+Exec=/home/user/path/to/translationStudio.exec  # This needs to be a dynamic absolute path to the executable file
+Icon=/home/user/path/to/icon/image.png  # This needs to be a dynamic absolute path to the icon image
+Terminal=false
+Categories=Translation;Languages;

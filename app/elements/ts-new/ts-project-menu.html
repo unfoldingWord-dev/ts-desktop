@@ -154,18 +154,18 @@
       ready: function() {
           var projects = App.projectsManager.getProjects();
           var tempobject = {};
-          var temparrary = [];
+          var temparray = [];
           _.forEach(_.groupBy(projects, 'category'), function (data, category) {
               if (category === 'null') {
-                  tempobject = {"name": "Open Bible Stories", "lefticon": "uw-icon:uw-icon-small", "righticon": "", "data": data};
+                  tempobject = {"name": "Open Bible Stories", "lefticon": "uw-obs-icon:uw-obs-icon", "righticon": "", "data": data};
               } else if (category === 'Bible: OT') {
-                  tempobject = {"name": "Old Testament", "lefticon": "project:project", "righticon": "chevron-right", "data": data};
+                  tempobject = {"name": "Old Testament", "lefticon": "uw-project-icon:uw-project-icon", "righticon": "chevron-right", "data": data};
               } else if (category === 'Bible: NT') {
-                  tempobject = {"name": "New Testament", "lefticon": "project:project", "righticon": "chevron-right", "data": data};
+                  tempobject = {"name": "New Testament", "lefticon": "uw-project-icon:uw-project-icon", "righticon": "chevron-right", "data": data};
               }
-              temparrary.push(tempobject);
+              temparray.push(tempobject);
           });
-          this.categorylist = temparrary;
+          this.categorylist = temparray;
       }
 
   });

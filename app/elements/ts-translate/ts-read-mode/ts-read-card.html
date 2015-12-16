@@ -19,23 +19,16 @@
             margin: 16px 40px 24px 16px;
         }
 
-        ts-source-card {
-            position: relative;
-        }
-
-        ts-target-view {
+        .bottom {
             position: absolute;
             width: 100%;
-            height: 100%;
-        }
-
-        .bottom {
             z-index: 1;
             top: 24px;
             left: 24px;
         }
 
         .top {
+            position: relative;
             z-index: 2;
             top: 0;
             left: 0;
@@ -90,11 +83,11 @@
     <template>
 
         <div id="contain">
-            <ts-source-card id="srccard" class="top" on-tap="srctop" chunk="[[chunk]]"></ts-source-card>
-            <ts-target-view id="transcard" class="bottom" on-tap="transtop" chunk="[[chunk]]"></ts-target-view>
+            <ts-source-card id="srccard" class$="[[sourceclass(chunk.state)]]" on-tap="srctop" chunk="[[chunk]]"></ts-source-card>
+            <ts-target-view id="transcard" class$="[[transclass(chunk.state)]]" on-tap="transtop" chunk="[[chunk]]"></ts-target-view>
         </div>
 
-        <iron-signals on-iron-signal-reset="reset"></iron-signals>
+        <iron-signals on-iron-signal-setheight="setheight"></iron-signals>
 
     </template>
 
@@ -113,29 +106,38 @@
             }
         },
 
-        reset: function () {
+        sourceclass: function (state) {
+            return state ? 'top' : 'bottom';
+        },
+
+        transclass: function (state) {
+            return state ? 'bottom' : 'top';
+        },
+
+        setheight: function () {
             var trans = this.$.transcard;
             var src = this.$.srccard;
-            trans.classList.remove("top");
-            src.classList.add("top");
-            trans.classList.add("bottom");
-            src.classList.remove("bottom");
+            trans.style.minHeight = 0;
+            src.style.minHeight = 0;
+            trans.style.minHeight = src.getBoundingClientRect().height + "px";
+            src.style.minHeight = trans.getBoundingClientRect().height + "px";
+            this.fire('updateheight');
         },
 
         transtop: function () {
             var trans = this.$.transcard;
             var src = this.$.srccard;
+            var mythis = this;
+            var id = this.chunk.chapterid;
 
-            if(!trans.classList.contains("top")) {
+            if(this.chunk.state) {
                 trans.classList.add("up");
                 src.classList.add("down");
                 setTimeout(function () {
                     trans.classList.remove("up");
                     src.classList.remove("down");
-                    trans.classList.add("top");
-                    src.classList.add("bottom");
-                    src.classList.remove("top");
-                    trans.classList.remove("bottom");
+                    mythis.set('chunk.state', false);
+                    mythis.fire('iron-signal', {name: 'updatestate', data: {id: id, mode: "read", value: false}});
                 }, 1000);
             }
         },
@@ -143,17 +145,17 @@
         srctop: function () {
             var trans = this.$.transcard;
             var src = this.$.srccard;
+            var mythis = this;
+            var id = this.chunk.chapterid;
 
-            if(!src.classList.contains("top")) {
+            if(!this.chunk.state) {
                 trans.classList.add("down");
                 src.classList.add("up");
                 setTimeout(function () {
                     trans.classList.remove("down");
                     src.classList.remove("up");
-                    src.classList.add("top");
-                    trans.classList.add("bottom");
-                    trans.classList.remove("top");
-                    src.classList.remove("bottom");
+                    mythis.set('chunk.state', true);
+                    mythis.fire('iron-signal', {name: 'updatestate', data: {id: id, mode: "read", value: true}});
                 }, 1000);
             }
         },

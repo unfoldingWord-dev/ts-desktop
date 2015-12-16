@@ -150,6 +150,7 @@
                 var getDeviceId = opts.deviceId ? Promise.resolve(opts.deviceId) : this.getDeviceId();
 
                 return getDeviceId.then(function (deviceId) {
+
                     return readKeyPair().then(function (keys) {
                         return {
                             keys: keys,

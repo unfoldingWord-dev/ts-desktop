@@ -22,17 +22,17 @@
             flex: auto;
         }
 
-        iron-pages {
+        #middle {
             flex: 1 0 400px;
             display: flex;
         }
 
-        ts-resource-card {
+        #right {
             margin: 0 16px;
             flex: 0 0 400px;
         }
 
-        ts-source-chunk {
+        #left {
             margin: 0 16px;
             flex: 1 0 400px;
         }
@@ -42,15 +42,17 @@
 	<template>
 
         <div id="contain">
-            <ts-source-chunk reviewmode chunk="[[chunk]]"></ts-source-chunk>
-            <iron-pages selected="{{selected}}">
-                <ts-target-review selected="{{selected}}" chunk="{{chunk}}"></ts-target-review>
-                <ts-target-edit selected="{{selected}}" chunk="{{chunk}}"></ts-target-edit>
-            </iron-pages>
-            <ts-resource-card chunk="[[chunk]]"></ts-resource-card>
+            <ts-source-chunk id="left" reviewmode chunk="[[chunk]]"></ts-source-chunk>
+            <div id="middle">
+                <template is="dom-if" if="{{chunk.state.review}}">
+                    <ts-target-review chunk="{{chunk}}" on-setheight="setheight"></ts-target-review>
+                </template>
+                <template is="dom-if" if="{{!chunk.state.review}}">
+                    <ts-target-edit chunk="{{chunk}}" on-setheight="setheight"></ts-target-edit>
+                </template>
+            </div>
+            <ts-resource-card id="right" chunk="[[chunk]]"></ts-resource-card>
         </div>
-
-        <iron-signals on-iron-signal-reset="reset"></iron-signals>
 
 	</template>
 
@@ -71,15 +73,11 @@
                 type: Object,
                 value: {},
                 notify: true
-            },
-            selected: {
-                type: Number,
-                value: 0
             }
 		},
 
-        reset: function () {
-            this.selected = 0;
+        setheight: function () {
+            this.fire('updateheight');
         },
 
 		ready: function() {

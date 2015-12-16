@@ -302,9 +302,9 @@ gulp.task('build', [], function () {
                 oldFile.pipe(newFile);
 
                 // Copy icon.png file to the build folder
-                newFile = fs.createWriteStream('./build/translationStudio/linux64/icon.png');
-                oldFile = fs.createReadStream('./icons/icon.png');
-                oldFile.pipe(newFile);
+                var newFile1 = fs.createWriteStream('./build/translationStudio/linux64/icon.png');
+                var oldFile1 = fs.createReadStream('./icons/icon.png');
+                oldFile1.pipe(newFile1);
             }
             else {
                 console.log('stats is not directory', err);

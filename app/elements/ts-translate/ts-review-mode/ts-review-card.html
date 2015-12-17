@@ -45,7 +45,7 @@
             <ts-source-chunk reviewmode chunk="[[chunk]]"></ts-source-chunk>
             <iron-pages selected="{{selected}}">
                 <ts-target-review selected="{{selected}}" chunk="{{chunk}}"></ts-target-review>
-                <ts-target-edit selected="{{selected}}" chunk="{{chunk}}"></ts-target-edit>
+                <ts-target-edit selected="{{selected}}" chunk="{{chunk}}" on-setheight="setheight"></ts-target-edit>
             </iron-pages>
             <ts-resource-card chunk="[[chunk]]"></ts-resource-card>
         </div>
@@ -80,6 +80,10 @@
 
         reset: function () {
             this.selected = 0;
+        },
+
+        setheight: function () {
+            this.fire('updateheight');
         },
 
 		ready: function() {

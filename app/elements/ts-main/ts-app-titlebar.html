@@ -96,6 +96,7 @@
         },
 
         closeWindow: function() {
+            this.fire('iron-signal', {name: 'savestate'});
             App.close();
         },
 

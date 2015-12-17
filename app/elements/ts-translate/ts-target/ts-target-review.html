@@ -98,7 +98,7 @@
             </div>
             <div id="togglebox">
                 <p>Mark chunk as done</p>
-                <paper-toggle-button id="toggle" on-tap="checkdone"></paper-toggle-button>
+                <paper-toggle-button id="toggle" on-change="checkdone"></paper-toggle-button>
             </div>
         </paper-material>
 
@@ -201,8 +201,18 @@
             var textarray = this.chunk.transcontent.split(" ");
             var completed = this.chunk.completed;
             var index = this.chunk.index;
+            var toggle = this.$.toggle;
             var returnstr = "";
-            this.$.toggle.checked = false;
+            var mythis = this;
+
+            if (toggle.pressed) {
+                setTimeout(function() {
+                    mythis.checkdone();
+                }, 100);
+                return;
+            }
+
+            toggle.checked = false;
 
             if (!completed) {
                 if (this.chunk.transcontent === "") {

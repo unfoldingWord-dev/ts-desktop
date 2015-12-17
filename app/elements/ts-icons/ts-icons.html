@@ -12,7 +12,10 @@
   </svg>
 </iron-iconset-svg>
 
-<iron-iconset id="uw-icon" src="../elements/ts-icons/uw-icon-small.png" name="uw-icon" size="18" icons="uw-icon-small">
+<iron-iconset id="uw-obs-icon" src="../elements/ts-icons/uw-icon-small.png" name="uw-obs-icon" size="18" icons="uw-obs-icon">
+</iron-iconset>
+
+<iron-iconset id="uw-project-icon" src="../elements/ts-icons/uw-project-icon.png" name="uw-project-icon" size="24" icons="uw-project-icon">
 </iron-iconset>
 
 <iron-iconset id="uw-tab-small" src="../elements/ts-icons/uw-tab-small.png" name="uw-tab-small" size="24" icons="uw-tab-small">
@@ -27,20 +30,17 @@
 <iron-iconset-svg name="titlebar" size="16">
     <svg>
         <defs>
-            <g id="close">
-                <path id="close-shape" d="M5,4C4.4,4,4,4.5,4,5c0,0.3,0.1,0.5,0.3,0.7L6.6,8
-        	l-2.3,2.3C4.1,10.5,4,10.7,4,11c0,0.6,0.4,1,1,1c0.3,0,0.5-0.1,0.7-0.3L8,9.4l2.3,2.3c0.2,0.2,0.4,0.3,0.7,0.3c0.6,0,1-0.4,1-1
-        	c0-0.3-0.1-0.5-0.3-0.7L9.4,8l2.3-2.3C11.9,5.5,12,5.3,12,5c0-0.6-0.4-1-1-1c-0.3,0-0.5,0.1-0.7,0.3L8,6.6L5.7,4.3c0,0,0,0,0,0
-        	C5.5,4.1,5.3,4,5,4L5,4z"/>
+            <g id="maximize">
+                <path d="M 2 2 H 14 V 14 H 2 Z" fill="none" stroke-width="2" stroke="white"/>
             </g>
             <g id="minimize">
-                <path class="window-btn" id="minimize-shape" d="M4,10v2h8v-2H4z"/>
+                <path d="M 2 8 H 14" fill="none" stroke-width="2" stroke="white"/>
             </g>
-            <g id="maximize">
-                <path class="window-btn" id="maximize-shape" d="M7,4v3H4v2h3v3h2V9h3V7H9V4H7z"/>
+            <g id="close">
+                <path d="M 2 2 L 14 14 M 2 14 L 14 2" fill="none" stroke-width="2" stroke="white"/>
             </g>
             <g id="restore">
-                <rect class="window-btn" id="restore-shape" x="4" y="7" width="8" height="2"/>
+                <path d="M 2 6 H 10 V 14 H 2 Z M 6 6 V 6 2 H 14 V 10 H 10" fill="none" stroke-width="2" stroke="white"/>
             </g>
         </defs>
     </svg>

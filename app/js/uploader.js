@@ -147,13 +147,9 @@
                     port: 9095
                 }, config);
 
-                debugger;
-
                 var getDeviceId = opts.deviceId ? Promise.resolve(opts.deviceId) : this.getDeviceId();
 
                 return getDeviceId.then(function (deviceId) {
-
-                    debugger;
 
                     return readKeyPair().then(function (keys) {
                         return {

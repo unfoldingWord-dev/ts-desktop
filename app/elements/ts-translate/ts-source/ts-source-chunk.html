@@ -22,16 +22,16 @@
         }
 
         #heading {
-            padding: 5px 1em;
+            padding: 0 0 8px 16px;
             color: var(--secondary-text-color);
             display: flex;
             justify-content: space-between;
-            min-height: 50px;
+            min-height: 48px;
             align-items: center;
         }
 
         #content {
-            padding: 0.5em 50px;
+            padding: 16px 16px 24px 16px;
             flex: auto;
         }
 
@@ -41,7 +41,11 @@
             color: var(--primary-text-color);
         }
 
-        :host([reviewmode]) .ref {
+        #ref {
+            padding-right: 16px;
+        }
+
+        :host([reviewmode]) #ref {
             display: none;
         }
 
@@ -56,8 +60,8 @@
         <paper-material elevation="1">
             <div id="heading">
                 <ts-source-tab projectdata="[[chunk.data]]"></ts-source-tab>
-                <div class="ref">
-                    <span>[[chunk.meta.chunkref]]</span> - <span>[[chunk.data.language.ln]]</span>
+                <div id="ref">
+                    <span>[[chunk.meta.chunkref]]</span>
                 </div>
             </div>
             <div id="content">

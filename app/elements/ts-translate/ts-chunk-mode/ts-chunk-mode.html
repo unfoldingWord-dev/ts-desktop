@@ -61,9 +61,9 @@
     <template>
 
         <div id="contain">
-            <iron-list id="chunklist" items="{{chunks.data}}" as="chunk">
+            <iron-list id="chunklist" items="{{chunks.data}}" as="chunk" on-scroll="setheights">
                 <template>
-                    <ts-chunk-card id="{{createid(index)}}" chunk="{{chunk}}"></ts-chunk-card>
+                    <ts-chunk-card id="{{createid(index)}}" chunk="{{chunk}}" on-updateheight="updateheight"></ts-chunk-card>
                 </template>
             </iron-list>
         </div>
@@ -99,6 +99,16 @@
             }
         },
 
+        updateheight: function (e) {
+            var list = this.$.chunklist;
+            var index = e.model.index;
+            list.updateSizeForItem(index);
+        },
+
+        setheights: function () {
+            this.fire('iron-signal', {name: 'setheight'});
+        },
+
         frommode: function () {
             this.getlocation();
             this.moveout();
@@ -106,6 +116,7 @@
 
         tomode: function () {
             this.setpreview();
+            this.setheights();
             this.setlocation();
             this.movein();
         },

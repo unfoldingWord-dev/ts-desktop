@@ -26,18 +26,18 @@
             color: var(--secondary-text-color);
             display: flex;
             justify-content: space-between;
-            min-height: 42px;
-            align-items: flex-end;
+            min-height: 48px;
+            align-items: center;
             font-size: 88%;
             font-weight: 300;
             border-bottom: 1px solid var(--note-card-pink);
-            margin-bottom: 4px;
             letter-spacing: 1px;
-            padding: 0 0 0.25em 1.75em;
+            padding: 0 10px 0 16px;
 		}
 
         #content {
-			padding: 0 50px;
+            margin-top: 24px;
+			padding: 0 16px;
             flex: auto;
             display: flex;
 		}
@@ -61,7 +61,7 @@
         }
 
         #heading paper-icon-button {
-            padding: 5px;
+            padding: 6px;
         }
 
         :host([chunkmode]) paper-icon-button {
@@ -81,10 +81,10 @@
                 <div>
                     <span>[[chunk.meta.chunkref]]</span> - <span>[[chunk.data.language.ln]]</span>
                 </div>
-                <paper-icon-button icon="clear" on-tap="review"></paper-icon-button>
+                <paper-icon-button icon="done" on-tap="review"></paper-icon-button>
             </div>
             <div id="content" class="editmode">
-                <iron-autogrow-textarea id="textbox" on-change="change" bind-value="{{chunk.transcontent}}"></iron-autogrow-textarea>
+                <iron-autogrow-textarea id="textbox" on-change="change" bind-value="{{chunk.transcontent}}" on-input="input"></iron-autogrow-textarea>
                 <p id="textholder"></p>
             </div>
         </paper-material>
@@ -103,11 +103,6 @@
             chunk: {
                 type: Object,
                 value: {},
-                notify: true
-            },
-            selected: {
-                type: Number,
-                value: 0,
                 notify: true
             }
 		},
@@ -154,7 +149,14 @@
         },
 
         review: function () {
-            this.selected = 0;
+            var id = this.chunk.meta.chapterid + "-" + this.chunk.meta.frameid;
+            this.set('chunk.state.review', true);
+            this.fire('setheight');
+            this.fire('iron-signal', {name: 'updatestate', data: {id: id, mode: "review", value: true}});
+        },
+
+        input: function () {
+            this.fire('setheight');
         },
 
 		ready: function() {

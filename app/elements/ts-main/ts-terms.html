@@ -136,6 +136,7 @@
 
         accept: function () {
             this.accepted = true;
+            App.configurator.setValue("accepted", true);
         },
 
         close: function () {

@@ -117,6 +117,10 @@
       ready: function() {
           this.updatelist();
           this.setdefault();
+          var accepted = App.configurator.getValue("accepted");
+          if (accepted) {
+              this.accepted = true;
+          }
       }
 
   });

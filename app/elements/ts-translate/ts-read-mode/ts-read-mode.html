@@ -61,9 +61,9 @@
     <template>
 
         <div id="contain">
-            <iron-list id="readlist" items="{{chapters.data}}" as="chunk">
+            <iron-list id="readlist" items="{{chapters.data}}" as="chunk" on-scroll="setheights">
                 <template>
-                    <ts-read-card id="{{createid(index)}}" chunk="[[chunk]]"></ts-read-card>
+                    <ts-read-card id="{{createid(index)}}" chunk="[[chunk]]" on-updateheight="updateheight"></ts-read-card>
                 </template>
             </iron-list>
         </div>
@@ -98,6 +98,16 @@
             }
         },
 
+        updateheight: function (e) {
+            var list = this.$.readlist;
+            var index = e.model.index;
+            list.updateSizeForItem(index);
+        },
+
+        setheights: function () {
+            this.fire('iron-signal', {name: 'setheight'});
+        },
+
         frommode: function () {
             this.getlocation();
             this.moveout();
@@ -105,6 +115,7 @@
 
         tomode: function () {
             this.setpreview();
+            this.setheights();
             this.setlocation();
             this.movein();
         },
@@ -149,18 +160,8 @@
 
         setlocation: function () {
             var list = this.$.readlist;
-            var card;
-            var found = false;
-            var i = 0;
-
-            while (i < 10000 && !found) {
-                list.scrollToIndex(i);
-                card = document.getElementById(this.modename + i);
-                if (card.chunk.chapter === this.modestatus.chapter) {
-                    found = true;
-                }
-                i++;
-            }
+            var index = parseInt(this.modestatus.chapter) - 1;
+            list.scrollToIndex(index);
         },
 
         createid: function (index) {

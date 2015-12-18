@@ -297,17 +297,17 @@ gulp.task('build', [], function () {
         fs.stat('./build/translationStudio/linux64', function(err, stats) {
             if (stats.isDirectory()) {
                 // Copy desktop entry to the build folder
-                var newFile = fs.createWriteStream('./build/translationStudio/linux64/.desktop'),
-                    oldFile = fs.createReadStream('./icons/.desktop');
-                oldFile.pipe(newFile);
+                var desktopTarget = fs.createWriteStream('./build/translationStudio/linux64/translationStudio.desktop');
+                var desktopSource = fs.createReadStream('./icons/translationStudio.desktop');
+                desktopSource.pipe(desktopTarget);
 
                 // Copy icon.png file to the build folder
-                var newFile1 = fs.createWriteStream('./build/translationStudio/linux64/icon.png');
-                var oldFile1 = fs.createReadStream('./icons/icon.png');
-                oldFile1.pipe(newFile1);
+                var iconTarget = fs.createWriteStream('./build/translationStudio/linux64/icon.png');
+                var iconSource = fs.createReadStream('./icons/icon.png');
+                iconSource.pipe(iconTarget);
             }
             else {
-                console.log('stats is not directory', err);
+                console.log('Error in accessing linux64 build folder:', err);
             }
         });
 

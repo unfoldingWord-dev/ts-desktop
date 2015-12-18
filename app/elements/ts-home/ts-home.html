@@ -6,6 +6,8 @@
 <link rel="import" href="../../components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
 <link rel="import" href="../../components/iron-list/iron-list.html">
+<link rel="import" href="../../components/paper-progress/paper-progress.html">
+<link rel="import" href="../../components/iron-signals/iron-signals.html">
 
 <link rel="import" href="../ts-icons/ts-icons.html">
 <link rel="import" href="./ts-new-project-button.html">
@@ -201,6 +203,34 @@
             color: var(--accent-color);
         }
 
+        #loading {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+            width: 320px;
+            height: 220px;
+            color: var(--primary-text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 110%;
+        }
+
+        paper-progress {
+            --paper-progress-active-color: var(--accent-color);
+            width: 250px;
+        }
+
+        #bar {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
     </style>
 
     <template>
@@ -282,7 +312,16 @@
             </div>
         </paper-dialog>
 
+        <paper-dialog id="loading" modal="true">
+            <p>Loading project. Please wait...</p>
+            <div id="bar">
+                <paper-progress indeterminate="true"></paper-progress>
+            </div>
+        </paper-dialog>
+
         <ts-new-project-button route="{{route}}"></ts-new-project-button>
+
+        <iron-signals on-iron-signal-loadcomplete="loadcomplete"></iron-signals>
 
     </template>
 
@@ -334,7 +373,20 @@
 
         openproject: function (e) {
             var projectdata = e.model.proj;
-            this.fire('iron-signal', {name: 'loadproject', data: {projdata: projectdata}});
+            var mythis = this;
+            var loading = this.$.loading;
+            loading.open();
+            setTimeout(function() {
+                mythis.fire('iron-signal', {name: 'loadproject', data: {projdata: projectdata}});
+            }, 100);
+        },
+
+        loadcomplete: function () {
+            this.route = "translate";
+            var mythis = this;
+            setTimeout(function() {
+                mythis.$.loading.close();
+            }, 300);
         },
 
         openinfo: function (e) {

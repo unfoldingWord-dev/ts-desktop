@@ -147,6 +147,7 @@
         <iron-signals on-iron-signal-opennodata="opennodata"></iron-signals>
         <iron-signals on-iron-signal-opensource="opensource"></iron-signals>
         <iron-signals on-iron-signal-savetofile="savetofile"></iron-signals>
+        <iron-signals on-iron-signal-updatestate="updatestate"></iron-signals>
 
     </template>
 
@@ -250,8 +251,16 @@
             this.$.reviewmode.notifyResize();
         },
 
+        updatestate: function (event, data) {
+            var id = data.id;
+            var mode = data.mode;
+            this.currentproject.state[id][mode] = data.value;
+        },
+
         loadnewproject: function (event, data) {
             var blank = [];
+            var blankstate = {};
+            this.set('currentproject.state', blankstate);
             this.set('currentproject.translation', blank);
             this.set('currentproject.data', data.projdata);
             this.savetofile();
@@ -422,7 +431,8 @@
 
                 var statedata = this.currentproject.state[chapterid + '-' + frameid];
                 if (!statedata) {
-                    transchunk.state = {chunk: true, review: true};
+                    transchunk.state = {read: true, chunk: true, review: true};
+                    this.currentproject.state[chapterid + '-' + frameid] = {read: true, chunk: true, review: true};
                 } else {
                     transchunk.state = statedata;
                 }

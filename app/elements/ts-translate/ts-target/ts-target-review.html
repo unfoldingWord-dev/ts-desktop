@@ -127,11 +127,6 @@
                 type: Object,
                 value: {},
                 notify: true
-            },
-            selected: {
-                type: Boolean,
-                value: true,
-                notify: true
             }
         },
 
@@ -239,7 +234,8 @@
         },
 
         edit: function () {
-            this.selected = false;
+            this.set('chunk.state.review', false);
+            this.fire('setheight');
         },
 
 		ready: function() {

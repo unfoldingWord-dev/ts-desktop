@@ -44,17 +44,15 @@
         <div id="contain">
             <ts-source-chunk id="left" reviewmode chunk="[[chunk]]"></ts-source-chunk>
             <div id="middle">
-                <template is="dom-if" if="{{selected}}">
-                    <ts-target-review selected="{{selected}}" chunk="{{chunk}}"></ts-target-review>
+                <template is="dom-if" if="{{chunk.state.review}}">
+                    <ts-target-review chunk="{{chunk}}" on-setheight="setheight"></ts-target-review>
                 </template>
-                <template is="dom-if" if="{{!selected}}">
-                    <ts-target-edit selected="{{selected}}" chunk="{{chunk}}" on-setheight="setheight"></ts-target-edit>
+                <template is="dom-if" if="{{!chunk.state.review}}">
+                    <ts-target-edit chunk="{{chunk}}" on-setheight="setheight"></ts-target-edit>
                 </template>
             </div>
             <ts-resource-card id="right" chunk="[[chunk]]"></ts-resource-card>
         </div>
-
-        <iron-signals on-iron-signal-reset="reset"></iron-signals>
 
 	</template>
 
@@ -75,16 +73,8 @@
                 type: Object,
                 value: {},
                 notify: true
-            },
-            selected: {
-                type: Boolean,
-                value: true
             }
 		},
-
-        reset: function () {
-            this.selected = true;
-        },
 
         setheight: function () {
             this.fire('updateheight');

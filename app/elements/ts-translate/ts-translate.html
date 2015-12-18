@@ -278,7 +278,7 @@
                 mythis.pullsource();
                 mythis.createchunks();
                 mythis.createchapters();
-                mythis.route = "translate";
+                mythis.fire('iron-signal', {name: 'loadcomplete'});
                 mythis.reset();
                 mythis.checksources();
                 setTimeout(function() {

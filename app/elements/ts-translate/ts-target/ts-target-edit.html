@@ -106,8 +106,8 @@
                 notify: true
             },
             selected: {
-                type: Number,
-                value: 0,
+                type: Boolean,
+                value: true,
                 notify: true
             }
 		},
@@ -154,7 +154,7 @@
         },
 
         review: function () {
-            this.selected = 0;
+            this.selected = true;
         },
 
         input: function () {

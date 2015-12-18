@@ -104,7 +104,7 @@
 
         <div id="pages">
             <ts-read-mode id="readmode" chapters="[[chapters]]" modestatus="{{modestatus}}"></ts-read-mode>
-            <ts-chunk-mode id="chunkmode" chunks="{{chunks}}" modestatus="{{modestatus}}" on-resize="resize"></ts-chunk-mode>
+            <ts-chunk-mode id="chunkmode" chunks="{{chunks}}" modestatus="{{modestatus}}"></ts-chunk-mode>
             <ts-review-mode id="reviewmode" chunks="{{chunks}}" modestatus="{{modestatus}}"></ts-review-mode>
             <ts-nosource-mode id="nosourcemode" projectdata="[[currentproject.data]]"></ts-nosource-mode>
         </div>
@@ -148,6 +148,7 @@
         <iron-signals on-iron-signal-opensource="opensource"></iron-signals>
         <iron-signals on-iron-signal-savetofile="savetofile"></iron-signals>
         <iron-signals on-iron-signal-updatestate="updatestate"></iron-signals>
+        <iron-signals on-iron-signal-savestate="savestate"></iron-signals>
 
     </template>
 
@@ -255,6 +256,16 @@
             var id = data.id;
             var mode = data.mode;
             this.currentproject.state[id][mode] = data.value;
+        },
+
+        savestate: function () {
+            if (this.route === "translate") {
+                var key = "uw-" + this.currentproject.data.project.slug + "-" + this.currentproject.data.language.lc;
+                this.getlocation();
+                App.configurator.setValue(key + "-chapter", this.modestatus.chapter);
+                App.configurator.setValue(key + "-index", this.modestatus.index);
+                App.configurator.setValue(key + "-selected", this.selected);
+            }
         },
 
         loadnewproject: function (event, data) {
@@ -547,9 +558,19 @@
             var review = this.$.reviewmode;
             var nosource = this.$.nosourcemode;
             var sources = this.currentproject.data.sources;
+            var key = "uw-" + this.currentproject.data.project.slug + "-" + this.currentproject.data.language.lc;
+            var index = App.configurator.getValue(key + "-index");
+            var chapter = App.configurator.getValue(key + "-chapter");
+            var selected = App.configurator.getValue(key + "-selected");
 
             mythis.set('selected', 0);
             mythis.set('modestatus', {"chapter": 1, "lastmode": 1, "index": -1});
+            if (chapter > 0) {
+                mythis.set('modestatus.chapter', chapter);
+            }
+            if (index >= 0) {
+                mythis.set('modestatus.index', index);
+            }
             read.classList.add("hide");
             chunk.classList.add("hide");
             review.classList.add("hide");
@@ -557,7 +578,11 @@
 
             if (sources !== undefined && sources.length !== 0) {
                 setTimeout(function() {
-                    mythis.set('selected', 1);
+                    if (selected > 0) {
+                        mythis.set('selected', selected);
+                    } else {
+                        mythis.set('selected', 1);
+                    }
                 }, 500);
             }
         },
@@ -696,6 +721,7 @@
         },
 
         gohome: function () {
+            this.savestate();
             this.animationConfig.exit.name = 'slide-right-animation';
             this.animationConfig.entry.name = 'slide-from-right-animation';
             this.fire('iron-signal', {name: 'setdefault'});
@@ -704,6 +730,7 @@
 
         gopublish: function () {
             if(this.currentproject.data.sources.length) {
+                this.savestate();
                 this.animationConfig.exit.name = 'slide-left-animation';
                 this.animationConfig.entry.name = 'slide-from-left-animation';
                 this.fire('iron-signal', {name: 'updatepublish'});
@@ -713,6 +740,7 @@
         },
 
         gosettings: function () {
+            this.savestate();
             this.animationConfig.exit.name = 'slide-left-animation';
             this.animationConfig.entry.name = 'slide-from-left-animation';
             this.backto = this.route;

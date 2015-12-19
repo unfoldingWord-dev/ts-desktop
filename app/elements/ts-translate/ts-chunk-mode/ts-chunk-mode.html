@@ -106,7 +106,12 @@
         },
 
         setheights: function () {
-            this.fire('iron-signal', {name: 'setheight'});
+            for (var i = 0; i < this.chunks.data.length; i++) {
+                var card = document.getElementById(this.modename + i);
+                if (card !== null) {
+                    card.setheight();
+                }
+            }
         },
 
         frommode: function () {
@@ -116,6 +121,7 @@
 
         tomode: function () {
             this.setpreview();
+            this.setlocation();
             this.setheights();
             this.setlocation();
             this.movein();

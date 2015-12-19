@@ -259,7 +259,7 @@ function ProjectsManager(query, configurator) {
         createReadyFile: function (meta) {
             var paths = this.getPaths(meta);
 
-            return write(paths.ready, "");
+            return write(paths.ready, (new Date()).toString());
         },
 
         exportTranslation: function (translation, meta, filename) {

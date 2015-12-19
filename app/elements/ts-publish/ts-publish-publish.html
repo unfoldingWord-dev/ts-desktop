@@ -254,6 +254,9 @@
 
             return App.projectsManager.createReadyFile(meta)
                 .then(function () {
+                    return App.git.stage(paths.projectDir);
+                })
+                .then(function () {
                     return App.uploader.register();
                 })
                 .then(function (reg) {

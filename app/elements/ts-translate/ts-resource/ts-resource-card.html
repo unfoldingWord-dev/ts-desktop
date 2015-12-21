@@ -58,20 +58,24 @@
             padding-bottom: 10px;
         }
 
+        .hide {
+            display: none;
+        }
+
 	</style>
 
 	<template>
 
         <paper-material elevation="1">
             <div id="heading">
-                <paper-tabs selected="{{selected}}">
-                    <paper-tab>Notes</paper-tab>
-                    <paper-tab>Words</paper-tab>
-                    <paper-tab>Questions</paper-tab>
+                <paper-tabs selected="{{chunk.state.resource}}" on-tap="updatestate">
+                    <paper-tab class$="[[checkclass(chunk.notes.length)]]">Notes</paper-tab>
+                    <paper-tab class$="[[checkclass(chunk.words.length)]]">Words</paper-tab>
+                    <paper-tab class$="[[checkclass(chunk.questions.length)]]">Questions</paper-tab>
                 </paper-tabs>
             </div>
             <div id="content">
-                <iron-pages selected="{{selected}}">
+                <iron-pages selected="{{chunk.state.resource}}">
                     <div>
                         <template is="dom-repeat" items="{{chunk.notes}}" as="note">
                             <p class="link" on-tap="opennote">{{note.title}}</p>
@@ -102,15 +106,24 @@
 		is: 'ts-resource-card',
 
 		properties: {
-            selected: {
-                type: Number,
-                value: 0
-            },
             chunk: {
                 type: Object,
                 value: {}
             }
 		},
+
+        checkclass: function (length) {
+            return length ? '' : 'hide';
+        },
+
+        updatestate: function () {
+            var id = this.chunk.meta.chapterid + "-" + this.chunk.meta.frameid;
+            var mythis = this;
+            setTimeout(function() {
+                var value = mythis.chunk.state.resource;
+                mythis.fire('iron-signal', {name: 'updatestate', data: {id: id, mode: "resource", value: value}});
+            }, 500);
+        },
 
         opennote: function (e) {
             var note = e.model.note;

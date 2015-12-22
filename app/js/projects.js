@@ -252,6 +252,16 @@ function ProjectsManager(query, configurator) {
             return zipper(r);
         },
 
+        getAllWords: function () {
+
+            var r = query([
+                "select w.id, w.term, w.definition, w.definition_title 'title' from translation_word w",
+                "order by w.term"
+            ].join(' '));
+
+            return zipper(r);
+        },
+
         getWordExamples: function (wordid) {
 
             var r = query([

@@ -59,6 +59,23 @@
             color: var(--accent-color);
         }
 
+        #editpopup {
+            width: 350px;
+            height: 175px;
+            text-align: center;
+            color: var(--primary-text-color);
+        }
+
+        #editpopup .buttons {
+            display: flex;
+            justify-content: center;
+            color: var(--secondary-text-color);
+        }
+
+        #editpopup .buttons paper-button:hover {
+            color: var(--accent-color);
+        }
+
         #sourcepopup {
             height: 500px;
             width: 500px;
@@ -124,6 +141,17 @@
             </div>
         </paper-dialog>
 
+        <paper-dialog id="editpopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <h2>Edit Chunk</h2>
+            <div>
+                <p>This chunk is done. Continue editing?</p>
+            </div>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Dismiss</paper-button>
+                <paper-button dialog-confirm on-tap="closeedit">Edit</paper-button>
+            </div>
+        </paper-dialog>
+
         <paper-dialog id="nodatapopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <h2>No Translation</h2>
             <div>
@@ -149,6 +177,7 @@
         <iron-signals on-iron-signal-loadproject="loadproject"></iron-signals>
         <iron-signals on-iron-signal-updatetranslation="updatetranslation"></iron-signals>
         <iron-signals on-iron-signal-openchecklist="openchecklist"></iron-signals>
+        <iron-signals on-iron-signal-openedit="openedit"></iron-signals>
         <iron-signals on-iron-signal-opennodata="opennodata"></iron-signals>
         <iron-signals on-iron-signal-opensource="opensource"></iron-signals>
         <iron-signals on-iron-signal-savetofile="savetofile"></iron-signals>
@@ -235,6 +264,16 @@
         closechecklist: function () {
             var index = this.modestatus.index;
             this.fire('iron-signal', {name: 'completechunk', data: {index: index}});
+        },
+
+        openedit: function (event, data) {
+            this.modestatus.index = data.index;
+            this.$.editpopup.open();
+        },
+
+        closeedit: function () {
+            var index = this.modestatus.index;
+            this.fire('iron-signal', {name: 'editchunk', data: {index: index}});
         },
 
         opensource: function () {

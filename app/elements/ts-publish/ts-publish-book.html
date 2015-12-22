@@ -73,6 +73,10 @@
 
         updatepublish: function () {
             this.createchapters();
+            var mythis = this;
+            setTimeout(function() {
+                mythis.$.contain.scrollTop = 0;
+            }, 250);
         },
 
         createchapters: function () {

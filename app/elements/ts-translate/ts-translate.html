@@ -59,6 +59,23 @@
             color: var(--accent-color);
         }
 
+        #editpopup {
+            width: 350px;
+            height: 175px;
+            text-align: center;
+            color: var(--primary-text-color);
+        }
+
+        #editpopup .buttons {
+            display: flex;
+            justify-content: center;
+            color: var(--secondary-text-color);
+        }
+
+        #editpopup .buttons paper-button:hover {
+            color: var(--accent-color);
+        }
+
         #sourcepopup {
             height: 500px;
             width: 500px;
@@ -124,6 +141,17 @@
             </div>
         </paper-dialog>
 
+        <paper-dialog id="editpopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <h2>Edit Chunk</h2>
+            <div>
+                <p>This chunk is done. Continue editing?</p>
+            </div>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Dismiss</paper-button>
+                <paper-button dialog-confirm on-tap="closeedit">Edit</paper-button>
+            </div>
+        </paper-dialog>
+
         <paper-dialog id="nodatapopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <h2>No Translation</h2>
             <div>
@@ -147,13 +175,16 @@
         <iron-signals on-iron-signal-updateselected="updateselected"></iron-signals>
         <iron-signals on-iron-signal-loadnewproject="loadnewproject"></iron-signals>
         <iron-signals on-iron-signal-loadproject="loadproject"></iron-signals>
+        <iron-signals on-iron-signal-loadpublish="loadpublish"></iron-signals>
         <iron-signals on-iron-signal-updatetranslation="updatetranslation"></iron-signals>
         <iron-signals on-iron-signal-openchecklist="openchecklist"></iron-signals>
+        <iron-signals on-iron-signal-openedit="openedit"></iron-signals>
         <iron-signals on-iron-signal-opennodata="opennodata"></iron-signals>
         <iron-signals on-iron-signal-opensource="opensource"></iron-signals>
         <iron-signals on-iron-signal-savetofile="savetofile"></iron-signals>
         <iron-signals on-iron-signal-updatestate="updatestate"></iron-signals>
         <iron-signals on-iron-signal-savestate="savestate"></iron-signals>
+        <iron-signals on-iron-signal-reset="reset"></iron-signals>
 
     </template>
 
@@ -237,6 +268,16 @@
             this.fire('iron-signal', {name: 'completechunk', data: {index: index}});
         },
 
+        openedit: function (event, data) {
+            this.modestatus.index = data.index;
+            this.$.editpopup.open();
+        },
+
+        closeedit: function () {
+            var index = this.modestatus.index;
+            this.fire('iron-signal', {name: 'editchunk', data: {index: index}});
+        },
+
         opensource: function () {
             var modal = this.$.modal;
             var sources = App.projectsManager.sources;
@@ -276,6 +317,7 @@
         loadnewproject: function (event, data) {
             var blank = [];
             var blankstate = {};
+            this.setrightanimation();
             this.set('currentproject.state', blankstate);
             this.set('currentproject.translation', blank);
             this.set('currentproject.data', data.projdata);
@@ -288,6 +330,7 @@
             var mythis = this;
             var blankstate = {};
             var loading = this.$.loading;
+            this.setrightanimation();
             this.route = "translate";
             setTimeout(function() {
                 loading.open();
@@ -304,6 +347,34 @@
                             mythis.setmodestate();
                             mythis.checksources();
                             mythis.fire('iron-signal', {name: 'adjustbar'});
+                        }, 250);
+                    });
+                }, 250);
+            }, 500);
+        },
+
+        loadpublish: function (event, data) {
+            var mythis = this;
+            var blankstate = {};
+            var loading = this.$.loading;
+            this.setrightanimation();
+            this.route = "translate";
+            setTimeout(function() {
+                loading.open();
+                setTimeout(function() {
+                    mythis.set('currentproject.data', data.projdata);
+                    mythis.set('currentproject.state', blankstate);
+                    App.projectsManager.loadTargetTranslation(data.projdata).then(function (translation) {
+                        mythis.set('rawdata', translation);
+                        mythis.pullsource();
+                        mythis.createchunks();
+                        mythis.createchapters();
+                        loading.close();
+                        setTimeout(function() {
+                            mythis.setmodestate();
+                            mythis.checksources();
+                            mythis.fire('iron-signal', {name: 'adjustbar'});
+                            mythis.gopublish();
                         }, 250);
                     });
                 }, 250);
@@ -771,8 +842,6 @@
 
         gohome: function () {
             this.savestate();
-            this.animationConfig.exit.name = 'slide-right-animation';
-            this.animationConfig.entry.name = 'slide-from-right-animation';
             this.fire('iron-signal', {name: 'setdefault'});
             this.reset();
             this.route = "home";
@@ -781,8 +850,7 @@
         gopublish: function () {
             if(this.currentproject.data.sources.length) {
                 this.savestate();
-                this.animationConfig.exit.name = 'slide-left-animation';
-                this.animationConfig.entry.name = 'slide-from-left-animation';
+                this.setleftanimation();
                 this.fire('iron-signal', {name: 'updatepublish'});
                 this.route = "publish";
                 this.selected = 1;
@@ -791,10 +859,19 @@
 
         gosettings: function () {
             this.savestate();
-            this.animationConfig.exit.name = 'slide-left-animation';
-            this.animationConfig.entry.name = 'slide-from-left-animation';
+            this.setleftanimation();
             this.backto = this.route;
             this.route = "settings";
+        },
+
+        setrightanimation: function () {
+            this.animationConfig.exit.name = 'slide-right-animation';
+            this.animationConfig.entry.name = 'slide-from-right-animation';
+        },
+
+        setleftanimation: function () {
+            this.animationConfig.exit.name = 'slide-left-animation';
+            this.animationConfig.entry.name = 'slide-from-left-animation';
         },
 
         ready: function() {

@@ -129,6 +129,15 @@
             font-size: 120%;
         }
 
+        #resourcepopup #footer {
+            flex: 0 0 50px;
+            display: flex;
+            align-items: center;
+            border-top: 1px solid var(--border-color);
+            text-transform: uppercase;
+            padding-left: 40px;
+        }
+
         #examples {
             margin-top: 10px;
         }
@@ -136,6 +145,14 @@
         .link {
             color: var(--accent-color);
             cursor: pointer;
+        }
+
+        .words {
+            padding: 5px 0;
+        }
+
+        #resourcepopup #footer.hide {
+            display: none;
         }
 
 	</style>
@@ -148,6 +165,7 @@
                     <ts-review-card id="{{createid(index)}}" chunk="{{chunk}}" on-updateheight="updateheight"></ts-review-card>
                 </template>
             </iron-list>
+
             <paper-material id="resourcepopup" class="hide">
                 <div class="buttons">
                     <paper-button on-tap="closeresource"><iron-icon icon="clear"></iron-icon>Close</paper-button>
@@ -156,19 +174,28 @@
                     <div id="textholder"></div>
                     <template is="dom-if" if="{{related.length}}">
                         <h3>See Also:</h3>
-                    </template>
-                    <template is="dom-repeat" items="{{related}}" as="word">
-                        <p class="link" on-tap="newword">{{word.term}}</p>
+                        <template is="dom-repeat" items="{{related}}" as="word">
+                            <p class="link" on-tap="newword">{{word.term}}</p>
+                        </template>
                     </template>
                     <template is="dom-if" if="{{examples.length}}">
                         <h3>Examples:</h3>
+                        <template is="dom-repeat" items="{{examples}}" as="example">
+                            <div id="examples">
+                                <p class="link" on-tap="examplescroll"><span>{{chunks.data.0.data.project.name}}</span> <span>{{example.chapter}}</span>:<span>{{example.frame}}</span></p>
+                                <p>{{example.body}}</p>
+                            </div>
+                        </template>
                     </template>
-                    <template is="dom-repeat" items="{{examples}}" as="example">
-                        <div id="examples">
-                            <p class="link" on-tap="examplescroll"><span>{{chunks.data.0.data.project.name}}</span> <span>{{example.chapter}}</span>:<span>{{example.frame}}</span></p>
-                            <p>{{example.body}}</p>
-                        </div>
+                    <template is="dom-if" if="{{allwords.length}}">
+                        <h3>Words Index</h3>
+                        <template is="dom-repeat" items="{{allwords}}" as="word">
+                            <p class="link words" on-tap="newword">{{word.term}}</p>
+                        </template>
                     </template>
+                </div>
+                <div id="footer">
+                    <p class="link" on-tap="openindex">Words Index</p>
                 </div>
             </paper-material>
         </div>
@@ -211,6 +238,10 @@
             examples: {
                 type: Array,
                 value: []
+            },
+            allwords: {
+                type: Array,
+                value: []
             }
         },
 
@@ -234,23 +265,42 @@
             var textholder = this.$.textholder;
             var content = "";
             var clear = [];
+            var footer = this.$.footer;
 
             if (data.type === "note") {
                 this.set('related', clear);
                 this.set('examples', clear);
+                this.set('allwords', clear);
+                footer.classList.add("hide");
                 content = "\<h2 class='style-scope ts-review-mode'\>" + data.title + "\<\/h2\>\<p class='style-scope ts-review-mode'\>" + data.body + "\<\/p\>";
             }
             if (data.type === "word") {
                 this.set('related', App.projectsManager.getRelatedWords(data.id));
                 this.set('examples', App.projectsManager.getWordExamples(data.id));
+                this.set('allwords', clear);
+                footer.classList.remove("hide");
                 content = "\<h2 class='style-scope ts-review-mode'\>" + data.term + "\<\/h2\>\<h3 class='style-scope ts-review-mode'\>" + data.title + "\<\/h3\>" + data.definition;
             }
             if (data.type === "question") {
                 this.set('related', clear);
                 this.set('examples', clear);
+                this.set('allwords', clear);
+                footer.classList.add("hide");
                 content = "\<h2 class='style-scope ts-review-mode'\>" + data.question + "\<\/h2\>\<p class='style-scope ts-review-mode'\>" + data.answer + "\<\/p\>";
             }
+            if (data.type === "allwords") {
+                this.set('related', clear);
+                this.set('examples', clear);
+                this.set('allwords', App.projectsManager.getAllWords());
+                footer.classList.add("hide");
+                content = "";
+            }
             textholder.innerHTML = content;
+        },
+
+        openindex: function () {
+            var data = {type: "allwords"};
+            this.fillresource(data);
         },
 
         newword: function (e) {

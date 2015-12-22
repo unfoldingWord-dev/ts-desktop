@@ -252,6 +252,16 @@ function ProjectsManager(query, configurator) {
             return zipper(r);
         },
 
+        getWordExamples: function (wordid) {
+
+            var r = query([
+                "select cast(e.frame_slug as int) 'frame', cast(e.chapter_slug as int) 'chapter', e.body from translation_word_example e",
+                "where e.translation_word_id='" + wordid + "'"
+            ].join(' '));
+
+            return zipper(r);
+        },
+
         getFrameQuestions: function (frameid) {
 
             var r = query([

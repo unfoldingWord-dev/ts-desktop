@@ -126,20 +126,20 @@
         },
 
         opennote: function (e) {
-            var note = e.model.note;
-            var content = "\<h2 class='style-scope ts-review-mode'\>" + note.title + "\<\/h2\>\<p class='style-scope ts-review-mode'\>" + note.body + "\<\/p\>";
+            var content = e.model.note;
+            content.type = "note";
             this.fire('iron-signal', {name: 'openresource', data: {content: content}});
         },
 
         openword: function (e) {
-            var word = e.model.word;
-            var content = "\<h2 class='style-scope ts-review-mode'\>" + word.term + "\<\/h2\>" + word.definition;
+            var content = e.model.word;
+            content.type = "word";
             this.fire('iron-signal', {name: 'openresource', data: {content: content}});
         },
 
         openquestion: function (e) {
-            var question = e.model.question;
-            var content = "\<h2 class='style-scope ts-review-mode'\>" + question.question + "\<\/h2\>\<p class='style-scope ts-review-mode'\>" + question.answer + "\<\/p\>";
+            var content = e.model.question;
+            content.type = "question";
             this.fire('iron-signal', {name: 'openresource', data: {content: content}});
         },
 

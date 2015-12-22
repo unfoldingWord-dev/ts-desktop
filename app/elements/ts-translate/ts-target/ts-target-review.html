@@ -103,6 +103,7 @@
         </paper-material>
 
         <iron-signals on-iron-signal-completechunk="completechunk"></iron-signals>
+        <iron-signals on-iron-signal-editchunk="editchunk"></iron-signals>
 
 	</template>
 
@@ -230,6 +231,14 @@
                 this.set('chunk.transcontent', returnstr.trim());
                 this.set('chunk.completed', false);
                 this.fire('iron-signal', {name: 'updatetranslation'});
+            }
+        },
+
+        editchunk: function (event, data) {
+            var index = data.index;
+
+            if (this.chunk.index === index) {
+                this.checkdone();
             }
         },
 

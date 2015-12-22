@@ -132,6 +132,8 @@
             var src = this.$.srccard;
             var mythis = this;
             var id = this.chunk.meta.chapterid + "-" + this.chunk.meta.frameid;
+            var completed = this.chunk.completed;
+            var index = this.chunk.index;
 
             if(this.chunk.state.chunk) {
                 trans.classList.add("up");
@@ -142,6 +144,8 @@
                     mythis.set('chunk.state.chunk', false);
                     mythis.fire('iron-signal', {name: 'updatestate', data: {id: id, mode: "chunk", value: false}});
                 }, 1000);
+            } else if (completed) {
+                this.fire('iron-signal', {name: 'openedit', data: {index: index}});
             }
         },
 

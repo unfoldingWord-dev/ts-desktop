@@ -394,6 +394,12 @@
                 var words = App.projectsManager.getFrameWords(id);
                 var verses = [];
 
+                for (var n = 0; n < notes.length; n++) {
+                    if (notes[n].title === "") {
+                        notes[n].title = notes[n].body;
+                    }
+                }
+
                 while (test.test(sourcedata)) {
                     var versestr = sourcedata.substring(sourcedata.search(startstr) + 15, sourcedata.search(endstr));
                     if (versestr.indexOf("-") < 0) {
@@ -666,8 +672,22 @@
                 var frameid = translation[i].meta.frameid;
                 var statedata = this.currentproject.state[chapterid + '-' + frameid];
                 if (statedata === undefined) {
-                    translation[i].state = {chunk: true, review: true};
-                    this.currentproject.state[chapterid + '-' + frameid] = {chunk: true, review: true};
+                    translation[i].state = {chunk: true, review: true, resource: 0};
+                    this.currentproject.state[chapterid + '-' + frameid] = {chunk: true, review: true, resource: 0};
+                    if (!source[i].notes.length) {
+                        if (!source[i].words.length) {
+                            if (!source[i].questions.length) {
+                                translation[i].state.resource = 0;
+                                this.currentproject.state[chapterid + '-' + frameid].resource = 0;
+                            } else {
+                                translation[i].state.resource = 2;
+                                this.currentproject.state[chapterid + '-' + frameid].resource = 2;
+                            }
+                        } else {
+                            translation[i].state.resource = 1;
+                            this.currentproject.state[chapterid + '-' + frameid].resource = 1;
+                        }
+                    }
                 } else {
                     translation[i].state = statedata;
                 }

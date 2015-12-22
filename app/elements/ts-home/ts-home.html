@@ -283,7 +283,7 @@
                 </div>
                 <div id="righticons">
                     <paper-icon-button class="smallicon" icon="print" title="print"></paper-icon-button>
-                    <paper-icon-button class="smallicon" icon="cloud-done" title="publish"></paper-icon-button>
+                    <paper-icon-button on-tap="gopublish" class="smallicon" icon="cloud-done" title="publish"></paper-icon-button>
                     <paper-icon-button class="smallicon" icon="file-upload" title="backup"></paper-icon-button>
                 </div>
             </div>
@@ -351,6 +351,12 @@
                     }
                 }
             }
+        },
+
+        gopublish: function () {
+            var projectdata = this.currentinfo;
+            this.closeinfo();
+            this.fire('iron-signal', {name: 'loadpublish', data: {projdata: projectdata}});
         },
 
         openproject: function (e) {

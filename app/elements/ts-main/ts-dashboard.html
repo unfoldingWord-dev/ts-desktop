@@ -1,6 +1,9 @@
 
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
 <link rel="import" href="../../components/iron-signals/iron-signals.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/iron-input/iron-input.html">
+<link rel="import" href="../../components/paper-dialog/paper-dialog.html">
 
 <link rel="import" href="../ts-home/ts-home.html">
 <link rel="import" href="../ts-new/ts-new.html">
@@ -27,6 +30,53 @@
           flex: auto;
       }
 
+      .popup {
+          position: fixed;
+          top: 0;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          margin: auto;
+      }
+
+      .popup paper-button:hover {
+          color: var(--accent-color);
+      }
+
+      #feedback {
+          display: flex;
+          flex-direction: column;
+          width: 400px;
+          height: 350px;
+      }
+
+      #feedbackheader {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+      }
+
+      #feedbackbody {
+          display: flex;
+          flex-direction: column;
+          border-bottom: 1px solid var(--border-color);
+          border-top: 1px solid var(--border-color);
+          padding: 20px;
+      }
+
+      #feedbackbuttons {
+          display: flex;
+          justify-content: flex-end;
+          padding: 0 20px;
+      }
+
+      input {
+          border: none;
+          font-size: 120%;
+          padding: 10px;
+          color: var(--secondary-text-color);
+      }
+
   </style>
 
   <template>
@@ -44,8 +94,23 @@
           <ts-terms accepted="{{accepted}}"></ts-terms>
       </template>
 
+      <paper-dialog id="feedback" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <div id="feedbackheader">
+              <h2>Feedback</h2>
+              <p>This will use your internet connection</p>
+          </div>
+          <div id="feedbackbody">
+              <input is="iron-input" bind-value="{{feedback}}" placeholder="Describe the problem you are experiencing">
+          </div>
+          <div id="feedbackbuttons">
+              <paper-button on-tap="closefeedback">Cancel</paper-button>
+              <paper-button on-tap="sendfeedback">Confirm</paper-button>
+          </div>
+      </paper-dialog>
+
       <iron-signals on-iron-signal-updatelist="updatelist"></iron-signals>
       <iron-signals on-iron-signal-setdefault="setdefault"></iron-signals>
+      <iron-signals on-iron-signal-openfeedback="openfeedback"></iron-signals>
 
   </template>
 
@@ -77,7 +142,25 @@
           backto: {
             type: String,
             value: ""
+          },
+          feedback: {
+              type: String,
+              value: ""
           }
+      },
+
+      openfeedback: function () {
+          this.feedback = "";
+          this.$.feedback.open();
+      },
+
+      closefeedback: function () {
+          this.$.feedback.close();
+      },
+
+      sendfeedback: function () {
+          //do stuff
+          this.closefeedback();
       },
 
       _routeChanged: function (event) {

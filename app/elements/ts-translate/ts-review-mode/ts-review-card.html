@@ -45,7 +45,7 @@
         <div id="contain">
             <ts-source-chunk id="left" reviewmode chunk="[[chunk]]"></ts-source-chunk>
             <div id="middle">
-                <template is="dom-if" if="{{!test}}">
+                <template is="dom-if" if="{{chunk.meta.standard}}">
                     <template is="dom-if" if="{{chunk.state.review}}">
                         <ts-target-review chunk="{{chunk}}" on-setheight="setheight"></ts-target-review>
                     </template>
@@ -53,7 +53,7 @@
                         <ts-target-edit chunk="{{chunk}}" on-setheight="setheight"></ts-target-edit>
                     </template>
                 </template>
-                <template is="dom-if" if="{{test}}">
+                <template is="dom-if" if="{{!chunk.meta.standard}}">
                     <ts-target-helps chunk="{{chunk}}"></ts-target-helps>
                 </template>
             </div>
@@ -79,10 +79,6 @@
                 type: Object,
                 value: {},
                 notify: true
-            },
-            test: {
-                type: Boolean,
-                value: true
             }
 		},
 

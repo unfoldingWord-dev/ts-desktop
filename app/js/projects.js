@@ -81,7 +81,7 @@ function ProjectsManager(query, configurator) {
 
 
                 makeProjectPaths: function (meta) {
-                    return this.makeProjectPathsForProject(prefix + meta.project.slug + '-' + meta.language.lc);
+                    return this.makeProjectPathsForProject(prefix + meta.fullname);
                 },
 
                 makeProjectPathsForProject: function (project) {

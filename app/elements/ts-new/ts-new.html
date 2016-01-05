@@ -8,6 +8,7 @@
 <link rel="import" href="./ts-language-menu.html">
 <link rel="import" href="./ts-project-menu.html">
 <link rel="import" href="./ts-book-menu.html">
+<link rel="import" href="./ts-type-menu.html">
 
 <dom-module id="ts-new">
 
@@ -83,8 +84,9 @@
 
         <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
             <ts-language-menu id="languages" selected="{{selected}}" language="{{language}}"></ts-language-menu>
-            <ts-project-menu selected="{{selected}}" category="{{category}}" project="{{project}}" on-create="createproject"></ts-project-menu>
-            <ts-book-menu selected="{{selected}}" category="[[category]]" project="{{project}}" on-create="createproject"></ts-book-menu>
+            <ts-project-menu selected="{{selected}}" category="{{category}}" project="{{project}}"></ts-project-menu>
+            <ts-book-menu selected="{{selected}}" category="[[category]]" project="{{project}}"></ts-book-menu>
+            <ts-type-menu selected="{{selected}}" category="[[category]]" project="[[project]]" type="{{type}}" on-create="createproject"></ts-type-menu>
         </neon-animated-pages>
 
         <paper-dialog id="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -133,6 +135,10 @@
                 type: Object,
                 value: {}
             },
+            type: {
+                type: String,
+                value: ""
+            },
             projectlist: {
                 type: Array,
                 value: []
@@ -161,18 +167,28 @@
             var name = this.project.name;
             var project = this.project;
             var language = this.language;
+            var type = this.type;
+            var typeext = "";
             var projectarray = this.projectlist;
             var icon = this.category.lefticon;
             var popup = this.$.popup;
 
+            if (type === "Notes") {
+                typeext = "_n";
+            }
+            if (type === "Questions") {
+                typeext = "_q";
+            }
+            var fullname = project.slug + typeext + "-" + language.lc;
+
             for (var i = 0; i < projectarray.length; i++) {
-                if (projectarray[i].project.name === name && projectarray[i].language === language) {
+                if (projectarray[i].fullname === fullname) {
                     popup.open();
                     return;
                 }
             }
 
-            var newprojdata = {"project": project, "language": language, "icon": icon, "translators": [], "sources": [], "completion": 0, "currentsource": null};
+            var newprojdata = {"project": project, "fullname": fullname, "type": type, "language": language, "icon": icon, "translators": [], "sources": [], "completion": 0, "currentsource": null};
             this.fire('iron-signal', {name: 'loadnewproject', data: {projdata: newprojdata}});
             this.animationConfig.exit.name = 'slide-left-animation';
             this.route = "translate";

@@ -347,6 +347,7 @@ function ProjectsManager(query, configurator) {
                 package_version: 3,
                 target_language: language,
                 project_id: meta.project.slug,
+                project_type: meta.type,
                 source_translations: sources,
                 translators: meta.translators,
                 finished_frames: finishedFrames,

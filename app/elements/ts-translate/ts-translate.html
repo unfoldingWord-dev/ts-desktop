@@ -217,6 +217,10 @@
                 value: {},
                 notify: true
             },
+            standardproject: {
+                type: Boolean,
+                value: true
+            },
             rawdata: {
                 type: Object,
                 value: {}
@@ -321,6 +325,7 @@
             this.set('currentproject.state', blankstate);
             this.set('currentproject.translation', blank);
             this.set('currentproject.data', data.projdata);
+            this.checkstandard();
             this.savetofile();
             this.setmodestate();
             this.checksources();
@@ -337,6 +342,7 @@
                 setTimeout(function() {
                     mythis.set('currentproject.data', data.projdata);
                     mythis.set('currentproject.state', blankstate);
+                    mythis.checkstandard();
                     App.projectsManager.loadTargetTranslation(data.projdata).then(function (translation) {
                         mythis.set('rawdata', translation);
                         mythis.pullsource();
@@ -434,6 +440,11 @@
             });
         },
 
+        checkstandard: function () {
+            var check = this.currentproject.data.type === "Text";
+            this.set('standardproject', check);
+        },
+
         pullsource: function () {
             var current = this.currentproject.data.currentsource;
             if (current === null || current === undefined) {
@@ -451,6 +462,7 @@
             var test = new RegExp(startstr);
             var chapterref;
             var chunkref;
+            var standard = this.standardproject;
 
             for (var i = 0; i < frames.length; i++) {
                 var chapterid = frames[i].chapter;
@@ -510,12 +522,13 @@
                     frameid: frameid,
                     verses: verses,
                     chapterref: chapterref,
-                    chunkref: chunkref
+                    chunkref: chunkref,
+                    standard: standard
                 };
 
                 srcchunk = {
                     meta: meta,
-                    content: sourcedata,
+                    srccontent: sourcedata,
                     notes: notes,
                     words: words,
                     questions: questions
@@ -524,9 +537,9 @@
 
                 var rawdata = this.rawdata[chapterid + '-' + frameid];
                 if (rawdata === undefined) {
-                    transchunk = {content: "", completed: false, meta: meta};
+                    transchunk = {transcontent: "", helpscontent: [], completed: false, meta: meta};
                 } else {
-                    transchunk = {content: rawdata.content, completed: rawdata.completed, meta: meta};
+                    transchunk = {transcontent: rawdata.content, helpscontent: [], completed: rawdata.completed, meta: meta};
                 }
                 translation.push(transchunk);
             }
@@ -765,10 +778,10 @@
             }
 
             transdata.data = translation.map(function(chunk, index){
-                return {transcontent: chunk.content, completed: chunk.completed, data: projectdata, index: index, state: chunk.state};
+                return {transcontent: chunk.transcontent, helpscontent: chunk.helpscontent, completed: chunk.completed, data: projectdata, index: index, state: chunk.state};
             });
             srcdata.data = source.map(function(chunk){
-                return {srccontent: chunk.content, meta: chunk.meta, notes: chunk.notes, words: chunk.words, questions: chunk.questions};
+                return {srccontent: chunk.srccontent, meta: chunk.meta, notes: chunk.notes, words: chunk.words, questions: chunk.questions};
             });
             var merged = _.merge(srcdata, transdata);
             this.set('chunks', merged);
@@ -798,7 +811,7 @@
                     if (!chunk.completed) {
                         chapcomplete = false;
                     }
-                    chapcontent += chunk.content + " ";
+                    chapcontent += chunk.transcontent + " ";
                 });
                 transchapters.push({completed: chapcomplete, transcontent: chapcontent, data: projectdata});
             });
@@ -813,7 +826,7 @@
                 var chapstate = true;
 
                 _.forEach(data, function (chunk) {
-                    chapcontent += chunk.content + " ";
+                    chapcontent += chunk.srccontent + " ";
                     chapterref = chunk.meta.chapterref;
                     chapterid = chunk.meta.chapterid;
                 });

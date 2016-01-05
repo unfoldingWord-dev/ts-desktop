@@ -46,20 +46,25 @@
             background: var(--card-background-color);
             flex: 0 0 auto;
             border-radius: 3px;
-            margin: 5px 0;
+            margin: 8px 0;
         }
 
         .contentheader {
             color: var(--secondary-text-color);
-            min-height: 48px;
+            min-height: 40px;
             border-bottom: 1px solid var(--note-card-pink);
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
         }
 
         .contentbody {
             background-size: 100% 32px;
             background-image: -webkit-linear-gradient(var(--card-background-color) 27px, var(--border-color) 27px, var(--border-color) 28px, var(--card-background-color) 28px);
             border-radius: 3px;
-            min-height: 96px;
+            min-height: 48px;
+            padding: 0 16px;
+            margin-top: 8px;
         }
 
         #content {
@@ -68,6 +73,13 @@
             display: flex;
             flex-direction: column;
 		}
+
+        #content iron-autogrow-textarea {
+            line-height: 2;
+            border: none;
+            margin: 0;
+            width: 100%;
+        }
 
         #togglebox {
             display: flex;
@@ -98,17 +110,19 @@
                 <div>
                     <span>[[chunk.meta.chunkref]]</span> - <span>[[chunk.data.language.ln]]</span> - <span>[[chunk.data.type]]</span>
                 </div>
-                <paper-icon-button icon="add" on-tap="edit"></paper-icon-button>
+                <paper-icon-button icon="add" on-tap="addhelp"></paper-icon-button>
             </paper-material>
             <div id="content">
-                <paper-material class="contentbox" elevation="1">
-                    <div class="contentheader">
-
-                    </div>
-                    <div class="contentbody">
-
-                    </div>
-                </paper-material>
+                <template is="dom-repeat" items="{{chunk.helpscontent}}" as="help">
+                    <paper-material class="contentbox" elevation="1">
+                        <div class="contentheader">
+                            <iron-autogrow-textarea class="headertextbox" bind-value="{{help.title}}" placeholder="Add Title Here"></iron-autogrow-textarea>
+                        </div>
+                        <div class="contentbody">
+                            <iron-autogrow-textarea class="bodytextbox" bind-value="{{help.body}}" placeholder="Add Content Here"></iron-autogrow-textarea>
+                        </div>
+                    </paper-material>
+                </template>
             </div>
             <paper-material id="togglebox" elevation="1">
                 <p>Mark chunk as done</p>
@@ -140,6 +154,11 @@
         observers: [
             'rendertext(chunk.*)'
         ],
+
+        addhelp: function () {
+            var newhelp = {title: "", body: ""};
+            this.push('chunk.helpscontent', newhelp);
+        },
 
         rendertext: function () {
             if(this.chunk && this.chunk.srccontent) {

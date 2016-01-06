@@ -318,8 +318,13 @@ function ProjectsManager(query, configurator) {
                 };
             };
 
+            var isTranslation = meta.type.toUpperCase() === 'TEXT';
+
             var chunks = _.chain(translation)
-                .filter('content')
+                .filter(function (c) {
+                    // make sure we don't write any empty content
+                    return isTranslation ? !!c.transcontent : !!c.helpscontent.length;
+                })
                 .indexBy(makeComplexId)
                 .value();
 
@@ -373,7 +378,7 @@ function ProjectsManager(query, configurator) {
 
             var writeChunk = function (c) {
                 var f = path.join(paths.projectDir, c.meta.chapterid, c.meta.frameid + '.txt');
-                return write(f, c.content);
+                return write(f, isTranslation ? c.transcontent : JSON.stringify(c.helpscontent));
             };
 
             var writeChunks = function (data) {
@@ -388,7 +393,6 @@ function ProjectsManager(query, configurator) {
                 .then(makeChapterDirs(chunks))
                 .then(writeChunks(chunks))
                 .then(git.init.bind(git, paths.projectDir))
-                // .then(git.diff.bind(git, paths.projectDir))
                 .then(git.stage.bind(git, paths.projectDir));
         },
 

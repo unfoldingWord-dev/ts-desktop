@@ -78,7 +78,7 @@
         iron-list {
             font-size: 110%;
             max-height: 90vh;
-            width: 470px;
+            width: 600px;
             background: var(--card-background-color);
             box-shadow: 0 2px 3px 2px var(--border-color);
         }
@@ -95,7 +95,7 @@
 
         #headings {
             flex: 0 0 50px;
-            width: 470px;
+            width: 600px;
             display: flex;
             align-items: center;
         }
@@ -116,7 +116,7 @@
         }
 
         .smallspan {
-            width: 45px;
+            width: 70px;
             display: inline-flex;
             justify-content: center;
         }
@@ -215,28 +215,6 @@
             padding: 0 50px;
         }
 
-        #loading {
-            width: 320px;
-            height: 220px;
-            color: var(--primary-text-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 110%;
-        }
-
-        paper-progress {
-            --paper-progress-active-color: var(--accent-color);
-            width: 250px;
-        }
-
-        #bar {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 40px;
-        }
-
     </style>
 
     <template>
@@ -262,6 +240,7 @@
                     <div id="headings" class="smalltext">
                         <span class="smallspan"></span>
                         <span class="bigspan">Project</span>
+                        <span class="smallspan">Type</span>
                         <span class="bigspan">Language</span>
                         <span>Progress</span>
                     </div>
@@ -272,6 +251,7 @@
                                     <div class="left" on-tap="openproject">
                                         <span class="smallspan"><iron-icon class="smallicon" icon="[[proj.icon]]"></iron-icon></span>
                                         <span class="bigspan">[[proj.project.name]]</span>
+                                        <span class="smallspan smalltext">[[proj.type]]</span>
                                         <span class="smalltext bigspan">[[proj.language.ln]]</span>
                                         <span class="smallspan"><ts-completion-icon percent="[[proj.completion]]"></ts-completion-icon></span>
                                     </div>
@@ -305,7 +285,7 @@
                 </div>
                 <div id="righticons">
                     <paper-icon-button class="smallicon" icon="print" title="print"></paper-icon-button>
-                    <paper-icon-button class="smallicon" icon="cloud-done" title="publish"></paper-icon-button>
+                    <paper-icon-button on-tap="gopublish" class="smallicon" icon="cloud-done" title="publish"></paper-icon-button>
                     <paper-icon-button class="smallicon" icon="file-upload" title="backup"></paper-icon-button>
                 </div>
             </div>
@@ -325,16 +305,7 @@
             </div>
         </paper-dialog>
 
-        <paper-dialog id="loading" class="popup" modal="true">
-            <p>Loading project. Please wait...</p>
-            <div id="bar">
-                <paper-progress indeterminate="true"></paper-progress>
-            </div>
-        </paper-dialog>
-
         <ts-new-project-button route="{{route}}"></ts-new-project-button>
-
-        <iron-signals on-iron-signal-loadcomplete="loadcomplete"></iron-signals>
 
     </template>
 
@@ -384,22 +355,15 @@
             }
         },
 
-        openproject: function (e) {
-            var projectdata = e.model.proj;
-            var mythis = this;
-            var loading = this.$.loading;
-            loading.open();
-            setTimeout(function() {
-                mythis.fire('iron-signal', {name: 'loadproject', data: {projdata: projectdata}});
-            }, 100);
+        gopublish: function () {
+            var projectdata = this.currentinfo;
+            this.closeinfo();
+            this.fire('iron-signal', {name: 'loadpublish', data: {projdata: projectdata}});
         },
 
-        loadcomplete: function () {
-            this.route = "translate";
-            var mythis = this;
-            setTimeout(function() {
-                mythis.$.loading.close();
-            }, 300);
+        openproject: function (e) {
+            var projectdata = e.model.proj;
+            this.fire('iron-signal', {name: 'loadproject', data: {projdata: projectdata}});
         },
 
         openinfo: function (e) {

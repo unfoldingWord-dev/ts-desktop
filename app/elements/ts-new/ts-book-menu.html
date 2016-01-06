@@ -129,7 +129,7 @@
 
       store: function(e) {
           this.project = e.model.project;
-          this.fire('create');
+          this.selected = this.selected + 1;
       },
 
       togroup: function () {

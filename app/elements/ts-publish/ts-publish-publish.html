@@ -205,6 +205,7 @@
 
         gohome: function () {
             this.fire('iron-signal', {name: 'setdefault'});
+            this.fire('iron-signal', {name: 'reset'});
             this.route = "home";
             this.selected = 0;
         },
@@ -253,6 +254,9 @@
             popup.open();
 
             return App.projectsManager.createReadyFile(meta)
+                .then(function () {
+                    return App.git.stage(paths.projectDir);
+                })
                 .then(function () {
                     return App.uploader.register();
                 })

@@ -81,7 +81,7 @@ function ProjectsManager(query, configurator) {
 
 
                 makeProjectPaths: function (meta) {
-                    return this.makeProjectPathsForProject(prefix + meta.project.slug + '-' + meta.language.lc);
+                    return this.makeProjectPathsForProject(prefix + meta.fullname);
                 },
 
                 makeProjectPathsForProject: function (project) {
@@ -233,9 +233,40 @@ function ProjectsManager(query, configurator) {
         getFrameWords: function (frameid) {
 
             var r = query([
-                "select w.term, w.definition from translation_word w",
+                "select w.id, w.term, w.definition, w.definition_title 'title' from translation_word w",
                 "join frame__translation_word f on w.id=f.translation_word_id",
                 "where f.frame_id='" + frameid + "'"
+            ].join(' '));
+
+            return zipper(r);
+        },
+
+        getRelatedWords: function (wordid) {
+
+            var r = query([
+                "select w.id, w.term, w.definition, w.definition_title 'title' from translation_word w",
+                "join translation_word_related r on w.slug=r.slug",
+                "where r.translation_word_id='" + wordid + "'"
+            ].join(' '));
+
+            return zipper(r);
+        },
+
+        getAllWords: function () {
+
+            var r = query([
+                "select w.id, w.term, w.definition, w.definition_title 'title' from translation_word w",
+                "order by w.term"
+            ].join(' '));
+
+            return zipper(r);
+        },
+
+        getWordExamples: function (wordid) {
+
+            var r = query([
+                "select cast(e.frame_slug as int) 'frame', cast(e.chapter_slug as int) 'chapter', e.body from translation_word_example e",
+                "where e.translation_word_id='" + wordid + "'"
             ].join(' '));
 
             return zipper(r);
@@ -259,7 +290,7 @@ function ProjectsManager(query, configurator) {
         createReadyFile: function (meta) {
             var paths = this.getPaths(meta);
 
-            return write(paths.ready, "");
+            return write(paths.ready, (new Date()).toString());
         },
 
         exportTranslation: function (translation, meta, filename) {
@@ -316,6 +347,7 @@ function ProjectsManager(query, configurator) {
                 package_version: 3,
                 target_language: language,
                 project_id: meta.project.slug,
+                project_type: meta.type,
                 source_translations: sources,
                 translators: meta.translators,
                 finished_frames: finishedFrames,

@@ -294,22 +294,24 @@ gulp.task('build', [], function () {
 
     nw.build().then(function () {
         // Adding app icon for linux64
-        fs.stat('./build/translationStudio/linux64', function(err, stats) {
-            if (stats.isDirectory()) {
-                // Copy desktop entry to the build folder
-                var desktopTarget = fs.createWriteStream('./build/translationStudio/linux64/translationStudio.desktop');
-                var desktopSource = fs.createReadStream('./icons/translationStudio.desktop');
-                desktopSource.pipe(desktopTarget);
+        if(fs.exists('./build/translationStudio/linux64')) {
+            fs.stat('./build/translationStudio/linux64', function (err, stats) {
+                if (stats.isDirectory()) {
+                    // Copy desktop entry to the build folder
+                    var desktopTarget = fs.createWriteStream('./build/translationStudio/linux64/translationStudio.desktop');
+                    var desktopSource = fs.createReadStream('./icons/translationStudio.desktop');
+                    desktopSource.pipe(desktopTarget);
 
-                // Copy icon.png file to the build folder
-                var iconTarget = fs.createWriteStream('./build/translationStudio/linux64/icon.png');
-                var iconSource = fs.createReadStream('./icons/icon.png');
-                iconSource.pipe(iconTarget);
-            }
-            else {
-                console.log('Error in accessing linux64 build folder:', err);
-            }
-        });
+                    // Copy icon.png file to the build folder
+                    var iconTarget = fs.createWriteStream('./build/translationStudio/linux64/icon.png');
+                    var iconSource = fs.createReadStream('./icons/icon.png');
+                    iconSource.pipe(iconTarget);
+                }
+                else {
+                    console.log('Error in accessing linux64 build folder:', err);
+                }
+            });
+        }
 
         console.log('all done! everything is in ./build');
     }).catch(console.error.bind(console, 'there was an error building...'));

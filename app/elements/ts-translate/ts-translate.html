@@ -25,13 +25,16 @@
             position: relative;
         }
 
-        #checklistpopup {
+        .popup {
             position: fixed;
             top: 0;
             bottom: 0;
-            left: 50px;
-            right: 15px;
+            left: 0;
+            right: 0;
             margin: auto;
+        }
+
+        #checklistpopup {
             width: 350px;
             height: 225px;
             text-align: center;
@@ -56,13 +59,24 @@
             color: var(--accent-color);
         }
 
+        #editpopup {
+            width: 350px;
+            height: 175px;
+            text-align: center;
+            color: var(--primary-text-color);
+        }
+
+        #editpopup .buttons {
+            display: flex;
+            justify-content: center;
+            color: var(--secondary-text-color);
+        }
+
+        #editpopup .buttons paper-button:hover {
+            color: var(--accent-color);
+        }
+
         #sourcepopup {
-            position: fixed;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            margin: auto;
             height: 500px;
             width: 500px;
             display: flex;
@@ -74,12 +88,6 @@
         }
 
         #nodatapopup {
-            position: fixed;
-            top: 0;
-            bottom: 0;
-            left: 50px;
-            right: 15px;
-            margin: auto;
             width: 300px;
             height: 175px;
             text-align: center;
@@ -96,20 +104,30 @@
             color: var(--accent-color);
         }
 
+        #loading {
+            width: 320px;
+            height: 100px;
+            color: var(--primary-text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 110%;
+        }
+
     </style>
 
     <template>
 
-        <ts-translate-sidebar selected="{{selected}}" on-gohome="gohome" on-gopublish="gopublish" on-gosettings="gosettings"></ts-translate-sidebar>
+        <ts-translate-sidebar selected="{{selected}}" standardproject="[[standardproject]]" on-gohome="gohome" on-gopublish="gopublish" on-gosettings="gosettings"></ts-translate-sidebar>
 
         <div id="pages">
             <ts-read-mode id="readmode" chapters="[[chapters]]" modestatus="{{modestatus}}"></ts-read-mode>
-            <ts-chunk-mode id="chunkmode" chunks="{{chunks}}" modestatus="{{modestatus}}" on-resize="resize"></ts-chunk-mode>
+            <ts-chunk-mode id="chunkmode" chunks="{{chunks}}" modestatus="{{modestatus}}"></ts-chunk-mode>
             <ts-review-mode id="reviewmode" chunks="{{chunks}}" modestatus="{{modestatus}}"></ts-review-mode>
             <ts-nosource-mode id="nosourcemode" projectdata="[[currentproject.data]]"></ts-nosource-mode>
         </div>
 
-        <paper-dialog id="checklistpopup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+        <paper-dialog id="checklistpopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <h2>Chunk Checklist</h2>
             <div>
                 <p id="spaced">Are you sure you're Done with this chunk?</p>
@@ -123,7 +141,18 @@
             </div>
         </paper-dialog>
 
-        <paper-dialog id="nodatapopup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+        <paper-dialog id="editpopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <h2>Edit Chunk</h2>
+            <div>
+                <p>This chunk is done. Continue editing?</p>
+            </div>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Dismiss</paper-button>
+                <paper-button dialog-confirm on-tap="closeedit">Edit</paper-button>
+            </div>
+        </paper-dialog>
+
+        <paper-dialog id="nodatapopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <h2>No Translation</h2>
             <div>
                 <p>You cannot complete a blank chunk!</p>
@@ -133,8 +162,12 @@
             </div>
         </paper-dialog>
 
-        <paper-dialog id="sourcepopup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+        <paper-dialog id="sourcepopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <ts-source-modal id="modal" on-close="closesource"></ts-source-modal>
+        </paper-dialog>
+
+        <paper-dialog id="loading" class="popup" modal="true">
+            <p>Loading project. Please wait...</p>
         </paper-dialog>
 
         <iron-signals on-iron-signal-frompublish="frompublish"></iron-signals>
@@ -142,12 +175,16 @@
         <iron-signals on-iron-signal-updateselected="updateselected"></iron-signals>
         <iron-signals on-iron-signal-loadnewproject="loadnewproject"></iron-signals>
         <iron-signals on-iron-signal-loadproject="loadproject"></iron-signals>
+        <iron-signals on-iron-signal-loadpublish="loadpublish"></iron-signals>
         <iron-signals on-iron-signal-updatetranslation="updatetranslation"></iron-signals>
         <iron-signals on-iron-signal-openchecklist="openchecklist"></iron-signals>
+        <iron-signals on-iron-signal-openedit="openedit"></iron-signals>
         <iron-signals on-iron-signal-opennodata="opennodata"></iron-signals>
         <iron-signals on-iron-signal-opensource="opensource"></iron-signals>
         <iron-signals on-iron-signal-savetofile="savetofile"></iron-signals>
         <iron-signals on-iron-signal-updatestate="updatestate"></iron-signals>
+        <iron-signals on-iron-signal-savestate="savestate"></iron-signals>
+        <iron-signals on-iron-signal-reset="reset"></iron-signals>
 
     </template>
 
@@ -179,6 +216,10 @@
                 type: Object,
                 value: {},
                 notify: true
+            },
+            standardproject: {
+                type: Boolean,
+                value: true
             },
             rawdata: {
                 type: Object,
@@ -231,6 +272,16 @@
             this.fire('iron-signal', {name: 'completechunk', data: {index: index}});
         },
 
+        openedit: function (event, data) {
+            this.modestatus.index = data.index;
+            this.$.editpopup.open();
+        },
+
+        closeedit: function () {
+            var index = this.modestatus.index;
+            this.fire('iron-signal', {name: 'editchunk', data: {index: index}});
+        },
+
         opensource: function () {
             var modal = this.$.modal;
             var sources = App.projectsManager.sources;
@@ -257,34 +308,83 @@
             this.currentproject.state[id][mode] = data.value;
         },
 
+        savestate: function () {
+            if (this.route === "translate") {
+                var key = "uw-" + this.currentproject.data.fullname;
+                this.getlocation();
+                App.configurator.setValue(key + "-chapter", this.modestatus.chapter);
+                App.configurator.setValue(key + "-index", this.modestatus.index);
+                App.configurator.setValue(key + "-selected", this.selected);
+            }
+        },
+
         loadnewproject: function (event, data) {
             var blank = [];
             var blankstate = {};
+            this.setrightanimation();
             this.set('currentproject.state', blankstate);
             this.set('currentproject.translation', blank);
             this.set('currentproject.data', data.projdata);
+            this.checkstandard();
             this.savetofile();
-            this.reset();
+            this.setmodestate();
             this.checksources();
         },
 
         loadproject: function (event, data) {
             var mythis = this;
             var blankstate = {};
-            mythis.set('currentproject.data', data.projdata);
-            mythis.set('currentproject.state', blankstate);
-            App.projectsManager.loadTargetTranslation(data.projdata).then(function (translation) {
-                mythis.set('rawdata', translation);
-                mythis.pullsource();
-                mythis.createchunks();
-                mythis.createchapters();
-                mythis.fire('iron-signal', {name: 'loadcomplete'});
-                mythis.reset();
-                mythis.checksources();
+            var loading = this.$.loading;
+            this.setrightanimation();
+            this.route = "translate";
+            setTimeout(function() {
+                loading.open();
                 setTimeout(function() {
-                    mythis.fire('iron-signal', {name: 'adjustbar'});
-                }, 500);
-            });
+                    mythis.set('currentproject.data', data.projdata);
+                    mythis.set('currentproject.state', blankstate);
+                    mythis.checkstandard();
+                    App.projectsManager.loadTargetTranslation(data.projdata).then(function (translation) {
+                        mythis.set('rawdata', translation);
+                        mythis.pullsource();
+                        mythis.createchunks();
+                        mythis.createchapters();
+                        loading.close();
+                        setTimeout(function() {
+                            mythis.setmodestate();
+                            mythis.checksources();
+                            mythis.fire('iron-signal', {name: 'adjustbar'});
+                        }, 250);
+                    });
+                }, 250);
+            }, 500);
+        },
+
+        loadpublish: function (event, data) {
+            var mythis = this;
+            var blankstate = {};
+            var loading = this.$.loading;
+            this.setrightanimation();
+            this.route = "translate";
+            setTimeout(function() {
+                loading.open();
+                setTimeout(function() {
+                    mythis.set('currentproject.data', data.projdata);
+                    mythis.set('currentproject.state', blankstate);
+                    App.projectsManager.loadTargetTranslation(data.projdata).then(function (translation) {
+                        mythis.set('rawdata', translation);
+                        mythis.pullsource();
+                        mythis.createchunks();
+                        mythis.createchapters();
+                        loading.close();
+                        setTimeout(function() {
+                            mythis.setmodestate();
+                            mythis.checksources();
+                            mythis.fire('iron-signal', {name: 'adjustbar'});
+                            mythis.gopublish();
+                        }, 250);
+                    });
+                }, 250);
+            }, 500);
         },
 
         updatesources: function (event, data) {
@@ -340,6 +440,11 @@
             });
         },
 
+        checkstandard: function () {
+            var check = this.currentproject.data.type === "Text";
+            this.set('standardproject', check);
+        },
+
         pullsource: function () {
             var current = this.currentproject.data.currentsource;
             if (current === null || current === undefined) {
@@ -357,6 +462,7 @@
             var test = new RegExp(startstr);
             var chapterref;
             var chunkref;
+            var standard = this.standardproject;
 
             for (var i = 0; i < frames.length; i++) {
                 var chapterid = frames[i].chapter;
@@ -370,6 +476,12 @@
                 var questions = App.projectsManager.getFrameQuestions(id);
                 var words = App.projectsManager.getFrameWords(id);
                 var verses = [];
+
+                for (var n = 0; n < notes.length; n++) {
+                    if (notes[n].title === "") {
+                        notes[n].title = notes[n].body;
+                    }
+                }
 
                 while (test.test(sourcedata)) {
                     var versestr = sourcedata.substring(sourcedata.search(startstr) + 15, sourcedata.search(endstr));
@@ -410,12 +522,13 @@
                     frameid: frameid,
                     verses: verses,
                     chapterref: chapterref,
-                    chunkref: chunkref
+                    chunkref: chunkref,
+                    standard: standard
                 };
 
                 srcchunk = {
                     meta: meta,
-                    content: sourcedata,
+                    srccontent: sourcedata,
                     notes: notes,
                     words: words,
                     questions: questions
@@ -424,9 +537,9 @@
 
                 var rawdata = this.rawdata[chapterid + '-' + frameid];
                 if (rawdata === undefined) {
-                    transchunk = {content: "", completed: false, meta: meta};
+                    transchunk = {transcontent: "", helpscontent: [], completed: false, meta: meta};
                 } else {
-                    transchunk = {content: rawdata.content, completed: rawdata.completed, meta: meta};
+                    transchunk = {transcontent: rawdata.content, helpscontent: [], completed: rawdata.completed, meta: meta};
                 }
                 translation.push(transchunk);
             }
@@ -509,6 +622,18 @@
             }
         },
 
+        setheights: function () {
+            var selected = this.selected;
+            var read = this.$.readmode;
+            var chunk = this.$.chunkmode;
+
+            if (selected === 1) {
+                read.setheights();
+            } else if (selected === 2) {
+                chunk.setheights();
+            }
+        },
+
         modechange: function (tomode, frommode) {
             var read = this.$.readmode;
             var chunk = this.$.chunkmode;
@@ -546,7 +671,6 @@
             var chunk = this.$.chunkmode;
             var review = this.$.reviewmode;
             var nosource = this.$.nosourcemode;
-            var sources = this.currentproject.data.sources;
 
             mythis.set('selected', 0);
             mythis.set('modestatus', {"chapter": 1, "lastmode": 1, "index": -1});
@@ -554,10 +678,40 @@
             chunk.classList.add("hide");
             review.classList.add("hide");
             nosource.classList.add("hide");
+        },
+
+        setmodestate: function () {
+            var mythis = this;
+            var sources = this.currentproject.data.sources;
+            var key = "uw-" + this.currentproject.data.fullname;
+            var index = App.configurator.getValue(key + "-index");
+            var chapter = App.configurator.getValue(key + "-chapter");
+            var selected = App.configurator.getValue(key + "-selected");
+            var standard = this.standardproject;
+
+            if (chapter > 0) {
+                mythis.set('modestatus.chapter', chapter);
+            }
+            if (index >= 0) {
+                mythis.set('modestatus.index', index);
+            }
+            if (standard) {
+                mythis.set('modestatus.lastmode', 1);
+            } else {
+                mythis.set('modestatus.lastmode', 3);
+            }
 
             if (sources !== undefined && sources.length !== 0) {
                 setTimeout(function() {
-                    mythis.set('selected', 1);
+                    if (selected > 0) {
+                        mythis.set('selected', selected);
+                    } else {
+                        if (standard) {
+                            mythis.set('selected', 1);
+                        } else {
+                            mythis.set('selected', 3);
+                        }
+                    }
                 }, 500);
             }
         },
@@ -583,7 +737,7 @@
 
         upload: function () {
             var update = this.chunks.data.map(function(chunk){
-                return {meta: chunk.meta, content: chunk.transcontent, completed: chunk.completed};
+                return {meta: chunk.meta, transcontent: chunk.transcontent, helpscontent: chunk.helpscontent, completed: chunk.completed};
             });
             var count = 0;
             for (var i = 0; i < update.length; i++) {
@@ -612,18 +766,32 @@
                 var frameid = translation[i].meta.frameid;
                 var statedata = this.currentproject.state[chapterid + '-' + frameid];
                 if (statedata === undefined) {
-                    translation[i].state = {chunk: true, review: true};
-                    this.currentproject.state[chapterid + '-' + frameid] = {chunk: true, review: true};
+                    translation[i].state = {chunk: true, review: true, resource: 0};
+                    this.currentproject.state[chapterid + '-' + frameid] = {chunk: true, review: true, resource: 0};
+                    if (!source[i].notes.length) {
+                        if (!source[i].words.length) {
+                            if (!source[i].questions.length) {
+                                translation[i].state.resource = 0;
+                                this.currentproject.state[chapterid + '-' + frameid].resource = 0;
+                            } else {
+                                translation[i].state.resource = 2;
+                                this.currentproject.state[chapterid + '-' + frameid].resource = 2;
+                            }
+                        } else {
+                            translation[i].state.resource = 1;
+                            this.currentproject.state[chapterid + '-' + frameid].resource = 1;
+                        }
+                    }
                 } else {
                     translation[i].state = statedata;
                 }
             }
 
             transdata.data = translation.map(function(chunk, index){
-                return {transcontent: chunk.content, completed: chunk.completed, data: projectdata, index: index, state: chunk.state};
+                return {transcontent: chunk.transcontent, helpscontent: chunk.helpscontent, completed: chunk.completed, data: projectdata, index: index, state: chunk.state};
             });
             srcdata.data = source.map(function(chunk){
-                return {srccontent: chunk.content, meta: chunk.meta, notes: chunk.notes, words: chunk.words, questions: chunk.questions};
+                return {srccontent: chunk.srccontent, meta: chunk.meta, notes: chunk.notes, words: chunk.words, questions: chunk.questions};
             });
             var merged = _.merge(srcdata, transdata);
             this.set('chunks', merged);
@@ -653,7 +821,7 @@
                     if (!chunk.completed) {
                         chapcomplete = false;
                     }
-                    chapcontent += chunk.content + " ";
+                    chapcontent += chunk.transcontent + " ";
                 });
                 transchapters.push({completed: chapcomplete, transcontent: chapcontent, data: projectdata});
             });
@@ -668,7 +836,7 @@
                 var chapstate = true;
 
                 _.forEach(data, function (chunk) {
-                    chapcontent += chunk.content + " ";
+                    chapcontent += chunk.srccontent + " ";
                     chapterref = chunk.meta.chapterref;
                     chapterid = chunk.meta.chapterid;
                 });
@@ -696,33 +864,45 @@
         },
 
         gohome: function () {
-            this.animationConfig.exit.name = 'slide-right-animation';
-            this.animationConfig.entry.name = 'slide-from-right-animation';
+            this.savestate();
             this.fire('iron-signal', {name: 'setdefault'});
+            this.reset();
             this.route = "home";
         },
 
         gopublish: function () {
             if(this.currentproject.data.sources.length) {
-                this.animationConfig.exit.name = 'slide-left-animation';
-                this.animationConfig.entry.name = 'slide-from-left-animation';
+                this.savestate();
+                this.setleftanimation();
                 this.fire('iron-signal', {name: 'updatepublish'});
                 this.route = "publish";
-                this.selected = 1;
             }
         },
 
         gosettings: function () {
-            this.animationConfig.exit.name = 'slide-left-animation';
-            this.animationConfig.entry.name = 'slide-from-left-animation';
+            this.savestate();
+            this.setleftanimation();
             this.backto = this.route;
             this.route = "settings";
         },
 
+        setrightanimation: function () {
+            this.animationConfig.exit.name = 'slide-right-animation';
+            this.animationConfig.entry.name = 'slide-from-right-animation';
+        },
+
+        setleftanimation: function () {
+            this.animationConfig.exit.name = 'slide-left-animation';
+            this.animationConfig.entry.name = 'slide-from-left-animation';
+        },
+
         ready: function() {
             var mythis = this;
+            this.reset();
             window.addEventListener("resize", function () {
-                mythis.fire('iron-signal', {name: 'setheight'});
+                mythis.getlocation();
+                mythis.setlocation();
+                mythis.setheights();
             });
         }
 

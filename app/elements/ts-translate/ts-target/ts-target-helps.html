@@ -19,14 +19,11 @@
         #main {
             flex: auto;
             display: flex;
-
             flex-direction: column;
-
         }
 
 		#heading {
 			color: var(--secondary-text-color);
-
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -46,7 +43,7 @@
             background: var(--card-background-color);
             flex: 0 0 auto;
             border-radius: 3px;
-            margin: 8px 0;
+            margin-top: 8px;
         }
 
         .contentheader {
@@ -68,7 +65,6 @@
         }
 
         #content {
-
             flex: auto;
             display: flex;
             flex-direction: column;
@@ -84,10 +80,10 @@
         #togglebox {
             display: flex;
             justify-content: space-between;
-
             color: var(--secondary-text-color);
             font-size: 88%;
             padding: 0 16px;
+            margin-top: 8px;
             align-items: center;
             border-radius: 3px;
         }
@@ -116,10 +112,11 @@
                 <template is="dom-repeat" items="{{chunk.helpscontent}}" as="help">
                     <paper-material class="contentbox" elevation="1">
                         <div class="contentheader">
-                            <iron-autogrow-textarea class="headertextbox" bind-value="{{help.title}}" placeholder="Add Title Here"></iron-autogrow-textarea>
+                            <iron-autogrow-textarea class="headertextbox" bind-value="{{help.title}}" on-input="input" placeholder="Add Title Here"></iron-autogrow-textarea>
+                            <paper-icon-button icon="close" on-tap="deletehelp"></paper-icon-button>
                         </div>
                         <div class="contentbody">
-                            <iron-autogrow-textarea class="bodytextbox" bind-value="{{help.body}}" placeholder="Add Content Here"></iron-autogrow-textarea>
+                            <iron-autogrow-textarea class="bodytextbox" bind-value="{{help.body}}" on-input="input" placeholder="Add Content Here"></iron-autogrow-textarea>
                         </div>
                     </paper-material>
                 </template>
@@ -131,7 +128,6 @@
         </div>
 
         <iron-signals on-iron-signal-completechunk="completechunk"></iron-signals>
-        <iron-signals on-iron-signal-editchunk="editchunk"></iron-signals>
 
 	</template>
 
@@ -158,6 +154,17 @@
         addhelp: function () {
             var newhelp = {title: "", body: ""};
             this.push('chunk.helpscontent', newhelp);
+            this.fire('setheight');
+        },
+
+        deletehelp: function (e) {
+            var index = e.model.index;
+            this.splice('chunk.helpscontent', index, 1);
+            this.fire('setheight');
+        },
+
+        input: function () {
+            this.fire('setheight');
         },
 
         rendertext: function () {
@@ -265,21 +272,6 @@
                 this.set('chunk.completed', false);
                 this.fire('iron-signal', {name: 'updatetranslation'});
             }
-        },
-
-        editchunk: function (event, data) {
-            var index = data.index;
-
-            if (this.chunk.index === index) {
-                this.checkdone();
-            }
-        },
-
-        edit: function () {
-            var id = this.chunk.meta.chapterid + "-" + this.chunk.meta.frameid;
-            this.set('chunk.state.review', false);
-            this.fire('setheight');
-            this.fire('iron-signal', {name: 'updatestate', data: {id: id, mode: "review", value: false}});
         },
 
 		ready: function() {

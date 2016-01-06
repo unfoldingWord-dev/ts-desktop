@@ -118,7 +118,7 @@
 
     <template>
 
-        <ts-translate-sidebar selected="{{selected}}" on-gohome="gohome" on-gopublish="gopublish" on-gosettings="gosettings"></ts-translate-sidebar>
+        <ts-translate-sidebar selected="{{selected}}" standardproject="[[standardproject]]" on-gohome="gohome" on-gopublish="gopublish" on-gosettings="gosettings"></ts-translate-sidebar>
 
         <div id="pages">
             <ts-read-mode id="readmode" chapters="[[chapters]]" modestatus="{{modestatus}}"></ts-read-mode>
@@ -310,7 +310,7 @@
 
         savestate: function () {
             if (this.route === "translate") {
-                var key = "uw-" + this.currentproject.data.project.slug + "-" + this.currentproject.data.language.lc;
+                var key = "uw-" + this.currentproject.data.fullname;
                 this.getlocation();
                 App.configurator.setValue(key + "-chapter", this.modestatus.chapter);
                 App.configurator.setValue(key + "-index", this.modestatus.index);
@@ -683,10 +683,11 @@
         setmodestate: function () {
             var mythis = this;
             var sources = this.currentproject.data.sources;
-            var key = "uw-" + this.currentproject.data.project.slug + "-" + this.currentproject.data.language.lc;
+            var key = "uw-" + this.currentproject.data.fullname;
             var index = App.configurator.getValue(key + "-index");
             var chapter = App.configurator.getValue(key + "-chapter");
             var selected = App.configurator.getValue(key + "-selected");
+            var standard = this.standardproject;
 
             if (chapter > 0) {
                 mythis.set('modestatus.chapter', chapter);
@@ -694,13 +695,22 @@
             if (index >= 0) {
                 mythis.set('modestatus.index', index);
             }
+            if (standard) {
+                mythis.set('modestatus.lastmode', 1);
+            } else {
+                mythis.set('modestatus.lastmode', 3);
+            }
 
             if (sources !== undefined && sources.length !== 0) {
                 setTimeout(function() {
                     if (selected > 0) {
                         mythis.set('selected', selected);
                     } else {
-                        mythis.set('selected', 1);
+                        if (standard) {
+                            mythis.set('selected', 1);
+                        } else {
+                            mythis.set('selected', 3);
+                        }
                     }
                 }, 500);
             }

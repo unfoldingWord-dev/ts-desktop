@@ -54,7 +54,7 @@
                     </template>
                 </template>
                 <template is="dom-if" if="{{!chunk.meta.standard}}">
-                    <ts-target-helps chunk="{{chunk}}"></ts-target-helps>
+                    <ts-target-helps chunk="{{chunk}}" on-setheight="setheight"></ts-target-helps>
                 </template>
             </div>
             <ts-resource-card id="right" chunk="[[chunk]]"></ts-resource-card>

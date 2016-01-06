@@ -737,7 +737,7 @@
 
         upload: function () {
             var update = this.chunks.data.map(function(chunk){
-                return {meta: chunk.meta, content: chunk.transcontent, completed: chunk.completed};
+                return {meta: chunk.meta, transcontent: chunk.transcontent, helpscontent: chunk.helpscontent, completed: chunk.completed};
             });
             var count = 0;
             for (var i = 0; i < update.length; i++) {

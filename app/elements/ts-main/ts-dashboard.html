@@ -1,6 +1,11 @@
 
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
 <link rel="import" href="../../components/iron-signals/iron-signals.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/iron-input/iron-input.html">
+<link rel="import" href="../../components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../components/iron-icons/notification-icons.html">
 
 <link rel="import" href="../ts-home/ts-home.html">
 <link rel="import" href="../ts-new/ts-new.html">
@@ -27,6 +32,93 @@
           flex: auto;
       }
 
+      .popup {
+          position: fixed;
+          top: 0;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          margin: auto;
+      }
+
+      .popup paper-button:hover {
+          color: var(--accent-color);
+      }
+
+      #feedback {
+          display: flex;
+          flex-direction: column;
+          width: 500px;
+          height: 300px;
+      }
+
+      #feedbackheader {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+      }
+
+      #feedbackbody {
+          display: flex;
+          flex-direction: column;
+          border-bottom: 1px solid var(--border-color);
+          border-top: 1px solid var(--border-color);
+          padding: 20px;
+      }
+
+      #feedbackbuttons {
+          display: flex;
+          justify-content: flex-end;
+          padding: 0 20px;
+      }
+
+      input {
+          border: none;
+          font-size: 120%;
+          padding: 10px;
+          color: var(--secondary-text-color);
+      }
+
+      #confirm {
+          width: 320px;
+          height: 220px;
+          color: var(--primary-text-color);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          font-size: 110%;
+      }
+
+      #buttonbox {
+          display: flex;
+          justify-content: center;
+          color: var(--secondary-text-color);
+      }
+
+      #buttonbox paper-button:hover {
+          color: var(--accent-color);
+      }
+
+      paper-progress {
+          --paper-progress-active-color: var(--accent-color);
+          width: 250px;
+      }
+
+      #bar {
+          display: flex;
+          justify-content: center;
+          margin-bottom: 40px;
+      }
+
+      #text {
+          text-align: center;
+      }
+
+      h2 {
+          color: var(--accent-color);
+      }
+
   </style>
 
   <template>
@@ -44,8 +136,41 @@
           <ts-terms accepted="{{accepted}}"></ts-terms>
       </template>
 
+      <paper-dialog id="feedback" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <div id="feedbackheader">
+              <h2>Feedback</h2>
+              <p><iron-icon icon="notification:wifi"></iron-icon> This will use your internet connection</p>
+          </div>
+          <div id="feedbackbody">
+              <input is="iron-input" bind-value="{{feedback}}" placeholder="Describe the problem you are experiencing">
+          </div>
+          <div id="feedbackbuttons">
+              <paper-button on-tap="closefeedback">Cancel</paper-button>
+              <paper-button on-tap="sendfeedback">Confirm</paper-button>
+          </div>
+      </paper-dialog>
+
+      <paper-dialog id="confirm" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <template is="dom-if" if="{{options.loading}}">
+              <p>{{options.body}}</p>
+              <div id="bar">
+                  <paper-progress indeterminate="true"></paper-progress>
+              </div>
+          </template>
+          <template is="dom-if" if="{{!options.loading}}">
+              <h2>{{options.title}}</h2>
+              <div id="text">
+                  <p>{{options.body}}</p>
+              </div>
+              <div id="buttonbox">
+                  <paper-button on-tap="closeconfirm">Close</paper-button>
+              </div>
+          </template>
+      </paper-dialog>
+
       <iron-signals on-iron-signal-updatelist="updatelist"></iron-signals>
       <iron-signals on-iron-signal-setdefault="setdefault"></iron-signals>
+      <iron-signals on-iron-signal-openfeedback="openfeedback"></iron-signals>
 
   </template>
 
@@ -77,6 +202,50 @@
           backto: {
             type: String,
             value: ""
+          },
+          feedback: {
+              type: String,
+              value: ""
+          },
+          options: {
+              type: Object,
+              value: {loading: false, title: "", body: ""}
+          }
+      },
+
+      openfeedback: function () {
+          this.feedback = "";
+          this.$.feedback.open();
+      },
+
+      closefeedback: function () {
+          this.$.feedback.close();
+      },
+
+      closeconfirm: function () {
+          this.$.confirm.close();
+      },
+
+      sendfeedback: function () {
+          var message = this.feedback;
+          var mythis = this;
+
+          this.set('options.body', "Sending Feedback.  Please wait...");
+          this.set('options.loading', true);
+          this.closefeedback();
+          this.$.confirm.open();
+
+          if (App.reporter.canReportToGithub()) {
+              App.reporter.reportBug(message, function (res) {
+                  console.log(res);
+                  mythis.set('options.title', "Feedback Sent");
+                  mythis.set('options.body', "Your feedback has been successfully sent.  Thanks.");
+                  mythis.set('options.loading', false);
+              });
+          } else {
+              mythis.set('options.title', "Feedback Failed");
+              mythis.set('options.body', "You are not set up with a token to send feedback.");
+              mythis.set('options.loading', false);
           }
       },
 

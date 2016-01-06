@@ -56,12 +56,28 @@
         }
 
         .contentbody {
-            background-size: 100% 32px;
-            background-image: -webkit-linear-gradient(var(--card-background-color) 27px, var(--border-color) 27px, var(--border-color) 28px, var(--card-background-color) 28px);
-            border-radius: 3px;
+            color: var(--primary-text-color);
             min-height: 48px;
             padding: 0 16px;
             margin-top: 8px;
+        }
+
+        .editmode .contentbody {
+            background-size: 100% 32px;
+            background-image: -webkit-linear-gradient(var(--card-background-color) 27px, var(--border-color) 27px, var(--border-color) 28px, var(--card-background-color) 28px);
+            border-radius: 3px;
+        }
+
+        .editmode p {
+            display: none;
+        }
+
+        .donemode iron-autogrow-textarea {
+            display: none;
+        }
+
+        .donemode paper-icon-button {
+            display: none;
         }
 
         #content {
@@ -75,6 +91,11 @@
             border: none;
             margin: 0;
             width: 100%;
+        }
+
+        #content p {
+            line-height: 2;
+            margin: 0;
         }
 
         #togglebox {
@@ -106,17 +127,21 @@
                 <div>
                     <span>[[chunk.meta.chunkref]]</span> - <span>[[chunk.data.language.ln]]</span> - <span>[[chunk.data.type]]</span>
                 </div>
-                <paper-icon-button icon="add" on-tap="addhelp"></paper-icon-button>
+                <template is="dom-if" if="{{!chunk.completed}}">
+                    <paper-icon-button icon="add" on-tap="addhelp"></paper-icon-button>
+                </template>
             </paper-material>
-            <div id="content">
+            <div id="content" class="editmode">
                 <template is="dom-repeat" items="{{chunk.helpscontent}}" as="help">
                     <paper-material class="contentbox" elevation="1">
                         <div class="contentheader">
-                            <iron-autogrow-textarea class="headertextbox" bind-value="{{help.title}}" on-input="input" placeholder="Add Title Here"></iron-autogrow-textarea>
+                            <p>{{help.title}}</p>
+                            <iron-autogrow-textarea bind-value="{{help.title}}" on-change="change" on-input="input" placeholder="Add Title Here"></iron-autogrow-textarea>
                             <paper-icon-button icon="close" on-tap="deletehelp"></paper-icon-button>
                         </div>
                         <div class="contentbody">
-                            <iron-autogrow-textarea class="bodytextbox" bind-value="{{help.body}}" on-input="input" placeholder="Add Content Here"></iron-autogrow-textarea>
+                            <p>{{help.body}}</p>
+                            <iron-autogrow-textarea bind-value="{{help.body}}" on-change="change" on-input="input" placeholder="Add Content Here"></iron-autogrow-textarea>
                         </div>
                     </paper-material>
                 </template>
@@ -155,95 +180,54 @@
             var newhelp = {title: "", body: ""};
             this.push('chunk.helpscontent', newhelp);
             this.fire('setheight');
+            this.fire('iron-signal', {name: 'updatetranslation'});
         },
 
         deletehelp: function (e) {
             var index = e.model.index;
             this.splice('chunk.helpscontent', index, 1);
             this.fire('setheight');
+            this.fire('iron-signal', {name: 'updatetranslation'});
         },
 
         input: function () {
             this.fire('setheight');
         },
 
+        change: function () {
+            this.fire('iron-signal', {name: 'updatetranslation'});
+        },
+
         rendertext: function () {
             if(this.chunk && this.chunk.srccontent) {
-                var verses = this.chunk.meta.verses;
-                var chap = this.chunk.meta.chapter;
                 var completed = this.chunk.completed;
-                var textholder = this.$.textholder;
-                var textarray = this.chunk.transcontent.split(" ");
-                var vmstr1 = "\<ts-verse-marker id='c";
-                var vmstr2 = "v";
-                var vmstr3 = "' draggable='true' ondragstart='drag(event)' verse='";
-                var vmstr4 = "'\>\<\/ts-verse-marker\>";
-                var textstr1 = "\<span ondrop='drop(event)' ondragover='allowDrop(event)'\>";
-                var textstr2 = "\<\/span\> ";
-                var numstr1 = "\<sup\>";
-                var numstr2 = "\<\/sup\>";
-                var returnstr = "";
-                var verse = 0;
-                var i = 0;
+                var content = this.$.content;
 
-                if(!completed) {
-                    for (i = 0; i < verses.length; i++) {
-                        returnstr += vmstr1 + chap + vmstr2 + verses[i] + vmstr3 + verses[i] + vmstr4;
-                    }
-                    for (i = 0; i < textarray.length; i++) {
-                        returnstr += textstr1 + textarray[i] + textstr2;
-                    }
+                if (completed) {
+                    content.classList.remove("editmode");
+                    content.classList.add("donemode");
                 } else {
-                    for (i = 0; i < textarray.length; i++) {
-                        if (textarray[i].substring(0, 2) === "/v") {
-                            verse = textarray[i].substring(2);
-                            returnstr += numstr1 + verse + numstr2;
-                        } else {
-                            returnstr += textarray[i] + " ";
-                        }
-                    }
+                    content.classList.add("editmode");
+                    content.classList.remove("donemode");
                 }
-                //textholder.innerHTML = returnstr;
                 this.$.toggle.checked = completed;
             }
         },
 
         completechunk: function (event, data) {
             var index = data.index;
-
             if (this.chunk.index === index) {
-                var textholder = this.$.textholder;
-                var children = textholder.children;
-                var type = "";
-                var text = "";
-                var versenum = 0;
-                var returnstr = "";
-
-                for (var i = 0; i < children.length; i++) {
-                    type = children[i].nodeName;
-
-                    if (type === "TS-VERSE-MARKER") {
-                        versenum = children[i].verse;
-                        returnstr += "/v" + versenum + " ";
-                    } else {
-                        text = children[i].textContent;
-                        returnstr += text + " ";
-                    }
-                }
-
-                this.set('chunk.transcontent', returnstr.trim());
                 this.set('chunk.completed', true);
                 this.$.toggle.checked = true;
                 this.fire('iron-signal', {name: 'updatetranslation'});
+                this.fire('setheight');
             }
         },
 
         checkdone: function () {
-            var textarray = this.chunk.transcontent.split(" ");
             var completed = this.chunk.completed;
             var index = this.chunk.index;
             var toggle = this.$.toggle;
-            var returnstr = "";
             var mythis = this;
 
             if (toggle.pressed) {
@@ -252,25 +236,18 @@
                 }, 100);
                 return;
             }
-
             toggle.checked = false;
 
             if (!completed) {
-                if (this.chunk.transcontent === "") {
+                if (this.chunk.transcontent !== "") {
                     this.fire('iron-signal', {name: 'opennodata'});
                 } else {
                     this.fire('iron-signal', {name: 'openchecklist', data: {index: index}});
                 }
             } else {
-                for (var i = 0; i < textarray.length; i++) {
-                    if (textarray[i].substring(0, 2) !== "/v") {
-                        returnstr += textarray[i] + " ";
-                    }
-                }
-
-                this.set('chunk.transcontent', returnstr.trim());
                 this.set('chunk.completed', false);
                 this.fire('iron-signal', {name: 'updatetranslation'});
+                this.fire('setheight');
             }
         },
 

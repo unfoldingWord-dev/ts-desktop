@@ -300,6 +300,10 @@ function ProjectsManager(query, configurator) {
             //Save data to filename passed in (passed in parameter includes path and filename but not file type extension)
         },
 
+        isTranslation: function (meta) {
+            return meta.type.toUpperCase() === 'TEXT';
+        },
+
         saveTargetTranslation: function (translation, meta) {
             var paths = this.getPaths(meta);
 
@@ -318,7 +322,7 @@ function ProjectsManager(query, configurator) {
                 };
             };
 
-            var isTranslation = meta.type.toUpperCase() === 'TEXT';
+            var isTranslation = this.isTranslation(meta);
 
             var chunks = _.chain(translation)
                 .filter(function (c) {
@@ -366,8 +370,16 @@ function ProjectsManager(query, configurator) {
                 };
             };
 
+            var doChapterDir = function (fn, c) {
+                fn(path.join(paths.projectDir, c.meta.chapterid));
+            };
+
+            var deleteChapterDir = function (c) {
+                return doChapterDir(rm, c);
+            };
+
             var makeChapterDir = function (c) {
-                return mkdirp(path.join(paths.projectDir, c.meta.chapterid));
+                return doChapterDir(mkdirp, c);
             };
 
             var makeChapterDirs = function (data) {
@@ -390,6 +402,7 @@ function ProjectsManager(query, configurator) {
             return mkdirp(paths.projectDir)
                 .then(writeFile(paths.manifest, manifest))
                 .then(writeFile(paths.project, meta))
+                .then(deleteChapterDirs(chunks))
                 .then(makeChapterDirs(chunks))
                 .then(writeChunks(chunks))
                 .then(git.init.bind(git, paths.projectDir))
@@ -425,6 +438,8 @@ function ProjectsManager(query, configurator) {
         loadTargetTranslation: function (meta) {
             var paths = this.getPaths(meta);
 
+            var isTranslation = this.isTranslation(meta);
+
             // read manifest, get object with finished frames
 
             // return an object with keys that are the complexid
@@ -438,20 +453,31 @@ function ProjectsManager(query, configurator) {
 
             var readChunk = function (f) {
                 return read(f).then(function (c) {
-                    return {
-                        content: c.toString(),
+                    var parsed = {
                         name: parseChunkName(f)
                     };
+
+                    if (isTranslation) {
+                        parsed['transcontent'] = c.toString();
+                    } else {
+                        parsed['helpscontent'] = JSON.parse(c);
+                    }
+
+                    return parsed;
                 })
             };
 
             var markFinished = function (chunks) {
                 return function (finished) {
                     return _.mapValues(chunks, function (c, name) {
-                        return {
-                            content: c.content,
-                            completed: !!finished[name]
-                        }
+                        var mapped = {
+                            completed: !!finished[name];
+                        },
+                        key = isTranslation ? 'transcontent' : 'helpscontent';
+
+                        mapped[key] = c[key];
+
+                        return mapped;
                     });
                 };
             };

@@ -380,7 +380,7 @@ function ProjectsManager(query, configurator) {
                 var f = path.join(paths.projectDir, c.meta.chapterid, c.meta.frameid + '.txt'),
                     hasContent = isTranslation ? !!c.transcontent : !!c.helpscontent.length;
 
-                return hasContent ? write(f, isTranslation ? c.transcontent : JSON.stringify(c.helpscontent)) : rm(f);
+                return hasContent ? write(f, isTranslation ? c.transcontent : toJSON(c.helpscontent)) : rm(f);
             };
 
             var updateChunks = function (data) {

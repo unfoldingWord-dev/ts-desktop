@@ -325,10 +325,6 @@ function ProjectsManager(query, configurator) {
             var isTranslation = this.isTranslation(meta);
 
             var chunks = _.chain(translation)
-                .filter(function (c) {
-                    // make sure we don't write any empty content
-                    return isTranslation ? !!c.transcontent : !!c.helpscontent.length;
-                })
                 .indexBy(makeComplexId)
                 .value();
 
@@ -370,16 +366,8 @@ function ProjectsManager(query, configurator) {
                 };
             };
 
-            var doChapterDir = function (fn, c) {
-                fn(path.join(paths.projectDir, c.meta.chapterid));
-            };
-
-            var deleteChapterDir = function (c) {
-                return doChapterDir(rm, c);
-            };
-
             var makeChapterDir = function (c) {
-                return doChapterDir(mkdirp, c);
+                return mkdirp(path.join(paths.projectDir, c.meta.chapterid));
             };
 
             var makeChapterDirs = function (data) {
@@ -388,29 +376,24 @@ function ProjectsManager(query, configurator) {
                 };
             };
 
-            var deleteChapterDirs = function (data) {
-                return function () {
-                    return Promise.all(_.map(data, deleteChapterDir));
-                };
+            var updateChunk = function (c) {
+                var f = path.join(paths.projectDir, c.meta.chapterid, c.meta.frameid + '.txt'),
+                    hasContent = isTranslation ? !!c.transcontent : !!c.helpscontent.length;
+
+                return hasContent ? write(f, isTranslation ? c.transcontent : JSON.stringify(c.helpscontent)) : rm(f);
             };
 
-            var writeChunk = function (c) {
-                var f = path.join(paths.projectDir, c.meta.chapterid, c.meta.frameid + '.txt');
-                return write(f, isTranslation ? c.transcontent : JSON.stringify(c.helpscontent));
-            };
-
-            var writeChunks = function (data) {
+            var updateChunks = function (data) {
                 return function () {
-                    return Promise.all(_.map(data, writeChunk));
+                    return Promise.all(_.map(data, updateChunk));
                 };
             };
 
             return mkdirp(paths.projectDir)
                 .then(writeFile(paths.manifest, manifest))
                 .then(writeFile(paths.project, meta))
-                .then(deleteChapterDirs(chunks))
                 .then(makeChapterDirs(chunks))
-                .then(writeChunks(chunks))
+                .then(updateChunks(chunks))
                 .then(git.init.bind(git, paths.projectDir))
                 .then(git.stage.bind(git, paths.projectDir));
         },

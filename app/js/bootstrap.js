@@ -190,7 +190,7 @@
 
             let defaults = require('../config/defaults');
 
-            if(fs.exists('../config/private')) {
+            if(fs.exists(path.normalize('../config/private'))) {
                 let privateDefaults = require('../config/private');
                 _this.configurator.loadConfig(privateDefaults);
             }

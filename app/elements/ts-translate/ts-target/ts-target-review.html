@@ -98,11 +98,12 @@
             </div>
             <div id="togglebox">
                 <p>Mark chunk as done</p>
-                <paper-toggle-button id="toggle" on-tap="checkdone" toggles="false"></paper-toggle-button>
+                <paper-toggle-button id="toggle" on-change="checkdone"></paper-toggle-button>
             </div>
         </paper-material>
 
         <iron-signals on-iron-signal-completechunk="completechunk"></iron-signals>
+        <iron-signals on-iron-signal-editchunk="editchunk"></iron-signals>
 
 	</template>
 
@@ -201,8 +202,18 @@
             var textarray = this.chunk.transcontent.split(" ");
             var completed = this.chunk.completed;
             var index = this.chunk.index;
+            var toggle = this.$.toggle;
             var returnstr = "";
-            this.$.toggle.checked = false;
+            var mythis = this;
+
+            if (toggle.pressed) {
+                setTimeout(function() {
+                    mythis.checkdone();
+                }, 100);
+                return;
+            }
+
+            toggle.checked = false;
 
             if (!completed) {
                 if (this.chunk.transcontent === "") {
@@ -220,6 +231,14 @@
                 this.set('chunk.transcontent', returnstr.trim());
                 this.set('chunk.completed', false);
                 this.fire('iron-signal', {name: 'updatetranslation'});
+            }
+        },
+
+        editchunk: function (event, data) {
+            var index = data.index;
+
+            if (this.chunk.index === index) {
+                this.checkdone();
             }
         },
 

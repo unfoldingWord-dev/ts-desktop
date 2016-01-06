@@ -388,6 +388,12 @@ function ProjectsManager(query, configurator) {
                 };
             };
 
+            var deleteChapterDirs = function (data) {
+                return function () {
+                    return Promise.all(_.map(data, deleteChapterDir));
+                };
+            };
+
             var writeChunk = function (c) {
                 var f = path.join(paths.projectDir, c.meta.chapterid, c.meta.frameid + '.txt');
                 return write(f, isTranslation ? c.transcontent : JSON.stringify(c.helpscontent));

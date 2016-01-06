@@ -471,7 +471,7 @@ function ProjectsManager(query, configurator) {
                 return function (finished) {
                     return _.mapValues(chunks, function (c, name) {
                         var mapped = {
-                            completed: !!finished[name];
+                            completed: !!finished[name]
                         },
                         key = isTranslation ? 'transcontent' : 'helpscontent';
 

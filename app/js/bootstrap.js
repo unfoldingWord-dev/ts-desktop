@@ -9,6 +9,7 @@
     let gui = require('nw.gui');
     let mainWindow = gui.Window.get();
     let path = require('path');
+    let fs = require('fs');
     let Reporter = require('../js/reporter').Reporter;
 
     // hook up global exception handler
@@ -187,10 +188,13 @@
 
             _this.configurator.setStorage(window.localStorage);
 
-            let config = require('../config/ts-config');
             let defaults = require('../config/defaults');
 
-            _this.configurator.loadConfig(config);
+            if(fs.exists('../config/private')) {
+                let privateDefaults = require('../config/private');
+                _this.configurator.loadConfig(privateDefaults);
+            }
+
             _this.configurator.loadConfig(defaults);
             _this.configurator.setValue('rootDir', gui.App.dataPath, {'mutable':false});
             _this.configurator.setValue('targetTranslationsDir', path.join(gui.App.dataPath, 'targetTranslations'), {'mutable':false});
@@ -249,6 +253,7 @@
 
             _this.reporter = new Reporter({
                 logPath: logPath,
+                oauthToken: configurator.getValue("github-oauth"),
                 repoOwner: configurator.getValue('repoOwner'),
                 repo: configurator.getValue('repo'),
                 maxLogFileKb: configurator.getValue('maxLogFileKb'),

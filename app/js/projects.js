@@ -302,7 +302,10 @@ function ProjectsManager(query, configurator) {
          * @returns {Promise.<boolean>}
          */
         exportTranslation: function (translation, meta, filename) {
-            console.log("Exporting File", translation, meta, filename); //this is just here so you can view what's being passed in
+            // validate input
+            if(filename === null || filename === '') {
+                return Promise.reject();
+            }
 
             return new Promise(function(resolve, reject) {
                 // TRICKY: look into the first frame to see the format
@@ -327,7 +330,7 @@ function ProjectsManager(query, configurator) {
                             numFinishedFrames = 0;
                         }
 
-                        if(frame.completed) {
+                        if(frame.transcontent !== '') {
                             numFinishedFrames ++;
                         }
 
@@ -361,7 +364,7 @@ function ProjectsManager(query, configurator) {
                     resolve(true);
                 } else {
                     // we don't support anything but dokuwiki right now
-                    reject();
+                    resolve(false);
                 }
             });
         },

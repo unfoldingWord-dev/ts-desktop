@@ -20,6 +20,7 @@
     "fs-readfile-promise": "^2.0.0",
     "getmac": "^1.0.7",
     "jsonfile": "^2.2.1",
+    "locale": "0.0.20",
     "lodash": "^3.9.3",
     "md5": "^2.0.0",
     "mkdirp": "^0.5.1",

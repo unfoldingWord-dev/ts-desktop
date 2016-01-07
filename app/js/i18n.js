@@ -8,6 +8,7 @@
     let jsonfile = require('jsonfile');
     let _ = require('lodash');
     let locale2 = new require('locale');
+    //let Proxy = require('node-proxy');
 
     /**
      * Loads the i18n dictionary from the library.
@@ -100,6 +101,21 @@
              */
             getLocale: function () {
                 return locale;
+            },
+
+            /**
+             * Returns the dictionary of translations in this locale
+             * @returns
+             */
+            getDictionary: function () {
+                //let that = this;
+                //let handler = {
+                //    get: function(target, name) {
+                //        return that._(name);
+                //    }
+                //};
+                //return Proxy.create(handler);
+                return {};
             }
         };
 

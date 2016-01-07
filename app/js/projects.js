@@ -295,7 +295,7 @@ function ProjectsManager(query, configurator) {
         },
 
         /**
-         * TODO: specify the parameter types.
+         *
          * @param translation an array of frames
          * @param meta the target translation manifest and other info
          * @param filename the path where the export will be saved

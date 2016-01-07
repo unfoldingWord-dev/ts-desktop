@@ -68,7 +68,11 @@
             border-radius: 3px;
         }
 
-        .editmode p {
+        .editmode .contentheader p {
+            display: none;
+        }
+
+        .editmode .contentbody p {
             display: none;
         }
 
@@ -118,6 +122,16 @@
             cursor: pointer;
         }
 
+        #iconbox {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: var(--secondary-text-color);
+            cursor: pointer;
+        }
+
 	</style>
 
 	<template>
@@ -132,6 +146,12 @@
                 </template>
             </paper-material>
             <div id="content" class="editmode">
+                <template is="dom-if" if="{{!chunk.helpscontent.length}}">
+                    <div id="iconbox" on-tap="addhelp">
+                        <p>Click to add <span>[[chunk.data.type]]</span></p>
+                        <paper-icon-button icon="add"></paper-icon-button>
+                    </div>
+                </template>
                 <template is="dom-repeat" items="{{chunk.helpscontent}}" as="help">
                     <paper-material class="contentbox" elevation="1">
                         <div class="contentheader">

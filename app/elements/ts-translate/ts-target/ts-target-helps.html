@@ -44,6 +44,26 @@
             flex: 0 0 auto;
             border-radius: 3px;
             margin-top: 8px;
+            display: flex;
+        }
+
+        .rightbox {
+            flex: 0 0 24px;
+            border-left: 1px solid var(--border-color);
+            border-radius: 0 3px 3px 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .rightbox paper-icon-button {
+            padding: 0;
+            width: 24px;
+            color: var(--secondary-text-color);
+        }
+
+        .leftbox {
+            flex: auto;
         }
 
         .contentheader {
@@ -80,7 +100,7 @@
             display: none;
         }
 
-        .donemode paper-icon-button {
+        .donemode .rightbox {
             display: none;
         }
 
@@ -154,14 +174,20 @@
                 </template>
                 <template is="dom-repeat" items="{{chunk.helpscontent}}" as="help">
                     <paper-material class="contentbox" elevation="1">
-                        <div class="contentheader">
-                            <p>{{help.title}}</p>
-                            <iron-autogrow-textarea bind-value="{{help.title}}" on-change="change" on-input="input" placeholder="Add Title Here"></iron-autogrow-textarea>
-                            <paper-icon-button icon="close" on-tap="checkdelete"></paper-icon-button>
+                        <div class="leftbox">
+                            <div class="contentheader">
+                                <p>{{help.title}}</p>
+                                <iron-autogrow-textarea bind-value="{{help.title}}" on-change="change" on-input="input" placeholder="Add Title Here"></iron-autogrow-textarea>
+                            </div>
+                            <div class="contentbody">
+                                <p>{{help.body}}</p>
+                                <iron-autogrow-textarea bind-value="{{help.body}}" on-change="change" on-input="input" placeholder="Add Content Here"></iron-autogrow-textarea>
+                            </div>
                         </div>
-                        <div class="contentbody">
-                            <p>{{help.body}}</p>
-                            <iron-autogrow-textarea bind-value="{{help.body}}" on-change="change" on-input="input" placeholder="Add Content Here"></iron-autogrow-textarea>
+                        <div class="rightbox">
+                            <paper-icon-button icon="close" on-tap="checkdelete"></paper-icon-button>
+                            <paper-icon-button icon="arrow-drop-up" on-tap="moveup"></paper-icon-button>
+                            <paper-icon-button icon="arrow-drop-down" on-tap="movedown"></paper-icon-button>
                         </div>
                     </paper-material>
                 </template>
@@ -196,6 +222,26 @@
         observers: [
             'rendertext(chunk.*)'
         ],
+
+        moveup: function (e) {
+            var noteindex = e.model.index;
+            if (noteindex > 0) {
+                this.movehelp(noteindex, -1);
+            }
+        },
+
+        movedown: function (e) {
+            var noteindex = e.model.index;
+            if (noteindex < this.chunk.helpscontent.length - 1) {
+                this.movehelp(noteindex, 1);
+            }
+        },
+
+        movehelp: function (index, dir) {
+            var removed = this.splice('chunk.helpscontent', index, 1)[0];
+            this.splice('chunk.helpscontent', index + dir, 0, removed);
+            this.fire('iron-signal', {name: 'updatetranslation'});
+        },
 
         addhelp: function () {
             var newhelp = {title: "", body: ""};

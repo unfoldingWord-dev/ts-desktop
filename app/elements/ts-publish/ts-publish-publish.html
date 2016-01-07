@@ -269,8 +269,13 @@
                     mythis.set('options.loading', false);
                 })
                 .catch(function (err) {
+                    App.reporter.logError(err.stderr);
+                    if(err.stderr.indexOf('DENIED by fallthru')) {
+                        App.reporter.logNotice('Destroying invalid ssh keys');
+                        App.uploader.destroyKeys();
+                    }
                     mythis.set('options.title', "Publish Failed");
-                    mythis.set('options.body', "We're sorry.  An error occurred while trying to upload your project");
+                    mythis.set('options.body', "We're sorry.  An error occurred while trying to upload your project. Please try again.");
                     mythis.set('options.loading', false);
                 });
         }

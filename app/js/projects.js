@@ -302,69 +302,74 @@ function ProjectsManager(query, configurator) {
          * @returns {Promise.<boolean>}
          */
         exportTranslation: function (translation, meta, filename) {
+            console.log("Exporting File", translation, meta, filename);
             // validate input
             if(filename === null || filename === '') {
                 return Promise.reject();
             }
 
             return new Promise(function(resolve, reject) {
-                // TRICKY: look into the first frame to see the format
-                if(translation[0].meta.format === 'default') {
-                    // the default format is currently dokuwiki
-                    let chapterContent = '',
-                        currentChapter = -1,
-                        zip = new AdmZip(),
-                        numFinishedFrames = 0;
-                    for(let frame of translation) {
-
-                        // close chapter chapter
-                        if(frame.meta.chapter !== currentChapter) {
-                            if(chapterContent !== '' && numFinishedFrames > 0) {
-                                // TODO: we need to get the chapter reference and insert it here
-                                chapterContent += '////\n';
-                                //console.log('chapter ' + currentChapter, chapterContent);
-                                zip.addFile(currentChapter + '.txt', new Buffer(chapterContent), null);
-                            }
-                            currentChapter = frame.meta.chapter;
-                            chapterContent = '';
+                if(meta.type.toLowerCase() === 'text') {
+                    // TRICKY: look into the first frame to see the format
+                    if(translation[0].meta.format === 'default') {
+                        // the default format is currently dokuwiki
+                        let chapterContent = '',
+                            currentChapter = -1,
+                            zip = new AdmZip(),
                             numFinishedFrames = 0;
+                        for(let frame of translation) {
+
+                            // close chapter chapter
+                            if(frame.meta.chapter !== currentChapter) {
+                                if(chapterContent !== '' && numFinishedFrames > 0) {
+                                    // TODO: we need to get the chapter reference and insert it here
+                                    chapterContent += '////\n';
+                                    //console.log('chapter ' + currentChapter, chapterContent);
+                                    zip.addFile(currentChapter + '.txt', new Buffer(chapterContent), null);
+                                }
+                                currentChapter = frame.meta.chapter;
+                                chapterContent = '';
+                                numFinishedFrames = 0;
+                            }
+
+                            if(frame.transcontent !== '') {
+                                numFinishedFrames ++;
+                            }
+
+                            // build chapter header
+                            if(chapterContent === '') {
+                                chapterContent += '//\n';
+                                chapterContent += meta.language.ln + '\n';
+                                chapterContent += '//\n\n';
+
+                                chapterContent += '//\n';
+                                chapterContent += meta.project.name + '\n';
+                                chapterContent += '//\n\n';
+
+                                chapterContent += '//\n';
+                                chapterContent += frame.meta.title + '\n';
+                                chapterContent += '//\n\n';
+                            }
+
+                            // add frame
+                            chapterContent += '{{https://api.unfoldingword.org/' + meta.project.slug + '/jpg/1/en/360px/' + meta.project.slug + '-' + meta.language.lc + '-' + frame.meta.chapterid + '-' + frame.meta.frameid + '.jpg}}\n\n';
+                            chapterContent += frame.transcontent + '\n\n';
+                        }
+                        if(chapterContent !== '' && numFinishedFrames > 0) {
+                            // TODO: we need to get the chapter reference and insert it here
+                            chapterContent += '////\n';
+                            //console.log('chapter ' + currentChapter, chapterContent);
+                            zip.addFile(currentChapter + '.txt', new Buffer(chapterContent), null);
                         }
 
-                        if(frame.transcontent !== '') {
-                            numFinishedFrames ++;
-                        }
-
-                        // build chapter header
-                        if(chapterContent === '') {
-                            chapterContent += '//\n';
-                            chapterContent += meta.language.ln + '\n';
-                            chapterContent += '//\n\n';
-
-                            chapterContent += '//\n';
-                            chapterContent += meta.project.name + '\n';
-                            chapterContent += '//\n\n';
-
-                            chapterContent += '//\n';
-                            chapterContent += frame.meta.title + '\n';
-                            chapterContent += '//\n\n';
-                        }
-
-                        // add frame
-                        chapterContent += '{{https://api.unfoldingword.org/' + meta.project.slug + '/jpg/1/en/360px/' + meta.project.slug + '-' + meta.language.lc + '-' + frame.meta.chapterid + '-' + frame.meta.frameid + '.jpg}}\n\n';
-                        chapterContent += frame.transcontent + '\n\n';
+                        zip.writeZip(filename + '.zip');
+                        resolve(true);
+                    } else {
+                        // we don't support anything but dokuwiki right now
+                        resolve(false);
                     }
-                    if(chapterContent !== '' && numFinishedFrames > 0) {
-                        // TODO: we need to get the chapter reference and insert it here
-                        chapterContent += '////\n';
-                        //console.log('chapter ' + currentChapter, chapterContent);
-                        zip.addFile(currentChapter + '.txt', new Buffer(chapterContent), null);
-                    }
-
-                    zip.writeZip(filename + '.zip');
-                    resolve(true);
                 } else {
-                    // we don't support anything but dokuwiki right now
-                    resolve(false);
+                    // TODO: support exporting other target translation types if needed e.g. notes, words, questions
                 }
             });
         },

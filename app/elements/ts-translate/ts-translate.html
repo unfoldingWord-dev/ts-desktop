@@ -59,6 +59,23 @@
             color: var(--accent-color);
         }
 
+        #helpchecklistpopup {
+            width: 350px;
+            height: 225px;
+            text-align: center;
+            color: var(--primary-text-color);
+        }
+
+        #helpchecklistpopup .buttons {
+            display: flex;
+            justify-content: center;
+            color: var(--secondary-text-color);
+        }
+
+        #helpchecklistpopup .buttons paper-button:hover {
+            color: var(--accent-color);
+        }
+
         #editpopup {
             width: 350px;
             height: 175px;
@@ -141,6 +158,17 @@
             </div>
         </paper-dialog>
 
+        <paper-dialog id="helpchecklistpopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <h2>Chunk Checklist</h2>
+            <div>
+                <p>Are you sure you're Done with this chunk?</p>
+            </div>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Cancel</paper-button>
+                <paper-button dialog-confirm on-tap="closehelpchecklist">Confirm</paper-button>
+            </div>
+        </paper-dialog>
+
         <paper-dialog id="editpopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <h2>Edit Chunk</h2>
             <div>
@@ -153,9 +181,9 @@
         </paper-dialog>
 
         <paper-dialog id="nodatapopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <h2>No Translation</h2>
+            <h2>Missing Data</h2>
             <div>
-                <p>You cannot complete a blank chunk!</p>
+                <p>All fields are not complete.</p>
             </div>
             <div class="buttons">
                 <paper-button dialog-dismiss>OK</paper-button>
@@ -178,6 +206,7 @@
         <iron-signals on-iron-signal-loadpublish="loadpublish"></iron-signals>
         <iron-signals on-iron-signal-updatetranslation="updatetranslation"></iron-signals>
         <iron-signals on-iron-signal-openchecklist="openchecklist"></iron-signals>
+        <iron-signals on-iron-signal-openhelpchecklist="openhelpchecklist"></iron-signals>
         <iron-signals on-iron-signal-openedit="openedit"></iron-signals>
         <iron-signals on-iron-signal-opennodata="opennodata"></iron-signals>
         <iron-signals on-iron-signal-opensource="opensource"></iron-signals>
@@ -270,6 +299,16 @@
         closechecklist: function () {
             var index = this.modestatus.index;
             this.fire('iron-signal', {name: 'completechunk', data: {index: index}});
+        },
+
+        openhelpchecklist: function (event, data) {
+            this.modestatus.index = data.index;
+            this.$.helpchecklistpopup.open();
+        },
+
+        closehelpchecklist: function () {
+            var index = this.modestatus.index;
+            this.fire('iron-signal', {name: 'completehelp', data: {index: index}});
         },
 
         openedit: function (event, data) {
@@ -536,10 +575,15 @@
                 source.push(srcchunk);
 
                 var rawdata = this.rawdata[chapterid + '-' + frameid];
-                if (rawdata === undefined) {
-                    transchunk = {transcontent: "", helpscontent: [], completed: false, meta: meta};
-                } else {
-                    transchunk = {transcontent: rawdata.content, helpscontent: [], completed: rawdata.completed, meta: meta};
+                transchunk = {transcontent: "", helpscontent: [], completed: false, meta: meta};
+
+                if (rawdata !== undefined) {
+                    transchunk.completed = rawdata.completed;
+                    if (standard) {
+                        transchunk.transcontent = rawdata.transcontent;
+                    } else {
+                        transchunk.helpscontent = rawdata.helpscontent;
+                    }
                 }
                 translation.push(transchunk);
             }

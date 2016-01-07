@@ -109,12 +109,12 @@
             border-radius: 3px;
         }
 
-        #toggle {
+        #helptoggle {
             --paper-toggle-button-checked-bar-color: var(--primary-color);
             --paper-toggle-button-checked-button-color: var(--primary-color-dark);
         }
 
-        #toggle:hover {
+        #helptoggle:hover {
             cursor: pointer;
         }
 
@@ -148,11 +148,11 @@
             </div>
             <paper-material id="togglebox" elevation="1">
                 <p>Mark chunk as done</p>
-                <paper-toggle-button id="toggle" on-change="checkdone"></paper-toggle-button>
+                <paper-toggle-button id="helptoggle" on-change="helpcheckdone"></paper-toggle-button>
             </paper-material>
         </div>
 
-        <iron-signals on-iron-signal-completechunk="completechunk"></iron-signals>
+        <iron-signals on-iron-signal-completehelp="completehelp"></iron-signals>
 
 	</template>
 
@@ -210,25 +210,35 @@
                     content.classList.add("editmode");
                     content.classList.remove("donemode");
                 }
-                this.$.toggle.checked = completed;
+                this.$.helptoggle.checked = completed;
             }
         },
 
-        completechunk: function (event, data) {
+        completehelp: function (event, data) {
             var index = data.index;
             if (this.chunk.index === index) {
                 this.set('chunk.completed', true);
-                this.$.toggle.checked = true;
+                this.$.helptoggle.checked = true;
                 this.fire('iron-signal', {name: 'updatetranslation'});
                 this.fire('setheight');
             }
         },
 
-        checkdone: function () {
+        helpcheckdone: function () {
             var completed = this.chunk.completed;
             var index = this.chunk.index;
-            var toggle = this.$.toggle;
+            var toggle = this.$.helptoggle;
             var mythis = this;
+            var blankcheck = false;
+            var helps = this.chunk.helpscontent;
+
+            if (helps.length) {
+                for (var i = 0; i < helps.length; i++) {
+                    if (helps[i].title === "" || helps[i].body === "") {
+                        blankcheck = true;
+                    }
+                }
+            }
 
             if (toggle.pressed) {
                 setTimeout(function() {
@@ -239,10 +249,10 @@
             toggle.checked = false;
 
             if (!completed) {
-                if (this.chunk.transcontent !== "") {
+                if (blankcheck) {
                     this.fire('iron-signal', {name: 'opennodata'});
                 } else {
-                    this.fire('iron-signal', {name: 'openchecklist', data: {index: index}});
+                    this.fire('iron-signal', {name: 'openhelpchecklist', data: {index: index}});
                 }
             } else {
                 this.set('chunk.completed', false);

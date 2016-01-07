@@ -480,7 +480,7 @@
         },
 
         checkstandard: function () {
-            var check = this.currentproject.data.type === "Text";
+            var check = this.currentproject.data.type.code === "text";
             this.set('standardproject', check);
         },
 

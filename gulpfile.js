@@ -9,6 +9,7 @@ var gulp = require('gulp'),
     jshint = require('gulp-jshint'),
     stylish = require('jshint-stylish'),
     jscs = require('gulp-jscs'),
+    rimraf = require('rimraf'),
     map = require('map-stream'),
     argv = require('yargs').argv,
     NwBuilder = require('nw-builder');
@@ -58,6 +59,10 @@ gulp.task('lint', [
 
 // pass parameters like: gulp build --win --osx --linux
 gulp.task('build', [], function () {
+    // clean out extra files
+    rimraf.sync('app/logs');
+    rimraf.sync('app/ssh');
+
     var platforms = [];
     if(argv.win !== undefined) {
         platforms = ['win64', 'win32'];

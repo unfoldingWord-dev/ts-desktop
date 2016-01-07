@@ -509,6 +509,7 @@
                 var frameid = frames[i].verse;
                 var frame = parseInt(frameid);
                 var title = frames[i].title;
+                var format = frames[i].format;
                 var id = frames[i].id;
                 var sourcedata = frames[i].chunk;
                 var notes = App.projectsManager.getFrameNotes(id);
@@ -562,7 +563,8 @@
                     verses: verses,
                     chapterref: chapterref,
                     chunkref: chunkref,
-                    standard: standard
+                    standard: standard,
+                    format: format
                 };
 
                 srcchunk = {

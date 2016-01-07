@@ -81,7 +81,7 @@ function ProjectsManager(query, configurator) {
 
 
                 makeProjectPaths: function (meta) {
-                    return this.makeProjectPathsForProject(prefix + meta.project.slug + '-' + meta.language.lc);
+                    return this.makeProjectPathsForProject(prefix + meta.fullname);
                 },
 
                 makeProjectPathsForProject: function (project) {
@@ -312,6 +312,10 @@ function ProjectsManager(query, configurator) {
           // TODO: perform the import
         },
 
+        isTranslation: function (meta) {
+            return meta.type.toUpperCase() === 'TEXT';
+        },
+
         saveTargetTranslation: function (translation, meta) {
             var paths = this.getPaths(meta);
 
@@ -330,8 +334,9 @@ function ProjectsManager(query, configurator) {
                 };
             };
 
+            var isTranslation = this.isTranslation(meta);
+
             var chunks = _.chain(translation)
-                .filter('content')
                 .indexBy(makeComplexId)
                 .value();
 
@@ -359,6 +364,7 @@ function ProjectsManager(query, configurator) {
                 package_version: 3,
                 target_language: language,
                 project_id: meta.project.slug,
+                project_type: meta.type,
                 source_translations: sources,
                 translators: meta.translators,
                 finished_frames: finishedFrames,
@@ -382,14 +388,16 @@ function ProjectsManager(query, configurator) {
                 };
             };
 
-            var writeChunk = function (c) {
-                var f = path.join(paths.projectDir, c.meta.chapterid, c.meta.frameid + '.txt');
-                return write(f, c.content);
+            var updateChunk = function (c) {
+                var f = path.join(paths.projectDir, c.meta.chapterid, c.meta.frameid + '.txt'),
+                    hasContent = isTranslation ? !!c.transcontent : !!c.helpscontent.length;
+
+                return hasContent ? write(f, isTranslation ? c.transcontent : toJSON(c.helpscontent)) : rm(f);
             };
 
-            var writeChunks = function (data) {
+            var updateChunks = function (data) {
                 return function () {
-                    return Promise.all(_.map(data, writeChunk));
+                    return Promise.all(_.map(data, updateChunk));
                 };
             };
 
@@ -397,9 +405,8 @@ function ProjectsManager(query, configurator) {
                 .then(writeFile(paths.manifest, manifest))
                 .then(writeFile(paths.project, meta))
                 .then(makeChapterDirs(chunks))
-                .then(writeChunks(chunks))
+                .then(updateChunks(chunks))
                 .then(git.init.bind(git, paths.projectDir))
-                // .then(git.diff.bind(git, paths.projectDir))
                 .then(git.stage.bind(git, paths.projectDir));
         },
 
@@ -432,6 +439,8 @@ function ProjectsManager(query, configurator) {
         loadTargetTranslation: function (meta) {
             var paths = this.getPaths(meta);
 
+            var isTranslation = this.isTranslation(meta);
+
             // read manifest, get object with finished frames
 
             // return an object with keys that are the complexid
@@ -445,20 +454,31 @@ function ProjectsManager(query, configurator) {
 
             var readChunk = function (f) {
                 return read(f).then(function (c) {
-                    return {
-                        content: c.toString(),
+                    var parsed = {
                         name: parseChunkName(f)
                     };
+
+                    if (isTranslation) {
+                        parsed['transcontent'] = c.toString();
+                    } else {
+                        parsed['helpscontent'] = JSON.parse(c);
+                    }
+
+                    return parsed;
                 })
             };
 
             var markFinished = function (chunks) {
                 return function (finished) {
                     return _.mapValues(chunks, function (c, name) {
-                        return {
-                            content: c.content,
+                        var mapped = {
                             completed: !!finished[name]
-                        }
+                        },
+                        key = isTranslation ? 'transcontent' : 'helpscontent';
+
+                        mapped[key] = c[key];
+
+                        return mapped;
                     });
                 };
             };

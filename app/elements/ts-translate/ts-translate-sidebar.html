@@ -75,9 +75,9 @@
 
     <template>
         <div id="top">
-            <paper-icon-button id="read" icon="assignment" title="Read Mode" on-tap="read"></paper-icon-button>
-            <paper-icon-button id="chunk" icon="flip-to-front" title="Chunk Mode" on-tap="chunk"></paper-icon-button>
-            <paper-icon-button id="review" icon="assignment-turned-in" title="Review Mode" on-tap="review"></paper-icon-button>
+            <paper-icon-button id="read" class$="[[checkclass(standardproject)]]" icon="assignment" title="Read Mode" on-tap="read"></paper-icon-button>
+            <paper-icon-button id="chunk" class$="[[checkclass(standardproject)]]" icon="flip-to-front" title="Chunk Mode" on-tap="chunk"></paper-icon-button>
+            <paper-icon-button id="review" class$="[[checkclass(standardproject)]]" icon="assignment-turned-in" title="Review Mode" on-tap="review"></paper-icon-button>
         </div>
         <paper-menu-button horizontal-offset="10" vertical-offset="10" vertical-align="bottom">
             <paper-icon-button class="current dropdown-trigger" icon="more-vert" title="options"></paper-icon-button>
@@ -104,12 +104,20 @@
                 type: Number,
                 value: 0,
                 notify: true
+            },
+            standardproject: {
+                type: Boolean,
+                value: true
             }
         },
 
         observers: [
             'modechange(selected)'
         ],
+
+        checkclass: function (standard) {
+            return standard ? '' : 'hide';
+        },
 
         modechange: function (selected) {
             var read = this.$.read;

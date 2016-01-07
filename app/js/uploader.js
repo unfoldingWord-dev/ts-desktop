@@ -7,6 +7,7 @@
         jsonfile = require('jsonfile'),
         getmac = require('getmac'),
         path = require('path'),
+        rimraf = require('rimraf'),
         fs = require('fs'),
         _ = require('lodash'),
         utils = require('../js/lib/util'),
@@ -165,6 +166,13 @@
                         return reg;
                     });
                 });
+            },
+
+            /**
+             * Deletes the ssh keys. They will be regenerated/registered next time we publish
+             */
+            destroyKeys: function () {
+                rimraf.sync(paths.sshPath);
             },
 
             verifyProfile: function (profile) {

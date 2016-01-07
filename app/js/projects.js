@@ -5,6 +5,7 @@ var _ = require('lodash'),
     path = require('path'),
     mkdirP = require('mkdirp'),
     rimraf = require('rimraf'),
+    AdmZip = require('adm-zip'),
     utils = require('../js/lib/util'),
     wrap = utils.promisify,
     guard = utils.guard;
@@ -307,9 +308,10 @@ function ProjectsManager(query, configurator) {
                 // TRICKY: look into the first frame to see the format
                 if(translation[0].meta.format === 'default') {
                     // the default format is currently dokuwiki
-                    let chapterContent = '';
-                    let currentChapter = -1;
-                    let numFinishedFrames = 0;
+                    let chapterContent = '',
+                        currentChapter = -1,
+                        zip = new AdmZip(),
+                        numFinishedFrames = 0;
                     for(let frame of translation) {
 
                         // close chapter chapter
@@ -317,8 +319,8 @@ function ProjectsManager(query, configurator) {
                             if(chapterContent !== '' && numFinishedFrames > 0) {
                                 // TODO: we need to get the chapter reference and insert it here
                                 chapterContent += '////\n';
-                                console.log('chapter ' + currentChapter, chapterContent);
-                                // TODO: write content to file
+                                //console.log('chapter ' + currentChapter, chapterContent);
+                                zip.addFile(currentChapter + '.txt', new Buffer(chapterContent), null);
                             }
                             currentChapter = frame.meta.chapter;
                             chapterContent = '';
@@ -351,11 +353,11 @@ function ProjectsManager(query, configurator) {
                     if(chapterContent !== '' && numFinishedFrames > 0) {
                         // TODO: we need to get the chapter reference and insert it here
                         chapterContent += '////\n';
-                        console.log('chapter ' + currentChapter, chapterContent);
-                        // TODO: write content to file
+                        //console.log('chapter ' + currentChapter, chapterContent);
+                        zip.addFile(currentChapter + '.txt', new Buffer(chapterContent), null);
                     }
 
-                    // TODO: zip up generated files
+                    zip.writeZip(filename + '.zip');
                     resolve(true);
                 } else {
                     // we don't support anything but dokuwiki right now

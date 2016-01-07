@@ -136,8 +136,8 @@
                 value: {}
             },
             type: {
-                type: String,
-                value: ""
+                type: Object,
+                value: {}
             },
             projectlist: {
                 type: Array,
@@ -164,7 +164,6 @@
         },
 
         createproject: function () {
-            var name = this.project.name;
             var project = this.project;
             var language = this.language;
             var type = this.type;
@@ -173,12 +172,10 @@
             var icon = this.category.lefticon;
             var popup = this.$.popup;
 
-            if (type === "Notes") {
-                typeext = "_tn";
+            if (type.code !== "text") {
+                typeext = "_" + type.code;
             }
-            if (type === "Questions") {
-                typeext = "_tq";
-            }
+
             var fullname = project.slug + typeext + "-" + language.lc;
 
             for (var i = 0; i < projectarray.length; i++) {

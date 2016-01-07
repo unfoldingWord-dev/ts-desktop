@@ -157,7 +157,7 @@
                         <div class="contentheader">
                             <p>{{help.title}}</p>
                             <iron-autogrow-textarea bind-value="{{help.title}}" on-change="change" on-input="input" placeholder="Add Title Here"></iron-autogrow-textarea>
-                            <paper-icon-button icon="close" on-tap="deletehelp"></paper-icon-button>
+                            <paper-icon-button icon="close" on-tap="checkdelete"></paper-icon-button>
                         </div>
                         <div class="contentbody">
                             <p>{{help.body}}</p>
@@ -173,6 +173,7 @@
         </div>
 
         <iron-signals on-iron-signal-completehelp="completehelp"></iron-signals>
+        <iron-signals on-iron-signal-deletehelp="deletehelp"></iron-signals>
 
 	</template>
 
@@ -203,11 +204,21 @@
             this.fire('iron-signal', {name: 'updatetranslation'});
         },
 
-        deletehelp: function (e) {
-            var index = e.model.index;
-            this.splice('chunk.helpscontent', index, 1);
-            this.fire('setheight');
-            this.fire('iron-signal', {name: 'updatetranslation'});
+        deletehelp: function (event, data) {
+            var chunkindex = data.index[0];
+            var noteindex = data.index[1];
+
+            if (this.chunk.index === chunkindex) {
+                this.splice('chunk.helpscontent', noteindex, 1);
+                this.fire('setheight');
+                this.fire('iron-signal', {name: 'updatetranslation'});
+            }
+        },
+
+        checkdelete: function (e) {
+            var noteindex = e.model.index;
+            var chunkindex = this.chunk.index;
+            this.fire('iron-signal', {name: 'opendelete', data: {index: [chunkindex, noteindex]}});
         },
 
         input: function () {

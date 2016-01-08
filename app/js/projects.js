@@ -308,8 +308,10 @@ function ProjectsManager(query, configurator) {
                 return Promise.reject();
             }
 
+            var isTranslation = this.isTranslation(meta);
+
             return new Promise(function(resolve, reject) {
-                if(meta.type.toLowerCase() === 'text') {
+                if(isTranslation) {
                     // TRICKY: look into the first frame to see the format
                     if(translation[0].meta.format === 'default') {
                         // the default format is currently dokuwiki
@@ -379,13 +381,7 @@ function ProjectsManager(query, configurator) {
         },
 
         isTranslation: function (meta) {
-            var test;
-            if (meta.type.code === undefined) {
-                test = true;
-            } else {
-                test = meta.type.code === 'text';
-            }
-            return test;
+            return !meta.type.code || meta.type.code === 'text';
         },
 
         saveTargetTranslation: function (translation, meta) {

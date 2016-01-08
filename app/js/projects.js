@@ -419,7 +419,7 @@ function ProjectsManager(query, configurator) {
 
             var prop = function (prop) {
                 return function (v, k) {
-                    return v[prop] ? k : false
+                    return v[prop] ? k : false;
                 };
             };
 
@@ -554,7 +554,7 @@ function ProjectsManager(query, configurator) {
                     }
 
                     return parsed;
-                })
+                });
             };
 
             var markFinished = function (chunks) {

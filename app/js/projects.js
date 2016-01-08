@@ -379,26 +379,34 @@ function ProjectsManager(query, configurator) {
         /**
          * Imports a tstudio archive
          * @param file {File} the path to the archive
+         * @returns {Promise.<boolean>}
          */
         importTargetTranslation: function(file) {
-            console.log('importing archive', file.path);
-            let translationPaths = tstudioMigrator.listTargetTranslations(file);
-            if(translationPaths.length > 0) {
-                // proceed to import
-                let zip = new AdmZip(file.path);
-                _.forEach(translationPaths, function(tpath) {
-                    let outputDir = path.join(configurator.getValue('tempDir'), tpath);
-                    zip.extractEntryTo(tpath, outputDir, false, true);
-                    if(targetTranslationMigrator.migrate(outputDir)) {
-
+            console.log('importing archive', file);
+            return new Promise(function(resolve, reject) {
+                tstudioMigrator.listTargetTranslations(file).then(function(relativePaths) {
+                    if(relativePaths.length > 0) {
+                        // proceed to import
+                        let zip = new AdmZip(file.path);
+                        _.forEach(relativePaths, function(tpath) {
+                            let outputDir = path.join(configurator.getValue('tempDir'), tpath);
+                            zip.extractEntryTo(tpath + '/', outputDir, false, true);
+                            targetTranslationMigrator.migrate(outputDir).then(function() {
+                                // TODO: perform the import
+                                resolve(true);
+                            })
+                            .catch(function(err) {
+                                reject(err);
+                            });
+                        });
+                    } else {
+                        reject('The archive is empty or not supported');
                     }
-
+                })
+                .catch(function(err) {
+                    reject(err);
                 });
-
-            } else {
-                // unsupported or empty archive
-                console.log('the archive is empty or not supported', file);
-            }
+            });
         },
 
         isTranslation: function (meta) {

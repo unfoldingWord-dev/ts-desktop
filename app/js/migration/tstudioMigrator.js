@@ -11,37 +11,38 @@
      * Migrations should always pass through in order to collect all needed updates
      * without having to always update past migrations.
      * @param file {File} the tstudio archive file
-     * @returns {string[]} an array of paths in the archive to target translations
+     * @returns {Promise.<string[]>} an array of paths in the archive to target translations
      */
     function listTargetTranslations (file) {
-        try {
-            let zip = new AdmZip(file.path);
-            let manifest = JSON.parse(zip.readAsText('manifest.json'));
-            let packageVersion = manifest.package_version;
-            switch (packageVersion) {
-                case 1:
-                    manifest = v1(manifest);
-                case 2:
-                    manifest = v2(manifest);
-                    break;
-                default:
-                    // unsupported version
-                    return [];
+        return new Promise(function(resolve, reject) {
+            try {
+                let zip = new AdmZip(file.path);
+                let manifest = JSON.parse(zip.readAsText('manifest.json'));
+                let packageVersion = manifest.package_version;
+                switch (packageVersion) {
+                    case 1:
+                        manifest = v1(manifest);
+                    case 2:
+                        manifest = v2(manifest);
+                        break;
+                    default:
+                        reject('unsupported package version "' + packageVersion + '"');
+                }
+                // update archive to keep things pretty
+                zip.updateFile('manifest.json', JSON.stringify(manifest));
+                // TODO: writing back to the zip is broken. See https://github.com/cthackers/adm-zip/issues/64
+                //zip.writeZip(file.path);
+                // return paths
+                let paths = [];
+                _.forEach(manifest.target_translations, function(item) {
+                    paths.push(item.path);
+                });
+                resolve(paths);
+            } catch (err) {
+                reject('failed to migrate tstudio archive: ' + err);
             }
-            // update archive to keep things pretty
-            zip.updateFile('manifest.json', JSON.stringify(manifest));
-            zip.writeZip();
+        });
 
-            // return paths
-            let paths = [];
-            _.forEach(manifest.target_translations, function(item) {
-                paths.push(item.path);
-            });
-            return paths;
-        } catch (err) {
-            console.log('tstudio migration failed', file, err);
-            return [];
-        }
     }
 
     /**

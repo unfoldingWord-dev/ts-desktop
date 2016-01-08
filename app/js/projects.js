@@ -301,7 +301,13 @@ function ProjectsManager(query, configurator) {
         },
 
         isTranslation: function (meta) {
-            return meta.type.code === 'text';
+            var test;
+            if (meta.type.code === undefined) {
+                test = true;
+            } else {
+                test = meta.type.code === 'text';
+            }
+            return test;
         },
 
         saveTargetTranslation: function (translation, meta) {

@@ -234,6 +234,9 @@
                         mythis.set('options.loading', false);
                     })
                     .catch(function (err) {
+                        if(err !== null) {
+                            console.log(err);
+                        }
                         mythis.set('options.title', "Export Failed");
                         mythis.set('options.body', "We're sorry.  An error occurred while trying to save your project");
                         mythis.set('options.loading', false);

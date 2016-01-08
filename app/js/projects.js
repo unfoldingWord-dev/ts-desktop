@@ -529,11 +529,12 @@ function ProjectsManager(query, configurator) {
         loadTargetTranslationsList: function () {
             var makePaths = config.makeProjectPathsForProject.bind(config);
 
-            // return the project.json, not the manifest.json
-
             return this.loadProjectsList()
                        .then(map(makePaths))
                        .then(map('project'))
+                       .then(filter(function(path) {
+                           return fs.existsSync(path);
+                       }))
                        .then(map(read))
                        .then(Promise.all.bind(Promise))
                        .then(map(fromJSON));

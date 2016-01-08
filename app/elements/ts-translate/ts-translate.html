@@ -131,6 +131,30 @@
             font-size: 110%;
         }
 
+        #delete {
+            width: 450px;
+            height: 175px;
+        }
+
+        #delete iron-icon {
+            padding-right: 10px;
+        }
+
+        #delete p {
+            font-size: 110%;
+        }
+
+        #deletebuttons {
+            display: flex;
+            justify-content: flex-end;
+            padding: 0 50px;
+            color: var(--secondary-text-color);
+        }
+
+        #deletebuttons paper-button:hover {
+            color: var(--accent-color);
+        }
+
     </style>
 
     <template>
@@ -190,6 +214,17 @@
             </div>
         </paper-dialog>
 
+        <paper-dialog id="delete" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <h2><iron-icon icon="delete"></iron-icon>Delete</h2>
+            <div>
+                <p>This will permanently remove this note/question. Continue?</p>
+            </div>
+            <div id="deletebuttons">
+                <paper-button on-tap="closedelete">No</paper-button>
+                <paper-button on-tap="deletehelp">Confirm</paper-button>
+            </div>
+        </paper-dialog>
+
         <paper-dialog id="sourcepopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <ts-source-modal id="modal" on-close="closesource"></ts-source-modal>
         </paper-dialog>
@@ -207,6 +242,7 @@
         <iron-signals on-iron-signal-updatetranslation="updatetranslation"></iron-signals>
         <iron-signals on-iron-signal-openchecklist="openchecklist"></iron-signals>
         <iron-signals on-iron-signal-openhelpchecklist="openhelpchecklist"></iron-signals>
+        <iron-signals on-iron-signal-opendelete="opendelete"></iron-signals>
         <iron-signals on-iron-signal-openedit="openedit"></iron-signals>
         <iron-signals on-iron-signal-opennodata="opennodata"></iron-signals>
         <iron-signals on-iron-signal-opensource="opensource"></iron-signals>
@@ -309,6 +345,21 @@
         closehelpchecklist: function () {
             var index = this.modestatus.index;
             this.fire('iron-signal', {name: 'completehelp', data: {index: index}});
+        },
+
+        opendelete: function (event, data) {
+            this.modestatus.index = data.index;
+            this.$.delete.open();
+        },
+
+        closedelete: function () {
+            this.$.delete.close();
+        },
+
+        deletehelp: function () {
+            var index = this.modestatus.index;
+            this.fire('iron-signal', {name: 'deletehelp', data: {index: index}});
+            this.closedelete();
         },
 
         openedit: function (event, data) {
@@ -480,7 +531,7 @@
         },
 
         checkstandard: function () {
-            var check = this.currentproject.data.type === "Text";
+            var check = this.currentproject.data.type.code === "text";
             this.set('standardproject', check);
         },
 

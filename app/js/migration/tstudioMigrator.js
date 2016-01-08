@@ -51,6 +51,7 @@
      * @returns {JSON} the migrated manifest or null
      */
     function v2(manifest) {
+        manifest.package_version = 2;
         return manifest;
     }
 

@@ -460,6 +460,7 @@
                 setTimeout(function() {
                     mythis.set('currentproject.data', data.projdata);
                     mythis.set('currentproject.state', blankstate);
+                    mythis.checkstandard();
                     App.projectsManager.loadTargetTranslation(data.projdata).then(function (translation) {
                         mythis.set('rawdata', translation);
                         mythis.pullsource();

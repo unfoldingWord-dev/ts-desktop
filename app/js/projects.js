@@ -392,13 +392,22 @@ function ProjectsManager(query, configurator) {
                             let outputDir = path.join(configurator.getValue('tempDir'), tpath);
                             zip.extractEntryTo(tpath + '/', outputDir, false, true);
                             targetTranslationMigrator.migrate(outputDir).then(function() {
-                                // TODO: perform the import
-                                resolve(true);
+                                // import the target translation
+                                // TODO: need to use the id not the path
+                                utils.move(outputDir, path.join(configurator.getValue('targetTranslationsDir'), tpath), function(err) {
+                                    if(err) {
+                                        console.log(err);
+                                    } else {
+                                        console.log('finished importing target translation');
+                                    }
+                                });
                             })
                             .catch(function(err) {
-                                reject(err);
+                                console.log(err);
                             });
                         });
+                        console.log('finished importing');
+                        resolve(true);
                     } else {
                         reject('The archive is empty or not supported');
                     }

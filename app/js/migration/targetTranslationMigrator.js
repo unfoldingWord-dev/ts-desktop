@@ -26,10 +26,17 @@
                                 manifest = v2(manifest);
                             case 3:
                                 manifest = v3(manifest);
+                            case 4:
+                                manifest = v4(manifest);
                                 break;
                             default:
                                 reject('unsupported package version "' + packageVersion + '"');
                         }
+                        
+                        // update generator
+                        manifest.generator.name = 'ts-desktop';
+                        // TODO: update build number
+
                         // save manifest
                         jsonfile.writeFile(manifestFile, manifest, function (writeErr) {
                             if(writeErr !== null) {
@@ -52,7 +59,17 @@
      * @param manifest {JSON}
      * @returns {JSON}
      */
+    function v4(manifest) {
+        return manifest;
+    }
+
+    /**
+     * we added a project_type
+     * @param manifest {JSON}
+     * @returns {JSON}
+     */
     function v3(manifest) {
+        manifest.project_type = 'text';
         return manifest;
     }
 
@@ -93,6 +110,16 @@
         // target language
         manifest.target_language.id = manifest.target_language.slug;
         delete manifest.target_language.slug;
+
+        // add placeholders
+        manifest.package_version = 3;
+        if(!manifest.hasOwnProperty('translators')) {
+            manifest.translators = [];
+        }
+        if(!manifest.hasOwnProperty('source_translations')) {
+            manifest.source_translations = {};
+        }
+
         return manifest;
     }
 

@@ -8,8 +8,6 @@
     let jsonfile = require('jsonfile');
     let _ = require('lodash');
     let locale2 = new require('locale');
-    // TODO: this proxy implimentation works in tests but not while running the app.
-    //let Proxy = require('node-proxy');
 
     /**
      * Loads the i18n dictionary from the library.

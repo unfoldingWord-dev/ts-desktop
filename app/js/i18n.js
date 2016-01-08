@@ -8,8 +8,6 @@
     let jsonfile = require('jsonfile');
     let _ = require('lodash');
     let locale2 = new require('locale');
-    // TODO: this proxy implimentation works in tests but not while running the app.
-    //let Proxy = require('node-proxy');
 
     /**
      * Loads the i18n dictionary from the library.
@@ -74,9 +72,10 @@
 
         let i18n = {
             /**
-             * Returns the localized value
+             * Returns the localized value.
+             * If no value is found it will log the missing key in the console
              * @param key
-             * @returns {*}
+             * @returns {string} an empty string if the localization does not exist
              * @private
              */
             _: function (key) {
@@ -85,8 +84,10 @@
                         return dictionary[key];
                     }
                 }
+                console.log('i18n: Missing localization for key "' + key + '"');
                 return '[i18n: ' + key + ']';
             },
+
             /**
              * Changes the active locale
              * The default locale will be used if this locale is missing translations
@@ -96,6 +97,7 @@
                 locale = chooseBestLocale(dir, code);
                 dictionary = loadLocale(dir, locale, defaultLocale);
             },
+
             /**
              * Returns the locale code
              * @returns {string}
@@ -105,19 +107,11 @@
             },
 
             /**
-             * Returns the dictionary of translations in this locale
-             * @returns
+             * Returns the dictionary for the localization
+             * @returns {{}}
              */
-            getDictionary: function () {
-                // TODO: this does not work until we can support proxies
-                //let that = this;
-                //let handler = {
-                //    get: function(target, name) {
-                //        return that._(name);
-                //    }
-                //};
-                //return Proxy.create(handler);
-                return {};
+            get dictionary() {
+                return dictionary;
             }
         };
 

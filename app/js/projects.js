@@ -305,6 +305,7 @@ function ProjectsManager(query, configurator) {
             console.log("Exporting File", translation, meta, filename);
             // validate input
             if(filename === null || filename === '') {
+                console.log('the filename is empty');
                 return Promise.reject();
             }
 
@@ -368,10 +369,13 @@ function ProjectsManager(query, configurator) {
                         resolve(true);
                     } else {
                         // we don't support anything but dokuwiki right now
+                        console.log('we only support exporting the defaul format (dokuwiki) for now');
                         resolve(false);
                     }
                 } else {
                     // TODO: support exporting other target translation types if needed e.g. notes, words, questions
+                    console.log('we do not support exporting that project type yet.');
+                    reject();
                 }
             });
         },

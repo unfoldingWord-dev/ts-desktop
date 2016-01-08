@@ -9,31 +9,42 @@
      * Performs the nessesary migrations on a target translation.
      * Migrations should always pass through in order to collect all needed updates
      * without having to always update past migrations.
-     * @param file {File} the target translation directory
-     * @returns {boolean} true if migration was successful
+     * @param dir {string} the target translation directory
+     * @returns {Promise.<boolean>} true if migration was successful
      */
-    function migrate (file) {
-        try {
-            let manifestFile = path.join(file.path, 'manifest.json');
-            let manifest = jsonfile.readFileSync(manifestFile);
-            let packageVersion = manifest.package_version;
-            switch (packageVersion) {
-                case 2:
-                    manifest = v2(manifest);
-                case 3:
-                    manifest = v3(manifest);
-                    break;
-                default:
-                    // unsupported version
-                    return false;
+    function migrate (dir) {
+        return new Promise(function(resolve, reject) {
+            try {
+                let manifestFile = path.join(dir, 'manifest.json');
+                jsonfile.readFile(manifestFile, function(readErr, manifest) {
+                    if(readErr !== null) {
+                        reject('failed to read the manifest ' + readErr);
+                    } else {
+                        let packageVersion = manifest.package_version;
+                        switch (packageVersion) {
+                            case 2:
+                                manifest = v2(manifest);
+                            case 3:
+                                manifest = v3(manifest);
+                                break;
+                            default:
+                                reject('unsupported package version "' + packageVersion + '"');
+                        }
+                        // save manifest
+                        jsonfile.writeFile(manifestFile, manifest, function (writeErr) {
+                            if(writeErr !== null) {
+                                reject('failed to update the manifest: ' + writeErr);
+                            } else {
+                                resolve(true);
+                            }
+                        });
+                    }
+                });
+            } catch (err) {
+                reject('failed to migrate target translation: ' + err);
             }
-            // save manifest
-            jsonfile.writeFileSync(manifestFile, manifest);
-            return true;
-        } catch (err) {
-            console.log('targetTranslation migration failed', file, err);
-            return false;
-        }
+        });
+
     }
 
     /**

@@ -87,7 +87,7 @@
                     }
                 }
                 console.log('i18n: Missing localization for key "' + key + '"');
-                return '';
+                return '[i18n: ' + key + ']';
             },
 
             /**
@@ -109,21 +109,11 @@
             },
 
             /**
-             * Returns the dictionary of translations in this locale
-             * @returns
+             * Returns the dictionary for the localization
+             * @returns {{}}
              */
-            getDictionary: function () {
+            get dictionary() {
                 return dictionary;
-                // NOTE: if we could get proxies to work then we could log a notice when an invalid key was used
-                // this would help debugging a lot.
-                //let that = this;
-                //let handler = {
-                //    get: function(target, name) {
-                //        return that._(name);
-                //    }
-                //};
-                //return Proxy.create(handler);
-                //return {};
             }
         };
 

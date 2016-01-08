@@ -7,6 +7,8 @@ var _ = require('lodash'),
     rimraf = require('rimraf'),
     AdmZip = require('adm-zip'),
     utils = require('../js/lib/util'),
+    tstudioMigrator = require('../js/migration/tstudioMigrator'),
+    targetTranslationMigrator = require('../js/migration/targetTranslationMigrator'),
     wrap = utils.promisify,
     guard = utils.guard;
 
@@ -374,8 +376,29 @@ function ProjectsManager(query, configurator) {
             });
         },
 
-        importTargetTranslation: function() {
-          // TODO: perform the import
+        /**
+         * Imports a tstudio archive
+         * @param file {File} the path to the archive
+         */
+        importTargetTranslation: function(file) {
+            console.log('importing archive', file.path);
+            let translationPaths = tstudioMigrator.listTargetTranslations(file);
+            if(translationPaths.length > 0) {
+                // proceed to import
+                let zip = new AdmZip(file.path);
+                _.forEach(translationPaths, function(tpath) {
+                    let outputDir = path.join(configurator.getValue('tempDir'), tpath);
+                    zip.extractEntryTo(tpath, outputDir, false, true);
+                    if(targetTranslationMigrator.migrate(outputDir)) {
+
+                    }
+
+                });
+
+            } else {
+                // unsupported or empty archive
+                console.log('the archive is empty or not supported', file);
+            }
         },
 
         isTranslation: function (meta) {

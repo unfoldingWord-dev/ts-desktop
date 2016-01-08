@@ -215,7 +215,7 @@
             var popup = this.$.popup;
             var meta = this.currentproject.data;
             var translation = this.currentproject.translation;
-            var name = 'uw-' + meta.project.slug + '-' + meta.language.lc;
+            var name = 'uw-' + meta.fullname;
             var input = this.$.input;
             var filename;
             input.nwsaveas = name;
@@ -247,7 +247,7 @@
             var mythis = this;
             var meta = this.currentproject.data;
             var paths = App.projectsManager.getPaths(meta);
-            var repo = 'uw-' + meta.project.slug + '-' + meta.language.lc;
+            var repo = 'uw-' + meta.fullname;
 
             this.set('options.body', "Uploading Project.  Please wait...");
             this.set('options.loading', true);

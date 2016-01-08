@@ -403,27 +403,7 @@
         },
 
         ready: function() {
-            this.locale = {
-                'home_title':App.locale._('home_title'),
-                'welcome': App.locale._('welcome'),
-                'home_welcome1': App.locale._('home_welcome1'),
-                'home_welcome2': App.locale._('home_welcome2'),
-                'start_new_project': App.locale._('start_new_project'),
-                'project': App.locale._('project'),
-                'type': App.locale._('type'),
-                'language': App.locale._('language'),
-                'progress': App.locale._('progress'),
-                'target_language': App.locale._('target_language'),
-                'translators': App.locale._('translators'),
-                'dismiss': App.locale._('dismiss'),
-                'delete': App.locale._('delete'),
-                'confirm_delete_translation': App.locale._('confirm_delete_translation'),
-                'no': App.locale._('no'),
-                'confirm': App.locale._('confirm'),
-            };
-            // TODO: we could replace the above with this if we can support Proxies
-//            this.locale = App.locale.getDictionary();
-            this.locale.delete;
+            this.locale = App.locale.getDictionary();
         }
 
     });

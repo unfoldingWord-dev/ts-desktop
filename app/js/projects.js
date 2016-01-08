@@ -305,11 +305,14 @@ function ProjectsManager(query, configurator) {
             console.log("Exporting File", translation, meta, filename);
             // validate input
             if(filename === null || filename === '') {
+                console.log('the filename is empty');
                 return Promise.reject();
             }
 
+            var isTranslation = this.isTranslation(meta);
+
             return new Promise(function(resolve, reject) {
-                if(meta.type.toLowerCase() === 'text') {
+                if(isTranslation) {
                     // TRICKY: look into the first frame to see the format
                     if(translation[0].meta.format === 'default') {
                         // the default format is currently dokuwiki
@@ -366,10 +369,13 @@ function ProjectsManager(query, configurator) {
                         resolve(true);
                     } else {
                         // we don't support anything but dokuwiki right now
+                        console.log('we only support exporting the defaul format (dokuwiki) for now');
                         resolve(false);
                     }
                 } else {
                     // TODO: support exporting other target translation types if needed e.g. notes, words, questions
+                    console.log('we do not support exporting that project type yet.');
+                    reject();
                 }
             });
         },
@@ -379,13 +385,7 @@ function ProjectsManager(query, configurator) {
         },
 
         isTranslation: function (meta) {
-            var test;
-            if (meta.type.code === undefined) {
-                test = true;
-            } else {
-                test = meta.type.code === 'text';
-            }
-            return test;
+            return !meta.type.code || meta.type.code === 'text';
         },
 
         saveTargetTranslation: function (translation, meta) {

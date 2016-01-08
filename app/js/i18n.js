@@ -74,9 +74,10 @@
 
         let i18n = {
             /**
-             * Returns the localized value
+             * Returns the localized value.
+             * If no value is found it will log the missing key in the console
              * @param key
-             * @returns {*}
+             * @returns {string} an empty string if the localization does not exist
              * @private
              */
             _: function (key) {
@@ -85,8 +86,10 @@
                         return dictionary[key];
                     }
                 }
-                return '[i18n: ' + key + ']';
+                console.log('i18n: Missing localization for key "' + key + '"');
+                return '';
             },
+
             /**
              * Changes the active locale
              * The default locale will be used if this locale is missing translations
@@ -96,6 +99,7 @@
                 locale = chooseBestLocale(dir, code);
                 dictionary = loadLocale(dir, locale, defaultLocale);
             },
+
             /**
              * Returns the locale code
              * @returns {string}
@@ -109,7 +113,9 @@
              * @returns
              */
             getDictionary: function () {
-                // TODO: this does not work until we can support proxies
+                return dictionary;
+                // NOTE: if we could get proxies to work then we could log a notice when an invalid key was used
+                // this would help debugging a lot.
                 //let that = this;
                 //let handler = {
                 //    get: function(target, name) {
@@ -117,7 +123,7 @@
                 //    }
                 //};
                 //return Proxy.create(handler);
-                return {};
+                //return {};
             }
         };
 

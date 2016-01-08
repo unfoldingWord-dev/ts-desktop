@@ -94,7 +94,7 @@
               <template>
                   <div class="row" on-tap="store">
                       <div>
-                          <span>[[type]]</span>
+                          <span>[[type.name]]</span>
                       </div>
                   </div>
               </template>
@@ -129,13 +129,13 @@
               value: false
           },
           type: {
-              type: String,
-              value: "",
+              type: Object,
+              value: {},
               notify: true
           },
           typelist: {
               type: Array,
-              value: ["Text", "Notes", "Questions"]
+              value: [{name: "Text", code: "text"}, {name: "Notes", code: "tn"}, {name: "Questions", code: "tq"}]
           }
       },
 

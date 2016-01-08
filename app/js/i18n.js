@@ -8,6 +8,7 @@
     let jsonfile = require('jsonfile');
     let _ = require('lodash');
     let locale2 = new require('locale');
+    // TODO: this proxy implimentation works in tests but not while running the app.
     //let Proxy = require('node-proxy');
 
     /**
@@ -108,6 +109,7 @@
              * @returns
              */
             getDictionary: function () {
+                // TODO: this does not work until we can support proxies
                 //let that = this;
                 //let handler = {
                 //    get: function(target, name) {

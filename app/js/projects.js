@@ -402,7 +402,13 @@ function ProjectsManager(query, configurator) {
         },
 
         isTranslation: function (meta) {
-            return meta.type.toUpperCase() === 'TEXT';
+            var test;
+            if (meta.type.code === undefined) {
+                test = true;
+            } else {
+                test = meta.type.code === 'text';
+            }
+            return test;
         },
 
         saveTargetTranslation: function (translation, meta) {
@@ -453,7 +459,7 @@ function ProjectsManager(query, configurator) {
                 package_version: 3,
                 target_language: language,
                 project_id: meta.project.slug,
-                project_type: meta.type,
+                project_type: meta.type.code,
                 source_translations: sources,
                 translators: meta.translators,
                 finished_frames: finishedFrames,

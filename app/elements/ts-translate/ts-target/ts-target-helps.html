@@ -179,11 +179,11 @@
                         <div class="leftbox">
                             <div class="contentheader">
                                 <p>{{help.title}}</p>
-                                <iron-autogrow-textarea bind-value="{{help.title}}" on-change="change" on-input="input" placeholder="Add Title Here"></iron-autogrow-textarea>
+                                <iron-autogrow-textarea bind-value="{{help.title}}" on-change="change" on-input="input" placeholder$="[[checktitle(chunk.data.type.code)]]"></iron-autogrow-textarea>
                             </div>
                             <div class="contentbody">
                                 <p>{{help.body}}</p>
-                                <iron-autogrow-textarea bind-value="{{help.body}}" on-change="change" on-input="input" placeholder="Add Content Here"></iron-autogrow-textarea>
+                                <iron-autogrow-textarea bind-value="{{help.body}}" on-change="change" on-input="input" placeholder$="[[checkbody(chunk.data.type.code)]]"></iron-autogrow-textarea>
                             </div>
                         </div>
                         <div class="rightbox">
@@ -224,6 +224,28 @@
         observers: [
             'rendertext(chunk.*)'
         ],
+
+        checktitle: function (type) {
+            var text = "";
+            if (type === "tn") {
+                text = "Add Title Here";
+            }
+            if (type === "tq") {
+                text = "Add Question Here";
+            }
+            return text;
+        },
+
+        checkbody: function (type) {
+            var text = "";
+            if (type === "tn") {
+                text = "Add Content Here";
+            }
+            if (type === "tq") {
+                text = "Add Answer Here";
+            }
+            return text;
+        },
 
         moveup: function (e) {
             var noteindex = e.model.index;

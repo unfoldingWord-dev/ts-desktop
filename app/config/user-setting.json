@@ -23,7 +23,8 @@
             {
                 "name": "fontsize",
                 "mainText": "Font Size",
-                "value": "Normal"
+                "value": "Normal",
+                "options": ["Smaller", "Small", "Normal", "Large", "Larger"]
             }
         ]
     },

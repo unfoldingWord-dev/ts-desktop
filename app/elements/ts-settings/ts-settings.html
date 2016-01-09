@@ -165,7 +165,7 @@
         },
 
         ready: function() {
-            this.settings = App.configurator.getUserSetting();
+            this.settings = App.configurator.getUserSettingArr();
         },
 
         back: function() {
@@ -204,6 +204,7 @@
             this.set(path, value);
             this.closeSettingModal();
             this.saveSettings();
+            this.updateFont();
         },
 
         _onSettingCancel: function() {
@@ -249,8 +250,15 @@
 
         saveSettings: function() {
             console.log('Saving user settings');
-            App.configurator.saveUserSetting(this.settings);
+            App.configurator.saveUserSettingArr(this.settings);
             console.log('User setting has been saved');
+        },
+
+        updateFont: function() {
+            console.log('Updating font');
+            console.dir(document.body);
+            document.body.style.fontSize = "50%";
+            console.log('Font has been updated');
         }
 
     });

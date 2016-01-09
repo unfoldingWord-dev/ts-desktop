@@ -8,7 +8,7 @@
     'use strict';
 
     let _ = require('lodash');
-    let user_setting = require('../config/user-setting');
+    let userSetting = require('../config/user-setting-2');
 
     function Configurator () {
         let storage = {};
@@ -85,12 +85,46 @@
                 storage = storeObject;
             },
 
-            saveUserSetting: function(setting) {
-                storage['user-setting'] = JSON.stringify(setting);
+            saveUserSettingArr: function(settingArr) {
+                storage['user-setting'] = JSON.stringify(settingArr);
             },
 
-            getUserSetting: function() {
-                return JSON.parse(storage['user-setting']) || user_setting;
+            getUserSettingArr: function() {
+                return this.mapUserSettings(this.getDefaultUserSettingArr());
+            },
+
+            getDefaultUserSettingArr: function() {
+                return userSetting;
+            },
+
+            mapUserSettings: function(settingArr, groupOrder) {
+                var orderedSettingObj = {};
+                var groupOrder = groupOrder || [];
+                var removed = [];
+
+                // Group setting objects by the given group order
+                groupOrder.forEach(function(order) {
+                    if (!orderedSettingObj.order)
+                        orderedSettingObj[order] = [];
+                    settingArr.forEach(function(setting) {
+                        if (setting.group.toLowerCase() === order.toLowerCase()) {
+                            orderedSettingObj[order].push(setting);
+                            removed.push(setting);
+                        }
+                    });
+                    settingArr = _.difference(settingArr, removed);
+                });
+
+                // Take the remaining setting and append them grouped by their "group"
+                settingArr.forEach(function(setting) {
+                    if (!orderedSettingObj[setting.group])
+                        orderedSettingObj[setting.group] = [];
+                    orderedSettingObj[setting.group].push(setting);
+                });
+
+                return _.map(orderedSettingObj, function(list, group) {
+                    return {group: group, list: list};
+                });
             },
 
             /**

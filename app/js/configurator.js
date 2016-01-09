@@ -98,8 +98,9 @@
             },
 
             getUserSetting: function(name) {
-                var settingArr = this.getUserSettingArr();
-                _.find(settingArr, {'name': name}, value);
+                var s = this.getUserSettingArr();
+                var list = _.find(s, {'list': [{'name': name}]}).list;
+                return _.find(list, {'name': name}).value;
             },
 
             mapUserSettings: function(settingArr, groupOrder) {

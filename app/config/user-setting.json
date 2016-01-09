@@ -1,104 +1,100 @@
 [
     {
-        "group": "General",
-        "list": [
-            {
-                "name": "remembermyplace",
-                "mainText": "Remember My Place",
-                "helpText": "Display the last viewed screen when starting the app",
-                "value": false
-            },
-            {
-                "name": "highlightkeyterms",
-                "mainText":"Highlight Key Terms",
-                "helpText": "Make key terms clickable in the source text",
-                "value": true
-            },
-            {
-                "name": "font",
-                "mainText": "Font",
-                "value": "Tahoma",
-                "options": ["Arial", "Times New Roman", "Calibri", "Tahoma"]
-            },
-            {
-                "name": "fontsize",
-                "mainText": "Font Size",
-                "value": "Normal",
-                "options": ["Smaller", "Small", "Normal", "Large", "Larger"]
-            }
-        ]
+        "name": "remembermyplace",
+        "mainText": "Remember My Place",
+        "helpText": "Display the last viewed screen when starting the app",
+        "value": false,
+        "group": "general"
     },
     {
-        "group": "Share",
-        "list": [
-            {
-                "name": "exportformat",
-                "mainText": "Export Format",
-                "value": "DokuWiki",
-                "options": ["DokuWiki", "translationStudio"]
-            }
-        ]
+        "name": "highlightkeyterms",
+        "mainText":"Highlight Key Terms",
+        "helpText": "Make key terms clickable in the source text",
+        "value": true,
+        "group": "general"
     },
     {
-        "group": "Upload",
-        "list": [
-            {
-                "name": "autosavechanges",
-                "mainText": "Auto Save Changes",
-                "helpText": "Every <int> seconds",
-                "nullText": "Never",
-                "value": 5,
-                "options": [1, 5, 10, 15]
-            },
-            {
-                "name": "authserver",
-                "mainText": "Authentication Server",
-                "value": "ts.door43.org"
-            },
-            {
-                "name": "authserverport",
-                "mainText": "Authentication Server Port",
-                "value": "9095"
-            },
-            {
-                "name": "dataserver",
-                "mainText": "Data Server",
-                "value": "gitolite3@ts.door43.org"
-            },
-            {
-                "name": "dataserverport",
-                "mainText": "Data Server Port",
-                "value": "9299"
-            },
-            {
-                "name": "mediaserver",
-                "mainText": "Media Server",
-                "value": "https://api.unfoldingword.org"
-            }
-        ]
+        "name": "font",
+        "mainText": "Font",
+        "value": "Tahoma",
+        "options": ["Arial", "Times New Roman", "Calibri", "Tahoma"],
+        "group": "general"
     },
     {
-        "group": "Advanced",
-        "list": [
-            {
-                "name": "backupinterval",
-                "mainText": "Backup Interval",
-                "helpText": "<int> minutes",
-                "nullText": "Disable Backup",
-                "value": 5,
-                "options": [1, 2, 3, 4, 5, 10, 15]
-            },
-            {
-                "name": "logginglevel",
-                "mainText": "Logging Level",
-                "value": "Warnings",
-                "options": ["Information", "Warnings", "Errors"]
-            },
-            {
-                "name": "developertools",
-                "mainText": "Developer Tools",
-                "helpText": "Opens the developer tools"
-            }
-        ]
+        "name": "fontsize",
+        "mainText": "Font Size",
+        "value": "Normal",
+        "options": ["Smaller", "Small", "Normal", "Large", "Larger"],
+        "group": "general"
+    },
+    {
+        "name": "exportformat",
+        "mainText": "Export Format",
+        "value": "DokuWiki",
+        "options": ["DokuWiki", "translationStudio"],
+        "group": "share"
+    },
+    {
+        "name": "autosavechanges",
+        "mainText": "Auto Save Changes",
+        "helpText": "Every <int> seconds",
+        "nullText": "Never",
+        "value": 5,
+        "options": [1, 5, 10, 15],
+        "unit": "second",
+        "group": "upload"
+    },
+    {
+        "name": "authserver",
+        "mainText": "Authentication Server",
+        "value": "ts.door43.org",
+        "group": "upload"
+    },
+    {
+        "name": "authserverport",
+        "mainText": "Authentication Server Port",
+        "value": "9095",
+        "group": "upload"
+    },
+    {
+        "name": "dataserver",
+        "mainText": "Data Server",
+        "value": "gitolite3@ts.door43.org",
+        "group": "upload"
+    },
+    {
+        "name": "dataserverport",
+        "mainText": "Data Server Port",
+        "value": "9299",
+        "group": "upload"
+    },
+    {
+        "name": "mediaserver",
+        "mainText": "Media Server",
+        "value": "https://api.unfoldingword.org",
+        "group": "upload"
+    },
+    {
+        "name": "backupinterval",
+        "mainText": "Backup Interval",
+        "helpText": "<int> minutes",
+        "nullText": "Disable Backup",
+        "value": 5,
+        "options": [1, 2, 3, 4, 5, 10, 15],
+        "unit": "second",
+        "group": "advanced"
+    },
+    {
+        "name": "logginglevel",
+        "mainText": "Logging Level",
+        "value": "Warnings",
+        "options": ["Information", "Warnings", "Errors"],
+        "group": "advanced"
+    },
+    {
+        "name": "developertools",
+        "mainText": "Developer Tools",
+        "helpText": "Opens the developer tools",
+        "group": "advanced"
     }
 ]

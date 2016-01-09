@@ -145,7 +145,7 @@
                 <div id="lower">
                     <p>You may also share and distribute your project using these options.</p>
                     <div class="link" on-tap="export">Export to File</div>
-                    <input class="hide" id="input" type="file" nwsaveas="" nwworkingdir="" />
+                    <input class="hide" id="input" type="file" nwsaveas="" />
                 </div>
             </div>
         </div>
@@ -218,26 +218,29 @@
             var name = 'uw-' + meta.fullname;
             var input = this.$.input;
             var filename;
+            var firsttime = true;
+            input.value = null;
             input.nwsaveas = name;
-            //input.nwworkingdir = "C:";
             input.addEventListener("change", function (evt) {
-                var inputthis = this;
-                mythis.set('options.body', "Exporting Project.  Please wait...");
-                mythis.set('options.loading', true);
-                popup.open();
-                filename = inputthis.value;
-                inputthis.value = null;
-                return App.projectsManager.exportTranslation(translation, meta, filename)
-                    .then(function () {
-                        mythis.set('options.title', "Project Exported");
-                        mythis.set('options.body', "Your project has been successfully saved to a file.  Thanks.");
-                        mythis.set('options.loading', false);
-                    })
-                    .catch(function (err) {
-                        mythis.set('options.title', "Export Failed");
-                        mythis.set('options.body', "We're sorry.  An error occurred while trying to save your project");
-                        mythis.set('options.loading', false);
-                    });
+                if (firsttime) {
+                    firsttime = false;
+                    mythis.set('options.body', "Exporting Project.  Please wait...");
+                    mythis.set('options.loading', true);
+                    popup.open();
+                    filename = input.value;
+                    return App.projectsManager.exportTranslation(translation, meta, filename)
+                        .then(function () {
+                            mythis.set('options.title', "Project Exported");
+                            mythis.set('options.body', "Your project has been successfully saved to a file.  Thanks.");
+                            mythis.set('options.loading', false);
+
+                        })
+                        .catch(function (err) {
+                            mythis.set('options.title', "Export Failed");
+                            mythis.set('options.body', "We're sorry.  An error occurred while trying to save your project");
+                            mythis.set('options.loading', false);
+                        });
+                }
             }, false);
             input.click();
         },

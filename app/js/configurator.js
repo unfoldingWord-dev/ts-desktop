@@ -8,7 +8,7 @@
     'use strict';
 
     let _ = require('lodash');
-    let userSetting = require('../config/user-setting-2');
+    let userSetting = require('../config/user-setting');
 
     function Configurator () {
         let storage = {};
@@ -104,31 +104,30 @@
             },
 
             mapUserSettings: function(settingArr, groupOrder) {
-                var orderedSettingObj = {};
+                var settingObj = {};
                 var groupOrder = groupOrder || [];
-                var removed = [];
+                var settingAdded = [];
 
                 // Group setting objects by the given group order
                 groupOrder.forEach(function(order) {
-                    if (!orderedSettingObj.order)
-                        orderedSettingObj[order] = [];
+                    if (!settingObj.order) settingObj[order] = [];
                     settingArr.forEach(function(setting) {
                         if (setting.group.toLowerCase() === order.toLowerCase()) {
-                            orderedSettingObj[order].push(setting);
-                            removed.push(setting);
+                            settingObj[order].push(setting);
+                            settingAdded.push(setting);
                         }
                     });
-                    settingArr = _.difference(settingArr, removed);
+                    settingArr = _.difference(settingArr, settingAdded);
                 });
 
                 // Take the remaining setting and append them grouped by their "group"
                 settingArr.forEach(function(setting) {
-                    if (!orderedSettingObj[setting.group])
-                        orderedSettingObj[setting.group] = [];
-                    orderedSettingObj[setting.group].push(setting);
+                    if (!settingObj[setting.group]) settingObj[setting.group] = [];
+                    settingObj[setting.group].push(setting);
                 });
 
-                return _.map(orderedSettingObj, function(list, group) {
+                // Return mapped/grouped/orderd object as an array
+                return _.map(settingObj, function(list, group) {
                     return {group: group, list: list};
                 });
             },

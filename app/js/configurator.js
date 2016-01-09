@@ -90,11 +90,16 @@
             },
 
             getUserSettingArr: function() {
-                return this.mapUserSettings(this.getDefaultUserSettingArr());
+                return JSON.parse(storage['user-setting']) || this.mapUserSettings(this.getDefaultUserSettingArr());
             },
 
             getDefaultUserSettingArr: function() {
                 return userSetting;
+            },
+
+            getUserSetting: function(name) {
+                var settingArr = this.getUserSettingArr();
+                _.find(settingArr, {'name': name}, value);
             },
 
             mapUserSettings: function(settingArr, groupOrder) {

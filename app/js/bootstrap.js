@@ -52,7 +52,7 @@
     let Translator = require('../js/translator').Translator;
     let Library = require('../js/library').Library;
     let ProjectsManager = require('../js/projects').ProjectsManager;
-
+    let i18n = new require('../js/i18n').Locale('./i18n');//, mainWindow.navigator.language),
     let util = require('../js/lib/util');
 
     /**
@@ -71,6 +71,8 @@
         appName: 'translationStudio',
 
         gui: gui,
+
+        locale: i18n,
 
         configurator: configurator,
 

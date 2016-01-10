@@ -59,6 +59,23 @@
             color: var(--accent-color);
         }
 
+        #helpchecklistpopup {
+            width: 350px;
+            height: 225px;
+            text-align: center;
+            color: var(--primary-text-color);
+        }
+
+        #helpchecklistpopup .buttons {
+            display: flex;
+            justify-content: center;
+            color: var(--secondary-text-color);
+        }
+
+        #helpchecklistpopup .buttons paper-button:hover {
+            color: var(--accent-color);
+        }
+
         #editpopup {
             width: 350px;
             height: 175px;
@@ -114,11 +131,35 @@
             font-size: 110%;
         }
 
+        #delete {
+            width: 450px;
+            height: 175px;
+        }
+
+        #delete iron-icon {
+            padding-right: 10px;
+        }
+
+        #delete p {
+            font-size: 110%;
+        }
+
+        #deletebuttons {
+            display: flex;
+            justify-content: flex-end;
+            padding: 0 50px;
+            color: var(--secondary-text-color);
+        }
+
+        #deletebuttons paper-button:hover {
+            color: var(--accent-color);
+        }
+
     </style>
 
     <template>
 
-        <ts-translate-sidebar selected="{{selected}}" on-gohome="gohome" on-gopublish="gopublish" on-gosettings="gosettings"></ts-translate-sidebar>
+        <ts-translate-sidebar selected="{{selected}}" standardproject="[[standardproject]]" on-gohome="gohome" on-gopublish="gopublish" on-gosettings="gosettings"></ts-translate-sidebar>
 
         <div id="pages">
             <ts-read-mode id="readmode" chapters="[[chapters]]" modestatus="{{modestatus}}"></ts-read-mode>
@@ -141,6 +182,17 @@
             </div>
         </paper-dialog>
 
+        <paper-dialog id="helpchecklistpopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <h2>Chunk Checklist</h2>
+            <div>
+                <p>Are you sure you're Done with this chunk?</p>
+            </div>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Cancel</paper-button>
+                <paper-button dialog-confirm on-tap="closehelpchecklist">Confirm</paper-button>
+            </div>
+        </paper-dialog>
+
         <paper-dialog id="editpopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <h2>Edit Chunk</h2>
             <div>
@@ -153,12 +205,23 @@
         </paper-dialog>
 
         <paper-dialog id="nodatapopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <h2>No Translation</h2>
+            <h2>Missing Data</h2>
             <div>
-                <p>You cannot complete a blank chunk!</p>
+                <p>All fields are not complete.</p>
             </div>
             <div class="buttons">
                 <paper-button dialog-dismiss>OK</paper-button>
+            </div>
+        </paper-dialog>
+
+        <paper-dialog id="delete" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <h2><iron-icon icon="delete"></iron-icon>Delete</h2>
+            <div>
+                <p>This will permanently remove this note/question. Continue?</p>
+            </div>
+            <div id="deletebuttons">
+                <paper-button on-tap="closedelete">No</paper-button>
+                <paper-button on-tap="deletehelp">Confirm</paper-button>
             </div>
         </paper-dialog>
 
@@ -178,6 +241,8 @@
         <iron-signals on-iron-signal-loadpublish="loadpublish"></iron-signals>
         <iron-signals on-iron-signal-updatetranslation="updatetranslation"></iron-signals>
         <iron-signals on-iron-signal-openchecklist="openchecklist"></iron-signals>
+        <iron-signals on-iron-signal-openhelpchecklist="openhelpchecklist"></iron-signals>
+        <iron-signals on-iron-signal-opendelete="opendelete"></iron-signals>
         <iron-signals on-iron-signal-openedit="openedit"></iron-signals>
         <iron-signals on-iron-signal-opennodata="opennodata"></iron-signals>
         <iron-signals on-iron-signal-opensource="opensource"></iron-signals>
@@ -216,6 +281,10 @@
                 type: Object,
                 value: {},
                 notify: true
+            },
+            standardproject: {
+                type: Boolean,
+                value: true
             },
             rawdata: {
                 type: Object,
@@ -268,6 +337,31 @@
             this.fire('iron-signal', {name: 'completechunk', data: {index: index}});
         },
 
+        openhelpchecklist: function (event, data) {
+            this.modestatus.index = data.index;
+            this.$.helpchecklistpopup.open();
+        },
+
+        closehelpchecklist: function () {
+            var index = this.modestatus.index;
+            this.fire('iron-signal', {name: 'completehelp', data: {index: index}});
+        },
+
+        opendelete: function (event, data) {
+            this.modestatus.index = data.index;
+            this.$.delete.open();
+        },
+
+        closedelete: function () {
+            this.$.delete.close();
+        },
+
+        deletehelp: function () {
+            var index = this.modestatus.index;
+            this.fire('iron-signal', {name: 'deletehelp', data: {index: index}});
+            this.closedelete();
+        },
+
         openedit: function (event, data) {
             this.modestatus.index = data.index;
             this.$.editpopup.open();
@@ -306,7 +400,7 @@
 
         savestate: function () {
             if (this.route === "translate") {
-                var key = "uw-" + this.currentproject.data.project.slug + "-" + this.currentproject.data.language.lc;
+                var key = "uw-" + this.currentproject.data.fullname;
                 this.getlocation();
                 App.configurator.setValue(key + "-chapter", this.modestatus.chapter);
                 App.configurator.setValue(key + "-index", this.modestatus.index);
@@ -321,6 +415,7 @@
             this.set('currentproject.state', blankstate);
             this.set('currentproject.translation', blank);
             this.set('currentproject.data', data.projdata);
+            this.checkstandard();
             this.savetofile();
             this.setmodestate();
             this.checksources();
@@ -337,6 +432,7 @@
                 setTimeout(function() {
                     mythis.set('currentproject.data', data.projdata);
                     mythis.set('currentproject.state', blankstate);
+                    mythis.checkstandard();
                     App.projectsManager.loadTargetTranslation(data.projdata).then(function (translation) {
                         mythis.set('rawdata', translation);
                         mythis.pullsource();
@@ -364,6 +460,7 @@
                 setTimeout(function() {
                     mythis.set('currentproject.data', data.projdata);
                     mythis.set('currentproject.state', blankstate);
+                    mythis.checkstandard();
                     App.projectsManager.loadTargetTranslation(data.projdata).then(function (translation) {
                         mythis.set('rawdata', translation);
                         mythis.pullsource();
@@ -434,6 +531,11 @@
             });
         },
 
+        checkstandard: function () {
+            var check = this.currentproject.data.type.code === "text";
+            this.set('standardproject', check);
+        },
+
         pullsource: function () {
             var current = this.currentproject.data.currentsource;
             if (current === null || current === undefined) {
@@ -451,6 +553,7 @@
             var test = new RegExp(startstr);
             var chapterref;
             var chunkref;
+            var standard = this.standardproject;
 
             for (var i = 0; i < frames.length; i++) {
                 var chapterid = frames[i].chapter;
@@ -458,6 +561,7 @@
                 var frameid = frames[i].verse;
                 var frame = parseInt(frameid);
                 var title = frames[i].title;
+                var format = frames[i].format;
                 var id = frames[i].id;
                 var sourcedata = frames[i].chunk;
                 var notes = App.projectsManager.getFrameNotes(id);
@@ -482,7 +586,7 @@
                             verses.push(j);
                         }
                     }
-                    sourcedata = sourcedata.replace(startstr, " /v");
+                    sourcedata = sourcedata.replace(startstr, " \\v");
                     sourcedata = sourcedata.replace(endstr, " ");
                 }
 
@@ -510,12 +614,14 @@
                     frameid: frameid,
                     verses: verses,
                     chapterref: chapterref,
-                    chunkref: chunkref
+                    chunkref: chunkref,
+                    standard: standard,
+                    format: format
                 };
 
                 srcchunk = {
                     meta: meta,
-                    content: sourcedata,
+                    srccontent: sourcedata,
                     notes: notes,
                     words: words,
                     questions: questions
@@ -523,10 +629,15 @@
                 source.push(srcchunk);
 
                 var rawdata = this.rawdata[chapterid + '-' + frameid];
-                if (rawdata === undefined) {
-                    transchunk = {content: "", completed: false, meta: meta};
-                } else {
-                    transchunk = {content: rawdata.content, completed: rawdata.completed, meta: meta};
+                transchunk = {transcontent: "", helpscontent: [], completed: false, meta: meta};
+
+                if (rawdata !== undefined) {
+                    transchunk.completed = rawdata.completed;
+                    if (standard) {
+                        transchunk.transcontent = rawdata.transcontent;
+                    } else {
+                        transchunk.helpscontent = rawdata.helpscontent;
+                    }
                 }
                 translation.push(transchunk);
             }
@@ -670,10 +781,11 @@
         setmodestate: function () {
             var mythis = this;
             var sources = this.currentproject.data.sources;
-            var key = "uw-" + this.currentproject.data.project.slug + "-" + this.currentproject.data.language.lc;
+            var key = "uw-" + this.currentproject.data.fullname;
             var index = App.configurator.getValue(key + "-index");
             var chapter = App.configurator.getValue(key + "-chapter");
             var selected = App.configurator.getValue(key + "-selected");
+            var standard = this.standardproject;
 
             if (chapter > 0) {
                 mythis.set('modestatus.chapter', chapter);
@@ -681,13 +793,22 @@
             if (index >= 0) {
                 mythis.set('modestatus.index', index);
             }
+            if (standard) {
+                mythis.set('modestatus.lastmode', 1);
+            } else {
+                mythis.set('modestatus.lastmode', 3);
+            }
 
             if (sources !== undefined && sources.length !== 0) {
                 setTimeout(function() {
                     if (selected > 0) {
                         mythis.set('selected', selected);
                     } else {
-                        mythis.set('selected', 1);
+                        if (standard) {
+                            mythis.set('selected', 1);
+                        } else {
+                            mythis.set('selected', 3);
+                        }
                     }
                 }, 500);
             }
@@ -714,7 +835,7 @@
 
         upload: function () {
             var update = this.chunks.data.map(function(chunk){
-                return {meta: chunk.meta, content: chunk.transcontent, completed: chunk.completed};
+                return {meta: chunk.meta, transcontent: chunk.transcontent, helpscontent: chunk.helpscontent, completed: chunk.completed};
             });
             var count = 0;
             for (var i = 0; i < update.length; i++) {
@@ -765,10 +886,10 @@
             }
 
             transdata.data = translation.map(function(chunk, index){
-                return {transcontent: chunk.content, completed: chunk.completed, data: projectdata, index: index, state: chunk.state};
+                return {transcontent: chunk.transcontent, helpscontent: chunk.helpscontent, completed: chunk.completed, data: projectdata, index: index, state: chunk.state};
             });
             srcdata.data = source.map(function(chunk){
-                return {srccontent: chunk.content, meta: chunk.meta, notes: chunk.notes, words: chunk.words, questions: chunk.questions};
+                return {srccontent: chunk.srccontent, meta: chunk.meta, notes: chunk.notes, words: chunk.words, questions: chunk.questions};
             });
             var merged = _.merge(srcdata, transdata);
             this.set('chunks', merged);
@@ -798,7 +919,7 @@
                     if (!chunk.completed) {
                         chapcomplete = false;
                     }
-                    chapcontent += chunk.content + " ";
+                    chapcontent += chunk.transcontent + " ";
                 });
                 transchapters.push({completed: chapcomplete, transcontent: chapcontent, data: projectdata});
             });
@@ -813,7 +934,7 @@
                 var chapstate = true;
 
                 _.forEach(data, function (chunk) {
-                    chapcontent += chunk.content + " ";
+                    chapcontent += chunk.srccontent + " ";
                     chapterref = chunk.meta.chapterref;
                     chapterid = chunk.meta.chapterid;
                 });

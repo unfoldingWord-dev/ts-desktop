@@ -5,6 +5,7 @@ var _ = require('lodash'),
     path = require('path'),
     mkdirP = require('mkdirp'),
     rimraf = require('rimraf'),
+    AdmZip = require('adm-zip'),
     utils = require('../js/lib/util'),
     wrap = utils.promisify,
     guard = utils.guard;
@@ -81,7 +82,7 @@ function ProjectsManager(query, configurator) {
 
 
                 makeProjectPaths: function (meta) {
-                    return this.makeProjectPathsForProject(prefix + meta.project.slug + '-' + meta.language.lc);
+                    return this.makeProjectPathsForProject(prefix + meta.fullname);
                 },
 
                 makeProjectPathsForProject: function (project) {
@@ -165,7 +166,7 @@ function ProjectsManager(query, configurator) {
         getSourceFrames: function (source) {
             var s = typeof source === 'object' ? source.id : source,
                 r = query([
-                    "select f.id, f.slug 'verse', f.body 'chunk', c.slug 'chapter', c.title from frame f",
+                    "select f.id, f.slug 'verse', f.body 'chunk', c.slug 'chapter', c.title, f.format from frame f",
                     "join chapter c on c.id=f.chapter_id",
                     "join resource r on r.id=c.resource_id",
                     "join source_language sl on sl.id=r.source_language_id",
@@ -293,11 +294,98 @@ function ProjectsManager(query, configurator) {
             return write(paths.ready, (new Date()).toString());
         },
 
+        /**
+         *
+         * @param translation an array of frames
+         * @param meta the target translation manifest and other info
+         * @param filename the path where the export will be saved
+         * @returns {Promise.<boolean>}
+         */
         exportTranslation: function (translation, meta, filename) {
-            console.log("Exporting File", translation, meta, filename); //this is just here so you can view what's being passed in
-            return Promise.resolve(true);  //this is just here to simulate a successful file transfer until real code is added
-            //Add code here to parse through translation of project and create data
-            //Save data to filename passed in (passed in parameter includes path and filename but not file type extension)
+            console.log("Exporting File", translation, meta, filename);
+            // validate input
+            if(filename === null || filename === '') {
+                console.log('the filename is empty');
+                return Promise.reject();
+            }
+
+            var isTranslation = this.isTranslation(meta);
+
+            return new Promise(function(resolve, reject) {
+                if(isTranslation) {
+                    // TRICKY: look into the first frame to see the format
+                    if(translation[0].meta.format === 'default') {
+                        // the default format is currently dokuwiki
+                        let chapterContent = '',
+                            currentChapter = -1,
+                            zip = new AdmZip(),
+                            numFinishedFrames = 0;
+                        for(let frame of translation) {
+
+                            // close chapter chapter
+                            if(frame.meta.chapter !== currentChapter) {
+                                if(chapterContent !== '' && numFinishedFrames > 0) {
+                                    // TODO: we need to get the chapter reference and insert it here
+                                    chapterContent += '////\n';
+                                    //console.log('chapter ' + currentChapter, chapterContent);
+                                    zip.addFile(currentChapter + '.txt', new Buffer(chapterContent), null);
+                                }
+                                currentChapter = frame.meta.chapter;
+                                chapterContent = '';
+                                numFinishedFrames = 0;
+                            }
+
+                            if(frame.transcontent !== '') {
+                                numFinishedFrames ++;
+                            }
+
+                            // build chapter header
+                            if(chapterContent === '') {
+                                chapterContent += '//\n';
+                                chapterContent += meta.language.ln + '\n';
+                                chapterContent += '//\n\n';
+
+                                chapterContent += '//\n';
+                                chapterContent += meta.project.name + '\n';
+                                chapterContent += '//\n\n';
+
+                                chapterContent += '//\n';
+                                chapterContent += frame.meta.title + '\n';
+                                chapterContent += '//\n\n';
+                            }
+
+                            // add frame
+                            chapterContent += '{{https://api.unfoldingword.org/' + meta.project.slug + '/jpg/1/en/360px/' + meta.project.slug + '-' + meta.language.lc + '-' + frame.meta.chapterid + '-' + frame.meta.frameid + '.jpg}}\n\n';
+                            chapterContent += frame.transcontent + '\n\n';
+                        }
+                        if(chapterContent !== '' && numFinishedFrames > 0) {
+                            // TODO: we need to get the chapter reference and insert it here
+                            chapterContent += '////\n';
+                            //console.log('chapter ' + currentChapter, chapterContent);
+                            zip.addFile(currentChapter + '.txt', new Buffer(chapterContent), null);
+                        }
+
+                        zip.writeZip(filename + '.zip');
+                        resolve(true);
+                    } else {
+                        // we don't support anything but dokuwiki right now
+                        console.log('we only support exporting the defaul format (dokuwiki) for now');
+                        resolve(false);
+                    }
+                } else {
+                    // TODO: support exporting other target translation types if needed e.g. notes, words, questions
+                    console.log('we do not support exporting that project type yet.');
+                    reject();
+                }
+            });
+        },
+
+        importTargetTranslation: function() {
+          // TODO: perform the import
+        },
+
+        isTranslation: function (meta) {
+            return !meta.type.code || meta.type.code === 'text';
         },
 
         saveTargetTranslation: function (translation, meta) {
@@ -318,8 +406,9 @@ function ProjectsManager(query, configurator) {
                 };
             };
 
+            var isTranslation = this.isTranslation(meta);
+
             var chunks = _.chain(translation)
-                .filter('content')
                 .indexBy(makeComplexId)
                 .value();
 
@@ -347,6 +436,7 @@ function ProjectsManager(query, configurator) {
                 package_version: 3,
                 target_language: language,
                 project_id: meta.project.slug,
+                project_type: meta.type.code,
                 source_translations: sources,
                 translators: meta.translators,
                 finished_frames: finishedFrames,
@@ -370,14 +460,16 @@ function ProjectsManager(query, configurator) {
                 };
             };
 
-            var writeChunk = function (c) {
-                var f = path.join(paths.projectDir, c.meta.chapterid, c.meta.frameid + '.txt');
-                return write(f, c.content);
+            var updateChunk = function (c) {
+                var f = path.join(paths.projectDir, c.meta.chapterid, c.meta.frameid + '.txt'),
+                    hasContent = isTranslation ? !!c.transcontent : !!c.helpscontent.length;
+
+                return hasContent ? write(f, isTranslation ? c.transcontent : toJSON(c.helpscontent)) : rm(f);
             };
 
-            var writeChunks = function (data) {
+            var updateChunks = function (data) {
                 return function () {
-                    return Promise.all(_.map(data, writeChunk));
+                    return Promise.all(_.map(data, updateChunk));
                 };
             };
 
@@ -385,9 +477,8 @@ function ProjectsManager(query, configurator) {
                 .then(writeFile(paths.manifest, manifest))
                 .then(writeFile(paths.project, meta))
                 .then(makeChapterDirs(chunks))
-                .then(writeChunks(chunks))
+                .then(updateChunks(chunks))
                 .then(git.init.bind(git, paths.projectDir))
-                // .then(git.diff.bind(git, paths.projectDir))
                 .then(git.stage.bind(git, paths.projectDir));
         },
 
@@ -420,6 +511,8 @@ function ProjectsManager(query, configurator) {
         loadTargetTranslation: function (meta) {
             var paths = this.getPaths(meta);
 
+            var isTranslation = this.isTranslation(meta);
+
             // read manifest, get object with finished frames
 
             // return an object with keys that are the complexid
@@ -433,20 +526,31 @@ function ProjectsManager(query, configurator) {
 
             var readChunk = function (f) {
                 return read(f).then(function (c) {
-                    return {
-                        content: c.toString(),
+                    var parsed = {
                         name: parseChunkName(f)
                     };
+
+                    if (isTranslation) {
+                        parsed['transcontent'] = c.toString();
+                    } else {
+                        parsed['helpscontent'] = JSON.parse(c);
+                    }
+
+                    return parsed;
                 })
             };
 
             var markFinished = function (chunks) {
                 return function (finished) {
                     return _.mapValues(chunks, function (c, name) {
-                        return {
-                            content: c.content,
+                        var mapped = {
                             completed: !!finished[name]
-                        }
+                        },
+                        key = isTranslation ? 'transcontent' : 'helpscontent';
+
+                        mapped[key] = c[key];
+
+                        return mapped;
                     });
                 };
             };

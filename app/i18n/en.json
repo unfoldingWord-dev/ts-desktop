@@ -1,1 +1,19 @@
-{}
+{
+    "app_name": "translationStudio",
+    "home_title": "Your Translation Projects",
+    "welcome": "Welcome!",
+    "home_welcome1": "This is your Home Screen. When you have translation projects on this device, they will appear here.",
+    "home_welcome2": "You can start a new project anytime by tapping the blue button in the top right.",
+    "start_new_project": "Start a new project",
+    "project": "Project",
+    "type": "Type",
+    "language": "Language",
+    "progress": "Progress",
+    "target_language": "Target Language",
+    "translators": "Translators",
+    "dismiss": "Dismiss",
+    "delete": "Delete",
+    "confirm_delete_translation": "This will permanently remove the translation. Continue?",
+    "no": "No",
+    "confirm": "Confirm"
+}

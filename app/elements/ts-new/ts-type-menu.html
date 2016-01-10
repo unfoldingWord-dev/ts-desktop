@@ -3,7 +3,7 @@
 <link rel="import" href="../../components/iron-icons/iron-icons.html">
 <link rel="import" href="../../components/iron-list/iron-list.html">
 
-<dom-module id="ts-book-menu">
+<dom-module id="ts-type-menu">
 
     <style>
 
@@ -81,16 +81,20 @@
           <div>
               <span class="click" on-tap="togroup">[[category.name]]</span>
               <iron-icon icon="chevron-right"></iron-icon>
-              <em>Choose a book</em>
+              <template is="dom-if" if="{{!obs}}">
+                  <span class="click" on-tap="tobook">[[project.name]]</span>
+                  <iron-icon icon="chevron-right"></iron-icon>
+              </template>
+              <em>Choose a type</em>
           </div>
       </div>
 
       <div id="contain">
-          <iron-list items="[[category.data]]" as="project">
+          <iron-list items="[[typelist]]" as="type">
               <template>
                   <div class="row" on-tap="store">
                       <div>
-                          <span>[[project.name]]</span>
+                          <span>[[type.name]]</span>
                       </div>
                   </div>
               </template>
@@ -104,7 +108,7 @@
 <script>
 
   Polymer({
-    is: 'ts-book-menu',
+    is: 'ts-type-menu',
 
       properties: {
           selected: {
@@ -118,8 +122,20 @@
           },
           project: {
               type: Object,
+              value: {}
+          },
+          obs: {
+              type: Boolean,
+              value: false
+          },
+          type: {
+              type: Object,
               value: {},
               notify: true
+          },
+          typelist: {
+              type: Array,
+              value: [{name: "Text", code: "text"}, {name: "Notes", code: "tn"}, {name: "Questions", code: "tq"}]
           }
       },
 
@@ -127,13 +143,25 @@
           Polymer.IronResizableBehavior
       ],
 
+      observers: [
+          'checkobs(category.name)'
+      ],
+
+      checkobs: function (name) {
+          this.obs = name === "Open Bible Stories";
+      },
+
       store: function(e) {
-          this.project = e.model.project;
-          this.selected = this.selected + 1;
+          this.type = e.model.type;
+          this.fire('create');
       },
 
       togroup: function () {
           this.selected = 1;
+      },
+
+      tobook: function () {
+          this.selected = 2;
       },
 
     ready: function() {

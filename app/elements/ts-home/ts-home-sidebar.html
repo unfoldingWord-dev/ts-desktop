@@ -62,11 +62,12 @@
             <paper-icon-button class="dropdown-trigger" icon="more-vert" title="options"></paper-icon-button>
             <paper-menu class="dropdown-content">
                 <paper-item><iron-icon class="smallicon" icon="maps:local-library"></iron-icon>Update</paper-item>
-                <paper-item><iron-icon class="smallicon" icon="file-download"></iron-icon>Import</paper-item>
+                <paper-item on-tap="import"><iron-icon class="smallicon" icon="file-download"></iron-icon>Import</paper-item>
                 <paper-item on-tap="feedback"><iron-icon class="smallicon" icon="announcement"></iron-icon>Feedback</paper-item>
                 <paper-item on-tap="settings"><iron-icon class="smallicon" icon="settings"></iron-icon>Settings</paper-item>
             </paper-menu>
         </paper-menu-button>
+        <input type="file" style="display:none;" id="importDialog" accept=".tstudio" title="test" multiple>
     </template>
 
 </dom-module>
@@ -102,6 +103,20 @@
 
         feedback: function() {
             this.fire('iron-signal', {name: 'openfeedback'});
+        },
+
+        import: function() {
+            var chooser = this.$.importDialog;
+            chooser.addEventListener('change', function(evt) {
+                for(var i=0; i < this.files.length; i ++) {
+                    if(this.files[i].name.split('.').pop().toLowerCase() === 'tstudio') {
+                        console.log(this.files[i].name);
+                        App.projectsManager.importTargetTranslation(this.files[i]);
+                    }
+                }
+                // TODO: display any errors and reload the target translation list
+            }, false);
+            chooser.click();
         },
 
         ready: function() {

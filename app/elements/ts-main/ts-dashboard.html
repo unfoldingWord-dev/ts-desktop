@@ -259,7 +259,18 @@
           var mythis = this;
           App.projectsManager.loadTargetTranslationsList().then(function(list) {
               mythis.set('projectlist', list);
+              mythis.checklist();
           });
+      },
+
+      checklist: function () {
+          var list = this.projectlist;
+          for (var i = 0; i < list.length; i++) {
+              if (list[i].type === undefined) {
+                  list[i].type = {name: "Text", code: "text"};
+                  list[i].fullname = list[i].project.slug + "-" + list[i].language.lc;
+              }
+          }
       },
 
       setdefault: function () {

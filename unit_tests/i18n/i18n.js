@@ -13,10 +13,10 @@
 
     describe('@i18n', function () {
         describe('@Defaults', function () {
-            let i18n = new Locale('');
+            let i18n = new Locale('./app/i18n','');
 
             it('should return a code tag', function () {
-                assert.equal(i18n._('test'), '[i18n: test]');
+                assert.equal(i18n._('missing_key'), '[i18n: missing_key]');
             });
 
             it('should default to english', function () {
@@ -46,6 +46,19 @@
 
             it('should use default locale when missing translations', function () {
                 assert.equal(i18nInstance._('missingFromDe'), 'This is english!');
+            });
+        });
+
+        describe('@DictionaryReference', function () {
+            let i18nInstance = new Locale('./unit_tests/i18n/data/', 'en');
+            let dictionary = i18nInstance.dictionary;
+
+            it('should return the localization of the named property', function () {
+                assert.equal(dictionary.test, 'This is a test!');
+            });
+
+            it('should return an undefined value for the missing property', function() {
+                assert.equal(dictionary.missing_property, undefined);
             });
         });
     });

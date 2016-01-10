@@ -78,7 +78,7 @@
         iron-list {
             font-size: 110%;
             max-height: 90vh;
-            width: 470px;
+            width: 600px;
             background: var(--card-background-color);
             box-shadow: 0 2px 3px 2px var(--border-color);
         }
@@ -95,7 +95,7 @@
 
         #headings {
             flex: 0 0 50px;
-            width: 470px;
+            width: 600px;
             display: flex;
             align-items: center;
         }
@@ -116,7 +116,7 @@
         }
 
         .smallspan {
-            width: 45px;
+            width: 70px;
             display: inline-flex;
             justify-content: center;
         }
@@ -223,25 +223,26 @@
 
         <div id="main">
             <div id="header">
-                <div id="title">Your Translation Projects</div>
+                <div id="title">{{locale.home_title}}</div>
             </div>
             <template is="dom-if" if="{{!projectlist.length}}">
                 <div class="contain">
                     <div id="welcome">
-                        <p>Welcome!</p>
-                        <p>This is your Home Screen. When you have translation projects on this device, they will appear here.</p>
-                        <p>You can start a new project anytime by tapping the blue button in the top right.</p>
+                        <p>{{locale.welcome}}</p>
+                        <p>{{locale.home_welcome1}}</p>
+                        <p>{{locale.home_welcome2}}</p>
                     </div>
-                    <paper-button raised id="start" on-tap="start">Start a new project</paper-button>
+                    <paper-button raised id="start" on-tap="start">{{locale.start_new_project}}</paper-button>
                 </div>
             </template>
             <template is="dom-if" if="{{projectlist.length}}">
                 <div class="contain">
                     <div id="headings" class="smalltext">
                         <span class="smallspan"></span>
-                        <span class="bigspan">Project</span>
-                        <span class="bigspan">Language</span>
-                        <span>Progress</span>
+                        <span class="bigspan">{{locale.project}}</span>
+                        <span class="smallspan">{{locale.type}}</span>
+                        <span class="bigspan">{{locale.language}}</span>
+                        <span>{{locale.progress}}</span>
                     </div>
                     <div id="list">
                         <iron-list items="[[projectlist]]" as="proj">
@@ -250,6 +251,7 @@
                                     <div class="left" on-tap="openproject">
                                         <span class="smallspan"><iron-icon class="smallicon" icon="[[proj.icon]]"></iron-icon></span>
                                         <span class="bigspan">[[proj.project.name]]</span>
+                                        <span class="smallspan smalltext">[[proj.type.name]]</span>
                                         <span class="smalltext bigspan">[[proj.language.ln]]</span>
                                         <span class="smallspan"><ts-completion-icon percent="[[proj.completion]]"></ts-completion-icon></span>
                                     </div>
@@ -267,10 +269,10 @@
         <paper-dialog id="info" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <h2><span>[[currentinfo.project.name]]</span> - <span>[[currentinfo.language.ln]]</span></h2>
             <div>
-                <p>Project: <strong><span>[[currentinfo.project.name]]</span> (<span>[[currentinfo.project.slug]]</span>)</strong></p>
-                <p>Target Language: <strong><span>[[currentinfo.language.ln]]</span> (<span>[[currentinfo.language.lc]]</span>)</strong></p>
-                <p>Progress: <strong><span>[[currentinfo.completion]]</span>%</strong></p>
-                <p>Translators:</p>
+                <p>{{locale.project}}: <strong><span>[[currentinfo.project.name]]</span> (<span>[[currentinfo.project.slug]]</span>)</strong></p>
+                <p>{{locale.target_language}}: <strong><span>[[currentinfo.language.ln]]</span> (<span>[[currentinfo.language.lc]]</span>)</strong></p>
+                <p>{{locale.progress}}: <strong><span>[[currentinfo.completion]]</span>%</strong></p>
+                <p>{{locale.translators}}:</p>
                 <template is="dom-if" if="{{currentinfo.translators.length}}">
                     <template is="dom-repeat" items="{{currentinfo.translators}}" as="user">
                         <p class="offset"><strong>{{user.name}}</strong></p>
@@ -288,18 +290,18 @@
                 </div>
             </div>
             <div id="infobuttons">
-                <paper-button on-tap="closeinfo">Dismiss</paper-button>
+                <paper-button on-tap="closeinfo">{{locale.dismiss}}</paper-button>
             </div>
         </paper-dialog>
 
         <paper-dialog id="delete" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <h2><iron-icon icon="delete"></iron-icon>Delete</h2>
+            <h2><iron-icon icon="delete"></iron-icon>{{locale.delete}}</h2>
             <div>
-                <p>This will permanently remove the translation. Continue?</p>
+                <p>{{locale.confirm_delete_translation}}</p>
             </div>
             <div id="deletebuttons">
-                <paper-button on-tap="closedelete">No</paper-button>
-                <paper-button on-tap="deleteproject">Confirm</paper-button>
+                <paper-button on-tap="closedelete">{{locale.no}}</paper-button>
+                <paper-button on-tap="deleteproject">{{locale.confirm}}</paper-button>
             </div>
         </paper-dialog>
 
@@ -332,6 +334,10 @@
             projectlist: {
                 type: Array,
                 value: []
+            },
+            locale: {
+                type: Object,
+                value: {}
             },
             backto: {
                 type: String,
@@ -397,7 +403,7 @@
         },
 
         ready: function() {
-
+            this.locale = App.locale.dictionary;
         }
 
     });

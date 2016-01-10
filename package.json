@@ -15,19 +15,21 @@
     "url": "git@github.com:unfoldingWord-dev/ts-desktop.git"
   },
   "dependencies": {
+    "adm-zip": "^0.4.7",
     "async": "^1.4.2",
     "fs-readfile-promise": "^2.0.0",
     "getmac": "^1.0.7",
-    "ssh-keygen": "^0.2.1",
+    "jsonfile": "^2.2.1",
+    "locale": "0.0.20",
     "lodash": "^3.9.3",
     "md5": "^2.0.0",
     "mkdirp": "^0.5.1",
-    "jsonfile": "^2.2.1",
     "moment": "^2.10.3",
     "node-dir": "^0.1.8",
     "nw": "^0.12.3",
     "request": "^2.58.0",
     "sql.js": "^0.2.21",
+    "ssh-keygen": "^0.2.1",
     "ssh2": "^0.4.10",
     "traverse": "^0.6.6"
   },

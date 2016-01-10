@@ -145,7 +145,7 @@
                 <div id="lower">
                     <p>You may also share and distribute your project using these options.</p>
                     <div class="link" on-tap="export">Export to File</div>
-                    <input class="hide" id="input" type="file" nwsaveas="" nwworkingdir="" />
+                    <input class="hide" id="input" type="file" nwsaveas="" />
                 </div>
             </div>
         </div>
@@ -215,29 +215,32 @@
             var popup = this.$.popup;
             var meta = this.currentproject.data;
             var translation = this.currentproject.translation;
-            var name = 'uw-' + meta.project.slug + '-' + meta.language.lc;
+            var name = 'uw-' + meta.fullname;
             var input = this.$.input;
             var filename;
+            var firsttime = true;
+            input.value = null;
             input.nwsaveas = name;
-            //input.nwworkingdir = "C:";
             input.addEventListener("change", function (evt) {
-                var inputthis = this;
-                mythis.set('options.body', "Exporting Project.  Please wait...");
-                mythis.set('options.loading', true);
-                popup.open();
-                filename = inputthis.value;
-                inputthis.value = null;
-                return App.projectsManager.exportTranslation(translation, meta, filename)
-                    .then(function () {
-                        mythis.set('options.title', "Project Exported");
-                        mythis.set('options.body', "Your project has been successfully saved to a file.  Thanks.");
-                        mythis.set('options.loading', false);
-                    })
-                    .catch(function (err) {
-                        mythis.set('options.title', "Export Failed");
-                        mythis.set('options.body', "We're sorry.  An error occurred while trying to save your project");
-                        mythis.set('options.loading', false);
-                    });
+                if (firsttime) {
+                    firsttime = false;
+                    mythis.set('options.body', "Exporting Project.  Please wait...");
+                    mythis.set('options.loading', true);
+                    popup.open();
+                    filename = input.value;
+                    return App.projectsManager.exportTranslation(translation, meta, filename)
+                        .then(function () {
+                            mythis.set('options.title', "Project Exported");
+                            mythis.set('options.body', "Your project has been successfully saved to a file.  Thanks.");
+                            mythis.set('options.loading', false);
+
+                        })
+                        .catch(function (err) {
+                            mythis.set('options.title', "Export Failed");
+                            mythis.set('options.body', "We're sorry.  An error occurred while trying to save your project");
+                            mythis.set('options.loading', false);
+                        });
+                }
             }, false);
             input.click();
         },
@@ -247,7 +250,7 @@
             var mythis = this;
             var meta = this.currentproject.data;
             var paths = App.projectsManager.getPaths(meta);
-            var repo = 'uw-' + meta.project.slug + '-' + meta.language.lc;
+            var repo = 'uw-' + meta.fullname;
 
             this.set('options.body', "Uploading Project.  Please wait...");
             this.set('options.loading', true);
@@ -269,8 +272,13 @@
                     mythis.set('options.loading', false);
                 })
                 .catch(function (err) {
+                    App.reporter.logError(err.stderr);
+                    if(err.stderr.indexOf('DENIED by fallthru')) {
+                        App.reporter.logNotice('Destroying invalid ssh keys');
+                        App.uploader.destroyKeys();
+                    }
                     mythis.set('options.title', "Publish Failed");
-                    mythis.set('options.body', "We're sorry.  An error occurred while trying to upload your project");
+                    mythis.set('options.body', "We're sorry.  An error occurred while trying to upload your project. Please try again.");
                     mythis.set('options.loading', false);
                 });
         }

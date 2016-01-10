@@ -74,35 +74,74 @@
             return Object.keys(storage);
         };
 
+        let fontSizeMap = {
+            'normal': '100%',
+            'small': '90%',
+            'smaller': '80%',
+            'large': '110%',
+            'larger': '120%'
+        };
+
         // This is the returned object
         let configurator = {
 
+            /**
+             * Returns the storage being used
+             * @returns {object}
+             */
             _storage: function() {
                 return storage;
             },
 
+            /**
+             * Set the storage object used for this app
+             * @param storeObject
+             */
             setStorage: function (storeObject) {
                 storage = storeObject;
             },
 
+            /**
+             * Write the whole (mapped) setting array to the user's preferred storage
+             * @param settingArr
+             */
             saveUserSettingArr: function(settingArr) {
                 storage['user-setting'] = JSON.stringify(settingArr);
             },
 
+            /**
+             * Fetch the (mapped) setting array
+             * @return setting array from user's storage or from default file
+             */
             getUserSettingArr: function() {
                 return JSON.parse(storage['user-setting']) || this.mapUserSettings(this.getDefaultUserSettingArr());
             },
 
+            /**
+             * Fetch the raw and default setting array from JSON file
+             * @return setting array from user-setting.json
+             */
             getDefaultUserSettingArr: function() {
                 return userSetting;
             },
 
+            /**
+             * Get the value of a setting
+             * @param name: of the user setting
+             * @return value of the user setting
+             */
             getUserSetting: function(name) {
                 var s = this.getUserSettingArr();
                 var list = _.find(s, {'list': [{'name': name}]}).list;
                 return _.find(list, {'name': name}).value;
             },
 
+            /**
+             * Map the raw setting array into groups and lists for UI to display
+             * @param settingArr: array of setting objects
+             * @param groupOrder: (optional) array of string of group name
+             * @return array of setting-group objects
+             */
             mapUserSettings: function(settingArr, groupOrder) {
                 var settingObj = {};
                 var groupOrder = groupOrder || [];
@@ -132,6 +171,19 @@
                 });
             },
 
+            applyPrefAppearance: function() {
+                console.log('Applying appearance');
+                // console.log(window.document);
+                var tsTranslate = window.document.querySelector('ts-translate');
+                var fontSizeVal = this.getUserSetting('fontsize').toLowerCase();
+                console.log(fontSizeMap[fontSizeVal]);
+                tsTranslate.style.fontSize = fontSizeMap[fontSizeVal];
+            },
+
+            applyPrefBehavior: function() {
+                console.log('Pretend to apply behavior');
+            },
+
             /**
              * Retreives a value
              * @param key
@@ -143,9 +195,9 @@
 
             /**
              * Adds a new value to the configurator
-             * @param key the key used to retreive the value
-             * @param value the value that will be stored
-             * @param meta optional parameters to help specify how the value should be treated
+             * @param key: the key used to retreive the value
+             * @param value: the value that will be stored
+             * @param meta: (optional) parameters to help specify how the value should be treated
              */
             setValue: function (key, value, meta) {
                 setValue(key, value, meta);

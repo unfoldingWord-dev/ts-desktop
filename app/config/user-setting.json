@@ -16,8 +16,8 @@
     {
         "name": "font",
         "mainText": "Font",
-        "value": "Tahoma",
-        "options": ["Arial", "Times New Roman", "Calibri", "Tahoma"],
+        "value": "Roboto",
+        "options": ["Roboto", "Arial", "Times New Roman", "Calibri", "Tahoma"],
         "group": "general"
     },
     {

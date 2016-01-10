@@ -114,7 +114,7 @@
              * @return setting array from user's storage or from default file
              */
             getUserSettingArr: function() {
-                return JSON.parse(storage['user-setting']) || this.mapUserSettings(this.getDefaultUserSettingArr());
+                return this.mapUserSettings(this.getDefaultUserSettingArr());
             },
 
             /**
@@ -172,12 +172,12 @@
             },
 
             applyPrefAppearance: function() {
-                console.log('Applying appearance');
-                // console.log(window.document);
-                var tsTranslate = window.document.querySelector('ts-translate');
-                var fontSizeVal = this.getUserSetting('fontsize').toLowerCase();
-                console.log(fontSizeMap[fontSizeVal]);
+                let body = window.document.querySelector('body');
+                let tsTranslate = window.document.querySelector('ts-translate');
+                let fontSizeVal = this.getUserSetting('fontsize').toLowerCase();
+                
                 tsTranslate.style.fontSize = fontSizeMap[fontSizeVal];
+                tsTranslate.style.fontFamily = this.getUserSetting('font');
             },
 
             applyPrefBehavior: function() {

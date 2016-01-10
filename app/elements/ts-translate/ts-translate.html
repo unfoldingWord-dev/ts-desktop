@@ -881,6 +881,12 @@
                 mythis.setlocation();
                 mythis.setheights();
             });
+            // Apply user preference
+            this.async(function() {
+                App.configurator.applyPrefAppearance();
+                App.configurator.applyPrefBehavior();
+            // console.log(document.querySelector('ts-translate'));
+            }, 30);
         }
 
     });

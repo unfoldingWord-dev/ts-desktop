@@ -249,7 +249,7 @@
                             <template>
                                 <div class="row">
                                     <div class="left" on-tap="openproject">
-                                        <span class="smallspan"><iron-icon class="smallicon" icon="[[proj.icon]]"></iron-icon></span>
+                                        <span class="smallspan"><iron-icon class="smallicon" icon$="[[checkicon(proj.project.slug)]]"></iron-icon></span>
                                         <span class="bigspan">[[proj.project.name]]</span>
                                         <span class="smallspan smalltext">[[proj.type.name]]</span>
                                         <span class="smalltext bigspan">[[proj.language.ln]]</span>
@@ -357,6 +357,10 @@
                     }
                 }
             }
+        },
+
+        checkicon: function (slug) {
+            return slug === "obs" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
         },
 
         gopublish: function () {

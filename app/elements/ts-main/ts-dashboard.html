@@ -266,8 +266,8 @@
       checklist: function () {
           var list = this.projectlist;
           for (var i = 0; i < list.length; i++) {
-              if (list[i].type === undefined) {
-                  list[i].type = {name: "Text", code: "text"};
+              if (list[i].project_type === undefined) {
+                  list[i].project_type = "text";
                   list[i].fullname = list[i].project.slug + "-" + list[i].target_language.id;
               }
           }

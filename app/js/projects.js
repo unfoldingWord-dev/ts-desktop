@@ -342,7 +342,7 @@ function ProjectsManager(query, configurator) {
                             // build chapter header
                             if(chapterContent === '') {
                                 chapterContent += '//\n';
-                                chapterContent += meta.language.ln + '\n';
+                                chapterContent += meta.target_language.name + '\n';
                                 chapterContent += '//\n\n';
 
                                 chapterContent += '//\n';
@@ -355,7 +355,7 @@ function ProjectsManager(query, configurator) {
                             }
 
                             // add frame
-                            chapterContent += '{{https://api.unfoldingword.org/' + meta.project.slug + '/jpg/1/en/360px/' + meta.project.slug + '-' + meta.language.lc + '-' + frame.meta.chapterid + '-' + frame.meta.frameid + '.jpg}}\n\n';
+                            chapterContent += '{{https://api.unfoldingword.org/' + meta.project.slug + '/jpg/1/en/360px/' + meta.project.slug + '-' + meta.target_language.id + '-' + frame.meta.chapterid + '-' + frame.meta.frameid + '.jpg}}\n\n';
                             chapterContent += frame.transcontent + '\n\n';
                         }
                         if(chapterContent !== '' && numFinishedFrames > 0) {
@@ -385,7 +385,7 @@ function ProjectsManager(query, configurator) {
         },
 
         isTranslation: function (meta) {
-            return !meta.type.code || meta.type.code === 'text';
+            return !meta.project_type || meta.project_type === 'text';
         },
 
         saveTargetTranslation: function (translation, meta) {
@@ -434,7 +434,7 @@ function ProjectsManager(query, configurator) {
                 package_version: 3,
                 target_language: meta.target_language,
                 project_id: meta.project.slug,
-                project_type: meta.type.code,
+                project_type: meta.project_type,
                 source_translations: sources,
                 translators: meta.translators,
                 finished_frames: finishedFrames,

@@ -152,7 +152,7 @@
       },
 
       store: function(e) {
-          this.type = e.model.type;
+          this.type = e.model.type.code;
           this.fire('create');
       },
 

@@ -408,6 +408,20 @@
             }
         },
 
+        savesource: function () {
+            var key = "uw-" + this.currentproject.data.fullname;
+            var source = this.currentproject.data.currentsource;
+            App.configurator.setValue(key + "-source", source);
+        },
+
+        retrievesource: function () {
+            var key = "uw-" + this.currentproject.data.fullname;
+            var source = App.configurator.getValue(key + "-source");
+            if (source !== undefined  && source !== "") {
+                this.set('currentproject.data.currentsource', source);
+            }
+        },
+
         loadnewproject: function (event, data) {
             var blank = [];
             var blankstate = {};
@@ -433,6 +447,7 @@
                     mythis.set('currentproject.data', data.projdata);
                     mythis.set('currentproject.state', blankstate);
                     mythis.checkstandard();
+                    mythis.retrievesource();
                     App.projectsManager.loadTargetTranslation(data.projdata).then(function (translation) {
                         mythis.set('rawdata', translation);
                         mythis.pullsource();
@@ -461,6 +476,7 @@
                     mythis.set('currentproject.data', data.projdata);
                     mythis.set('currentproject.state', blankstate);
                     mythis.checkstandard();
+                    mythis.retrievesource();
                     App.projectsManager.loadTargetTranslation(data.projdata).then(function (translation) {
                         mythis.set('rawdata', translation);
                         mythis.pullsource();
@@ -483,6 +499,7 @@
             var meta = mythis.currentproject.data;
             mythis.set('currentproject.data.sources', data.sources);
             mythis.set('currentproject.data.currentsource', data.selected);
+            mythis.savesource();
             mythis.getlocation();
             App.projectsManager.loadTargetTranslation(meta).then(function (translation) {
                 mythis.set('rawdata', translation);
@@ -503,6 +520,7 @@
             var mythis = this;
             var meta = mythis.currentproject.data;
             mythis.set('currentproject.data.currentsource', data.selected);
+            mythis.savesource();
             mythis.getlocation();
             App.projectsManager.loadTargetTranslation(meta).then(function (translation) {
                 mythis.set('rawdata', translation);

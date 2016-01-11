@@ -252,7 +252,7 @@
                                         <span class="smallspan"><iron-icon class="smallicon" icon$="[[checkicon(proj.project.slug)]]"></iron-icon></span>
                                         <span class="bigspan">[[proj.project.name]]</span>
                                         <span class="smallspan smalltext">[[proj.type.name]]</span>
-                                        <span class="smalltext bigspan">[[proj.language.ln]]</span>
+                                        <span class="smalltext bigspan">[[proj.target_language.name]]</span>
                                         <span class="smallspan"><ts-completion-icon percent="[[proj.completion]]"></ts-completion-icon></span>
                                     </div>
                                     <div>
@@ -267,10 +267,10 @@
         </div>
 
         <paper-dialog id="info" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <h2><span>[[currentinfo.project.name]]</span> - <span>[[currentinfo.language.ln]]</span></h2>
+            <h2><span>[[currentinfo.project.name]]</span> - <span>[[currentinfo.target_language.name]]</span></h2>
             <div>
                 <p>{{locale.project}}: <strong><span>[[currentinfo.project.name]]</span> (<span>[[currentinfo.project.slug]]</span>)</strong></p>
-                <p>{{locale.target_language}}: <strong><span>[[currentinfo.language.ln]]</span> (<span>[[currentinfo.language.lc]]</span>)</strong></p>
+                <p>{{locale.target_language}}: <strong><span>[[currentinfo.target_language.name]]</span> (<span>[[currentinfo.target_language.id]]</span>)</strong></p>
                 <p>{{locale.progress}}: <strong><span>[[currentinfo.completion]]</span>%</strong></p>
                 <p>{{locale.translators}}:</p>
                 <template is="dom-if" if="{{currentinfo.translators.length}}">

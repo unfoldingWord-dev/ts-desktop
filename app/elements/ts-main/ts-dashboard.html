@@ -268,7 +268,7 @@
           for (var i = 0; i < list.length; i++) {
               if (list[i].type === undefined) {
                   list[i].type = {name: "Text", code: "text"};
-                  list[i].fullname = list[i].project.slug + "-" + list[i].language.lc;
+                  list[i].fullname = list[i].project.slug + "-" + list[i].target_language.id;
               }
           }
       },

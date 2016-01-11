@@ -112,7 +112,7 @@ function ProjectsManager(query, configurator) {
          */
 
         get targetLanguages () {
-            var r = query("select id, slug 'lc', name 'ln', direction, region from target_language order by slug");
+            var r = query("select slug 'id', name, direction from target_language order by slug");
             return zipper(r);
         },
 
@@ -427,14 +427,12 @@ function ProjectsManager(query, configurator) {
                 })
                 .value();
 
-            var language = {id: meta.language.lc, name: meta.language.ln, direction: meta.language.direction};
-
             var manifest = {
                 generator: {
                     name: 'ts-desktop'
                 },
                 package_version: 3,
-                target_language: language,
+                target_language: meta.target_language,
                 project_id: meta.project.slug,
                 project_type: meta.type.code,
                 source_translations: sources,

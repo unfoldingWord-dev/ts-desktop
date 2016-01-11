@@ -175,7 +175,7 @@
                 typeext = "_" + type.code;
             }
 
-            var fullname = project.slug + typeext + "-" + language.lc;
+            var fullname = project.slug + typeext + "-" + language.id;
 
             for (var i = 0; i < projectarray.length; i++) {
                 if (projectarray[i].fullname === fullname) {
@@ -184,7 +184,7 @@
                 }
             }
 
-            var newprojdata = {"project": project, "fullname": fullname, "type": type, "language": language, "translators": [], "sources": [], "completion": 0, "currentsource": null};
+            var newprojdata = {"project": project, "fullname": fullname, "type": type, "target_language": language, "translators": [], "sources": [], "completion": 0, "currentsource": null};
             this.fire('iron-signal', {name: 'loadnewproject', data: {projdata: newprojdata}});
             this.animationConfig.exit.name = 'slide-left-animation';
             this.route = "translate";

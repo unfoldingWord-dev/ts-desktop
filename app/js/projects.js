@@ -383,21 +383,23 @@ function ProjectsManager(query, configurator) {
                         if(chapterContent !== '' && numFinishedFrames > 0) {
                             // TODO: we need to get the chapter reference and insert it here
                             chapterContent += '////\n';
-                            //console.log('chapter ' + currentChapter, chapterContent);
                             zip.addFile(currentChapter + '.txt', new Buffer(chapterContent), null);
                         }
 
-                        zip.writeZip(filename + '.zip');
-                        resolve(true);
+                        if(zip.getEntries().length > 0) {
+                            zip.writeZip(filename + '.zip');
+                            resolve(true);
+                        } else {
+                            // there was nothing to export
+                            reject('there was nothing to export');
+                        }
                     } else {
                         // we don't support anything but dokuwiki right now
-                        console.log('we only support exporting the defaul format (dokuwiki) for now');
-                        resolve(false);
+                        reject('we only support exporting the defaul format (dokuwiki) for now');
                     }
                 } else {
                     // TODO: support exporting other target translation types if needed e.g. notes, words, questions
-                    console.log('we do not support exporting that project type yet.');
-                    reject();
+                    reject('we do not support exporting that project type yet.');
                 }
             });
         },

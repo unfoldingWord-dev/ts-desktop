@@ -82,7 +82,7 @@
         createchapters: function () {
             var transchapters = [];
             var translation = this.currentproject.translation;
-            var name = this.currentproject.data.project.name;
+            var name = this.currentproject.data.project_name;
 
             var transdata = translation.map(function(chunk, index){
                 return {content: chunk.content, completed: chunk.completed, meta: chunk.meta, index: index};

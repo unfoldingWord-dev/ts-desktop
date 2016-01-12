@@ -375,7 +375,7 @@
         opensource: function () {
             var modal = this.$.modal;
             var sources = App.projectsManager.sources;
-            var projectid = this.currentproject.data.project.slug;
+            var projectid = this.currentproject.data.project_id;
             modal.allSources = _.filter(sources, {'project': projectid, 'level': 3});
             modal.sources = this.currentproject.data.sources;
             modal.selectedSource = this.currentproject.data.currentsource;
@@ -406,6 +406,12 @@
                 App.configurator.setValue(key + "-index", this.modestatus.index);
                 App.configurator.setValue(key + "-selected", this.selected);
             }
+        },
+
+        savecompletion: function () {
+            var key = "uw-" + this.currentproject.data.fullname;
+            var completion = this.currentproject.data.completion;
+            App.configurator.setValue(key + "-completion", completion);
         },
 
         savesource: function () {
@@ -561,7 +567,7 @@
             }
             var currentsource = this.currentproject.data.sources[current];
             var frames = App.projectsManager.getSourceFrames(currentsource);
-            var name = this.currentproject.data.project.name;
+            var name = this.currentproject.data.project_name;
             var source = [];
             var srcchunk = {};
             var transchunk = {};
@@ -863,6 +869,7 @@
             }
             var completion = Math.round((count / update.length) * 100);
             this.set('currentproject.data.completion', completion);
+            this.savecompletion();
             this.set('currentproject.translation', update);
         },
 

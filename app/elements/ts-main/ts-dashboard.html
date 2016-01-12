@@ -258,19 +258,48 @@
       updatelist: function () {
           var mythis = this;
           App.projectsManager.loadTargetTranslationsList().then(function(list) {
-              mythis.set('projectlist', list);
-              mythis.checklist();
+              mythis.checklist(list);
           });
       },
 
-      checklist: function () {
-          var list = this.projectlist;
+      checklist: function (list) {
+
           for (var i = 0; i < list.length; i++) {
+              list[i].project_name = App.projectsManager.getProjectName(list[i].project_id)[0].name;
+
+              list[i].sources = [];
+
+              var group = list[i].source_translations;
+              for (var item in group) {
+                  if (group.hasOwnProperty(item)) {
+                      list[i].sources.push(App.projectsManager.getSourceDetails(item)[0]);
+                  }
+              }
+
+              if (list[i].sources.length) {
+                  list[i].currentsource = 0;
+              } else {
+                  list[i].currentsource = null;
+              }
               if (list[i].project_type === undefined) {
                   list[i].project_type = "text";
-                  list[i].fullname = list[i].project.slug + "-" + list[i].target_language.id;
+              }
+              var typeext = "";
+              if (list[i].project_type !== "text") {
+                  typeext = "_" + list[i].project_type;
+              }
+              var fullname = list[i].project_id + typeext + "-" + list[i].target_language.id;
+              list[i].fullname = fullname;
+              var key = "uw-" + fullname;
+              var completion = App.configurator.getValue(key + "-completion");
+              if (completion !== undefined  && completion !== "") {
+                  list[i].completion = completion;
+              } else {
+                  list[i].completion = 0;
               }
           }
+
+          this.set('projectlist', list);
       },
 
       setdefault: function () {

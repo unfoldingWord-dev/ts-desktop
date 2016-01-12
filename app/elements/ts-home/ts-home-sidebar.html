@@ -110,8 +110,13 @@
             chooser.addEventListener('change', function(evt) {
                 for(var i=0; i < this.files.length; i ++) {
                     if(this.files[i].name.split('.').pop().toLowerCase() === 'tstudio') {
-                        console.log(this.files[i].name);
-                        App.projectsManager.importTargetTranslation(this.files[i]);
+                        App.projectsManager.importTargetTranslation(this.files[i])
+                            .then(function() {
+                                console.log('import finished');
+                            })
+                            .catch(function(err) {
+                                console.log(err);
+                            });
                     }
                 }
                 // TODO: display any errors and reload the target translation list

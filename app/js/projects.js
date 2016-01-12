@@ -7,6 +7,8 @@ var _ = require('lodash'),
     rimraf = require('rimraf'),
     AdmZip = require('adm-zip'),
     utils = require('../js/lib/util'),
+    tstudioMigrator = require('../js/migration/tstudioMigrator'),
+    targetTranslationMigrator = require('../js/migration/targetTranslationMigrator'),
     wrap = utils.promisify,
     guard = utils.guard;
 
@@ -400,8 +402,46 @@ function ProjectsManager(query, configurator) {
             });
         },
 
-        importTargetTranslation: function() {
-          // TODO: perform the import
+        /**
+         * Imports a tstudio archive
+         * @param file {File} the path to the archive
+         * @returns {Promise.<boolean>}
+         */
+        importTargetTranslation: function(file) {
+            console.log('importing archive', file);
+            return new Promise(function(resolve, reject) {
+                tstudioMigrator.listTargetTranslations(file).then(function(relativePaths) {
+                    if(relativePaths.length > 0) {
+                        // proceed to import
+                        let zip = new AdmZip(file.path);
+                        _.forEach(relativePaths, function(tpath) {
+                            let outputDir = path.join(configurator.getValue('tempDir'), tpath);
+                            zip.extractEntryTo(tpath + '/', outputDir, false, true);
+                            targetTranslationMigrator.migrate(outputDir).then(function() {
+                                // import the target translation
+                                // TODO: need to use the id not the path
+                                utils.move(outputDir, path.join(configurator.getValue('targetTranslationsDir'), tpath), function(err) {
+                                    if(err) {
+                                        console.log(err);
+                                    } else {
+                                        console.log('finished importing target translation');
+                                    }
+                                });
+                            })
+                            .catch(function(err) {
+                                console.log(err);
+                            });
+                        });
+                        console.log('finished importing');
+                        resolve(true);
+                    } else {
+                        reject('The archive is empty or not supported');
+                    }
+                })
+                .catch(function(err) {
+                    reject(err);
+                });
+            });
         },
 
         isTranslation: function (meta) {
@@ -420,7 +460,7 @@ function ProjectsManager(query, configurator) {
 
             var prop = function (prop) {
                 return function (v, k) {
-                    return v[prop] ? k : false
+                    return v[prop] ? k : false;
                 };
             };
 
@@ -550,7 +590,7 @@ function ProjectsManager(query, configurator) {
                     }
 
                     return parsed;
-                })
+                });
             };
 
             var markFinished = function (chunks) {

@@ -324,13 +324,10 @@ function ProjectsManager(query, configurator) {
          * @returns {Promise.<boolean>}
          */
         exportTranslation: function (translation, meta, filename) {
-            console.log("Exporting File", translation, meta, filename);
             // validate input
             if(filename === null || filename === '') {
-                console.log('the filename is empty');
-                return Promise.reject();
+                return Promise.reject('The filename is empty');
             }
-
             var isTranslation = this.isTranslation(meta);
 
             return new Promise(function(resolve, reject) {
@@ -391,15 +388,15 @@ function ProjectsManager(query, configurator) {
                             resolve(true);
                         } else {
                             // there was nothing to export
-                            reject('there was nothing to export');
+                            reject('There was nothing to export');
                         }
                     } else {
                         // we don't support anything but dokuwiki right now
-                        reject('we only support exporting the defaul format (dokuwiki) for now');
+                        reject('We only support exporting OBS projects for now');
                     }
                 } else {
                     // TODO: support exporting other target translation types if needed e.g. notes, words, questions
-                    reject('we do not support exporting that project type yet.');
+                    reject('We do not support exporting that project type yet');
                 }
             });
         },

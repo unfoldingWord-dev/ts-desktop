@@ -142,12 +142,12 @@
             },
 
             register: function (config) {
+                // TODO: the host and port need to be retrieved from the configuration
+                // NOTE: DONE. Pass those info in config and it will override the host and the port below
                 var opts = _.merge({}, {
                     host: 'ts.door43.org',
                     port: 9095
                 }, config);
-
-                console.log('OPTS', opts);
 
                 var getDeviceId = opts.deviceId ? Promise.resolve(opts.deviceId) : this.getDeviceId();
 

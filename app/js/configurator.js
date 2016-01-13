@@ -14,47 +14,78 @@
         let storage = {};
 
         let getValue = function (key) {
-            if (!key) { return key; }
-
+            if (key === undefined) {
+                return key;
+            }
             key = key.toLowerCase();
-            let valueObj = JSON.parse(storage[key] || '{}');
+
+            let valueObjStr = storage[key] || '{}';
+            let valueObj = JSON.parse(valueObjStr);
             let metaObj = valueObj.meta || {'default': ''};
 
-            return valueObj.value || metaObj.default;
+            //load value
+            let value = valueObj.value;
+
+            //otherwise use default (if present)
+            if (value === undefined && metaObj.default) {
+                value = metaObj.default;
+            }
+
+            return value;
         };
 
         let getMetaValue = function (key, metaKey) {
-            if (!key) { return key; }
-            
+            if (key === undefined) {
+                return key;
+            }
             key = key.toLowerCase();
-            let valueObj = JSON.parse(storage[key] || '{}');
+
+            let valueObjStr = storage[key] || '{}';
+            let valueObj = JSON.parse(valueObjStr);
 
             return valueObj.meta ? valueObj.meta[metaKey] : '';
         };
 
         let setValue = function (key, value, meta) {
-            if (!key || !value) { return; }
-            
+            if (key === undefined || value === undefined) {
+                return;
+            }
             key = key.toLowerCase();
             value = typeof value === 'boolean' || typeof value === 'number' ? value : value.toString();
 
-            if (getMetaValue(key, 'mutable') === false) { return; }
+            //return if read-only
+            let mutable = getMetaValue(key, 'mutable');
+            if (mutable !== undefined && mutable === false) {
+                return;
+            }
 
+            //load value object or create new empty value object
             let emptyStorageObj = {'value': value, 'meta': {'mutable': true, 'type': typeof value, 'default': ''}};
             let valueObj = storage[key] !== undefined ? JSON.parse(storage[key]) : emptyStorageObj;
+
+            //update value
             valueObj.value = value;
+
+            //update meta
             valueObj.meta = _.merge(valueObj.meta, meta);
 
+            //update value in storage
             storage[key] = JSON.stringify(valueObj);
         };
 
         let unsetValue = function (key) {
-            if (!key) { return; }
-
+            if (key === undefined) {
+                return;
+            }
             key = key.toLowerCase();
 
-            if (getMetaValue(key, 'mutable') === false) { return; }
+            //return if read-only
+            let mutable = getMetaValue(key, 'mutable');
+            if (mutable === false) {
+                return;
+            }
 
+            //remove value from storage
             if (typeof storage.removeItem === 'function') {
                 storage.removeItem(key);
             } else {
@@ -171,6 +202,9 @@
                 });
             },
 
+            /**
+             * Apply user preferences for app's look
+             */
             applyPrefAppearance: function() {
                 let body = window.document.querySelector('body');
                 let tsTranslate = window.document.querySelector('ts-translate');

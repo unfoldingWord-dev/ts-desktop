@@ -261,7 +261,10 @@
                     return App.git.stage(paths.projectDir);
                 })
                 .then(function () {
-                    return App.uploader.register();
+                    return App.uploader.register({
+                        'host': App.configurator.getUserSetting('authserver'),
+                        'port': App.configurator.getUserSetting('authserverport')
+                    });
                 })
                 .then(function (reg) {
                     return App.git.push(paths.projectDir, repo, reg);

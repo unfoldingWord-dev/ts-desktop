@@ -267,7 +267,10 @@
                     });
                 })
                 .then(function (reg) {
-                    return App.git.push(paths.projectDir, repo, reg);
+                    return App.git.push(paths.projectDir, repo, reg, {
+                        'host': App.configurator.getUserSetting('dataserver'),
+                        'port': App.configurator.getUserSetting('dataserverport')
+                    });
                 })
                 .then(function () {
                     mythis.set('options.title', "Project Published");

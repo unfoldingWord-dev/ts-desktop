@@ -233,11 +233,14 @@
                             mythis.set('options.title', "Project Exported");
                             mythis.set('options.body', "Your project has been successfully saved to a file.  Thanks.");
                             mythis.set('options.loading', false);
-
                         })
                         .catch(function (err) {
+                            var errmessage = "We're sorry.  An error occurred while trying to save your project";
+                            if(err !== null) {
+                                errmessage = err;
+                            }
                             mythis.set('options.title', "Export Failed");
-                            mythis.set('options.body', "We're sorry.  An error occurred while trying to save your project");
+                            mythis.set('options.body', errmessage);
                             mythis.set('options.loading', false);
                         });
                 }

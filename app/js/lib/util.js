@@ -4,6 +4,7 @@
     'use strict';
 
     var diacritics = require('./diacritics'),
+        fs = require('fs'),
         _ = require('lodash');
 
     /**
@@ -20,7 +21,7 @@
         }
         e.message += '\n';
         throw e;
-    };
+    }
 
     /**
      * Ignores diacritics and ignores case.
@@ -38,7 +39,7 @@
      */
     function camelize (a) {
         return a.replace(/(?:^\w|[A-Z]|\b\w)/g, function(letter, index) {
-            return index == 0 ? letter.toLowerCase() : letter.toUpperCase();
+            return index === 0 ? letter.toLowerCase() : letter.toUpperCase();
         }).replace(/\s+/g, '');
     }
 
@@ -49,8 +50,12 @@
             var args = (function () {
                 var narg = function (arg) { return typeof arg === 'undefined'; };
 
-                if (narg(arg1) && narg(arg2)) return [];
-                if (narg(arg2)) return [arg1];
+                if (narg(arg1) && narg(arg2)) {
+                    return [];
+                }
+                if (narg(arg2)) {
+                    return [arg1];
+                }
                 return [arg1, arg2];
             })();
 
@@ -98,6 +103,42 @@
             var data = arguments.length === 1 ? arguments[0] : arguments;
             log(msg, data);
             return data;
+        };
+    }
+
+    /**
+     * Moves a file/directory with a copy fallback
+     * http://stackoverflow.com/questions/8579055/how-i-move-files-on-node-js/29105404#29105404
+     * @param oldPath
+     * @param newPath
+     * @param callback
+     */
+    function move (oldPath, newPath, callback) {
+        fs.rename(oldPath, newPath, function (err) {
+            if (err) {
+                if (err.code === 'EXDEV' || err.code === 'EPERM') {
+                    copy();
+                } else {
+                    callback(err);
+                }
+                return;
+            }
+            callback();
+        });
+
+        function copy () {
+            var readStream = fs.createReadStream(oldPath);
+            var writeStream = fs.createWriteStream(newPath);
+
+            readStream.on('error', callback);
+            writeStream.on('error', callback);
+            readStream.on('close', function () {
+
+                fs.unlink(oldPath, callback);
+            });
+
+            readStream.pipe(writeStream);
+
         }
     }
 
@@ -109,5 +150,6 @@
     exports.guard = guard;
     exports.log = log;
     exports.logr = logr;
+    exports.move = move;
 
 }());

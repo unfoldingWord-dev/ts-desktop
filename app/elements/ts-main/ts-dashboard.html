@@ -119,6 +119,10 @@
           color: var(--accent-color);
       }
 
+      .hide {
+          display: none;
+      }
+
   </style>
 
   <template>
@@ -135,6 +139,8 @@
       <template is="dom-if" if="{{!accepted}}">
           <ts-terms accepted="{{accepted}}"></ts-terms>
       </template>
+
+      <input type="file" class="hide" id="import" accept=".tstudio" title="test" multiple>
 
       <paper-dialog id="feedback" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
           <div id="feedbackheader">
@@ -171,6 +177,7 @@
       <iron-signals on-iron-signal-updatelist="updatelist"></iron-signals>
       <iron-signals on-iron-signal-setdefault="setdefault"></iron-signals>
       <iron-signals on-iron-signal-openfeedback="openfeedback"></iron-signals>
+      <iron-signals on-iron-signal-openimport="openimport"></iron-signals>
 
   </template>
 
@@ -211,6 +218,38 @@
               type: Object,
               value: {loading: false, title: "", body: ""}
           }
+      },
+
+      openimport: function() {
+          var mythis = this;
+          var confirm = this.$.confirm;
+          var chooser = this.$.import;
+          chooser.addEventListener('change', function(evt) {
+              mythis.set('options.body', "Importing.  Please wait...");
+              mythis.set('options.loading', true);
+              confirm.open();
+              for(var i=0; i < this.files.length; i ++) {
+                  if(this.files[i].name.split('.').pop().toLowerCase() === 'tstudio') {
+                      App.projectsManager.importTargetTranslation(this.files[i])
+                          .then(function() {
+                              mythis.set('options.title', "Import Complete");
+                              mythis.set('options.body', "Your project(s) has been successfully imported.  Thanks.");
+                              mythis.set('options.loading', false);
+                              mythis.updatelist();
+                          })
+                          .catch(function(err) {
+                              var errmessage = "We're sorry.  An error occurred while trying to import your project";
+                              if(err !== null) {
+                                  errmessage = err;
+                              }
+                              mythis.set('options.title', "Import Failed");
+                              mythis.set('options.body', errmessage);
+                              mythis.set('options.loading', false);
+                          });
+                  }
+              }
+          }, false);
+          chooser.click();
       },
 
       openfeedback: function () {

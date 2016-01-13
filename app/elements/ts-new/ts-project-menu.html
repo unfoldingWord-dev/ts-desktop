@@ -96,9 +96,9 @@
               <template>
                   <div class="row" on-tap="store">
                       <div>
-                          <iron-icon class="small" icon="[[category.lefticon]]"></iron-icon>
+                          <iron-icon class="small" icon$="[[checkicon(category.name)]]"></iron-icon>
                           <span>[[category.name]]</span>
-                          <iron-icon class="right" icon="[[category.righticon]]"></iron-icon>
+                          <iron-icon class="right" icon$="[[checkmore(category.name)]]"></iron-icon>
                       </div>
                   </div>
               </template>
@@ -141,6 +141,14 @@
           Polymer.IronResizableBehavior
       ],
 
+      checkicon: function (name) {
+          return name === "Open Bible Stories" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
+      },
+
+      checkmore: function (name) {
+          return name === "Open Bible Stories" ? '' : 'chevron-right';
+      },
+
       store: function(e) {
           this.category = e.model.category;
           if (this.category.name === "Open Bible Stories") {
@@ -157,11 +165,11 @@
           var temparray = [];
           _.forEach(_.groupBy(projects, 'category'), function (data, category) {
               if (category === 'null') {
-                  tempobject = {"name": "Open Bible Stories", "lefticon": "uw-obs-icon:uw-obs-icon", "righticon": "", "data": data};
+                  tempobject = {"name": "Open Bible Stories", "data": data};
               } else if (category === 'Bible: OT') {
-                  tempobject = {"name": "Old Testament", "lefticon": "uw-project-icon:uw-project-icon", "righticon": "chevron-right", "data": data};
+                  tempobject = {"name": "Old Testament", "data": data};
               } else if (category === 'Bible: NT') {
-                  tempobject = {"name": "New Testament", "lefticon": "uw-project-icon:uw-project-icon", "righticon": "chevron-right", "data": data};
+                  tempobject = {"name": "New Testament", "data": data};
               }
               temparray.push(tempobject);
           });

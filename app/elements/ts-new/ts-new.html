@@ -169,14 +169,22 @@
             var type = this.type;
             var typeext = "";
             var projectarray = this.projectlist;
-            var icon = this.category.lefticon;
             var popup = this.$.popup;
+            var typename;
 
-            if (type.code !== "text") {
-                typeext = "_" + type.code;
+            if (type === "text") {
+                typename = "Text";
+            } else if (type === "tn") {
+                typename = "Notes";
+            } else if (type === "tq") {
+                typename = "Questions";
             }
 
-            var fullname = project.slug + typeext + "-" + language.lc;
+            if (type !== "text") {
+                typeext = "_" + type;
+            }
+
+            var fullname = project.slug + typeext + "-" + language.id;
 
             for (var i = 0; i < projectarray.length; i++) {
                 if (projectarray[i].fullname === fullname) {
@@ -185,7 +193,7 @@
                 }
             }
 
-            var newprojdata = {"project": project, "fullname": fullname, "type": type, "language": language, "icon": icon, "translators": [], "sources": [], "completion": 0, "currentsource": null};
+            var newprojdata = {"project_id": project.slug, "project_name": project.name, "type_name": typename, "fullname": fullname, "project_type": type, "target_language": language, "translators": [], "sources": [], "completion": 0, "currentsource": null};
             this.fire('iron-signal', {name: 'loadnewproject', data: {projdata: newprojdata}});
             this.animationConfig.exit.name = 'slide-left-animation';
             this.route = "translate";

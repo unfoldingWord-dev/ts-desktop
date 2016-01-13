@@ -7,6 +7,8 @@ var _ = require('lodash'),
     rimraf = require('rimraf'),
     AdmZip = require('adm-zip'),
     utils = require('../js/lib/util'),
+    tstudioMigrator = require('../js/migration/tstudioMigrator'),
+    targetTranslationMigrator = require('../js/migration/targetTranslationMigrator'),
     wrap = utils.promisify,
     guard = utils.guard;
 
@@ -112,7 +114,7 @@ function ProjectsManager(query, configurator) {
          */
 
         get targetLanguages () {
-            var r = query("select id, slug 'lc', name 'ln', direction, region from target_language order by slug");
+            var r = query("select slug 'id', name, direction from target_language order by slug");
             return zipper(r);
         },
 
@@ -137,6 +139,15 @@ function ProjectsManager(query, configurator) {
             return zipper(r);
         },
 
+        getProjectName: function (id) {
+            var r = query([
+                "select sl.project_name 'name' from project p",
+                "join source_language sl on sl.project_id=p.id",
+                "where sl.slug='en' and p.slug='" + id + "'",
+            ].join(' '));
+            return zipper(r);
+        },
+
         /**
          *  var sources = pm.sources,
          *      englishSources = _.filter(sources, 'lc', 'en'),
@@ -151,6 +162,17 @@ function ProjectsManager(query, configurator) {
                     "join project p on p.id=sl.project_id",
                     "order by r.name"
                 ].join(' '));
+            return zipper(r);
+        },
+
+        getSourceDetails: function (source) {
+            var id = source.split('-');
+            var r = query([
+                "select r.id, r.slug 'source', r.name, sl.name 'ln', sl.slug 'lc', p.slug 'project', r.checking_level 'level', r.version, r.modified_at 'date_modified' from resource r",
+                "join source_language sl on sl.id=r.source_language_id",
+                "join project p on p.id=sl.project_id",
+                "where p.slug='" + id[0] + "' and sl.slug='" + id[1] + "' and r.slug='" + id[2] + "'"
+            ].join(' '));
             return zipper(r);
         },
 
@@ -302,13 +324,10 @@ function ProjectsManager(query, configurator) {
          * @returns {Promise.<boolean>}
          */
         exportTranslation: function (translation, meta, filename) {
-            console.log("Exporting File", translation, meta, filename);
             // validate input
             if(filename === null || filename === '') {
-                console.log('the filename is empty');
-                return Promise.reject();
+                return Promise.reject('The filename is empty');
             }
-
             var isTranslation = this.isTranslation(meta);
 
             return new Promise(function(resolve, reject) {
@@ -342,11 +361,11 @@ function ProjectsManager(query, configurator) {
                             // build chapter header
                             if(chapterContent === '') {
                                 chapterContent += '//\n';
-                                chapterContent += meta.language.ln + '\n';
+                                chapterContent += meta.target_language.name + '\n';
                                 chapterContent += '//\n\n';
 
                                 chapterContent += '//\n';
-                                chapterContent += meta.project.name + '\n';
+                                chapterContent += meta.project_name + '\n';
                                 chapterContent += '//\n\n';
 
                                 chapterContent += '//\n';
@@ -355,43 +374,81 @@ function ProjectsManager(query, configurator) {
                             }
 
                             // add frame
-                            chapterContent += '{{https://api.unfoldingword.org/' + meta.project.slug + '/jpg/1/en/360px/' + meta.project.slug + '-' + meta.language.lc + '-' + frame.meta.chapterid + '-' + frame.meta.frameid + '.jpg}}\n\n';
+                            chapterContent += '{{https://api.unfoldingword.org/' + meta.project_id + '/jpg/1/en/360px/' + meta.project_id + '-' + meta.target_language.id + '-' + frame.meta.chapterid + '-' + frame.meta.frameid + '.jpg}}\n\n';
                             chapterContent += frame.transcontent + '\n\n';
                         }
                         if(chapterContent !== '' && numFinishedFrames > 0) {
                             // TODO: we need to get the chapter reference and insert it here
                             chapterContent += '////\n';
-                            //console.log('chapter ' + currentChapter, chapterContent);
                             zip.addFile(currentChapter + '.txt', new Buffer(chapterContent), null);
                         }
 
-                        zip.writeZip(filename + '.zip');
-                        resolve(true);
+                        if(zip.getEntries().length > 0) {
+                            zip.writeZip(filename + '.zip');
+                            resolve(true);
+                        } else {
+                            // there was nothing to export
+                            reject('There was nothing to export');
+                        }
                     } else {
                         // we don't support anything but dokuwiki right now
-                        console.log('we only support exporting the defaul format (dokuwiki) for now');
-                        resolve(false);
+                        reject('We only support exporting OBS projects for now');
                     }
                 } else {
                     // TODO: support exporting other target translation types if needed e.g. notes, words, questions
-                    console.log('we do not support exporting that project type yet.');
-                    reject();
+                    reject('We do not support exporting that project type yet');
                 }
             });
         },
 
-        importTargetTranslation: function() {
-          // TODO: perform the import
+        /**
+         * Imports a tstudio archive
+         * @param file {File} the path to the archive
+         * @returns {Promise.<boolean>}
+         */
+        importTargetTranslation: function(file) {
+            console.log('importing archive', file);
+            return new Promise(function(resolve, reject) {
+                tstudioMigrator.listTargetTranslations(file).then(function(relativePaths) {
+                    if(relativePaths.length > 0) {
+                        // proceed to import
+                        let zip = new AdmZip(file.path);
+                        _.forEach(relativePaths, function(tpath) {
+                            let outputDir = path.join(configurator.getValue('tempDir'), tpath);
+                            zip.extractEntryTo(tpath + '/', outputDir, false, true);
+                            targetTranslationMigrator.migrate(outputDir).then(function() {
+                                // import the target translation
+                                // TODO: need to use the id not the path
+                                utils.move(outputDir, path.join(configurator.getValue('targetTranslationsDir'), tpath), function(err) {
+                                    if(err) {
+                                        console.log(err);
+                                    } else {
+                                        console.log('finished importing target translation');
+                                    }
+                                });
+                            })
+                            .catch(function(err) {
+                                console.log(err);
+                            });
+                        });
+                        console.log('finished importing');
+                        resolve(true);
+                    } else {
+                        reject('The archive is empty or not supported');
+                    }
+                })
+                .catch(function(err) {
+                    reject(err);
+                });
+            });
         },
 
         isTranslation: function (meta) {
-            return !meta.type.code || meta.type.code === 'text';
+            return !meta.project_type || meta.project_type === 'text';
         },
 
         saveTargetTranslation: function (translation, meta) {
             var paths = this.getPaths(meta);
-
-            // save project.json and manifest.json
 
             // translation is an array
             // translation[0].meta.frameid
@@ -402,7 +459,7 @@ function ProjectsManager(query, configurator) {
 
             var prop = function (prop) {
                 return function (v, k) {
-                    return v[prop] ? k : false
+                    return v[prop] ? k : false;
                 };
             };
 
@@ -427,16 +484,14 @@ function ProjectsManager(query, configurator) {
                 })
                 .value();
 
-            var language = {id: meta.language.lc, name: meta.language.ln, direction: meta.language.direction};
-
             var manifest = {
                 generator: {
                     name: 'ts-desktop'
                 },
                 package_version: 3,
-                target_language: language,
-                project_id: meta.project.slug,
-                project_type: meta.type.code,
+                target_language: meta.target_language,
+                project_id: meta.project_id,
+                project_type: meta.project_type,
                 source_translations: sources,
                 translators: meta.translators,
                 finished_frames: finishedFrames,
@@ -475,7 +530,6 @@ function ProjectsManager(query, configurator) {
 
             return mkdirp(paths.projectDir)
                 .then(writeFile(paths.manifest, manifest))
-                .then(writeFile(paths.project, meta))
                 .then(makeChapterDirs(chunks))
                 .then(updateChunks(chunks))
                 .then(git.init.bind(git, paths.projectDir))
@@ -489,11 +543,9 @@ function ProjectsManager(query, configurator) {
         loadTargetTranslationsList: function () {
             var makePaths = config.makeProjectPathsForProject.bind(config);
 
-            // return the project.json, not the manifest.json
-
             return this.loadProjectsList()
                        .then(map(makePaths))
-                       .then(map('project'))
+                       .then(map('manifest'))
                        .then(map(read))
                        .then(Promise.all.bind(Promise))
                        .then(map(fromJSON));
@@ -537,7 +589,7 @@ function ProjectsManager(query, configurator) {
                     }
 
                     return parsed;
-                })
+                });
             };
 
             var markFinished = function (chunks) {

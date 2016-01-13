@@ -375,7 +375,7 @@
         opensource: function () {
             var modal = this.$.modal;
             var sources = App.projectsManager.sources;
-            var projectid = this.currentproject.data.project.slug;
+            var projectid = this.currentproject.data.project_id;
             modal.allSources = _.filter(sources, {'project': projectid, 'level': 3});
             modal.sources = this.currentproject.data.sources;
             modal.selectedSource = this.currentproject.data.currentsource;
@@ -408,6 +408,26 @@
             }
         },
 
+        savecompletion: function () {
+            var key = "uw-" + this.currentproject.data.fullname;
+            var completion = this.currentproject.data.completion;
+            App.configurator.setValue(key + "-completion", completion);
+        },
+
+        savesource: function () {
+            var key = "uw-" + this.currentproject.data.fullname;
+            var source = this.currentproject.data.currentsource;
+            App.configurator.setValue(key + "-source", source);
+        },
+
+        retrievesource: function () {
+            var key = "uw-" + this.currentproject.data.fullname;
+            var source = App.configurator.getValue(key + "-source");
+            if (source !== undefined  && source !== "") {
+                this.set('currentproject.data.currentsource', source);
+            }
+        },
+
         loadnewproject: function (event, data) {
             var blank = [];
             var blankstate = {};
@@ -433,6 +453,7 @@
                     mythis.set('currentproject.data', data.projdata);
                     mythis.set('currentproject.state', blankstate);
                     mythis.checkstandard();
+                    mythis.retrievesource();
                     App.projectsManager.loadTargetTranslation(data.projdata).then(function (translation) {
                         mythis.set('rawdata', translation);
                         mythis.pullsource();
@@ -461,6 +482,7 @@
                     mythis.set('currentproject.data', data.projdata);
                     mythis.set('currentproject.state', blankstate);
                     mythis.checkstandard();
+                    mythis.retrievesource();
                     App.projectsManager.loadTargetTranslation(data.projdata).then(function (translation) {
                         mythis.set('rawdata', translation);
                         mythis.pullsource();
@@ -483,6 +505,7 @@
             var meta = mythis.currentproject.data;
             mythis.set('currentproject.data.sources', data.sources);
             mythis.set('currentproject.data.currentsource', data.selected);
+            mythis.savesource();
             mythis.getlocation();
             App.projectsManager.loadTargetTranslation(meta).then(function (translation) {
                 mythis.set('rawdata', translation);
@@ -503,6 +526,7 @@
             var mythis = this;
             var meta = mythis.currentproject.data;
             mythis.set('currentproject.data.currentsource', data.selected);
+            mythis.savesource();
             mythis.getlocation();
             App.projectsManager.loadTargetTranslation(meta).then(function (translation) {
                 mythis.set('rawdata', translation);
@@ -532,7 +556,7 @@
         },
 
         checkstandard: function () {
-            var check = this.currentproject.data.type.code === "text";
+            var check = this.currentproject.data.project_type === "text";
             this.set('standardproject', check);
         },
 
@@ -543,7 +567,7 @@
             }
             var currentsource = this.currentproject.data.sources[current];
             var frames = App.projectsManager.getSourceFrames(currentsource);
-            var name = this.currentproject.data.project.name;
+            var name = this.currentproject.data.project_name;
             var source = [];
             var srcchunk = {};
             var transchunk = {};
@@ -845,6 +869,7 @@
             }
             var completion = Math.round((count / update.length) * 100);
             this.set('currentproject.data.completion', completion);
+            this.savecompletion();
             this.set('currentproject.translation', update);
         },
 

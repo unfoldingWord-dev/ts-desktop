@@ -7,6 +7,8 @@ var _ = require('lodash'),
     rimraf = require('rimraf'),
     AdmZip = require('adm-zip'),
     utils = require('../js/lib/util'),
+    tstudioMigrator = require('../js/migration/tstudioMigrator'),
+    targetTranslationMigrator = require('../js/migration/targetTranslationMigrator'),
     wrap = utils.promisify,
     guard = utils.guard;
 
@@ -322,13 +324,10 @@ function ProjectsManager(query, configurator) {
          * @returns {Promise.<boolean>}
          */
         exportTranslation: function (translation, meta, filename) {
-            console.log("Exporting File", translation, meta, filename);
             // validate input
             if(filename === null || filename === '') {
-                console.log('the filename is empty');
-                return Promise.reject();
+                return Promise.reject('The filename is empty');
             }
-
             var isTranslation = this.isTranslation(meta);
 
             return new Promise(function(resolve, reject) {
@@ -381,27 +380,67 @@ function ProjectsManager(query, configurator) {
                         if(chapterContent !== '' && numFinishedFrames > 0) {
                             // TODO: we need to get the chapter reference and insert it here
                             chapterContent += '////\n';
-                            //console.log('chapter ' + currentChapter, chapterContent);
                             zip.addFile(currentChapter + '.txt', new Buffer(chapterContent), null);
                         }
 
-                        zip.writeZip(filename + '.zip');
-                        resolve(true);
+                        if(zip.getEntries().length > 0) {
+                            zip.writeZip(filename + '.zip');
+                            resolve(true);
+                        } else {
+                            // there was nothing to export
+                            reject('There was nothing to export');
+                        }
                     } else {
                         // we don't support anything but dokuwiki right now
-                        console.log('we only support exporting the defaul format (dokuwiki) for now');
-                        resolve(false);
+                        reject('We only support exporting OBS projects for now');
                     }
                 } else {
                     // TODO: support exporting other target translation types if needed e.g. notes, words, questions
-                    console.log('we do not support exporting that project type yet.');
-                    reject();
+                    reject('We do not support exporting that project type yet');
                 }
             });
         },
 
-        importTargetTranslation: function() {
-          // TODO: perform the import
+        /**
+         * Imports a tstudio archive
+         * @param file {File} the path to the archive
+         * @returns {Promise.<boolean>}
+         */
+        importTargetTranslation: function(file) {
+            console.log('importing archive', file);
+            return new Promise(function(resolve, reject) {
+                tstudioMigrator.listTargetTranslations(file).then(function(relativePaths) {
+                    if(relativePaths.length > 0) {
+                        // proceed to import
+                        let zip = new AdmZip(file.path);
+                        _.forEach(relativePaths, function(tpath) {
+                            let outputDir = path.join(configurator.getValue('tempDir'), tpath);
+                            zip.extractEntryTo(tpath + '/', outputDir, false, true);
+                            targetTranslationMigrator.migrate(outputDir).then(function() {
+                                // import the target translation
+                                // TODO: need to use the id not the path
+                                utils.move(outputDir, path.join(configurator.getValue('targetTranslationsDir'), tpath), function(err) {
+                                    if(err) {
+                                        console.log(err);
+                                    } else {
+                                        console.log('finished importing target translation');
+                                    }
+                                });
+                            })
+                            .catch(function(err) {
+                                console.log(err);
+                            });
+                        });
+                        console.log('finished importing');
+                        resolve(true);
+                    } else {
+                        reject('The archive is empty or not supported');
+                    }
+                })
+                .catch(function(err) {
+                    reject(err);
+                });
+            });
         },
 
         isTranslation: function (meta) {
@@ -420,7 +459,7 @@ function ProjectsManager(query, configurator) {
 
             var prop = function (prop) {
                 return function (v, k) {
-                    return v[prop] ? k : false
+                    return v[prop] ? k : false;
                 };
             };
 
@@ -550,7 +589,7 @@ function ProjectsManager(query, configurator) {
                     }
 
                     return parsed;
-                })
+                });
             };
 
             var markFinished = function (chunks) {

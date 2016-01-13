@@ -98,7 +98,7 @@
         <div class="body">
 
             <template is="dom-repeat" items="[[settings]]" index-as="group">
-                <div class="setting-group-header">{{item.group}}</div>
+                <div class="setting-group-header">{{_capitalize(item.group)}}</div>
                 <div class="setting-group-body">
                     <template is="dom-repeat" items="{{item.list}}" as="setting" index-as="list">
                         <div id="{{setting.name}}" class="setting-group-item" on-tap="_runTapHandler" data-group="[[group]]" data-list="[[list]]">
@@ -170,6 +170,12 @@
 
         back: function() {
             this.route = this.backto;
+        },
+
+        _capitalize: function(text) {
+            return text.charAt(0).toUpperCase() + text.slice(1).replace(/( [a-z])/g, function(match) {
+                return match.toUpperCase();
+            });
         },
 
         _computeHelpText: function(setting) {

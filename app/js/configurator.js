@@ -29,7 +29,7 @@
             key = key.toLowerCase();
             let valueObj = JSON.parse(storage[key] || '{}');
 
-            return valueObj.meta[metaKey] || '';
+            return valueObj.meta ? valueObj.meta[metaKey] : '';
         };
 
         let setValue = function (key, value, meta) {

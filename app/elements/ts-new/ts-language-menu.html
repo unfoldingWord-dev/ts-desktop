@@ -94,8 +94,8 @@
               <template>
                   <div class="row" on-tap="store">
                       <div>
-                          <span>[[lang.ln]]</span>
-                          <span class="right">[[lang.lc]]</span>
+                          <span>[[lang.name]]</span>
+                          <span class="right">[[lang.id]]</span>
                       </div>
                   </div>
               </template>
@@ -143,10 +143,10 @@
           let search = App.util.startsWithBase.bind(null, query);
 
           var bycode = languagelist.filter(function (lang) {
-              return search(lang.lc);
+              return search(lang.id);
           });
           var byname = languagelist.filter(function (lang) {
-              return search(lang.ln);
+              return search(lang.name);
           });
           var combined = bycode.concat(byname);
 

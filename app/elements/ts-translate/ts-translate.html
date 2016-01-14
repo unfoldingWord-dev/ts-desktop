@@ -433,6 +433,7 @@
         },
 
         loadnewproject: function (event, data) {
+            var mythis = this;
             var blank = [];
             var blankstate = {};
             this.setrightanimation();
@@ -441,8 +442,18 @@
             this.set('currentproject.data', data.projdata);
             this.checkstandard();
             this.savetofile();
-            this.setmodestate();
-            this.checksources();
+            if (data.projdata.project_type !== "text") {
+                var newmeta = {fullname: data.projdata.basename};
+                App.projectsManager.loadTargetTranslation(newmeta).then(function (newtranslation) {
+                    mythis.set('rawdata2', newtranslation);
+                    mythis.setmodestate();
+                    mythis.checksources();
+                });
+            } else {
+                mythis.set('rawdata2', {});
+                mythis.setmodestate();
+                mythis.checksources();
+            }
         },
 
         loadproject: function (event, data) {
@@ -460,15 +471,22 @@
                     mythis.retrievesource();
                     App.projectsManager.loadTargetTranslation(data.projdata).then(function (translation) {
                         mythis.set('rawdata', translation);
-
-
-
-                        var newmeta = {fullname: data.projdata.basename};
-
-
-                        App.projectsManager.loadTargetTranslation(newmeta).then(function (newtranslation) {
-                            mythis.set('rawdata2', newtranslation);
-
+                        if (data.projdata.project_type !== "text") {
+                            var newmeta = {fullname: data.projdata.basename};
+                            App.projectsManager.loadTargetTranslation(newmeta).then(function (newtranslation) {
+                                mythis.set('rawdata2', newtranslation);
+                                mythis.pullsource();
+                                mythis.createchunks();
+                                mythis.createchapters();
+                                loading.close();
+                                setTimeout(function() {
+                                    mythis.setmodestate();
+                                    mythis.checksources();
+                                    mythis.fire('iron-signal', {name: 'adjustbar'});
+                                }, 250);
+                            });
+                        } else {
+                            mythis.set('rawdata2', {});
                             mythis.pullsource();
                             mythis.createchunks();
                             mythis.createchapters();
@@ -478,14 +496,8 @@
                                 mythis.checksources();
                                 mythis.fire('iron-signal', {name: 'adjustbar'});
                             }, 250);
-
-                        });
-
-
+                        }
                     });
-
-
-
                 }, 250);
             }, 500);
         },
@@ -505,16 +517,34 @@
                     mythis.retrievesource();
                     App.projectsManager.loadTargetTranslation(data.projdata).then(function (translation) {
                         mythis.set('rawdata', translation);
-                        mythis.pullsource();
-                        mythis.createchunks();
-                        mythis.createchapters();
-                        loading.close();
-                        setTimeout(function() {
-                            mythis.setmodestate();
-                            mythis.checksources();
-                            mythis.fire('iron-signal', {name: 'adjustbar'});
-                            mythis.gopublish();
-                        }, 250);
+                        if (data.projdata.project_type !== "text") {
+                            var newmeta = {fullname: data.projdata.basename};
+                            App.projectsManager.loadTargetTranslation(newmeta).then(function (newtranslation) {
+                                mythis.set('rawdata2', newtranslation);
+                                mythis.pullsource();
+                                mythis.createchunks();
+                                mythis.createchapters();
+                                loading.close();
+                                setTimeout(function() {
+                                    mythis.setmodestate();
+                                    mythis.checksources();
+                                    mythis.fire('iron-signal', {name: 'adjustbar'});
+                                    mythis.gopublish();
+                                }, 250);
+                            });
+                        } else {
+                            mythis.set('rawdata2', {});
+                            mythis.pullsource();
+                            mythis.createchunks();
+                            mythis.createchapters();
+                            loading.close();
+                            setTimeout(function() {
+                                mythis.setmodestate();
+                                mythis.checksources();
+                                mythis.fire('iron-signal', {name: 'adjustbar'});
+                                mythis.gopublish();
+                            }, 250);
+                        }
                     });
                 }, 250);
             }, 500);

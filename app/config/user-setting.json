@@ -71,7 +71,7 @@
     {
         "name": "mediaserver",
         "mainText": "Media Server",
-        "value": "https://api.unfoldingword.org",
+        "value": "https://api.unfoldingword.org/",
         "group": "upload"
     },
     {

@@ -44,7 +44,6 @@
             max-height: 90vh;
             width: 450px;
             color: var(--primary-text-color);
-            background: var(--card-background-color);
             box-shadow: 0 2px 3px 2px var(--border-color);
         }
 
@@ -52,13 +51,24 @@
             display: block;
             margin: 0;
             padding: 1em;
+            background: var(--card-background-color);
             border-bottom: 1px solid var(--border-color);
             transition: background .3s, color .3s;
             cursor: pointer;
         }
 
+        .row.unavailable {
+            background: var(--border-color);
+            border-bottom: 1px solid var(--card-background-color);
+        }
+
         .row:hover {
             background: var(--accent-color-light);
+        }
+
+        .row.unavailable:hover {
+            background: var(--border-color);
+            border-bottom: 1px solid var(--card-background-color);
         }
 
         ::-webkit-scrollbar {
@@ -92,7 +102,7 @@
       <div id="contain">
           <iron-list items="[[typelist]]" as="type">
               <template>
-                  <div class="row" on-tap="store">
+                  <div class$="[[checkclass(type.code, allowed.*)]]" on-tap="store">
                       <div>
                           <span>[[type.name]]</span>
                       </div>
@@ -124,6 +134,10 @@
               type: Object,
               value: {}
           },
+          allowed: {
+              type: Object,
+              value: {}
+          },
           obs: {
               type: Boolean,
               value: false
@@ -146,6 +160,10 @@
       observers: [
           'checkobs(category.name)'
       ],
+
+      checkclass: function (code) {
+          return this.allowed[code] ? 'row' : 'row unavailable';
+      },
 
       checkobs: function (name) {
           this.obs = name === "Open Bible Stories";

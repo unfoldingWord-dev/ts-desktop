@@ -290,6 +290,10 @@
                 type: Object,
                 value: {}
             },
+            rawdata2: {
+                type: Object,
+                value: {}
+            },
             modestatus: {
                 type: Object,
                 value: {}
@@ -456,16 +460,32 @@
                     mythis.retrievesource();
                     App.projectsManager.loadTargetTranslation(data.projdata).then(function (translation) {
                         mythis.set('rawdata', translation);
-                        mythis.pullsource();
-                        mythis.createchunks();
-                        mythis.createchapters();
-                        loading.close();
-                        setTimeout(function() {
-                            mythis.setmodestate();
-                            mythis.checksources();
-                            mythis.fire('iron-signal', {name: 'adjustbar'});
-                        }, 250);
+
+
+
+                        var newmeta = {fullname: data.projdata.basename};
+
+
+                        App.projectsManager.loadTargetTranslation(newmeta).then(function (newtranslation) {
+                            mythis.set('rawdata2', newtranslation);
+
+                            mythis.pullsource();
+                            mythis.createchunks();
+                            mythis.createchapters();
+                            loading.close();
+                            setTimeout(function() {
+                                mythis.setmodestate();
+                                mythis.checksources();
+                                mythis.fire('iron-signal', {name: 'adjustbar'});
+                            }, 250);
+
+                        });
+
+
                     });
+
+
+
                 }, 250);
             }, 500);
         },
@@ -653,6 +673,7 @@
                 source.push(srcchunk);
 
                 var rawdata = this.rawdata[chapterid + '-' + frameid];
+                var rawdata2 = this.rawdata2[chapterid + '-' + frameid];
                 transchunk = {transcontent: "", helpscontent: [], completed: false, meta: meta};
 
                 if (rawdata !== undefined) {
@@ -663,6 +684,10 @@
                         transchunk.helpscontent = rawdata.helpscontent;
                     }
                 }
+                if (rawdata2 !== undefined && !standard) {
+                    transchunk.transcontent = rawdata2.transcontent;
+                }
+
                 translation.push(transchunk);
             }
 

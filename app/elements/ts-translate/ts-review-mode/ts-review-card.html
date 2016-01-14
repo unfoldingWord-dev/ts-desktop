@@ -23,8 +23,9 @@
             flex: auto;
         }
 
-        #middle {
+        .middle {
             flex: 1 0 400px;
+            margin-left: 16px;
             display: flex;
         }
 
@@ -34,7 +35,7 @@
         }
 
         #left {
-            margin: 0 16px;
+            margin-left: 16px;
             flex: 1 0 400px;
         }
 
@@ -44,19 +45,24 @@
 
         <div id="contain">
             <ts-source-chunk id="left" reviewmode chunk="[[chunk]]"></ts-source-chunk>
-            <div id="middle">
-                <template is="dom-if" if="{{chunk.meta.standard}}">
+            <template is="dom-if" if="{{chunk.meta.standard}}">
+                <div class="middle">
                     <template is="dom-if" if="{{chunk.state.review}}">
                         <ts-target-review chunk="{{chunk}}" on-setheight="setheight"></ts-target-review>
                     </template>
                     <template is="dom-if" if="{{!chunk.state.review}}">
                         <ts-target-edit chunk="{{chunk}}" on-setheight="setheight"></ts-target-edit>
                     </template>
-                </template>
-                <template is="dom-if" if="{{!chunk.meta.standard}}">
+                </div>
+            </template>
+            <template is="dom-if" if="{{!chunk.meta.standard}}">
+                <div class="middle">
+                    <ts-target-edit chunkmode chunk="{{chunk}}"></ts-target-edit>
+                </div>
+                <div class="middle">
                     <ts-target-helps chunk="{{chunk}}" on-setheight="setheight"></ts-target-helps>
-                </template>
-            </div>
+                </div>
+            </template>
             <ts-resource-card id="right" chunk="[[chunk]]"></ts-resource-card>
         </div>
 

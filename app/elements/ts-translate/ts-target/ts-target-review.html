@@ -158,7 +158,7 @@
                         if (textarray[i].substring(0, 2) === "\\v") {
                             verse = textarray[i].substring(2);
                             returnstr += numstr1 + verse + numstr2;
-                        } else {
+                        } else if (textarray[i].substring(0, 2) !== "\\c") {
                             returnstr += textarray[i] + " ";
                         }
                     }
@@ -178,6 +178,10 @@
                 var text = "";
                 var versenum = 0;
                 var returnstr = "";
+
+                if (this.chunk.meta.frame === 1) {
+                    returnstr = "\\c" + this.chunk.meta.chapter + " ";
+                }
 
                 for (var i = 0; i < children.length; i++) {
                     type = children[i].nodeName;
@@ -223,7 +227,7 @@
                 }
             } else {
                 for (var i = 0; i < textarray.length; i++) {
-                    if (textarray[i].substring(0, 2) !== "\\v") {
+                    if (textarray[i].substring(0, 2) !== "\\v" && textarray[i].substring(0, 2) !== "\\c") {
                         returnstr += textarray[i] + " ";
                     }
                 }

@@ -219,6 +219,7 @@
             var input = this.$.input;
             var filename;
             var firsttime = true;
+            var mediaServer = App.configurator.getUserSetting('mediaserver');
             input.value = null;
             input.nwsaveas = name;
             input.addEventListener("change", function (evt) {
@@ -228,7 +229,7 @@
                     mythis.set('options.loading', true);
                     popup.open();
                     filename = input.value;
-                    return App.projectsManager.exportTranslation(translation, meta, filename)
+                    return App.projectsManager.exportTranslation(translation, meta, filename, mediaServer)
                         .then(function () {
                             mythis.set('options.title', "Project Exported");
                             mythis.set('options.body', "Your project has been successfully saved to a file.  Thanks.");

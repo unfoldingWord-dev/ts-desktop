@@ -145,7 +145,7 @@
              * @return setting array from user's storage or from default file
              */
             getUserSettingArr: function() {
-                return this.mapUserSettings(this.getDefaultUserSettingArr());
+                return JSON.parse(storage['user-setting']) || this.mapUserSettings(this.getDefaultUserSettingArr());
             },
 
             /**

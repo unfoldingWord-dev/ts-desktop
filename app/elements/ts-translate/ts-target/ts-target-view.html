@@ -104,7 +104,7 @@
                         if (textarray[i].substring(0, 2) === "\\v") {
                             verse = textarray[i].substring(2);
                             returnstr += numstr1 + verse + numstr2;
-                        } else {
+                        } else if (textarray[i].substring(0, 2) !== "\\c") {
                             returnstr += textarray[i] + " ";
                         }
                     }
@@ -112,7 +112,7 @@
                     contentbox.classList.remove("editmode");
                 } else {
                     for (i = 0; i < textarray.length; i++) {
-                        if (textarray[i].substring(0, 2) !== "\\v") {
+                        if (textarray[i].substring(0, 2) !== "\\v" && textarray[i].substring(0, 2) !== "\\c") {
                             returnstr += textarray[i] + " ";
                         }
                     }

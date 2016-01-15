@@ -415,11 +415,12 @@ function ProjectsManager(query, configurator) {
                         let zip = new AdmZip(file.path);
                         _.forEach(relativePaths, function(tpath) {
                             let outputDir = path.join(configurator.getValue('tempDir'), tpath);
-                            zip.extractEntryTo(tpath + '/', outputDir, false, true);
-                            targetTranslationMigrator.migrate(outputDir).then(function() {
+                            //zip.extractEntryTo(tpath + '/*', outputDir, false, true);
+                            zip.extractAllTo(outputDir, true);
+                             targetTranslationMigrator.migrate(outputDir + "/" + tpath).then(function() {
                                 // import the target translation
                                 // TODO: need to use the id not the path
-                                utils.move(outputDir, path.join(configurator.getValue('targetTranslationsDir'), tpath), function(err) {
+                                utils.move(outputDir + "/" + tpath, path.join(configurator.getValue('targetTranslationsDir'), tpath), function(err) {
                                     if(err) {
                                         console.log(err);
                                     } else {

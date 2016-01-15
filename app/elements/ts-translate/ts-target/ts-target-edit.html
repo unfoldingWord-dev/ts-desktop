@@ -129,7 +129,7 @@
                         if (textarray[i].substring(0, 2) === "\\v") {
                             verse = textarray[i].substring(2);
                             returnstr += numstr1 + verse + numstr2;
-                        } else {
+                        } else if (textarray[i].substring(0, 2) !== "\\c") {
                             returnstr += textarray[i] + " ";
                         }
                     }

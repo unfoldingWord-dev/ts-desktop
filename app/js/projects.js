@@ -6,6 +6,7 @@ var _ = require('lodash'),
     mkdirP = require('mkdirp'),
     rimraf = require('rimraf'),
     AdmZip = require('adm-zip'),
+    archiver = require('archiver'),
     utils = require('../js/lib/util'),
     tstudioMigrator = require('../js/migration/tstudioMigrator'),
     targetTranslationMigrator = require('../js/migration/targetTranslationMigrator'),
@@ -316,10 +317,29 @@ function ProjectsManager(query, configurator) {
             return write(paths.ready, (new Date()).toString());
         },
 
-        backupTranslation: function (meta, filename) {
+        backupTranslation: function (meta, filename, name) {
+            var paths = this.getPaths(meta);
             return new Promise(function(resolve, reject) {
-                resolve(true);
+                var source = paths.projectDir;
+                var output = fs.createWriteStream(filename + ".tstudio");
+                var archive = archiver.create('zip', {});
 
+                var manifest = {
+                    generator: {
+                        name: 'ts-desktop',
+                        build: ''
+                    },
+                    package_version: 2,
+                    timestamp: '',
+                    target_translations: [{path: name, id: name, commit_hash: '', direction: "ltr"}]
+                };
+
+                archive.pipe(output);
+                archive.bulk([{expand: true, cwd: source, dest: name + "/", src: ["**/*"]}]);
+                archive.append(toJSON(manifest), {name: 'manifest.json'});
+                archive.finalize();
+
+                resolve(true);
             });
         },
 

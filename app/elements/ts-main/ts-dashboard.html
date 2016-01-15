@@ -240,7 +240,7 @@
                   mythis.set('options.loading', true);
                   confirm.open();
                   filename = backup.value;
-                  return App.projectsManager.backupTranslation(meta, filename)
+                  return App.projectsManager.backupTranslation(meta, filename, name)
                       .then(function () {
                           mythis.set('options.title', "Backup Complete");
                           mythis.set('options.body', "Your project has been successfully archived.  Thanks.");

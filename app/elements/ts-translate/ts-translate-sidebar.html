@@ -84,7 +84,7 @@
             <paper-menu class="dropdown-content">
                 <paper-item on-tap="home"><iron-icon class="smallicon" icon="project:project"></iron-icon>Home</paper-item>
                 <paper-item on-tap="publish"><iron-icon class="smallicon" icon="cloud-done"></iron-icon>Publish</paper-item>
-                <paper-item><iron-icon class="smallicon" icon="file-upload"></iron-icon>Backup</paper-item>
+                <paper-item on-tap="backup"><iron-icon class="smallicon" icon="file-upload"></iron-icon>Backup</paper-item>
                 <paper-item on-tap="feedback"><iron-icon class="smallicon" icon="announcement"></iron-icon>Feedback</paper-item>
                 <paper-item on-tap="settings"><iron-icon class="smallicon" icon="settings"></iron-icon>Settings</paper-item>
             </paper-menu>
@@ -164,6 +164,10 @@
 
         review: function () {
             this.selected = 3;
+        },
+
+        backup: function () {
+            this.fire('gobackup');
         },
 
         publish: function () {

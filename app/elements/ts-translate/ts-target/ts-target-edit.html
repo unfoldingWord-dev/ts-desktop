@@ -114,6 +114,7 @@
         rendertext: function () {
             if(this.chunk && this.chunk.srccontent) {
                 var completed = this.chunk.completed;
+                var standard = this.chunk.meta.standard;
                 var contentbox = this.$.content;
                 var textbox = this.$.textbox;
                 var textholder = this.$.textholder;
@@ -123,12 +124,12 @@
                 var returnstr = "";
                 var verse = 0;
 
-                if (completed) {
+                if (completed || !standard) {
                     for (var i = 0; i < textarray.length; i++) {
                         if (textarray[i].substring(0, 2) === "\\v") {
                             verse = textarray[i].substring(2);
                             returnstr += numstr1 + verse + numstr2;
-                        } else {
+                        } else if (textarray[i].substring(0, 2) !== "\\c") {
                             returnstr += textarray[i] + " ";
                         }
                     }

@@ -264,6 +264,7 @@
           var mythis = this;
           var confirm = this.$.confirm;
           var chooser = this.$.import;
+          chooser.value = null;
           chooser.addEventListener('change', function(evt) {
               mythis.set('options.body', "Importing.  Please wait...");
               mythis.set('options.loading', true);
@@ -275,7 +276,9 @@
                               mythis.set('options.title', "Import Complete");
                               mythis.set('options.body', "Your project(s) has been successfully imported.  Thanks.");
                               mythis.set('options.loading', false);
-                              mythis.updatelist();
+                              setTimeout(function() {
+                                  mythis.updatelist();
+                              }, 250);
                           })
                           .catch(function(err) {
                               var errmessage = "We're sorry.  An error occurred while trying to import your project";
@@ -371,6 +374,7 @@
                   typeext = "_" + list[i].project_type;
               }
               var fullname = list[i].project_id + typeext + "-" + list[i].target_language.id;
+              list[i].basename = list[i].project_id + "-" + list[i].target_language.id;
               list[i].fullname = fullname;
               var key = "uw-" + fullname;
               var completion = App.configurator.getValue(key + "-completion");

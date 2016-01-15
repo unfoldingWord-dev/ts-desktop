@@ -331,6 +331,7 @@
                   typeext = "_" + list[i].project_type;
               }
               var fullname = list[i].project_id + typeext + "-" + list[i].target_language.id;
+              list[i].basename = list[i].project_id + "-" + list[i].target_language.id;
               list[i].fullname = fullname;
               var key = "uw-" + fullname;
               var completion = App.configurator.getValue(key + "-completion");

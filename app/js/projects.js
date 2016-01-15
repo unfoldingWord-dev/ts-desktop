@@ -316,6 +316,13 @@ function ProjectsManager(query, configurator) {
             return write(paths.ready, (new Date()).toString());
         },
 
+        backupTranslation: function (meta, filename) {
+            return new Promise(function(resolve, reject) {
+                resolve(true);
+
+            });
+        },
+
         /**
          *
          * @param translation an array of frames

@@ -322,9 +322,8 @@ function ProjectsManager(query, configurator) {
             return new Promise(function(resolve, reject) {
                 var source = paths.projectDir;
                 var output = fs.createWriteStream(filename + ".tstudio");
-                var archive = archiver.create('zip', {});
+                var archive = archiver.create('zip');
                 var timestamp = new Date().getTime();
-
                 var manifest = {
                     generator: {
                         name: 'ts-desktop',
@@ -334,12 +333,10 @@ function ProjectsManager(query, configurator) {
                     timestamp: timestamp,
                     target_translations: [{path: name, id: name, commit_hash: '', direction: "ltr"}]
                 };
-
                 archive.pipe(output);
                 archive.directory(source, name + "/");
                 archive.append(toJSON(manifest), {name: 'manifest.json'});
                 archive.finalize();
-
                 resolve(true);
             });
         },
@@ -365,8 +362,10 @@ function ProjectsManager(query, configurator) {
                         // the default format is currently dokuwiki
                         let chapterContent = '',
                             currentChapter = -1,
-                            zip = new AdmZip(),
+                            zip = archiver.create('zip'),
+                            output = fs.createWriteStream(filename + ".zip"),
                             numFinishedFrames = 0;
+                        zip.pipe(output);
                         for(let frame of translation) {
 
                             // close chapter chapter
@@ -375,7 +374,7 @@ function ProjectsManager(query, configurator) {
                                     // TODO: we need to get the chapter reference and insert it here
                                     chapterContent += '////\n';
                                     //console.log('chapter ' + currentChapter, chapterContent);
-                                    zip.addFile(currentChapter + '.txt', new Buffer(chapterContent), null);
+                                    zip.append(chapterContent, {name: currentChapter + '.txt'});
                                 }
                                 currentChapter = frame.meta.chapter;
                                 chapterContent = '';
@@ -408,16 +407,10 @@ function ProjectsManager(query, configurator) {
                         if(chapterContent !== '' && numFinishedFrames > 0) {
                             // TODO: we need to get the chapter reference and insert it here
                             chapterContent += '////\n';
-                            zip.addFile(currentChapter + '.txt', new Buffer(chapterContent), null);
+                            zip.append(chapterContent, {name: currentChapter + '.txt'});
                         }
-
-                        if(zip.getEntries().length > 0) {
-                            zip.writeZip(filename + '.zip');
-                            resolve(true);
-                        } else {
-                            // there was nothing to export
-                            reject('There was nothing to export');
-                        }
+                        zip.finalize();
+                        resolve(true);
                     } else {
                         // we don't support anything but dokuwiki right now
                         reject('We only support exporting OBS projects for now');

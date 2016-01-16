@@ -323,6 +323,7 @@ function ProjectsManager(query, configurator) {
                 var source = paths.projectDir;
                 var output = fs.createWriteStream(filename + ".tstudio");
                 var archive = archiver.create('zip', {});
+                var timestamp = new Date().getTime();
 
                 var manifest = {
                     generator: {
@@ -330,7 +331,7 @@ function ProjectsManager(query, configurator) {
                         build: ''
                     },
                     package_version: 2,
-                    timestamp: '',
+                    timestamp: timestamp,
                     target_translations: [{path: name, id: name, commit_hash: '', direction: "ltr"}]
                 };
 

@@ -335,7 +335,7 @@ function ProjectsManager(query, configurator) {
                 };
 
                 archive.pipe(output);
-                archive.bulk([{expand: true, cwd: source, dest: name + "/", src: ["**/*"]}]);
+                archive.directory(source, name + "/");
                 archive.append(toJSON(manifest), {name: 'manifest.json'});
                 archive.finalize();
 

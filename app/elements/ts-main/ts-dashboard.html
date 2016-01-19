@@ -142,6 +142,8 @@
 
       <input type="file" class="hide" id="import" accept=".tstudio" title="test" multiple>
 
+      <input class="hide" id="backup" type="file" nwsaveas="" />
+
       <paper-dialog id="feedback" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
           <div id="feedbackheader">
               <h2>Feedback</h2>
@@ -178,6 +180,7 @@
       <iron-signals on-iron-signal-setdefault="setdefault"></iron-signals>
       <iron-signals on-iron-signal-openfeedback="openfeedback"></iron-signals>
       <iron-signals on-iron-signal-openimport="openimport"></iron-signals>
+      <iron-signals on-iron-signal-openbackup="openbackup"></iron-signals>
 
   </template>
 
@@ -218,6 +221,43 @@
               type: Object,
               value: {loading: false, title: "", body: ""}
           }
+      },
+
+      openbackup: function (event, data) {
+          var mythis = this;
+          var confirm = this.$.confirm;
+          var meta = data.meta;
+          var name = 'uw-' + meta.fullname;
+          var backup = this.$.backup;
+          var filename;
+          var firsttime = true;
+          backup.value = null;
+          backup.nwsaveas = name;
+          backup.addEventListener("change", function (evt) {
+              if (firsttime) {
+                  firsttime = false;
+                  mythis.set('options.body', "Creating Backup.  Please wait...");
+                  mythis.set('options.loading', true);
+                  confirm.open();
+                  filename = backup.value;
+                  return App.projectsManager.backupTranslation(meta, filename, name)
+                      .then(function () {
+                          mythis.set('options.title', "Backup Complete");
+                          mythis.set('options.body', "Your project has been successfully archived.  Thanks.");
+                          mythis.set('options.loading', false);
+                      })
+                      .catch(function (err) {
+                          var errmessage = "We're sorry.  An error occurred while trying to backup your project";
+                          if(err !== null) {
+                              errmessage = err;
+                          }
+                          mythis.set('options.title', "Backup Failed");
+                          mythis.set('options.body', errmessage);
+                          mythis.set('options.loading', false);
+                      });
+              }
+          }, false);
+          backup.click();
       },
 
       openimport: function() {

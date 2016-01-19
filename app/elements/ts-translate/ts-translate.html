@@ -159,7 +159,7 @@
 
     <template>
 
-        <ts-translate-sidebar selected="{{selected}}" standardproject="[[standardproject]]" on-gohome="gohome" on-gopublish="gopublish" on-gosettings="gosettings"></ts-translate-sidebar>
+        <ts-translate-sidebar selected="{{selected}}" standardproject="[[standardproject]]" on-gohome="gohome" on-gopublish="gopublish" on-gobackup="gobackup" on-gosettings="gosettings"></ts-translate-sidebar>
 
         <div id="pages">
             <ts-read-mode id="readmode" chapters="[[chapters]]" modestatus="{{modestatus}}"></ts-read-mode>
@@ -1055,6 +1055,11 @@
                 this.fire('iron-signal', {name: 'updatepublish'});
                 this.route = "publish";
             }
+        },
+
+        gobackup: function () {
+            var meta = this.currentproject.data;
+            this.fire('iron-signal', {name: 'openbackup', data: {meta: meta}});
         },
 
         gosettings: function () {

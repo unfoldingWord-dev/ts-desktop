@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "adm-zip": "^0.4.7",
+    "archiver": "^0.21.0",
     "async": "^1.4.2",
     "fs-readfile-promise": "^2.0.0",
     "getmac": "^1.0.7",

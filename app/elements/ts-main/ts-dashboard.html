@@ -369,9 +369,18 @@
               } else if (list[i].project_type === "tq") {
                   list[i].type_name = "Questions";
               }
+              if (list[i].resource_id === undefined) {
+                  if (list[i].project_type === "text") {
+                      list[i].resource_id = "ulb";
+                  } else {
+                      list[i].resource_id = "";
+                  }
+              }
               var typeext = "";
               if (list[i].project_type !== "text") {
                   typeext = "_" + list[i].project_type;
+              } else if (list[i].resource_id !== "ulb") {
+                  typeext = "_" + list[i].resource_id;
               }
               var fullname = list[i].project_id + typeext + "-" + list[i].target_language.id;
               list[i].basename = list[i].project_id + "-" + list[i].target_language.id;

@@ -189,7 +189,7 @@ function ProjectsManager(query, configurator) {
         getSourceFrames: function (source) {
             var s = typeof source === 'object' ? source.id : source,
                 r = query([
-                    "select f.id, f.slug 'verse', f.body 'chunk', c.slug 'chapter', c.title, f.format from frame f",
+                    "select f.id, f.slug 'verse', f.body 'chunk', c.slug 'chapter', c.title, c.reference, f.format from frame f",
                     "join chapter c on c.id=f.chapter_id",
                     "join resource r on r.id=c.resource_id",
                     "join source_language sl on sl.id=r.source_language_id",

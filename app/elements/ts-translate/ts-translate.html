@@ -618,6 +618,8 @@
             var currentsource = this.currentproject.data.sources[current];
             var frames = App.projectsManager.getSourceFrames(currentsource);
             var name = this.currentproject.data.project_name;
+            var language = this.currentproject.data.target_language.name;
+            var resource = this.currentproject.data.resource_id;
             var source = [];
             var srcchunk = {};
             var transchunk = {};
@@ -628,6 +630,10 @@
             var chapterref;
             var chunkref;
             var standard = this.standardproject;
+            var refaddon = language;
+            if (resource !== "") {
+                refaddon += " (" + resource + ")";
+            }
 
             for (var i = 0; i < frames.length; i++) {
                 if (frames[i].verse === "00") {
@@ -699,6 +705,7 @@
                     verses: verses,
                     chapterref: chapterref,
                     chunkref: chunkref,
+                    refaddon: " - " + refaddon,
                     standard: standard,
                     format: format
                 };
@@ -710,6 +717,7 @@
                         chapterid: "00",
                         frameid: "title",
                         chunkref: "",
+                        refaddon: refaddon,
                         standard: standard,
                         verses: []
                     };
@@ -740,6 +748,7 @@
                     frameid: "title",
                     verses: [],
                     chunkref: "",
+                    refaddon: refaddon,
                     standard: standard
                 };
 
@@ -773,6 +782,7 @@
                     frameid: "reference",
                     verses: [],
                     chunkref: "",
+                    refaddon: refaddon,
                     standard: standard
                 };
 
@@ -1058,7 +1068,9 @@
                     if (!chunk.completed) {
                         chapcomplete = false;
                     }
-                    chapcontent += chunk.transcontent + " ";
+                    if (chunk.meta.frame > 0) {
+                        chapcontent += chunk.transcontent + " ";
+                    }
                 });
                 if (chapter > 0) {
                     transchapters.push({completed: chapcomplete, transcontent: chapcontent, data: projectdata});
@@ -1071,12 +1083,16 @@
                 var chapcontent = "";
                 var chapter = parseInt(chap);
                 var chapterref = "";
+                var refaddon = "";
                 var chapterid = "";
                 var chapstate = true;
 
                 _.forEach(data, function (chunk) {
-                    chapcontent += chunk.srccontent + " ";
+                    if (chunk.meta.frame > 0) {
+                        chapcontent += chunk.srccontent + " ";
+                    }
                     chapterref = chunk.meta.chapterref;
+                    refaddon = chunk.meta.refaddon;
                     chapterid = chunk.meta.chapterid;
                 });
 
@@ -1087,7 +1103,7 @@
                     chapstate = chapterstatedata.read;
                 }
                 if (chapter > 0) {
-                    srcchapters.push({chapter: chapter, srccontent: chapcontent, chapterref: chapterref, chapterid: chapterid, state: chapstate});
+                    srcchapters.push({chapter: chapter, srccontent: chapcontent, chapterref: chapterref, refaddon: refaddon, chapterid: chapterid, state: chapstate});
                 }
             });
 

@@ -98,7 +98,7 @@
         <div class="body">
 
             <template is="dom-repeat" items="[[settings]]" index-as="group">
-                <div class="setting-group-header">{{item.group}}</div>
+                <div class="setting-group-header">{{_capitalize(item.group)}}</div>
                 <div class="setting-group-body">
                     <template is="dom-repeat" items="{{item.list}}" as="setting" index-as="list">
                         <div id="{{setting.name}}" class="setting-group-item" on-tap="_runTapHandler" data-group="[[group]]" data-list="[[list]]">
@@ -165,116 +165,17 @@
         },
 
         ready: function() {
-            // Setting is not working yet
-            // this.settings = App.settings.getSettings();
-            // console.log(this.settings);
-            this.settings = [
-                {
-                    "group": "General",
-                    "list": [
-                        {
-                            "name": "remembermyplace",
-                            "mainText": "Remember My Place",
-                            "helpText": "Display the last viewed screen when starting the app",
-                            "value": false
-                        },
-                        {
-                            "name": "highlightkeyterms",
-                            "mainText":"Highlight Key Terms",
-                            "helpText": "Make key terms clickable in the source text",
-                            "value": true
-                        },
-                        {
-                            "name": "font",
-                            "mainText": "Font",
-                            "value": "Tahoma",
-                            "options": ["Arial", "Times New Roman", "Calibri", "Tahoma"]
-                        },
-                        {
-                            "name": "fontsize",
-                            "mainText": "Font Size",
-                            "value": "Normal"
-                        }
-                    ]
-                },
-                {
-                    "group": "Share",
-                    "list": [
-                        {
-                            "name": "exportformat",
-                            "mainText": "Export Format",
-                            "value": "DokuWiki",
-                            "options": ["DokuWiki", "translationStudio"]
-                        }
-                    ]
-                },
-                {
-                    "group": "Upload",
-                    "list": [
-                        {
-                            "name": "autosavechanges",
-                            "mainText": "Auto Save Changes",
-                            "helpText": "Every <int> seconds",
-                            "nullText": "Never",
-                            "value": 5,
-                            "options": [1, 5, 10, 15]
-                        },
-                        {
-                            "name": "authserver",
-                            "mainText": "Authentication Server",
-                            "value": "ts.door43.org"
-                        },
-                        {
-                            "name": "authserverport",
-                            "mainText": "Authentication Server Port",
-                            "value": "9095"
-                        },
-                        {
-                            "name": "dataserver",
-                            "mainText": "Data Server",
-                            "value": "gitolite3@ts.door43.org"
-                        },
-                        {
-                            "name": "dataserverport",
-                            "mainText": "Data Server Port",
-                            "value": "9299"
-                        },
-                        {
-                            "name": "mediaserver",
-                            "mainText": "Media Server",
-                            "value": "https://api.unfoldingword.org"
-                        }
-                    ]
-                },
-                {
-                    "group": "Advanced",
-                    "list": [
-                        {
-                            "name": "backupinterval",
-                            "mainText": "Backup Interval",
-                            "helpText": "<int> minutes",
-                            "nullText": "Disable Backup",
-                            "value": 5,
-                            "options": [1, 2, 3, 4, 5, 10, 15]
-                        },
-                        {
-                            "name": "logginglevel",
-                            "mainText": "Logging Level",
-                            "value": "Warnings",
-                            "options": ["Information", "Warnings", "Errors"]
-                        },
-                        {
-                            "name": "developertools",
-                            "mainText": "Developer Tools",
-                            "helpText": "Opens the developer tools"
-                        }
-                    ]
-                }
-            ];
+            this.settings = App.configurator.getUserSettingArr();
         },
 
         back: function() {
             this.route = this.backto;
+        },
+
+        _capitalize: function(text) {
+            return text.charAt(0).toUpperCase() + text.slice(1).replace(/( [a-z])/g, function(match) {
+                return match.toUpperCase();
+            });
         },
 
         _computeHelpText: function(setting) {
@@ -304,11 +205,13 @@
             }
         },
 
-        _onSettingConfirm: function(path) {
+        _onSettingConfirm: function(path, name) {
             var value = document.querySelector('ts-setting-modal').selected || document.querySelector('ts-setting-modal').text;
             this.set(path, value);
             this.closeSettingModal();
             this.saveSettings();
+            App.configurator.applyPrefAppearance();
+            App.configurator.applyPrefBehavior();
         },
 
         _onSettingCancel: function() {
@@ -316,7 +219,7 @@
         },
 
         developertools: function(event) {
-            console.log('open dev tools');
+            App.showDevTools();
         },
 
         toggleValue: function(event) {
@@ -342,7 +245,7 @@
             }
             this.appendChild(modal);
             modal.fire('open');
-            modal.addEventListener('setting-confirm', this._onSettingConfirm.bind(this, path, event.target.dataGroup, event.target.dataList));
+            modal.addEventListener('setting-confirm', this._onSettingConfirm.bind(this, path, event.target.id));
             modal.addEventListener('setting-cancel', this._onSettingCancel.bind(this));
             return modal
         },
@@ -353,7 +256,7 @@
         },
 
         saveSettings: function() {
-            console.log('write code to save settings to disk here');
+            App.configurator.saveUserSettingArr(this.settings);
         }
 
     });

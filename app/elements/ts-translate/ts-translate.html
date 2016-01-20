@@ -630,11 +630,20 @@
             var standard = this.standardproject;
 
             for (var i = 0; i < frames.length; i++) {
+                if (frames[i].verse === "00") {
+                    frames.push(frames.splice(i, 1)[0]);
+                    i = frames.length;
+                }
+            }
+
+            for (i = 0; i < frames.length; i++) {
                 var chapterid = frames[i].chapter;
                 var chapter = parseInt(chapterid);
                 var frameid = frames[i].verse;
                 var frame = parseInt(frameid);
+                var complexid = chapterid + '-' + frameid;
                 var title = frames[i].title;
+                var reference = frames[i].reference;
                 var format = frames[i].format;
                 var id = frames[i].id;
                 var sourcedata = frames[i].chunk;
@@ -684,6 +693,7 @@
                     chapter: chapter,
                     frame: frame,
                     title: title,
+                    reference: reference,
                     chapterid: chapterid,
                     frameid: frameid,
                     verses: verses,
@@ -692,6 +702,30 @@
                     standard: standard,
                     format: format
                 };
+
+                if (complexid === "01-01") {
+                    var bookmeta = {
+                        chapter: 0,
+                        frame: 1,
+                        chapterid: "00",
+                        frameid: "title",
+                        chunkref: "",
+                        standard: standard,
+                        verses: []
+                    };
+                    srcchunk = {
+                        meta: bookmeta,
+                        srccontent: name,
+                        notes: [],
+                        words: [],
+                        questions: []
+                    };
+                    source.push(srcchunk);
+                    transchunk = {transcontent: "", helpscontent: [], completed: false, meta: bookmeta};
+                    translation.push(transchunk);
+                }
+
+
 
                 srcchunk = {
                     meta: meta,
@@ -702,8 +736,8 @@
                 };
                 source.push(srcchunk);
 
-                var rawdata = this.rawdata[chapterid + '-' + frameid];
-                var rawdata2 = this.rawdata2[chapterid + '-' + frameid];
+                var rawdata = this.rawdata[complexid];
+                var rawdata2 = this.rawdata2[complexid];
                 transchunk = {transcontent: "", helpscontent: [], completed: false, meta: meta};
 
                 if (rawdata !== undefined) {
@@ -720,50 +754,6 @@
 
                 translation.push(transchunk);
             }
-
-            source.sort(function (a, b) {
-                var achap = a.meta.chapterid;
-                var aframe = a.meta.frameid;
-                var bchap = b.meta.chapterid;
-                var bframe = b.meta.frameid;
-                if (achap.length === 2) {
-                    achap = "0" + achap;
-                }
-                if (aframe.length === 2) {
-                    aframe = "0" + aframe;
-                }
-                if (bchap.length === 2) {
-                    bchap = "0" + bchap;
-                }
-                if (bframe.length === 2) {
-                    bframe = "0" + bframe;
-                }
-                var first = achap + aframe;
-                var second = bchap + bframe;
-                return first - second;
-            });
-
-            translation.sort(function (a, b) {
-                var achap = a.meta.chapterid;
-                var aframe = a.meta.frameid;
-                var bchap = b.meta.chapterid;
-                var bframe = b.meta.frameid;
-                if (achap.length === 2) {
-                    achap = "0" + achap;
-                }
-                if (aframe.length === 2) {
-                    aframe = "0" + aframe;
-                }
-                if (bchap.length === 2) {
-                    bchap = "0" + bchap;
-                }
-                if (bframe.length === 2) {
-                    bframe = "0" + bframe;
-                }
-                var first = achap + aframe;
-                var second = bchap + bframe;
-                return first - second;
-            });
 
             this.set('currentproject.source', source);
             this.set('currentproject.translation', translation);
@@ -994,6 +984,7 @@
             }), function (data, chap) {
                 var chapcomplete = true;
                 var chapcontent = "";
+                var chapter = parseInt(chap);
 
                 _.forEach(data, function (chunk) {
                     if (!chunk.completed) {
@@ -1001,7 +992,9 @@
                     }
                     chapcontent += chunk.transcontent + " ";
                 });
-                transchapters.push({completed: chapcomplete, transcontent: chapcontent, data: projectdata});
+                if (chapter > 0) {
+                    transchapters.push({completed: chapcomplete, transcontent: chapcontent, data: projectdata});
+                }
             });
 
             _.forEach(_.groupBy(source, function(chunks) {
@@ -1025,7 +1018,9 @@
                 } else {
                     chapstate = chapterstatedata.read;
                 }
-                srcchapters.push({chapter: chapter, srccontent: chapcontent, chapterref: chapterref, chapterid: chapterid, state: chapstate});
+                if (chapter > 0) {
+                    srcchapters.push({chapter: chapter, srccontent: chapcontent, chapterref: chapterref, chapterid: chapterid, state: chapstate});
+                }
             });
 
             transdata.data = transchapters;

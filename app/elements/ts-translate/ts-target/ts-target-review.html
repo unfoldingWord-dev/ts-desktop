@@ -179,7 +179,7 @@
                 var versenum = 0;
                 var returnstr = "";
 
-                if (this.chunk.meta.frame === 1) {
+                if (this.chunk.meta.frame === 1 && this.chunk.data.project_id !== "obs") {
                     returnstr = "\\c" + this.chunk.meta.chapter + " ";
                 }
 

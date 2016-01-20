@@ -703,7 +703,7 @@
                     format: format
                 };
 
-                if (complexid === "01-01") {
+                if (complexid === "01-01" && standard) {
                     var bookmeta = {
                         chapter: 0,
                         frame: 1,
@@ -721,11 +721,79 @@
                         questions: []
                     };
                     source.push(srcchunk);
+                    var rawbookdata = this.rawdata["00-title"];
                     transchunk = {transcontent: "", helpscontent: [], completed: false, meta: bookmeta};
+
+                    if (rawbookdata !== undefined) {
+                        transchunk.completed = rawbookdata.completed;
+                        transchunk.transcontent = rawbookdata.transcontent;
+                    }
                     translation.push(transchunk);
                 }
 
+                var titlemeta = {
+                    chapter: chapter,
+                    frame: 0,
+                    title: title,
+                    reference: reference,
+                    chapterid: chapterid,
+                    frameid: "title",
+                    verses: [],
+                    chunkref: "",
+                    standard: standard
+                };
 
+                if (frameid === "01" && standard && title !== "") {
+                    srcchunk = {
+                        meta: titlemeta,
+                        srccontent: title,
+                        notes: [],
+                        words: [],
+                        questions: []
+                    };
+                    source.push(srcchunk);
+
+                    var rawtitledata = this.rawdata[chapterid + "-title"];
+                    transchunk = {transcontent: "", helpscontent: [], completed: false, meta: titlemeta};
+
+                    if (rawtitledata !== undefined) {
+                        transchunk.completed = rawtitledata.completed;
+                        transchunk.transcontent = rawtitledata.transcontent;
+                    }
+
+                    translation.push(transchunk);
+                }
+
+                var refmeta = {
+                    chapter: chapter,
+                    frame: 0,
+                    title: title,
+                    reference: reference,
+                    chapterid: chapterid,
+                    frameid: "reference",
+                    verses: [],
+                    chunkref: "",
+                    standard: standard
+                };
+
+                if (frameid === "01" && standard && reference !== "") {
+                    srcchunk = {
+                        meta: refmeta,
+                        srccontent: reference,
+                        notes: [],
+                        words: [],
+                        questions: []
+                    };
+                    source.push(srcchunk);
+                    var rawrefdata = this.rawdata[chapterid + "-reference"];
+                    transchunk = {transcontent: "", helpscontent: [], completed: false, meta: refmeta};
+
+                    if (rawrefdata !== undefined) {
+                        transchunk.completed = rawrefdata.completed;
+                        transchunk.transcontent = rawrefdata.transcontent;
+                    }
+                    translation.push(transchunk);
+                }
 
                 srcchunk = {
                     meta: meta,

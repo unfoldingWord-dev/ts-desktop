@@ -144,7 +144,7 @@ function ProjectsManager(query, configurator) {
             var r = query([
                 "select sl.project_name 'name' from project p",
                 "join source_language sl on sl.project_id=p.id",
-                "where sl.slug='en' and p.slug='" + id + "'",
+                "where sl.slug='en' and p.slug='" + id + "'"
             ].join(' '));
             return zipper(r);
         },
@@ -392,7 +392,7 @@ function ProjectsManager(query, configurator) {
                                 chapterContent += '//\n\n';
 
                                 chapterContent += '//\n';
-                                chapterContent += meta.project_name + '\n';
+                                chapterContent += meta.project.name + '\n';
                                 chapterContent += '//\n\n';
 
                                 chapterContent += '//\n';
@@ -401,7 +401,7 @@ function ProjectsManager(query, configurator) {
                             }
 
                             // add frame
-                            chapterContent += '{{https://api.unfoldingword.org/' + meta.project_id + '/jpg/1/en/360px/' + meta.project_id + '-' + meta.target_language.id + '-' + frame.meta.chapterid + '-' + frame.meta.frameid + '.jpg}}\n\n';
+                            chapterContent += '{{https://api.unfoldingword.org/' + meta.project.id + '/jpg/1/en/360px/' + meta.project.id + '-' + meta.target_language.id + '-' + frame.meta.chapterid + '-' + frame.meta.frameid + '.jpg}}\n\n';
                             chapterContent += frame.transcontent + '\n\n';
                         }
                         if(chapterContent !== '' && numFinishedFrames > 0) {
@@ -466,7 +466,7 @@ function ProjectsManager(query, configurator) {
         },
 
         isTranslation: function (meta) {
-            return !meta.project_type || meta.project_type === 'text';
+            return !meta.project.type || meta.project.type === 'text';
         },
 
         saveTargetTranslation: function (translation, meta) {
@@ -508,18 +508,17 @@ function ProjectsManager(query, configurator) {
 
             var manifest = {
                 generator: {
-                    name: 'ts-desktop'
+                    name: 'ts-desktop',
+                    build: ''
                 },
                 package_version: 3,
                 target_language: meta.target_language,
-                project_id: meta.project_id,
-                project_type: meta.project_type,
+                project: meta.project,
                 resource_id: meta.resource_id,
                 source_translations: sources,
+                parent_draft_resource_id: '',
                 translators: meta.translators,
-                finished_frames: finishedFrames,
-                finished_titles: [],
-                finished_references: []
+                finished_frames: finishedFrames
             };
 
             var writeFile = function (name, data) {

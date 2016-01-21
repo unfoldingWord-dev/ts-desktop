@@ -379,7 +379,7 @@
         opensource: function () {
             var modal = this.$.modal;
             var sources = App.projectsManager.sources;
-            var projectid = this.currentproject.data.project_id;
+            var projectid = this.currentproject.data.project.id;
             modal.allSources = _.filter(sources, {'project': projectid, 'level': 3});
             modal.sources = this.currentproject.data.sources;
             modal.selectedSource = this.currentproject.data.currentsource;
@@ -442,7 +442,7 @@
             this.set('currentproject.data', data.projdata);
             this.checkstandard();
             this.savetofile();
-            if (data.projdata.project_type !== "text") {
+            if (data.projdata.project.type !== "text" && data.projdata.project.type !== "tw") {
                 var newmeta = {fullname: data.projdata.basename};
                 App.projectsManager.loadTargetTranslation(newmeta).then(function (newtranslation) {
                     mythis.set('rawdata2', newtranslation);
@@ -471,7 +471,7 @@
                     mythis.retrievesource();
                     App.projectsManager.loadTargetTranslation(data.projdata).then(function (translation) {
                         mythis.set('rawdata', translation);
-                        if (data.projdata.project_type !== "text") {
+                        if (data.projdata.project.type !== "text") {
                             var newmeta = {fullname: data.projdata.basename};
                             App.projectsManager.loadTargetTranslation(newmeta).then(function (newtranslation) {
                                 mythis.set('rawdata2', newtranslation);
@@ -517,7 +517,7 @@
                     mythis.retrievesource();
                     App.projectsManager.loadTargetTranslation(data.projdata).then(function (translation) {
                         mythis.set('rawdata', translation);
-                        if (data.projdata.project_type !== "text") {
+                        if (data.projdata.project.type !== "text") {
                             var newmeta = {fullname: data.projdata.basename};
                             App.projectsManager.loadTargetTranslation(newmeta).then(function (newtranslation) {
                                 mythis.set('rawdata2', newtranslation);
@@ -606,7 +606,7 @@
         },
 
         checkstandard: function () {
-            var check = this.currentproject.data.project_type === "text";
+            var check = this.currentproject.data.project.type === "text";
             this.set('standardproject', check);
         },
 
@@ -617,7 +617,7 @@
             }
             var currentsource = this.currentproject.data.sources[current];
             var frames = App.projectsManager.getSourceFrames(currentsource);
-            var name = this.currentproject.data.project_name;
+            var name = this.currentproject.data.project.name;
             var language = this.currentproject.data.target_language.name;
             var resource = this.currentproject.data.resource_id;
             var source = [];

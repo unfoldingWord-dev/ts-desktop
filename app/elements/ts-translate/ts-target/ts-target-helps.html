@@ -179,11 +179,11 @@
                         <div class="leftbox">
                             <div class="contentheader">
                                 <p>{{help.title}}</p>
-                                <iron-autogrow-textarea bind-value="{{help.title}}" on-change="change" on-input="input" placeholder$="[[checktitle(chunk.data.project_type)]]"></iron-autogrow-textarea>
+                                <iron-autogrow-textarea bind-value="{{help.title}}" on-change="change" on-input="input" placeholder$="[[checktitle(chunk.data.project.type)]]"></iron-autogrow-textarea>
                             </div>
                             <div class="contentbody">
                                 <p>{{help.body}}</p>
-                                <iron-autogrow-textarea bind-value="{{help.body}}" on-change="change" on-input="input" placeholder$="[[checkbody(chunk.data.project_type)]]"></iron-autogrow-textarea>
+                                <iron-autogrow-textarea bind-value="{{help.body}}" on-change="change" on-input="input" placeholder$="[[checkbody(chunk.data.project.type)]]"></iron-autogrow-textarea>
                             </div>
                         </div>
                         <div class="rightbox">

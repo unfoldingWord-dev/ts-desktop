@@ -84,7 +84,7 @@
 
         <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
             <ts-language-menu id="languages" selected="{{selected}}" language="{{language}}"></ts-language-menu>
-            <ts-project-menu selected="{{selected}}" category="{{category}}" project="{{project}}"></ts-project-menu>
+            <ts-project-menu selected="{{selected}}" category="{{category}}" project="{{project}}" type="{{type}}" on-create="createproject"></ts-project-menu>
             <ts-book-menu selected="{{selected}}" category="[[category]]" project="{{project}}"></ts-book-menu>
             <ts-type-menu selected="{{selected}}" language="[[language]]" category="[[category]]" project="[[project]]" type="{{type}}" projectlist="[[projectlist]]" on-create="createproject"></ts-type-menu>
         </neon-animated-pages>
@@ -175,7 +175,9 @@
             var projectarray = this.projectlist;
             var popup = this.$.popup;
 
-            if (type.code !== "text") {
+            if (type.code === "tw") {
+                typeext = "";
+            } else if (type.code !== "text") {
                 typeext = "_" + type.code;
             } else if (type.resource !== "ulb") {
                 typeext = "_" + type.resource;
@@ -198,7 +200,7 @@
                 return;
             }
 
-            var newprojdata = {"project_id": project.slug, "project_name": project.name, "type_name": type.name, "fullname": fullname, "basename": basename, "project_type": type.code, "resource_id": type.resource, "target_language": language, "translators": [], "sources": [], "completion": 0, "currentsource": null};
+            var newprojdata = {"project": {"id": project.slug, "name": project.name, "type": type.code}, "type_name": type.name, "fullname": fullname, "basename": basename, "resource_id": type.resource, "target_language": language, "translators": [], "sources": [], "completion": 0, "currentsource": null};
             this.fire('iron-signal', {name: 'loadnewproject', data: {projdata: newprojdata}});
             this.animationConfig.exit.name = 'slide-left-animation';
             this.route = "translate";

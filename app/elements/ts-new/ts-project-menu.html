@@ -131,6 +131,11 @@
               value: {},
               notify: true
           },
+          type: {
+              type: Object,
+              value: {},
+              notify: true
+          },
           categorylist: {
               type: Array,
               value: []
@@ -155,6 +160,10 @@
               this.project = this.category.data[0];
               this.fire('iron-signal', {name: 'createtypes'});
               this.selected = this.selected + 2;
+          } else if (this.category.name === "Bible Words") {
+              this.project = this.category.data[0];
+              this.type = {name: "Words", code: "tw", resource: "", allowed: true};
+              this.fire('create');
           } else {
               this.selected = this.selected + 1;
           }
@@ -174,6 +183,7 @@
               }
               temparray.push(tempobject);
           });
+          temparray.push({"name": "Bible Words", "data": [{name: "Bible Words", slug: "tw"}]});
           this.categorylist = temparray;
       }
 

@@ -340,13 +340,25 @@
       updatelist: function () {
           var mythis = this;
           App.projectsManager.loadTargetTranslationsList().then(function(list) {
+              console.log(list);
               mythis.checklist(list);
           });
       },
 
       checklist: function (list) {
           for (var i = 0; i < list.length; i++) {
-              list[i].project_name = App.projectsManager.getProjectName(list[i].project_id)[0].name;
+
+              if (list[i].project === undefined) {
+                  list[i].project = {id: '', name: '', type: ''};
+                  list[i].project.id = list[i].project_id;
+                  list[i].project.name = App.projectsManager.getProjectName(list[i].project.id)[0].name;
+                  if (list[i].project_type === undefined) {
+                      list[i].project.type = "text";
+                  } else {
+                      list[i].project.type = list[i].project_type;
+                  }
+              }
+
               list[i].sources = [];
               var group = list[i].source_translations;
               for (var item in group) {
@@ -359,31 +371,36 @@
               } else {
                   list[i].currentsource = null;
               }
-              if (list[i].project_type === undefined) {
-                  list[i].project_type = "text";
-              }
-              if (list[i].project_type === "text") {
+
+              if (list[i].project.type === "text") {
                   list[i].type_name = "Text";
-              } else if (list[i].project_type === "tn") {
+              } else if (list[i].project.type === "tn") {
                   list[i].type_name = "Notes";
-              } else if (list[i].project_type === "tq") {
+              } else if (list[i].project.type === "tq") {
                   list[i].type_name = "Questions";
+              } else if (list[i].project.type === "tw") {
+                  list[i].type_name = "Words";
               }
+
               if (list[i].resource_id === undefined) {
-                  if (list[i].project_type === "text") {
+                  if (list[i].project.type === "text") {
                       list[i].resource_id = "ulb";
                   } else {
                       list[i].resource_id = "";
                   }
               }
+
               var typeext = "";
-              if (list[i].project_type !== "text") {
-                  typeext = "_" + list[i].project_type;
+
+              if (list[i].project.type === "tw") {
+                  typeext = "";
+              } else if (list[i].project.type !== "text") {
+                  typeext = "_" + list[i].project.type;
               } else if (list[i].resource_id !== "ulb") {
                   typeext = "_" + list[i].resource_id;
               }
-              var fullname = list[i].project_id + typeext + "-" + list[i].target_language.id;
-              list[i].basename = list[i].project_id + "-" + list[i].target_language.id;
+              var fullname = list[i].project.id + typeext + "-" + list[i].target_language.id;
+              list[i].basename = list[i].project.id + "-" + list[i].target_language.id;
               list[i].fullname = fullname;
               var key = "uw-" + fullname;
               var completion = App.configurator.getValue(key + "-completion");

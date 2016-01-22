@@ -514,6 +514,7 @@ function ProjectsManager(query, configurator) {
                 target_language: meta.target_language,
                 project_id: meta.project_id,
                 project_type: meta.project_type,
+                resource_id: meta.resource_id,
                 source_translations: sources,
                 translators: meta.translators,
                 finished_frames: finishedFrames,

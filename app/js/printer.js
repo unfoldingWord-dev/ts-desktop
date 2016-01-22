@@ -8,7 +8,7 @@ var _ = require('lodash'),
     PDFDocument = require('pdfkit');
 
 
-function Printer(query, configurator) {
+function Printer() {
 
     return {
 
@@ -87,7 +87,7 @@ function Printer(query, configurator) {
                                 .moveDown()
                                 .text(frame.transcontent);
                         }
-                        if(currentChapter != -1) {
+                        if(currentChapter !== -1) {
                             // TODO: we need to get the chapter reference and insert it here
                             // close chapter
                             //frame.meta.reference

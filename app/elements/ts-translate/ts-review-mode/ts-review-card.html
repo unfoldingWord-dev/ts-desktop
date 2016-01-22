@@ -68,7 +68,7 @@
                 <ts-resource-card class="right" chunk="[[chunk]]"></ts-resource-card>
             </template>
             <template is="dom-if" if="{{chunk.meta.words}}">
-                <ts-target-words class="middle" chunk="[[chunk]]"></ts-target-words>
+                <ts-target-words class="middle" chunk="[[chunk]]" on-setheight="setheight"></ts-target-words>
             </template>
         </div>
 

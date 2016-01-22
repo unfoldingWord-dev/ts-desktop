@@ -253,8 +253,8 @@
                             <template>
                                 <div class="row">
                                     <div class="left" on-tap="openproject">
-                                        <span class="smallspan"><iron-icon class="smallicon" icon$="[[checkicon(proj.project_id)]]"></iron-icon></span>
-                                        <span class="bigspan">[[proj.project_name]]</span>
+                                        <span class="smallspan"><iron-icon class="smallicon" icon$="[[checkicon(proj.project.id)]]"></iron-icon></span>
+                                        <span class="bigspan">[[proj.project.name]]</span>
                                         <span class="smallspan smalltext"><span>[[proj.type_name]]</span><span class="space">[[proj.resource_id]]</span></span>
                                         <span class="smalltext bigspan">[[proj.target_language.name]]</span>
                                         <span class="smallspan"><ts-completion-icon percent="[[proj.completion]]"></ts-completion-icon></span>
@@ -271,9 +271,9 @@
         </div>
 
         <paper-dialog id="info" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <h2><span>[[currentinfo.project_name]]</span> - <span>[[currentinfo.target_language.name]]</span></h2>
+            <h2><span>[[currentinfo.project.name]]</span> - <span>[[currentinfo.target_language.name]]</span></h2>
             <div>
-                <p>{{locale.project}}: <strong><span>[[currentinfo.project_name]]</span> (<span>[[currentinfo.project_id]]</span>)</strong></p>
+                <p>{{locale.project}}: <strong><span>[[currentinfo.project.name]]</span> (<span>[[currentinfo.project.id]]</span>)</strong></p>
                 <p>{{locale.target_language}}: <strong><span>[[currentinfo.target_language.name]]</span> (<span>[[currentinfo.target_language.id]]</span>)</strong></p>
                 <p>{{locale.progress}}: <strong><span>[[currentinfo.completion]]</span>%</strong></p>
                 <p>{{locale.translators}}:</p>
@@ -364,7 +364,7 @@
         },
 
         checkicon: function (slug) {
-            return slug === "obs" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
+            return slug === "obs" || slug === "tw" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
         },
 
         gopublish: function () {

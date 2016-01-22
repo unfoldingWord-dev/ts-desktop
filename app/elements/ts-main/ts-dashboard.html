@@ -383,7 +383,11 @@
 
               if (list[i].resource_id === undefined) {
                   if (list[i].project.type === "text") {
-                      list[i].resource_id = "ulb";
+                      if (list[i].project.id === "obs") {
+                          list[i].resource_id = "obs";
+                      } else {
+                          list[i].resource_id = "ulb";
+                      }
                   } else {
                       list[i].resource_id = "";
                   }
@@ -395,7 +399,7 @@
                   typeext = "";
               } else if (list[i].project.type !== "text") {
                   typeext = "_" + list[i].project.type;
-              } else if (list[i].resource_id !== "ulb") {
+              } else if (list[i].resource_id !== "ulb" && list[i].resource_id !== "obs") {
                   typeext = "_" + list[i].resource_id;
               }
               var fullname = list[i].project.id + typeext + "-" + list[i].target_language.id;

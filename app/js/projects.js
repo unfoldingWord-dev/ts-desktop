@@ -276,10 +276,17 @@ function ProjectsManager(query, configurator) {
             return zipper(r);
         },
 
-        getAllWords: function () {
+        getAllWords: function (type) {
+            var hash = "";
+            if (type === "bible") {
+                hash = "eac63a2df6164f63f5168021f8abcb0e";
+            } else if (type === "obs") {
+                hash = "c7388c8549f8ca1aa10e5ad272b8bb0d";
+            }
 
             var r = query([
                 "select w.id, w.slug, w.term, w.definition, w.definition_title 'title' from translation_word w",
+                "where w.catalog_hash='" + hash + "'",
                 "order by w.term"
             ].join(' '));
 

@@ -731,7 +731,7 @@
                     srcchunk = {
                         meta: bookmeta,
                         srccontent: name,
-                        wordcontent: {},
+                        wordcontent: "",
                         notes: [],
                         words: [],
                         questions: []
@@ -765,7 +765,7 @@
                     srcchunk = {
                         meta: titlemeta,
                         srccontent: title,
-                        wordcontent: {},
+                        wordcontent: "",
                         notes: [],
                         words: [],
                         questions: []
@@ -801,7 +801,7 @@
                     srcchunk = {
                         meta: refmeta,
                         srccontent: reference,
-                        wordcontent: {},
+                        wordcontent: "",
                         notes: [],
                         words: [],
                         questions: []
@@ -820,7 +820,7 @@
                 srcchunk = {
                     meta: meta,
                     srccontent: sourcedata,
-                    wordcontent: {},
+                    wordcontent: "",
                     notes: notes,
                     words: words,
                     questions: questions
@@ -851,11 +851,9 @@
         },
 
         pullwords: function () {
-
-            var frames = App.projectsManager.getAllWords();
+            var frames = App.projectsManager.getAllWords("bible");
             var name = this.currentproject.data.project.name;
             var language = this.currentproject.data.target_language.name;
-
             var source = [];
             var srcchunk = {};
             var transchunk = {};
@@ -866,7 +864,6 @@
                 var chapterid = "01";
                 var frameid = frames[i].slug;
                 var complexid = chapterid + '-' + frameid;
-                var sourcedata = {word: frames[i].term, definition: frames[i].definition};
 
                 var meta = {
                     chapterid: chapterid,
@@ -880,8 +877,8 @@
 
                 srcchunk = {
                     meta: meta,
-                    srccontent: "",
-                    wordcontent: sourcedata,
+                    srccontent: frames[i].definition,
+                    wordcontent: frames[i].term,
                     notes: [],
                     words: [],
                     questions: []
@@ -889,9 +886,7 @@
                 source.push(srcchunk);
 
                 var rawdata = this.rawdata[complexid];
-
-                transchunk = {transcontent: "", helpscontent: [], completed: false, meta: meta};
-
+                transchunk = {transcontent: "", helpscontent: [{title: "", body: ""}], completed: false, meta: meta};
                 if (rawdata !== undefined) {
                     transchunk.completed = rawdata.completed;
                     transchunk.helpscontent = rawdata.helpscontent;

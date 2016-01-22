@@ -1,0 +1,371 @@
+
+<link rel="import" href="../../../components/paper-material/paper-material.html">
+<link rel="import" href="../../../components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="../../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../../components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../../components/iron-signals/iron-signals.html">
+
+<dom-module id="ts-target-words">
+
+	<style>
+
+        :host {
+            flex: auto;
+            display: flex;
+        }
+
+        #main {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+		#heading {
+			color: var(--secondary-text-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 48px;
+            font-size: 88%;
+            font-weight: 300;
+            letter-spacing: 1px;
+            padding: 0 10px 0 16px;
+            border-radius: 3px;
+		}
+
+        #heading paper-icon-button {
+            padding: 6px;
+        }
+
+        .contentbox {
+            background: var(--card-background-color);
+            flex: 0 0 auto;
+            border-radius: 3px;
+            margin-top: 8px;
+            display: flex;
+        }
+
+        .rightbox {
+            flex: 0 0 24px;
+            border-left: 1px solid var(--border-color);
+            border-radius: 0 3px 3px 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 5px 0;
+        }
+
+        .rightbox paper-icon-button {
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            color: var(--secondary-text-color);
+        }
+
+        .leftbox {
+            flex: auto;
+        }
+
+        .contentheader {
+            color: var(--secondary-text-color);
+            min-height: 40px;
+            border-bottom: 1px solid var(--note-card-pink);
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+        }
+
+        .contentbody {
+            color: var(--primary-text-color);
+            min-height: 48px;
+            padding: 0 16px;
+            margin-top: 8px;
+        }
+
+        .editmode .contentbody {
+            background-size: 100% 32px;
+            background-image: -webkit-linear-gradient(var(--card-background-color) 27px, var(--border-color) 27px, var(--border-color) 28px, var(--card-background-color) 28px);
+            border-radius: 3px;
+        }
+
+        .editmode .contentheader p {
+            display: none;
+        }
+
+        .editmode .contentbody p {
+            display: none;
+        }
+
+        .donemode iron-autogrow-textarea {
+            display: none;
+        }
+
+        .donemode .rightbox {
+            display: none;
+        }
+
+        #content {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+		}
+
+        #content iron-autogrow-textarea {
+            line-height: 2;
+            border: none;
+            margin: 0;
+            width: 100%;
+        }
+
+        #content p {
+            line-height: 2;
+            margin: 0;
+        }
+
+        #togglebox {
+            display: flex;
+            justify-content: space-between;
+            color: var(--secondary-text-color);
+            font-size: 88%;
+            padding: 0 16px;
+            margin-top: 8px;
+            align-items: center;
+            border-radius: 3px;
+        }
+
+        #helptoggle {
+            --paper-toggle-button-checked-bar-color: var(--primary-color);
+            --paper-toggle-button-checked-button-color: var(--primary-color-dark);
+        }
+
+        #helptoggle:hover {
+            cursor: pointer;
+        }
+
+        #iconbox {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: var(--secondary-text-color);
+            cursor: pointer;
+        }
+
+	</style>
+
+	<template>
+
+        <div id="main">
+            <paper-material id="heading" elevation="1">
+                <div>
+                    <span>[[chunk.meta.chunkref]]</span> - <span>[[chunk.data.target_language.name]]</span> - <span>[[chunk.data.type_name]]</span>
+                </div>
+                <template is="dom-if" if="{{!chunk.completed}}">
+                    <paper-icon-button icon="add" on-tap="addhelp"></paper-icon-button>
+                </template>
+            </paper-material>
+            <div id="content" class="editmode">
+                <template is="dom-if" if="{{!chunk.helpscontent.length}}">
+                    <div id="iconbox" on-tap="addhelp">
+                        <p>Click to add <span>[[chunk.data.type_name]]</span></p>
+                        <paper-icon-button icon="add"></paper-icon-button>
+                    </div>
+                </template>
+                <template is="dom-repeat" items="{{chunk.helpscontent}}" as="help">
+                    <paper-material class="contentbox" elevation="1">
+                        <div class="leftbox">
+                            <div class="contentheader">
+                                <p>{{help.title}}</p>
+                                <iron-autogrow-textarea bind-value="{{help.title}}" on-change="change" on-input="input" placeholder$="[[checktitle(chunk.data.project.type)]]"></iron-autogrow-textarea>
+                            </div>
+                            <div class="contentbody">
+                                <p>{{help.body}}</p>
+                                <iron-autogrow-textarea bind-value="{{help.body}}" on-change="change" on-input="input" placeholder$="[[checkbody(chunk.data.project.type)]]"></iron-autogrow-textarea>
+                            </div>
+                        </div>
+                        <div class="rightbox">
+                            <paper-icon-button icon="close" on-tap="checkdelete"></paper-icon-button>
+                            <paper-icon-button icon="arrow-drop-up" on-tap="moveup"></paper-icon-button>
+                            <paper-icon-button icon="arrow-drop-down" on-tap="movedown"></paper-icon-button>
+                        </div>
+                    </paper-material>
+                </template>
+            </div>
+            <paper-material id="togglebox" elevation="1">
+                <p>Mark chunk as done</p>
+                <paper-toggle-button id="helptoggle" on-change="helpcheckdone"></paper-toggle-button>
+            </paper-material>
+        </div>
+
+        <iron-signals on-iron-signal-completehelp="completehelp"></iron-signals>
+        <iron-signals on-iron-signal-deletehelp="deletehelp"></iron-signals>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+		is: 'ts-target-words',
+
+        properties: {
+            chunk: {
+                type: Object,
+                value: {},
+                notify: true
+            }
+        },
+
+        observers: [
+            'rendertext(chunk.*)'
+        ],
+
+        checktitle: function (type) {
+            var text = "";
+            if (type === "tn") {
+                text = "Add Title Here";
+            }
+            if (type === "tq") {
+                text = "Add Question Here";
+            }
+            return text;
+        },
+
+        checkbody: function (type) {
+            var text = "";
+            if (type === "tn") {
+                text = "Add Content Here";
+            }
+            if (type === "tq") {
+                text = "Add Answer Here";
+            }
+            return text;
+        },
+
+        moveup: function (e) {
+            var noteindex = e.model.index;
+            if (noteindex > 0) {
+                this.movehelp(noteindex, -1);
+            }
+        },
+
+        movedown: function (e) {
+            var noteindex = e.model.index;
+            if (noteindex < this.chunk.helpscontent.length - 1) {
+                this.movehelp(noteindex, 1);
+            }
+        },
+
+        movehelp: function (index, dir) {
+            var removed = this.splice('chunk.helpscontent', index, 1)[0];
+            this.splice('chunk.helpscontent', index + dir, 0, removed);
+            this.fire('iron-signal', {name: 'updatetranslation'});
+        },
+
+        addhelp: function () {
+            var newhelp = {title: "", body: ""};
+            this.push('chunk.helpscontent', newhelp);
+            this.fire('setheight');
+            this.fire('iron-signal', {name: 'updatetranslation'});
+        },
+
+        deletehelp: function (event, data) {
+            var chunkindex = data.index[0];
+            var noteindex = data.index[1];
+
+            if (this.chunk.index === chunkindex) {
+                this.splice('chunk.helpscontent', noteindex, 1);
+                this.fire('setheight');
+                this.fire('iron-signal', {name: 'updatetranslation'});
+            }
+        },
+
+        checkdelete: function (e) {
+            var noteindex = e.model.index;
+            var chunkindex = this.chunk.index;
+            this.fire('iron-signal', {name: 'opendelete', data: {index: [chunkindex, noteindex]}});
+        },
+
+        input: function () {
+            this.fire('setheight');
+        },
+
+        change: function () {
+            this.fire('iron-signal', {name: 'updatetranslation'});
+        },
+
+        rendertext: function () {
+            if(this.chunk && this.chunk.srccontent) {
+                var completed = this.chunk.completed;
+                var content = this.$.content;
+
+                if (completed) {
+                    content.classList.remove("editmode");
+                    content.classList.add("donemode");
+                } else {
+                    content.classList.add("editmode");
+                    content.classList.remove("donemode");
+                }
+                this.$.helptoggle.checked = completed;
+            }
+        },
+
+        completehelp: function (event, data) {
+            var index = data.index;
+            if (this.chunk.index === index) {
+                this.set('chunk.completed', true);
+                this.$.helptoggle.checked = true;
+                this.fire('iron-signal', {name: 'updatetranslation'});
+                this.fire('setheight');
+            }
+        },
+
+        helpcheckdone: function () {
+            var completed = this.chunk.completed;
+            var index = this.chunk.index;
+            var toggle = this.$.helptoggle;
+            var mythis = this;
+            var blankcheck = false;
+            var helps = this.chunk.helpscontent;
+
+            if (helps.length) {
+                for (var i = 0; i < helps.length; i++) {
+                    if (helps[i].title === "" || helps[i].body === "") {
+                        blankcheck = true;
+                    }
+                }
+            }
+
+            if (toggle.pressed) {
+                setTimeout(function() {
+                    mythis.checkdone();
+                }, 100);
+                return;
+            }
+            toggle.checked = false;
+
+            if (!completed) {
+                if (blankcheck) {
+                    this.fire('iron-signal', {name: 'opennodata'});
+                } else {
+                    this.fire('iron-signal', {name: 'openhelpchecklist', data: {index: index}});
+                }
+            } else {
+                this.set('chunk.completed', false);
+                this.fire('iron-signal', {name: 'updatetranslation'});
+                this.fire('setheight');
+            }
+        },
+
+		ready: function() {
+
+		}
+
+	});
+
+</script>

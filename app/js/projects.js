@@ -279,7 +279,7 @@ function ProjectsManager(query, configurator) {
         getAllWords: function () {
 
             var r = query([
-                "select w.id, w.term, w.definition, w.definition_title 'title' from translation_word w",
+                "select w.id, w.slug, w.term, w.definition, w.definition_title 'title' from translation_word w",
                 "order by w.term"
             ].join(' '));
 

@@ -340,7 +340,6 @@
       updatelist: function () {
           var mythis = this;
           App.projectsManager.loadTargetTranslationsList().then(function(list) {
-              console.log(list);
               mythis.checklist(list);
           });
       },

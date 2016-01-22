@@ -182,7 +182,7 @@
                         <h3>Examples:</h3>
                         <template is="dom-repeat" items="{{examples}}" as="example">
                             <div id="examples">
-                                <p class="link" on-tap="examplescroll"><span>{{chunks.data.0.data.project_name}}</span> <span>{{example.chapter}}</span>:<span>{{example.frame}}</span></p>
+                                <p class="link" on-tap="examplescroll"><span>{{chunks.data.0.data.project.name}}</span> <span>{{example.chapter}}</span>:<span>{{example.frame}}</span></p>
                                 <p>{{example.body}}</p>
                             </div>
                         </template>
@@ -266,6 +266,10 @@
             var content = "";
             var clear = [];
             var footer = this.$.footer;
+            var wordlist = "bible";
+            if (this.chunks.data[0].data.project.id === "obs") {
+                wordlist = "obs";
+            }
 
             if (data.type === "note") {
                 this.set('related', clear);
@@ -275,8 +279,13 @@
                 content = "\<h2 class='style-scope ts-review-mode'\>" + data.title + "\<\/h2\>\<p class='style-scope ts-review-mode'\>" + data.body + "\<\/p\>";
             }
             if (data.type === "word") {
-                this.set('related', App.projectsManager.getRelatedWords(data.id));
-                this.set('examples', App.projectsManager.getWordExamples(data.id));
+                if (wordlist === "obs") {
+                    this.set('related', App.projectsManager.getRelatedWords(data.id));
+                    this.set('examples', App.projectsManager.getWordExamples(data.id));
+                } else {
+                    this.set('related', clear);
+                    this.set('examples', clear);
+                }
                 this.set('allwords', clear);
                 footer.classList.remove("hide");
                 content = "\<h2 class='style-scope ts-review-mode'\>" + data.term + "\<\/h2\>\<h3 class='style-scope ts-review-mode'\>" + data.title + "\<\/h3\>" + data.definition;
@@ -291,7 +300,7 @@
             if (data.type === "allwords") {
                 this.set('related', clear);
                 this.set('examples', clear);
-                this.set('allwords', App.projectsManager.getAllWords());
+                this.set('allwords', App.projectsManager.getAllWords(wordlist));
                 footer.classList.add("hide");
                 content = "";
             }

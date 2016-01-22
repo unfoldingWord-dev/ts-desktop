@@ -84,9 +84,9 @@
 
         <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
             <ts-language-menu id="languages" selected="{{selected}}" language="{{language}}"></ts-language-menu>
-            <ts-project-menu selected="{{selected}}" category="{{category}}" project="{{project}}"></ts-project-menu>
+            <ts-project-menu selected="{{selected}}" category="{{category}}" project="{{project}}" type="{{type}}" on-create="createproject"></ts-project-menu>
             <ts-book-menu selected="{{selected}}" category="[[category]]" project="{{project}}"></ts-book-menu>
-            <ts-type-menu selected="{{selected}}" category="[[category]]" project="[[project]]" allowed="[[allowed]]" type="{{type}}" on-create="createproject"></ts-type-menu>
+            <ts-type-menu selected="{{selected}}" language="[[language]]" category="[[category]]" project="[[project]]" type="{{type}}" projectlist="[[projectlist]]" on-create="createproject"></ts-type-menu>
         </neon-animated-pages>
 
         <paper-dialog id="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -98,8 +98,6 @@
                 <paper-button dialog-dismiss>Ok</paper-button>
             </div>
         </paper-dialog>
-
-        <iron-signals on-iron-signal-checkproject="checkproject"></iron-signals>
 
     </template>
 
@@ -137,10 +135,6 @@
                 type: Object,
                 value: {}
             },
-            allowed: {
-                type: Object,
-                value: {}
-            },
             type: {
                 type: Object,
                 value: {}
@@ -173,30 +167,6 @@
             this.$.languages.notifyResize();
         },
 
-        checkproject: function () {
-            var project = this.project;
-            var language = this.language;
-            var projectarray = this.projectlist;
-            var basename = project.slug + "-" + language.id;
-            this.set('allowed', {text: true, tn: false, tq: false});
-
-            for (var i = 0; i < projectarray.length; i++) {
-                if (projectarray[i].basename === basename && projectarray[i].project_type === "text") {
-                    this.set('allowed', {text: false, tn: true, tq: true});
-                }
-            }
-            for (i = 0; i < projectarray.length; i++) {
-                if (projectarray[i].basename === basename) {
-                    if (projectarray[i].project_type === "tn") {
-                        this.set('allowed.tn', false);
-                    }
-                    if (projectarray[i].project_type === "tq") {
-                        this.set('allowed.tq', false);
-                    }
-                }
-            }
-        },
-
         createproject: function () {
             var project = this.project;
             var language = this.language;
@@ -204,18 +174,13 @@
             var typeext = "";
             var projectarray = this.projectlist;
             var popup = this.$.popup;
-            var typename;
 
-            if (type === "text") {
-                typename = "Text";
-            } else if (type === "tn") {
-                typename = "Notes";
-            } else if (type === "tq") {
-                typename = "Questions";
-            }
-
-            if (type !== "text") {
-                typeext = "_" + type;
+            if (type.code === "tw") {
+                typeext = "";
+            } else if (type.code !== "text") {
+                typeext = "_" + type.code;
+            } else if (type.resource !== "ulb" && type.resource !== "obs") {
+                typeext = "_" + type.resource;
             }
 
             var fullname = project.slug + typeext + "-" + language.id;
@@ -229,13 +194,13 @@
                 }
             }
 
-            if (!this.allowed[type]) {
+            if (!type.allowed) {
                 this.set('options', {title: "No Translation", body: "Cannot start this project until a standard translation project exists"});
                 popup.open();
                 return;
             }
 
-            var newprojdata = {"project_id": project.slug, "project_name": project.name, "type_name": typename, "fullname": fullname, "basename": basename, "project_type": type, "target_language": language, "translators": [], "sources": [], "completion": 0, "currentsource": null};
+            var newprojdata = {"project": {"id": project.slug, "name": project.name, "type": type.code}, "type_name": type.name, "fullname": fullname, "basename": basename, "resource_id": type.resource, "target_language": language, "translators": [], "sources": [], "completion": 0, "currentsource": null};
             this.fire('iron-signal', {name: 'loadnewproject', data: {projdata: newprojdata}});
             this.animationConfig.exit.name = 'slide-left-animation';
             this.route = "translate";

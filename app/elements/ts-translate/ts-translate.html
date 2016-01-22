@@ -379,7 +379,7 @@
         opensource: function () {
             var modal = this.$.modal;
             var sources = App.projectsManager.sources;
-            var projectid = this.currentproject.data.project_id;
+            var projectid = this.currentproject.data.project.id;
             modal.allSources = _.filter(sources, {'project': projectid, 'level': 3});
             modal.sources = this.currentproject.data.sources;
             modal.selectedSource = this.currentproject.data.currentsource;
@@ -442,7 +442,7 @@
             this.set('currentproject.data', data.projdata);
             this.checkstandard();
             this.savetofile();
-            if (data.projdata.project_type !== "text") {
+            if (data.projdata.project.type !== "text" && data.projdata.project.type !== "tw") {
                 var newmeta = {fullname: data.projdata.basename};
                 App.projectsManager.loadTargetTranslation(newmeta).then(function (newtranslation) {
                     mythis.set('rawdata2', newtranslation);
@@ -471,8 +471,8 @@
                     mythis.retrievesource();
                     App.projectsManager.loadTargetTranslation(data.projdata).then(function (translation) {
                         mythis.set('rawdata', translation);
-                        if (data.projdata.project_type !== "text") {
-                            var newmeta = {fullname: data.projdata.basename};
+                        if (data.projdata.project.type === "tn" || data.projdata.project.type === "tq") {
+                            var newmeta = {fullname: data.projdata.basename, project: {type: 'text'}};
                             App.projectsManager.loadTargetTranslation(newmeta).then(function (newtranslation) {
                                 mythis.set('rawdata2', newtranslation);
                                 mythis.pullsource();
@@ -487,9 +487,14 @@
                             });
                         } else {
                             mythis.set('rawdata2', {});
-                            mythis.pullsource();
-                            mythis.createchunks();
-                            mythis.createchapters();
+                            if (data.projdata.project.type === "tw") {
+                                mythis.pullwords();
+                                mythis.createchunks();
+                            } else {
+                                mythis.pullsource();
+                                mythis.createchunks();
+                                mythis.createchapters();
+                            }
                             loading.close();
                             setTimeout(function() {
                                 mythis.setmodestate();
@@ -517,7 +522,7 @@
                     mythis.retrievesource();
                     App.projectsManager.loadTargetTranslation(data.projdata).then(function (translation) {
                         mythis.set('rawdata', translation);
-                        if (data.projdata.project_type !== "text") {
+                        if (data.projdata.project.type !== "text") {
                             var newmeta = {fullname: data.projdata.basename};
                             App.projectsManager.loadTargetTranslation(newmeta).then(function (newtranslation) {
                                 mythis.set('rawdata2', newtranslation);
@@ -606,7 +611,7 @@
         },
 
         checkstandard: function () {
-            var check = this.currentproject.data.project_type === "text";
+            var check = this.currentproject.data.project.type === "text";
             this.set('standardproject', check);
         },
 
@@ -617,7 +622,7 @@
             }
             var currentsource = this.currentproject.data.sources[current];
             var frames = App.projectsManager.getSourceFrames(currentsource);
-            var name = this.currentproject.data.project_name;
+            var name = this.currentproject.data.project.name;
             var language = this.currentproject.data.target_language.name;
             var resource = this.currentproject.data.resource_id;
             var source = [];
@@ -707,6 +712,7 @@
                     chunkref: chunkref,
                     refaddon: " - " + refaddon,
                     standard: standard,
+                    words: false,
                     format: format
                 };
 
@@ -719,11 +725,13 @@
                         chunkref: "",
                         refaddon: refaddon,
                         standard: standard,
+                        words: false,
                         verses: []
                     };
                     srcchunk = {
                         meta: bookmeta,
                         srccontent: name,
+                        wordcontent: "",
                         notes: [],
                         words: [],
                         questions: []
@@ -749,13 +757,15 @@
                     verses: [],
                     chunkref: "",
                     refaddon: refaddon,
-                    standard: standard
+                    standard: standard,
+                    words: false
                 };
 
                 if (frameid === "01" && standard && title !== "") {
                     srcchunk = {
                         meta: titlemeta,
                         srccontent: title,
+                        wordcontent: "",
                         notes: [],
                         words: [],
                         questions: []
@@ -783,13 +793,15 @@
                     verses: [],
                     chunkref: "",
                     refaddon: refaddon,
-                    standard: standard
+                    standard: standard,
+                    words: false
                 };
 
                 if (frameid === "01" && standard && reference !== "") {
                     srcchunk = {
                         meta: refmeta,
                         srccontent: reference,
+                        wordcontent: "",
                         notes: [],
                         words: [],
                         questions: []
@@ -808,6 +820,7 @@
                 srcchunk = {
                     meta: meta,
                     srccontent: sourcedata,
+                    wordcontent: "",
                     notes: notes,
                     words: words,
                     questions: questions
@@ -830,6 +843,54 @@
                     transchunk.transcontent = rawdata2.transcontent;
                 }
 
+                translation.push(transchunk);
+            }
+
+            this.set('currentproject.source', source);
+            this.set('currentproject.translation', translation);
+        },
+
+        pullwords: function () {
+            var frames = App.projectsManager.getAllWords("bible");
+            var name = this.currentproject.data.project.name;
+            var language = this.currentproject.data.target_language.name;
+            var source = [];
+            var srcchunk = {};
+            var transchunk = {};
+            var translation = [];
+            var standard = this.standardproject;
+
+            for (var i = 0; i < frames.length; i++) {
+                var chapterid = "01";
+                var frameid = frames[i].slug;
+                var complexid = chapterid + '-' + frameid;
+
+                var meta = {
+                    chapterid: chapterid,
+                    chapter: 1,
+                    frameid: frameid,
+                    chunkref: name,
+                    refaddon: " - " + language,
+                    standard: standard,
+                    words: true
+                };
+
+                srcchunk = {
+                    meta: meta,
+                    srccontent: frames[i].definition,
+                    wordcontent: frames[i].term,
+                    notes: [],
+                    words: [],
+                    questions: []
+                };
+                source.push(srcchunk);
+
+                var rawdata = this.rawdata[complexid];
+                transchunk = {transcontent: "", helpscontent: [{title: "", body: ""}], completed: false, meta: meta};
+                if (rawdata !== undefined) {
+                    transchunk.completed = rawdata.completed;
+                    transchunk.helpscontent = rawdata.helpscontent;
+                }
                 translation.push(transchunk);
             }
 
@@ -946,7 +1007,7 @@
                 mythis.set('modestatus.lastmode', 3);
             }
 
-            if (sources !== undefined && sources.length !== 0) {
+            if ((sources !== undefined && sources.length !== 0) || this.currentproject.data.project.type === "tw") {
                 setTimeout(function() {
                     if (selected > 0) {
                         mythis.set('selected', selected);
@@ -972,7 +1033,7 @@
                     mythis.set('selected', lastmode);
                 }
             } else {
-                if (sources === undefined || sources.length === 0) {
+                if ((sources === undefined || sources.length === 0) && this.currentproject.data.project.type !== "tw") {
                     setTimeout(function() {
                         mythis.set('selected', 4);
                     }, 500);
@@ -998,7 +1059,7 @@
 
         createchunks: function () {
             var current = this.currentproject.data.currentsource;
-            if (current === null || current === undefined) {
+            if ((current === null || current === undefined) && this.currentproject.data.project.type !== "tw") {
                 return;
             }
             var transdata = {};
@@ -1037,7 +1098,7 @@
                 return {transcontent: chunk.transcontent, helpscontent: chunk.helpscontent, completed: chunk.completed, data: projectdata, index: index, state: chunk.state};
             });
             srcdata.data = source.map(function(chunk){
-                return {srccontent: chunk.srccontent, meta: chunk.meta, notes: chunk.notes, words: chunk.words, questions: chunk.questions};
+                return {srccontent: chunk.srccontent, wordcontent: chunk.wordcontent, meta: chunk.meta, notes: chunk.notes, words: chunk.words, questions: chunk.questions};
             });
             var merged = _.merge(srcdata, transdata);
             this.set('chunks', merged);

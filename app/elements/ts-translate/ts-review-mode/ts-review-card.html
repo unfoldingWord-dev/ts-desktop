@@ -5,6 +5,7 @@
 <link rel="import" href="../ts-target/ts-target-review.html">
 <link rel="import" href="../ts-target/ts-target-edit.html">
 <link rel="import" href="../ts-target/ts-target-helps.html">
+<link rel="import" href="../ts-target/ts-target-words.html">
 <link rel="import" href="../ts-source/ts-source-chunk.html">
 <link rel="import" href="../ts-resource/ts-resource-card.html">
 
@@ -25,17 +26,17 @@
 
         .middle {
             flex: 1 0 400px;
-            margin-left: 16px;
+            margin-right: 16px;
             display: flex;
         }
 
-        #right {
-            margin: 0 16px;
+        .right {
+            margin-right: 16px;
             flex: 0 0 400px;
         }
 
-        #left {
-            margin-left: 16px;
+        .left {
+            margin: 0 16px;
             flex: 1 0 400px;
         }
 
@@ -44,26 +45,31 @@
 	<template>
 
         <div id="contain">
-            <ts-source-chunk id="left" reviewmode chunk="[[chunk]]"></ts-source-chunk>
-            <template is="dom-if" if="{{chunk.meta.standard}}">
-                <div class="middle">
-                    <template is="dom-if" if="{{chunk.state.review}}">
-                        <ts-target-review chunk="{{chunk}}" on-setheight="setheight"></ts-target-review>
-                    </template>
-                    <template is="dom-if" if="{{!chunk.state.review}}">
-                        <ts-target-edit chunk="{{chunk}}" on-setheight="setheight"></ts-target-edit>
-                    </template>
-                </div>
+            <ts-source-chunk class="left" reviewmode chunk="[[chunk]]"></ts-source-chunk>
+            <template is="dom-if" if="{{!chunk.meta.words}}">
+                <template is="dom-if" if="{{chunk.meta.standard}}">
+                    <div class="middle">
+                        <template is="dom-if" if="{{chunk.state.review}}">
+                            <ts-target-review chunk="{{chunk}}" on-setheight="setheight"></ts-target-review>
+                        </template>
+                        <template is="dom-if" if="{{!chunk.state.review}}">
+                            <ts-target-edit chunk="{{chunk}}" on-setheight="setheight"></ts-target-edit>
+                        </template>
+                    </div>
+                </template>
+                <template is="dom-if" if="{{!chunk.meta.standard}}">
+                    <div class="middle">
+                        <ts-target-edit chunkmode chunk="{{chunk}}"></ts-target-edit>
+                    </div>
+                    <div class="middle">
+                        <ts-target-helps chunk="{{chunk}}" on-setheight="setheight"></ts-target-helps>
+                    </div>
+                </template>
+                <ts-resource-card class="right" chunk="[[chunk]]"></ts-resource-card>
             </template>
-            <template is="dom-if" if="{{!chunk.meta.standard}}">
-                <div class="middle">
-                    <ts-target-edit chunkmode chunk="{{chunk}}"></ts-target-edit>
-                </div>
-                <div class="middle">
-                    <ts-target-helps chunk="{{chunk}}" on-setheight="setheight"></ts-target-helps>
-                </div>
+            <template is="dom-if" if="{{chunk.meta.words}}">
+                <ts-target-words class="middle" chunk="[[chunk]]" on-setheight="setheight"></ts-target-words>
             </template>
-            <ts-resource-card id="right" chunk="[[chunk]]"></ts-resource-card>
         </div>
 
 	</template>

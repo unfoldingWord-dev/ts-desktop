@@ -17,7 +17,7 @@ function Printer() {
          * @param translation an array of frames
          * @param meta the target translation manifest and other info
          * @param filename the path where the export will be saved
-         * @param options allows control over what is printed
+         * @param options {includeIncompleteFrames: boolean, includeImages: boolean}
          * @returns {Promise.<boolean>}
          */
         targetTranslationToPdf: function (translation, meta, filename, options) {
@@ -80,12 +80,17 @@ function Printer() {
 
                             // chapter body
                             // TODO: check if frame is completed.
-                            doc.addPage()
-                                .fontSize(10);
-                            // TODO: provide support for images
-                            doc//.image('path to image', {width:doc.page.width - 72*2})
-                                .moveDown()
-                                .text(frame.transcontent);
+                            if(options.includeIncompleteFrames === true || frame.completed === true) {
+                                doc.addPage()
+                                    .fontSize(10);
+                                if (options.includeImages === true) {
+                                    // TODO: get the image path
+                                    //doc.image('path to image', {width:doc.page.width - 72*2})
+                                    doc.text('[image placeholder]', {align: 'center'});
+                                }
+                                doc.moveDown()
+                                    .text(frame.transcontent);
+                            }
                         }
                         if(currentChapter !== -1) {
                             // TODO: we need to get the chapter reference and insert it here

@@ -85,6 +85,12 @@
         "group": "advanced"
     },
     {
+        "name": "savedirectory",
+        "mainText": "Save Directory",
+        "value": "test",
+        "group": "advanced"
+    },
+    {
         "name": "logginglevel",
         "mainText": "Logging Level",
         "value": "Warnings",

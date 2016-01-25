@@ -214,7 +214,12 @@
                 tsTranslate.style.fontFamily = this.getUserSetting('font');
             },
 
+            /**
+             * 
+             */
             applyPrefBehavior: function() {
+                // We may not need this as settings that affects behavior is most likely called
+                //    using the App.configurator.getUserSetting(key) API.
                 console.log('Pretend to apply behavior');
             },
 

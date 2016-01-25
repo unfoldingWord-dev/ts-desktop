@@ -43,6 +43,9 @@
         }).replace(/\s+/g, '');
     }
 
+    /**
+     *
+     */
     function promisify (module, fn) {
         var f = module ? module[fn] : fn;
 
@@ -84,6 +87,9 @@
         };
     }
 
+    /**
+     *
+     */
     function log () {
         if (process.env.NODE_ENV !== 'test') {
             console.log.apply(console, arguments);

@@ -143,7 +143,7 @@ function ProjectsManager(query, configurator) {
             var r = query([
                 "select sl.project_name 'name' from project p",
                 "join source_language sl on sl.project_id=p.id",
-                "where sl.slug='en' and p.slug='" + id + "'",
+                "where sl.slug='en' and p.slug='" + id + "'"
             ].join(' '));
             return zipper(r);
         },
@@ -188,7 +188,7 @@ function ProjectsManager(query, configurator) {
         getSourceFrames: function (source) {
             var s = typeof source === 'object' ? source.id : source,
                 r = query([
-                    "select f.id, f.slug 'verse', f.body 'chunk', c.slug 'chapter', c.title, f.format from frame f",
+                    "select f.id, f.slug 'verse', f.body 'chunk', c.slug 'chapter', c.title, c.reference, f.format from frame f",
                     "join chapter c on c.id=f.chapter_id",
                     "join resource r on r.id=c.resource_id",
                     "join source_language sl on sl.id=r.source_language_id",
@@ -275,10 +275,17 @@ function ProjectsManager(query, configurator) {
             return zipper(r);
         },
 
-        getAllWords: function () {
+        getAllWords: function (type) {
+            var hash = "";
+            if (type === "bible") {
+                hash = "eac63a2df6164f63f5168021f8abcb0e";
+            } else if (type === "obs") {
+                hash = "c7388c8549f8ca1aa10e5ad272b8bb0d";
+            }
 
             var r = query([
-                "select w.id, w.term, w.definition, w.definition_title 'title' from translation_word w",
+                "select w.id, w.slug, w.term, w.definition, w.definition_title 'title' from translation_word w",
+                "where w.catalog_hash='" + hash + "'",
                 "order by w.term"
             ].join(' '));
 
@@ -392,7 +399,7 @@ function ProjectsManager(query, configurator) {
                                 chapterContent += '//\n\n';
 
                                 chapterContent += '//\n';
-                                chapterContent += meta.project_name + '\n';
+                                chapterContent += meta.project.name + '\n';
                                 chapterContent += '//\n\n';
 
                                 chapterContent += '//\n';
@@ -466,7 +473,7 @@ function ProjectsManager(query, configurator) {
         },
 
         isTranslation: function (meta) {
-            return !meta.project_type || meta.project_type === 'text';
+            return !meta.project.type || meta.project.type === 'text';
         },
 
         saveTargetTranslation: function (translation, meta) {
@@ -508,17 +515,17 @@ function ProjectsManager(query, configurator) {
 
             var manifest = {
                 generator: {
-                    name: 'ts-desktop'
+                    name: 'ts-desktop',
+                    build: ''
                 },
                 package_version: 3,
                 target_language: meta.target_language,
-                project_id: meta.project_id,
-                project_type: meta.project_type,
+                project: meta.project,
+                resource_id: meta.resource_id,
                 source_translations: sources,
+                parent_draft_resource_id: '',
                 translators: meta.translators,
-                finished_frames: finishedFrames,
-                finished_titles: [],
-                finished_references: []
+                finished_frames: finishedFrames
             };
 
             var writeFile = function (name, data) {

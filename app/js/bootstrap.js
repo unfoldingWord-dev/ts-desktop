@@ -54,6 +54,7 @@
     let ProjectsManager = require('../js/projects').ProjectsManager;
     let i18n = new require('../js/i18n').Locale('./i18n');//, mainWindow.navigator.language),
     let util = require('../js/lib/util');
+    let printer = require('../js/printer');
 
     /**
      * FIX - This provides a fix to the native chrome shadow missing
@@ -83,6 +84,8 @@
         util: util,
 
         git: git,
+
+        printer: printer,
 
         isMaximized: false,
 

@@ -11,12 +11,11 @@ var _ = require('lodash'),
     tstudioMigrator = require('../js/migration/tstudioMigrator'),
     targetTranslationMigrator = require('../js/migration/targetTranslationMigrator'),
     wrap = utils.promisify,
-    guard = utils.guard;
+    guard = utils.guard,
+    Git = require('../js/git').Git,
+    git = new Git();
 
-var Git = require('../js/git').Git;
-var git = new Git();
-
-function zipper (r) {
+function zipper(r) {
     return r.length ? _.map(r[0].values, _.zipObject.bind(_, r[0].columns)) : [];
 }
 

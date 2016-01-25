@@ -195,7 +195,10 @@
 
         _runTapHandler: function(event) {
             if (event.model.setting.name == 'developertools') {
-                this.developertools();
+                this.developerTools();
+            }
+            else if (event.model.setting.name == "refreshsettings") {
+                this.refreshSettings();
             }
             else if (typeof (event.model.setting.value) == 'boolean') {
                 this.toggleValue(event);
@@ -218,8 +221,12 @@
             this.closeSettingModal();
         },
 
-        developertools: function(event) {
+        developerTools: function(event) {
             App.showDevTools();
+        },
+
+        refreshSettings: function(event) {
+            this.settings = App.configurator.refreshUserSettings();
         },
 
         toggleValue: function(event) {

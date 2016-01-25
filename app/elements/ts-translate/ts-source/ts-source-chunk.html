@@ -35,7 +35,7 @@
             flex: auto;
         }
 
-        #content p {
+        #textholder {
             line-height: 2;
             margin-top: 0;
             color: var(--primary-text-color);
@@ -59,13 +59,20 @@
 
         <paper-material elevation="1">
             <div id="heading">
-                <ts-source-tab projectdata="[[chunk.data]]"></ts-source-tab>
-                <div id="ref">
-                    <span>[[chunk.meta.chunkref]]</span>
-                </div>
+                <template is="dom-if" if="{{!chunk.meta.words}}">
+                    <ts-source-tab projectdata="[[chunk.data]]"></ts-source-tab>
+                    <div id="ref">
+                        <span>[[chunk.meta.chunkref]]</span>
+                    </div>
+                </template>
+                <template is="dom-if" if="{{chunk.meta.words}}">
+                    <div>
+                        <span>[[chunk.wordcontent]]</span>
+                    </div>
+                </template>
             </div>
             <div id="content">
-                <p id="textholder"></p>
+                <div id="textholder"></div>
             </div>
         </paper-material>
 

@@ -379,7 +379,7 @@
         opensource: function () {
             var modal = this.$.modal;
             var sources = App.projectsManager.sources;
-            var projectid = this.currentproject.data.project_id;
+            var projectid = this.currentproject.data.project.id;
             modal.allSources = _.filter(sources, {'project': projectid, 'level': 3});
             modal.sources = this.currentproject.data.sources;
             modal.selectedSource = this.currentproject.data.currentsource;
@@ -442,7 +442,7 @@
             this.set('currentproject.data', data.projdata);
             this.checkstandard();
             this.savetofile();
-            if (data.projdata.project_type !== "text") {
+            if (data.projdata.project.type !== "text" && data.projdata.project.type !== "tw") {
                 var newmeta = {fullname: data.projdata.basename};
                 App.projectsManager.loadTargetTranslation(newmeta).then(function (newtranslation) {
                     mythis.set('rawdata2', newtranslation);
@@ -471,8 +471,8 @@
                     mythis.retrievesource();
                     App.projectsManager.loadTargetTranslation(data.projdata).then(function (translation) {
                         mythis.set('rawdata', translation);
-                        if (data.projdata.project_type !== "text") {
-                            var newmeta = {fullname: data.projdata.basename};
+                        if (data.projdata.project.type === "tn" || data.projdata.project.type === "tq") {
+                            var newmeta = {fullname: data.projdata.basename, project: {type: 'text'}};
                             App.projectsManager.loadTargetTranslation(newmeta).then(function (newtranslation) {
                                 mythis.set('rawdata2', newtranslation);
                                 mythis.pullsource();
@@ -487,9 +487,14 @@
                             });
                         } else {
                             mythis.set('rawdata2', {});
-                            mythis.pullsource();
-                            mythis.createchunks();
-                            mythis.createchapters();
+                            if (data.projdata.project.type === "tw") {
+                                mythis.pullwords();
+                                mythis.createchunks();
+                            } else {
+                                mythis.pullsource();
+                                mythis.createchunks();
+                                mythis.createchapters();
+                            }
                             loading.close();
                             setTimeout(function() {
                                 mythis.setmodestate();
@@ -517,7 +522,7 @@
                     mythis.retrievesource();
                     App.projectsManager.loadTargetTranslation(data.projdata).then(function (translation) {
                         mythis.set('rawdata', translation);
-                        if (data.projdata.project_type !== "text") {
+                        if (data.projdata.project.type !== "text") {
                             var newmeta = {fullname: data.projdata.basename};
                             App.projectsManager.loadTargetTranslation(newmeta).then(function (newtranslation) {
                                 mythis.set('rawdata2', newtranslation);
@@ -606,7 +611,7 @@
         },
 
         checkstandard: function () {
-            var check = this.currentproject.data.project_type === "text";
+            var check = this.currentproject.data.project.type === "text";
             this.set('standardproject', check);
         },
 
@@ -617,7 +622,9 @@
             }
             var currentsource = this.currentproject.data.sources[current];
             var frames = App.projectsManager.getSourceFrames(currentsource);
-            var name = this.currentproject.data.project_name;
+            var name = this.currentproject.data.project.name;
+            var language = this.currentproject.data.target_language.name;
+            var resource = this.currentproject.data.resource_id;
             var source = [];
             var srcchunk = {};
             var transchunk = {};
@@ -628,13 +635,26 @@
             var chapterref;
             var chunkref;
             var standard = this.standardproject;
+            var refaddon = language;
+            if (resource !== "") {
+                refaddon += " (" + resource + ")";
+            }
 
             for (var i = 0; i < frames.length; i++) {
+                if (frames[i].verse === "00") {
+                    frames.push(frames.splice(i, 1)[0]);
+                    i = frames.length;
+                }
+            }
+
+            for (i = 0; i < frames.length; i++) {
                 var chapterid = frames[i].chapter;
                 var chapter = parseInt(chapterid);
                 var frameid = frames[i].verse;
                 var frame = parseInt(frameid);
+                var complexid = chapterid + '-' + frameid;
                 var title = frames[i].title;
+                var reference = frames[i].reference;
                 var format = frames[i].format;
                 var id = frames[i].id;
                 var sourcedata = frames[i].chunk;
@@ -684,26 +704,131 @@
                     chapter: chapter,
                     frame: frame,
                     title: title,
+                    reference: reference,
                     chapterid: chapterid,
                     frameid: frameid,
                     verses: verses,
                     chapterref: chapterref,
                     chunkref: chunkref,
+                    refaddon: " - " + refaddon,
                     standard: standard,
+                    words: false,
                     format: format
                 };
+
+                if (complexid === "01-01" && standard) {
+                    var bookmeta = {
+                        chapter: 0,
+                        frame: 0,
+                        chapterid: "00",
+                        frameid: "title",
+                        chunkref: "",
+                        refaddon: refaddon,
+                        standard: standard,
+                        words: false,
+                        verses: []
+                    };
+                    srcchunk = {
+                        meta: bookmeta,
+                        srccontent: name,
+                        wordcontent: "",
+                        notes: [],
+                        words: [],
+                        questions: []
+                    };
+                    source.push(srcchunk);
+                    var rawbookdata = this.rawdata["00-title"];
+                    transchunk = {transcontent: "", helpscontent: [], completed: false, meta: bookmeta};
+
+                    if (rawbookdata !== undefined) {
+                        transchunk.completed = rawbookdata.completed;
+                        transchunk.transcontent = rawbookdata.transcontent;
+                    }
+                    translation.push(transchunk);
+                }
+
+                var titlemeta = {
+                    chapter: chapter,
+                    frame: 0,
+                    title: title,
+                    reference: reference,
+                    chapterid: chapterid,
+                    frameid: "title",
+                    verses: [],
+                    chunkref: "",
+                    refaddon: refaddon,
+                    standard: standard,
+                    words: false
+                };
+
+                if (frameid === "01" && standard && title !== "") {
+                    srcchunk = {
+                        meta: titlemeta,
+                        srccontent: title,
+                        wordcontent: "",
+                        notes: [],
+                        words: [],
+                        questions: []
+                    };
+                    source.push(srcchunk);
+
+                    var rawtitledata = this.rawdata[chapterid + "-title"];
+                    transchunk = {transcontent: "", helpscontent: [], completed: false, meta: titlemeta};
+
+                    if (rawtitledata !== undefined) {
+                        transchunk.completed = rawtitledata.completed;
+                        transchunk.transcontent = rawtitledata.transcontent;
+                    }
+
+                    translation.push(transchunk);
+                }
+
+                var refmeta = {
+                    chapter: chapter,
+                    frame: 0,
+                    title: title,
+                    reference: reference,
+                    chapterid: chapterid,
+                    frameid: "reference",
+                    verses: [],
+                    chunkref: "",
+                    refaddon: refaddon,
+                    standard: standard,
+                    words: false
+                };
+
+                if (frameid === "01" && standard && reference !== "") {
+                    srcchunk = {
+                        meta: refmeta,
+                        srccontent: reference,
+                        wordcontent: "",
+                        notes: [],
+                        words: [],
+                        questions: []
+                    };
+                    source.push(srcchunk);
+                    var rawrefdata = this.rawdata[chapterid + "-reference"];
+                    transchunk = {transcontent: "", helpscontent: [], completed: false, meta: refmeta};
+
+                    if (rawrefdata !== undefined) {
+                        transchunk.completed = rawrefdata.completed;
+                        transchunk.transcontent = rawrefdata.transcontent;
+                    }
+                    translation.push(transchunk);
+                }
 
                 srcchunk = {
                     meta: meta,
                     srccontent: sourcedata,
+                    wordcontent: "",
                     notes: notes,
                     words: words,
                     questions: questions
                 };
                 source.push(srcchunk);
 
-                var rawdata = this.rawdata[chapterid + '-' + frameid];
-                var rawdata2 = this.rawdata2[chapterid + '-' + frameid];
+                var rawdata = this.rawdata[complexid];
+                var rawdata2 = this.rawdata2[complexid];
                 transchunk = {transcontent: "", helpscontent: [], completed: false, meta: meta};
 
                 if (rawdata !== undefined) {
@@ -721,49 +846,53 @@
                 translation.push(transchunk);
             }
 
-            source.sort(function (a, b) {
-                var achap = a.meta.chapterid;
-                var aframe = a.meta.frameid;
-                var bchap = b.meta.chapterid;
-                var bframe = b.meta.frameid;
-                if (achap.length === 2) {
-                    achap = "0" + achap;
-                }
-                if (aframe.length === 2) {
-                    aframe = "0" + aframe;
-                }
-                if (bchap.length === 2) {
-                    bchap = "0" + bchap;
-                }
-                if (bframe.length === 2) {
-                    bframe = "0" + bframe;
-                }
-                var first = achap + aframe;
-                var second = bchap + bframe;
-                return first - second;
-            });
+            this.set('currentproject.source', source);
+            this.set('currentproject.translation', translation);
+        },
 
-            translation.sort(function (a, b) {
-                var achap = a.meta.chapterid;
-                var aframe = a.meta.frameid;
-                var bchap = b.meta.chapterid;
-                var bframe = b.meta.frameid;
-                if (achap.length === 2) {
-                    achap = "0" + achap;
+        pullwords: function () {
+            var frames = App.projectsManager.getAllWords("bible");
+            var name = this.currentproject.data.project.name;
+            var language = this.currentproject.data.target_language.name;
+            var source = [];
+            var srcchunk = {};
+            var transchunk = {};
+            var translation = [];
+            var standard = this.standardproject;
+
+            for (var i = 0; i < frames.length; i++) {
+                var chapterid = "01";
+                var frameid = frames[i].slug;
+                var complexid = chapterid + '-' + frameid;
+
+                var meta = {
+                    chapterid: chapterid,
+                    chapter: 1,
+                    frameid: frameid,
+                    chunkref: name,
+                    refaddon: " - " + language,
+                    standard: standard,
+                    words: true
+                };
+
+                srcchunk = {
+                    meta: meta,
+                    srccontent: frames[i].definition,
+                    wordcontent: frames[i].term,
+                    notes: [],
+                    words: [],
+                    questions: []
+                };
+                source.push(srcchunk);
+
+                var rawdata = this.rawdata[complexid];
+                transchunk = {transcontent: "", helpscontent: [{title: "", body: ""}], completed: false, meta: meta};
+                if (rawdata !== undefined) {
+                    transchunk.completed = rawdata.completed;
+                    transchunk.helpscontent = rawdata.helpscontent;
                 }
-                if (aframe.length === 2) {
-                    aframe = "0" + aframe;
-                }
-                if (bchap.length === 2) {
-                    bchap = "0" + bchap;
-                }
-                if (bframe.length === 2) {
-                    bframe = "0" + bframe;
-                }
-                var first = achap + aframe;
-                var second = bchap + bframe;
-                return first - second;
-            });
+                translation.push(transchunk);
+            }
 
             this.set('currentproject.source', source);
             this.set('currentproject.translation', translation);
@@ -878,7 +1007,7 @@
                 mythis.set('modestatus.lastmode', 3);
             }
 
-            if (sources !== undefined && sources.length !== 0) {
+            if ((sources !== undefined && sources.length !== 0) || this.currentproject.data.project.type === "tw") {
                 setTimeout(function() {
                     if (selected > 0) {
                         mythis.set('selected', selected);
@@ -904,7 +1033,7 @@
                     mythis.set('selected', lastmode);
                 }
             } else {
-                if (sources === undefined || sources.length === 0) {
+                if ((sources === undefined || sources.length === 0) && this.currentproject.data.project.type !== "tw") {
                     setTimeout(function() {
                         mythis.set('selected', 4);
                     }, 500);
@@ -930,7 +1059,7 @@
 
         createchunks: function () {
             var current = this.currentproject.data.currentsource;
-            if (current === null || current === undefined) {
+            if ((current === null || current === undefined) && this.currentproject.data.project.type !== "tw") {
                 return;
             }
             var transdata = {};
@@ -969,7 +1098,7 @@
                 return {transcontent: chunk.transcontent, helpscontent: chunk.helpscontent, completed: chunk.completed, data: projectdata, index: index, state: chunk.state};
             });
             srcdata.data = source.map(function(chunk){
-                return {srccontent: chunk.srccontent, meta: chunk.meta, notes: chunk.notes, words: chunk.words, questions: chunk.questions};
+                return {srccontent: chunk.srccontent, wordcontent: chunk.wordcontent, meta: chunk.meta, notes: chunk.notes, words: chunk.words, questions: chunk.questions};
             });
             var merged = _.merge(srcdata, transdata);
             this.set('chunks', merged);
@@ -994,14 +1123,19 @@
             }), function (data, chap) {
                 var chapcomplete = true;
                 var chapcontent = "";
+                var chapter = parseInt(chap);
 
                 _.forEach(data, function (chunk) {
                     if (!chunk.completed) {
                         chapcomplete = false;
                     }
-                    chapcontent += chunk.transcontent + " ";
+                    if (chunk.meta.frame > 0) {
+                        chapcontent += chunk.transcontent + " ";
+                    }
                 });
-                transchapters.push({completed: chapcomplete, transcontent: chapcontent, data: projectdata});
+                if (chapter > 0) {
+                    transchapters.push({completed: chapcomplete, transcontent: chapcontent, data: projectdata});
+                }
             });
 
             _.forEach(_.groupBy(source, function(chunks) {
@@ -1010,12 +1144,16 @@
                 var chapcontent = "";
                 var chapter = parseInt(chap);
                 var chapterref = "";
+                var refaddon = "";
                 var chapterid = "";
                 var chapstate = true;
 
                 _.forEach(data, function (chunk) {
-                    chapcontent += chunk.srccontent + " ";
+                    if (chunk.meta.frame > 0) {
+                        chapcontent += chunk.srccontent + " ";
+                    }
                     chapterref = chunk.meta.chapterref;
+                    refaddon = chunk.meta.refaddon;
                     chapterid = chunk.meta.chapterid;
                 });
 
@@ -1025,7 +1163,9 @@
                 } else {
                     chapstate = chapterstatedata.read;
                 }
-                srcchapters.push({chapter: chapter, srccontent: chapcontent, chapterref: chapterref, chapterid: chapterid, state: chapstate});
+                if (chapter > 0) {
+                    srcchapters.push({chapter: chapter, srccontent: chapcontent, chapterref: chapterref, refaddon: refaddon, chapterid: chapterid, state: chapstate});
+                }
             });
 
             transdata.data = transchapters;

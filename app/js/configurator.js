@@ -105,6 +105,53 @@
             return Object.keys(storage);
         };
 
+        /**
+         * Map the raw setting array into groups and lists for UI to display
+         * @param settingArr: array of setting objects
+         * @param groupOrder: (optional) array of string of group name
+         * @return array of setting-group objects
+         */
+        let mapUserSettings = function(settingArr, groupOrder) {
+            var settingObj = {};
+            var groupOrder = groupOrder || [];
+            var settingAdded = [];
+
+            // Group setting objects by the given group order
+            groupOrder.forEach(function(order) {
+                if (!settingObj.order) settingObj[order] = [];
+                settingArr.forEach(function(setting) {
+                    if (setting.group.toLowerCase() === order.toLowerCase()) {
+                        settingObj[order].push(setting);
+                        settingAdded.push(setting);
+                    }
+                });
+                settingArr = _.difference(settingArr, settingAdded);
+            });
+
+            // Take the remaining setting and append them grouped by their "group"
+            settingArr.forEach(function(setting) {
+                if (!settingObj[setting.group]) settingObj[setting.group] = [];
+                settingObj[setting.group].push(setting);
+            });
+
+            // Return mapped/grouped/orderd object as an array
+            return _.map(settingObj, function(list, group) {
+                return {group: group, list: list};
+            });
+        };
+
+        let flattenUserSetting = function(settingArr) {
+            var flatSetting = [];
+
+            settingArr.forEach(function(groupObj) {
+                groupObj.list.forEach(function(setting) {
+                    flatSetting.push(setting);
+                });
+            });
+
+            return flatSetting;
+        };
+
         let fontSizeMap = {
             'normal': '100%',
             'small': '90%',
@@ -113,8 +160,19 @@
             'larger': '120%'
         };
 
+
+        // 
         // This is the returned object
+        // 
         let configurator = {
+
+            /**
+             * Fetch the raw and default setting array from JSON file
+             * @return setting array from user-setting.json
+             */
+            _userSetting: function() {
+                return userSetting;
+            },
 
             /**
              * Returns the storage being used
@@ -133,27 +191,20 @@
             },
 
             /**
+             * Fetch the (mapped) setting array
+             * @return setting array from user's storage or from default file
+             */
+            getUserSettingArr: function() {
+                return JSON.parse(storage['user-setting']) || mapUserSettings(this._userSetting());
+                // return mapUserSettings(this._userSetting());
+            },
+
+            /**
              * Write the whole (mapped) setting array to the user's preferred storage
              * @param settingArr
              */
             saveUserSettingArr: function(settingArr) {
                 storage['user-setting'] = JSON.stringify(settingArr);
-            },
-
-            /**
-             * Fetch the (mapped) setting array
-             * @return setting array from user's storage or from default file
-             */
-            getUserSettingArr: function() {
-                return JSON.parse(storage['user-setting']) || this.mapUserSettings(this.getDefaultUserSettingArr());
-            },
-
-            /**
-             * Fetch the raw and default setting array from JSON file
-             * @return setting array from user-setting.json
-             */
-            getDefaultUserSettingArr: function() {
-                return userSetting;
             },
 
             /**
@@ -167,39 +218,19 @@
                 return _.find(list, {'name': name}).value;
             },
 
-            /**
-             * Map the raw setting array into groups and lists for UI to display
-             * @param settingArr: array of setting objects
-             * @param groupOrder: (optional) array of string of group name
-             * @return array of setting-group objects
-             */
-            mapUserSettings: function(settingArr, groupOrder) {
-                var settingObj = {};
-                var groupOrder = groupOrder || [];
-                var settingAdded = [];
+            refreshUserSetting: function() {
+                var defaults = this._userSetting();
+                var current = flattenUserSetting(JSON.parse(storage['user-setting']));
 
-                // Group setting objects by the given group order
-                groupOrder.forEach(function(order) {
-                    if (!settingObj.order) settingObj[order] = [];
-                    settingArr.forEach(function(setting) {
-                        if (setting.group.toLowerCase() === order.toLowerCase()) {
-                            settingObj[order].push(setting);
-                            settingAdded.push(setting);
-                        }
-                    });
-                    settingArr = _.difference(settingArr, settingAdded);
-                });
-
-                // Take the remaining setting and append them grouped by their "group"
-                settingArr.forEach(function(setting) {
-                    if (!settingObj[setting.group]) settingObj[setting.group] = [];
-                    settingObj[setting.group].push(setting);
-                });
-
-                // Return mapped/grouped/orderd object as an array
-                return _.map(settingObj, function(list, group) {
-                    return {group: group, list: list};
-                });
+                // Keep current values and remove non-existent settings
+                for (var i in current) {
+                    var j = _.findIndex(defaults, {'name': current[i].name});
+                    if (j >= 0) {
+                        defaults[j].value = current[i].value;
+                    }
+                }
+                
+                return mapUserSettings(defaults);
             },
 
             /**

@@ -101,17 +101,19 @@
                 <div class="setting-group-header">{{_capitalize(item.group)}}</div>
                 <div class="setting-group-body">
                     <template is="dom-repeat" items="{{item.list}}" as="setting" index-as="list">
-                        <div id="{{setting.name}}" class="setting-group-item" on-tap="_runTapHandler" data-group="[[group]]" data-list="[[list]]">
-                            <div class="setting-text avoid-clicks">
-                                <div class="main-text">{{setting.mainText}}</div>
-                                <div class="help-text">{{_computeHelpText(setting.*)}}</div>
-                            </div>
-                            <template is="dom-if" if="{{_isBoolean(setting.value)}}">
-                                <div class="setting-checkbox avoid-clicks">
-                                    <paper-checkbox class="right" checked="{{setting.value}}"></paper-checkbox>
+                        <template is="dom-if" if="{{_isVisible(setting.visible)}}">
+                            <div id="{{setting.name}}" class="setting-group-item" on-tap="_runTapHandler" data-group="[[group]]" data-list="[[list]]">
+                                <div class="setting-text avoid-clicks">
+                                    <div class="main-text">{{setting.mainText}}</div>
+                                    <div class="help-text">{{_computeHelpText(setting.*)}}</div>
                                 </div>
-                            </template>
-                        </div>
+                                <template is="dom-if" if="{{_isBoolean(setting.value)}}">
+                                    <div class="setting-checkbox avoid-clicks">
+                                        <paper-checkbox class="right" checked="{{setting.value}}"></paper-checkbox>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
                     </template>
                 </div>
             </template>
@@ -172,6 +174,11 @@
             this.route = this.backto;
         },
 
+        _isVisible: function(bool) {
+            if (bool == undefined) bool = true;
+            return bool;
+        },
+
         _capitalize: function(text) {
             return text.charAt(0).toUpperCase() + text.slice(1).replace(/( [a-z])/g, function(match) {
                 return match.toUpperCase();
@@ -195,13 +202,16 @@
 
         _runTapHandler: function(event) {
             if (event.model.setting.name == 'developertools') {
-                this.developerTools();
+                App.showDevTools();
             }
             else if (event.model.setting.name == "refreshsettings") {
-                this.refreshSettings();
+                this.settings = App.configurator.refreshUserSetting();
+                this.saveSettings();
             }
             else if (typeof (event.model.setting.value) == 'boolean') {
-                this.toggleValue(event);
+                var path = 'settings.' + event.target.dataGroup + '.list.' + event.target.dataList + '.value';
+                this.set(path, !event.model.setting.value);
+                this.saveSettings();
             }
             else {
                 this.openSettingModal(event);
@@ -219,20 +229,6 @@
 
         _onSettingCancel: function() {
             this.closeSettingModal();
-        },
-
-        developerTools: function(event) {
-            App.showDevTools();
-        },
-
-        refreshSettings: function(event) {
-            this.settings = App.configurator.refreshUserSettings();
-        },
-
-        toggleValue: function(event) {
-            var path = 'settings.' + event.target.dataGroup + '.list.' + event.target.dataList + '.value';
-            this.set(path, !event.model.setting.value);
-            this.saveSettings();
         },
 
         openSettingModal: function(event) {

@@ -370,7 +370,7 @@
         gopublish: function () {
             var projectdata = this.currentinfo;
             this.closeinfo();
-            this.fire('iron-signal', {name: 'loadpublish', data: {projdata: projectdata}});
+            this.fire('iron-signal', {name: 'loadproject', data: {projdata: projectdata, type: "publish"}});
         },
 
         gobackup: function () {
@@ -381,7 +381,7 @@
 
         openproject: function (e) {
             var projectdata = e.model.proj;
-            this.fire('iron-signal', {name: 'loadproject', data: {projdata: projectdata}});
+            this.fire('iron-signal', {name: 'loadproject', data: {projdata: projectdata, type: "home"}});
         },
 
         openinfo: function (e) {

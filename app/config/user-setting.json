@@ -1,0 +1,144 @@
+[
+    {
+        "name": "remembermyplace",
+        "mainText": "Remember My Place",
+        "helpText": "Display the last viewed screen when starting the app",
+        "value": false,
+        "group": "general",
+        "enabled": true,
+        "visible": false
+    },
+    {
+        "name": "highlightkeyterms",
+        "mainText":"Highlight Key Terms",
+        "helpText": "Make key terms clickable in the source text",
+        "value": true,
+        "group": "general",
+        "enabled": true,
+        "visible": false
+    },
+    {
+        "name": "font",
+        "mainText": "Font",
+        "value": "Roboto",
+        "options": ["Roboto", "Arial", "Times New Roman", "Calibri", "Tahoma"],
+        "group": "general",
+        "enabled": true,
+        "visible": true
+    },
+    {
+        "name": "fontsize",
+        "mainText": "Font Size",
+        "value": "Normal",
+        "options": ["Smaller", "Small", "Normal", "Large", "Larger"],
+        "group": "general",
+        "enabled": true,
+        "visible": true
+    },
+    {
+        "name": "exportformat",
+        "mainText": "Export Format",
+        "value": "DokuWiki",
+        "options": ["DokuWiki", "translationStudio"],
+        "group": "share",
+        "enabled": true,
+        "visible": false
+    },
+    {
+        "name": "autosavechanges",
+        "mainText": "Auto Save Changes",
+        "helpText": "Every <int> seconds",
+        "nullText": "Never",
+        "value": 5,
+        "options": [1, 5, 10, 15],
+        "unit": "second",
+        "group": "upload",
+        "enabled": true,
+        "visible": false
+    },
+    {
+        "name": "authserver",
+        "mainText": "Authentication Server",
+        "value": "ts.door43.org",
+        "group": "upload",
+        "enabled": true,
+        "visible": true
+    },
+    {
+        "name": "authserverport",
+        "mainText": "Authentication Server Port",
+        "value": "9095",
+        "group": "upload",
+        "enabled": true,
+        "visible": true
+    },
+    {
+        "name": "dataserver",
+        "mainText": "Data Server",
+        "value": "gitolite3@ts.door43.org",
+        "group": "upload",
+        "enabled": true,
+        "visible": true
+    },
+    {
+        "name": "dataserverport",
+        "mainText": "Data Server Port",
+        "value": "9299",
+        "group": "upload",
+        "enabled": true,
+        "visible": true
+    },
+    {
+        "name": "mediaserver",
+        "mainText": "Media Server",
+        "value": "https://api.unfoldingword.org/",
+        "group": "upload",
+        "enabled": true,
+        "visible": true
+    },
+    {
+        "name": "backupinterval",
+        "mainText": "Backup Interval",
+        "helpText": "<int> minutes",
+        "nullText": "Disable Backup",
+        "value": 5,
+        "options": [1, 2, 3, 4, 5, 10, 15],
+        "unit": "second",
+        "group": "advanced",
+        "enabled": true,
+        "visible": false
+    },
+    {
+        "name": "savedirectory",
+        "mainText": "Save Directory",
+        "value": "test",
+        "group": "advanced",
+        "enabled": true,
+        "visible": false
+    },
+    {
+        "name": "logginglevel",
+        "mainText": "Logging Level",
+        "value": "Warnings",
+        "options": ["Information", "Warnings", "Errors"],
+        "group": "advanced",
+        "enabled": true,
+        "visible": false
+    },
+    {
+        "name": "developertools",
+        "mainText": "Developer Tools",
+        "helpText": "Opens the developer tools",
+        "group": "advanced",
+        "enabled": true,
+        "visible": true
+    },
+    {
+        "name": "refreshsettings",
+        "mainText": "Refresh Settings",
+        "helpText": "Update user options to the most current",
+        "group": "advanced",
+        "enabled": true,
+        "visible": true
+    }
+]

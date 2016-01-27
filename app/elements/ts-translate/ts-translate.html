@@ -433,15 +433,17 @@
         },
 
         loadnewproject: function (event, data) {
+            //this function not currently being used, but saved in case needed later
             var mythis = this;
             var blank = [];
             var blankstate = {};
             this.setrightanimation();
+            this.route = "translate";
             this.set('currentproject.state', blankstate);
             this.set('currentproject.translation', blank);
             this.set('currentproject.data', data.projdata);
             this.checkstandard();
-            this.savetofile();
+            //this.savetofile();
             if (data.projdata.project.type !== "text" && data.projdata.project.type !== "tw") {
                 var newmeta = {fullname: data.projdata.basename};
                 App.projectsManager.loadTargetTranslation(newmeta).then(function (newtranslation) {
@@ -451,6 +453,10 @@
                 });
             } else {
                 mythis.set('rawdata2', {});
+                if (data.projdata.project.type === "tw") {
+                    mythis.pullwords();
+                    mythis.createchunks();
+                }
                 mythis.setmodestate();
                 mythis.checksources();
             }
@@ -460,6 +466,7 @@
             var mythis = this;
             var blankstate = {};
             var loading = this.$.loading;
+            var type = data.type;
             this.setrightanimation();
             this.route = "translate";
             setTimeout(function() {
@@ -483,6 +490,9 @@
                                     mythis.setmodestate();
                                     mythis.checksources();
                                     mythis.fire('iron-signal', {name: 'adjustbar'});
+                                    if (type === "publish") {
+                                        mythis.gopublish();
+                                    }
                                 }, 250);
                             });
                         } else {
@@ -500,6 +510,9 @@
                                 mythis.setmodestate();
                                 mythis.checksources();
                                 mythis.fire('iron-signal', {name: 'adjustbar'});
+                                if (type === "publish") {
+                                    mythis.gopublish();
+                                }
                             }, 250);
                         }
                     });
@@ -508,6 +521,7 @@
         },
 
         loadpublish: function (event, data) {
+            //this function is not currently being used, but saved in case needed later
             var mythis = this;
             var blankstate = {};
             var loading = this.$.loading;
@@ -1189,7 +1203,7 @@
         },
 
         gopublish: function () {
-            if(this.currentproject.data.sources.length) {
+            if(this.currentproject.data.sources.length || this.currentproject.data.project.type === "tw") {
                 this.savestate();
                 this.setleftanimation();
                 this.fire('iron-signal', {name: 'updatepublish'});

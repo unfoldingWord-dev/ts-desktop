@@ -168,6 +168,7 @@
         },
 
         createproject: function () {
+            var mythis = this;
             var project = this.project;
             var language = this.language;
             var type = this.type;
@@ -201,10 +202,12 @@
             }
 
             var newprojdata = {"project": {"id": project.slug, "name": project.name, "type": type.code}, "type_name": type.name, "fullname": fullname, "basename": basename, "resource_id": type.resource, "target_language": language, "translators": [], "sources": [], "completion": 0, "currentsource": null};
-            this.fire('iron-signal', {name: 'loadnewproject', data: {projdata: newprojdata}});
             this.animationConfig.exit.name = 'slide-left-animation';
-            this.route = "translate";
-            this.selected = 0;
+            App.projectsManager.saveTargetTranslation([], newprojdata).then(function() {
+                mythis.fire('iron-signal', {name: 'updatelist'});
+                mythis.fire('iron-signal', {name: 'loadproject', data: {projdata: newprojdata, type: "new"}});
+                mythis.selected = 0;
+            });
         },
 
         back: function () {

@@ -11,11 +11,12 @@ var _ = require('lodash'),
     tstudioMigrator = require('../js/migration/tstudioMigrator'),
     targetTranslationMigrator = require('../js/migration/targetTranslationMigrator'),
     wrap = utils.promisify,
-    guard = utils.guard,
-    Git = require('../js/git').Git,
-    git = new Git();
+    guard = utils.guard;
 
-function zipper(r) {
+var Git = require('../js/git').Git;
+var git = new Git();
+
+function zipper (r) {
     return r.length ? _.map(r[0].values, _.zipObject.bind(_, r[0].columns)) : [];
 }
 
@@ -352,10 +353,9 @@ function ProjectsManager(query, configurator) {
          * @param translation an array of frames
          * @param meta the target translation manifest and other info
          * @param filename the path where the export will be saved
-         * @param mediaServer the API URL
          * @returns {Promise.<boolean>}
          */
-        exportTranslation: function (translation, meta, filename, mediaServer) {
+        exportTranslation: function (translation, meta, filename) {
             // validate input
             if(filename === null || filename === '') {
                 return Promise.reject('The filename is empty');
@@ -408,7 +408,7 @@ function ProjectsManager(query, configurator) {
                             }
 
                             // add frame
-                            chapterContent += '{{' + mediaServer + meta.project_id + '/jpg/1/en/360px/' + meta.project_id + '-' + meta.target_language.id + '-' + frame.meta.chapterid + '-' + frame.meta.frameid + '.jpg}}\n\n';
+                            chapterContent += '{{https://api.unfoldingword.org/' + meta.project.id + '/jpg/1/en/360px/' + meta.project.id + '-' + meta.target_language.id + '-' + frame.meta.chapterid + '-' + frame.meta.frameid + '.jpg}}\n\n';
                             chapterContent += frame.transcontent + '\n\n';
                         }
                         if(chapterContent !== '' && numFinishedFrames > 0) {

@@ -8,7 +8,6 @@
     'use strict';
 
     let _ = require('lodash');
-    let userSetting = require('../config/user-setting');
 
     function Configurator () {
         let storage = {};
@@ -98,160 +97,45 @@
         };
 
         let setDefaultValue = function (key, value) {
-            setValue(key, value, {'default': value || ''});
+            setValue(key, value, {'default': value});
         };
 
         let getKeys = function () {
             return Object.keys(storage);
         };
 
-        /**
-         * Map the raw setting array into groups and lists for UI to display
-         * @param settingArr: array of setting objects
-         * @param groupOrder: (optional) array of string of group name
-         * @return array of setting-group objects
-         */
-        let mapUserSettings = function(settingArr, groupOrder) {
-            var settingObj = {};
-            var groupOrder = groupOrder || [];
-            var settingAdded = [];
+        let getText = function (key) {
+            console.log('getting text for', key);
+            if (!key) {
+                return;
+            }
+            key = key.toLowerCase();
 
-            // Group setting objects by the given group order
-            groupOrder.forEach(function(order) {
-                if (!settingObj.order) settingObj[order] = [];
-                settingArr.forEach(function(setting) {
-                    if (setting.group.toLowerCase() === order.toLowerCase()) {
-                        settingObj[order].push(setting);
-                        settingAdded.push(setting);
-                    }
-                });
-                settingArr = _.difference(settingArr, settingAdded);
-            });
+            let valueObjStr = storage[key] || '{}';
+            console.log('valobjstr', valueObjStr);
+            let valueObj = JSON.parse(valueObjStr);
+            let text = valueObj.text;
 
-            // Take the remaining setting and append them grouped by their "group"
-            settingArr.forEach(function(setting) {
-                if (!settingObj[setting.group]) settingObj[setting.group] = [];
-                settingObj[setting.group].push(setting);
-            });
-
-            // Return mapped/grouped/orderd object as an array
-            return _.map(settingObj, function(list, group) {
-                return {group: group, list: list};
-            });
+            console.log('returning', text);
+            return text;
         };
 
-        let flattenUserSetting = function(settingArr) {
-            var flatSetting = [];
+        let getType = function (key) {
+            if (!key) {
+                return;
+            }
+            key = key.toLowerCase();
 
-            settingArr.forEach(function(groupObj) {
-                groupObj.list.forEach(function(setting) {
-                    flatSetting.push(setting);
-                });
-            });
+            let valueObjStr = storage[key] || '{}';
+            let valueObj = JSON.parse(valueObjStr);
+            let type = valueObj.meta.type;
 
-            return flatSetting;
+            return type;
         };
 
-        let fontSizeMap = {
-            'normal': '100%',
-            'small': '90%',
-            'smaller': '80%',
-            'large': '110%',
-            'larger': '120%'
-        };
-
-
-        // 
-        // This is the returned object
-        // 
         let configurator = {
-
-            /**
-             * Fetch the raw and default setting array from JSON file
-             * @return setting array from user-setting.json
-             */
-            _userSetting: function() {
-                return userSetting;
-            },
-
-            /**
-             * Returns the storage being used
-             * @returns {object}
-             */
-            _storage: function() {
-                return storage;
-            },
-
-            /**
-             * Set the storage object used for this app
-             * @param storeObject
-             */
             setStorage: function (storeObject) {
                 storage = storeObject;
-            },
-
-            /**
-             * Fetch the (mapped) setting array
-             * @return setting array from user's storage or from default file
-             */
-            getUserSettingArr: function() {
-                return JSON.parse(storage['user-setting']) || mapUserSettings(this._userSetting());
-                // return mapUserSettings(this._userSetting());
-            },
-
-            /**
-             * Write the whole (mapped) setting array to the user's preferred storage
-             * @param settingArr
-             */
-            saveUserSettingArr: function(settingArr) {
-                storage['user-setting'] = JSON.stringify(settingArr);
-            },
-
-            /**
-             * Get the value of a setting
-             * @param name: of the user setting
-             * @return value of the user setting
-             */
-            getUserSetting: function(name) {
-                var s = this.getUserSettingArr();
-                var list = _.find(s, {'list': [{'name': name}]}).list;
-                return _.find(list, {'name': name}).value;
-            },
-
-            refreshUserSetting: function() {
-                var defaults = this._userSetting();
-                var current = flattenUserSetting(JSON.parse(storage['user-setting']));
-
-                // Keep current values and remove non-existent settings
-                for (var i in current) {
-                    var j = _.findIndex(defaults, {'name': current[i].name});
-                    if (j >= 0) {
-                        defaults[j].value = current[i].value;
-                    }
-                }
-                
-                return mapUserSettings(defaults);
-            },
-
-            /**
-             * Apply user preferences for app's look
-             */
-            applyPrefAppearance: function() {
-                let body = window.document.querySelector('body');
-                let tsTranslate = window.document.querySelector('ts-translate');
-                let fontSizeVal = this.getUserSetting('fontsize').toLowerCase();
-                
-                tsTranslate.style.fontSize = fontSizeMap[fontSizeVal];
-                tsTranslate.style.fontFamily = this.getUserSetting('font');
-            },
-
-            /**
-             * 
-             */
-            applyPrefBehavior: function() {
-                // We may not need this as settings that affects behavior is most likely called
-                //    using the App.configurator.getUserSetting(key) API.
-                console.log('Pretend to apply behavior');
             },
 
             /**
@@ -260,18 +144,28 @@
              * @returns {object}
              */
             getValue: function (key) {
-                return getValue(key) || '';
+                let value = getValue(key);
+                if (value === undefined) {
+                    return '';
+                }
+
+                return value;
             },
 
             /**
              * Adds a new value to the configurator
-             * @param key: the key used to retreive the value
-             * @param value: the value that will be stored
-             * @param meta: (optional) parameters to help specify how the value should be treated
+             * @param key the key used to retreive the value
+             * @param value the value that will be stored
+             * @param meta optional parameters to help specify how the value should be treated
              */
             setValue: function (key, value, meta) {
                 setValue(key, value, meta);
             },
+
+
+            // getText: function (key) {
+            //     let
+            // },
 
             /**
              * Loads a configuration object into the configurator
@@ -309,6 +203,35 @@
                 for (let i = 0; i < keys.length; i++) {
                     unsetValue(keys[i]);
                 }
+            },
+
+            getSettings: function (config) {
+                var settings = [];
+                for (var group in config) {
+                    if (config.hasOwnProperty(group)) {
+                        var keyArrays = config[group];
+                        var list = [];
+                        for (var i = 0; i < keyArrays.length; i++) {
+                            var key = keyArrays[i];
+                            list.push({
+                                "name": key,
+                                "text": getText(key),
+                                "value": getValue(key),
+                                "type": getType(key),
+                                "handler": key + 'Tap'
+                            });
+                            console.log(keyArrays[i]);
+                        }
+                        settings.push({'group': group, 'list': list});
+                    }
+                }
+            //     var settings = [];
+            //     keys.forEach(function(key) {
+            //         settings.push({name: key, value: getValue(key), type: getMetaValue(key, type)});
+            //     });
+            //     return settings;
+                console.log(storage);
+                return [];
             }
 
         };

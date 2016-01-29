@@ -1,23 +1,5 @@
 [
     {
-        "name": "remembermyplace",
-        "mainText": "Remember My Place",
-        "helpText": "Display the last viewed screen when starting the app",
-        "value": false,
-        "group": "general",
-        "enabled": true,
-        "visible": false
-    },
-    {
-        "name": "highlightkeyterms",
-        "mainText":"Highlight Key Terms",
-        "helpText": "Make key terms clickable in the source text",
-        "value": true,
-        "group": "general",
-        "enabled": true,
-        "visible": false
-    },
-    {
         "name": "font",
         "mainText": "Font",
         "value": "Roboto",
@@ -34,27 +16,6 @@
         "group": "general",
         "enabled": true,
         "visible": true
-    },
-    {
-        "name": "exportformat",
-        "mainText": "Export Format",
-        "value": "DokuWiki",
-        "options": ["DokuWiki", "translationStudio"],
-        "group": "share",
-        "enabled": true,
-        "visible": false
-    },
-    {
-        "name": "autosavechanges",
-        "mainText": "Auto Save Changes",
-        "helpText": "Every <int> seconds",
-        "nullText": "Never",
-        "value": 5,
-        "options": [1, 5, 10, 15],
-        "unit": "second",
-        "group": "upload",
-        "enabled": true,
-        "visible": false
     },
     {
         "name": "authserver",
@@ -95,18 +56,6 @@
         "group": "upload",
         "enabled": true,
         "visible": true
-    },
-    {
-        "name": "backupinterval",
-        "mainText": "Backup Interval",
-        "helpText": "<int> minutes",
-        "nullText": "Disable Backup",
-        "value": 5,
-        "options": [1, 2, 3, 4, 5, 10, 15],
-        "unit": "second",
-        "group": "advanced",
-        "enabled": true,
-        "visible": false
     },
     {
         "name": "savedirectory",

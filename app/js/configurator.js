@@ -112,31 +112,10 @@
          * @return array of setting-group objects
          */
         let mapUserSettings = function(settingArr, groupOrder) {
-            var settingObj = {};
-            var groupOrder = groupOrder || [];
-            var settingAdded = [];
-
-            // Group setting objects by the given group order
-            groupOrder.forEach(function(order) {
-                if (!settingObj.order) settingObj[order] = [];
-                settingArr.forEach(function(setting) {
-                    if (setting.group.toLowerCase() === order.toLowerCase()) {
-                        settingObj[order].push(setting);
-                        settingAdded.push(setting);
-                    }
-                });
-                settingArr = _.difference(settingArr, settingAdded);
-            });
-
-            // Take the remaining setting and append them grouped by their "group"
-            settingArr.forEach(function(setting) {
-                if (!settingObj[setting.group]) settingObj[setting.group] = [];
-                settingObj[setting.group].push(setting);
-            });
-
-            // Return mapped/grouped/orderd object as an array
-            return _.map(settingObj, function(list, group) {
-                return {group: group, list: list};
+            // TODO: Order group
+            var grouped = _.groupBy(settingArr, 'group');
+            return _.map(grouped, function (list, group) {
+                return { group, list };
             });
         };
 
@@ -195,8 +174,11 @@
              * @return setting array from user's storage or from default file
              */
             getUserSettingArr: function() {
-                return JSON.parse(storage['user-setting']) || mapUserSettings(this._userSetting());
-                // return mapUserSettings(this._userSetting());
+                var us;
+                try {
+                    us = JSON.parse(storage['user-setting']);
+                } catch (e) { }
+                return us || mapUserSettings(this._userSetting());
             },
 
             /**
@@ -229,7 +211,7 @@
                         defaults[j].value = current[i].value;
                     }
                 }
-                
+
                 return mapUserSettings(defaults);
             },
 

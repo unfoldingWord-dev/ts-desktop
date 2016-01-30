@@ -464,22 +464,21 @@
 
         loadproject: function (event, data) {
             var mythis = this;
-            var blankstate = {};
             var loading = this.$.loading;
             var type = data.type;
+            var projdata = data.projdata;
             this.setrightanimation();
             this.route = "translate";
             setTimeout(function() {
                 loading.open();
                 setTimeout(function() {
-                    mythis.set('currentproject.data', data.projdata);
-                    mythis.set('currentproject.state', blankstate);
+                    mythis.set('currentproject', {data: projdata, state: {}, source: [], translation: []});
                     mythis.checkstandard();
                     mythis.retrievesource();
-                    App.projectsManager.loadTargetTranslation(data.projdata).then(function (translation) {
+                    App.projectsManager.loadTargetTranslation(projdata).then(function (translation) {
                         mythis.set('rawdata', translation);
-                        if (data.projdata.project.type === "tn" || data.projdata.project.type === "tq") {
-                            var newmeta = {fullname: data.projdata.basename, project: {type: 'text'}};
+                        if (projdata.project.type === "tn" || projdata.project.type === "tq") {
+                            var newmeta = {fullname: projdata.basename, project: {type: 'text'}};
                             App.projectsManager.loadTargetTranslation(newmeta).then(function (newtranslation) {
                                 mythis.set('rawdata2', newtranslation);
                                 mythis.pullsource();
@@ -497,7 +496,7 @@
                             });
                         } else {
                             mythis.set('rawdata2', {});
-                            if (data.projdata.project.type === "tw") {
+                            if (projdata.project.type === "tw") {
                                 mythis.pullwords();
                                 mythis.createchunks();
                             } else {
@@ -752,9 +751,9 @@
                     };
                     source.push(srcchunk);
                     var rawbookdata = this.rawdata["00-title"];
-                    transchunk = {transcontent: "", helpscontent: [], completed: false, meta: bookmeta};
+                    transchunk = {transcontent: "", helpscontent: [], completed: false, meta: bookmeta, state: {}};
 
-                    if (rawbookdata !== undefined) {
+                    if (rawbookdata) {
                         transchunk.completed = rawbookdata.completed;
                         transchunk.transcontent = rawbookdata.transcontent;
                     }
@@ -787,9 +786,9 @@
                     source.push(srcchunk);
 
                     var rawtitledata = this.rawdata[chapterid + "-title"];
-                    transchunk = {transcontent: "", helpscontent: [], completed: false, meta: titlemeta};
+                    transchunk = {transcontent: "", helpscontent: [], completed: false, meta: titlemeta, state: {}};
 
-                    if (rawtitledata !== undefined) {
+                    if (rawtitledata) {
                         transchunk.completed = rawtitledata.completed;
                         transchunk.transcontent = rawtitledata.transcontent;
                     }
@@ -822,9 +821,9 @@
                     };
                     source.push(srcchunk);
                     var rawrefdata = this.rawdata[chapterid + "-reference"];
-                    transchunk = {transcontent: "", helpscontent: [], completed: false, meta: refmeta};
+                    transchunk = {transcontent: "", helpscontent: [], completed: false, meta: refmeta, state: {}};
 
-                    if (rawrefdata !== undefined) {
+                    if (rawrefdata) {
                         transchunk.completed = rawrefdata.completed;
                         transchunk.transcontent = rawrefdata.transcontent;
                     }
@@ -843,9 +842,9 @@
 
                 var rawdata = this.rawdata[complexid];
                 var rawdata2 = this.rawdata2[complexid];
-                transchunk = {transcontent: "", helpscontent: [], completed: false, meta: meta};
+                transchunk = {transcontent: "", helpscontent: [], completed: false, meta: meta, state: {}};
 
-                if (rawdata !== undefined) {
+                if (rawdata) {
                     transchunk.completed = rawdata.completed;
                     if (standard) {
                         transchunk.transcontent = rawdata.transcontent;
@@ -853,7 +852,7 @@
                         transchunk.helpscontent = rawdata.helpscontent;
                     }
                 }
-                if (rawdata2 !== undefined && !standard) {
+                if (rawdata2 && !standard) {
                     transchunk.transcontent = rawdata2.transcontent;
                 }
 
@@ -901,8 +900,8 @@
                 source.push(srcchunk);
 
                 var rawdata = this.rawdata[complexid];
-                transchunk = {transcontent: "", helpscontent: [{title: "", body: ""}], completed: false, meta: meta};
-                if (rawdata !== undefined) {
+                transchunk = {transcontent: "", helpscontent: [{title: "", body: ""}], completed: false, meta: meta, state: {}};
+                if (rawdata) {
                     transchunk.completed = rawdata.completed;
                     transchunk.helpscontent = rawdata.helpscontent;
                 }
@@ -1084,28 +1083,24 @@
             var projectdata = this.currentproject.data;
 
             for (var i = 0; i < translation.length; i++) {
-                var chapterid = translation[i].meta.chapterid;
-                var frameid = translation[i].meta.frameid;
-                var statedata = this.currentproject.state[chapterid + '-' + frameid];
-                if (statedata === undefined) {
+                var complexid = translation[i].meta.chapterid + '-' + translation[i].meta.frameid;
+                var statedata = this.currentproject.state[complexid];
+                if (statedata) {
+                    translation[i].state = statedata;
+                } else {
                     translation[i].state = {chunk: true, review: true, resource: 0};
-                    this.currentproject.state[chapterid + '-' + frameid] = {chunk: true, review: true, resource: 0};
                     if (!source[i].notes.length) {
                         if (!source[i].words.length) {
                             if (!source[i].questions.length) {
                                 translation[i].state.resource = 0;
-                                this.currentproject.state[chapterid + '-' + frameid].resource = 0;
                             } else {
                                 translation[i].state.resource = 2;
-                                this.currentproject.state[chapterid + '-' + frameid].resource = 2;
                             }
                         } else {
                             translation[i].state.resource = 1;
-                            this.currentproject.state[chapterid + '-' + frameid].resource = 1;
                         }
                     }
-                } else {
-                    translation[i].state = statedata;
+                    this.currentproject.state[complexid] = translation[i].state;
                 }
             }
 

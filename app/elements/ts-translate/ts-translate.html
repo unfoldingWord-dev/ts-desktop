@@ -3,6 +3,7 @@
 <link rel="import" href="../../components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../components/paper-button/paper-button.html">
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../components/paper-checkbox/paper-checkbox.html">
 
 <link rel="import" href="./ts-read-mode/ts-read-mode.html">
 <link rel="import" href="./ts-chunk-mode/ts-chunk-mode.html">
@@ -155,11 +156,79 @@
             color: var(--accent-color);
         }
 
+        #printpopup {
+            width: 450px;
+            height: 240px;
+            font-size: 110%;
+        }
+
+        #printbuttons {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 0 10px;
+            color: var(--secondary-text-color);
+            border-top: 1px solid var(--border-color);
+        }
+
+        #printbuttons paper-button:hover {
+            color: var(--accent-color);
+        }
+
+        paper-checkbox {
+            --paper-checkbox-checked-color: var(--accent-color-dark);
+            --paper-checkbox-unchecked-color: var(--accent-color-dark);
+        }
+
+        #confirm {
+            width: 320px;
+            height: 220px;
+            color: var(--primary-text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 110%;
+        }
+
+        #buttonbox {
+            display: flex;
+            justify-content: center;
+            color: var(--secondary-text-color);
+        }
+
+        #buttonbox paper-button:hover {
+            color: var(--accent-color);
+        }
+
+        paper-progress {
+            --paper-progress-active-color: var(--accent-color);
+            width: 250px;
+        }
+
+        #bar {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        #text {
+            text-align: center;
+        }
+
+        #confirm h2 {
+            color: var(--accent-color);
+        }
+
+        .hidden {
+            display: none;
+        }
+
     </style>
 
     <template>
 
-        <ts-translate-sidebar selected="{{selected}}" standardproject="[[standardproject]]" on-gohome="gohome" on-gopublish="gopublish" on-gobackup="gobackup" on-gosettings="gosettings"></ts-translate-sidebar>
+        <ts-translate-sidebar selected="{{selected}}" standardproject="[[standardproject]]" on-gohome="gohome" on-gopublish="gopublish" on-gobackup="gobackup" on-goprint="goprint" on-gosettings="gosettings"></ts-translate-sidebar>
 
         <div id="pages">
             <ts-read-mode id="readmode" chapters="[[chapters]]" modestatus="{{modestatus}}"></ts-read-mode>
@@ -214,6 +283,23 @@
             </div>
         </paper-dialog>
 
+        <paper-dialog id="printpopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <h2>Print</h2>
+            <div>
+                <p><span>[[currentproject.data.project.name]]</span> - <span>[[currentproject.data.target_language.name]]</span></p>
+            </div>
+            <div>
+                <p><paper-checkbox id="imagebox"></paper-checkbox><span>Include images</span></p>
+                <p><paper-checkbox id="chunkbox" checked="true"></paper-checkbox><span>Include incomplete chunks</span></p>
+            </div>
+            <div id="printbuttons">
+                <paper-button dialog-dismiss>Cancel</paper-button>
+                <paper-button on-tap="print">Save to PDF</paper-button>
+            </div>
+        </paper-dialog>
+
+        <input class="hidden" id="printinput" type="file" nwsaveas="" />
+
         <paper-dialog id="delete" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <h2><iron-icon icon="delete"></iron-icon>Delete</h2>
             <div>
@@ -231,6 +317,24 @@
 
         <paper-dialog id="loading" class="popup" modal="true">
             <p>Loading project. Please wait...</p>
+        </paper-dialog>
+
+        <paper-dialog id="confirm" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <template is="dom-if" if="{{options.loading}}">
+                <p>{{options.body}}</p>
+                <div id="bar">
+                    <paper-progress indeterminate="true"></paper-progress>
+                </div>
+            </template>
+            <template is="dom-if" if="{{!options.loading}}">
+                <h2>{{options.title}}</h2>
+                <div id="text">
+                    <p>{{options.body}}</p>
+                </div>
+                <div id="buttonbox">
+                    <paper-button dialog-dismiss>Close</paper-button>
+                </div>
+            </template>
         </paper-dialog>
 
         <iron-signals on-iron-signal-frompublish="frompublish"></iron-signals>
@@ -310,6 +414,10 @@
             chunks: {
                 type: Object,
                 value: {}
+            },
+            options: {
+                type: Object,
+                value: {loading: false, title: "", body: ""}
             },
             animationConfig: {
                 value: function () {
@@ -739,7 +847,8 @@
                         refaddon: refaddon,
                         standard: standard,
                         words: false,
-                        verses: []
+                        verses: [],
+                        format: format
                     };
                     srcchunk = {
                         meta: bookmeta,
@@ -771,7 +880,8 @@
                     chunkref: "",
                     refaddon: refaddon,
                     standard: standard,
-                    words: false
+                    words: false,
+                    format: format
                 };
 
                 if (frameid === "01" && standard && title !== "") {
@@ -807,7 +917,8 @@
                     chunkref: "",
                     refaddon: refaddon,
                     standard: standard,
-                    words: false
+                    words: false,
+                    format: format
                 };
 
                 if (frameid === "01" && standard && reference !== "") {
@@ -1207,6 +1318,12 @@
             }
         },
 
+        goprint: function () {
+            this.$.chunkbox.checked = true;
+            this.$.imagebox.checked = false;
+            this.$.printpopup.open();
+        },
+
         gobackup: function () {
             var meta = this.currentproject.data;
             this.fire('iron-signal', {name: 'openbackup', data: {meta: meta}});
@@ -1217,6 +1334,46 @@
             this.setleftanimation();
             this.backto = this.route;
             this.route = "settings";
+        },
+
+        print: function () {
+            var mythis = this;
+            var popup = this.$.confirm;
+            var meta = this.currentproject.data;
+            var translation = this.currentproject.translation;
+            var name = 'uw-' + meta.fullname;
+            var input = this.$.printinput;
+            var filename;
+            var firsttime = true;
+            var options = {includeIncompleteFrames: this.$.chunkbox.checked, includeImages: this.$.imagebox.checked};
+            this.$.printpopup.close();
+            input.value = null;
+            input.nwsaveas = name;
+            input.addEventListener("change", function (evt) {
+                if (firsttime) {
+                    firsttime = false;
+                    mythis.set('options.body', "Creating PDF. Please wait...");
+                    mythis.set('options.loading', true);
+                    popup.open();
+                    filename = input.value;
+                    return App.printer.targetTranslationToPdf(translation, meta, filename, options)
+                        .then(function () {
+                            mythis.set('options.title', "PDF Created");
+                            mythis.set('options.body', "Your project has been successfully saved to a PDF.  Thanks.");
+                            mythis.set('options.loading', false);
+                        })
+                        .catch(function (err) {
+                            var errmessage = "We're sorry.  An error occurred while trying to save your project";
+                            if(err !== null) {
+                                errmessage = err;
+                            }
+                            mythis.set('options.title', "Print Failed");
+                            mythis.set('options.body', errmessage);
+                            mythis.set('options.loading', false);
+                        });
+                }
+            }, false);
+            input.click();
         },
 
         setrightanimation: function () {

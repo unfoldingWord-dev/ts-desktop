@@ -12,6 +12,10 @@ function Printer() {
 
     return {
 
+        isTranslation: function (meta) {
+            return !meta.project.type || meta.project.type === 'text';
+        },
+
         /**
          * Generates a pdf of the target translation
          * @param translation an array of frames

@@ -600,6 +600,9 @@
                                     if (type === "publish") {
                                         mythis.gopublish();
                                     }
+                                    if (type === "print") {
+                                        mythis.goprint();
+                                    }
                                 }, 250);
                             });
                         } else {
@@ -619,6 +622,9 @@
                                 mythis.fire('iron-signal', {name: 'adjustbar'});
                                 if (type === "publish") {
                                     mythis.gopublish();
+                                }
+                                if (type === "print") {
+                                    mythis.goprint();
                                 }
                             }, 250);
                         }

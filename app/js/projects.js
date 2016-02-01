@@ -434,7 +434,7 @@ function ProjectsManager(query, configurator) {
          * @param file {File} the path to the archive
          * @returns {Promise.<boolean>}
          */
-        importTargetTranslation: function(file) {
+        restoreTargetTranslation: function(file) {
             console.log('importing archive', file);
             return new Promise(function(resolve, reject) {
                 tstudioMigrator.listTargetTranslations(file).then(function(relativePaths) {

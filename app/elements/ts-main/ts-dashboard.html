@@ -140,7 +140,7 @@
           <ts-terms accepted="{{accepted}}"></ts-terms>
       </template>
 
-      <input type="file" class="hide" id="import" accept=".tstudio" title="test" multiple>
+      <input type="file" class="hide" id="restore" accept=".tstudio" multiple>
 
       <input class="hide" id="backup" type="file" nwsaveas="" />
 
@@ -179,7 +179,7 @@
       <iron-signals on-iron-signal-updatelist="updatelist"></iron-signals>
       <iron-signals on-iron-signal-setdefault="setdefault"></iron-signals>
       <iron-signals on-iron-signal-openfeedback="openfeedback"></iron-signals>
-      <iron-signals on-iron-signal-openimport="openimport"></iron-signals>
+      <iron-signals on-iron-signal-openrestore="openrestore"></iron-signals>
       <iron-signals on-iron-signal-openbackup="openbackup"></iron-signals>
 
   </template>
@@ -260,32 +260,32 @@
           backup.click();
       },
 
-      openimport: function() {
+      openrestore: function() {
           var mythis = this;
           var confirm = this.$.confirm;
-          var chooser = this.$.import;
+          var chooser = this.$.restore;
           chooser.value = null;
           chooser.addEventListener('change', function(evt) {
-              mythis.set('options.body', "Importing.  Please wait...");
+              mythis.set('options.body', "Restoring.  Please wait...");
               mythis.set('options.loading', true);
               confirm.open();
               for(var i=0; i < this.files.length; i ++) {
                   if(this.files[i].name.split('.').pop().toLowerCase() === 'tstudio') {
-                      App.projectsManager.importTargetTranslation(this.files[i])
+                      App.projectsManager.restoreTargetTranslation(this.files[i])
                           .then(function() {
-                              mythis.set('options.title', "Import Complete");
-                              mythis.set('options.body', "Your project(s) has been successfully imported.  Thanks.");
+                              mythis.set('options.title', "Restore Complete");
+                              mythis.set('options.body', "Your project(s) has been successfully restored.  Thanks.");
                               mythis.set('options.loading', false);
                               setTimeout(function() {
                                   mythis.updatelist();
                               }, 250);
                           })
                           .catch(function(err) {
-                              var errmessage = "We're sorry.  An error occurred while trying to import your project";
+                              var errmessage = "We're sorry.  An error occurred while trying to restore your project";
                               if(err !== null) {
                                   errmessage = err;
                               }
-                              mythis.set('options.title', "Import Failed");
+                              mythis.set('options.title', "Restore Failed");
                               mythis.set('options.body', errmessage);
                               mythis.set('options.loading', false);
                           });

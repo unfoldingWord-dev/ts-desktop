@@ -66,13 +66,36 @@
             text-transform: uppercase;
         }
 
-        #popup {
+        .popup {
             position: fixed;
             top: 0;
             bottom: 0;
             left: 0;
             right: 0;
             margin: auto;
+        }
+
+        #confirm {
+            width: 350px;
+            height: 175px;
+        }
+
+        #confirm p {
+            font-size: 110%;
+        }
+
+        #confirmbuttons {
+            display: flex;
+            justify-content: flex-end;
+            padding: 0 50px;
+            color: var(--secondary-text-color);
+        }
+
+        #confirmbuttons paper-button:hover {
+            color: var(--accent-color);
+        }
+
+        #loading {
             width: 320px;
             height: 220px;
             color: var(--primary-text-color);
@@ -108,7 +131,7 @@
             text-align: center;
         }
 
-        h2 {
+        #loading h2 {
             color: var(--accent-color);
         }
 
@@ -150,7 +173,7 @@
             </div>
         </div>
 
-        <paper-dialog id="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+        <paper-dialog id="loading" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <template is="dom-if" if="{{options.loading}}">
                 <p>{{options.body}}</p>
                 <div id="bar">
@@ -166,6 +189,17 @@
                     <paper-button dialog-confirm on-tap="gohome">Return Home</paper-button>
                 </div>
             </template>
+        </paper-dialog>
+
+        <paper-dialog id="confirm" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <h2>Overwrite?</h2>
+            <div>
+                <p>This file already exists. Overwrite?</p>
+            </div>
+            <div id="confirmbuttons">
+                <paper-button dialog-dismiss>No</paper-button>
+                <paper-button on-tap="executeexport">Confirm</paper-button>
+            </div>
         </paper-dialog>
 
     </template>
@@ -212,40 +246,61 @@
 
         export: function () {
             var mythis = this;
-            var popup = this.$.popup;
             var meta = this.currentproject.data;
-            var translation = this.currentproject.translation;
             var name = 'uw-' + meta.fullname;
             var input = this.$.input;
-            var filename;
             var firsttime = true;
+            var confirm = this.$.confirm;
+
             input.value = null;
             input.nwsaveas = name;
             input.addEventListener("change", function (evt) {
                 if (firsttime) {
                     firsttime = false;
-                    mythis.set('options.body', "Exporting Project.  Please wait...");
-                    mythis.set('options.loading', true);
-                    popup.open();
-                    filename = input.value;
-                    return App.projectsManager.exportTranslation(translation, meta, filename)
-                        .then(function () {
-                            mythis.set('options.title', "Project Exported");
-                            mythis.set('options.body', "Your project has been successfully saved to a file.  Thanks.");
-                            mythis.set('options.loading', false);
-                        })
-                        .catch(function (err) {
-                            var errmessage = "We're sorry.  An error occurred while trying to save your project";
-                            if(err !== null) {
-                                errmessage = err;
-                            }
-                            mythis.set('options.title', "Export Failed");
-                            mythis.set('options.body', errmessage);
-                            mythis.set('options.loading', false);
-                        });
+                    var filename = input.value;
+
+                    return App.projectsManager.fileExists(filename + ".zip")
+                        .then (function (stat) {
+                        if (stat) {
+                            confirm.open();
+                        } else {
+                            mythis.executeexport();
+                        }
+                    });
                 }
             }, false);
             input.click();
+        },
+
+        executeexport: function () {
+            var mythis = this;
+            var loading = this.$.loading;
+            var translation = this.currentproject.translation;
+            var meta = this.currentproject.data;
+            var input = this.$.input;
+            var filename = input.value;
+            var confirm = this.$.confirm;
+
+            confirm.close();
+            mythis.set('options.body', "Exporting Project.  Please wait...");
+            mythis.set('options.loading', true);
+            loading.open();
+
+            return App.projectsManager.exportTranslation(translation, meta, filename)
+                .then(function () {
+                    mythis.set('options.title', "Project Exported");
+                    mythis.set('options.body', "Your project has been successfully saved to a file.  Thanks.");
+                    mythis.set('options.loading', false);
+                })
+                .catch(function (err) {
+                    var errmessage = "We're sorry.  An error occurred while trying to save your project";
+                    if(err !== null) {
+                        errmessage = err;
+                    }
+                    mythis.set('options.title', "Export Failed");
+                    mythis.set('options.body', errmessage);
+                    mythis.set('options.loading', false);
+                });
         },
 
         upload: function() {

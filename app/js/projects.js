@@ -472,6 +472,14 @@ function ProjectsManager(query, configurator) {
             });
         },
 
+        fileExists: function (file) {
+            return stat(file).then(function (){
+                return true;
+            }).catch(function () {
+                return false;
+            });
+        },
+
         isTranslation: function (meta) {
             return !meta.project.type || meta.project.type === 'text';
         },
@@ -573,11 +581,21 @@ function ProjectsManager(query, configurator) {
             var makePaths = config.makeProjectPathsForProject.bind(config);
 
             return this.loadProjectsList()
-                       .then(map(makePaths))
-                       .then(map('manifest'))
-                       .then(map(read))
-                       .then(Promise.all.bind(Promise))
-                       .then(map(fromJSON));
+                .then(map(makePaths))
+                .then(map('manifest'))
+                .then(function (list) {
+                    return _.filter(list, function (path) {
+                        try {
+                            var test = fs.statSync(path);
+                        } catch (e) {
+                            test = false;
+                        }
+                        return test;
+                    })
+                })
+                .then(map(read))
+                .then(Promise.all.bind(Promise))
+                .then(map(fromJSON));
         },
 
         loadFinishedFramesList: function (meta) {

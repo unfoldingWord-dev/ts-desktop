@@ -849,8 +849,8 @@
                         frame: 0,
                         chapterid: "00",
                         frameid: "title",
-                        chunkref: "",
-                        refaddon: refaddon,
+                        chunkref: "Project Title",
+                        refaddon: " - " + refaddon,
                         standard: standard,
                         words: false,
                         verses: [],
@@ -883,8 +883,8 @@
                     chapterid: chapterid,
                     frameid: "title",
                     verses: [],
-                    chunkref: "",
-                    refaddon: refaddon,
+                    chunkref: "Story Title",
+                    refaddon: " - " + refaddon,
                     standard: standard,
                     words: false,
                     format: format
@@ -920,8 +920,8 @@
                     chapterid: chapterid,
                     frameid: "reference",
                     verses: [],
-                    chunkref: "",
-                    refaddon: refaddon,
+                    chunkref: "Story Reference",
+                    refaddon: " - " + refaddon,
                     standard: standard,
                     words: false,
                     format: format
@@ -1302,10 +1302,14 @@
         },
 
         frompublish: function (event, data) {
+            var mythis = this;
             this.selected = 0;
             this.set('modestatus.index', data.index);
             this.route = "translate";
-            this.selected = 3;
+            setTimeout(function() {
+                mythis.selected = 3;
+            }, 500);
+
         },
 
         gohome: function () {

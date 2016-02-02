@@ -85,7 +85,7 @@
             var name = this.currentproject.data.project.name;
 
             var transdata = translation.map(function(chunk, index){
-                return {content: chunk.content, completed: chunk.completed, meta: chunk.meta, index: index};
+                return {content: chunk.transcontent, completed: chunk.completed, meta: chunk.meta, index: index};
             });
 
             _.forEach(_.groupBy(transdata, function(chunks) {
@@ -93,13 +93,19 @@
             }), function (data, chap) {
                 var chapcomplete = true;
                 var chapter = parseInt(chap);
+                var reference;
+                if (chapter === 0) {
+                    reference = "Project Details";
+                } else {
+                    reference = name + " " + chapter;
+                }
 
                 _.forEach(data, function (chunk) {
                     if (!chunk.completed) {
                         chapcomplete = false;
                     }
                 });
-                transchapters.push({name: name, chapter: chapter, completed: chapcomplete, chunks: data});
+                transchapters.push({reference: reference, completed: chapcomplete, chunks: data});
             });
             this.set('chapters', transchapters);
         },

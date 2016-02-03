@@ -304,7 +304,7 @@
         },
 
         upload: function() {
-            var popup = this.$.popup;
+            var loading = this.$.loading;
             var mythis = this;
             var meta = this.currentproject.data;
             var paths = App.projectsManager.getPaths(meta);
@@ -312,7 +312,7 @@
 
             this.set('options.body', "Uploading Project.  Please wait...");
             this.set('options.loading', true);
-            popup.open();
+            loading.open();
 
             return App.projectsManager.createReadyFile(meta)
                 .then(function () {

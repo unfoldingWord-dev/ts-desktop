@@ -1,0 +1,93 @@
+[
+    {
+        "name": "font",
+        "mainText": "Font",
+        "value": "Roboto",
+        "options": ["Roboto", "Arial", "Times New Roman", "Calibri", "Tahoma"],
+        "group": "general",
+        "enabled": true,
+        "visible": true
+    },
+    {
+        "name": "fontsize",
+        "mainText": "Font Size",
+        "value": "Normal",
+        "options": ["Smaller", "Small", "Normal", "Large", "Larger"],
+        "group": "general",
+        "enabled": true,
+        "visible": true
+    },
+    {
+        "name": "authserver",
+        "mainText": "Authentication Server",
+        "value": "ts.door43.org",
+        "group": "upload",
+        "enabled": true,
+        "visible": true
+    },
+    {
+        "name": "authserverport",
+        "mainText": "Authentication Server Port",
+        "value": "9095",
+        "group": "upload",
+        "enabled": true,
+        "visible": true
+    },
+    {
+        "name": "dataserver",
+        "mainText": "Data Server",
+        "value": "gitolite3@ts.door43.org",
+        "group": "upload",
+        "enabled": true,
+        "visible": true
+    },
+    {
+        "name": "dataserverport",
+        "mainText": "Data Server Port",
+        "value": "9299",
+        "group": "upload",
+        "enabled": true,
+        "visible": true
+    },
+    {
+        "name": "mediaserver",
+        "mainText": "Media Server",
+        "value": "https://api.unfoldingword.org/",
+        "group": "upload",
+        "enabled": true,
+        "visible": true
+    },
+    {
+        "name": "savedirectory",
+        "mainText": "Save Directory",
+        "value": "test",
+        "group": "advanced",
+        "enabled": true,
+        "visible": false
+    },
+    {
+        "name": "logginglevel",
+        "mainText": "Logging Level",
+        "value": "Warnings",
+        "options": ["Information", "Warnings", "Errors"],
+        "group": "advanced",
+        "enabled": true,
+        "visible": false
+    },
+    {
+        "name": "developertools",
+        "mainText": "Developer Tools",
+        "helpText": "Opens the developer tools",
+        "group": "advanced",
+        "enabled": true,
+        "visible": true
+    },
+    {
+        "name": "refreshsettings",
+        "mainText": "Refresh Settings",
+        "helpText": "Update user options to the most current",
+        "group": "advanced",
+        "enabled": true,
+        "visible": true
+    }
+]

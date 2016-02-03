@@ -74,7 +74,12 @@
             </div>
             <template is="dom-if" if="{{!chunk.completed}}">
                 <div class="body">
-                    <p>[[chunk.content]]</p>
+                    <template is="dom-if" if="{{chunk.meta.standard}}">
+                        <p>[[chunk.transcontent]]</p>
+                    </template>
+                    <template is="dom-if" if="{{!chunk.meta.standard}}">
+                        <p>[[chunk.helpscontent.0.title]]</p>
+                    </template>
                 </div>
             </template>
         </paper-material>

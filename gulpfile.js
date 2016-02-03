@@ -192,7 +192,6 @@ gulp.task('build', [], function () {
             './node_modules/lcid/**',
             './node_modules/load-json-file/**',
             './node_modules/lodash/**',
-            './node_modules/lodash.*/**',
             './node_modules/longest/**',
             './node_modules/loud-rejection/**',
             './node_modules/lpad/**',

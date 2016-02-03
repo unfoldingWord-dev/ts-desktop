@@ -77,6 +77,10 @@ gulp.task('build', [], function () {
     var nw = new NwBuilder({
         files: [
             './app/**/**',
+            './node_modules/adm-zip/**',
+            './node_modules/locale/**',
+            './node_modules/pdfkit/**',
+            './node_modules/archiver/**',
             './node_modules/ansi-regex/**',
             './node_modules/ansi-styles/**',
             './node_modules/asn1/**',

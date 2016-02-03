@@ -2,9 +2,10 @@
 
 var _ = require('lodash'),
     fs = require('fs'),
-    path = require('path'),
-    mkdirP = require('mkdirp'),
-    rimraf = require('rimraf'),
+    //path = require('path'),
+    //mkdirP = require('mkdirp'),
+    //rimraf = require('rimraf'),
+    _ = require('lodash'),
     PDFDocument = require('pdfkit');
 
 
@@ -33,8 +34,38 @@ function Printer() {
 
             return new Promise(function(resolve, reject) {
                 if(isTranslation) {
-                    // TRICKY: look into the first frame to see the format
-                    if(translation[0].meta.format === 'default') {
+                    // normalize input
+                    let chapters = _.mapValues(_.groupBy(translation, function(obj) {
+                        return obj.meta.chapterid;
+                    }), function(chapter, key) {
+                        let frames = _.mapKeys(chapter, function(obj) {
+                            return obj.meta.frameid;
+                        });
+                        let obj = {
+                            id: key,
+                            title: frames.title,
+                            reference: frames.reference === undefined ? null : frames.reference,
+                            format: frames.title.meta.format // everyone has a title
+                        };
+                        delete frames.reference;
+                        delete frames.title;
+                        obj.frames = _.sortBy(frames, function(f) {
+                            return f.meta.frame;
+                        });
+                        return obj;
+                    });
+                    let project = {
+                        format: chapters['00'].format,
+                        title: chapters['00'].title
+                    };
+                    delete chapters['00'];
+                    project.chapters = _.sortBy(chapters, 'id');
+                    chapters = null;
+
+                    //console.debug(project);
+
+                    // TRICKY: look into the first chapter to see the format
+                    if(project.format === 'default') {
                         // the default format is currently dokuwiki
                         let doc = new PDFDocument({
                             bufferPages: true,
@@ -45,85 +76,106 @@ function Printer() {
                                 right: 72
                             }
                         });
-                        let chapterPages = [];
                         doc.pipe(fs.createWriteStream(filename + '.pdf'));
 
-                        // meta
-                        doc.info.Title = meta.project_name; // todo: get translated project title
+                        // default meta
+                        doc.info.Title = project.title.transcontent || meta.project_name;
                         doc.info.Author = 'Joel Lonbeck'; // todo: translators
-                        doc.info.Subject = 'an unrestricted, visual mini-Bible in any language'; // todo: project sub-title
+                        //doc.info.Subject = 'an unrestricted, visual mini-Bible in any language'; // todo: project sub-title
                         doc.info.Keywords = meta.target_language.name;
 
-                        // title
-                        doc
-                            .fontSize(25)
-                            .text('Open Bible Stories', 72, doc.page.height / 2, {align: 'center'});
+                        // book title
+                        doc.fontSize(25)
+                            .text(project.title.transcontent, 72, doc.page.height / 2, {align: 'center'});
 
-                        // TOC
+                        // TOC placeholders
                         doc.addPage();
+                        let lastTOCPage = doc.bufferedPageRange().count;
+                        let tocPages = {
+                            start: lastTOCPage - 1
+                        };
+                        doc.fontSize(25)
+                            .text(' ', 72, 72)
+                            .moveDown();
+                        _.forEach(project.chapters, function(chapter) {
+                            doc.fontSize(10)
+                                .text(' ')
+                                .moveDown();
+                            let currPage = doc.bufferedPageRange().count;
+                            if(lastTOCPage !== currPage) {
+                                // record toc page split
+                                tocPages[chapter.id] = currPage - 1;
+                                lastTOCPage = currPage;
 
-                        let currentChapter = -1;
-                        for(let frame of translation) {
-                            if(frame.meta.chapter !== currentChapter) {
-                                if(currentChapter !== -1) {
-                                    // close chapter
-                                    //frame.meta.reference
-                                    // TODO: we need to get the chapter reference and insert it here
-                                }
-
-                                // start new chapter
-                                doc.addPage()
-                                    .fontSize(20)
-                                    .text(frame.meta.title, 72, doc.page.height / 2, {align: 'center'});
-                                chapterPages.push({
-                                    title: frame.meta.title,
-                                    page: doc.bufferedPageRange().count
-                                });
-                                currentChapter = frame.meta.chapter;
+                                // give room for header on new page
+                                doc.fontSize(25)
+                                    .text(' ', 72, 72)
+                                    .moveDown();
                             }
+                        });
 
-                            // chapter body
-                            // TODO: check if frame is completed.
-                            if(options.includeIncompleteFrames === true || frame.completed === true) {
-                                doc.addPage()
-                                    .fontSize(10);
-                                if (options.includeImages === true) {
-                                    // TODO: get the image path
-                                    //doc.image('path to image', {width:doc.page.width - 72*2})
-                                    doc.text('[image placeholder]', {align: 'center'});
+                        // book body
+                        _.forEach(project.chapters, function(chapter) {
+                            // chapter title
+                            doc.addPage();
+                            doc.fontSize(20)
+                                .text(chapter.title.transcontent || chapter.meta.title, 72, doc.page.height / 2, {align: 'center'});
+                            chapter.page = doc.bufferedPageRange().count;
+
+                            // frames
+                            doc.addPage();
+                            _.forEach(chapter.frames, function(frame) {
+                                if(options.includeIncompleteFrames === true || frame.completed === true) {
+                                    if (options.includeImages === true) {
+                                        // TODO: get the image path
+                                        //doc.image('path to image', {width:doc.page.width - 72*2})
+                                        doc.fontSize(10)
+                                            .text('[photo]', {align: 'center'});
+                                    }
+                                    doc.moveDown()
+                                        .fontSize(10)
+                                        .text(frame.transcontent);
                                 }
+                            });
+
+                            // chapter reference
+                            if(chapter.reference !== null) {
                                 doc.moveDown()
-                                    .text(frame.transcontent);
+                                    .fontSize(10)
+                                    .text(chapter.reference.transcontent);
                             }
-                        }
-                        if(currentChapter !== -1) {
-                            // TODO: we need to get the chapter reference and insert it here
-                            // close chapter
-                            //frame.meta.reference
-                        }
+                        });
 
                         // number pages
                         let range = doc.bufferedPageRange();
                         for(let i = range.start; i < range.start + range.count; i ++) {
                             doc.switchToPage(i);
                             doc.text(i + 1, 72, doc.page.height - 50 - 12, {align: 'center'});
-
-                            // write TOC
-                            if(i === 1) {
-                                // TODO: display correct title of TOC based on the project
-                                doc.fontSize(25)
-                                    .text('Table of Contents', 72, 72)
-                                    .moveDown()
-                                    .fontSize(10);
-                                // TRICKY: skip title page and TOC
-                                for(let chapterPage of chapterPages) {
-                                    doc.text(chapterPage.title)
-                                        .moveUp()
-                                        .text(chapterPage.page, {align: 'right'})
-                                        .moveDown();
-                                }
-                            }
                         }
+
+                        // write TOC
+                        let currTocPage = tocPages.start;
+                        doc.switchToPage(currTocPage);
+                        // TODO: display correct title of TOC based on the project
+                        doc.fontSize(25)
+                            .text('Table of Contents', 72, 72)
+                            .moveDown();
+                        _.forEach(project.chapters, function(chapter) {
+                            if(tocPages[chapter.id] !== undefined && tocPages[chapter.id] !== currTocPage) {
+                                currTocPage = tocPages[chapter.id];
+                                doc.switchToPage(currTocPage);
+                                doc.fontSize(10)
+                                    .text(' ')
+                                    .moveUp();
+                            }
+                            doc.switchToPage(currTocPage);
+                            doc.fontSize(10)
+                                .text(chapter.title.transcontent)
+                                .moveUp()
+                                .text(chapter.page + '', {align: 'right'})
+                                .moveDown();
+                        });
+
                         doc.end();
                         resolve(true);
                     } else {

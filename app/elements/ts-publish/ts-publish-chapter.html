@@ -49,7 +49,12 @@
             </div>
             <div class="icon">
                 <template is="dom-if" if="{{chapter.completed}}">
-                    <iron-icon class="done" icon="done"></iron-icon>
+                    <template is="dom-if" if="{{!chapter.combined}}">
+                        <iron-icon class="done" icon="done"></iron-icon>
+                    </template>
+                    <template is="dom-if" if="{{chapter.combined}}">
+                        <iron-icon class="done" icon="done-all"></iron-icon>
+                    </template>
                 </template>
                 <template is="dom-if" if="{{!chapter.completed}}">
                     <iron-icon class="review" icon="report"></iron-icon>

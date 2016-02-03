@@ -99,7 +99,7 @@
 
 
             for (var i = 0; i < transdata.length; i++) {
-                if (transdata[i].meta.frame !== 0 && transdata[i-1].meta.frame !== 0 && transdata[i].completed === true && transdata[i-1].completed === true) {
+                if (transdata[i].meta.frame !== 0 && transdata[i-1].meta.frame !== 0 && transdata[i].completed === true && transdata[i-1].completed === true && transdata[i].meta.chapter === transdata[i-1].meta.chapter) {
                     transdata[i-1].meta.chunkref = transdata[i].meta.chapterref + ":" + transdata[i-1].start + "-" + transdata[i].end;
                     transdata.splice(i, 1);
                     i--;
@@ -123,8 +123,17 @@
                         chapcomplete = false;
                     }
                 });
-                transchapters.push({reference: reference, completed: chapcomplete, chunks: data});
+                transchapters.push({reference: reference, completed: chapcomplete, start: chapter, end: chapter, chunks: data});
             });
+
+            for (i = 0; i < transchapters.length; i++) {
+                if (transchapters[i].start !== 0 && transchapters[i-1].start !== 0 && transchapters[i].completed === true && transchapters[i-1].completed === true) {
+                    transchapters[i-1].reference = name + " " + transchapters[i-1].start + "-" + transchapters[i].end;
+                    transchapters.splice(i, 1);
+                    i--;
+                }
+            }
+
             this.set('chapters', transchapters);
         },
 

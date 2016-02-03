@@ -535,7 +535,7 @@
         retrievesource: function () {
             var key = "uw-" + this.currentproject.data.fullname;
             var source = App.configurator.getValue(key + "-source");
-            if (source !== undefined  && source !== "") {
+            if (source !== undefined  && source !== "" && source < this.currentproject.data.sources.length) {
                 this.set('currentproject.data.currentsource', source);
             }
         },

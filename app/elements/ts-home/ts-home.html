@@ -412,7 +412,13 @@
         deleteproject: function () {
             var mythis = this;
             var projectdata = this.currentinfo;
+            var key = "uw-" + projectdata.fullname;
             App.projectsManager.deleteTargetTranslation(projectdata).then(function() {
+                App.configurator.unsetValue(key + "-chapter");
+                App.configurator.unsetValue(key + "-index");
+                App.configurator.unsetValue(key + "-selected");
+                App.configurator.unsetValue(key + "-completion");
+                App.configurator.unsetValue(key + "-source");
                 mythis.fire('iron-signal', {name: 'updatelist'});
                 mythis.$.delete.close();
             });

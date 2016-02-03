@@ -85,8 +85,26 @@
             var name = this.currentproject.data.project.name;
 
             var transdata = translation.map(function(chunk, index){
-                return {content: chunk.transcontent, completed: chunk.completed, meta: chunk.meta, index: index};
+                var start;
+                var end;
+                if (chunk.meta.verses.length) {
+                    start = chunk.meta.verses[0];
+                    end = chunk.meta.verses[chunk.meta.verses.length-1];
+                } else {
+                    start = chunk.meta.frame;
+                    end = chunk.meta.frame;
+                }
+                return {content: chunk.transcontent, completed: chunk.completed, meta: chunk.meta, index: index, start: start, end: end};
             });
+
+
+            for (var i = 0; i < transdata.length; i++) {
+                if (transdata[i].meta.frame !== 0 && transdata[i-1].meta.frame !== 0 && transdata[i].completed === true && transdata[i-1].completed === true) {
+                    transdata[i-1].meta.chunkref = transdata[i].meta.chapterref + ":" + transdata[i-1].start + "-" + transdata[i].end;
+                    transdata.splice(i, 1);
+                    i--;
+                }
+            }
 
             _.forEach(_.groupBy(transdata, function(chunks) {
                 return chunks.meta.chapter;

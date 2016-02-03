@@ -91,13 +91,13 @@
                     start = chunk.meta.verses[0];
                     end = chunk.meta.verses[chunk.meta.verses.length-1];
                 } else if (name === "Bible Words") {
-                    start = chunk.meta.chunkref;
-                    end = chunk.meta.chunkref;
+                    start = chunk.meta.frameid;
+                    end = chunk.meta.frameid;
                 } else {
                     start = chunk.meta.frame;
                     end = chunk.meta.frame;
                 }
-                return {transcontent: chunk.transcontent, helpscontent: chunk.helpscontent, completed: chunk.completed, meta: chunk.meta, index: index, start: start, end: end};
+                return {transcontent: chunk.transcontent, helpscontent: chunk.helpscontent, completed: chunk.completed, meta: chunk.meta, index: index, start: start, end: end, combined: false};
             });
 
             for (var i = 0; i < transdata.length; i++) {
@@ -107,6 +107,7 @@
                     } else {
                         transdata[i-1].meta.chunkref = transdata[i].meta.chapterref + ":" + transdata[i-1].start + "-" + transdata[i].end;
                     }
+                    transdata[i-1].combined = true;
                     transdata.splice(i, 1);
                     i--;
                 }
@@ -131,12 +132,13 @@
                         chapcomplete = false;
                     }
                 });
-                transchapters.push({reference: reference, completed: chapcomplete, start: chapter, end: chapter, chunks: data});
+                transchapters.push({reference: reference, completed: chapcomplete, start: chapter, end: chapter, combined: false, chunks: data});
             });
 
             for (i = 0; i < transchapters.length; i++) {
                 if (transchapters[i].start > 1 && transchapters[i].completed === true && transchapters[i-1].completed === true) {
                     transchapters[i-1].reference = name + " " + transchapters[i-1].start + "-" + transchapters[i].end;
+                    transchapters[i-1].combined = true;
                     transchapters.splice(i, 1);
                     i--;
                 }

@@ -9,13 +9,37 @@
 
         :host {
             color: var(--primary-text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #contain {
+            flex: 0 0 auto;
+            position: relative;
+            margin-top: 15px;
+            width: 450px;
+            height: 100px;
         }
 
         .card {
             background: var(--card-background-color);
             width: 420px;
-            margin: 15px auto 0 auto;
             font-size: 110%;
+            position: absolute;
+        }
+
+        .top {
+            top: 0;
+            left: 15px;
+            z-index: 2;
+        }
+
+        .bottom {
+            top: 5px;
+            left: 20px;
+            height: 50px;
+            z-index: 1;
         }
 
         .header {
@@ -58,31 +82,41 @@
 
     <template>
 
-        <paper-material class="card" elevation="1">
-            <div class="header">
-                <div class="ref">
-                    <span>[[chunk.meta.chunkref]]</span>
+        <div id="contain">
+            <paper-material class="card top" elevation="1">
+                <div class="header">
+                    <div class="ref">
+                        <span>[[chunk.meta.chunkref]]</span>
+                    </div>
+                    <div class="icon">
+                        <template is="dom-if" if="{{chunk.completed}}">
+                            <template is="dom-if" if="{{!chunk.combined}}">
+                                <iron-icon class="done" icon="done"></iron-icon>
+                            </template>
+                            <template is="dom-if" if="{{chunk.combined}}">
+                                <iron-icon class="done" icon="done-all"></iron-icon>
+                            </template>
+                        </template>
+                        <template is="dom-if" if="{{!chunk.completed}}">
+                            <paper-button raised class="review" on-tap="gotochunk">Review</paper-button>
+                        </template>
+                    </div>
                 </div>
-                <div class="icon">
-                    <template is="dom-if" if="{{chunk.completed}}">
-                        <iron-icon class="done" icon="done"></iron-icon>
-                    </template>
-                    <template is="dom-if" if="{{!chunk.completed}}">
-                        <paper-button raised class="review" on-tap="gotochunk">Review</paper-button>
-                    </template>
-                </div>
-            </div>
-            <template is="dom-if" if="{{!chunk.completed}}">
-                <div class="body">
-                    <template is="dom-if" if="{{chunk.meta.standard}}">
-                        <p>[[chunk.transcontent]]</p>
-                    </template>
-                    <template is="dom-if" if="{{!chunk.meta.standard}}">
-                        <p>[[chunk.helpscontent.0.title]]</p>
-                    </template>
-                </div>
+                <template is="dom-if" if="{{!chunk.completed}}">
+                    <div class="body">
+                        <template is="dom-if" if="{{chunk.meta.standard}}">
+                            <p>[[chunk.transcontent]]</p>
+                        </template>
+                        <template is="dom-if" if="{{!chunk.meta.standard}}">
+                            <p>[[chunk.helpscontent.0.title]]</p>
+                        </template>
+                    </div>
+                </template>
+            </paper-material>
+            <template is="dom-if" if="{{chunk.combined}}">
+                <paper-material class="card bottom" elevation="1"></paper-material>
             </template>
-        </paper-material>
+        </div>
 
     </template>
 

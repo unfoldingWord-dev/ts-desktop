@@ -27,7 +27,6 @@
     "mkdirp": "^0.5.1",
     "moment": "^2.10.3",
     "node-dir": "^0.1.8",
-    "nw": "^0.12.3",
     "pdfkit": "^0.7.2",
     "request": "^2.58.0",
     "sql.js": "^0.2.21",
@@ -37,6 +36,7 @@
   },
   "devDependencies": {
     "bower": "^1.4.1",
+    "electron-prebuilt": "^0.36.7",
     "gulp": "^3.9.0",
     "gulp-jscs": "^3.0.2",
     "gulp-jshint": "^1.12.0",
@@ -44,15 +44,11 @@
     "jshint-stylish": "^2.0.1",
     "map-stream": "0.0.6",
     "mocha": "^2.3.3",
-    "nw-builder": "^2.2.0",
     "rimraf": "^2.4.2",
     "yargs": "^3.17.1"
   },
-  "engines": {
-    "node": ">=5.5.0"
-  },
   "scripts": {
-    "start": "nw app"
+    "start": "electron app/js/main.js"
   },
   "license": "GPL-2.0"
 }

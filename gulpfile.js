@@ -1,7 +1,7 @@
 /**
  * translationStudio gulpfile
  *
- * Copyright 2015
+ * Copyright 2016
  */
 
 var gulp = require('gulp'),

@@ -280,13 +280,14 @@
             var input = this.$.input;
             var filename = input.value;
             var confirm = this.$.confirm;
+            var mediaServer = App.configurator.getUserSetting('mediaserver');
 
             confirm.close();
             mythis.set('options.body', "Exporting Project.  Please wait...");
             mythis.set('options.loading', true);
             loading.open();
 
-            return App.projectsManager.exportTranslation(translation, meta, filename)
+            return App.projectsManager.exportTranslation(translation, meta, filename, mediaServer)
                 .then(function () {
                     mythis.set('options.title', "Project Exported");
                     mythis.set('options.body', "Your project has been successfully saved to a file.  Thanks.");
@@ -319,10 +320,16 @@
                     return App.git.stage(paths.projectDir);
                 })
                 .then(function () {
-                    return App.uploader.register();
+                    return App.uploader.register({
+                        'host': App.configurator.getUserSetting('authserver'),
+                        'port': App.configurator.getUserSetting('authserverport')
+                    });
                 })
                 .then(function (reg) {
-                    return App.git.push(paths.projectDir, repo, reg);
+                    return App.git.push(paths.projectDir, repo, reg, {
+                        'host': App.configurator.getUserSetting('dataserver'),
+                        'port': App.configurator.getUserSetting('dataserverport')
+                    });
                 })
                 .then(function () {
                     mythis.set('options.title', "Project Published");

@@ -355,7 +355,7 @@ function ProjectsManager(query, configurator) {
          * @param filename the path where the export will be saved
          * @returns {Promise.<boolean>}
          */
-        exportTranslation: function (translation, meta, filename) {
+        exportTranslation: function (translation, meta, filename, mediaServer) {
             // validate input
             if(filename === null || filename === '') {
                 return Promise.reject('The filename is empty');
@@ -408,7 +408,7 @@ function ProjectsManager(query, configurator) {
                             }
 
                             // add frame
-                            chapterContent += '{{https://api.unfoldingword.org/' + meta.project.id + '/jpg/1/en/360px/' + meta.project.id + '-' + meta.target_language.id + '-' + frame.meta.chapterid + '-' + frame.meta.frameid + '.jpg}}\n\n';
+                            chapterContent += '{{' + mediaServer + meta.project_id + '/jpg/1/en/360px/' + meta.project_id + '-' + meta.target_language.id + '-' + frame.meta.chapterid + '-' + frame.meta.frameid + '.jpg}}\n\n';
                             chapterContent += frame.transcontent + '\n\n';
                         }
                         if(chapterContent !== '' && numFinishedFrames > 0) {

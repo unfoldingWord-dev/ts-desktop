@@ -353,6 +353,7 @@ function ProjectsManager(query, configurator) {
          * @param translation an array of frames
          * @param meta the target translation manifest and other info
          * @param filename the path where the export will be saved
+         * @param mediaServer is the location of the media files
          * @returns {Promise.<boolean>}
          */
         exportTranslation: function (translation, meta, filename, mediaServer) {
@@ -408,7 +409,7 @@ function ProjectsManager(query, configurator) {
                             }
 
                             // add frame
-                            chapterContent += '{{' + mediaServer + meta.project_id + '/jpg/1/en/360px/' + meta.project_id + '-' + meta.target_language.id + '-' + frame.meta.chapterid + '-' + frame.meta.frameid + '.jpg}}\n\n';
+                            chapterContent += '{{' + mediaServer + meta.project.id + '/jpg/1/en/360px/' + meta.project.id + '-' + meta.target_language.id + '-' + frame.meta.chapterid + '-' + frame.meta.frameid + '.jpg}}\n\n';
                             chapterContent += frame.transcontent + '\n\n';
                         }
                         if(chapterContent !== '' && numFinishedFrames > 0) {

@@ -247,10 +247,17 @@
         export: function () {
             var mythis = this;
             var meta = this.currentproject.data;
+            var translation = this.currentproject.translation;
+            var extension = '.zip';
             var name = 'uw-' + meta.fullname;
             var input = this.$.input;
             var firsttime = true;
             var confirm = this.$.confirm;
+
+            //get the correct extension for this format
+            if(translation[0].meta.format === 'usx'){
+                extension = '.usfm';
+            }//add more formats as added to ts-desktop
 
             input.value = null;
             input.nwsaveas = name;
@@ -259,7 +266,7 @@
                     firsttime = false;
                     var filename = input.value;
 
-                    return App.projectsManager.fileExists(filename + ".zip")
+                    return App.projectsManager.fileExists(filename + extension)
                         .then (function (stat) {
                         if (stat) {
                             confirm.open();

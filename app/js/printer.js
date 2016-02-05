@@ -2,9 +2,8 @@
 
 var _ = require('lodash'),
     fs = require('fs'),
-    //path = require('path'),
-    //mkdirP = require('mkdirp'),
-    //rimraf = require('rimraf'),
+    path = require('path'),
+    mkdirP = require('mkdirp'),
     _ = require('lodash'),
     PDFDocument = require('pdfkit');
 
@@ -28,6 +27,56 @@ function Printer() {
             return !meta.project.type || meta.project.type === 'text';
         },
 
+        getImages: function(meta){
+            return new Promise(function(resolve, reject){
+                var App = window.App,
+                    imageRoot = path.join(App.configurator.getValue('rootdir'), "images"),
+                    imagePath = path.join(imageRoot,meta.resource_id),
+                    fs = require('fs');
+
+                //check to see if we need to create the images directory;
+                if(!fs.existsSync(imagePath)){
+                    mkdirP.sync(imagePath);
+                }
+
+                //if the zip file isn't downloaded yet, go get it.
+                if(!fs.existsSync(path.join(imagePath,"images.zip"))){
+                    var https = require('https');
+                    var file = fs.createWriteStream(imagePath + "/images.zip");
+                    https.get(App.configurator.getValue("mediaServer") + "/" + meta.resource_id + "/jpg/1/" + meta.target_language.id + "/" + meta.resource_id + "-images-360px.zip", function(response) {
+                        var saving = response.pipe(file);
+
+                        //unzip the file
+                        saving.on('finish',function(){
+                            var AdmZip = require('adm-zip');
+                            var zip = new AdmZip(imagePath + "/images.zip");
+                            zip.extractAllTo(imagePath);
+
+                            //look in all the directories that the zip file contained and move their files to the root images directory
+                            var directories = fs.readdirSync(imagePath).filter(function(file) {
+                                return fs.statSync(path.join(imagePath, file)).isDirectory();
+                            });
+                            directories.forEach(function(dir){
+                                var dirPath = path.join(imagePath,dir),
+                                    files = fs.readdirSync(dirPath);
+                                files.forEach(function(file){
+                                    var filePath = path.join(imagePath,dir,file),
+                                        newPath = path.join(imageRoot,file);
+                                    fs.renameSync(filePath,newPath);
+                                });
+
+                                //remove the empty directory
+                                fs.rmdir(dirPath);
+                            });
+                            resolve();
+                        });
+                    });
+                } else {
+                    resolve();
+                }
+            });
+        },
+
         /**
          * Generates a pdf of the target translation
          * @param translation an array of frames
@@ -42,6 +91,7 @@ function Printer() {
                 return Promise.reject('The filename is empty');
             }
             var isTranslation = this.isTranslation(meta);
+            var imagePath = path.join(window.App.configurator.getValue('rootdir'), "images");
 
             return new Promise(function(resolve, reject) {
                 if(isTranslation) {
@@ -146,9 +196,8 @@ function Printer() {
                                 if(options.includeIncompleteFrames === true || frame.completed === true) {
                                     if (options.includeImages === true) {
                                         // TODO: get the image path
-                                        //doc.image('path to image', {width:doc.page.width - 72*2})
-                                        doc.fontSize(10)
-                                            .text('[photo]', {align: 'center'});
+                                        var imgPath = path.join(imagePath,meta.fullname + "-" + frame.meta.chapterId + "-" + frame.meta.frameId + ".jpg");
+                                        doc.image(imgPath, {width:doc.page.width - 72*2});
                                     }
                                     doc.moveDown()
                                         .fontSize(10)

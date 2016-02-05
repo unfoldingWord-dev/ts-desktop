@@ -412,6 +412,10 @@
                 value: '',
                 notify: true
             },
+            projectlist: {
+                type: Array,
+                value: []
+            },
             currentproject: {
                 type: Object,
                 value: {},
@@ -426,6 +430,10 @@
                 value: {}
             },
             rawdata2: {
+                type: Object,
+                value: {}
+            },
+            worddata: {
                 type: Object,
                 value: {}
             },
@@ -576,6 +584,7 @@
             var load = this.$.load;
             var type = data.type;
             var projdata = data.projdata;
+            var list = this.projectlist;
 
             var loadsource = function () {
                 if (projdata.project.type === "tw") {
@@ -600,6 +609,52 @@
                 }, 250);
             };
 
+            var loadwords = function () {
+                if (projdata.project.type !== "tw") {
+                    var wordmeta = false;
+                    for (var i = 0; i < list.length; i++) {
+                        if (list[i].target_language.id === projdata.target_language.id && list[i].project.type === "tw") {
+                            wordmeta = list[i];
+                        }
+                    }
+                    if (wordmeta) {
+                        App.projectsManager.loadTargetTranslation(wordmeta).then(function (words) {
+                            mythis.set('worddata', words);
+                            loadsource();
+                        });
+                    } else {
+                        mythis.set('worddata', {});
+                        loadsource();
+                    }
+                } else {
+                    mythis.set('worddata', {});
+                    loadsource();
+                }
+            };
+
+            var loaddata2 = function () {
+                if (projdata.project.type === "tn" || projdata.project.type === "tq") {
+                    var newmeta = false;
+                    for (var i = 0; i < list.length; i++) {
+                        if (list[i].basename === projdata.basename && list[i].project.type === "text" && list[i].resource_id !== "udb") {
+                            newmeta = list[i];
+                        }
+                    }
+                    if (newmeta) {
+                        App.projectsManager.loadTargetTranslation(newmeta).then(function (newtranslation) {
+                            mythis.set('rawdata2', newtranslation);
+                            loadwords();
+                        });
+                    } else {
+                        mythis.set('rawdata2', {});
+                        loadwords();
+                    }
+                } else {
+                    mythis.set('rawdata2', {});
+                    loadwords();
+                }
+            };
+
             this.setrightanimation();
             this.route = "translate";
             setTimeout(function() {
@@ -610,16 +665,7 @@
                     mythis.retrievesource();
                     App.projectsManager.loadTargetTranslation(projdata).then(function (translation) {
                         mythis.set('rawdata', translation);
-                        if (projdata.project.type === "tn" || projdata.project.type === "tq") {
-                            var newmeta = {fullname: projdata.basename, project: {type: 'text'}};
-                            App.projectsManager.loadTargetTranslation(newmeta).then(function (newtranslation) {
-                                mythis.set('rawdata2', newtranslation);
-                                loadsource();
-                            });
-                        } else {
-                            mythis.set('rawdata2', {});
-                            loadsource();
-                        }
+                        loaddata2();
                     });
                 }, 250);
             }, 500);

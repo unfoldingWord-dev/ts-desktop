@@ -382,7 +382,7 @@ function ProjectsManager(query, configurator) {
                                     // TODO: we need to get the chapter reference and insert it here
                                     chapterContent += '////\n';
                                     //console.log('chapter ' + currentChapter, chapterContent);
-                                    zip.append(chapterContent, {name: currentChapter + '.txt'});
+                                    zip.append(new Buffer(chapterContent), {name: currentChapter + '.txt'});
                                 }
                                 currentChapter = frame.meta.chapter;
                                 chapterContent = '';
@@ -415,13 +415,51 @@ function ProjectsManager(query, configurator) {
                         if(chapterContent !== '' && numFinishedFrames > 0) {
                             // TODO: we need to get the chapter reference and insert it here
                             chapterContent += '////\n';
-                            zip.append(chapterContent, {name: currentChapter + '.txt'});
+                            zip.append(new Buffer(chapterContent), {name: currentChapter + '.txt'});
                         }
                         zip.finalize();
                         resolve(true);
-                    } else {
-                        // we don't support anything but dokuwiki right now
-                        reject('We only support exporting OBS projects for now');
+                    } 
+                    else if(translation[0].meta.format === 'usx'){
+                         let
+                            currentChapter = 1,
+                            numFinishedFrames = 0,
+                            chapterContent = '';
+                        for(let frame of translation) {
+                            // build chapter header
+                            if(chapterContent === '') {
+                                //add in USFM header elements
+                                chapterContent += '\n\\\id ' + meta.project.id.toUpperCase() + ' ' + meta.sources[0].name + '\n';
+                    
+                                chapterContent += '\\\ide ' + frame.meta.format + '\n';
+
+                                chapterContent += '\\\h ' + meta.project.name.toUpperCase() + '\n';
+
+                                chapterContent += '\\' + 'toc1 ' + meta.project.name + '\n';
+
+                                chapterContent += '\\' + 'toc2 ' + meta.project.name + '\n';
+
+                                chapterContent += '\\' + 'toc3 ' + meta.project.id + '\n';
+
+                                chapterContent += '\\\mt1 ' + meta.project.name.toUpperCase() + '\n';
+
+                                chapterContent += '\\\c ' + frame.meta.chapter + '\n';
+                            }
+                            if(currentChapter !== frame.meta.chapter){
+                                chapterContent += '\\\c ' + frame.meta.chapter + '\n';
+                                currentChapter = frame.meta.chapter;
+                            }
+                            // add frame
+                            if(frame.transcontent !== ''){
+                            chapterContent += frame.transcontent + '\n';
+                            }
+                        }
+
+                        fs.writeFile(filename + '.usfm', new Buffer(chapterContent));
+                        resolve(true);   
+                    }else {
+                        // we don't support anything but dokuwiki and usx right now
+                        reject('We only support exporting OBS and USX projects for now');
                     }
                 } else {
                     // TODO: support exporting other target translation types if needed e.g. notes, words, questions

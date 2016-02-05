@@ -771,6 +771,14 @@
                 var words = App.projectsManager.getFrameWords(id);
                 var verses = [];
 
+                for (var w = 0; w < words.length; w++) {
+                    var worddata = this.worddata["01-" + words[w].slug];
+                    if (worddata && worddata.helpscontent[0].body !== "" && worddata.helpscontent[0].title !== "") {
+                        words[w].term = worddata.helpscontent[0].title;
+                        words[w].definition = worddata.helpscontent[0].body;
+                    }
+                }
+
                 for (var n = 0; n < notes.length; n++) {
                     if (notes[n].title === "") {
                         notes[n].title = notes[n].body;

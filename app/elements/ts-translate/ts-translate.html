@@ -122,7 +122,7 @@
             color: var(--accent-color);
         }
 
-        #loading {
+        #load {
             width: 320px;
             height: 100px;
             color: var(--primary-text-color);
@@ -180,7 +180,7 @@
             --paper-checkbox-unchecked-color: var(--accent-color-dark);
         }
 
-        #confirm {
+        #loading {
             width: 320px;
             height: 220px;
             color: var(--primary-text-color);
@@ -216,7 +216,27 @@
             text-align: center;
         }
 
-        #confirm h2 {
+        #loading h2 {
+            color: var(--accent-color);
+        }
+
+        #confirm {
+            width: 350px;
+            height: 175px;
+        }
+
+        #confirm p {
+            font-size: 110%;
+        }
+
+        #confirmbuttons {
+            display: flex;
+            justify-content: flex-end;
+            padding: 0 50px;
+            color: var(--secondary-text-color);
+        }
+
+        #confirmbuttons paper-button:hover {
             color: var(--accent-color);
         }
 
@@ -315,11 +335,11 @@
             <ts-source-modal id="modal" on-close="closesource"></ts-source-modal>
         </paper-dialog>
 
-        <paper-dialog id="loading" class="popup" modal="true">
+        <paper-dialog id="load" class="popup" modal="true">
             <p>Loading project. Please wait...</p>
         </paper-dialog>
 
-        <paper-dialog id="confirm" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+        <paper-dialog id="loading" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <template is="dom-if" if="{{options.loading}}">
                 <p>{{options.body}}</p>
                 <div id="bar">
@@ -335,6 +355,17 @@
                     <paper-button dialog-dismiss>Close</paper-button>
                 </div>
             </template>
+        </paper-dialog>
+
+        <paper-dialog id="confirm" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <h2>Overwrite?</h2>
+            <div>
+                <p>This file already exists. Overwrite?</p>
+            </div>
+            <div id="confirmbuttons">
+                <paper-button dialog-dismiss>No</paper-button>
+                <paper-button on-tap="executeprint">Confirm</paper-button>
+            </div>
         </paper-dialog>
 
         <iron-signals on-iron-signal-frompublish="frompublish"></iron-signals>
@@ -572,13 +603,13 @@
 
         loadproject: function (event, data) {
             var mythis = this;
-            var loading = this.$.loading;
+            var load = this.$.load;
             var type = data.type;
             var projdata = data.projdata;
             this.setrightanimation();
             this.route = "translate";
             setTimeout(function() {
-                loading.open();
+                load.open();
                 setTimeout(function() {
                     mythis.set('currentproject', {data: projdata, state: {}, source: [], translation: []});
                     mythis.checkstandard();
@@ -592,7 +623,7 @@
                                 mythis.pullsource();
                                 mythis.createchunks();
                                 mythis.createchapters();
-                                loading.close();
+                                load.close();
                                 setTimeout(function() {
                                     mythis.setmodestate();
                                     mythis.checksources();
@@ -615,7 +646,7 @@
                                 mythis.createchunks();
                                 mythis.createchapters();
                             }
-                            loading.close();
+                            load.close();
                             setTimeout(function() {
                                 mythis.setmodestate();
                                 mythis.checksources();
@@ -626,55 +657,6 @@
                                 if (type === "print") {
                                     mythis.goprint();
                                 }
-                            }, 250);
-                        }
-                    });
-                }, 250);
-            }, 500);
-        },
-
-        loadpublish: function (event, data) {
-            //this function is not currently being used, but saved in case needed later
-            var mythis = this;
-            var blankstate = {};
-            var loading = this.$.loading;
-            this.setrightanimation();
-            this.route = "translate";
-            setTimeout(function() {
-                loading.open();
-                setTimeout(function() {
-                    mythis.set('currentproject.data', data.projdata);
-                    mythis.set('currentproject.state', blankstate);
-                    mythis.checkstandard();
-                    mythis.retrievesource();
-                    App.projectsManager.loadTargetTranslation(data.projdata).then(function (translation) {
-                        mythis.set('rawdata', translation);
-                        if (data.projdata.project.type !== "text") {
-                            var newmeta = {fullname: data.projdata.basename};
-                            App.projectsManager.loadTargetTranslation(newmeta).then(function (newtranslation) {
-                                mythis.set('rawdata2', newtranslation);
-                                mythis.pullsource();
-                                mythis.createchunks();
-                                mythis.createchapters();
-                                loading.close();
-                                setTimeout(function() {
-                                    mythis.setmodestate();
-                                    mythis.checksources();
-                                    mythis.fire('iron-signal', {name: 'adjustbar'});
-                                    mythis.gopublish();
-                                }, 250);
-                            });
-                        } else {
-                            mythis.set('rawdata2', {});
-                            mythis.pullsource();
-                            mythis.createchunks();
-                            mythis.createchapters();
-                            loading.close();
-                            setTimeout(function() {
-                                mythis.setmodestate();
-                                mythis.checksources();
-                                mythis.fire('iron-signal', {name: 'adjustbar'});
-                                mythis.gopublish();
                             }, 250);
                         }
                     });
@@ -1348,42 +1330,63 @@
 
         print: function () {
             var mythis = this;
-            var popup = this.$.confirm;
             var meta = this.currentproject.data;
-            var translation = this.currentproject.translation;
             var name = 'uw-' + meta.fullname;
             var input = this.$.printinput;
-            var filename;
             var firsttime = true;
-            var options = {includeIncompleteFrames: this.$.chunkbox.checked, includeImages: this.$.imagebox.checked};
+            var confirm = this.$.confirm;
+
             this.$.printpopup.close();
             input.value = null;
             input.nwsaveas = name;
             input.addEventListener("change", function (evt) {
                 if (firsttime) {
                     firsttime = false;
-                    mythis.set('options.body', "Creating PDF. Please wait...");
-                    mythis.set('options.loading', true);
-                    popup.open();
-                    filename = input.value;
-                    return App.printer.targetTranslationToPdf(translation, meta, filename, options)
-                        .then(function () {
-                            mythis.set('options.title', "PDF Created");
-                            mythis.set('options.body', "Your project has been successfully saved to a PDF.  Thanks.");
-                            mythis.set('options.loading', false);
-                        })
-                        .catch(function (err) {
-                            var errmessage = "We're sorry.  An error occurred while trying to save your project";
-                            if(err !== null) {
-                                errmessage = err;
+                    var filename = input.value;
+
+                    return App.projectsManager.fileExists(filename + ".pdf")
+                        .then (function (stat) {
+                            if (stat) {
+                                confirm.open();
+                            } else {
+                                mythis.executeprint();
                             }
-                            mythis.set('options.title', "Print Failed");
-                            mythis.set('options.body', errmessage);
-                            mythis.set('options.loading', false);
                         });
                 }
             }, false);
             input.click();
+        },
+
+        executeprint: function () {
+            var mythis = this;
+            var loading = this.$.loading;
+            var meta = this.currentproject.data;
+            var translation = this.currentproject.translation;
+            var input = this.$.printinput;
+            var filename = input.value;
+            var options = {includeIncompleteFrames: this.$.chunkbox.checked, includeImages: this.$.imagebox.checked};
+            var confirm = this.$.confirm;
+
+            confirm.close();
+            mythis.set('options.body', "Creating PDF. Please wait...");
+            mythis.set('options.loading', true);
+            loading.open();
+
+            return App.printer.targetTranslationToPdf(translation, meta, filename, options)
+                .then(function () {
+                    mythis.set('options.title', "PDF Created");
+                    mythis.set('options.body', "Your project has been successfully saved to a PDF.  Thanks.");
+                    mythis.set('options.loading', false);
+                })
+                .catch(function (err) {
+                    var errmessage = "We're sorry.  An error occurred while trying to save your project";
+                    if(err !== null) {
+                        errmessage = err;
+                    }
+                    mythis.set('options.title', "Print Failed");
+                    mythis.set('options.body', errmessage);
+                    mythis.set('options.loading', false);
+                });
         },
 
         setrightanimation: function () {

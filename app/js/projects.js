@@ -419,7 +419,7 @@ function ProjectsManager(query, configurator) {
                         }
                         zip.finalize();
                         resolve(true);
-                    } 
+                    }
                     else if(translation[0].meta.format === 'usx'){
                          let
                             currentChapter = 1,
@@ -430,7 +430,7 @@ function ProjectsManager(query, configurator) {
                             if(chapterContent === '') {
                                 //add in USFM header elements
                                 chapterContent += '\n\\\id ' + meta.project.id.toUpperCase() + ' ' + meta.sources[0].name + '\n';
-                    
+
                                 chapterContent += '\\\ide ' + frame.meta.format + '\n';
 
                                 chapterContent += '\\\h ' + meta.project.name.toUpperCase() + '\n';
@@ -455,8 +455,8 @@ function ProjectsManager(query, configurator) {
                             }
                         }
 
-                        fs.writeFile(filename + '.usfm', new Buffer(chapterContent));
-                        resolve(true);   
+                        fs.writeFile(filename + '.txt', new Buffer(chapterContent));
+                        resolve(true);
                     }else {
                         // we don't support anything but dokuwiki and usx right now
                         reject('We only support exporting OBS and USX projects for now');

@@ -11,6 +11,17 @@ var _ = require('lodash'),
 
 function Printer() {
 
+    /**
+     * Returns the value of the first property found in the object.
+     * If the object has no properties null is returned
+     * @param obj
+     * @returns {}
+     */
+    function getFirstPropValue(obj) {
+        let values = _.values(obj);
+        return values.length ? values[0] : null;
+    }
+
     return {
 
         isTranslation: function (meta) {
@@ -36,22 +47,28 @@ function Printer() {
                 if(isTranslation) {
                     // normalize input
                     let chapters = _.mapValues(_.groupBy(translation, function(obj) {
+                        //console.debug('map chapter values', obj);
                         return obj.meta.chapterid;
                     }), function(chapter, key) {
                         let frames = _.mapKeys(chapter, function(obj) {
+                            //console.debug('map chapter keys', obj);
                             return obj.meta.frameid;
                         });
+                        //console.debug('forming chapter', frames);
+                        let formatReference = getFirstPropValue(frames); // refer to one of the frames for the format
+                        console.debug(formatReference);
                         let chapterObj = {
                             id: key,
-                            title: frames.title,
+                            title: frames.title || key,
                             reference: frames.reference === undefined ? null : frames.reference,
-                            format: frames.title.meta.format // everyone has a title
+                            format: formatReference.meta.format
                         };
                         delete frames.reference;
                         delete frames.title;
                         chapterObj.frames = _.sortBy(_.filter(frames, function(o) {
                             return o.transcontent !== '';
                         }), function(f) {
+                            //console.debug('sort frames',f);
                             return f.meta.frame;
                         });
                         return chapterObj;
@@ -66,8 +83,6 @@ function Printer() {
                     }), 'id');
                     chapters = null;
 
-
-                    // TRICKY: look into the first chapter to see the format
                     if(project.format === 'default') {
                         // the default format is currently dokuwiki
                         let doc = new PDFDocument({
@@ -83,7 +98,7 @@ function Printer() {
 
                         // default meta
                         doc.info.Title = project.title.transcontent || meta.project.name;
-                        doc.info.Author = 'Joel Lonbeck'; // todo: translators
+                        //doc.info.Author = 'Joel Lonbeck'; // todo: translators
                         //doc.info.Subject = 'an unrestricted, visual mini-Bible in any language'; // todo: project sub-title
                         doc.info.Keywords = meta.target_language.name;
 

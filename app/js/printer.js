@@ -41,7 +41,7 @@ function Printer() {
                         let frames = _.mapKeys(chapter, function(obj) {
                             return obj.meta.frameid;
                         });
-                        let obj = {
+                        let chapterObj = {
                             id: key,
                             title: frames.title,
                             reference: frames.reference === undefined ? null : frames.reference,
@@ -49,20 +49,23 @@ function Printer() {
                         };
                         delete frames.reference;
                         delete frames.title;
-                        obj.frames = _.sortBy(frames, function(f) {
+                        chapterObj.frames = _.sortBy(_.filter(frames, function(o) {
+                            return o.transcontent !== '';
+                        }), function(f) {
                             return f.meta.frame;
                         });
-                        return obj;
+                        return chapterObj;
                     });
                     let project = {
                         format: chapters['00'].format,
                         title: chapters['00'].title
                     };
                     delete chapters['00'];
-                    project.chapters = _.sortBy(chapters, 'id');
+                    project.chapters = _.sortBy(_.filter(chapters, function(o) {
+                        return o.frames.length > 0;
+                    }), 'id');
                     chapters = null;
 
-                    //console.debug(project);
 
                     // TRICKY: look into the first chapter to see the format
                     if(project.format === 'default') {
@@ -79,7 +82,7 @@ function Printer() {
                         doc.pipe(fs.createWriteStream(filename + '.pdf'));
 
                         // default meta
-                        doc.info.Title = project.title.transcontent || meta.project_name;
+                        doc.info.Title = project.title.transcontent || meta.project.name;
                         doc.info.Author = 'Joel Lonbeck'; // todo: translators
                         //doc.info.Subject = 'an unrestricted, visual mini-Bible in any language'; // todo: project sub-title
                         doc.info.Keywords = meta.target_language.name;
@@ -119,7 +122,7 @@ function Printer() {
                             // chapter title
                             doc.addPage();
                             doc.fontSize(20)
-                                .text(chapter.title.transcontent || chapter.meta.title, 72, doc.page.height / 2, {align: 'center'});
+                                .text(chapter.title.transcontent || chapter.title.meta.title, 72, doc.page.height / 2, {align: 'center'});
                             chapter.page = doc.bufferedPageRange().count;
 
                             // frames
@@ -150,7 +153,8 @@ function Printer() {
                         let range = doc.bufferedPageRange();
                         for(let i = range.start; i < range.start + range.count; i ++) {
                             doc.switchToPage(i);
-                            doc.text(i + 1, 72, doc.page.height - 50 - 12, {align: 'center'});
+                            doc.fontSize(10)
+                                .text(i + 1, 72, doc.page.height - 50 - 12, {align: 'center'});
                         }
 
                         // write TOC
@@ -170,7 +174,7 @@ function Printer() {
                             }
                             doc.switchToPage(currTocPage);
                             doc.fontSize(10)
-                                .text(chapter.title.transcontent)
+                                .text(chapter.title.transcontent || chapter.title.meta.title)
                                 .moveUp()
                                 .text(chapter.page + '', {align: 'right'})
                                 .moveDown();

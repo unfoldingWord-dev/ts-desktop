@@ -571,41 +571,35 @@
             }
         },
 
-        loadnewproject: function (event, data) {
-            //this function not currently being used, but saved in case needed later
-            var mythis = this;
-            var blank = [];
-            var blankstate = {};
-            this.setrightanimation();
-            this.route = "translate";
-            this.set('currentproject.state', blankstate);
-            this.set('currentproject.translation', blank);
-            this.set('currentproject.data', data.projdata);
-            this.checkstandard();
-            //this.savetofile();
-            if (data.projdata.project.type !== "text" && data.projdata.project.type !== "tw") {
-                var newmeta = {fullname: data.projdata.basename};
-                App.projectsManager.loadTargetTranslation(newmeta).then(function (newtranslation) {
-                    mythis.set('rawdata2', newtranslation);
-                    mythis.setmodestate();
-                    mythis.checksources();
-                });
-            } else {
-                mythis.set('rawdata2', {});
-                if (data.projdata.project.type === "tw") {
-                    mythis.pullwords();
-                    mythis.createchunks();
-                }
-                mythis.setmodestate();
-                mythis.checksources();
-            }
-        },
-
         loadproject: function (event, data) {
             var mythis = this;
             var load = this.$.load;
             var type = data.type;
             var projdata = data.projdata;
+
+            var loadsource = function () {
+                if (projdata.project.type === "tw") {
+                    mythis.pullwords();
+                    mythis.createchunks();
+                } else {
+                    mythis.pullsource();
+                    mythis.createchunks();
+                    mythis.createchapters();
+                }
+                load.close();
+                setTimeout(function() {
+                    mythis.setmodestate();
+                    mythis.checksources();
+                    mythis.fire('iron-signal', {name: 'adjustbar'});
+                    if (type === "publish") {
+                        mythis.gopublish();
+                    }
+                    if (type === "print") {
+                        mythis.goprint();
+                    }
+                }, 250);
+            };
+
             this.setrightanimation();
             this.route = "translate";
             setTimeout(function() {
@@ -620,44 +614,11 @@
                             var newmeta = {fullname: projdata.basename, project: {type: 'text'}};
                             App.projectsManager.loadTargetTranslation(newmeta).then(function (newtranslation) {
                                 mythis.set('rawdata2', newtranslation);
-                                mythis.pullsource();
-                                mythis.createchunks();
-                                mythis.createchapters();
-                                load.close();
-                                setTimeout(function() {
-                                    mythis.setmodestate();
-                                    mythis.checksources();
-                                    mythis.fire('iron-signal', {name: 'adjustbar'});
-                                    if (type === "publish") {
-                                        mythis.gopublish();
-                                    }
-                                    if (type === "print") {
-                                        mythis.goprint();
-                                    }
-                                }, 250);
+                                loadsource();
                             });
                         } else {
                             mythis.set('rawdata2', {});
-                            if (projdata.project.type === "tw") {
-                                mythis.pullwords();
-                                mythis.createchunks();
-                            } else {
-                                mythis.pullsource();
-                                mythis.createchunks();
-                                mythis.createchapters();
-                            }
-                            load.close();
-                            setTimeout(function() {
-                                mythis.setmodestate();
-                                mythis.checksources();
-                                mythis.fire('iron-signal', {name: 'adjustbar'});
-                                if (type === "publish") {
-                                    mythis.gopublish();
-                                }
-                                if (type === "print") {
-                                    mythis.goprint();
-                                }
-                            }, 250);
+                            loadsource();
                         }
                     });
                 }, 250);
@@ -665,31 +626,20 @@
         },
 
         updatesources: function (event, data) {
-            var mythis = this;
-            var meta = mythis.currentproject.data;
-            mythis.set('currentproject.data.sources', data.sources);
-            mythis.set('currentproject.data.currentsource', data.selected);
-            mythis.savesource();
-            mythis.getlocation();
-            App.projectsManager.loadTargetTranslation(meta).then(function (translation) {
-                mythis.set('rawdata', translation);
-                mythis.pullsource();
-                mythis.createchunks();
-                mythis.createchapters();
-                mythis.savetofile();
-                mythis.forceResize();
-                mythis.setlocation();
-                mythis.checksources();
-                setTimeout(function() {
-                    mythis.fire('iron-signal', {name: 'adjustbar'});
-                }, 250);
-            });
+            this.set('currentproject.data.sources', data.sources);
+            this.set('currentproject.data.currentsource', data.selected);
+            this.loaddata(true);
         },
 
         updateselected: function (event, data) {
+            this.set('currentproject.data.currentsource', data.selected);
+            this.loaddata(false);
+        },
+
+        loaddata: function (check) {
             var mythis = this;
             var meta = mythis.currentproject.data;
-            mythis.set('currentproject.data.currentsource', data.selected);
+
             mythis.savesource();
             mythis.getlocation();
             App.projectsManager.loadTargetTranslation(meta).then(function (translation) {
@@ -700,6 +650,9 @@
                 mythis.savetofile();
                 mythis.forceResize();
                 mythis.setlocation();
+                if (check) {
+                    mythis.checksources();
+                }
                 setTimeout(function() {
                     mythis.fire('iron-signal', {name: 'adjustbar'});
                 }, 250);

@@ -412,6 +412,10 @@
                 value: '',
                 notify: true
             },
+            projectlist: {
+                type: Array,
+                value: []
+            },
             currentproject: {
                 type: Object,
                 value: {},
@@ -426,6 +430,10 @@
                 value: {}
             },
             rawdata2: {
+                type: Object,
+                value: {}
+            },
+            worddata: {
                 type: Object,
                 value: {}
             },
@@ -571,41 +579,82 @@
             }
         },
 
-        loadnewproject: function (event, data) {
-            //this function not currently being used, but saved in case needed later
-            var mythis = this;
-            var blank = [];
-            var blankstate = {};
-            this.setrightanimation();
-            this.route = "translate";
-            this.set('currentproject.state', blankstate);
-            this.set('currentproject.translation', blank);
-            this.set('currentproject.data', data.projdata);
-            this.checkstandard();
-            //this.savetofile();
-            if (data.projdata.project.type !== "text" && data.projdata.project.type !== "tw") {
-                var newmeta = {fullname: data.projdata.basename};
-                App.projectsManager.loadTargetTranslation(newmeta).then(function (newtranslation) {
-                    mythis.set('rawdata2', newtranslation);
-                    mythis.setmodestate();
-                    mythis.checksources();
-                });
-            } else {
-                mythis.set('rawdata2', {});
-                if (data.projdata.project.type === "tw") {
-                    mythis.pullwords();
-                    mythis.createchunks();
-                }
-                mythis.setmodestate();
-                mythis.checksources();
-            }
-        },
-
         loadproject: function (event, data) {
             var mythis = this;
             var load = this.$.load;
             var type = data.type;
             var projdata = data.projdata;
+            var list = this.projectlist;
+
+            var loadsource = function () {
+                if (projdata.project.type === "tw") {
+                    mythis.pullwords();
+                    mythis.createchunks();
+                } else {
+                    mythis.pullsource();
+                    mythis.createchunks();
+                    mythis.createchapters();
+                }
+                load.close();
+                setTimeout(function() {
+                    mythis.setmodestate();
+                    mythis.checksources();
+                    mythis.fire('iron-signal', {name: 'adjustbar'});
+                    if (type === "publish") {
+                        mythis.gopublish();
+                    }
+                    if (type === "print") {
+                        mythis.goprint();
+                    }
+                }, 250);
+            };
+
+            var loadwords = function () {
+                if (projdata.project.type !== "tw") {
+                    var wordmeta = false;
+                    for (var i = 0; i < list.length; i++) {
+                        if (list[i].target_language.id === projdata.target_language.id && list[i].project.type === "tw") {
+                            wordmeta = list[i];
+                        }
+                    }
+                    if (wordmeta) {
+                        App.projectsManager.loadTargetTranslation(wordmeta).then(function (words) {
+                            mythis.set('worddata', words);
+                            loadsource();
+                        });
+                    } else {
+                        mythis.set('worddata', {});
+                        loadsource();
+                    }
+                } else {
+                    mythis.set('worddata', {});
+                    loadsource();
+                }
+            };
+
+            var loaddata2 = function () {
+                if (projdata.project.type === "tn" || projdata.project.type === "tq") {
+                    var newmeta = false;
+                    for (var i = 0; i < list.length; i++) {
+                        if (list[i].basename === projdata.basename && list[i].project.type === "text" && list[i].resource_id !== "udb") {
+                            newmeta = list[i];
+                        }
+                    }
+                    if (newmeta) {
+                        App.projectsManager.loadTargetTranslation(newmeta).then(function (newtranslation) {
+                            mythis.set('rawdata2', newtranslation);
+                            loadwords();
+                        });
+                    } else {
+                        mythis.set('rawdata2', {});
+                        loadwords();
+                    }
+                } else {
+                    mythis.set('rawdata2', {});
+                    loadwords();
+                }
+            };
+
             this.setrightanimation();
             this.route = "translate";
             setTimeout(function() {
@@ -616,80 +665,27 @@
                     mythis.retrievesource();
                     App.projectsManager.loadTargetTranslation(projdata).then(function (translation) {
                         mythis.set('rawdata', translation);
-                        if (projdata.project.type === "tn" || projdata.project.type === "tq") {
-                            var newmeta = {fullname: projdata.basename, project: {type: 'text'}};
-                            App.projectsManager.loadTargetTranslation(newmeta).then(function (newtranslation) {
-                                mythis.set('rawdata2', newtranslation);
-                                mythis.pullsource();
-                                mythis.createchunks();
-                                mythis.createchapters();
-                                load.close();
-                                setTimeout(function() {
-                                    mythis.setmodestate();
-                                    mythis.checksources();
-                                    mythis.fire('iron-signal', {name: 'adjustbar'});
-                                    if (type === "publish") {
-                                        mythis.gopublish();
-                                    }
-                                    if (type === "print") {
-                                        mythis.goprint();
-                                    }
-                                }, 250);
-                            });
-                        } else {
-                            mythis.set('rawdata2', {});
-                            if (projdata.project.type === "tw") {
-                                mythis.pullwords();
-                                mythis.createchunks();
-                            } else {
-                                mythis.pullsource();
-                                mythis.createchunks();
-                                mythis.createchapters();
-                            }
-                            load.close();
-                            setTimeout(function() {
-                                mythis.setmodestate();
-                                mythis.checksources();
-                                mythis.fire('iron-signal', {name: 'adjustbar'});
-                                if (type === "publish") {
-                                    mythis.gopublish();
-                                }
-                                if (type === "print") {
-                                    mythis.goprint();
-                                }
-                            }, 250);
-                        }
+                        loaddata2();
                     });
                 }, 250);
             }, 500);
         },
 
         updatesources: function (event, data) {
-            var mythis = this;
-            var meta = mythis.currentproject.data;
-            mythis.set('currentproject.data.sources', data.sources);
-            mythis.set('currentproject.data.currentsource', data.selected);
-            mythis.savesource();
-            mythis.getlocation();
-            App.projectsManager.loadTargetTranslation(meta).then(function (translation) {
-                mythis.set('rawdata', translation);
-                mythis.pullsource();
-                mythis.createchunks();
-                mythis.createchapters();
-                mythis.savetofile();
-                mythis.forceResize();
-                mythis.setlocation();
-                mythis.checksources();
-                setTimeout(function() {
-                    mythis.fire('iron-signal', {name: 'adjustbar'});
-                }, 250);
-            });
+            this.set('currentproject.data.sources', data.sources);
+            this.set('currentproject.data.currentsource', data.selected);
+            this.loaddata(true);
         },
 
         updateselected: function (event, data) {
+            this.set('currentproject.data.currentsource', data.selected);
+            this.loaddata(false);
+        },
+
+        loaddata: function (check) {
             var mythis = this;
             var meta = mythis.currentproject.data;
-            mythis.set('currentproject.data.currentsource', data.selected);
+
             mythis.savesource();
             mythis.getlocation();
             App.projectsManager.loadTargetTranslation(meta).then(function (translation) {
@@ -700,6 +696,9 @@
                 mythis.savetofile();
                 mythis.forceResize();
                 mythis.setlocation();
+                if (check) {
+                    mythis.checksources();
+                }
                 setTimeout(function() {
                     mythis.fire('iron-signal', {name: 'adjustbar'});
                 }, 250);
@@ -772,6 +771,14 @@
                 var words = App.projectsManager.getFrameWords(id);
                 var verses = [];
 
+                for (var w = 0; w < words.length; w++) {
+                    var worddata = this.worddata["01-" + words[w].slug];
+                    if (worddata && worddata.helpscontent[0].body !== "" && worddata.helpscontent[0].title !== "") {
+                        words[w].term = worddata.helpscontent[0].title;
+                        words[w].definition = worddata.helpscontent[0].body;
+                    }
+                }
+
                 for (var n = 0; n < notes.length; n++) {
                     if (notes[n].title === "") {
                         notes[n].title = notes[n].body;
@@ -806,7 +813,7 @@
                     chunkref = title + ":" + frame;
                 } else {
                     chapterref = name + " " + chapter;
-                    chunkref = name + " " + chapter + ":" + verses[0] + "-" + verses[verses.length-1];
+                    chunkref = name + " " + chapter + ":" + verses[0] + "–" + verses[verses.length-1];
                 }
 
                 var meta = {
@@ -819,7 +826,7 @@
                     verses: verses,
                     chapterref: chapterref,
                     chunkref: chunkref,
-                    refaddon: " - " + refaddon,
+                    refaddon: " — " + refaddon,
                     standard: standard,
                     words: false,
                     format: format
@@ -832,7 +839,7 @@
                         chapterid: "00",
                         frameid: "title",
                         chunkref: "Project Title",
-                        refaddon: " - " + refaddon,
+                        refaddon: " — " + refaddon,
                         standard: standard,
                         words: false,
                         verses: [],
@@ -866,7 +873,7 @@
                     frameid: "title",
                     verses: [],
                     chunkref: "Story Title",
-                    refaddon: " - " + refaddon,
+                    refaddon: " — " + refaddon,
                     standard: standard,
                     words: false,
                     format: format
@@ -903,7 +910,7 @@
                     frameid: "reference",
                     verses: [],
                     chunkref: "Story Reference",
-                    refaddon: " - " + refaddon,
+                    refaddon: " — " + refaddon,
                     standard: standard,
                     words: false,
                     format: format
@@ -983,7 +990,7 @@
                     frameid: frameid,
                     verses: [],
                     chunkref: frames[i].term,
-                    refaddon: " - " + language,
+                    refaddon: " — " + language,
                     standard: standard,
                     words: true
                 };

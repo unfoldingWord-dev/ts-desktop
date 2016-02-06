@@ -1367,26 +1367,37 @@
             var options = {includeIncompleteFrames: this.$.chunkbox.checked, includeImages: this.$.imagebox.checked};
             var confirm = this.$.confirm;
 
+            var generatePdf = function(){
+                mythis.set('options.body', "Creating PDF. Please wait...");
+                return App.printer.targetTranslationToPdf(translation, meta, filename, options)
+                    .then(function () {
+                        mythis.set('options.title', "PDF Created");
+                        mythis.set('options.body', "Your project has been successfully saved to a PDF.  Thanks.");
+                        mythis.set('options.loading', false);
+                    })
+                    .catch(function (err) {
+                        var errmessage = "We're sorry.  An error occurred while trying to save your project";
+                        if(err !== null) {
+                            errmessage = err;
+                        }
+                        mythis.set('options.title', "Print Failed");
+                        mythis.set('options.body', errmessage);
+                        mythis.set('options.loading', false);
+                    });
+            };
+
             confirm.close();
-            mythis.set('options.body', "Creating PDF. Please wait...");
             mythis.set('options.loading', true);
             loading.open();
 
-            return App.printer.targetTranslationToPdf(translation, meta, filename, options)
-                .then(function () {
-                    mythis.set('options.title', "PDF Created");
-                    mythis.set('options.body', "Your project has been successfully saved to a PDF.  Thanks.");
-                    mythis.set('options.loading', false);
-                })
-                .catch(function (err) {
-                    var errmessage = "We're sorry.  An error occurred while trying to save your project";
-                    if(err !== null) {
-                        errmessage = err;
-                    }
-                    mythis.set('options.title', "Print Failed");
-                    mythis.set('options.body', errmessage);
-                    mythis.set('options.loading', false);
+            if(options.includeImages){
+                mythis.set('options.body', "Downloading Images. Please wait...");
+                return App.printer.getImages(meta).then(function(){
+                    return generatePdf();
                 });
+            } else {
+                return generatePdf();
+            }
         },
 
         setrightanimation: function () {

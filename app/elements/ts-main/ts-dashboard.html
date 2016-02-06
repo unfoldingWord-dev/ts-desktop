@@ -79,7 +79,7 @@
           color: var(--secondary-text-color);
       }
 
-      #confirm {
+      #loading {
           width: 320px;
           height: 220px;
           color: var(--primary-text-color);
@@ -115,7 +115,27 @@
           text-align: center;
       }
 
-      h2 {
+      #loading h2 {
+          color: var(--accent-color);
+      }
+
+      #confirm {
+          width: 350px;
+          height: 175px;
+      }
+
+      #confirm p {
+          font-size: 110%;
+      }
+
+      #confirmbuttons {
+          display: flex;
+          justify-content: flex-end;
+          padding: 0 50px;
+          color: var(--secondary-text-color);
+      }
+
+      #confirmbuttons paper-button:hover {
           color: var(--accent-color);
       }
 
@@ -158,7 +178,7 @@
           </div>
       </paper-dialog>
 
-      <paper-dialog id="confirm" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+      <paper-dialog id="loading" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
           <template is="dom-if" if="{{options.loading}}">
               <p>{{options.body}}</p>
               <div id="bar">
@@ -171,9 +191,20 @@
                   <p>{{options.body}}</p>
               </div>
               <div id="buttonbox">
-                  <paper-button on-tap="closeconfirm">Close</paper-button>
+                  <paper-button dialog-dismiss>Close</paper-button>
               </div>
           </template>
+      </paper-dialog>
+
+      <paper-dialog id="confirm" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <h2>Overwrite?</h2>
+          <div>
+              <p>This file already exists. Overwrite?</p>
+          </div>
+          <div id="confirmbuttons">
+              <paper-button dialog-dismiss>No</paper-button>
+              <paper-button on-tap="executebackup">Confirm</paper-button>
+          </div>
       </paper-dialog>
 
       <iron-signals on-iron-signal-updatelist="updatelist"></iron-signals>
@@ -220,55 +251,82 @@
           options: {
               type: Object,
               value: {loading: false, title: "", body: ""}
+          },
+          tempbackup: {
+              type: Object,
+              value: {}
           }
       },
 
       openbackup: function (event, data) {
           var mythis = this;
-          var confirm = this.$.confirm;
           var meta = data.meta;
+          this.set('tempbackup', meta);
           var name = 'uw-' + meta.fullname;
           var backup = this.$.backup;
-          var filename;
           var firsttime = true;
+          var confirm = this.$.confirm;
+
           backup.value = null;
           backup.nwsaveas = name;
           backup.addEventListener("change", function (evt) {
               if (firsttime) {
                   firsttime = false;
-                  mythis.set('options.body', "Creating Backup.  Please wait...");
-                  mythis.set('options.loading', true);
-                  confirm.open();
-                  filename = backup.value;
-                  return App.projectsManager.backupTranslation(meta, filename, name)
-                      .then(function () {
-                          mythis.set('options.title', "Backup Complete");
-                          mythis.set('options.body', "Your project has been successfully archived.  Thanks.");
-                          mythis.set('options.loading', false);
-                      })
-                      .catch(function (err) {
-                          var errmessage = "We're sorry.  An error occurred while trying to backup your project";
-                          if(err !== null) {
-                              errmessage = err;
+                  var filename = backup.value;
+
+                  return App.projectsManager.fileExists(filename + ".tstudio")
+                      .then (function (stat) {
+                          if (stat) {
+                              confirm.open();
+                          } else {
+                              mythis.executebackup();
                           }
-                          mythis.set('options.title', "Backup Failed");
-                          mythis.set('options.body', errmessage);
-                          mythis.set('options.loading', false);
                       });
               }
           }, false);
           backup.click();
       },
 
+      executebackup: function () {
+          var mythis = this;
+          var loading = this.$.loading;
+          var meta = this.tempbackup;
+          var name = 'uw-' + meta.fullname;
+          var backup = this.$.backup;
+          var filename = backup.value;
+          var confirm = this.$.confirm;
+
+          confirm.close();
+          mythis.set('options.body', "Creating Backup.  Please wait...");
+          mythis.set('options.loading', true);
+          loading.open();
+
+          return App.projectsManager.backupTranslation(meta, filename, name)
+              .then(function () {
+                  mythis.set('options.title', "Backup Complete");
+                  mythis.set('options.body', "Your project has been successfully archived.  Thanks.");
+                  mythis.set('options.loading', false);
+              })
+              .catch(function (err) {
+                  var errmessage = "We're sorry.  An error occurred while trying to backup your project";
+                  if(err !== null) {
+                      errmessage = err;
+                  }
+                  mythis.set('options.title', "Backup Failed");
+                  mythis.set('options.body', errmessage);
+                  mythis.set('options.loading', false);
+              });
+      },
+
       openrestore: function() {
           var mythis = this;
-          var confirm = this.$.confirm;
+          var loading = this.$.loading;
           var chooser = this.$.restore;
           chooser.value = null;
           chooser.addEventListener('change', function(evt) {
               mythis.set('options.body', "Restoring.  Please wait...");
               mythis.set('options.loading', true);
-              confirm.open();
+              loading.open();
               for(var i=0; i < this.files.length; i ++) {
                   if(this.files[i].name.split('.').pop().toLowerCase() === 'tstudio') {
                       App.projectsManager.restoreTargetTranslation(this.files[i])
@@ -304,10 +362,6 @@
           this.$.feedback.close();
       },
 
-      closeconfirm: function () {
-          this.$.confirm.close();
-      },
-
       sendfeedback: function () {
           var message = this.feedback;
           var mythis = this;
@@ -315,7 +369,7 @@
           this.set('options.body', "Sending Feedback.  Please wait...");
           this.set('options.loading', true);
           this.closefeedback();
-          this.$.confirm.open();
+          this.$.loading.open();
 
           if (App.reporter.canReportToGithub()) {
               App.reporter.reportBug(message, function (res) {

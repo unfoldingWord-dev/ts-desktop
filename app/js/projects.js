@@ -455,7 +455,7 @@ function ProjectsManager(query, configurator) {
                             }
                         }
 
-                        fs.writeFile(filename + '.usfm', new Buffer(chapterContent));
+                        fs.writeFile(filename + '.txt', new Buffer(chapterContent));
                         resolve(true);
                     }else {
                         // we don't support anything but dokuwiki and usx right now

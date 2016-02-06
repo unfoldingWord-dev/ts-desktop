@@ -824,7 +824,7 @@
                     chunkref = title + ":" + frame;
                 } else {
                     chapterref = name + " " + chapter;
-                    chunkref = name + " " + chapter + ":" + verses[0] + "-" + verses[verses.length-1];
+                    chunkref = name + " " + chapter + ":" + verses[0] + "–" + verses[verses.length-1];
                 }
 
                 var meta = {
@@ -837,7 +837,7 @@
                     verses: verses,
                     chapterref: chapterref,
                     chunkref: chunkref,
-                    refaddon: " - " + refaddon,
+                    refaddon: " — " + refaddon,
                     standard: standard,
                     words: false,
                     format: format
@@ -850,7 +850,7 @@
                         chapterid: "00",
                         frameid: "title",
                         chunkref: "Project Title",
-                        refaddon: " - " + refaddon,
+                        refaddon: " — " + refaddon,
                         standard: standard,
                         words: false,
                         verses: [],
@@ -884,7 +884,7 @@
                     frameid: "title",
                     verses: [],
                     chunkref: "Story Title",
-                    refaddon: " - " + refaddon,
+                    refaddon: " — " + refaddon,
                     standard: standard,
                     words: false,
                     format: format
@@ -921,7 +921,7 @@
                     frameid: "reference",
                     verses: [],
                     chunkref: "Story Reference",
-                    refaddon: " - " + refaddon,
+                    refaddon: " — " + refaddon,
                     standard: standard,
                     words: false,
                     format: format
@@ -1001,7 +1001,7 @@
                     frameid: frameid,
                     verses: [],
                     chunkref: frames[i].term,
-                    refaddon: " - " + language,
+                    refaddon: " — " + language,
                     standard: standard,
                     words: true
                 };
@@ -1362,25 +1362,44 @@
             input.addEventListener("change", function (evt) {
                 if (firsttime) {
                     firsttime = false;
-                    mythis.set('options.body', "Creating PDF. Please wait...");
+                    var generatePdf = function(){
+                        mythis.set('options.body', "Creating PDF. Please wait...");
+                        filename = input.value;
+                        return App.printer.targetTranslationToPdf(translation, meta, filename, options)
+                            .then(function () {
+                                mythis.set('options.title', "PDF Created");
+                                mythis.set('options.body', "Your project has been successfully saved to a PDF.  Thanks.");
+                                mythis.set('options.loading', false);
+                            })
+                            .catch(function (err) {
+                                var errmessage = "We're sorry.  An error occurred while trying to save your project";
+                                if(err !== null) {
+                                    errmessage = err;
+                                }
+                                mythis.set('options.title', "Print Failed");
+                                mythis.set('options.body', errmessage);
+                                mythis.set('options.loading', false);
+                            });
+                    };
+
                     mythis.set('options.loading', true);
                     popup.open();
-                    filename = input.value;
-                    return App.printer.targetTranslationToPdf(translation, meta, filename, options)
-                        .then(function () {
-                            mythis.set('options.title', "PDF Created");
-                            mythis.set('options.body', "Your project has been successfully saved to a PDF.  Thanks.");
-                            mythis.set('options.loading', false);
-                        })
-                        .catch(function (err) {
-                            var errmessage = "We're sorry.  An error occurred while trying to save your project";
+                    if(options.includeImages){
+                        mythis.set('options.body', "Downloading Images. Please wait...");
+                        return App.printer.getImages(meta).then(function(){
+                            return generatePdf();
+                        }).catch(function(err) {
+                            var message = "We're sorry.  An error occurred while trying to download images for this project";
                             if(err !== null) {
-                                errmessage = err;
+                                message = err;
                             }
-                            mythis.set('options.title', "Print Failed");
-                            mythis.set('options.body', errmessage);
+                            mythis.set('options.title', "Download Failed");
+                            mythis.set('options.body', message);
                             mythis.set('options.loading', false);
                         });
+                    } else {
+                        return generatePdf();
+                    }
                 }
             }, false);
             input.click();

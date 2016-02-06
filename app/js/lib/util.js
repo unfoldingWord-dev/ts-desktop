@@ -5,6 +5,8 @@
 
     var diacritics = require('./diacritics'),
         fs = require('fs'),
+        https = require('https'),
+        http = require('http'),
         _ = require('lodash');
 
     /**
@@ -142,6 +144,31 @@
         }
     }
 
+    /**
+     * Performs a file download over https
+     * @param url the url to download
+     * @param dest the location where the file will be downloaded
+     * @param secure if true https will be used
+     * @returns {Promise}
+     */
+    function download (url, dest, secure) {
+        secure = secure || false;
+        return new Promise(function(resolve, reject) {
+            let out = fs.createWriteStream(dest);
+            let protocol = secure ? https : http;
+            protocol.get(url, function(response) {
+                response.pipe(out);
+                out.on('finish', function() {
+                    out.close(resolve);
+                });
+            }).on('error', function(err) {
+                fs.unlink(dest);
+                reject(err.message);
+            });
+        });
+    }
+
+    exports.download = download;
     exports.raiseWithContext = raiseWithContext;
     exports.removeDiacritics = diacritics.removeDiacritics;
     exports.startsWithBase = startsWithBase;

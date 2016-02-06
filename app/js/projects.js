@@ -353,9 +353,10 @@ function ProjectsManager(query, configurator) {
          * @param translation an array of frames
          * @param meta the target translation manifest and other info
          * @param filename the path where the export will be saved
+         * @param mediaServer is the location of the media files
          * @returns {Promise.<boolean>}
          */
-        exportTranslation: function (translation, meta, filename) {
+        exportTranslation: function (translation, meta, filename, mediaServer) {
             // validate input
             if(filename === null || filename === '') {
                 return Promise.reject('The filename is empty');
@@ -381,7 +382,7 @@ function ProjectsManager(query, configurator) {
                                     // TODO: we need to get the chapter reference and insert it here
                                     chapterContent += '////\n';
                                     //console.log('chapter ' + currentChapter, chapterContent);
-                                    zip.append(chapterContent, {name: currentChapter + '.txt'});
+                                    zip.append(new Buffer(chapterContent), {name: currentChapter + '.txt'});
                                 }
                                 currentChapter = frame.meta.chapter;
                                 chapterContent = '';
@@ -408,19 +409,57 @@ function ProjectsManager(query, configurator) {
                             }
 
                             // add frame
-                            chapterContent += '{{https://api.unfoldingword.org/' + meta.project.id + '/jpg/1/en/360px/' + meta.project.id + '-' + meta.target_language.id + '-' + frame.meta.chapterid + '-' + frame.meta.frameid + '.jpg}}\n\n';
+                            chapterContent += '{{' + mediaServer + meta.project.id + '/jpg/1/en/360px/' + meta.project.id + '-' + meta.target_language.id + '-' + frame.meta.chapterid + '-' + frame.meta.frameid + '.jpg}}\n\n';
                             chapterContent += frame.transcontent + '\n\n';
                         }
                         if(chapterContent !== '' && numFinishedFrames > 0) {
                             // TODO: we need to get the chapter reference and insert it here
                             chapterContent += '////\n';
-                            zip.append(chapterContent, {name: currentChapter + '.txt'});
+                            zip.append(new Buffer(chapterContent), {name: currentChapter + '.txt'});
                         }
                         zip.finalize();
                         resolve(true);
-                    } else {
-                        // we don't support anything but dokuwiki right now
-                        reject('We only support exporting OBS projects for now');
+                    }
+                    else if(translation[0].meta.format === 'usx'){
+                         let
+                            currentChapter = 1,
+                            numFinishedFrames = 0,
+                            chapterContent = '';
+                        for(let frame of translation) {
+                            // build chapter header
+                            if(chapterContent === '') {
+                                //add in USFM header elements
+                                chapterContent += '\n\\\id ' + meta.project.id.toUpperCase() + ' ' + meta.sources[0].name + '\n';
+
+                                chapterContent += '\\\ide ' + frame.meta.format + '\n';
+
+                                chapterContent += '\\\h ' + meta.project.name.toUpperCase() + '\n';
+
+                                chapterContent += '\\' + 'toc1 ' + meta.project.name + '\n';
+
+                                chapterContent += '\\' + 'toc2 ' + meta.project.name + '\n';
+
+                                chapterContent += '\\' + 'toc3 ' + meta.project.id + '\n';
+
+                                chapterContent += '\\\mt1 ' + meta.project.name.toUpperCase() + '\n';
+
+                                chapterContent += '\\\c ' + frame.meta.chapter + '\n';
+                            }
+                            if(currentChapter !== frame.meta.chapter){
+                                chapterContent += '\\\c ' + frame.meta.chapter + '\n';
+                                currentChapter = frame.meta.chapter;
+                            }
+                            // add frame
+                            if(frame.transcontent !== ''){
+                            chapterContent += frame.transcontent + '\n';
+                            }
+                        }
+
+                        fs.writeFile(filename + '.txt', new Buffer(chapterContent));
+                        resolve(true);
+                    }else {
+                        // we don't support anything but dokuwiki and usx right now
+                        reject('We only support exporting OBS and USX projects for now');
                     }
                 } else {
                     // TODO: support exporting other target translation types if needed e.g. notes, words, questions

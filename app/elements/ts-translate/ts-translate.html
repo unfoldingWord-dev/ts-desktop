@@ -1349,6 +1349,7 @@
             input.addEventListener("change", function (evt) {
                 if (firsttime) {
                     firsttime = false;
+
                     var filename = input.value;
 
                     return App.projectsManager.fileExists(filename + ".pdf")
@@ -1401,6 +1402,14 @@
                 mythis.set('options.body', "Downloading Images. Please wait...");
                 return App.printer.getImages(meta).then(function(){
                     return generatePdf();
+                }).catch(function(err){
+                    var message = "We're sorry.  An error occurred while trying to download images for this project";
+                    if(err !== null) {
+                        message = err;
+                    }
+                    mythis.set('options.title', "Download Failed");
+                    mythis.set('options.body', message);
+                    mythis.set('options.loading', false);
                 });
             } else {
                 return generatePdf();

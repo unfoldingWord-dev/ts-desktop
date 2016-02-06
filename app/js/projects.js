@@ -23,7 +23,7 @@ function zipper (r) {
 var map = guard('map'),
     indexBy = guard('indexBy'),
     flatten = guard('flatten'),
-    filter = guard('filter'),
+    // filter = guard('filter'),  // Never used
     compact = guard('compact');
 
 /**
@@ -34,8 +34,8 @@ var map = guard('map'),
 
 function ProjectsManager(query, configurator) {
 
-    var puts = console.log.bind(console),
-        write = wrap(fs, 'writeFile'),
+    // var puts = console.log.bind(console),  // Never used
+    var write = wrap(fs, 'writeFile'),
         read = wrap(fs, 'readFile'),
         mkdirp = wrap(null, mkdirP),
         rm = wrap(null, rimraf),
@@ -373,6 +373,48 @@ function ProjectsManager(query, configurator) {
             });
         },
 
+        /*
+         * Moves (using utils function) .tstudio files from the old to the new path
+         * @param oldPath: source backup directory
+         * @param newPath: target backup directory
+         */
+        migrateBackup: function(oldPath, newPath) {
+            var tstudioFiles = [];
+            readdir(oldPath, function(err, files) {
+                if (err) { console.log(err); }
+                tstudioFiles = files.filter(function(f) {
+                    // Only return files with .tstudio extensions
+                    return f.split('.').pop() === 'tstudio';
+                });
+                tstudioFiles.forEach(function(f) {
+                    var oldFilePath = oldPath + path.sep + f;
+                    var newFilePath = newPath + path.sep + f;
+                    utils.move(oldFilePath, newFilePath, function(err) {
+                        if (err) { console.log(err); }
+                    });
+                });
+            });
+        },
+
+        // fakeBackup: function() {
+        //     console.log('Backing up...');
+        // },
+
+        /*
+         */
+        startAutoBackup: function() {
+            // console.log('Auto Backup has start');
+            // return window.setInterval(this.fakeBackup, 3000);
+        },
+
+        /*
+         */
+        stopAutoBackup: function(id) {
+            // console.log('stopping id', id);
+            // window.clearInterval(id);
+            // console.log('Auto Backup is stopped');
+        },
+
         /**
          *
          * @param translation an array of frames
@@ -482,7 +524,7 @@ function ProjectsManager(query, configurator) {
 
                         fs.writeFile(filename + '.txt', new Buffer(chapterContent));
                         resolve(true);
-                    }else {
+                    } else {
                         // we don't support anything but dokuwiki and usx right now
                         reject('We only support exporting OBS and USX projects for now');
                     }

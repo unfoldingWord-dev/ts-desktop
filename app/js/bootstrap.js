@@ -10,6 +10,7 @@
     let mainWindow = gui.Window.get();
     let path = require('path');
     let fs = require('fs');
+    let mkdirp = require('mkdirp');
     let Reporter = require('../js/reporter').Reporter;
 
     let date = new Date();
@@ -188,7 +189,6 @@
             });
         },
 
-
         /**
          * Loads read-only and default configuration settings
          */
@@ -208,8 +208,25 @@
             _this.configurator.loadConfig(defaults);
             _this.configurator.setValue('rootDir', gui.App.dataPath, {'mutable':false});
             _this.configurator.setValue('targetTranslationsDir', path.join(gui.App.dataPath, 'targetTranslations'), {'mutable':false});
+            // NOTE: Do we need these tempDir and indexDir? I don't see them being created.
             _this.configurator.setValue('tempDir', path.join(gui.App.dataPath, 'temp'), {'mutable':false});
             _this.configurator.setValue('indexDir', path.join(gui.App.dataPath, 'index'), {'mutable':false});
+
+            let backuplocation = _this.configurator.getUserSetting('backuplocation');
+            // Empty backuplocation means it hasn't been setup, or been deleted previously.
+            if (backuplocation === "" || backuplocation === undefined || !App.util.isValidPath(backuplocation)) {
+                console.warn('Backup location contains bad value. Resetting backup location.');
+                let defaultLocation = path.join(process.env['HOME'], App.appName, 'backup');
+                _this.configurator.setUserSetting('backuplocation', defaultLocation);
+                mkdirp(defaultLocation, function(err) {
+                    if (err) {
+                        console.error(err);
+                    } else {
+                        console.log(defaultLocation + ' is created.');
+                    }
+                });
+            }
+
         },
 
         /**

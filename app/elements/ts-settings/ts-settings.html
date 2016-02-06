@@ -69,6 +69,9 @@
             --paper-checkbox-checked-color: var(--accent-color-dark);
             --paper-checkbox-unchecked-color: var(--accent-color-dark);
         }
+        .hide {
+            display: none;
+        }
     </style>
 
     <template>
@@ -104,6 +107,8 @@
             </template>
 
         </div>
+
+        <input id="backup-location-browser" name="backup-location-browser" class="hide" type="file" nwdirectory directory on-change="_updateBackupLocation"/>
 
     </template>
 
@@ -158,6 +163,7 @@
 
         ready: function() {
             this.settings = App.configurator.getUserSettingArr();
+            this.$['backup-location-browser'].nwworkingdir = App.configurator.getUserSetting('backuplocation');
         },
 
         back: function() {
@@ -165,7 +171,7 @@
         },
 
         _isVisible: function(bool) {
-            if (bool == undefined) bool = true;
+            if (bool === undefined) { bool = true; }
             return bool;
         },
 
@@ -177,7 +183,7 @@
 
         _computeHelpText: function(setting) {
             var text;
-            if (typeof(setting.base.value) === "number" && setting.base.helpText) {
+            if (typeof setting.base.value === "number" && setting.base.helpText) {
                 text = setting.base.helpText.replace("<int>", setting.base.value);
             }
             else {
@@ -187,20 +193,25 @@
         },
 
         _isBoolean: function(value) {
-            return typeof(value) == 'boolean';
+            return typeof value === 'boolean';
         },
 
         _runTapHandler: function(event) {
-            if (event.model.setting.name == 'developertools') {
+            var name = event.model.setting.name;
+            var value = event.model.setting.value;
+            if (name === 'developertools') {
                 App.showDevTools();
             }
-            else if (event.model.setting.name == "refreshsettings") {
+            else if (name === "refreshsettings") {
                 this.settings = App.configurator.refreshUserSetting();
                 this.saveSettings();
             }
-            else if (typeof (event.model.setting.value) == 'boolean') {
+            else if (name === "backuplocation") {
+                document.querySelector('#backup-location-browser').click();
+            }
+            else if (typeof value === 'boolean') {
                 var path = 'settings.' + event.target.dataGroup + '.list.' + event.target.dataList + '.value';
-                this.set(path, !event.model.setting.value);
+                this.set(path, !value);
                 this.saveSettings();
             }
             else {
@@ -219,6 +230,15 @@
 
         _onSettingCancel: function() {
             this.closeSettingModal();
+        },
+
+        _updateBackupLocation: function() {
+            var newPath = this.$['backup-location-browser'].value;
+            if (newPath) {
+                var oldPath = App.configurator.getUserSetting('backuplocation');
+                this.settings = App.configurator.setUserSetting('backuplocation', newPath);
+                App.projectsManager.migrateBackup(oldPath, newPath);
+            }
         },
 
         openSettingModal: function(event) {
@@ -240,7 +260,7 @@
             modal.fire('open');
             modal.addEventListener('setting-confirm', this._onSettingConfirm.bind(this, path, event.target.id));
             modal.addEventListener('setting-cancel', this._onSettingCancel.bind(this));
-            return modal
+            return modal;
         },
 
         closeSettingModal: function() {

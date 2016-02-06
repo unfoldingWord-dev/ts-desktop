@@ -8,6 +8,7 @@
     'use strict';
 
     let _ = require('lodash');
+    let path = require('path');
     let userSetting = require('../config/user-setting');
 
     function Configurator () {
@@ -119,6 +120,8 @@
             });
         };
 
+        /**
+         */
         let flattenUserSetting = function(settingArr) {
             var flatSetting = [];
 
@@ -131,6 +134,8 @@
             return flatSetting;
         };
 
+        /**
+         */
         let fontSizeMap = {
             'normal': '100%',
             'small': '90%',
@@ -144,6 +149,12 @@
         // This is the returned object
         // 
         let configurator = {
+
+            /**
+             */
+            get PATH_SEP() {
+                return path.sep;
+            },
 
             /**
              * Fetch the raw and default setting array from JSON file
@@ -195,17 +206,37 @@
              * @return value of the user setting
              */
             getUserSetting: function(name) {
-                var s = this.getUserSettingArr();
-                var list = _.find(s, {'list': [{'name': name}]}).list;
-                return _.find(list, {'name': name}).value;
+                try {
+                    var s = this.getUserSettingArr();
+                    var list = _.find(s, {'list': [{'name': name}]}).list;
+                    return _.find(list, {'name': name}).value;     
+                } catch (e) { console.error(e); }
             },
 
+            /**
+             * Set the value of a setting
+             * @param name: of the user setting
+             * @return value of the user setting
+             */
+            setUserSetting: function(name, value) {
+                try {
+                    var s = this.getUserSettingArr();
+                    var listIndex = _.findIndex(s, {'list': [{'name': name}]});
+                    var settingIndex = _.findIndex(s[listIndex].list, {'name': name});
+                    s[listIndex].list[settingIndex].value = value;
+                    this.saveUserSettingArr(s);
+                    return s;
+                } catch (e) { console.error(e); }
+            },
+
+            /**
+             */
             refreshUserSetting: function() {
                 var defaults = this._userSetting();
                 var current = [];
                 try {
                     current = flattenUserSetting(JSON.parse(storage['user-setting']));
-                } catch (e) { }                
+                } catch (e) { console.error(e); }
 
                 // Keep current values and remove non-existent settings
                 for (var i in current) {
@@ -236,7 +267,7 @@
             applyPrefBehavior: function() {
                 // We may not need this as settings that affects behavior is most likely called
                 //    using the App.configurator.getUserSetting(key) API.
-                console.log('Pretend to apply behavior');
+                // console.log('Pretend to apply behavior');
             },
 
             /**

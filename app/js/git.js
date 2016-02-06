@@ -98,10 +98,11 @@ function Git() {
 		},
 
 		// Push staged files to remote repo
-		push: function(dir, repo, reg) {
+		push: function(dir, repo, reg, config) {
             // TODO: the host and port need to be retrieved from the configuration
+            // NOTE: DONE. host and port is configured in config param when called
 			var ssh = `ssh -i "${reg.paths.privateKeyPath}" -o "StrictHostKeyChecking no"`,
-				gitSshPush = `git push -u -f ssh://gitolite3@ts.door43.org:9299/tS/${reg.deviceId}/${repo} master`,
+				gitSshPush = `git push -u -f ssh://${config.host}:${config.port}/tS/${reg.deviceId}/${repo} master`,
             	push = cmd().cd(dir).and.set('GIT_SSH_COMMAND', ssh).do(gitSshPush);
 
             log('Starting push to server...\n' + push);

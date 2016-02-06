@@ -5,7 +5,8 @@ var _ = require('lodash'),
     path = require('path'),
     mkdirP = require('mkdirp'),
     AdmZip = require('adm-zip'),
-    https = require('https').
+    https = require('https'),
+    download = require('../js/lib/util').download,
     _ = require('lodash'),
     PDFDocument = require('pdfkit');
 
@@ -32,7 +33,7 @@ function Printer() {
         getImages: function(meta){
             return new Promise(function(resolve, reject){
                 let App = window.App,
-                    imageRoot = path.join(App.configurator.getValue('rootdir'), "images"),
+                    imageRoot = path.join(App.configurator.getValue('rootdir'), 'images'),
                     imagePath = path.join(imageRoot, meta.resource_id);
 
                 //check to see if we need to create the images directory;
@@ -41,39 +42,34 @@ function Printer() {
                 }
 
                 //if the zip file isn't downloaded yet, go get it.
-                if(!fs.existsSync(path.join(imagePath,"images.zip"))) {
-                    let file = fs.createWriteStream(imagePath + "/images.zip");
+                let dest = path.join(imagePath, 'images.zip');
+                if(!fs.existsSync(dest)) {
+                    //let out = fs.createWriteStream(dest);
                     // TRICKY: right now we have to hard code the urls until the api is updated
-                    let url = App.configurator.getValue("mediaServer") + 'obs/jpg/1/en/obs-images-360px.zip';
-                    console.log(url);
-                    https.get(url, function(response) {
-                        var saving = response.pipe(file);
+                    let url = App.configurator.getValue("mediaServer") + '/obs/jpg/1/en/obs-images-360px.zip';
+                    console.log('downloading images from', url);
+                    download(url, dest, true).then(function() {
+                        let zip = new AdmZip(dest);
+                        zip.extractAllTo(imagePath, true);
 
-                        // TODO: track the progress of the download and report to the ui
-
-                        //unzip the file
-                        saving.on('end', function() {
-                            let zip = new AdmZip(imagePath + "/images.zip");
-                            zip.extractAllTo(imagePath);
-
-                            //look in all the directories that the zip file contained and move their files to the root images directory
-                            let directories = fs.readdirSync(imagePath).filter(function(file) {
-                                return fs.statSync(path.join(imagePath, file)).isDirectory();
-                            });
-                            directories.forEach(function(dir){
-                                let dirPath = path.join(imagePath,dir),
-                                    files = fs.readdirSync(dirPath);
-                                files.forEach(function(file){
-                                    let filePath = path.join(imagePath,dir,file),
-                                        newPath = path.join(imageRoot,file);
-                                    fs.renameSync(filePath, newPath);
-                                });
-
-                                //remove the empty directory
-                                fs.rmdir(dirPath);
-                            });
-                            resolve();
+                        let directories = fs.readdirSync(imagePath).filter(function(file) {
+                            return fs.statSync(path.join(imagePath, file)).isDirectory();
                         });
+                        directories.forEach(function(dir){
+                            let dirPath = path.join(imagePath,dir),
+                                files = fs.readdirSync(dirPath);
+                            files.forEach(function(file){
+                                let filePath = path.join(imagePath,dir,file),
+                                    newPath = path.join(imagePath,file);
+                                fs.renameSync(filePath, newPath);
+                            });
+
+                            //remove the empty directory
+                            fs.rmdir(dirPath);
+                        });
+                        resolve();
+                    }).catch(function(err) {
+                        reject(err);
                     });
                 } else {
                     resolve();

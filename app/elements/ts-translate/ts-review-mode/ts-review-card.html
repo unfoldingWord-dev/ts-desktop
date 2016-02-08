@@ -45,8 +45,8 @@
 	<template>
 
         <div id="contain">
-            <ts-source-chunk class="left" reviewmode chunk="[[chunk]]"></ts-source-chunk>
             <template is="dom-if" if="{{!chunk.meta.words}}">
+                <ts-source-chunk class="left" reviewmode chunk="[[chunk]]"></ts-source-chunk>
                 <template is="dom-if" if="{{chunk.meta.standard}}">
                     <div class="middle">
                         <template is="dom-if" if="{{chunk.state.review}}">
@@ -68,6 +68,7 @@
                 <ts-resource-card class="right" chunk="[[chunk]]"></ts-resource-card>
             </template>
             <template is="dom-if" if="{{chunk.meta.words}}">
+                <ts-source-chunk class="left" reviewmode wordmode chunk="[[chunk]]"></ts-source-chunk>
                 <ts-target-words class="middle" chunk="[[chunk]]" on-setheight="setheight"></ts-target-words>
             </template>
         </div>

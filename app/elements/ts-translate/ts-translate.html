@@ -568,7 +568,11 @@
         savesource: function () {
             var key = "uw-" + this.currentproject.data.fullname;
             var source = this.currentproject.data.currentsource;
-            App.configurator.setValue(key + "-source", source);
+            if (source !== null) {
+                App.configurator.setValue(key + "-source", source);
+            } else {
+                App.configurator.unsetValue(key + "-source");
+            }
         },
 
         retrievesource: function () {

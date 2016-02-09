@@ -95,7 +95,6 @@
             if (!win.shown) {
                 win.show();
                 win.shown = true;
-                this.reporter.logNotice("Starting GUI");
                 // NOTE: needs to be in a setTimeout, otherwise doesn't work properly
                 setTimeout(win.focus.bind(win), 1);
             }
@@ -266,7 +265,6 @@
                 appVersion: require('../package.json').version
             });
 
-            _this.reporter.logNotice("Logs are being written to " + logPath);
 
             return _this.reporter;
         },

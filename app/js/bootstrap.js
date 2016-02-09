@@ -258,7 +258,7 @@
 
             _this.reporter = new Reporter({
                 logPath: logPath,
-                oauthToken: require('../config/private.json').value,
+                oauthToken: require('../config/private.json')[0].value,
                 repoOwner: configurator.getValue('repoOwner'),
                 repo: configurator.getValue('repo'),
                 maxLogFileKb: configurator.getValue('maxLogFileKb'),

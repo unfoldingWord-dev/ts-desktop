@@ -259,7 +259,7 @@
 
             _this.reporter = new Reporter({
                 logPath: logPath,
-                oauthToken: configurator.getValue("github-oauth"),
+                oauthToken: require('../config/private.json').value,
                 repoOwner: configurator.getValue('repoOwner'),
                 repo: configurator.getValue('repo'),
                 maxLogFileKb: configurator.getValue('maxLogFileKb'),

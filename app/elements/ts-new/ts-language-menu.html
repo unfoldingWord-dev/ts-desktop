@@ -158,6 +158,7 @@
       store: function (e) {
           this.language = e.model.lang;
           this.query = "";
+          this.fire('iron-signal', {name: 'createprojects'});
           this.selected = this.selected + 1;
       },
 

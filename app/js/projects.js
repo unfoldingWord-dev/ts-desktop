@@ -244,6 +244,21 @@ function ProjectsManager(query, configurator) {
             }
         },
 
+        getFrameUdb: function (source, chapterid, verseid) {
+            var sources = this.sources;
+            var udbsource = _.filter(sources, {'lc': source.lc, 'project': source.project, 'level': 3, 'source': 'udb'});
+            var s = udbsource[0].id,
+                r = query([
+                    "select f.id, f.slug 'verse', f.body 'chunk', c.slug 'chapter', c.title, c.reference, f.format from frame f",
+                    "join chapter c on c.id=f.chapter_id",
+                    "join resource r on r.id=c.resource_id",
+                    "join source_language sl on sl.id=r.source_language_id",
+                    "join project p on p.id=sl.project_id where r.id='" + s + "' and c.slug='" + chapterid + "' and f.slug='" + verseid + "'"
+                ].join(' '));
+
+            return zipper(r);
+        },
+
         getFrameNotes: function (frameid) {
 
                 var r = query([

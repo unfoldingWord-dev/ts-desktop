@@ -782,8 +782,12 @@
                 var verses = [];
                 var udbtext = null;
 
-                if (resource === "ulb") {
+                if (currentsource.source === "ulb") {
                     udbtext = App.projectsManager.getFrameUdb(currentsource, chapterid, frameid)[0].chunk;
+                    while (test.test(udbtext)) {
+                        udbtext = udbtext.replace(startstr, " \\v");
+                        udbtext = udbtext.replace(endstr, " ");
+                    }
                 }
 
                 for (var w = 0; w < words.length; w++) {

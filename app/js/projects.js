@@ -329,6 +329,16 @@ function ProjectsManager(query, configurator) {
             return zipper(r);
         },
 
+        getTa: function () {
+            var r = query([
+                "select t.id, t.slug, t.title, t.text, t.reference from translation_academy_article t"
+                //"join frame__translation_word f on w.id=f.translation_word_id",
+                //"where f.frame_id='" + frameid + "'"
+            ].join(' '));
+
+            return zipper(r);
+        },
+
         getPaths: function(meta) {
             return config.makeProjectPaths(meta);
         },

@@ -244,6 +244,21 @@ function ProjectsManager(query, configurator) {
             }
         },
 
+        getFrameUdb: function (source, chapterid, verseid) {
+            var sources = this.sources;
+            var udbsource = _.filter(sources, {'lc': source.lc, 'project': source.project, 'level': 3, 'source': 'udb'});
+            var s = udbsource[0].id,
+                r = query([
+                    "select f.id, f.slug 'verse', f.body 'chunk', c.slug 'chapter', c.title, c.reference, f.format from frame f",
+                    "join chapter c on c.id=f.chapter_id",
+                    "join resource r on r.id=c.resource_id",
+                    "join source_language sl on sl.id=r.source_language_id",
+                    "join project p on p.id=sl.project_id where r.id='" + s + "' and c.slug='" + chapterid + "' and f.slug='" + verseid + "'"
+                ].join(' '));
+
+            return zipper(r);
+        },
+
         getFrameNotes: function (frameid) {
 
                 var r = query([
@@ -309,6 +324,16 @@ function ProjectsManager(query, configurator) {
                 "select q.question, q.answer from checking_question q",
                 "join frame__checking_question f on q.id=f.checking_question_id",
                 "where f.frame_id='" + frameid + "'"
+            ].join(' '));
+
+            return zipper(r);
+        },
+
+        getTa: function () {
+            var r = query([
+                "select t.id, t.slug, t.title, t.text, t.reference from translation_academy_article t"
+                //"join frame__translation_word f on w.id=f.translation_word_id",
+                //"where f.frame_id='" + frameid + "'"
             ].join(' '));
 
             return zipper(r);

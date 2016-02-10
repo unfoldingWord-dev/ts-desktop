@@ -446,10 +446,6 @@
                 value: "",
                 notify: true
             },
-            gatewaymode: {
-                type: Boolean,
-                value: false
-            },
             chapters: {
                 type: Object,
                 value: {}
@@ -531,7 +527,13 @@
             var modal = this.$.modal;
             var sources = App.projectsManager.sources;
             var projectid = this.currentproject.data.project.id;
-            modal.allSources = _.filter(sources, {'project': projectid, 'level': 3});
+            if (this.currentproject.data.resource_id === "udb") {
+                modal.allSources = _.filter(sources, {'project': projectid, 'level': 3});
+            } else {
+                modal.allSources = _.filter(sources, function(source) {
+                    return source.project === projectid && source.level === 3 && source.source !== "udb";
+                });
+            }
             modal.sources = this.currentproject.data.sources;
             modal.selectedSource = this.currentproject.data.currentsource;
             this.$.sourcepopup.open();
@@ -778,6 +780,11 @@
                 var questions = App.projectsManager.getFrameQuestions(id);
                 var words = App.projectsManager.getFrameWords(id);
                 var verses = [];
+                var udbtext = null;
+
+                if (resource === "ulb") {
+                    udbtext = App.projectsManager.getFrameUdb(currentsource, chapterid, frameid)[0].chunk;
+                }
 
                 for (var w = 0; w < words.length; w++) {
                     var worddata = this.worddata["01-" + words[w].slug];
@@ -859,7 +866,8 @@
                         wordcontent: "",
                         notes: [],
                         words: [],
-                        questions: []
+                        questions: [],
+                        udbtext: null
                     };
                     source.push(srcchunk);
                     var rawbookdata = this.rawdata["00-title"];
@@ -894,7 +902,8 @@
                         wordcontent: "",
                         notes: [],
                         words: [],
-                        questions: []
+                        questions: [],
+                        udbtext: null
                     };
                     source.push(srcchunk);
 
@@ -931,7 +940,8 @@
                         wordcontent: "",
                         notes: [],
                         words: [],
-                        questions: []
+                        questions: [],
+                        udbtext: null
                     };
                     source.push(srcchunk);
                     var rawrefdata = this.rawdata[chapterid + "-reference"];
@@ -950,7 +960,8 @@
                     wordcontent: "",
                     notes: notes,
                     words: words,
-                    questions: questions
+                    questions: questions,
+                    udbtext: udbtext
                 };
                 source.push(srcchunk);
 
@@ -1009,7 +1020,8 @@
                     wordcontent: frames[i].term,
                     notes: [],
                     words: [],
-                    questions: []
+                    questions: [],
+                    udbtext: null
                 };
                 source.push(srcchunk);
 
@@ -1222,7 +1234,7 @@
                 return {transcontent: chunk.transcontent, helpscontent: chunk.helpscontent, completed: chunk.completed, data: projectdata, index: index, state: chunk.state};
             });
             srcdata.data = source.map(function(chunk){
-                return {srccontent: chunk.srccontent, wordcontent: chunk.wordcontent, meta: chunk.meta, notes: chunk.notes, words: chunk.words, questions: chunk.questions};
+                return {srccontent: chunk.srccontent, wordcontent: chunk.wordcontent, meta: chunk.meta, notes: chunk.notes, words: chunk.words, questions: chunk.questions, udbtext: chunk.udbtext};
             });
             var merged = _.merge(srcdata, transdata);
             this.set('chunks', merged);

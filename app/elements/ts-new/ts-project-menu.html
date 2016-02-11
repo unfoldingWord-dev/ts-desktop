@@ -138,10 +138,6 @@
               value: {},
               notify: true
           },
-          gatewaymode: {
-              type: Boolean,
-              value: false
-          },
           categorylist: {
               type: Array,
               value: []
@@ -164,7 +160,7 @@
           this.category = e.model.category;
           if (this.category.name === "Open Bible Stories") {
               this.project = this.category.data[0];
-              if (this.gatewaymode) {
+              if (App.configurator.getUserSetting('glmode')) {
                   this.fire('iron-signal', {name: 'createtypes'});
                   this.selected = this.selected + 2;
               } else {
@@ -194,7 +190,7 @@
               }
               temparray.push(tempobject);
           });
-          if (this.gatewaymode) {
+          if (App.configurator.getUserSetting('glmode')) {
               temparray.push({"name": "Bible Words", "data": [{name: "Bible Words", slug: "tw"}]});
           }
           this.categorylist = temparray;

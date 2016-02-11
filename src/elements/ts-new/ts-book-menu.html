@@ -120,6 +120,11 @@
               type: Object,
               value: {},
               notify: true
+          },
+          type: {
+              type: Object,
+              value: {},
+              notify: true
           }
       },
 
@@ -129,8 +134,13 @@
 
       store: function(e) {
           this.project = e.model.project;
-          this.fire('iron-signal', {name: 'createtypes'});
-          this.selected = this.selected + 1;
+          if (App.configurator.getUserSetting('glmode')) {
+              this.fire('iron-signal', {name: 'createtypes'});
+              this.selected = this.selected + 1;
+          } else {
+              this.type = {name: "Text - Unlocked Literal Bible", code: "text", resource: "ulb", allowed: true};
+              this.fire('create');
+          }
       },
 
       togroup: function () {

@@ -12,6 +12,11 @@
     let fs = require('fs');
     let Reporter = require('../js/reporter').Reporter;
 
+    let date = new Date();
+    date = date.getFullYear() + '_' + date.getMonth() + '_' + date.getDay();
+    let crashPath = path.join(gui.App.dataPath, 'logs', date + '.dump');
+    gui.App.setCrashDumpDir(crashPath);
+
     // hook up global exception handler
     process.removeAllListeners('uncaughtException');
     process.on('uncaughtException', function (err) {
@@ -193,10 +198,11 @@
             _this.configurator.setStorage(window.localStorage);
 
             let defaults = require('../config/defaults');
-
-            if(fs.exists(path.normalize('../config/private'))) {
-                let privateDefaults = require('../config/private');
+            try {
+                let privateDefaults = require('../config/private.json');
                 _this.configurator.loadConfig(privateDefaults);
+            } catch (e) {
+                console.log('Failed to load private settings');
             }
 
             _this.configurator.loadConfig(defaults);
@@ -258,7 +264,7 @@
 
             _this.reporter = new Reporter({
                 logPath: logPath,
-                oauthToken: require('../config/private.json')[0].value,
+                oauthToken: configurator.getValue('github-oauth'),
                 repoOwner: configurator.getValue('repoOwner'),
                 repo: configurator.getValue('repo'),
                 maxLogFileKb: configurator.getValue('maxLogFileKb'),

@@ -1,0 +1,131 @@
+
+<link rel="import" href="../../../components/paper-material/paper-material.html">
+<link rel="import" href="../../../components/iron-signals/iron-signals.html">
+
+<dom-module id="ts-target-view">
+
+	<style>
+
+        :host {
+            flex: auto;
+            display: flex;
+        }
+
+        paper-material {
+            flex: auto;
+            display: flex;
+            background: var(--card-background-color);
+            flex-direction: column;
+            border-radius: 3px;
+        }
+
+		#heading {
+            color: var(--secondary-text-color);
+            display: flex;
+            justify-content: flex-start;
+            min-height: 42px;
+            align-items: flex-end;
+            font-size: 88%;
+            font-weight: 300;
+            border-bottom: 1px solid var(--note-card-pink);
+            margin-bottom: 4px;
+            letter-spacing: 1px;
+            padding: 0 0 0.25em 1.75em;
+		}
+
+        #content {
+			padding: 0 50px;
+            flex: auto;
+            display: flex;
+		}
+
+        #content.editmode {
+            background-size: 100% 32px;
+            background-image: -webkit-linear-gradient(var(--card-background-color) 27px, var(--border-color) 27px, var(--border-color) 28px, var(--card-background-color) 28px);
+            border-radius: 3px;
+        }
+
+        #content p {
+			line-height: 2;
+            margin-top: 0;
+            color: var(--primary-text-color);
+		}
+
+	</style>
+
+	<template>
+
+        <paper-material elevation="1">
+            <div id="heading">
+                <div>
+                    <span>[[chunk.chapterref]]</span><span>[[chunk.refaddon]]</span>
+                </div>
+            </div>
+            <div id="content" class="editmode">
+                <p id="textholder"></p>
+            </div>
+        </paper-material>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+		is: 'ts-target-view',
+
+		properties: {
+            chunk: {
+                type: Object,
+                value: {}
+            }
+		},
+
+        observers: [
+            'rendertext(chunk.*)'
+        ],
+
+        rendertext: function () {
+            if(this.chunk && this.chunk.srccontent) {
+                var completed = this.chunk.completed;
+                var contentbox = this.$.content;
+                var textholder = this.$.textholder;
+                var textarray = this.chunk.transcontent.split(" ");
+                var numstr1 = "\<sup\>";
+                var numstr2 = "\<\/sup\>";
+                var returnstr = "";
+                var verse = 0;
+                var i = 0;
+
+                if (completed) {
+                    for (i = 0; i < textarray.length; i++) {
+                        if (textarray[i].substring(0, 2) === "\\v") {
+                            verse = textarray[i].substring(2);
+                            returnstr += numstr1 + verse + numstr2;
+                        } else if (textarray[i].substring(0, 2) !== "\\c") {
+                            returnstr += textarray[i] + " ";
+                        }
+                    }
+                    textholder.innerHTML = returnstr;
+                    contentbox.classList.remove("editmode");
+                } else {
+                    for (i = 0; i < textarray.length; i++) {
+                        if (textarray[i].substring(0, 2) !== "\\v" && textarray[i].substring(0, 2) !== "\\c") {
+                            returnstr += textarray[i] + " ";
+                        }
+                    }
+                    textholder.innerHTML = returnstr;
+                    contentbox.classList.add("editmode");
+                }
+            }
+        },
+
+		ready: function() {
+
+		}
+
+	});
+
+</script>

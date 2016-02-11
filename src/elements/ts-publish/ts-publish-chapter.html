@@ -1,0 +1,89 @@
+
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../components/paper-material/paper-material.html">
+
+<link rel="import" href="./ts-publish-chunk.html">
+
+<dom-module id="ts-publish-chapter">
+
+    <style>
+
+        :host {
+            color: var(--primary-text-color);
+        }
+
+        .card {
+            background: var(--card-background-color);
+            width: 450px;
+            height: 60px;
+            margin: 15px auto 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 110%;
+        }
+
+        .ref {
+            padding-left: 20px;
+        }
+
+        .icon {
+            padding-right: 20px;
+        }
+
+        .done {
+            color: var(--completed-color);
+        }
+
+        .review {
+            color: var(--review-color);
+        }
+
+    </style>
+
+    <template>
+
+        <paper-material class="card" elevation="1">
+            <div class="ref">
+                <span>[[chapter.reference]]</span>
+            </div>
+            <div class="icon">
+                <template is="dom-if" if="{{chapter.completed}}">
+                    <iron-icon class="done" icon="done"></iron-icon>
+                </template>
+                <template is="dom-if" if="{{!chapter.completed}}">
+                    <iron-icon class="review" icon="report"></iron-icon>
+                </template>
+            </div>
+        </paper-material>
+
+        <template is="dom-if" if="{{!chapter.completed}}">
+            <template is="dom-repeat" items="{{chapter.chunks}}" as="chunk">
+                <ts-publish-chunk chapter="[[chapter]]" chunk="[[chunk]]"></ts-publish-chunk>
+            </template>
+        </template>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-publish-chapter',
+
+        properties: {
+            chapter: {
+                type: Object,
+                value: {}
+            }
+        },
+
+        ready: function() {
+
+        }
+
+    });
+
+</script>

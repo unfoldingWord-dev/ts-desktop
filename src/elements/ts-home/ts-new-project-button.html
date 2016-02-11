@@ -1,0 +1,54 @@
+
+<link rel="import" href="../../components/paper-fab/paper-fab.html">
+
+<dom-module id="ts-new-project-button">
+
+    <style>
+
+        :host {
+            height: 60px;
+            width: 60px;
+        }
+
+        paper-fab {
+            border-radius: 49.9999%;
+            background: var(--accent-color);
+            color: var(--reverse-text-color);
+            margin: 2px;
+        }
+
+    </style>
+
+    <template>
+
+        <paper-fab icon="add" title="New Project" on-tap="new"></paper-fab>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-new-project-button',
+
+        properties: {
+            route: {
+                type: String,
+                value: '',
+                notify: true
+            }
+        },
+
+        new: function () {
+            this.route = "new";
+        },
+
+        ready: function() {
+
+        }
+
+    });
+
+</script>

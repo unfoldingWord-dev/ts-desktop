@@ -1,0 +1,262 @@
+
+<link rel="import" href="../../../components/paper-material/paper-material.html">
+<link rel="import" href="../../../components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="../../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../../components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../../components/iron-signals/iron-signals.html">
+
+<link rel="import" href="./ts-verse-marker.html">
+
+<script src="../../../js/dragging.js"></script>
+
+<dom-module id="ts-target-review">
+
+	<style>
+
+        :host {
+            flex: auto;
+            display: flex;
+        }
+
+        #main {
+            flex: auto;
+            display: flex;
+            background: var(--card-background-color);
+            flex-direction: column;
+            border-radius: 3px;
+        }
+
+		#heading {
+			color: var(--secondary-text-color);
+            border-bottom: 1px solid var(--note-card-pink);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 48px;
+            font-size: 88%;
+            font-weight: 300;
+            letter-spacing: 1px;
+            padding: 0 10px 0 16px;
+		}
+
+        #heading paper-icon-button {
+            padding: 6px;
+        }
+
+        #content {
+			padding: 24px 16px;
+            flex: auto;
+            display: flex;
+		}
+
+        #content p {
+			line-height: 2;
+			margin: 0;
+            color: var(--primary-text-color);
+		}
+
+        #content iron-icon {
+            color: var(--accent-color);
+        }
+
+        #togglebox {
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid var(--border-color);
+            color: var(--secondary-text-color);
+            font-size: 88%;
+            padding: 0 16px;
+            align-items: center;
+        }
+
+        #toggle {
+            --paper-toggle-button-checked-bar-color: var(--primary-color);
+            --paper-toggle-button-checked-button-color: var(--primary-color-dark);
+        }
+
+        #toggle:hover {
+            cursor: pointer;
+        }
+
+	</style>
+
+	<template>
+
+        <paper-material id="main" elevation="1">
+            <div id="heading">
+                <div>
+                    <span>[[chunk.meta.chunkref]]</span><span>[[chunk.meta.refaddon]]</span>
+                </div>
+                <template is="dom-if" if="{{!chunk.completed}}">
+                    <paper-icon-button icon="create" title="edit" on-tap="edit"></paper-icon-button>
+                </template>
+            </div>
+            <div id="content">
+                <p id="textholder"></p>
+            </div>
+            <div id="togglebox">
+                <p>Mark chunk as done</p>
+                <paper-toggle-button id="toggle" on-change="checkdone"></paper-toggle-button>
+            </div>
+        </paper-material>
+
+        <iron-signals on-iron-signal-completechunk="completechunk"></iron-signals>
+        <iron-signals on-iron-signal-editchunk="editchunk"></iron-signals>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+		is: 'ts-target-review',
+
+        properties: {
+            chunk: {
+                type: Object,
+                value: {},
+                notify: true
+            }
+        },
+
+        observers: [
+            'rendertext(chunk.*)'
+        ],
+
+        rendertext: function () {
+            if(this.chunk && this.chunk.srccontent) {
+                var verses = this.chunk.meta.verses;
+                var chap = this.chunk.meta.chapter;
+                var completed = this.chunk.completed;
+                var textholder = this.$.textholder;
+                var textarray = this.chunk.transcontent.split(" ");
+                var vmstr1 = "\<ts-verse-marker id='c";
+                var vmstr2 = "v";
+                var vmstr3 = "' draggable='true' ondragstart='drag(event)' verse='";
+                var vmstr4 = "'\>\<\/ts-verse-marker\>";
+                var textstr1 = "\<span ondrop='drop(event)' ondragover='allowDrop(event)'\>";
+                var textstr2 = "\<\/span\> ";
+                var numstr1 = "\<sup\>";
+                var numstr2 = "\<\/sup\>";
+                var returnstr = "";
+                var verse = 0;
+                var i = 0;
+
+                if(!completed) {
+                    for (i = 0; i < verses.length; i++) {
+                        returnstr += vmstr1 + chap + vmstr2 + verses[i] + vmstr3 + verses[i] + vmstr4;
+                    }
+                    for (i = 0; i < textarray.length; i++) {
+                        returnstr += textstr1 + textarray[i] + textstr2;
+                    }
+                } else {
+                    for (i = 0; i < textarray.length; i++) {
+                        if (textarray[i].substring(0, 2) === "\\v") {
+                            verse = textarray[i].substring(2);
+                            returnstr += numstr1 + verse + numstr2;
+                        } else if (textarray[i].substring(0, 2) !== "\\c") {
+                            returnstr += textarray[i] + " ";
+                        }
+                    }
+                }
+                textholder.innerHTML = returnstr;
+                this.$.toggle.checked = completed;
+            }
+        },
+
+        completechunk: function (event, data) {
+            var index = data.index;
+
+            if (this.chunk.index === index) {
+                var textholder = this.$.textholder;
+                var children = textholder.children;
+                var type = "";
+                var text = "";
+                var versenum = 0;
+                var returnstr = "";
+
+                if (this.chunk.meta.frame === 1 && this.chunk.data.project.id !== "obs") {
+                    returnstr = "\\c" + this.chunk.meta.chapter + " ";
+                }
+
+                for (var i = 0; i < children.length; i++) {
+                    type = children[i].nodeName;
+
+                    if (type === "TS-VERSE-MARKER") {
+                        versenum = children[i].verse;
+                        returnstr += "\\v" + versenum + " ";
+                    } else {
+                        text = children[i].textContent;
+                        returnstr += text + " ";
+                    }
+                }
+
+                this.set('chunk.transcontent', returnstr.trim());
+                this.set('chunk.completed', true);
+                this.$.toggle.checked = true;
+                this.fire('iron-signal', {name: 'updatetranslation'});
+            }
+        },
+
+        checkdone: function () {
+            var textarray = this.chunk.transcontent.split(" ");
+            var completed = this.chunk.completed;
+            var index = this.chunk.index;
+            var toggle = this.$.toggle;
+            var returnstr = "";
+            var mythis = this;
+
+            if (toggle.pressed) {
+                setTimeout(function() {
+                    mythis.checkdone();
+                }, 100);
+                return;
+            }
+
+            toggle.checked = false;
+
+            if (!completed) {
+                if (this.chunk.transcontent === "") {
+                    this.fire('iron-signal', {name: 'opennodata'});
+                } else {
+                    this.fire('iron-signal', {name: 'openchecklist', data: {index: index}});
+                }
+            } else {
+                for (var i = 0; i < textarray.length; i++) {
+                    if (textarray[i].substring(0, 2) !== "\\v" && textarray[i].substring(0, 2) !== "\\c") {
+                        returnstr += textarray[i] + " ";
+                    }
+                }
+
+                this.set('chunk.transcontent', returnstr.trim());
+                this.set('chunk.completed', false);
+                this.fire('iron-signal', {name: 'updatetranslation'});
+            }
+        },
+
+        editchunk: function (event, data) {
+            var index = data.index;
+
+            if (this.chunk.index === index) {
+                this.checkdone();
+            }
+        },
+
+        edit: function () {
+            var id = this.chunk.meta.chapterid + "-" + this.chunk.meta.frameid;
+            this.set('chunk.state.review', false);
+            this.fire('setheight');
+            this.fire('iron-signal', {name: 'updatestate', data: {id: id, mode: "review", value: false}});
+        },
+
+		ready: function() {
+
+		}
+
+	});
+
+</script>

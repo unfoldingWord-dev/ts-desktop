@@ -1,0 +1,122 @@
+[
+    {
+        "name": "logPath",
+        "value": "logs/log.txt",
+        "meta": {
+            "mutable": false,
+            "type": "string"
+        }
+    },
+    {
+        "name": "crashDir",
+        "value": "logs/crash",
+        "meta": {
+            "mutable": false,
+            "type": "string"
+        }
+    },
+    {
+        "name": "repoOwner",
+        "value": "unfoldingWord-dev",
+        "meta": {
+            "mutable": false,
+            "type": "string"
+        }
+    },
+    {
+        "name": "repo",
+        "value": "ts-desktop",
+        "meta": {
+            "mutable": false,
+            "type": "string"
+        }
+    },
+    {
+        "name": "maxLogFileKb",
+        "value": 200,
+        "meta": {
+            "mutable": false,
+            "type": "int"
+        }
+    },
+    {
+        "name": "authServer",
+        "value": "ts.door43.org",
+        "meta":{
+            "mutable": false,
+            "type": "string"
+        }
+    },
+    {
+        "name": "authServerPort",
+        "value": "9095",
+        "meta":{
+            "mutable": false,
+            "type": "string"
+        }
+    },
+    {
+        "name": "dataServer",
+        "value": "gitolite3@ts.door43.org",
+        "meta":{
+            "mutable": false,
+            "type": "string"
+        }
+    },
+    {
+        "name": "dataServerPort",
+        "value": "9299",
+        "meta":{
+            "mutable": false,
+            "type": "string"
+        }
+    },
+    {
+        "name": "mediaServer",
+        "value": "https://api.unfoldingword.org",
+        "meta":{
+            "mutable": false,
+            "type": "string"
+        }
+    },
+    {
+        "name": "backupInterval",
+        "value": 5,
+        "meta":{
+            "mutable": false,
+            "type": "int"
+        }
+    },
+    {
+        "name": "loggingLevel",
+        "value": "warnings",
+        "meta":{
+            "mutable": false,
+            "type": "string"
+        }
+    },
+    {
+        "name": "apiUrl",
+        "value": "https://api.unfoldingword.org/ts/txt/2/catalog.json",
+        "meta":{
+            "mutable": false,
+            "type": "string"
+        }
+    },
+    {
+        "name": "i18nLibrary",
+        "value": "app/i18n/",
+        "meta": {
+            "mutable": false,
+            "type": "string"
+        }
+    },
+    {
+        "name": "asyncLimit",
+        "value": 5,
+        "meta": {
+            "mutable": false,
+            "type": "number"
+        }
+    }
+]

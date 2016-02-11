@@ -17,7 +17,7 @@ var gulp = require('gulp'),
 var fs = require('fs');
 
 var APP_NAME = 'translationStudio',
-    JS_FILES = './app/js/**/*.js',
+    JS_FILES = './src/js/**/*.js',
     UNIT_TEST_FILES = './unit_tests/**/*.js';
 
 gulp.task('test', function () {
@@ -60,8 +60,8 @@ gulp.task('lint', [
 // pass parameters like: gulp build --win --osx --linux
 gulp.task('build', [], function () {
     // clean out extra files
-    rimraf.sync('app/logs');
-    rimraf.sync('app/ssh');
+    rimraf.sync('src/logs');
+    rimraf.sync('src/ssh');
 
     var platforms = [];
     if(argv.win !== undefined) {
@@ -76,7 +76,7 @@ gulp.task('build', [], function () {
 
     var nw = new NwBuilder({
         files: [
-            './app/**/**',
+            './src/**/**',
             './node_modules/**/**'
         ],
         platforms: platforms,

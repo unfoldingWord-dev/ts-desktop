@@ -48,7 +48,8 @@
     "yargs": "^3.17.1"
   },
   "scripts": {
-    "start": "electron app/js/main.js"
+    "start": "electron src/js/main.js"
   },
+  "main": "src/js/main.js",
   "license": "GPL-2.0"
 }

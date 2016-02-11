@@ -3,6 +3,7 @@
 const electron = require('electron');
 const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
+const ipcMain = electron.ipcMain;
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -31,8 +32,27 @@ function createWindow () {
         mainWindow = null;
     });
 
+    mainWindow.on('maximize', function () {
+        mainWindow.webContents.send('maximize');
+    });
+
+    mainWindow.on('unmaximize', function () {
+        mainWindow.webContents.send('unmaximize');
+    });
+
     mainWindow.focus();
 }
+
+ipcMain.on('main-window', function (event, arg) {
+    if (typeof mainWindow[arg] === 'function') {
+        let ret = mainWindow[arg]();
+        event.returnValue = !!ret;
+    } else if (mainWindow[arg]) {
+        event.returnValue = mainWindow[arg];
+    } else {
+        event.returnValue = null;
+    }
+});
 
 app.on('ready', createWindow);
 

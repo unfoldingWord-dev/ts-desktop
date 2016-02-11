@@ -157,7 +157,7 @@
         },
 
         ready: function() {
-            this.settings = App.configurator.getUserSettingArr();
+            this.settings = App.configurator.refreshUserSetting();
             this.$['backup-location-browser'].nwworkingdir = App.configurator.getUserSetting('backuplocation');
         },
 

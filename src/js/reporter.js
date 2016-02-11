@@ -52,6 +52,17 @@
             });
         };
 
+        _this.logClear = function (callback) {
+            fs.writeFile(logPath, '', function(err){
+                if (err) {
+                    throw new Error(err.message);
+                }
+                if (typeof callback === 'function') {
+                    callback();
+                }
+            });
+        };
+
         _this.reportBug = function (string, callback) {
             if (!string) {
                 throw new Error('reporter.reportBug requires a message.');
@@ -267,6 +278,7 @@
             });
             postReq.write(paramsJson);
             postReq.end();
+            _this.logClear();
         };
 
         _this.canReportToGithub = function () {

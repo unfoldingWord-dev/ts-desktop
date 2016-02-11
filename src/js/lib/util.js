@@ -5,7 +5,31 @@
 
     var diacritics = require('./diacritics'),
         fs = require('fs'),
+        https = require('https'),
+        http = require('http'),
         _ = require('lodash');
+
+    /**
+     * NOTE: Determines if a string is a valid path
+     * @param string: the string to be tested
+     */
+    function isValidPath(string) {
+        string = string.replace(/\//g, '\\');
+        var os = process.platform;
+        var win_path = /^(((\\\\([^\\/:\*\?"\|<>\. ]+))|([a-zA-Z]:\\))(([^\\/:\*\?"\|<>\. ]*)([\\]*))*)$/;
+        var linux_path = /^[\/]*([^\/\\ \:\*\?"<\>\|\.][^\/\\\:\*\?\"<\>\|]{0,63}\/)*$/;
+        var isValid = false;
+
+        if (os === 'win64' || os === 'win32') {
+            isValid = win_path.test(string);
+        } else if (os === 'linux' || os === 'darwin') {
+            isValid = linux_path.test(string);
+        } else {
+            console.warn('OS is not recognized', os);
+        }
+
+        return isValid;
+    }
 
     /**
      * Raises an exception along with some context to provide better debugging
@@ -43,6 +67,9 @@
         }).replace(/\s+/g, '');
     }
 
+    /*
+     * NOTE: Need doc
+     */
     function promisify (module, fn) {
         var f = module ? module[fn] : fn;
 
@@ -74,7 +101,6 @@
      *  and creates a curried function.
      *
      */
-
     function guard (method) {
         return function (cb) {
             var visit = typeof cb === 'function' ? function (v) { return cb(v); } : cb;
@@ -84,6 +110,9 @@
         };
     }
 
+    /*
+     * NOTE: Need doc
+     */
     function log () {
         if (process.env.NODE_ENV !== 'test') {
             console.log.apply(console, arguments);
@@ -142,6 +171,32 @@
         }
     }
 
+    /**
+     * Performs a file download over https
+     * @param url the url to download
+     * @param dest the location where the file will be downloaded
+     * @param secure if true https will be used
+     * @returns {Promise}
+     */
+    function download (url, dest, secure) {
+        secure = secure || false;
+        return new Promise(function(resolve, reject) {
+            let out = fs.createWriteStream(dest);
+            let protocol = secure ? https : http;
+            protocol.get(url, function(response) {
+                response.pipe(out);
+                out.on('finish', function() {
+                    out.close(resolve);
+                });
+            }).on('error', function(err) {
+                fs.unlink(dest);
+                reject(err.message);
+            });
+        });
+    }
+
+    exports.isValidPath = isValidPath;
+    exports.download = download;
     exports.raiseWithContext = raiseWithContext;
     exports.removeDiacritics = diacritics.removeDiacritics;
     exports.startsWithBase = startsWithBase;

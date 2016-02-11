@@ -58,6 +58,12 @@
             padding-bottom: 10px;
         }
 
+        #textholder {
+            line-height: 2;
+            margin-top: 0;
+            color: var(--primary-text-color);
+        }
+
         .hide {
             display: none;
         }
@@ -72,6 +78,7 @@
                     <paper-tab class$="[[checkclass(chunk.notes.length)]]">Notes</paper-tab>
                     <paper-tab class$="[[checkclass(chunk.words.length)]]">Words</paper-tab>
                     <paper-tab class$="[[checkclass(chunk.questions.length)]]">Questions</paper-tab>
+                    <paper-tab class$="[[checkclass(chunk.udbtext)]]">UDB</paper-tab>
                 </paper-tabs>
             </div>
             <div id="content">
@@ -90,6 +97,9 @@
                         <template is="dom-repeat" items="{{chunk.questions}}" as="question">
                             <p class="link" on-tap="openquestion">{{question.question}}</p>
                         </template>
+                    </div>
+                    <div>
+                        <div id="textholder"></div>
                     </div>
                 </iron-pages>
             </div>
@@ -111,6 +121,32 @@
                 value: {}
             }
 		},
+
+        observers: [
+            'rendertext(chunk.*)'
+        ],
+
+        rendertext: function () {
+            if(this.chunk && this.chunk.udbtext) {
+                var textarray = this.chunk.udbtext.split(" ");
+                var numstr1 = "\<sup\>";
+                var numstr2 = "\<\/sup\>";
+                var returnstr = "";
+                var verse = 0;
+
+                for (var i = 0; i < textarray.length; i++) {
+                    if (textarray[i].substring(0, 2) === "\\v") {
+                        verse = textarray[i].substring(2);
+                        returnstr += numstr1 + verse + numstr2;
+                    } else {
+                        returnstr += textarray[i] + " ";
+                    }
+                }
+                this.$.textholder.innerHTML = returnstr;
+            } else {
+                this.$.textholder.innerHTML = "";
+            }
+        },
 
         checkclass: function (length) {
             return length ? '' : 'hide';

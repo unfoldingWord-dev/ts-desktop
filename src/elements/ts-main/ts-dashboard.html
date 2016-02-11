@@ -79,7 +79,7 @@
           color: var(--secondary-text-color);
       }
 
-      #confirm {
+      #loading {
           width: 320px;
           height: 220px;
           color: var(--primary-text-color);
@@ -115,7 +115,27 @@
           text-align: center;
       }
 
-      h2 {
+      #loading h2 {
+          color: var(--accent-color);
+      }
+
+      #confirm {
+          width: 350px;
+          height: 175px;
+      }
+
+      #confirm p {
+          font-size: 110%;
+      }
+
+      #confirmbuttons {
+          display: flex;
+          justify-content: flex-end;
+          padding: 0 50px;
+          color: var(--secondary-text-color);
+      }
+
+      #confirmbuttons paper-button:hover {
           color: var(--accent-color);
       }
 
@@ -131,7 +151,7 @@
           <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
               <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]" backto="{{backto}}"></ts-home>
               <ts-new data-route="new" route="{{route}}" projectlist="[[projectlist]]"></ts-new>
-              <ts-translate data-route="translate" route="{{route}}" currentproject="{{currentproject}}" backto="{{backto}}"></ts-translate>
+              <ts-translate data-route="translate" route="{{route}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" backto="{{backto}}"></ts-translate>
               <ts-publish data-route="publish" route="{{route}}" currentproject="{{currentproject}}"></ts-publish>
               <ts-settings data-route="settings" route="{{route}}" backto="[[backto]]"></ts-settings>
           </neon-animated-pages>
@@ -140,9 +160,8 @@
           <ts-terms accepted="{{accepted}}"></ts-terms>
       </template>
 
-      <input type="file" class="hide" id="restore" accept=".tstudio" multiple>
-
-      <input class="hide" id="backup" type="file" nwsaveas="" />
+      <input id="restore" class="hide" type="file" accept=".tstudio" multiple />
+      <input id="backup" class="hide" type="file" nwsaveas="" />
 
       <paper-dialog id="feedback" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
           <div id="feedbackheader">
@@ -158,7 +177,7 @@
           </div>
       </paper-dialog>
 
-      <paper-dialog id="confirm" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+      <paper-dialog id="loading" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
           <template is="dom-if" if="{{options.loading}}">
               <p>{{options.body}}</p>
               <div id="bar">
@@ -171,9 +190,20 @@
                   <p>{{options.body}}</p>
               </div>
               <div id="buttonbox">
-                  <paper-button on-tap="closeconfirm">Close</paper-button>
+                  <paper-button dialog-dismiss>Close</paper-button>
               </div>
           </template>
+      </paper-dialog>
+
+      <paper-dialog id="confirm" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <h2>Overwrite?</h2>
+          <div>
+              <p>This file already exists. Overwrite?</p>
+          </div>
+          <div id="confirmbuttons">
+              <paper-button dialog-dismiss>No</paper-button>
+              <paper-button on-tap="executebackup">Confirm</paper-button>
+          </div>
       </paper-dialog>
 
       <iron-signals on-iron-signal-updatelist="updatelist"></iron-signals>
@@ -220,55 +250,90 @@
           options: {
               type: Object,
               value: {loading: false, title: "", body: ""}
+          },
+          tempbackup: {
+              type: Object,
+              value: {}
+          },
+          backuptimerid: {
+              type: Number,
+              value: -1
           }
       },
 
       openbackup: function (event, data) {
           var mythis = this;
-          var confirm = this.$.confirm;
           var meta = data.meta;
+          this.set('tempbackup', meta);
           var name = 'uw-' + meta.fullname;
           var backup = this.$.backup;
-          var filename;
           var firsttime = true;
+          var confirm = this.$.confirm;
+
           backup.value = null;
-          backup.nwsaveas = name;
+          backup.nwworkingdir = App.configurator.getUserSetting('backuplocation');
+          backup.nwsaveas = backup.nwworkingdir + App.configurator.PATH_SEP + name;
           backup.addEventListener("change", function (evt) {
+             // console.log('change');
               if (firsttime) {
                   firsttime = false;
-                  mythis.set('options.body', "Creating Backup.  Please wait...");
-                  mythis.set('options.loading', true);
-                  confirm.open();
-                  filename = backup.value;
-                  return App.projectsManager.backupTranslation(meta, filename, name)
-                      .then(function () {
-                          mythis.set('options.title', "Backup Complete");
-                          mythis.set('options.body', "Your project has been successfully archived.  Thanks.");
-                          mythis.set('options.loading', false);
-                      })
-                      .catch(function (err) {
-                          var errmessage = "We're sorry.  An error occurred while trying to backup your project";
-                          if(err !== null) {
-                              errmessage = err;
+                  var filename = backup.value;
+
+                  return App.projectsManager.fileExists(filename + ".tstudio")
+                      .then (function (stat) {
+                          if (stat) {
+                              confirm.open();
+                          } else {
+                              mythis.executebackup();
                           }
-                          mythis.set('options.title', "Backup Failed");
-                          mythis.set('options.body', errmessage);
-                          mythis.set('options.loading', false);
                       });
               }
           }, false);
           backup.click();
+          this.stopautobackup();
+      },
+
+      executebackup: function () {
+          var mythis = this;
+          var loading = this.$.loading;
+          var meta = this.tempbackup;
+          var name = 'uw-' + meta.fullname;
+          var backup = this.$.backup;
+          var filename = backup.value;
+          var confirm = this.$.confirm;
+
+          confirm.close();
+          mythis.set('options.body', "Creating Backup.  Please wait...");
+          mythis.set('options.loading', true);
+          loading.open();
+
+          return App.projectsManager.backupTranslation(meta, filename, name)
+              .then(function () {
+                  mythis.set('options.title', "Backup Complete");
+                  mythis.set('options.body', "Your project has been successfully archived.  Thanks.");
+                  mythis.set('options.loading', false);
+              })
+              .catch(function (err) {
+                  var errmessage = "We're sorry.  An error occurred while trying to backup your project";
+                  if(err !== null) {
+                      errmessage = err;
+                  }
+                  mythis.set('options.title', "Backup Failed");
+                  mythis.set('options.body', errmessage);
+                  mythis.set('options.loading', false);
+              });
       },
 
       openrestore: function() {
           var mythis = this;
-          var confirm = this.$.confirm;
+          var loading = this.$.loading;
           var chooser = this.$.restore;
           chooser.value = null;
           chooser.addEventListener('change', function(evt) {
+             // console.log('change');
               mythis.set('options.body', "Restoring.  Please wait...");
               mythis.set('options.loading', true);
-              confirm.open();
+              loading.open();
               for(var i=0; i < this.files.length; i ++) {
                   if(this.files[i].name.split('.').pop().toLowerCase() === 'tstudio') {
                       App.projectsManager.restoreTargetTranslation(this.files[i])
@@ -293,19 +358,28 @@
               }
           }, false);
           chooser.click();
+          this.stopautobackup();
       },
 
       openfeedback: function () {
           this.feedback = "";
           this.$.feedback.open();
+          this.stopautobackup();
       },
 
       closefeedback: function () {
           this.$.feedback.close();
+          // console.log('close feedback');
+          this.startautobackup();
       },
 
+      // NOTE: This function was removed by someone else. I put this back here to resolve a merge conflict.
+      //    If really not needed, please let me (Vicky) know before you delete it. I was planning to use it
+      //    as a hook for the autobackup.
       closeconfirm: function () {
           this.$.confirm.close();
+          // console.log('close confirm');
+          this.startautobackup();
       },
 
       sendfeedback: function () {
@@ -315,7 +389,7 @@
           this.set('options.body', "Sending Feedback.  Please wait...");
           this.set('options.loading', true);
           this.closefeedback();
-          this.$.confirm.open();
+          this.$.loading.open();
 
           if (App.reporter.canReportToGithub()) {
               App.reporter.reportBug(message, function (res) {
@@ -323,11 +397,15 @@
                   mythis.set('options.title', "Feedback Sent");
                   mythis.set('options.body', "Your feedback has been successfully sent.  Thanks.");
                   mythis.set('options.loading', false);
+                  // console.log('send feedback succeed');
+                  mythis.startautobackup();
               });
           } else {
               mythis.set('options.title', "Feedback Failed");
               mythis.set('options.body', "You are not set up with a token to send feedback.");
               mythis.set('options.loading', false);
+              // console.log('send feedback failed');
+              mythis.startautobackup();
           }
       },
 
@@ -335,6 +413,13 @@
           var el = this.querySelector('[data-route="' + this.route + '"]');
           // The async delay prevents a flicker. It's a UI thing, not a logic thing.
           el && el.forceResize && this.async(el.forceResize.bind(el), 30);
+
+          // console.log('route changed');
+          if (this.route === 'translate') {
+             this.startautobackup();
+          } else {
+             this.stopautobackup();
+          }
       },
 
       updatelist: function () {
@@ -418,6 +503,18 @@
 
       setdefault: function () {
           this.currentproject = {};
+      },
+
+      startautobackup: function() {
+         this.backuptimerid = App.projectsManager.startAutoBackup();
+         // console.log(this.backuptimerid);
+      },
+
+      stopautobackup: function() {
+         if (this.backuptimerid > 0) {
+            App.projectsManager.stopAutoBackup(this.backuptimerid);
+            this.backuptimerid = -1;
+         }
       },
 
       ready: function() {

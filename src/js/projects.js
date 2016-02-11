@@ -23,7 +23,7 @@ function zipper (r) {
 var map = guard('map'),
     indexBy = guard('indexBy'),
     flatten = guard('flatten'),
-    filter = guard('filter'),
+    // filter = guard('filter'),  // Never used
     compact = guard('compact');
 
 /**
@@ -34,8 +34,8 @@ var map = guard('map'),
 
 function ProjectsManager(query, configurator) {
 
-    var puts = console.log.bind(console),
-        write = wrap(fs, 'writeFile'),
+    // var puts = console.log.bind(console),  // Never used
+    var write = wrap(fs, 'writeFile'),
         read = wrap(fs, 'readFile'),
         mkdirp = wrap(null, mkdirP),
         rm = wrap(null, rimraf),
@@ -244,6 +244,21 @@ function ProjectsManager(query, configurator) {
             }
         },
 
+        getFrameUdb: function (source, chapterid, verseid) {
+            var sources = this.sources;
+            var udbsource = _.filter(sources, {'lc': source.lc, 'project': source.project, 'level': 3, 'source': 'udb'});
+            var s = udbsource[0].id,
+                r = query([
+                    "select f.id, f.slug 'verse', f.body 'chunk', c.slug 'chapter', c.title, c.reference, f.format from frame f",
+                    "join chapter c on c.id=f.chapter_id",
+                    "join resource r on r.id=c.resource_id",
+                    "join source_language sl on sl.id=r.source_language_id",
+                    "join project p on p.id=sl.project_id where r.id='" + s + "' and c.slug='" + chapterid + "' and f.slug='" + verseid + "'"
+                ].join(' '));
+
+            return zipper(r);
+        },
+
         getFrameNotes: function (frameid) {
 
                 var r = query([
@@ -257,7 +272,7 @@ function ProjectsManager(query, configurator) {
         getFrameWords: function (frameid) {
 
             var r = query([
-                "select w.id, w.term, w.definition, w.definition_title 'title' from translation_word w",
+                "select w.id, w.slug, w.term, w.definition, w.definition_title 'title' from translation_word w",
                 "join frame__translation_word f on w.id=f.translation_word_id",
                 "where f.frame_id='" + frameid + "'"
             ].join(' '));
@@ -314,6 +329,16 @@ function ProjectsManager(query, configurator) {
             return zipper(r);
         },
 
+        getTa: function () {
+            var r = query([
+                "select t.id, t.slug, t.title, t.text, t.reference from translation_academy_article t"
+                //"join frame__translation_word f on w.id=f.translation_word_id",
+                //"where f.frame_id='" + frameid + "'"
+            ].join(' '));
+
+            return zipper(r);
+        },
+
         getPaths: function(meta) {
             return config.makeProjectPaths(meta);
         },
@@ -348,14 +373,57 @@ function ProjectsManager(query, configurator) {
             });
         },
 
+        /*
+         * Moves (using utils function) .tstudio files from the old to the new path
+         * @param oldPath: source backup directory
+         * @param newPath: target backup directory
+         */
+        migrateBackup: function(oldPath, newPath) {
+            var tstudioFiles = [];
+            readdir(oldPath, function(err, files) {
+                if (err) { console.log(err); }
+                tstudioFiles = files.filter(function(f) {
+                    // Only return files with .tstudio extensions
+                    return f.split('.').pop() === 'tstudio';
+                });
+                tstudioFiles.forEach(function(f) {
+                    var oldFilePath = oldPath + path.sep + f;
+                    var newFilePath = newPath + path.sep + f;
+                    utils.move(oldFilePath, newFilePath, function(err) {
+                        if (err) { console.log(err); }
+                    });
+                });
+            });
+        },
+
+        // fakeBackup: function() {
+        //     console.log('Backing up...');
+        // },
+
+        /*
+         */
+        startAutoBackup: function() {
+            // console.log('Auto Backup has start');
+            // return window.setInterval(this.fakeBackup, 3000);
+        },
+
+        /*
+         */
+        stopAutoBackup: function(id) {
+            // console.log('stopping id', id);
+            // window.clearInterval(id);
+            // console.log('Auto Backup is stopped');
+        },
+
         /**
          *
          * @param translation an array of frames
          * @param meta the target translation manifest and other info
          * @param filename the path where the export will be saved
+         * @param mediaServer is the location of the media files
          * @returns {Promise.<boolean>}
          */
-        exportTranslation: function (translation, meta, filename) {
+        exportTranslation: function (translation, meta, filename, mediaServer) {
             // validate input
             if(filename === null || filename === '') {
                 return Promise.reject('The filename is empty');
@@ -381,7 +449,7 @@ function ProjectsManager(query, configurator) {
                                     // TODO: we need to get the chapter reference and insert it here
                                     chapterContent += '////\n';
                                     //console.log('chapter ' + currentChapter, chapterContent);
-                                    zip.append(chapterContent, {name: currentChapter + '.txt'});
+                                    zip.append(new Buffer(chapterContent), {name: currentChapter + '.txt'});
                                 }
                                 currentChapter = frame.meta.chapter;
                                 chapterContent = '';
@@ -408,19 +476,57 @@ function ProjectsManager(query, configurator) {
                             }
 
                             // add frame
-                            chapterContent += '{{https://api.unfoldingword.org/' + meta.project.id + '/jpg/1/en/360px/' + meta.project.id + '-' + meta.target_language.id + '-' + frame.meta.chapterid + '-' + frame.meta.frameid + '.jpg}}\n\n';
+                            chapterContent += '{{' + mediaServer + meta.project.id + '/jpg/1/en/360px/' + meta.project.id + '-' + meta.target_language.id + '-' + frame.meta.chapterid + '-' + frame.meta.frameid + '.jpg}}\n\n';
                             chapterContent += frame.transcontent + '\n\n';
                         }
                         if(chapterContent !== '' && numFinishedFrames > 0) {
                             // TODO: we need to get the chapter reference and insert it here
                             chapterContent += '////\n';
-                            zip.append(chapterContent, {name: currentChapter + '.txt'});
+                            zip.append(new Buffer(chapterContent), {name: currentChapter + '.txt'});
                         }
                         zip.finalize();
                         resolve(true);
+                    }
+                    else if(translation[0].meta.format === 'usx'){
+                         let
+                            currentChapter = 1,
+                            numFinishedFrames = 0,
+                            chapterContent = '';
+                        for(let frame of translation) {
+                            // build chapter header
+                            if(chapterContent === '') {
+                                //add in USFM header elements
+                                chapterContent += '\n\\\id ' + meta.project.id.toUpperCase() + ' ' + meta.sources[0].name + '\n';
+
+                                chapterContent += '\\\ide ' + frame.meta.format + '\n';
+
+                                chapterContent += '\\\h ' + meta.project.name.toUpperCase() + '\n';
+
+                                chapterContent += '\\' + 'toc1 ' + meta.project.name + '\n';
+
+                                chapterContent += '\\' + 'toc2 ' + meta.project.name + '\n';
+
+                                chapterContent += '\\' + 'toc3 ' + meta.project.id + '\n';
+
+                                chapterContent += '\\\mt1 ' + meta.project.name.toUpperCase() + '\n';
+
+                                chapterContent += '\\\c ' + frame.meta.chapter + '\n';
+                            }
+                            if(currentChapter !== frame.meta.chapter){
+                                chapterContent += '\\\c ' + frame.meta.chapter + '\n';
+                                currentChapter = frame.meta.chapter;
+                            }
+                            // add frame
+                            if(frame.transcontent !== ''){
+                            chapterContent += frame.transcontent + '\n';
+                            }
+                        }
+
+                        fs.writeFile(filename + '.txt', new Buffer(chapterContent));
+                        resolve(true);
                     } else {
-                        // we don't support anything but dokuwiki right now
-                        reject('We only support exporting OBS projects for now');
+                        // we don't support anything but dokuwiki and usx right now
+                        reject('We only support exporting OBS and USX projects for now');
                     }
                 } else {
                     // TODO: support exporting other target translation types if needed e.g. notes, words, questions

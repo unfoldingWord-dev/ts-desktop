@@ -2,19 +2,79 @@
 
 var _ = require('lodash'),
     fs = require('fs'),
-    //path = require('path'),
-    //mkdirP = require('mkdirp'),
-    //rimraf = require('rimraf'),
+    path = require('path'),
+    mkdirP = require('mkdirp'),
+    AdmZip = require('adm-zip'),
+    https = require('https'),
+    download = require('../js/lib/util').download,
     _ = require('lodash'),
     PDFDocument = require('pdfkit');
 
 
 function Printer() {
 
+    /**
+     * Returns the value of the first property found in the object.
+     * If the object has no properties null is returned
+     * @param obj
+     * @returns {}
+     */
+    function getFirstPropValue(obj) {
+        let values = _.values(obj);
+        return values.length ? values[0] : null;
+    }
+
     return {
 
         isTranslation: function (meta) {
             return !meta.project.type || meta.project.type === 'text';
+        },
+
+        getImages: function(meta){
+            return new Promise(function(resolve, reject){
+                let App = window.App,
+                    imageRoot = path.join(App.configurator.getValue('rootdir'), 'images'),
+                    imagePath = path.join(imageRoot, meta.resource_id);
+
+                //check to see if we need to create the images directory;
+                if(!fs.existsSync(imagePath)){
+                    mkdirP.sync(imagePath);
+                }
+
+                //if the zip file isn't downloaded yet, go get it.
+                let dest = path.join(imagePath, 'images.zip');
+                if(!fs.existsSync(dest)) {
+                    //let out = fs.createWriteStream(dest);
+                    // TRICKY: right now we have to hard code the urls until the api is updated
+                    let url = App.configurator.getValue("mediaServer") + '/obs/jpg/1/en/obs-images-360px.zip';
+                    console.log('downloading images from', url);
+                    download(url, dest, true).then(function() {
+                        let zip = new AdmZip(dest);
+                        zip.extractAllTo(imagePath, true);
+
+                        let directories = fs.readdirSync(imagePath).filter(function(file) {
+                            return fs.statSync(path.join(imagePath, file)).isDirectory();
+                        });
+                        directories.forEach(function(dir){
+                            let dirPath = path.join(imagePath,dir),
+                                files = fs.readdirSync(dirPath);
+                            files.forEach(function(file){
+                                let filePath = path.join(imagePath,dir,file),
+                                    newPath = path.join(imagePath,file);
+                                fs.renameSync(filePath, newPath);
+                            });
+
+                            //remove the empty directory
+                            fs.rmdir(dirPath);
+                        });
+                        resolve();
+                    }).catch(function(err) {
+                        reject(err);
+                    });
+                } else {
+                    resolve();
+                }
+            });
         },
 
         /**
@@ -30,41 +90,51 @@ function Printer() {
             if(filename === null || filename === '') {
                 return Promise.reject('The filename is empty');
             }
-            var isTranslation = this.isTranslation(meta);
+            let isTranslation = this.isTranslation(meta),
+                App = window.App,
+                imageRoot = path.join(App.configurator.getValue('rootdir'), "images"),
+                imagePath = path.join(imageRoot, meta.resource_id);
 
             return new Promise(function(resolve, reject) {
                 if(isTranslation) {
                     // normalize input
                     let chapters = _.mapValues(_.groupBy(translation, function(obj) {
+                        //console.debug('map chapter values', obj);
                         return obj.meta.chapterid;
                     }), function(chapter, key) {
                         let frames = _.mapKeys(chapter, function(obj) {
+                            //console.debug('map chapter keys', obj);
                             return obj.meta.frameid;
                         });
-                        let obj = {
+                        //console.debug('forming chapter', frames);
+                        let formatReference = getFirstPropValue(frames); // refer to one of the frames for the format
+                        console.debug(formatReference);
+                        let chapterObj = {
                             id: key,
-                            title: frames.title,
+                            title: frames.title || key,
                             reference: frames.reference === undefined ? null : frames.reference,
-                            format: frames.title.meta.format // everyone has a title
+                            format: formatReference.meta.format
                         };
                         delete frames.reference;
                         delete frames.title;
-                        obj.frames = _.sortBy(frames, function(f) {
+                        chapterObj.frames = _.sortBy(_.filter(frames, function(o) {
+                            return o.transcontent !== '';
+                        }), function(f) {
+                            //console.debug('sort frames',f);
                             return f.meta.frame;
                         });
-                        return obj;
+                        return chapterObj;
                     });
                     let project = {
                         format: chapters['00'].format,
                         title: chapters['00'].title
                     };
                     delete chapters['00'];
-                    project.chapters = _.sortBy(chapters, 'id');
+                    project.chapters = _.sortBy(_.filter(chapters, function(o) {
+                        return o.frames.length > 0;
+                    }), 'id');
                     chapters = null;
 
-                    //console.debug(project);
-
-                    // TRICKY: look into the first chapter to see the format
                     if(project.format === 'default') {
                         // the default format is currently dokuwiki
                         let doc = new PDFDocument({
@@ -79,8 +149,8 @@ function Printer() {
                         doc.pipe(fs.createWriteStream(filename + '.pdf'));
 
                         // default meta
-                        doc.info.Title = project.title.transcontent || meta.project_name;
-                        doc.info.Author = 'Joel Lonbeck'; // todo: translators
+                        doc.info.Title = project.title.transcontent || meta.project.name;
+                        //doc.info.Author = 'Joel Lonbeck'; // todo: translators
                         //doc.info.Subject = 'an unrestricted, visual mini-Bible in any language'; // todo: project sub-title
                         doc.info.Keywords = meta.target_language.name;
 
@@ -119,7 +189,7 @@ function Printer() {
                             // chapter title
                             doc.addPage();
                             doc.fontSize(20)
-                                .text(chapter.title.transcontent || chapter.meta.title, 72, doc.page.height / 2, {align: 'center'});
+                                .text(chapter.title.transcontent || chapter.title.meta.title, 72, doc.page.height / 2, {align: 'center'});
                             chapter.page = doc.bufferedPageRange().count;
 
                             // frames
@@ -127,10 +197,11 @@ function Printer() {
                             _.forEach(chapter.frames, function(frame) {
                                 if(options.includeIncompleteFrames === true || frame.completed === true) {
                                     if (options.includeImages === true) {
-                                        // TODO: get the image path
-                                        //doc.image('path to image', {width:doc.page.width - 72*2})
-                                        doc.fontSize(10)
-                                            .text('[photo]', {align: 'center'});
+                                        console.debug(meta);
+                                        console.debug(frame);
+                                        // TRICKY: right now all images are en
+                                        var imgPath = path.join(imagePath, meta.resource_id + "-en-" + frame.meta.chapterid + "-" + frame.meta.frameid + ".jpg");
+                                        doc.image(imgPath, {width:doc.page.width - 72*2});
                                     }
                                     doc.moveDown()
                                         .fontSize(10)
@@ -150,7 +221,8 @@ function Printer() {
                         let range = doc.bufferedPageRange();
                         for(let i = range.start; i < range.start + range.count; i ++) {
                             doc.switchToPage(i);
-                            doc.text(i + 1, 72, doc.page.height - 50 - 12, {align: 'center'});
+                            doc.fontSize(10)
+                                .text(i + 1, 72, doc.page.height - 50 - 12, {align: 'center'});
                         }
 
                         // write TOC
@@ -170,7 +242,7 @@ function Printer() {
                             }
                             doc.switchToPage(currTocPage);
                             doc.fontSize(10)
-                                .text(chapter.title.transcontent)
+                                .text(chapter.title.transcontent || chapter.title.meta.title)
                                 .moveUp()
                                 .text(chapter.page + '', {align: 'right'})
                                 .moveDown();

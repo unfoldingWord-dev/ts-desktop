@@ -105,6 +105,8 @@
           </iron-list>
       </div>
 
+      <iron-signals on-iron-signal-createprojects="createprojects"></iron-signals>
+
   </template>
 
 </dom-module>
@@ -158,8 +160,13 @@
           this.category = e.model.category;
           if (this.category.name === "Open Bible Stories") {
               this.project = this.category.data[0];
-              this.fire('iron-signal', {name: 'createtypes'});
-              this.selected = this.selected + 2;
+              if (App.configurator.getUserSetting('glmode')) {
+                  this.fire('iron-signal', {name: 'createtypes'});
+                  this.selected = this.selected + 2;
+              } else {
+                  this.type = {name: "Text - Open Bible Stories", code: "text", resource: "obs", allowed: true};
+                  this.fire('create');
+              }
           } else if (this.category.name === "Bible Words") {
               this.project = this.category.data[0];
               this.type = {name: "Words", code: "tw", resource: "", allowed: true};
@@ -169,7 +176,7 @@
           }
       },
 
-      ready: function() {
+      createprojects: function () {
           var projects = App.projectsManager.getProjects();
           var tempobject = {};
           var temparray = [];
@@ -183,8 +190,14 @@
               }
               temparray.push(tempobject);
           });
-          temparray.push({"name": "Bible Words", "data": [{name: "Bible Words", slug: "tw"}]});
+          if (App.configurator.getUserSetting('glmode')) {
+              temparray.push({"name": "Bible Words", "data": [{name: "Bible Words", slug: "tw"}]});
+          }
           this.categorylist = temparray;
+      },
+
+      ready: function () {
+
       }
 
   });

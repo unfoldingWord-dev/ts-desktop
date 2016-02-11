@@ -122,7 +122,7 @@
             color: var(--accent-color);
         }
 
-        #loading {
+        #load {
             width: 320px;
             height: 100px;
             color: var(--primary-text-color);
@@ -180,7 +180,7 @@
             --paper-checkbox-unchecked-color: var(--accent-color-dark);
         }
 
-        #confirm {
+        #loading {
             width: 320px;
             height: 220px;
             color: var(--primary-text-color);
@@ -216,7 +216,27 @@
             text-align: center;
         }
 
-        #confirm h2 {
+        #loading h2 {
+            color: var(--accent-color);
+        }
+
+        #confirm {
+            width: 350px;
+            height: 175px;
+        }
+
+        #confirm p {
+            font-size: 110%;
+        }
+
+        #confirmbuttons {
+            display: flex;
+            justify-content: flex-end;
+            padding: 0 50px;
+            color: var(--secondary-text-color);
+        }
+
+        #confirmbuttons paper-button:hover {
             color: var(--accent-color);
         }
 
@@ -315,11 +335,11 @@
             <ts-source-modal id="modal" on-close="closesource"></ts-source-modal>
         </paper-dialog>
 
-        <paper-dialog id="loading" class="popup" modal="true">
+        <paper-dialog id="load" class="popup" modal="true">
             <p>Loading project. Please wait...</p>
         </paper-dialog>
 
-        <paper-dialog id="confirm" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+        <paper-dialog id="loading" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <template is="dom-if" if="{{options.loading}}">
                 <p>{{options.body}}</p>
                 <div id="bar">
@@ -335,6 +355,17 @@
                     <paper-button dialog-dismiss>Close</paper-button>
                 </div>
             </template>
+        </paper-dialog>
+
+        <paper-dialog id="confirm" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <h2>Overwrite?</h2>
+            <div>
+                <p>This file already exists. Overwrite?</p>
+            </div>
+            <div id="confirmbuttons">
+                <paper-button dialog-dismiss>No</paper-button>
+                <paper-button on-tap="executeprint">Confirm</paper-button>
+            </div>
         </paper-dialog>
 
         <iron-signals on-iron-signal-frompublish="frompublish"></iron-signals>
@@ -381,6 +412,10 @@
                 value: '',
                 notify: true
             },
+            projectlist: {
+                type: Array,
+                value: []
+            },
             currentproject: {
                 type: Object,
                 value: {},
@@ -395,6 +430,10 @@
                 value: {}
             },
             rawdata2: {
+                type: Object,
+                value: {}
+            },
+            worddata: {
                 type: Object,
                 value: {}
             },
@@ -488,7 +527,13 @@
             var modal = this.$.modal;
             var sources = App.projectsManager.sources;
             var projectid = this.currentproject.data.project.id;
-            modal.allSources = _.filter(sources, {'project': projectid, 'level': 3});
+            if (this.currentproject.data.resource_id === "udb") {
+                modal.allSources = _.filter(sources, {'project': projectid, 'level': 3});
+            } else {
+                modal.allSources = _.filter(sources, function(source) {
+                    return source.project === projectid && source.level === 3 && source.source !== "udb";
+                });
+            }
             modal.sources = this.currentproject.data.sources;
             modal.selectedSource = this.currentproject.data.currentsource;
             this.$.sourcepopup.open();
@@ -529,7 +574,11 @@
         savesource: function () {
             var key = "uw-" + this.currentproject.data.fullname;
             var source = this.currentproject.data.currentsource;
-            App.configurator.setValue(key + "-source", source);
+            if (source !== null) {
+                App.configurator.setValue(key + "-source", source);
+            } else {
+                App.configurator.unsetValue(key + "-source");
+            }
         },
 
         retrievesource: function () {
@@ -540,174 +589,113 @@
             }
         },
 
-        loadnewproject: function (event, data) {
-            //this function not currently being used, but saved in case needed later
-            var mythis = this;
-            var blank = [];
-            var blankstate = {};
-            this.setrightanimation();
-            this.route = "translate";
-            this.set('currentproject.state', blankstate);
-            this.set('currentproject.translation', blank);
-            this.set('currentproject.data', data.projdata);
-            this.checkstandard();
-            //this.savetofile();
-            if (data.projdata.project.type !== "text" && data.projdata.project.type !== "tw") {
-                var newmeta = {fullname: data.projdata.basename};
-                App.projectsManager.loadTargetTranslation(newmeta).then(function (newtranslation) {
-                    mythis.set('rawdata2', newtranslation);
-                    mythis.setmodestate();
-                    mythis.checksources();
-                });
-            } else {
-                mythis.set('rawdata2', {});
-                if (data.projdata.project.type === "tw") {
-                    mythis.pullwords();
-                    mythis.createchunks();
-                }
-                mythis.setmodestate();
-                mythis.checksources();
-            }
-        },
-
         loadproject: function (event, data) {
             var mythis = this;
-            var loading = this.$.loading;
+            var load = this.$.load;
             var type = data.type;
             var projdata = data.projdata;
+            var list = this.projectlist;
+
+            var loadsource = function () {
+                if (projdata.project.type === "tw") {
+                    mythis.pullwords();
+                    mythis.createchunks();
+                } else {
+                    mythis.pullsource();
+                    mythis.createchunks();
+                    mythis.createchapters();
+                }
+                load.close();
+                setTimeout(function() {
+                    mythis.setmodestate();
+                    mythis.checksources();
+                    mythis.fire('iron-signal', {name: 'adjustbar'});
+                    if (type === "publish") {
+                        mythis.gopublish();
+                    }
+                    if (type === "print") {
+                        mythis.goprint();
+                    }
+                }, 250);
+            };
+
+            var loadwords = function () {
+                if (projdata.project.type !== "tw") {
+                    var wordmeta = false;
+                    for (var i = 0; i < list.length; i++) {
+                        if (list[i].target_language.id === projdata.target_language.id && list[i].project.type === "tw") {
+                            wordmeta = list[i];
+                        }
+                    }
+                    if (wordmeta) {
+                        App.projectsManager.loadTargetTranslation(wordmeta).then(function (words) {
+                            mythis.set('worddata', words);
+                            loadsource();
+                        });
+                    } else {
+                        mythis.set('worddata', {});
+                        loadsource();
+                    }
+                } else {
+                    mythis.set('worddata', {});
+                    loadsource();
+                }
+            };
+
+            var loaddata2 = function () {
+                if (projdata.project.type === "tn" || projdata.project.type === "tq") {
+                    var newmeta = false;
+                    for (var i = 0; i < list.length; i++) {
+                        if (list[i].basename === projdata.basename && list[i].project.type === "text" && list[i].resource_id !== "udb") {
+                            newmeta = list[i];
+                        }
+                    }
+                    if (newmeta) {
+                        App.projectsManager.loadTargetTranslation(newmeta).then(function (newtranslation) {
+                            mythis.set('rawdata2', newtranslation);
+                            loadwords();
+                        });
+                    } else {
+                        mythis.set('rawdata2', {});
+                        loadwords();
+                    }
+                } else {
+                    mythis.set('rawdata2', {});
+                    loadwords();
+                }
+            };
+
             this.setrightanimation();
             this.route = "translate";
             setTimeout(function() {
-                loading.open();
+                load.open();
                 setTimeout(function() {
                     mythis.set('currentproject', {data: projdata, state: {}, source: [], translation: []});
                     mythis.checkstandard();
                     mythis.retrievesource();
                     App.projectsManager.loadTargetTranslation(projdata).then(function (translation) {
                         mythis.set('rawdata', translation);
-                        if (projdata.project.type === "tn" || projdata.project.type === "tq") {
-                            var newmeta = {fullname: projdata.basename, project: {type: 'text'}};
-                            App.projectsManager.loadTargetTranslation(newmeta).then(function (newtranslation) {
-                                mythis.set('rawdata2', newtranslation);
-                                mythis.pullsource();
-                                mythis.createchunks();
-                                mythis.createchapters();
-                                loading.close();
-                                setTimeout(function() {
-                                    mythis.setmodestate();
-                                    mythis.checksources();
-                                    mythis.fire('iron-signal', {name: 'adjustbar'});
-                                    if (type === "publish") {
-                                        mythis.gopublish();
-                                    }
-                                    if (type === "print") {
-                                        mythis.goprint();
-                                    }
-                                }, 250);
-                            });
-                        } else {
-                            mythis.set('rawdata2', {});
-                            if (projdata.project.type === "tw") {
-                                mythis.pullwords();
-                                mythis.createchunks();
-                            } else {
-                                mythis.pullsource();
-                                mythis.createchunks();
-                                mythis.createchapters();
-                            }
-                            loading.close();
-                            setTimeout(function() {
-                                mythis.setmodestate();
-                                mythis.checksources();
-                                mythis.fire('iron-signal', {name: 'adjustbar'});
-                                if (type === "publish") {
-                                    mythis.gopublish();
-                                }
-                                if (type === "print") {
-                                    mythis.goprint();
-                                }
-                            }, 250);
-                        }
-                    });
-                }, 250);
-            }, 500);
-        },
-
-        loadpublish: function (event, data) {
-            //this function is not currently being used, but saved in case needed later
-            var mythis = this;
-            var blankstate = {};
-            var loading = this.$.loading;
-            this.setrightanimation();
-            this.route = "translate";
-            setTimeout(function() {
-                loading.open();
-                setTimeout(function() {
-                    mythis.set('currentproject.data', data.projdata);
-                    mythis.set('currentproject.state', blankstate);
-                    mythis.checkstandard();
-                    mythis.retrievesource();
-                    App.projectsManager.loadTargetTranslation(data.projdata).then(function (translation) {
-                        mythis.set('rawdata', translation);
-                        if (data.projdata.project.type !== "text") {
-                            var newmeta = {fullname: data.projdata.basename};
-                            App.projectsManager.loadTargetTranslation(newmeta).then(function (newtranslation) {
-                                mythis.set('rawdata2', newtranslation);
-                                mythis.pullsource();
-                                mythis.createchunks();
-                                mythis.createchapters();
-                                loading.close();
-                                setTimeout(function() {
-                                    mythis.setmodestate();
-                                    mythis.checksources();
-                                    mythis.fire('iron-signal', {name: 'adjustbar'});
-                                    mythis.gopublish();
-                                }, 250);
-                            });
-                        } else {
-                            mythis.set('rawdata2', {});
-                            mythis.pullsource();
-                            mythis.createchunks();
-                            mythis.createchapters();
-                            loading.close();
-                            setTimeout(function() {
-                                mythis.setmodestate();
-                                mythis.checksources();
-                                mythis.fire('iron-signal', {name: 'adjustbar'});
-                                mythis.gopublish();
-                            }, 250);
-                        }
+                        loaddata2();
                     });
                 }, 250);
             }, 500);
         },
 
         updatesources: function (event, data) {
-            var mythis = this;
-            var meta = mythis.currentproject.data;
-            mythis.set('currentproject.data.sources', data.sources);
-            mythis.set('currentproject.data.currentsource', data.selected);
-            mythis.savesource();
-            mythis.getlocation();
-            App.projectsManager.loadTargetTranslation(meta).then(function (translation) {
-                mythis.set('rawdata', translation);
-                mythis.pullsource();
-                mythis.createchunks();
-                mythis.createchapters();
-                mythis.savetofile();
-                mythis.forceResize();
-                mythis.setlocation();
-                mythis.checksources();
-                setTimeout(function() {
-                    mythis.fire('iron-signal', {name: 'adjustbar'});
-                }, 250);
-            });
+            this.set('currentproject.data.sources', data.sources);
+            this.set('currentproject.data.currentsource', data.selected);
+            this.loaddata(true);
         },
 
         updateselected: function (event, data) {
+            this.set('currentproject.data.currentsource', data.selected);
+            this.loaddata(false);
+        },
+
+        loaddata: function (check) {
             var mythis = this;
             var meta = mythis.currentproject.data;
-            mythis.set('currentproject.data.currentsource', data.selected);
+
             mythis.savesource();
             mythis.getlocation();
             App.projectsManager.loadTargetTranslation(meta).then(function (translation) {
@@ -718,6 +706,9 @@
                 mythis.savetofile();
                 mythis.forceResize();
                 mythis.setlocation();
+                if (check) {
+                    mythis.checksources();
+                }
                 setTimeout(function() {
                     mythis.fire('iron-signal', {name: 'adjustbar'});
                 }, 250);
@@ -789,6 +780,23 @@
                 var questions = App.projectsManager.getFrameQuestions(id);
                 var words = App.projectsManager.getFrameWords(id);
                 var verses = [];
+                var udbtext = null;
+
+                if (currentsource.source === "ulb") {
+                    udbtext = App.projectsManager.getFrameUdb(currentsource, chapterid, frameid)[0].chunk;
+                    while (test.test(udbtext)) {
+                        udbtext = udbtext.replace(startstr, " \\v");
+                        udbtext = udbtext.replace(endstr, " ");
+                    }
+                }
+
+                for (var w = 0; w < words.length; w++) {
+                    var worddata = this.worddata["01-" + words[w].slug];
+                    if (worddata && worddata.helpscontent[0].body !== "" && worddata.helpscontent[0].title !== "") {
+                        words[w].term = worddata.helpscontent[0].title;
+                        words[w].definition = worddata.helpscontent[0].body;
+                    }
+                }
 
                 for (var n = 0; n < notes.length; n++) {
                     if (notes[n].title === "") {
@@ -824,7 +832,7 @@
                     chunkref = title + ":" + frame;
                 } else {
                     chapterref = name + " " + chapter;
-                    chunkref = name + " " + chapter + ":" + verses[0] + "-" + verses[verses.length-1];
+                    chunkref = name + " " + chapter + ":" + verses[0] + "–" + verses[verses.length-1];
                 }
 
                 var meta = {
@@ -837,7 +845,7 @@
                     verses: verses,
                     chapterref: chapterref,
                     chunkref: chunkref,
-                    refaddon: " - " + refaddon,
+                    refaddon: " — " + refaddon,
                     standard: standard,
                     words: false,
                     format: format
@@ -850,7 +858,7 @@
                         chapterid: "00",
                         frameid: "title",
                         chunkref: "Project Title",
-                        refaddon: " - " + refaddon,
+                        refaddon: " — " + refaddon,
                         standard: standard,
                         words: false,
                         verses: [],
@@ -862,7 +870,8 @@
                         wordcontent: "",
                         notes: [],
                         words: [],
-                        questions: []
+                        questions: [],
+                        udbtext: null
                     };
                     source.push(srcchunk);
                     var rawbookdata = this.rawdata["00-title"];
@@ -884,7 +893,7 @@
                     frameid: "title",
                     verses: [],
                     chunkref: "Story Title",
-                    refaddon: " - " + refaddon,
+                    refaddon: " — " + refaddon,
                     standard: standard,
                     words: false,
                     format: format
@@ -897,7 +906,8 @@
                         wordcontent: "",
                         notes: [],
                         words: [],
-                        questions: []
+                        questions: [],
+                        udbtext: null
                     };
                     source.push(srcchunk);
 
@@ -921,7 +931,7 @@
                     frameid: "reference",
                     verses: [],
                     chunkref: "Story Reference",
-                    refaddon: " - " + refaddon,
+                    refaddon: " — " + refaddon,
                     standard: standard,
                     words: false,
                     format: format
@@ -934,7 +944,8 @@
                         wordcontent: "",
                         notes: [],
                         words: [],
-                        questions: []
+                        questions: [],
+                        udbtext: null
                     };
                     source.push(srcchunk);
                     var rawrefdata = this.rawdata[chapterid + "-reference"];
@@ -953,7 +964,8 @@
                     wordcontent: "",
                     notes: notes,
                     words: words,
-                    questions: questions
+                    questions: questions,
+                    udbtext: udbtext
                 };
                 source.push(srcchunk);
 
@@ -1001,7 +1013,7 @@
                     frameid: frameid,
                     verses: [],
                     chunkref: frames[i].term,
-                    refaddon: " - " + language,
+                    refaddon: " — " + language,
                     standard: standard,
                     words: true
                 };
@@ -1012,7 +1024,8 @@
                     wordcontent: frames[i].term,
                     notes: [],
                     words: [],
-                    questions: []
+                    questions: [],
+                    udbtext: null
                 };
                 source.push(srcchunk);
 
@@ -1225,7 +1238,7 @@
                 return {transcontent: chunk.transcontent, helpscontent: chunk.helpscontent, completed: chunk.completed, data: projectdata, index: index, state: chunk.state};
             });
             srcdata.data = source.map(function(chunk){
-                return {srccontent: chunk.srccontent, wordcontent: chunk.wordcontent, meta: chunk.meta, notes: chunk.notes, words: chunk.words, questions: chunk.questions};
+                return {srccontent: chunk.srccontent, wordcontent: chunk.wordcontent, meta: chunk.meta, notes: chunk.notes, words: chunk.words, questions: chunk.questions, udbtext: chunk.udbtext};
             });
             var merged = _.merge(srcdata, transdata);
             this.set('chunks', merged);
@@ -1309,7 +1322,6 @@
             setTimeout(function() {
                 mythis.selected = 3;
             }, 500);
-
         },
 
         gohome: function () {
@@ -1348,42 +1360,83 @@
 
         print: function () {
             var mythis = this;
-            var popup = this.$.confirm;
             var meta = this.currentproject.data;
-            var translation = this.currentproject.translation;
             var name = 'uw-' + meta.fullname;
             var input = this.$.printinput;
-            var filename;
             var firsttime = true;
-            var options = {includeIncompleteFrames: this.$.chunkbox.checked, includeImages: this.$.imagebox.checked};
+            var confirm = this.$.confirm;
+
             this.$.printpopup.close();
             input.value = null;
             input.nwsaveas = name;
             input.addEventListener("change", function (evt) {
                 if (firsttime) {
                     firsttime = false;
-                    mythis.set('options.body', "Creating PDF. Please wait...");
-                    mythis.set('options.loading', true);
-                    popup.open();
-                    filename = input.value;
-                    return App.printer.targetTranslationToPdf(translation, meta, filename, options)
-                        .then(function () {
-                            mythis.set('options.title', "PDF Created");
-                            mythis.set('options.body', "Your project has been successfully saved to a PDF.  Thanks.");
-                            mythis.set('options.loading', false);
-                        })
-                        .catch(function (err) {
-                            var errmessage = "We're sorry.  An error occurred while trying to save your project";
-                            if(err !== null) {
-                                errmessage = err;
+
+                    var filename = input.value;
+
+                    return App.projectsManager.fileExists(filename + ".pdf")
+                        .then (function (stat) {
+                            if (stat) {
+                                confirm.open();
+                            } else {
+                                mythis.executeprint();
                             }
-                            mythis.set('options.title', "Print Failed");
-                            mythis.set('options.body', errmessage);
-                            mythis.set('options.loading', false);
                         });
                 }
             }, false);
             input.click();
+        },
+
+        executeprint: function () {
+            var mythis = this;
+            var loading = this.$.loading;
+            var meta = this.currentproject.data;
+            var translation = this.currentproject.translation;
+            var input = this.$.printinput;
+            var filename = input.value;
+            var options = {includeIncompleteFrames: this.$.chunkbox.checked, includeImages: this.$.imagebox.checked};
+            var confirm = this.$.confirm;
+
+            var generatePdf = function(){
+                mythis.set('options.body', "Creating PDF. Please wait...");
+                return App.printer.targetTranslationToPdf(translation, meta, filename, options)
+                    .then(function () {
+                        mythis.set('options.title', "PDF Created");
+                        mythis.set('options.body', "Your project has been successfully saved to a PDF.  Thanks.");
+                        mythis.set('options.loading', false);
+                    })
+                    .catch(function (err) {
+                        var errmessage = "We're sorry.  An error occurred while trying to save your project";
+                        if(err !== null) {
+                            errmessage = err;
+                        }
+                        mythis.set('options.title', "Print Failed");
+                        mythis.set('options.body', errmessage);
+                        mythis.set('options.loading', false);
+                    });
+            };
+
+            confirm.close();
+            mythis.set('options.loading', true);
+            loading.open();
+
+            if(options.includeImages){
+                mythis.set('options.body', "Downloading Images. Please wait...");
+                return App.printer.getImages(meta).then(function(){
+                    return generatePdf();
+                }).catch(function(err){
+                    var message = "We're sorry.  An error occurred while trying to download images for this project";
+                    if(err !== null) {
+                        message = err;
+                    }
+                    mythis.set('options.title', "Download Failed");
+                    mythis.set('options.body', message);
+                    mythis.set('options.loading', false);
+                });
+            } else {
+                return generatePdf();
+            }
         },
 
         setrightanimation: function () {

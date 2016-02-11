@@ -169,8 +169,6 @@
 
       createtypes: function () {
           var project = this.project.slug;
-          var sources = App.projectsManager.sources;
-          var selections = _.filter(sources, {'project': project, 'level': 3, 'lc': 'en'});
           var typearray = [];
           var language = this.language;
           var projectarray = this.projectlist;
@@ -183,12 +181,11 @@
               }
           }
 
-          for (i = 0; i < selections.length; i++) {
-              if (selections[i].source === "ulb") {
-                  typearray.push({name: "Text - " + selections[i].name, code: "text", resource: selections[i].source, allowed: true, fullname: basename});
-              } else {
-                  typearray.push({name: "Text - " + selections[i].name, code: "text", resource: selections[i].source, allowed: true, fullname: project + "_" + selections[i].source + "-" + language.id});
-              }
+          if (project === "obs") {
+              typearray.push({name: "Text - Open Bible Stories", code: "text", resource: "obs", allowed: true, fullname: basename});
+          } else {
+              typearray.push({name: "Text - Unlocked Literal Bible", code: "text", resource: "ulb", allowed: true, fullname: basename});
+              typearray.push({name: "Text - Unlocked Dynamic Bible", code: "text", resource: "udb", allowed: true, fullname: project + "_udb-" + language.id});
           }
           typearray.push({name: "Notes", code: "tn", resource: "", allowed: standardexists, fullname: project + "_tn-" + language.id});
           typearray.push({name: "Questions", code: "tq", resource: "", allowed: standardexists, fullname: project + "_tq-" + language.id});

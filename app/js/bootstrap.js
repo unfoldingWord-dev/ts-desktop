@@ -13,10 +13,8 @@
     let mkdirp = require('mkdirp');
     let Reporter = require('../js/reporter').Reporter;
 
-    let date = new Date();
-    date = date.getFullYear() + '_' + date.getMonth() + '_' + date.getDay();
-    let crashPath = path.join(gui.App.dataPath, 'logs', date + '.dump');
-    gui.App.setCrashDumpDir(crashPath);
+    let crashDir = path.join(gui.App.dataPath, 'logs');
+    gui.App.setCrashDumpDir(crashDir);
 
     // hook up global exception handler
     process.removeAllListeners('uncaughtException');

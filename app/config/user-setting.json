@@ -58,12 +58,12 @@
         "visible": true
     },
     {
-        "name": "savedirectory",
-        "mainText": "Save Directory",
-        "value": "test",
+        "name": "backuplocation",
+        "mainText": "Backup Location",
+        "value": "",
         "group": "advanced",
         "enabled": true,
-        "visible": false
+        "visible": true
     },
     {
         "name": "logginglevel",

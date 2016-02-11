@@ -2,7 +2,7 @@
     {
         "name": "glmode",
         "mainText": "GL Mode",
-        "helpText": "Display contents available to gateway languages only",
+        "helpText": "Display additional translation options for gateway languages",
         "value": false,
         "group": "general"
     },

@@ -84,8 +84,8 @@
 
         <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
             <ts-language-menu id="languages" selected="{{selected}}" language="{{language}}"></ts-language-menu>
-            <ts-project-menu selected="{{selected}}" category="{{category}}" project="{{project}}" type="{{type}}" gatewaymode="[[gatewaymode]]" on-create="createproject"></ts-project-menu>
-            <ts-book-menu selected="{{selected}}" category="[[category]]" project="{{project}}" type="{{type}}" gatewaymode="[[gatewaymode]]" on-create="createproject"></ts-book-menu>
+            <ts-project-menu selected="{{selected}}" category="{{category}}" project="{{project}}" type="{{type}}" on-create="createproject"></ts-project-menu>
+            <ts-book-menu selected="{{selected}}" category="[[category]]" project="{{project}}" type="{{type}}" on-create="createproject"></ts-book-menu>
             <ts-type-menu selected="{{selected}}" language="[[language]]" category="[[category]]" project="[[project]]" type="{{type}}" projectlist="[[projectlist]]" on-create="createproject"></ts-type-menu>
         </neon-animated-pages>
 
@@ -142,10 +142,6 @@
             options: {
                 type: Object,
                 value: {title: "", body: ""}
-            },
-            gatewaymode: {
-                type: Boolean,
-                value: false
             },
             projectlist: {
                 type: Array,

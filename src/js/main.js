@@ -20,7 +20,7 @@ function createWindow () {
 
     mainWindow.dataPath = app.getPath('userData');
 
-    mainWindow.webContents.openDevTools();
+    // mainWindow.webContents.openDevTools();
 
     // and load the index.html of the app.
     mainWindow.loadURL('file://' + __dirname + '/../views/index.html');

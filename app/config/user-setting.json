@@ -1,5 +1,12 @@
 [
     {
+        "name": "glmode",
+        "mainText": "GL Mode",
+        "helpText": "Display contents available to gateway languages only",
+        "value": false,
+        "group": "general"
+    },
+    {
         "name": "font",
         "mainText": "Font",
         "value": "Roboto",

@@ -125,10 +125,6 @@
               type: Object,
               value: {},
               notify: true
-          },
-          gatewaymode: {
-              type: Boolean,
-              value: false
           }
       },
 
@@ -138,7 +134,7 @@
 
       store: function(e) {
           this.project = e.model.project;
-          if (this.gatewaymode) {
+          if (App.configurator.getUserSetting('glmode')) {
               this.fire('iron-signal', {name: 'createtypes'});
               this.selected = this.selected + 1;
           } else {

@@ -232,7 +232,7 @@
             if (newPath) {
                 var oldPath = App.configurator.getUserSetting('backuplocation');
                 this.settings = App.configurator.setUserSetting('backuplocation', newPath);
-                App.projectsManager.migrateBackup(oldPath, newPath);
+                // App.projectsManager.migrateBackup(oldPath, newPath);
             }
         },
 

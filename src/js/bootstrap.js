@@ -42,7 +42,7 @@ process.stdout.write = console.log.bind(console);
             let privateDefaults = require('../config/private.json');
             c.loadConfig(privateDefaults);
         } catch (e) {
-            console.warn('Failed to load private settings');
+            console.info('No private settings.');
         }
 
         c.loadConfig(defaults);

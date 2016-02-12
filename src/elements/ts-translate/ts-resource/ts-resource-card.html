@@ -1,0 +1,188 @@
+
+<link rel="import" href="../../../components/paper-material/paper-material.html">
+<link rel="import" href="../../../components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../../../components/iron-pages/iron-pages.html">
+
+<dom-module id="ts-resource-card">
+
+	<style>
+
+        :host {
+            flex: auto;
+            display: flex;
+        }
+
+        paper-material {
+            flex: auto;
+            display: flex;
+            background: var(--card-background-color);
+            flex-direction: column;
+            border-radius: 3px;
+        }
+
+		#heading {
+			padding: 0 16px;
+			color: var(--secondary-text-color);
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 48px;
+		}
+
+        #content {
+			padding: 24px 16px;
+            flex: auto;
+		}
+
+        #content p {
+			line-height: 1.5;
+			margin: 0;
+		}
+
+        :host {
+            --paper-tab-ink: var(--accent-color-light);
+        }
+
+        paper-tabs {
+            --paper-tabs-selection-bar-color: var(--accent-color);
+        }
+
+        paper-tab {
+            width: 120px;
+        }
+
+        .link {
+            color: var(--accent-color);
+            font-weight: bold;
+            cursor: pointer;
+            padding-bottom: 10px;
+        }
+
+        #textholder {
+            line-height: 2;
+            margin-top: 0;
+            color: var(--primary-text-color);
+        }
+
+        .hide {
+            display: none;
+        }
+
+	</style>
+
+	<template>
+
+        <paper-material elevation="1">
+            <div id="heading">
+                <paper-tabs selected="{{chunk.state.resource}}" on-tap="updatestate">
+                    <paper-tab class$="[[checkclass(chunk.notes.length)]]">Notes</paper-tab>
+                    <paper-tab class$="[[checkclass(chunk.words.length)]]">Words</paper-tab>
+                    <paper-tab class$="[[checkclass(chunk.questions.length)]]">Questions</paper-tab>
+                    <paper-tab class$="[[checkclass(chunk.udbtext)]]">UDB</paper-tab>
+                </paper-tabs>
+            </div>
+            <div id="content">
+                <iron-pages selected="{{chunk.state.resource}}">
+                    <div>
+                        <template is="dom-repeat" items="{{chunk.notes}}" as="note">
+                            <p class="link" on-tap="opennote">{{note.title}}</p>
+                        </template>
+                    </div>
+                    <div>
+                        <template is="dom-repeat" items="{{chunk.words}}" as="word">
+                            <p class="link" on-tap="openword">{{word.term}}</p>
+                        </template>
+                    </div>
+                    <div>
+                        <template is="dom-repeat" items="{{chunk.questions}}" as="question">
+                            <p class="link" on-tap="openquestion">{{question.question}}</p>
+                        </template>
+                    </div>
+                    <div>
+                        <div id="textholder"></div>
+                    </div>
+                </iron-pages>
+            </div>
+        </paper-material>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+		is: 'ts-resource-card',
+
+		properties: {
+            chunk: {
+                type: Object,
+                value: {}
+            }
+		},
+
+        observers: [
+            'rendertext(chunk.*)'
+        ],
+
+        rendertext: function () {
+            if(this.chunk && this.chunk.udbtext) {
+                var textarray = this.chunk.udbtext.split(" ");
+                var numstr1 = "\<sup\>";
+                var numstr2 = "\<\/sup\>";
+                var returnstr = "";
+                var verse = 0;
+
+                for (var i = 0; i < textarray.length; i++) {
+                    if (textarray[i].substring(0, 2) === "\\v") {
+                        verse = textarray[i].substring(2);
+                        returnstr += numstr1 + verse + numstr2;
+                    } else {
+                        returnstr += textarray[i] + " ";
+                    }
+                }
+                this.$.textholder.innerHTML = returnstr;
+            } else {
+                this.$.textholder.innerHTML = "";
+            }
+        },
+
+        checkclass: function (length) {
+            return length ? '' : 'hide';
+        },
+
+        updatestate: function () {
+            var id = this.chunk.meta.chapterid + "-" + this.chunk.meta.frameid;
+            var mythis = this;
+            setTimeout(function() {
+                var value = mythis.chunk.state.resource;
+                mythis.fire('iron-signal', {name: 'updatestate', data: {id: id, mode: "resource", value: value}});
+            }, 500);
+        },
+
+        opennote: function (e) {
+            var content = e.model.note;
+            content.type = "note";
+            this.fire('iron-signal', {name: 'openresource', data: {content: content}});
+        },
+
+        openword: function (e) {
+            var content = e.model.word;
+            content.type = "word";
+            this.fire('iron-signal', {name: 'openresource', data: {content: content}});
+        },
+
+        openquestion: function (e) {
+            var content = e.model.question;
+            content.type = "question";
+            this.fire('iron-signal', {name: 'openresource', data: {content: content}});
+        },
+
+		ready: function() {
+
+		}
+
+	});
+
+</script>

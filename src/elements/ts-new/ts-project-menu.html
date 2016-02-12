@@ -1,0 +1,205 @@
+
+<link rel="import" href="../../components/iron-list/iron-list.html">
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../ts-icons/ts-icons.html">
+
+<dom-module id="ts-project-menu">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #contain {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #header {
+            color: var(--secondary-text-color);
+            font-size: 110%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            min-height: 60px;
+        }
+
+        #header > div {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--card-background-color);
+            width: 410px;
+            box-shadow: 0 -1px 2px 1px var(--primary-color-dark);
+        }
+
+        iron-list {
+            font-size: 110%;
+            max-height: 90vh;
+            width: 450px;
+            color: var(--primary-text-color);
+            background: var(--card-background-color);
+            box-shadow: 0 2px 3px 2px var(--border-color);
+        }
+
+        .row {
+            display: block;
+            margin: 0;
+            padding: 1em;
+            border-bottom: 1px solid var(--border-color);
+            transition: background .3s, color .3s;
+            cursor: pointer;
+        }
+
+        .row:hover {
+            background: var(--accent-color-light);
+        }
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        .right {
+            float: right;
+        }
+
+        .small {
+            --iron-icon-height: 18px;
+            --iron-icon-width: 18px;
+            color: var(--secondary-text-color);
+        }
+
+        .row span {
+            padding-left: 15px;
+        }
+
+    </style>
+
+  <template>
+
+      <div id="header">
+          <div>
+              <em>Choose a project</em>
+              <paper-icon-button class="right" icon="autorenew"></paper-icon-button>
+          </div>
+      </div>
+
+      <div id="contain">
+          <iron-list items="[[categorylist]]" as="category">
+              <template>
+                  <div class="row" on-tap="store">
+                      <div>
+                          <iron-icon class="small" icon$="[[checkicon(category.name)]]"></iron-icon>
+                          <span>[[category.name]]</span>
+                          <iron-icon class="right" icon$="[[checkmore(category.name)]]"></iron-icon>
+                      </div>
+                  </div>
+              </template>
+          </iron-list>
+      </div>
+
+      <iron-signals on-iron-signal-createprojects="createprojects"></iron-signals>
+
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+
+      is: 'ts-project-menu',
+
+      properties: {
+          selected: {
+              type: Number,
+              value: 0,
+              notify: true
+          },
+          category: {
+              type: Object,
+              value: {},
+              notify: true
+          },
+          project: {
+              type: Object,
+              value: {},
+              notify: true
+          },
+          type: {
+              type: Object,
+              value: {},
+              notify: true
+          },
+          categorylist: {
+              type: Array,
+              value: []
+          }
+      },
+
+      behaviors: [
+          Polymer.IronResizableBehavior
+      ],
+
+      checkicon: function (name) {
+          return name === "Open Bible Stories" || name === "Bible Words" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
+      },
+
+      checkmore: function (name) {
+          return name === "Open Bible Stories" || name === "Bible Words" ? '' : 'chevron-right';
+      },
+
+      store: function(e) {
+          this.category = e.model.category;
+          if (this.category.name === "Open Bible Stories") {
+              this.project = this.category.data[0];
+              if (App.configurator.getUserSetting('glmode')) {
+                  this.fire('iron-signal', {name: 'createtypes'});
+                  this.selected = this.selected + 2;
+              } else {
+                  this.type = {name: "Text - Open Bible Stories", code: "text", resource: "obs", allowed: true};
+                  this.fire('create');
+              }
+          } else if (this.category.name === "Bible Words") {
+              this.project = this.category.data[0];
+              this.type = {name: "Words", code: "tw", resource: "", allowed: true};
+              this.fire('create');
+          } else {
+              this.selected = this.selected + 1;
+          }
+      },
+
+      createprojects: function () {
+          var projects = App.projectsManager.getProjects();
+          var tempobject = {};
+          var temparray = [];
+          _.forEach(_.groupBy(projects, 'category'), function (data, category) {
+              if (category === 'null') {
+                  tempobject = {"name": "Open Bible Stories", "data": data};
+              } else if (category === 'Bible: OT') {
+                  tempobject = {"name": "Old Testament", "data": data};
+              } else if (category === 'Bible: NT') {
+                  tempobject = {"name": "New Testament", "data": data};
+              }
+              temparray.push(tempobject);
+          });
+          if (App.configurator.getUserSetting('glmode')) {
+              temparray.push({"name": "Bible Words", "data": [{name: "Bible Words", slug: "tw"}]});
+          }
+          this.categorylist = temparray;
+      },
+
+      ready: function () {
+
+      }
+
+  });
+
+</script>

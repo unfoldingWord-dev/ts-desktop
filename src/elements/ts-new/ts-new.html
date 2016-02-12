@@ -1,0 +1,224 @@
+
+<link rel="import" href="../../components/iron-resizable-behavior/iron-resizable-behavior.html">
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
+
+<link rel="import" href="./ts-language-menu.html">
+<link rel="import" href="./ts-project-menu.html">
+<link rel="import" href="./ts-book-menu.html">
+<link rel="import" href="./ts-type-menu.html">
+
+<dom-module id="ts-new">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
+
+        neon-animated-pages {
+            flex: none;
+            display: flex;
+            transform: translateY(-60px);
+            height: calc(100% - 45px);
+        }
+
+        neon-animated-pages > * {
+            flex: auto;
+        }
+
+        #header {
+            background-color: var(--primary-color);
+            min-height: 105px;
+        }
+
+        #title {
+            font-size: 125%;
+            color: var(--reverse-text-color);
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 45px;
+        }
+
+        [icon="arrow-back"] {
+            margin: 0 1em 0 .2em;
+        }
+
+        #popup {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+            width: 320px;
+            height: 220px;
+            text-align: center;
+            color: var(--primary-text-color);
+        }
+
+        #popup .buttons {
+            display: flex;
+            justify-content: center;
+            color: var(--secondary-text-color);
+        }
+
+        #popup .buttons paper-button:hover {
+            color: var(--accent-color);
+        }
+
+    </style>
+
+    <template>
+
+        <div id="header">
+            <div id="title">
+                <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
+                <span>New Project</span>
+            </div>
+        </div>
+
+        <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
+            <ts-language-menu id="languages" selected="{{selected}}" language="{{language}}"></ts-language-menu>
+            <ts-project-menu selected="{{selected}}" category="{{category}}" project="{{project}}" type="{{type}}" on-create="createproject"></ts-project-menu>
+            <ts-book-menu selected="{{selected}}" category="[[category]]" project="{{project}}" type="{{type}}" on-create="createproject"></ts-book-menu>
+            <ts-type-menu selected="{{selected}}" language="[[language]]" category="[[category]]" project="[[project]]" type="{{type}}" projectlist="[[projectlist]]" on-create="createproject"></ts-type-menu>
+        </neon-animated-pages>
+
+        <paper-dialog id="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <h2>[[options.title]]</h2>
+            <div>
+                <p>[[options.body]]</p>
+            </div>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Ok</paper-button>
+            </div>
+        </paper-dialog>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+        is: 'ts-new',
+
+        behaviors: [
+            Polymer.IronResizableBehavior,
+            Polymer.NeonAnimatableBehavior
+        ],
+
+        properties: {
+            selected: {
+                type: Number,
+                value: 0
+            },
+            route: {
+                type: String,
+                value: '',
+                notify: true
+            },
+            language: {
+                type: Object,
+                value: {}
+            },
+            category: {
+                type: Object,
+                value: {}
+            },
+            project: {
+                type: Object,
+                value: {}
+            },
+            type: {
+                type: Object,
+                value: {}
+            },
+            options: {
+                type: Object,
+                value: {title: "", body: ""}
+            },
+            projectlist: {
+                type: Array,
+                value: []
+            },
+            animationConfig: {
+                value: function () {
+                    return {
+                        'entry': {
+                            name: 'slide-from-right-animation',
+                            node: this
+                        },
+                        'exit': {
+                            name: 'slide-right-animation',
+                            node: this
+                        }
+                    }
+                }
+            }
+        },
+
+        forceResize: function (event) {
+            this.$.languages.notifyResize();
+        },
+
+        createproject: function () {
+            var mythis = this;
+            var project = this.project;
+            var language = this.language;
+            var type = this.type;
+            var typeext = "";
+            var projectarray = this.projectlist;
+            var popup = this.$.popup;
+
+            if (type.code === "tw") {
+                typeext = "";
+            } else if (type.code !== "text") {
+                typeext = "_" + type.code;
+            } else if (type.resource !== "ulb" && type.resource !== "obs") {
+                typeext = "_" + type.resource;
+            }
+
+            var fullname = project.slug + typeext + "-" + language.id;
+            var basename = project.slug + "-" + language.id;
+
+            for (var i = 0; i < projectarray.length; i++) {
+                if (projectarray[i].fullname === fullname) {
+                    this.set('options', {title: "Duplicate Found", body: "This project already exists"});
+                    popup.open();
+                    return;
+                }
+            }
+
+            if (!type.allowed) {
+                this.set('options', {title: "No Translation", body: "Cannot start this project until a standard translation project exists"});
+                popup.open();
+                return;
+            }
+
+            var newprojdata = {"project": {"id": project.slug, "name": project.name, "type": type.code}, "type_name": type.name, "fullname": fullname, "basename": basename, "resource_id": type.resource, "target_language": language, "translators": [], "sources": [], "completion": 0, "currentsource": null};
+            this.animationConfig.exit.name = 'slide-left-animation';
+            App.projectsManager.saveTargetTranslation([], newprojdata).then(function() {
+                mythis.fire('iron-signal', {name: 'updatelist'});
+                mythis.fire('iron-signal', {name: 'loadproject', data: {projdata: newprojdata, type: "new"}});
+                mythis.selected = 0;
+            });
+        },
+
+        back: function () {
+            this.animationConfig.exit.name = 'slide-right-animation';
+            this.selected === 0 ? this.route = "home" : this.selected = this.selected - 1;
+        },
+
+        ready: function() {
+
+        }
+
+    });
+
+</script>

@@ -1,0 +1,360 @@
+
+<link rel="import" href="../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/paper-progress/paper-progress.html">
+
+<dom-module id="ts-publish-publish">
+
+    <style>
+
+        :host {
+            display: flex;
+            color: var(--primary-text-color);
+        }
+
+        #contain {
+            display: flex;
+            justify-content: center;
+            flex: auto;
+        }
+
+        #contain > div {
+            background: var(--card-background-color);
+            box-shadow: 0 2px 3px 2px var(--border-color);
+        }
+
+        #left {
+            margin: 15px;
+            flex: 2 2;
+            padding: 20px;
+        }
+
+        #right {
+            flex: 1 1;
+            margin: 15px 15px 15px 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #right > div {
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: flex-start;
+            flex-grow: 1;
+        }
+
+        #right > div > * {
+            margin: 10px 20px;
+        }
+
+        #lower {
+            border-top: 1px solid var(--border-color);
+        }
+
+        .link {
+            color: var(--accent-color);
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        #publish {
+            background: var(--accent-color);
+            color: var(--reverse-text-color);
+            text-transform: uppercase;
+        }
+
+        .popup {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+        }
+
+        #confirm {
+            width: 350px;
+            height: 175px;
+        }
+
+        #confirm p {
+            font-size: 110%;
+        }
+
+        #confirmbuttons {
+            display: flex;
+            justify-content: flex-end;
+            padding: 0 50px;
+            color: var(--secondary-text-color);
+        }
+
+        #confirmbuttons paper-button:hover {
+            color: var(--accent-color);
+        }
+
+        #loading {
+            width: 320px;
+            height: 220px;
+            color: var(--primary-text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 110%;
+        }
+
+        #buttonbox {
+            display: flex;
+            justify-content: center;
+            color: var(--secondary-text-color);
+        }
+
+        #buttonbox paper-button:hover {
+            color: var(--accent-color);
+        }
+
+        paper-progress {
+            --paper-progress-active-color: var(--accent-color);
+            width: 250px;
+        }
+
+        #bar {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        #text {
+            text-align: center;
+        }
+
+        #loading h2 {
+            color: var(--accent-color);
+        }
+
+        #imagebox {
+            display: flex;
+            justify-content: center;
+        }
+
+        .hide {
+            display: none;
+        }
+
+    </style>
+
+    <template>
+
+        <div id="contain">
+            <div id="left">
+                <div id="imagebox">
+                    <img src="../ts-icons/uw-title-image.png" width="326" height="68">
+                </div>
+                <p>Publishing your work through unfoldingWord makes your content available:</p>
+                <ul>
+                    <li>Online at unfoldingword.org in multiple formats</li>
+                    <li>In the unfoldingWord Mobile App</li>
+                    <li>In a PDF suitable for printing</li>
+                </ul>
+            </div>
+            <div id="right">
+                <div>
+                    <p>Publish your project directly to unfoldingWord</p>
+                    <paper-button raised id="publish" on-tap="upload">Upload</paper-button>
+                </div>
+                <div id="lower">
+                    <p>You may also share and distribute your project using these options.</p>
+                    <div class="link" on-tap="export">Export to File</div>
+                    <input class="hide" id="input" type="file" nwsaveas="" />
+                </div>
+            </div>
+        </div>
+
+        <paper-dialog id="loading" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <template is="dom-if" if="{{options.loading}}">
+                <p>{{options.body}}</p>
+                <div id="bar">
+                    <paper-progress indeterminate="true"></paper-progress>
+                </div>
+            </template>
+            <template is="dom-if" if="{{!options.loading}}">
+                <h2>{{options.title}}</h2>
+                <div id="text">
+                    <p>{{options.body}}</p>
+                </div>
+                <div id="buttonbox">
+                    <paper-button dialog-confirm on-tap="gohome">Return Home</paper-button>
+                </div>
+            </template>
+        </paper-dialog>
+
+        <paper-dialog id="confirm" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <h2>Overwrite?</h2>
+            <div>
+                <p>This file already exists. Overwrite?</p>
+            </div>
+            <div id="confirmbuttons">
+                <paper-button dialog-dismiss>No</paper-button>
+                <paper-button on-tap="executeexport">Confirm</paper-button>
+            </div>
+        </paper-dialog>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-publish-publish',
+
+        properties: {
+            selected: {
+                type: Number,
+                value: 0,
+                notify: true
+            },
+            route: {
+                type: String,
+                value: '',
+                notify: true
+            },
+            currentproject: {
+                type: Object,
+                value: {}
+            },
+            options: {
+                type: Object,
+                value: {loading: false, title: "", body: ""}
+            }
+        },
+
+        ready: function() {
+
+        },
+
+        gohome: function () {
+            this.fire('iron-signal', {name: 'setdefault'});
+            this.fire('iron-signal', {name: 'reset'});
+            this.route = "home";
+            this.selected = 0;
+        },
+
+        export: function () {
+            var mythis = this;
+            var meta = this.currentproject.data;
+            var translation = this.currentproject.translation;
+            var extension = '.zip';
+            var name = 'uw-' + meta.fullname;
+            var input = this.$.input;
+            var firsttime = true;
+            var confirm = this.$.confirm;
+
+            //get the correct extension for this format
+            if(translation[0].meta.format === 'usx'){
+                extension = '.txt';
+            }//add more formats as added to ts-desktop
+
+            input.value = null;
+            input.nwsaveas = name;
+            input.addEventListener("change", function (evt) {
+                if (firsttime) {
+                    firsttime = false;
+                    var filename = input.value;
+
+                    return App.projectsManager.fileExists(filename + extension)
+                        .then (function (stat) {
+                        if (stat) {
+                            confirm.open();
+                        } else {
+                            mythis.executeexport();
+                        }
+                    });
+                }
+            }, false);
+            input.click();
+        },
+
+        executeexport: function () {
+            var mythis = this;
+            var loading = this.$.loading;
+            var translation = this.currentproject.translation;
+            var meta = this.currentproject.data;
+            var input = this.$.input;
+            var filename = input.value;
+            var confirm = this.$.confirm;
+            var mediaServer = App.configurator.getUserSetting('mediaserver');
+
+            confirm.close();
+            mythis.set('options.body', "Exporting Project.  Please wait...");
+            mythis.set('options.loading', true);
+            loading.open();
+
+            return App.projectsManager.exportTranslation(translation, meta, filename, mediaServer)
+                .then(function () {
+                    mythis.set('options.title', "Project Exported");
+                    mythis.set('options.body', "Your project has been successfully saved to a file.  Thanks.");
+                    mythis.set('options.loading', false);
+                })
+                .catch(function (err) {
+                    var errmessage = "We're sorry.  An error occurred while trying to save your project";
+                    if(err !== null) {
+                        errmessage = err;
+                    }
+                    mythis.set('options.title', "Export Failed");
+                    mythis.set('options.body', errmessage);
+                    mythis.set('options.loading', false);
+                });
+        },
+
+        upload: function() {
+            var loading = this.$.loading;
+            var mythis = this;
+            var meta = this.currentproject.data;
+            var paths = App.projectsManager.getPaths(meta);
+            var repo = 'uw-' + meta.fullname;
+
+            this.set('options.body', "Uploading Project.  Please wait...");
+            this.set('options.loading', true);
+            loading.open();
+
+            return App.projectsManager.createReadyFile(meta)
+                .then(function () {
+                    return App.git.stage(paths.projectDir);
+                })
+                .then(function () {
+                    return App.uploader.register({
+                        'host': App.configurator.getUserSetting('authserver'),
+                        'port': App.configurator.getUserSetting('authserverport')
+                    });
+                })
+                .then(function (reg) {
+                    return App.git.push(paths.projectDir, repo, reg, {
+                        'host': App.configurator.getUserSetting('dataserver'),
+                        'port': App.configurator.getUserSetting('dataserverport')
+                    });
+                })
+                .then(function () {
+                    mythis.set('options.title', "Project Published");
+                    mythis.set('options.body', "Your project has been successfully published to the server.  Thanks.");
+                    mythis.set('options.loading', false);
+                })
+                .catch(function (err) {
+                    App.reporter.logError(err.stderr);
+                    if(err.stderr.indexOf('DENIED by fallthru')) {
+                        App.reporter.logNotice('Destroying invalid ssh keys');
+                        App.uploader.destroyKeys();
+                    }
+                    mythis.set('options.title', "Publish Failed");
+                    mythis.set('options.body', "We're sorry.  An error occurred while trying to upload your project. Please try again.");
+                    mythis.set('options.loading', false);
+                });
+        }
+
+    });
+
+</script>

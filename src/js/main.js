@@ -6,7 +6,7 @@ var electron = require('electron'),
     BrowserWindow = electron.BrowserWindow,
     ipcMain = electron.ipcMain;
 
-app.setPath('userData', path.join(process.env.localappdata, app.getName()));
+app.setPath('userData', path.join(process.env.localappdata, 'translationstudio'));
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.

@@ -38,9 +38,11 @@ process.stdout.write = console.log.bind(console);
 
         let defaults = require('../config/defaults');
 
-        if(fs.exists(path.normalize('../config/private'))) {
-            let privateDefaults = require('../config/private');
+        try {
+            let privateDefaults = require('../config/private.json');
             c.loadConfig(privateDefaults);
+        } catch (e) {
+            console.info('No private settings.');
         }
 
         c.loadConfig(defaults);

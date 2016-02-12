@@ -12,6 +12,7 @@
     let fs = require('fs');
     let mkdirp = require('mkdirp');
     let Reporter = require('../js/reporter').Reporter;
+    let osHomedir = require('os-homedir');
 
     let crashDir = path.join(gui.App.dataPath, 'logs');
     gui.App.setCrashDumpDir(crashDir);
@@ -211,10 +212,10 @@
             _this.configurator.setValue('indexDir', path.join(gui.App.dataPath, 'index'), {'mutable':false});
 
             let backuplocation = _this.configurator.getUserSetting('backuplocation');
-            // Empty backuplocation means it hasn't been setup, or been deleted previously.
+            //// Empty backuplocation means it hasn't been setup, or been deleted previously.
             if (backuplocation === "" || backuplocation === undefined || !App.util.isValidPath(backuplocation)) {
                 console.warn('Backup location contains bad value. Resetting backup location.');
-                let defaultLocation = path.join(process.env['HOME'], App.appName, 'backup');
+                let defaultLocation = path.join(osHomedir(), App.appName, 'backup');
                 _this.configurator.setUserSetting('backuplocation', defaultLocation);
                 mkdirp(defaultLocation, function(err) {
                     if (err) {

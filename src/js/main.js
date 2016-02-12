@@ -1,9 +1,12 @@
 'use strict';
 
-const electron = require('electron');
-const app = electron.app;
-const BrowserWindow = electron.BrowserWindow;
-const ipcMain = electron.ipcMain;
+var electron = require('electron'),
+    path = require('path'),
+    app = electron.app,
+    BrowserWindow = electron.BrowserWindow,
+    ipcMain = electron.ipcMain;
+
+app.setPath('userData', path.join(process.env.localappdata, app.getName()));
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.

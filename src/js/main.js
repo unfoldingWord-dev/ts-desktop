@@ -15,8 +15,14 @@ let mainWindow;
 function createWindow () {
     // Create the browser window.
     mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
+        width: 980,
+        height: 580,
+        minWidth: 800,
+        minHeight: 580,
+        useContentSize: true,
+        center: true,
+        title: app.getName(),
+        backgroundColor: '#00796B',
         autoHideMenuBar: true,
         frame: false
     });

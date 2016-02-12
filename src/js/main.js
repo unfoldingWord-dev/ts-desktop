@@ -1,6 +1,7 @@
 'use strict';
 
 var electron = require('electron'),
+    dialog = electron.dialog,
     path = require('path'),
     app = electron.app,
     BrowserWindow = electron.BrowserWindow,
@@ -61,6 +62,11 @@ ipcMain.on('main-window', function (event, arg) {
     } else {
         event.returnValue = null;
     }
+});
+
+ipcMain.on('save-as', function (event, arg) {
+    var input = dialog.showSaveDialog(mainWindow, {});
+    event.returnValue = input || false;
 });
 
 app.on('ready', createWindow);

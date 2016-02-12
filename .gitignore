@@ -1,10 +1,11 @@
 .DS_Store
 node_modules/
-app/components/
+src/components/
 dist/
 cache/
 tmp/
 build/
+out/
 .brackets.json
 .idea
 test.html
@@ -14,7 +15,7 @@ results.txt
 unit_tests/report.txt
 ssh
 acceptance_tests/report.txt
-app/config/private.json
-app/logs/
-app/js/lib/index/
+src/config/private.json
+src/logs/
+src/js/lib/index/
 index/

@@ -65,7 +65,7 @@ ipcMain.on('main-window', function (event, arg) {
 });
 
 ipcMain.on('save-as', function (event, arg) {
-    var input = dialog.showSaveDialog(mainWindow, {});
+    var input = dialog.showSaveDialog(mainWindow, {defaultPath: arg.name});
     event.returnValue = input || false;
 });
 

@@ -104,7 +104,7 @@ process.stdout.write = console.log.bind(console);
             repoOwner: configurator.getValue('repoOwner'),
             repo: configurator.getValue('repo'),
             maxLogFileKb: configurator.getValue('maxLogFileKb'),
-            appVersion: require('../package.json').version
+            appVersion: require('../../package.json').version
         })
     };
 

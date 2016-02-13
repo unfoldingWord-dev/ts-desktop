@@ -1352,6 +1352,10 @@
             this.route = "settings";
         },
 
+        openacademy: function () {
+            App.ipc.send('openacademy');
+        },
+
         print: function () {
             var mythis = this;
             var meta = this.currentproject.data;

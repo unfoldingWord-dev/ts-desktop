@@ -1,0 +1,117 @@
+
+<link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
+
+<link rel="import" href="../ts-icons/ts-icons.html">
+
+<dom-module id="ts-academy-titlebar">
+
+    <style>
+
+        :host {
+            width: 100%;
+            display: block;
+            color: var(--reverse-text-color);
+            -webkit-app-region: drag;
+            -webkit-user-select: none;
+            user-select: none;
+            margin: 0;
+            padding: 0;
+            min-height: 40px;
+        }
+
+        header {
+            font-size: 120%;
+            height: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--primary-color-dark);
+        }
+
+        .title {
+            display: inline-block;
+            padding-left: 0.5em;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        .window-buttons {
+            -webkit-app-region: no-drag;
+            margin-right: 10px;
+        }
+
+        .window-buttons button {
+            border: none;
+            outline: none;
+            padding: 0 20px;
+            margin: 0;
+            background: transparent;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+        }
+
+        iron-icon {
+            --iron-icon-width: 16px;
+            --iron-icon-height: 16px;
+            color: var(--reverse-text-color);
+        }
+
+    </style>
+
+    <template>
+
+        <header>
+            <span class="title">translationAcademy</span>
+            <div class="window-buttons">
+                <button on-tap="minimizeWindow">
+                    <iron-icon icon="titlebar:minimize" title="minimize"></iron-icon>
+                </button>
+                <button on-tap="resizeWindow">
+                    <iron-icon id="resizeicon" icon="titlebar:maximize"></iron-icon>
+                </button>
+                <button on-tap="closeWindow">
+                    <iron-icon icon="titlebar:close" title="close"></iron-icon>
+                </button>
+            </div>
+        </header>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-academy-titlebar',
+
+        minimizeWindow: function() {
+            App.window.minimize();
+        },
+
+        resizeWindow: function() {
+            App.window.isMaximized() ? App.window.unmaximize() : App.window.maximize();
+        },
+
+        closeWindow: function() {
+            this.fire('iron-signal', {name: 'savestate'});
+            App.close();
+        },
+
+        ready: function () {
+            var resize = this.$.resizeicon;
+
+            App.ipc.on('maximize', function () {
+                resize.icon = 'titlebar:restore';
+            });
+
+            App.ipc.on('unmaximize', function() {
+                resize.icon = 'titlebar:maximize';
+            });
+        }
+
+    });
+
+</script>

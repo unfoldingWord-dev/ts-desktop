@@ -5,39 +5,30 @@
 
         :host {
             display: flex;
-            flex-direction: column;
+            flex: auto;
         }
 
-        #header {
-            background-color: var(--primary-color);
-        }
-
-        #title {
-            flex: 0 0 45px;
-            font-size: 125%;
-            color: var(--reverse-text-color);
+        #contain {
+            flex: auto;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
         #body {
-            flex: auto;
+            height: 500px;
+            width: 700px;
             background: var(--card-background-color);
             padding: 15px 45px;
-            overflow: auto;
+            overflow-y: auto;
         }
 
     </style>
 
     <template>
 
-        <div id="header">
-            <div id="title">
-                <span>translationAcademy</span>
-            </div>
-        </div>
-        <div id="body">
+        <div id="contain">
+            <div id="body"></div>
         </div>
 
     </template>

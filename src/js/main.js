@@ -55,7 +55,7 @@ function createWindow () {
 }
 
 function createAcademyWindow () {
-    // Create the browser window.
+
     academyWindow = new BrowserWindow({
         width: 980,
         height: 580,
@@ -65,19 +65,22 @@ function createAcademyWindow () {
         center: true,
         title: app.getName(),
         backgroundColor: '#00796B',
-        autoHideMenuBar: true
+        autoHideMenuBar: true,
+        frame: false
     });
 
-    // mainWindow.webContents.openDevTools();
-
-    // and load the index.html of the app.
-    academyWindow.loadURL('file://' + __dirname + '/../views/index.html');
+    academyWindow.loadURL('file://' + __dirname + '/../views/academy.html');
 
     academyWindow.on('closed', function() {
-        // Dereference the window object, usually you would store windows
-        // in an array if your app supports multi windows, this is the time
-        // when you should delete the corresponding element.
         academyWindow = null;
+    });
+
+    academyWindow.on('maximize', function () {
+        academyWindow.webContents.send('maximize');
+    });
+
+    academyWindow.on('unmaximize', function () {
+        academyWindow.webContents.send('unmaximize');
     });
 
     academyWindow.focus();

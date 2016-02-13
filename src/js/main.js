@@ -12,6 +12,7 @@ app.setPath('userData', path.join(process.env.localappdata, 'translationstudio')
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
+let academyWindow;
 
 function createWindow () {
     // Create the browser window.
@@ -53,6 +54,35 @@ function createWindow () {
     mainWindow.focus();
 }
 
+function createAcademyWindow () {
+    // Create the browser window.
+    academyWindow = new BrowserWindow({
+        width: 980,
+        height: 580,
+        minWidth: 800,
+        minHeight: 580,
+        useContentSize: true,
+        center: true,
+        title: app.getName(),
+        backgroundColor: '#00796B',
+        autoHideMenuBar: true
+    });
+
+    // mainWindow.webContents.openDevTools();
+
+    // and load the index.html of the app.
+    academyWindow.loadURL('file://' + __dirname + '/../views/index.html');
+
+    academyWindow.on('closed', function() {
+        // Dereference the window object, usually you would store windows
+        // in an array if your app supports multi windows, this is the time
+        // when you should delete the corresponding element.
+        academyWindow = null;
+    });
+
+    academyWindow.focus();
+}
+
 ipcMain.on('main-window', function (event, arg) {
     if (typeof mainWindow[arg] === 'function') {
         let ret = mainWindow[arg]();
@@ -62,6 +92,10 @@ ipcMain.on('main-window', function (event, arg) {
     } else {
         event.returnValue = null;
     }
+});
+
+ipcMain.on('openacademy', function (event, arg) {
+    createAcademyWindow();
 });
 
 ipcMain.on('save-as', function (event, arg) {

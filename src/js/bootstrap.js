@@ -54,6 +54,8 @@ process.stdout.write = console.log.bind(console);
         return c;
     })();
 
+
+
     // TODO: where should this be?
     mkdirp.sync(configurator.getValue('targetTranslationsDir'));
 

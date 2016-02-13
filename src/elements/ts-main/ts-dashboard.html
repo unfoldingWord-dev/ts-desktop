@@ -250,7 +250,7 @@
               type: Object,
               value: {loading: false, title: "", body: ""}
           },
-          tempbackup: {
+          tempdata: {
               type: Object,
               value: {meta: {}, filename: ""}
           }
@@ -259,12 +259,12 @@
       openbackup: function (event, data) {
           var mythis = this;
           var meta = data.meta;
-          this.set('tempbackup.meta', meta);
+          this.set('tempdata.meta', meta);
           var name = 'uw-' + meta.fullname;
           var confirm = this.$.confirm;
 
           var filename = App.ipc.sendSync('save-as', {name: name});
-          this.set('tempbackup.filename', filename);
+          this.set('tempdata.filename', filename);
 
           return App.projectsManager.fileExists(filename + ".tstudio")
               .then (function (stat) {
@@ -279,9 +279,9 @@
       executebackup: function () {
           var mythis = this;
           var loading = this.$.loading;
-          var meta = this.tempbackup.meta;
+          var meta = this.tempdata.meta;
           var name = 'uw-' + meta.fullname;
-          var filename = this.tempbackup.filename;
+          var filename = this.tempdata.filename;
           var confirm = this.$.confirm;
 
           confirm.close();

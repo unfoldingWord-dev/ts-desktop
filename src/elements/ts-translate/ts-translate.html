@@ -240,10 +240,6 @@
             color: var(--accent-color);
         }
 
-        .hidden {
-            display: none;
-        }
-
     </style>
 
     <template>
@@ -317,8 +313,6 @@
                 <paper-button on-tap="print">Save to PDF</paper-button>
             </div>
         </paper-dialog>
-
-        <input class="hidden" id="printinput" type="file" nwsaveas="" />
 
         <paper-dialog id="delete" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <h2><iron-icon icon="delete"></iron-icon>Delete</h2>
@@ -1362,30 +1356,20 @@
             var mythis = this;
             var meta = this.currentproject.data;
             var name = 'uw-' + meta.fullname;
-            var input = this.$.printinput;
-            var firsttime = true;
             var confirm = this.$.confirm;
 
             this.$.printpopup.close();
-            input.value = null;
-            input.nwsaveas = name;
-            input.addEventListener("change", function (evt) {
-                if (firsttime) {
-                    firsttime = false;
+            var filename = App.ipc.sendSync('save-as', {name: name});
+            App.configurator.setValue("print-filename", filename);
 
-                    var filename = input.value;
-
-                    return App.projectsManager.fileExists(filename + ".pdf")
-                        .then (function (stat) {
-                            if (stat) {
-                                confirm.open();
-                            } else {
-                                mythis.executeprint();
-                            }
-                        });
-                }
-            }, false);
-            input.click();
+            return App.projectsManager.fileExists(filename + ".pdf")
+                .then (function (stat) {
+                    if (stat) {
+                        confirm.open();
+                    } else if (filename) {
+                        mythis.executeprint();
+                    }
+                });
         },
 
         executeprint: function () {
@@ -1393,8 +1377,7 @@
             var loading = this.$.loading;
             var meta = this.currentproject.data;
             var translation = this.currentproject.translation;
-            var input = this.$.printinput;
-            var filename = input.value;
+            var filename = App.configurator.getValue("print-filename");
             var options = {includeIncompleteFrames: this.$.chunkbox.checked, includeImages: this.$.imagebox.checked};
             var confirm = this.$.confirm;
 

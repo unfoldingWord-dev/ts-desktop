@@ -69,7 +69,7 @@ function createAcademyWindow () {
         frame: false
     });
 
-    academyWindow.webContents.openDevTools();
+    //academyWindow.webContents.openDevTools();
 
     academyWindow.loadURL('file://' + __dirname + '/../views/academy.html');
 

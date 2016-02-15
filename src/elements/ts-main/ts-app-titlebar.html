@@ -92,7 +92,7 @@
         },
 
         resizeWindow: function() {
-            App.toggleMaximize();
+            App.window.isMaximized() ? App.window.unmaximize() : App.window.maximize();
         },
 
         closeWindow: function() {
@@ -102,11 +102,13 @@
 
         ready: function () {
             var resize = this.$.resizeicon;
-            App.window.on('maximize', function() {
-                resize.icon = "titlebar:restore";
+
+            App.ipc.on('maximize', function () {
+                resize.icon = 'titlebar:restore';
             });
-            App.window.on('unmaximize', function() {
-                resize.icon = "titlebar:maximize";
+            
+            App.ipc.on('unmaximize', function() {
+                resize.icon = 'titlebar:maximize';
             });
         }
 

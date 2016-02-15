@@ -69,6 +69,8 @@ function createAcademyWindow () {
         frame: false
     });
 
+    academyWindow.webContents.openDevTools();
+
     academyWindow.loadURL('file://' + __dirname + '/../views/academy.html');
 
     academyWindow.on('closed', function() {
@@ -92,6 +94,17 @@ ipcMain.on('main-window', function (event, arg) {
         event.returnValue = !!ret;
     } else if (mainWindow[arg]) {
         event.returnValue = mainWindow[arg];
+    } else {
+        event.returnValue = null;
+    }
+});
+
+ipcMain.on('academy-window', function (event, arg) {
+    if (typeof academyWindow[arg] === 'function') {
+        let ret = academyWindow[arg]();
+        event.returnValue = !!ret;
+    } else if (academyWindow[arg]) {
+        event.returnValue = academyWindow[arg];
     } else {
         event.returnValue = null;
     }

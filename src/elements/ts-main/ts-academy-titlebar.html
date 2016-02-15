@@ -88,16 +88,15 @@
         is: 'ts-academy-titlebar',
 
         minimizeWindow: function() {
-            App.window.minimize();
+            App.academyWindow.minimize();
         },
 
         resizeWindow: function() {
-            App.window.isMaximized() ? App.window.unmaximize() : App.window.maximize();
+            App.academyWindow.isMaximized() ? App.academyWindow.unmaximize() : App.academyWindow.maximize();
         },
 
         closeWindow: function() {
-            this.fire('iron-signal', {name: 'savestate'});
-            App.close();
+            App.academyWindow.close();
         },
 
         ready: function () {

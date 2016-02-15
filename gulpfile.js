@@ -7,7 +7,6 @@
 var gulp = require('gulp'),
     mocha = require('gulp-mocha'),
     rimraf = require('rimraf'),
-    map = require('map-stream'),
     argv = require('yargs').argv,
     packager = require('electron-packager'),
     fs = require('fs');

@@ -3,7 +3,6 @@
 ;(function () {
     'use strict';
 
-    //let md5 = require('md5');
     let url = require('url');
     let _ = require('lodash');
     let Db = require('./lib/db').Db;

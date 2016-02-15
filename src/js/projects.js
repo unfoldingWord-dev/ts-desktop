@@ -396,23 +396,12 @@ function ProjectsManager(query, configurator) {
             });
         },
 
-        // fakeBackup: function() {
-        //     console.log('Backing up...');
-        // },
-
-        /*
-         */
         startAutoBackup: function() {
-            // console.log('Auto Backup has start');
-            // return window.setInterval(this.fakeBackup, 3000);
+
         },
 
-        /*
-         */
         stopAutoBackup: function(id) {
-            // console.log('stopping id', id);
-            // window.clearInterval(id);
-            // console.log('Auto Backup is stopped');
+
         },
 
         /**

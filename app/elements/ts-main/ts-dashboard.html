@@ -161,6 +161,7 @@
       </template>
 
       <input id="restore" class="hide" type="file" accept=".tstudio" multiple />
+      <input id="import" class="hide" type="file" accept=".txt,.zip" />
       <input id="backup" class="hide" type="file" nwsaveas="" />
 
       <paper-dialog id="feedback" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -210,6 +211,7 @@
       <iron-signals on-iron-signal-setdefault="setdefault"></iron-signals>
       <iron-signals on-iron-signal-openfeedback="openfeedback"></iron-signals>
       <iron-signals on-iron-signal-openrestore="openrestore"></iron-signals>
+      <iron-signals on-iron-signal-openimport="openimport"></iron-signals>
       <iron-signals on-iron-signal-openbackup="openbackup"></iron-signals>
 
   </template>
@@ -359,6 +361,33 @@
           }, false);
           chooser.click();
           this.stopautobackup();
+      },
+
+      openimport: function () {
+          console.log("opening import");
+          var mythis = this;
+          var loading = this.$.loading;
+          var chooser = this.$.import;
+          chooser.value = null;
+          chooser.addEventListener('change', function(evt) {
+              mythis.set('options.body', "Importing.  Please wait...");
+              mythis.set('options.loading', true);
+              loading.open();
+              for(var i=0; i < this.files.length; i ++) {
+                  var fileExt = this.files[i].name.split('.').pop().toLowerCase();
+                  if(fileExt === "zip" || fileExt === "txt"){
+                      //App.projectsManager.importUSFMFile(this.files[0]).then(function(){
+                          mythis.set('options.title', "Import Complete");
+                          mythis.set('options.body', "Your file has been imported successfully.  Thanks.");
+                          mythis.set('options.loading', false);
+                          setTimeout(function() {
+                              mythis.updatelist();
+                          }, 250);
+                      //});
+                  }
+              }
+          }, false);
+          chooser.click();
       },
 
       openfeedback: function () {

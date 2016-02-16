@@ -21,6 +21,7 @@
     "async": "^1.4.2",
     "getmac": "^1.0.7",
     "jsonfile": "^2.2.1",
+    "locale": "0.0.20",
     "lodash": "^3.9.3",
     "md5": "^2.0.0",
     "mkdirp": "^0.5.1",
@@ -29,7 +30,8 @@
     "request": "^2.58.0",
     "rimraf": "^2.4.2",
     "sql.js": "^0.2.21",
-    "ssh-keygen": "^0.2.1"
+    "ssh-keygen": "^0.2.1",
+    "untildify": "^2.1.0"
   },
   "devDependencies": {
     "bower": "^1.7.7",

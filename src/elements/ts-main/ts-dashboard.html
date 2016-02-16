@@ -292,7 +292,6 @@
           var mythis = this;
           var loading = this.$.loading;
           var meta = this.tempbackup;
-          var name = 'uw-' + meta.fullname;
           var backup = this.$.backup;
           var filename = backup.value;
           var confirm = this.$.confirm;
@@ -302,7 +301,7 @@
           mythis.set('options.loading', true);
           loading.open();
 
-          return App.projectsManager.backupTranslation(meta, filename, name)
+          return App.projectsManager.backupTranslation(meta, filename)
               .then(function () {
                   mythis.set('options.title', "Backup Complete");
                   mythis.set('options.body', "Your project has been successfully archived.  Thanks.");
@@ -473,6 +472,7 @@
       },
 
       setdefault: function () {
+          App.projectsManager.stopAutoBackup();
           this.currentproject = {};
       },
 

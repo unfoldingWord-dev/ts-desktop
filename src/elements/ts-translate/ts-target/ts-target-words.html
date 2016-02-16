@@ -132,11 +132,11 @@
                     <paper-material class="contentbox" elevation="1">
                         <div class="contentheader">
                             <p>{{help.title}}</p>
-                            <iron-autogrow-textarea bind-value="{{help.title}}" on-change="change" on-input="input" placeholder="Translate word here"></iron-autogrow-textarea>
+                            <iron-autogrow-textarea bind-value="{{help.title}}" on-change="change" on-input="input" placeholder$="[[checktitle(chunk.data.project.type)]]"></iron-autogrow-textarea>
                         </div>
                         <div class="contentbody">
                             <p>{{help.body}}</p>
-                            <iron-autogrow-textarea bind-value="{{help.body}}" on-change="change" on-input="input" placeholder="Translate definition here"></iron-autogrow-textarea>
+                            <iron-autogrow-textarea bind-value="{{help.body}}" on-change="change" on-input="input" placeholder$="[[checkbody(chunk.data.project.type)]]"></iron-autogrow-textarea>
                         </div>
                     </paper-material>
                 </template>
@@ -177,6 +177,28 @@
 
         change: function () {
             this.fire('iron-signal', {name: 'updatetranslation'});
+        },
+
+        checktitle: function (type) {
+            var text = "";
+            if (type === "tw") {
+                text = "Translate word here";
+            }
+            if (type === "ta") {
+                text = "Translate title here";
+            }
+            return text;
+        },
+
+        checkbody: function (type) {
+            var text = "";
+            if (type === "tw") {
+                text = "Translate definition here";
+            }
+            if (type === "ta") {
+                text = "Translate text here";
+            }
+            return text;
         },
 
         rendertext: function () {

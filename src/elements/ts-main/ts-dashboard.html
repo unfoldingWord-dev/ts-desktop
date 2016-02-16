@@ -406,12 +406,14 @@
                   list[i].project = {id: '', name: '', type: ''};
                   list[i].project.id = list[i].project_id;
                   list[i].project.name = App.projectsManager.getProjectName(list[i].project.id)[0].name;
-                  if (list[i].project_type === undefined) {
+                  if (!list[i].project_type) {
                       list[i].project.type = "text";
                   } else {
                       list[i].project.type = list[i].project_type;
                   }
               }
+
+              list[i].project.type = list[i].project.type.toLowerCase();
 
               list[i].sources = [];
               var group = list[i].source_translations;

@@ -7,6 +7,7 @@ var _ = require('lodash'),
     rimraf = require('rimraf'),
     AdmZip = require('adm-zip'),
     archiver = require('archiver'),
+    untildify = require('untildify'),
     utils = require('../js/lib/util'),
     tstudioMigrator = require('../js/migration/tstudioMigrator'),
     targetTranslationMigrator = require('../js/migration/targetTranslationMigrator'),
@@ -66,6 +67,7 @@ function ProjectsManager(query, configurator) {
         },
         toJSON = _.partialRight(JSON.stringify, null, '\t'),
         fromJSON = JSON.parse.bind(JSON),
+        backupTimer,
         config = (function (prefix) {
             var isUW = _.partial(_.startsWith, _, prefix, 0),
                 isChunk = function (filename) {
@@ -349,8 +351,9 @@ function ProjectsManager(query, configurator) {
             return write(paths.ready, (new Date()).toString());
         },
 
-        backupTranslation: function (meta, filename, name) {
+        backupTranslation: function (meta, filename) {
             var paths = this.getPaths(meta);
+            var name = 'uw-' + meta.fullname;
             return new Promise(function(resolve, reject) {
                 var source = paths.projectDir;
                 var output = fs.createWriteStream(filename + ".tstudio");
@@ -396,12 +399,24 @@ function ProjectsManager(query, configurator) {
             });
         },
 
-        startAutoBackup: function() {
+        startAutoBackup: function(meta) {
+            var filePath = untildify(configurator.getUserSetting('backuplocation')),
+                name = 'uw-' + meta.fullname + '-backup',
+                myThis = this;
 
+            this.stopAutoBackup();
+
+            mkdirp(filePath)
+                .then(function() {
+                    return myThis.backupTranslation(meta, path.join(filePath, name));
+                })
+                .then(function() {
+                    backupTimer = setTimeout(myThis.startAutoBackup.bind(myThis, meta), 20000);
+                });
         },
 
-        stopAutoBackup: function(id) {
-
+        stopAutoBackup: function() {
+            clearTimeout(backupTimer);
         },
 
         /**
@@ -704,8 +719,9 @@ function ProjectsManager(query, configurator) {
 
         loadTargetTranslation: function (meta) {
             var paths = this.getPaths(meta);
-
             var isTranslation = this.isTranslation(meta);
+
+            this.startAutoBackup(meta);
 
             // read manifest, get object with finished frames
 

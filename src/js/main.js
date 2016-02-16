@@ -6,7 +6,14 @@ var electron = require('electron'),
     BrowserWindow = electron.BrowserWindow,
     ipcMain = electron.ipcMain;
 
-app.setPath('userData', path.join(process.env.localappdata, 'translationstudio'));
+app.setPath('userData', (function (dataDir) {
+    var base = process.env.LOCALAPPDATA ||
+        (process.platform == 'darwin'
+            ? path.join(process.env.HOME, 'Library', 'Application Support')
+            : path.join(process.env.HOME + '.config'));
+
+    return path.join(base, dataDir);
+})('translationstudio'));
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -21,7 +28,7 @@ function createWindow () {
         minHeight: 580,
         useContentSize: true,
         center: true,
-        title: app.getName(),
+        title: 'translationStudio',
         backgroundColor: '#00796B',
         autoHideMenuBar: true,
         frame: false

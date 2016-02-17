@@ -181,7 +181,7 @@
         },
 
         academy: function () {
-            this.fire('openacademy');
+            App.ipc.send('openacademy');
         },
 
         home: function () {

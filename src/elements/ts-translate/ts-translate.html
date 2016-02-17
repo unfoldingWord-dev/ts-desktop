@@ -244,7 +244,7 @@
 
     <template>
 
-        <ts-translate-sidebar selected="{{selected}}" standardproject="[[standardproject]]" on-gohome="gohome" on-gopublish="gopublish" on-gobackup="gobackup" on-goprint="goprint" on-openacademy="openacademy" on-gosettings="gosettings"></ts-translate-sidebar>
+        <ts-translate-sidebar selected="{{selected}}" standardproject="[[standardproject]]" on-gohome="gohome" on-gopublish="gopublish" on-gobackup="gobackup" on-goprint="goprint" on-gosettings="gosettings"></ts-translate-sidebar>
 
         <div id="pages">
             <ts-read-mode id="readmode" chapters="[[chapters]]" modestatus="{{modestatus}}"></ts-read-mode>
@@ -1370,10 +1370,6 @@
             this.setleftanimation();
             this.backto = this.route;
             this.route = "settings";
-        },
-
-        openacademy: function () {
-            App.ipc.send('openacademy');
         },
 
         print: function () {

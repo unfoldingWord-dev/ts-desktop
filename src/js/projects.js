@@ -354,6 +354,7 @@ function ProjectsManager(query, configurator) {
         backupTranslation: function (meta, filename) {
             var paths = this.getPaths(meta);
             var name = 'uw-' + meta.fullname;
+            
             return new Promise(function(resolve, reject) {
                 var source = paths.projectDir;
                 var output = fs.createWriteStream(filename + ".tstudio");

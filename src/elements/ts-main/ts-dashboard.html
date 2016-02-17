@@ -361,7 +361,6 @@
 
           if (App.reporter.canReportToGithub()) {
               App.reporter.reportBug(message, function (res) {
-                  console.log(res);
                   mythis.set('options.title', "Feedback Sent");
                   mythis.set('options.body', "Your feedback has been successfully sent.  Thanks.");
                   mythis.set('options.loading', false);

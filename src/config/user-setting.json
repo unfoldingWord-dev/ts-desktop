@@ -4,7 +4,9 @@
         "mainText": "GL Mode",
         "helpText": "Display additional translation options for gateway languages",
         "value": false,
-        "group": "general"
+        "group": "general",
+        "enabled": true,
+        "visible": true
     },
     {
         "name": "font",

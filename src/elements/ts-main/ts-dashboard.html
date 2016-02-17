@@ -421,6 +421,8 @@
                   list[i].type_name = "Questions";
               } else if (list[i].project.type === "tw") {
                   list[i].type_name = "Words";
+              } else if (list[i].project.type === "ta") {
+                  list[i].type_name = "Academy";
               }
 
               if (list[i].resource_id === undefined) {
@@ -437,7 +439,7 @@
 
               var typeext = "";
 
-              if (list[i].project.type === "tw") {
+              if (list[i].project.type === "tw" || list[i].project.type === "ta") {
                   typeext = "";
               } else if (list[i].project.type !== "text") {
                   typeext = "_" + list[i].project.type;

@@ -168,7 +168,6 @@
                 <div id="lower">
                     <p>You may also share and distribute your project using these options.</p>
                     <div class="link" on-tap="export">Export to File</div>
-                    <input class="hide" id="input" type="file" nwsaveas="" />
                 </div>
             </div>
         </div>
@@ -248,35 +247,25 @@
             var mythis = this;
             var meta = this.currentproject.data;
             var translation = this.currentproject.translation;
-            var extension = '.zip';
+            var extension = '.txt';
             var name = 'uw-' + meta.fullname;
-            var input = this.$.input;
-            var firsttime = true;
             var confirm = this.$.confirm;
 
-            //get the correct extension for this format
-            if(translation[0].meta.format === 'usx'){
-                extension = '.txt';
-            }//add more formats as added to ts-desktop
+            if(translation[0].meta.format === 'default'){
+                extension = '.zip';
+            }
 
-            input.value = null;
-            input.nwsaveas = name;
-            input.addEventListener("change", function (evt) {
-                if (firsttime) {
-                    firsttime = false;
-                    var filename = input.value;
+            var filename = App.ipc.sendSync('save-as', {name: name});
+            App.configurator.setValue("export-filename", filename);
 
-                    return App.projectsManager.fileExists(filename + extension)
-                        .then (function (stat) {
-                        if (stat) {
-                            confirm.open();
-                        } else {
-                            mythis.executeexport();
-                        }
-                    });
-                }
-            }, false);
-            input.click();
+            return App.projectsManager.fileExists(filename + extension)
+                .then (function (stat) {
+                    if (stat) {
+                        confirm.open();
+                    } else if (filename) {
+                        mythis.executeexport();
+                    }
+                });
         },
 
         executeexport: function () {
@@ -284,8 +273,7 @@
             var loading = this.$.loading;
             var translation = this.currentproject.translation;
             var meta = this.currentproject.data;
-            var input = this.$.input;
-            var filename = input.value;
+            var filename = App.configurator.getValue("export-filename");
             var confirm = this.$.confirm;
             var mediaServer = App.configurator.getUserSetting('mediaserver');
 

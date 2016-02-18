@@ -1,6 +1,7 @@
 'use strict';
 
 var electron = require('electron'),
+    dialog = electron.dialog,
     path = require('path'),
     app = electron.app,
     BrowserWindow = electron.BrowserWindow,
@@ -18,6 +19,7 @@ app.setPath('userData', (function (dataDir) {
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
+let academyWindow;
 
 function createWindow () {
     // Create the browser window.
@@ -59,6 +61,40 @@ function createWindow () {
     mainWindow.focus();
 }
 
+function createAcademyWindow () {
+
+    academyWindow = new BrowserWindow({
+        width: 980,
+        height: 580,
+        minWidth: 800,
+        minHeight: 580,
+        useContentSize: true,
+        center: true,
+        title: app.getName(),
+        backgroundColor: '#00796B',
+        autoHideMenuBar: true,
+        frame: false
+    });
+
+    //academyWindow.webContents.openDevTools();
+
+    academyWindow.loadURL('file://' + __dirname + '/../views/academy.html');
+
+    academyWindow.on('closed', function() {
+        academyWindow = null;
+    });
+
+    academyWindow.on('maximize', function () {
+        academyWindow.webContents.send('maximize');
+    });
+
+    academyWindow.on('unmaximize', function () {
+        academyWindow.webContents.send('unmaximize');
+    });
+
+    academyWindow.focus();
+}
+
 ipcMain.on('main-window', function (event, arg) {
     if (typeof mainWindow[arg] === 'function') {
         let ret = mainWindow[arg]();
@@ -68,6 +104,26 @@ ipcMain.on('main-window', function (event, arg) {
     } else {
         event.returnValue = null;
     }
+});
+
+ipcMain.on('academy-window', function (event, arg) {
+    if (typeof academyWindow[arg] === 'function') {
+        let ret = academyWindow[arg]();
+        event.returnValue = !!ret;
+    } else if (academyWindow[arg]) {
+        event.returnValue = academyWindow[arg];
+    } else {
+        event.returnValue = null;
+    }
+});
+
+ipcMain.on('openacademy', function (event, arg) {
+    createAcademyWindow();
+});
+
+ipcMain.on('save-as', function (event, arg) {
+    var input = dialog.showSaveDialog(mainWindow, {defaultPath: arg.name});
+    event.returnValue = input || false;
 });
 
 app.on('ready', createWindow);

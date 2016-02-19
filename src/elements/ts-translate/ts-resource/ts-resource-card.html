@@ -95,6 +95,8 @@
             </div>
         </paper-material>
 
+        <iron-signals on-iron-signal-selectresource="selectresource"></iron-signals>
+
 	</template>
 
 </dom-module>
@@ -112,8 +114,8 @@
             }
 		},
 
-        selectresource: function (index) {
-            //var index = this.chunk.state.resource;
+        selectresource: function () {
+            var index = this.chunk.state.resource;
             for (var i = 0; i < this.chunk.resources.length; i++) {
                 var key = this.chunk.resources[i].title.toLowerCase();
                 var tab = document.getElementById(key + "tab" + this.chunk.index);
@@ -122,7 +124,7 @@
                     tab.classList.add('selected');
                     tab.classList.remove('unselected');
                     page.classList.remove('hide');
-                    //page.rendertext();
+                    page.rendertext();
                 } else {
                     tab.classList.remove('selected');
                     tab.classList.add('unselected');
@@ -145,7 +147,7 @@
             var id = this.chunk.meta.chapterid + "-" + this.chunk.meta.frameid;
             this.set('chunk.state.resource', index);
             this.fire('iron-signal', {name: 'updatestate', data: {id: id, mode: "resource", value: index}});
-            this.selectresource(index);
+            this.selectresource();
         },
 
 		ready: function() {

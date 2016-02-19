@@ -283,7 +283,7 @@ function ProjectsManager(query, configurator) {
         getRelatedWords: function (wordid) {
 
             var r = query([
-                "select w.id, w.term, w.definition, w.definition_title 'title' from translation_word w",
+                "select w.id, w.term 'title', w.definition 'body', w.definition_title 'deftitle' from translation_word w",
                 "join translation_word_related r on w.slug=r.slug",
                 "where r.translation_word_id='" + wordid + "'"
             ].join(' '));
@@ -300,7 +300,7 @@ function ProjectsManager(query, configurator) {
             }
 
             var r = query([
-                "select w.id, w.slug, w.term, w.definition, w.definition_title 'title' from translation_word w",
+                "select w.id, w.slug, w.term 'title', w.definition 'body', w.definition_title 'deftitle' from translation_word w",
                 "where w.catalog_hash='" + hash + "'",
                 "order by w.term"
             ].join(' '));

@@ -793,7 +793,7 @@
                         udbtext = udbtext.replace(startstr, " \\v");
                         udbtext = udbtext.replace(endstr, " ");
                     }
-                    resources.push({title: "UDB", array: false, data: udbtext});
+                    resources.push({title: "UDB", array: false, data: [udbtext]});
                 }
 
                 for (var w = 0; w < words.length; w++) {

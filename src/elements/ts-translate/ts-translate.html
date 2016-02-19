@@ -778,22 +778,22 @@
                 var udbtext = null;
 
                 if (notes.length) {
-                    resources.push({title: "Notes", order: 0});
+                    resources.push({title: "Notes", array: true, data: notes});
                 }
                 if (words.length) {
-                    resources.push({title: "Words", order: 1});
+                    resources.push({title: "Words", array: true, data: words});
                 }
                 if (questions.length) {
-                    resources.push({title: "Questions", order: 2});
+                    resources.push({title: "Questions", array: true, data: questions});
                 }
 
                 if (currentsource.source === "ulb") {
                     udbtext = App.projectsManager.getFrameUdb(currentsource, chapterid, frameid)[0].chunk;
-                    resources.push({title: "UDB", order: 3});
                     while (test.test(udbtext)) {
                         udbtext = udbtext.replace(startstr, " \\v");
                         udbtext = udbtext.replace(endstr, " ");
                     }
+                    resources.push({title: "UDB", array: false, data: udbtext});
                 }
 
                 for (var w = 0; w < words.length; w++) {
@@ -874,11 +874,7 @@
                         meta: bookmeta,
                         srccontent: name,
                         wordcontent: "",
-                        resources: [],
-                        notes: [],
-                        words: [],
-                        questions: [],
-                        udbtext: null
+                        resources: []
                     };
                     source.push(srcchunk);
                     var rawbookdata = this.rawdata["00-title"];
@@ -911,11 +907,7 @@
                         meta: titlemeta,
                         srccontent: title,
                         wordcontent: "",
-                        resources: [],
-                        notes: [],
-                        words: [],
-                        questions: [],
-                        udbtext: null
+                        resources: []
                     };
                     source.push(srcchunk);
 
@@ -950,11 +942,7 @@
                         meta: refmeta,
                         srccontent: reference,
                         wordcontent: "",
-                        resources: [],
-                        notes: [],
-                        words: [],
-                        questions: [],
-                        udbtext: null
+                        resources: []
                     };
                     source.push(srcchunk);
                     var rawrefdata = this.rawdata[chapterid + "-reference"];
@@ -971,11 +959,7 @@
                     meta: meta,
                     srccontent: sourcedata,
                     wordcontent: "",
-                    resources: resources,
-                    notes: notes,
-                    words: words,
-                    questions: questions,
-                    udbtext: udbtext
+                    resources: resources
                 };
                 source.push(srcchunk);
 
@@ -1048,11 +1032,7 @@
                     meta: meta,
                     srccontent: body,
                     wordcontent: title,
-                    resources: [],
-                    notes: [],
-                    words: [],
-                    questions: [],
-                    udbtext: null
+                    resources: []
                 };
                 source.push(srcchunk);
 
@@ -1257,7 +1237,7 @@
                 return {transcontent: chunk.transcontent, helpscontent: chunk.helpscontent, completed: chunk.completed, data: projectdata, index: index, state: chunk.state};
             });
             srcdata.data = source.map(function(chunk){
-                return {srccontent: chunk.srccontent, wordcontent: chunk.wordcontent, meta: chunk.meta, resources: chunk.resources, notes: chunk.notes, words: chunk.words, questions: chunk.questions, udbtext: chunk.udbtext};
+                return {srccontent: chunk.srccontent, wordcontent: chunk.wordcontent, meta: chunk.meta, resources: chunk.resources};
             });
             var merged = _.merge(srcdata, transdata);
             this.set('chunks', merged);

@@ -1,0 +1,92 @@
+
+<dom-module id="ts-resource-data">
+
+	<style>
+
+        :host {
+            flex: auto;
+        }
+
+        p {
+			line-height: 1.5;
+			margin: 0;
+		}
+
+        .link {
+            color: var(--accent-color);
+            font-weight: bold;
+            cursor: pointer;
+            padding-bottom: 10px;
+        }
+
+        #textholder {
+            line-height: 2;
+            margin-top: 0;
+            color: var(--primary-text-color);
+        }
+
+	</style>
+
+	<template>
+
+        <template is="dom-if" if="{{resource.array}}">
+            <template is="dom-repeat" items="{{resource.data}}" as="data">
+                <p class="link" on-tap="opendata">{{data.title}}</p>
+            </template>
+        </template>
+        <template is="dom-if" if="{{!resource.array}}">
+            <div id="textholder"></div>
+        </template>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+		is: 'ts-resource-data',
+
+		properties: {
+            resource: {
+                type: Object,
+                value: {}
+            }
+		},
+
+        rendertext: function () {
+            if(!this.resource.array) {
+                var textarray = this.resource.data.split(" ");
+                var numstr1 = "\<sup\>";
+                var numstr2 = "\<\/sup\>";
+                var returnstr = "";
+                var verse = 0;
+
+                for (var i = 0; i < textarray.length; i++) {
+                    if (textarray[i].substring(0, 2) === "\\v") {
+                        verse = textarray[i].substring(2);
+                        returnstr += numstr1 + verse + numstr2;
+                    } else {
+                        returnstr += textarray[i] + " ";
+                    }
+                }
+                this.$.textholder.innerHTML = returnstr;
+            } else {
+                this.$.textholder.innerHTML = "";
+            }
+        },
+
+        opendata: function (e) {
+            var content = e.model.data;
+            //content.type = "note";
+            this.fire('iron-signal', {name: 'openresource', data: {content: content}});
+        },
+
+		ready: function() {
+
+		}
+
+	});
+
+</script>

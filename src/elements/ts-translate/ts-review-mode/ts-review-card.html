@@ -65,7 +65,7 @@
                         <ts-target-helps chunk="{{chunk}}" on-setheight="setheight"></ts-target-helps>
                     </div>
                 </template>
-                <ts-resource-card class="right" chunk="[[chunk]]"></ts-resource-card>
+                <ts-resource-card class="right" chunk="[[chunk]]" on-setheight="setheight"></ts-resource-card>
             </template>
             <template is="dom-if" if="{{chunk.meta.words}}">
                 <ts-source-chunk class="left" reviewmode wordmode chunk="[[chunk]]"></ts-source-chunk>

@@ -774,10 +774,22 @@
                 var questions = App.projectsManager.getFrameQuestions(id);
                 var words = App.projectsManager.getFrameWords(id);
                 var verses = [];
+                var resources = [];
                 var udbtext = null;
+
+                if (notes.length) {
+                    resources.push({title: "Notes", order: 0});
+                }
+                if (words.length) {
+                    resources.push({title: "Words", order: 1});
+                }
+                if (questions.length) {
+                    resources.push({title: "Questions", order: 2});
+                }
 
                 if (currentsource.source === "ulb") {
                     udbtext = App.projectsManager.getFrameUdb(currentsource, chapterid, frameid)[0].chunk;
+                    resources.push({title: "UDB", order: 3});
                     while (test.test(udbtext)) {
                         udbtext = udbtext.replace(startstr, " \\v");
                         udbtext = udbtext.replace(endstr, " ");
@@ -862,6 +874,7 @@
                         meta: bookmeta,
                         srccontent: name,
                         wordcontent: "",
+                        resources: [],
                         notes: [],
                         words: [],
                         questions: [],
@@ -898,6 +911,7 @@
                         meta: titlemeta,
                         srccontent: title,
                         wordcontent: "",
+                        resources: [],
                         notes: [],
                         words: [],
                         questions: [],
@@ -936,6 +950,7 @@
                         meta: refmeta,
                         srccontent: reference,
                         wordcontent: "",
+                        resources: [],
                         notes: [],
                         words: [],
                         questions: [],
@@ -956,6 +971,7 @@
                     meta: meta,
                     srccontent: sourcedata,
                     wordcontent: "",
+                    resources: resources,
                     notes: notes,
                     words: words,
                     questions: questions,
@@ -1032,6 +1048,7 @@
                     meta: meta,
                     srccontent: body,
                     wordcontent: title,
+                    resources: [],
                     notes: [],
                     words: [],
                     questions: [],
@@ -1232,17 +1249,6 @@
                     translation[i].state = statedata;
                 } else {
                     translation[i].state = {chunk: true, review: true, resource: 0};
-                    if (!source[i].notes.length) {
-                        if (!source[i].words.length) {
-                            if (!source[i].questions.length) {
-                                translation[i].state.resource = 0;
-                            } else {
-                                translation[i].state.resource = 2;
-                            }
-                        } else {
-                            translation[i].state.resource = 1;
-                        }
-                    }
                     this.currentproject.state[complexid] = translation[i].state;
                 }
             }
@@ -1251,7 +1257,7 @@
                 return {transcontent: chunk.transcontent, helpscontent: chunk.helpscontent, completed: chunk.completed, data: projectdata, index: index, state: chunk.state};
             });
             srcdata.data = source.map(function(chunk){
-                return {srccontent: chunk.srccontent, wordcontent: chunk.wordcontent, meta: chunk.meta, notes: chunk.notes, words: chunk.words, questions: chunk.questions, udbtext: chunk.udbtext};
+                return {srccontent: chunk.srccontent, wordcontent: chunk.wordcontent, meta: chunk.meta, resources: chunk.resources, notes: chunk.notes, words: chunk.words, questions: chunk.questions, udbtext: chunk.udbtext};
             });
             var merged = _.merge(srcdata, transdata);
             this.set('chunks', merged);

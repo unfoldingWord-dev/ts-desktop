@@ -160,7 +160,7 @@
 	<template>
 
         <div id="contain">
-            <iron-list id="reviewlist" items="{{chunks.data}}" as="chunk">
+            <iron-list id="reviewlist" items="{{chunks.data}}" as="chunk" on-scroll="setresources">
                 <template>
                     <ts-review-card id="{{createid(index)}}" chunk="{{chunk}}" on-updateheight="updateheight"></ts-review-card>
                 </template>
@@ -175,7 +175,7 @@
                     <template is="dom-if" if="{{related.length}}">
                         <h3>See Also:</h3>
                         <template is="dom-repeat" items="{{related}}" as="word">
-                            <p class="link" on-tap="newword">{{word.term}}</p>
+                            <p class="link" on-tap="newword">{{word.title}}</p>
                         </template>
                     </template>
                     <template is="dom-if" if="{{examples.length}}">
@@ -190,7 +190,7 @@
                     <template is="dom-if" if="{{allwords.length}}">
                         <h3>Words Index</h3>
                         <template is="dom-repeat" items="{{allwords}}" as="word">
-                            <p class="link words" on-tap="newword">{{word.term}}</p>
+                            <p class="link words" on-tap="newword">{{word.title}}</p>
                         </template>
                     </template>
                 </div>
@@ -245,6 +245,10 @@
             }
         },
 
+        setresources: function () {
+            this.fire('iron-signal', {name: 'selectresource'});
+        },
+
         updateheight: function (e) {
             var list = this.$.reviewlist;
             var index = e.model.index;
@@ -271,14 +275,14 @@
                 wordlist = "obs";
             }
 
-            if (data.type === "note") {
+            if (data.type === "Notes") {
                 this.set('related', clear);
                 this.set('examples', clear);
                 this.set('allwords', clear);
                 footer.classList.add("hide");
                 content = "\<h2 class='style-scope ts-review-mode'\>" + data.title + "\<\/h2\>\<p class='style-scope ts-review-mode'\>" + data.body + "\<\/p\>";
             }
-            if (data.type === "word") {
+            if (data.type === "Words") {
                 if (wordlist === "obs") {
                     this.set('related', App.projectsManager.getRelatedWords(data.id));
                     this.set('examples', App.projectsManager.getWordExamples(data.id));
@@ -288,14 +292,14 @@
                 }
                 this.set('allwords', clear);
                 footer.classList.remove("hide");
-                content = "\<h2 class='style-scope ts-review-mode'\>" + data.term + "\<\/h2\>\<h3 class='style-scope ts-review-mode'\>" + data.title + "\<\/h3\>" + data.definition;
+                content = "\<h2 class='style-scope ts-review-mode'\>" + data.title + "\<\/h2\>\<h3 class='style-scope ts-review-mode'\>" + data.deftitle + "\<\/h3\>" + data.body;
             }
-            if (data.type === "question") {
+            if (data.type === "Questions") {
                 this.set('related', clear);
                 this.set('examples', clear);
                 this.set('allwords', clear);
                 footer.classList.add("hide");
-                content = "\<h2 class='style-scope ts-review-mode'\>" + data.question + "\<\/h2\>\<p class='style-scope ts-review-mode'\>" + data.answer + "\<\/p\>";
+                content = "\<h2 class='style-scope ts-review-mode'\>" + data.title + "\<\/h2\>\<p class='style-scope ts-review-mode'\>" + data.body + "\<\/p\>";
             }
             if (data.type === "allwords") {
                 this.set('related', clear);
@@ -315,7 +319,7 @@
 
         newword: function (e) {
             var word = e.model.word;
-            word.type = "word";
+            word.type = "Words";
             this.fillresource(word);
         },
 
@@ -355,6 +359,8 @@
         tomode: function () {
             this.setpreview();
             this.setlocation();
+            this.setresources();
+            this.setlocation();
             this.movein();
         },
 
@@ -374,7 +380,6 @@
             var contain = this.$.contain;
 
             setTimeout(function() {
-                //mythis.fire('iron-signal', {name: 'selectresource'});
                 mythis.classList.remove("preview");
                 contain.classList.add("movein");
                 setTimeout(function() {

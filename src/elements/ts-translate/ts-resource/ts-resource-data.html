@@ -30,8 +30,8 @@
 	<template>
 
         <template is="dom-if" if="{{resource.array}}">
-            <template is="dom-repeat" items="{{resource.data}}" as="data">
-                <p class="link" on-tap="opendata">{{data.title}}</p>
+            <template is="dom-repeat" items="{{resource.data}}" as="entry">
+                <p class="link" on-tap="opendata">{{entry.title}}</p>
             </template>
         </template>
         <template is="dom-if" if="{{!resource.array}}">
@@ -57,7 +57,7 @@
 
         rendertext: function () {
             if(!this.resource.array) {
-                var textarray = this.resource.data.split(" ");
+                var textarray = this.resource.data[0].split(" ");
                 var numstr1 = "\<sup\>";
                 var numstr2 = "\<\/sup\>";
                 var returnstr = "";
@@ -71,15 +71,13 @@
                         returnstr += textarray[i] + " ";
                     }
                 }
-                this.$.textholder.innerHTML = returnstr;
-            } else {
-                this.$.textholder.innerHTML = "";
+                this.querySelector("#textholder").innerHTML = returnstr;
             }
         },
 
         opendata: function (e) {
-            var content = e.model.data;
-            //content.type = "note";
+            var content = e.model.entry;
+            content.type = this.resource.title;
             this.fire('iron-signal', {name: 'openresource', data: {content: content}});
         },
 

@@ -3,6 +3,8 @@
 <link rel="import" href="../../../components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../../../components/iron-pages/iron-pages.html">
 
+<link rel="import" href="./ts-resource-data.html">
+
 <dom-module id="ts-resource-card">
 
 	<style>
@@ -63,36 +65,8 @@
         #content {
 			padding: 24px 16px;
             flex: auto;
-		}
-
-        #content p {
-			line-height: 1.5;
-			margin: 0;
-		}
-
-        :host {
-            --paper-tab-ink: var(--accent-color-light);
-        }
-
-        paper-tabs {
-            --paper-tabs-selection-bar-color: var(--accent-color);
-            flex: auto;
             display: flex;
-            justify-content: space-between;
-        }
-
-        .link {
-            color: var(--accent-color);
-            font-weight: bold;
-            cursor: pointer;
-            padding-bottom: 10px;
-        }
-
-        #textholder {
-            line-height: 2;
-            margin-top: 0;
-            color: var(--primary-text-color);
-        }
+		}
 
         .hide {
             display: none;
@@ -104,35 +78,20 @@
 
         <paper-material elevation="1">
             <div id="heading">
-                <div class="bigspace"></div>
-                <template is="dom-repeat" items="{{chunk.resources}}" as="resource">
-                    <div class="littlespace"></div>
-                    <div class="tab unselected" id="{{createid(resource.title)}}" on-tap="updatestate">{{resource.title}}</div>
-                    <div class="littlespace"></div>
+                <template is="dom-if" if="{{chunk.resources.length}}">
+                    <div class="bigspace"></div>
+                    <template is="dom-repeat" items="{{chunk.resources}}" as="resource">
+                        <div class="littlespace"></div>
+                        <div class="tab unselected" id="{{createtabid(resource.title)}}" on-tap="updatestate">{{resource.title}}</div>
+                        <div class="littlespace"></div>
+                    </template>
+                    <div class="bigspace"></div>
                 </template>
-                <div class="bigspace"></div>
             </div>
             <div id="content">
-
-                    <div id="notes" class="hide">
-                        <template is="dom-repeat" items="{{chunk.notes}}" as="note">
-                            <p class="link" on-tap="opennote">{{note.title}}</p>
-                        </template>
-                    </div>
-                    <div id="words" class="hide">
-                        <template is="dom-repeat" items="{{chunk.words}}" as="word">
-                            <p class="link" on-tap="openword">{{word.term}}</p>
-                        </template>
-                    </div>
-                    <div id="questions" class="hide">
-                        <template is="dom-repeat" items="{{chunk.questions}}" as="question">
-                            <p class="link" on-tap="openquestion">{{question.question}}</p>
-                        </template>
-                    </div>
-                    <div id="udb" class="hide">
-                        <div id="textholder"></div>
-                    </div>
-
+                <template is="dom-repeat" items="{{chunk.resources}}" as="resource">
+                    <ts-resource-data id="{{createpageid(resource.title)}}" class="hide" resource="[[resource]]"></ts-resource-data>
+                </template>
             </div>
         </paper-material>
 
@@ -153,19 +112,17 @@
             }
 		},
 
-        observers: [
-            'rendertext(chunk.*)'
-        ],
-
-        selecttab: function (index) {
+        selectresource: function (index) {
+            //var index = this.chunk.state.resource;
             for (var i = 0; i < this.chunk.resources.length; i++) {
                 var key = this.chunk.resources[i].title.toLowerCase();
-                var tab = document.getElementById(key + this.chunk.index);
-                var page = this.$[key];
+                var tab = document.getElementById(key + "tab" + this.chunk.index);
+                var page = document.getElementById(key + "page" + this.chunk.index);
                 if (i === index) {
                     tab.classList.add('selected');
                     tab.classList.remove('unselected');
                     page.classList.remove('hide');
+                    //page.rendertext();
                 } else {
                     tab.classList.remove('selected');
                     tab.classList.add('unselected');
@@ -175,65 +132,23 @@
             this.fire('setheight');
         },
 
-        createid: function (title) {
-            return title.toLowerCase() + this.chunk.index;
+        createtabid: function (title) {
+            return title.toLowerCase() + "tab" + this.chunk.index;
         },
 
-        rendertext: function () {
-            if(this.chunk && this.chunk.udbtext) {
-                var textarray = this.chunk.udbtext.split(" ");
-                var numstr1 = "\<sup\>";
-                var numstr2 = "\<\/sup\>";
-                var returnstr = "";
-                var verse = 0;
-
-                for (var i = 0; i < textarray.length; i++) {
-                    if (textarray[i].substring(0, 2) === "\\v") {
-                        verse = textarray[i].substring(2);
-                        returnstr += numstr1 + verse + numstr2;
-                    } else {
-                        returnstr += textarray[i] + " ";
-                    }
-                }
-                this.$.textholder.innerHTML = returnstr;
-            } else {
-                this.$.textholder.innerHTML = "";
-            }
-        },
-
-        checkclass: function (length) {
-            return length ? '' : 'hide';
+        createpageid: function (title) {
+            return title.toLowerCase() + "page" + this.chunk.index;
         },
 
         updatestate: function (e) {
             var index = e.model.index;
             var id = this.chunk.meta.chapterid + "-" + this.chunk.meta.frameid;
             this.set('chunk.state.resource', index);
-            //this.fire('setheight');
             this.fire('iron-signal', {name: 'updatestate', data: {id: id, mode: "resource", value: index}});
-            this.selecttab(index);
-        },
-
-        opennote: function (e) {
-            var content = e.model.note;
-            content.type = "note";
-            this.fire('iron-signal', {name: 'openresource', data: {content: content}});
-        },
-
-        openword: function (e) {
-            var content = e.model.word;
-            content.type = "word";
-            this.fire('iron-signal', {name: 'openresource', data: {content: content}});
-        },
-
-        openquestion: function (e) {
-            var content = e.model.question;
-            content.type = "question";
-            this.fire('iron-signal', {name: 'openresource', data: {content: content}});
+            this.selectresource(index);
         },
 
 		ready: function() {
-            console.log("ready", this.chunk.state.resource);
 
 		}
 

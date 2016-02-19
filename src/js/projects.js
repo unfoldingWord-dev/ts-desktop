@@ -272,7 +272,7 @@ function ProjectsManager(query, configurator) {
         getFrameWords: function (frameid) {
 
             var r = query([
-                "select w.id, w.slug, w.term, w.definition, w.definition_title 'title' from translation_word w",
+                "select w.id, w.slug, w.term 'title', w.definition 'body', w.definition_title 'deftitle' from translation_word w",
                 "join frame__translation_word f on w.id=f.translation_word_id",
                 "where f.frame_id='" + frameid + "'"
             ].join(' '));
@@ -321,7 +321,7 @@ function ProjectsManager(query, configurator) {
         getFrameQuestions: function (frameid) {
 
             var r = query([
-                "select q.question, q.answer from checking_question q",
+                "select q.question 'title', q.answer 'body' from checking_question q",
                 "join frame__checking_question f on q.id=f.checking_question_id",
                 "where f.frame_id='" + frameid + "'"
             ].join(' '));

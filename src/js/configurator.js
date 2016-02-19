@@ -271,6 +271,16 @@
             },
 
             /**
+             * 
+             */
+            getAppVersion: function() {
+                try {
+                    let p = require('../../package');
+                    return p.version;
+                } catch (e) { console.log(e); }
+            },
+
+            /**
              * Retreives a value
              * @param key
              * @returns {object}

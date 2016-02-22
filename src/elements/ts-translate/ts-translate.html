@@ -244,7 +244,7 @@
 
     <template>
 
-        <ts-translate-sidebar selected="{{selected}}" standardproject="[[standardproject]]" on-gohome="gohome" on-gopublish="gopublish" on-gobackup="gobackup" on-goprint="goprint" on-openacademy="openacademy" on-gosettings="gosettings"></ts-translate-sidebar>
+        <ts-translate-sidebar selected="{{selected}}" standardproject="[[standardproject]]" on-gohome="gohome" on-gopublish="gopublish" on-gobackup="gobackup" on-goprint="goprint" on-gosettings="gosettings"></ts-translate-sidebar>
 
         <div id="pages">
             <ts-read-mode id="readmode" chapters="[[chapters]]" modestatus="{{modestatus}}"></ts-read-mode>
@@ -592,8 +592,8 @@
             var list = this.projectlist;
 
             var loadsource = function () {
-                if (projdata.project.type === "tw") {
-                    mythis.pullwords();
+                if (projdata.project.type === "tw" || projdata.project.type === "ta") {
+                    mythis.pulldata();
                     mythis.createchunks();
                 } else {
                     mythis.pullsource();
@@ -615,7 +615,7 @@
             };
 
             var loadwords = function () {
-                if (projdata.project.type !== "tw") {
+                if (projdata.project.type !== "tw" && projdata.project.type !== "ta") {
                     var wordmeta = false;
                     for (var i = 0; i < list.length; i++) {
                         if (list[i].target_language.id === projdata.target_language.id && list[i].project.type === "tw") {
@@ -987,27 +987,43 @@
             this.set('currentproject.translation', translation);
         },
 
-        pullwords: function () {
-            var frames = App.projectsManager.getAllWords("bible");
-            var name = this.currentproject.data.project.name;
+        pulldata: function () {
+            var type = this.currentproject.data.project.type;
             var language = this.currentproject.data.target_language.name;
+            var standard = this.standardproject;
+            var frames;
             var source = [];
             var srcchunk = {};
             var transchunk = {};
             var translation = [];
-            var standard = this.standardproject;
+
+            if (type === "tw") {
+                frames = App.projectsManager.getAllWords("bible");
+            } else if (type === "ta") {
+                frames = App.projectsManager.getTa();
+            }
 
             for (var i = 0; i < frames.length; i++) {
                 var chapterid = "01";
                 var frameid = frames[i].slug;
                 var complexid = chapterid + '-' + frameid;
+                var title;
+                var body;
+
+                if (type === "tw") {
+                    title = frames[i].term;
+                    body = frames[i].definition;
+                } else if (type === "ta") {
+                    title = frames[i].title;
+                    body = frames[i].text;
+                }
 
                 var meta = {
                     chapterid: chapterid,
                     chapter: 1,
                     frameid: frameid,
                     verses: [],
-                    chunkref: frames[i].term,
+                    chunkref: title,
                     refaddon: " — " + language,
                     standard: standard,
                     words: true
@@ -1015,8 +1031,8 @@
 
                 srcchunk = {
                     meta: meta,
-                    srccontent: frames[i].definition,
-                    wordcontent: frames[i].term,
+                    srccontent: body,
+                    wordcontent: title,
                     notes: [],
                     words: [],
                     questions: [],
@@ -1129,6 +1145,7 @@
             var mythis = this;
             var sources = this.currentproject.data.sources;
             var key = "uw-" + this.currentproject.data.fullname;
+            var type = this.currentproject.data.project.type;
             var index = App.configurator.getValue(key + "-index");
             var chapter = App.configurator.getValue(key + "-chapter");
             var selected = App.configurator.getValue(key + "-selected");
@@ -1146,7 +1163,7 @@
                 mythis.set('modestatus.lastmode', 3);
             }
 
-            if ((sources !== undefined && sources.length !== 0) || this.currentproject.data.project.type === "tw") {
+            if ((sources !== undefined && sources.length !== 0) || type === "tw" || type === "ta") {
                 setTimeout(function() {
                     if (selected > 0) {
                         mythis.set('selected', selected);
@@ -1166,13 +1183,14 @@
             var sources = this.currentproject.data.sources;
             var lastmode = this.modestatus.lastmode;
             var selected = this.selected;
+            var type = this.currentproject.data.project.type;
 
             if (selected === 4) {
                 if (sources !== undefined && sources.length !== 0) {
                     mythis.set('selected', lastmode);
                 }
             } else {
-                if ((sources === undefined || sources.length === 0) && this.currentproject.data.project.type !== "tw") {
+                if ((sources === undefined || sources.length === 0) && type !== "tw" && type !== "ta") {
                     setTimeout(function() {
                         mythis.set('selected', 4);
                     }, 500);
@@ -1198,7 +1216,8 @@
 
         createchunks: function () {
             var current = this.currentproject.data.currentsource;
-            if ((current === null || current === undefined) && this.currentproject.data.project.type !== "tw") {
+            var type = this.currentproject.data.project.type;
+            if ((current === null || current === undefined) && type !== "tw" && type !== "ta") {
                 return;
             }
             var transdata = {};
@@ -1327,7 +1346,8 @@
         },
 
         gopublish: function () {
-            if(this.currentproject.data.sources.length || this.currentproject.data.project.type === "tw") {
+            var type = this.currentproject.data.project.type;
+            if(this.currentproject.data.sources.length || type === "tw" || type === "ta") {
                 this.savestate();
                 this.setleftanimation();
                 this.fire('iron-signal', {name: 'updatepublish'});
@@ -1352,10 +1372,6 @@
             this.setleftanimation();
             this.backto = this.route;
             this.route = "settings";
-        },
-
-        openacademy: function () {
-            App.ipc.send('openacademy');
         },
 
         print: function () {

@@ -188,7 +188,7 @@
                 var us;
                 try {
                     us = JSON.parse(storage['user-setting']);
-                } catch (e) { }
+                } catch (e) { console.error(e); }
                 return us || mapUserSettings(this._userSetting());
             },
 
@@ -246,7 +246,9 @@
                     }
                 }
 
-                return mapUserSettings(defaults);
+                let mappedSettings = mapUserSettings(defaults);
+                this.saveUserSettingArr(mappedSettings);
+                return mappedSettings;
             },
 
             /**

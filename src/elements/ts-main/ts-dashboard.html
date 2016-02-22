@@ -279,9 +279,9 @@
       executebackup: function () {
           var mythis = this;
           var loading = this.$.loading;
-          var meta = this.tempdata.meta;
-          var name = 'uw-' + meta.fullname;
-          var filename = this.tempdata.filename;
+          var meta = this.tempbackup;
+          var backup = this.$.backup;
+          var filename = backup.value;
           var confirm = this.$.confirm;
 
           confirm.close();
@@ -289,7 +289,7 @@
           mythis.set('options.loading', true);
           loading.open();
 
-          return App.projectsManager.backupTranslation(meta, filename, name)
+          return App.projectsManager.backupTranslation(meta, filename)
               .then(function () {
                   mythis.set('options.title', "Backup Complete");
                   mythis.set('options.body', "Your project has been successfully archived.  Thanks.");
@@ -393,12 +393,14 @@
                   list[i].project = {id: '', name: '', type: ''};
                   list[i].project.id = list[i].project_id;
                   list[i].project.name = App.projectsManager.getProjectName(list[i].project.id)[0].name;
-                  if (list[i].project_type === undefined) {
+                  if (!list[i].project_type) {
                       list[i].project.type = "text";
                   } else {
                       list[i].project.type = list[i].project_type;
                   }
               }
+
+              list[i].project.type = list[i].project.type.toLowerCase();
 
               list[i].sources = [];
               var group = list[i].source_translations;
@@ -459,6 +461,7 @@
       },
 
       setdefault: function () {
+          App.projectsManager.stopAutoBackup();
           this.currentproject = {};
       },
 

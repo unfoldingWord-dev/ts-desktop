@@ -14,7 +14,7 @@ function Importer() {
          * @param file {File} the path to the archive or txt file
          * @returns {Promise.<boolean>}
          */
-        importUSFMFile: function (file) {
+        importUSFMFile: function (file,translation) {
             console.log("importing USFM", file);
             var self = this;
             return new Promise(function (resolve, reject) {
@@ -26,7 +26,7 @@ function Importer() {
                         for (var i = 0; i < files.length; i++) {
                             let txtFile = files[i];
                             console.log("txt file", txtFile);
-                            self.importSingleUSFMFile(txtFile);
+                            self.importSingleUSFMFile(txtFile,translation);
                         }
                     });
                 } else {
@@ -54,7 +54,7 @@ function Importer() {
             });
         },
 
-        importSingleUSFMFile: function (usfmFile, project) {
+        importSingleUSFMFile: function (usfmFile, translation) {
 
             //var projectPath = path.join(App.configurator.getValue('rootdir'),'targetTranslations','uw-mat-en');
             //var data = fs.readFileSync(usfmFile,'utf8');

@@ -1,0 +1,13 @@
+{
+	"generator": {
+		"name": "ts-desktop",
+		"build": ""
+	},
+	"package_version": 3,
+	"project": {
+		"slug": "unittest"
+	},
+	"source_translations": {},
+	"parent_draft_resource_id": "",
+	"finished_frames": []
+}

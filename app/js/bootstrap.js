@@ -56,6 +56,7 @@
     let Translator = require('../js/translator').Translator;
     let Library = require('../js/library').Library;
     let ProjectsManager = require('../js/projects').ProjectsManager;
+    let Importer = require('../js/importer').Importer;
     let i18n = new require('../js/i18n').Locale('./i18n');//, mainWindow.navigator.language),
     let util = require('../js/lib/util');
     let printer = new require('../js/printer').Printer();
@@ -248,6 +249,10 @@
             this.projectsManager = new ProjectsManager(db.exec.bind(db), this.configurator);
         },
 
+        initializeImporter: function(){
+            this.importer = new Importer();
+        },
+
         /**
          * Toggles the application maximize state
          */
@@ -299,6 +304,7 @@
             _this.initializeTranslator();
             _this.initializeLibrary();
             _this.initializeProjectsManager();
+            _this.initializeImporter();
             _this.initializeReporter();
 
             let platformInit = _this.platformInit[process.platform];

@@ -139,6 +139,65 @@
           color: var(--accent-color);
       }
 
+      #headings {
+          flex: 0 0 50px;
+          width: 100%;
+          display: flex;
+          align-items: center;
+      }
+
+      #import-dialog {
+          width: 450px;
+          height: 375px;
+      }
+
+      .row {
+          display: flex;
+          border-bottom: 1px solid var(--border-color);
+          transition: background .3s, color .3s;
+          cursor: pointer;
+          min-height: 60px;
+          justify-content: flex-start;
+          align-items: center;
+      }
+
+      .smalltext {
+          font-size: 75%;
+          color: var(--secondary-text-color);
+      }
+
+      .left {
+          display: flex;
+          align-items: center;
+      }
+
+      .smallspan {
+          width: 70px;
+          display: inline-flex;
+          justify-content: center;
+      }
+
+      .bigspan {
+          width: 160px;
+          display: inline-block;
+      }
+
+      .row:hover {
+          background: var(--accent-color-light);
+      }
+
+      .space {
+          padding-left: 5px;
+      }
+
+      #list {
+          flex: auto;
+          display: flex;
+          flex-direction: column;
+          max-height: 200px;
+          overflow-x: scroll;
+      }
+
       .hide {
           display: none;
       }
@@ -207,6 +266,39 @@
           </div>
       </paper-dialog>
 
+      <paper-dialog id="import-dialog" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <h2>Choose Translation</h2>
+          <div>
+              <template is="dom-if" if="{{projectlist.length}}">
+                  <div class="contain">
+                      <div id="headings" class="smalltext">
+                          <span class="smallspan"></span>
+                          <span class="bigspan">{{locale.project}}</span>
+                          <span class="smallspan">{{locale.type}}</span>
+                          <span class="bigspan">{{locale.language}}</span>
+                      </div>
+                      <div id="list">
+                          <iron-list items="[[projectlist]]" as="proj">
+                              <template>
+                                  <div class="row">
+                                      <div class="left" on-tap="startimport">
+                                          <span class="smallspan"><iron-icon class="smallicon" icon$="[[checkicon(proj.project.id)]]"></iron-icon></span>
+                                          <span class="bigspan">[[proj.project.name]]</span>
+                                          <span class="smallspan smalltext"><span>[[proj.type_name]]</span><span class="space">[[proj.resource_id]]</span></span>
+                                          <span class="smalltext bigspan">[[proj.target_language.name]]</span>
+                                      </div>
+                                  </div>
+                              </template>
+                          </iron-list>
+                      </div>
+                  </div>
+              </template>
+          </div>
+          <div id="importbuttons">
+              <paper-button dialog-dismiss>Cancel</paper-button>
+          </div>
+      </paper-dialog>
+
       <iron-signals on-iron-signal-updatelist="updatelist"></iron-signals>
       <iron-signals on-iron-signal-setdefault="setdefault"></iron-signals>
       <iron-signals on-iron-signal-openfeedback="openfeedback"></iron-signals>
@@ -260,7 +352,15 @@
           backuptimerid: {
               type: Number,
               value: -1
+          },
+          locale: {
+              type: Object,
+              value: {}
           }
+      },
+
+      checkicon: function (slug) {
+          return slug === "obs" || slug === "tw" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
       },
 
       openbackup: function (event, data) {
@@ -364,30 +464,43 @@
       },
 
       openimport: function () {
+          //this.set('currentinfo', e.model.proj);
+
+
           console.log("opening import");
+          console.log("project list",this.projectlist);
           var mythis = this;
-          var loading = this.$.loading;
           var chooser = this.$.import;
           chooser.value = null;
           chooser.addEventListener('change', function(evt) {
-              mythis.set('options.body', "Importing.  Please wait...");
-              mythis.set('options.loading', true);
-              loading.open();
-              for(var i=0; i < this.files.length; i ++) {
-                  var fileExt = this.files[i].name.split('.').pop().toLowerCase();
-                  if(fileExt === "zip" || fileExt === "txt"){
-                      //App.projectsManager.importUSFMFile(this.files[0]).then(function(){
-                          mythis.set('options.title', "Import Complete");
-                          mythis.set('options.body', "Your file has been imported successfully.  Thanks.");
-                          mythis.set('options.loading', false);
-                          setTimeout(function() {
-                              mythis.updatelist();
-                          }, 250);
-                      //});
-                  }
-              }
+              mythis.$['import-dialog'].open();
           }, false);
           chooser.click();
+      },
+
+      startimport: function(e){
+          var loading = this.$.loading;
+          var mythis = this;
+          var chooser = this.$.import;
+          var proj = e.model.proj;
+          this.$['import-dialog'].close();
+          console.log("selected project",proj);
+          mythis.set('options.body', "Importing.  Please wait...");
+          mythis.set('options.loading', true);
+          loading.open();
+          for(var i=0; i < chooser.files.length; i ++) {
+              var fileExt = chooser.files[i].name.split('.').pop().toLowerCase();
+              if(fileExt === "zip" || fileExt === "txt"){
+                  App.importer.importUSFMFile(chooser.files[0],proj).then(function(){
+                      mythis.set('options.title', "Import Complete");
+                      mythis.set('options.body', "Your file has been imported successfully.  Thanks.");
+                      mythis.set('options.loading', false);
+                      setTimeout(function() {
+                          mythis.updatelist();
+                      }, 250);
+                  });
+              }
+          }
       },
 
       openfeedback: function () {
@@ -553,6 +666,7 @@
           if (accepted) {
               this.accepted = true;
           }
+          this.locale = App.locale.dictionary;
       }
 
   });

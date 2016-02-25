@@ -161,6 +161,7 @@
             this.settings = App.configurator.refreshUserSetting();
             this.settings = App.configurator.setUserSetting('appversion', App.configurator.getAppVersion());
             this.settings = App.configurator.setUserSetting('datapath', App.configurator.getValue('rootdir'));
+            // TODO: get working with electron. (Read only in the meantime.)
             // this.$['backup-location-browser'].nwworkingdir = App.configurator.getUserSetting('backuplocation');
         },
 
@@ -240,7 +241,7 @@
             if (newPath) {
                 var oldPath = App.configurator.getUserSetting('datalocation');
                 this.settings = App.configurator.setUserSetting('datalocation', newPath);
-                // Why commented?
+                // TODO:
                 // App.projectsManager.migrateBackup(oldPath, newPath);
             }
         },

@@ -7,7 +7,6 @@ var _ = require('lodash'),
     rimraf = require('rimraf'),
     AdmZip = require('adm-zip'),
     archiver = require('archiver'),
-    untildify = require('untildify'),
     utils = require('../js/lib/util'),
     tstudioMigrator = require('../js/migration/tstudioMigrator'),
     targetTranslationMigrator = require('../js/migration/targetTranslationMigrator'),
@@ -24,7 +23,6 @@ function zipper (r) {
 var map = guard('map'),
     indexBy = guard('indexBy'),
     flatten = guard('flatten'),
-    // filter = guard('filter'),  // Never used
     compact = guard('compact');
 
 /**
@@ -412,8 +410,7 @@ function ProjectsManager(query, configurator) {
          */
         backupProjects: function(list) {
             let _this = this,
-                dataPath = untildify(configurator.getUserSetting('datalocation')),
-                backupDir = path.join(dataPath, 'automatic_backups');
+                backupDir = configurator.getUserPath('datalocation', 'automatic_backups');
 
             /*
              * NOTE: We are removing *after* we backup so that a backup is already there.

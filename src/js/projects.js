@@ -67,7 +67,8 @@ function ProjectsManager(query, configurator) {
         },
         toJSON = _.partialRight(JSON.stringify, null, '\t'),
         fromJSON = JSON.parse.bind(JSON),
-        backupTimer,
+        // NOTE: Old auto-backup implementation
+        // backupTimer,
         config = (function (prefix) {
             var isUW = _.partial(_.startsWith, _, prefix, 0),
                 isChunk = function (filename) {
@@ -351,24 +352,25 @@ function ProjectsManager(query, configurator) {
             return write(paths.ready, (new Date()).toString());
         },
 
-        backupTranslation: function (meta, filename) {
-            var paths = this.getPaths(meta);
-            var name = 'uw-' + meta.fullname;
+        backupTranslation: function (meta, filePath) {
+            let paths = this.getPaths(meta),
+                name = 'uw-' + meta.fullname;
             
             return new Promise(function(resolve, reject) {
-                var source = paths.projectDir;
-                var output = fs.createWriteStream(filename + ".tstudio");
-                var archive = archiver.create('zip');
-                var timestamp = new Date().getTime();
-                var manifest = {
-                    generator: {
-                        name: 'ts-desktop',
-                        build: ''
-                    },
-                    package_version: 2,
-                    timestamp: timestamp,
-                    target_translations: [{path: name, id: name, commit_hash: '', direction: "ltr"}]
-                };
+                let source = paths.projectDir,
+                    output = fs.createWriteStream(filePath + ".tstudio"),
+                    archive = archiver.create('zip'),
+                    timestamp = new Date().getTime(),
+                    manifest = {
+                        generator: {
+                            name: 'ts-desktop',
+                            build: ''
+                        },
+                        package_version: 2,
+                        timestamp: timestamp,
+                        target_translations: [{path: name, id: name, commit_hash: '', direction: "ltr"}]
+                    };
+
                 archive.pipe(output);
                 archive.directory(source, name + "/");
                 archive.append(toJSON(manifest), {name: 'manifest.json'});
@@ -400,24 +402,42 @@ function ProjectsManager(query, configurator) {
             });
         },
 
-        startAutoBackup: function(meta) {
-            var filePath = untildify(configurator.getUserSetting('backuplocation')),
-                name = 'uw-' + meta.fullname + '-backup',
-                myThis = this;
+        /*
+         * Store projects in automatic backup folder if there's any change
+         * @param list: projectlist proeperty
+         */
+        backupProjects: function(list) {
+            let myThis = this,
+                dataPath = untildify(configurator.getUserSetting('datalocation')),
+                dataFolder = 'translationStudio\\automatic_backups';
 
-            this.stopAutoBackup();
-
-            mkdirp(filePath)
-                .then(function() {
-                    return myThis.backupTranslation(meta, path.join(filePath, name));
-                })
-                .then(function() {
-                    backupTimer = setTimeout(myThis.startAutoBackup.bind(myThis, meta), 20000);
+            let removeOtherFiles = function(td, fn) {
+                readdir(td).then(function(files) {
+                    files.forEach(function(f) {
+                        if (f !== fn + '.tstudio') {
+                            rm(path.join(td, f), function(err) {
+                                if (err) { console.log(err); }
+                            });
+                        }
+                    });
                 });
-        },
+            };
 
-        stopAutoBackup: function() {
-            clearTimeout(backupTimer);
+            list.forEach(function(meta) {
+                let sourceDir = myThis.getPaths(meta).projectDir,
+                    projectFolder = 'uw-' + meta.fullname,
+                    targetDir = path.join(dataPath, dataFolder, projectFolder);
+
+                git.getHash(sourceDir).then(function(hash) {
+                    let fileName = hash + '-backup',
+                        filePath = path.join(targetDir, fileName);
+
+                    myThis.fileExists(filePath + '.tstudio')
+                        .then(function(exist) { return exist ? false : mkdirp(targetDir); })
+                        .then(myThis.backupTranslation(meta, filePath))
+                        .then(removeOtherFiles(targetDir, fileName));
+                });
+            });
         },
 
         /**
@@ -722,7 +742,8 @@ function ProjectsManager(query, configurator) {
             var paths = this.getPaths(meta);
             var isTranslation = this.isTranslation(meta);
 
-            this.startAutoBackup(meta);
+            // NOTE: Old auto-backup implementation
+            // this.startAutoBackup(meta);
 
             // read manifest, get object with finished frames
 

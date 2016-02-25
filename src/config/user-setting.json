@@ -68,10 +68,10 @@
     },
     {
         "name": "datalocation",
-        "mainText": "Data Location",
+        "mainText": "Backup Location",
         "value": "~/translationStudio",
         "group": "advanced",
-        "enabled": true,
+        "enabled": false,
         "visible": true
     },
     {
@@ -97,6 +97,22 @@
         "helpText": "Update user options to the most current",
         "group": "advanced",
         "enabled": true,
+        "visible": true
+    },
+    {
+        "name": "appversion",
+        "mainText": "App Version",
+        "value": "0.0.0",
+        "group": "about",
+        "enabled": false,
+        "visible": true
+    },
+    {
+        "name": "datapath",
+        "mainText": "Data Path",
+        "value": "/test/path",
+        "group": "about",
+        "enabled": false,
         "visible": true
     }
 ]

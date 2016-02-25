@@ -263,10 +263,12 @@
           var name = 'uw-' + meta.fullname;
           var confirm = this.$.confirm;
 
-          var filename = App.ipc.sendSync('save-as', {name: name});
+          var backupPath = App.configurator.getUserPath('datalocation', 'backups', name);
+
+          var filename = App.ipc.sendSync('save-as', {name: backupPath});
           this.set('tempdata.filename', filename);
 
-          return App.projectsManager.fileExists(filename + ".tstudio")
+          return App.projectsManager.fileExists(filename + '.tstudio')
               .then (function (stat) {
                   if (stat) {
                       confirm.open();

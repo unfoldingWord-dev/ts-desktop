@@ -67,7 +67,8 @@ function ProjectsManager(query, configurator) {
         },
         toJSON = _.partialRight(JSON.stringify, null, '\t'),
         fromJSON = JSON.parse.bind(JSON),
-        backupTimer,
+        // NOTE: Old auto-backup implementation
+        // backupTimer,
         config = (function (prefix) {
             var isUW = _.partial(_.startsWith, _, prefix, 0),
                 isChunk = function (filename) {
@@ -351,13 +352,13 @@ function ProjectsManager(query, configurator) {
             return write(paths.ready, (new Date()).toString());
         },
 
-        backupTranslation: function (meta, filename) {
+        backupTranslation: function (meta, filePath) {
             var paths = this.getPaths(meta);
             var name = 'uw-' + meta.fullname;
             
             return new Promise(function(resolve, reject) {
                 var source = paths.projectDir;
-                var output = fs.createWriteStream(filename + ".tstudio");
+                var output = fs.createWriteStream(filePath + ".tstudio");
                 var archive = archiver.create('zip');
                 var timestamp = new Date().getTime();
                 var manifest = {
@@ -400,24 +401,42 @@ function ProjectsManager(query, configurator) {
             });
         },
 
-        startAutoBackup: function(meta) {
-            var filePath = untildify(configurator.getUserSetting('backuplocation')),
-                name = 'uw-' + meta.fullname + '-backup',
+        // NOTE: Old auto-backup implementation
+        // startAutoBackup: function(meta) {
+        //     var filePath = untildify(configurator.getUserSetting('backuplocation')),
+        //         name = 'uw-' + meta.fullname + '-backup',
+        //         myThis = this;
+
+        //     this.stopAutoBackup();
+
+        //     mkdirp(filePath)
+        //         .then(function() {
+        //             return myThis.backupTranslation(meta, path.join(filePath, name));
+        //         })
+        //         .then(function() {
+        //             backupTimer = setTimeout(myThis.startAutoBackup.bind(myThis, meta), 20000);
+        //         });
+        // },
+
+        // NOTE: Old auto-backup implementation
+        // stopAutoBackup: function() {
+        //     clearTimeout(backupTimer);
+        // },
+
+        backupProject: function(meta) {
+            console.log('backupProject called', meta);
+            var dataPath = untildify(configurator.getUserSetting('backuplocation')),
+                folderName = 'uw-' + meta.fullname,
+                filePath = path.join(dataPath, 'translationStudio/automatic_backups', folderName),
+                fileName,
                 myThis = this;
 
-            this.stopAutoBackup();
+            console.log('filePath is', filePath);
 
-            mkdirp(filePath)
-                .then(function() {
-                    return myThis.backupTranslation(meta, path.join(filePath, name));
-                })
-                .then(function() {
-                    backupTimer = setTimeout(myThis.startAutoBackup.bind(myThis, meta), 20000);
-                });
-        },
-
-        stopAutoBackup: function() {
-            clearTimeout(backupTimer);
+            // mkdirp(filePath)
+            //     .then(function() {
+            //         return myThis.backupTranslation(meta, path.join(path, name));
+            //     });
         },
 
         /**
@@ -681,7 +700,8 @@ function ProjectsManager(query, configurator) {
                 .then(makeChapterDirs(chunks))
                 .then(updateChunks(chunks))
                 .then(git.init.bind(git, paths.projectDir))
-                .then(git.stage.bind(git, paths.projectDir));
+                .then(git.stage.bind(git, paths.projectDir))
+                .then(this.backupProject(meta));
         },
 
         loadProjectsList: function () {
@@ -722,7 +742,8 @@ function ProjectsManager(query, configurator) {
             var paths = this.getPaths(meta);
             var isTranslation = this.isTranslation(meta);
 
-            this.startAutoBackup(meta);
+            // NOTE: Old auto-backup implementation
+            // this.startAutoBackup(meta);
 
             // read manifest, get object with finished frames
 

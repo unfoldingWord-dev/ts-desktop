@@ -108,7 +108,7 @@ function Printer() {
                         });
                         //console.debug('forming chapter', frames);
                         let formatReference = getFirstPropValue(frames); // refer to one of the frames for the format
-                        console.debug(formatReference);
+                        //console.debug(formatReference);
                         let chapterObj = {
                             id: key,
                             title: frames.title || key,
@@ -197,11 +197,16 @@ function Printer() {
                             _.forEach(chapter.frames, function(frame) {
                                 if(options.includeIncompleteFrames === true || frame.completed === true) {
                                     if (options.includeImages === true) {
-                                        console.debug(meta);
-                                        console.debug(frame);
+                                        //console.debug(meta);
+                                        //console.debug(frame);
                                         // TRICKY: right now all images are en
                                         var imgPath = path.join(imagePath, meta.resource_id + "-en-" + frame.meta.chapterid + "-" + frame.meta.frameid + ".jpg");
-                                        doc.image(imgPath, {width:doc.page.width - 72*2});
+                                        //check the position of the text on the page. 
+                                        // 792 (total ht of page) - 50 ( lower margin) - 263.25 (height of pic) = 478.75 (max amount of space used before image)
+                                        if(doc.y > 478.75){
+                                            doc.addPage();
+                                        }
+                                       doc.image(imgPath, {width:doc.page.width - 72*2});
                                     }
                                     doc.moveDown()
                                         .fontSize(10)
@@ -252,11 +257,11 @@ function Printer() {
                         resolve(true);
                     } else {
                         // we don't support anything but dokuwiki right now
-                        reject('We only support exporting OBS projects for now');
+                        reject('We only support printing OBS projects for now');
                     }
                 } else {
                     // TODO: support exporting other target translation types if needed e.g. notes, words, questions
-                    reject('We do not support exporting that project type yet');
+                    reject('We do not support printing that project type yet');
                 }
             });
         }

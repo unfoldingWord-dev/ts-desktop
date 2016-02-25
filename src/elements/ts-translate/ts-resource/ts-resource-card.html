@@ -24,7 +24,6 @@
 			padding: 0 16px;
 			color: var(--secondary-text-color);
             display: flex;
-            justify-content: flex-start;
             align-items: center;
             min-height: 48px;
 		}
@@ -45,10 +44,9 @@
 
         paper-tabs {
             --paper-tabs-selection-bar-color: var(--accent-color);
-        }
-
-        paper-tab {
-            width: 120px;
+            flex: auto;
+            display: flex;
+            justify-content: space-between;
         }
 
         .link {

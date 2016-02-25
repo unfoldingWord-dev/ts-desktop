@@ -161,7 +161,6 @@
       </template>
 
       <input id="restore" class="hide" type="file" accept=".tstudio" multiple />
-      <input id="backup" class="hide" type="file" nwsaveas="" />
 
       <paper-dialog id="feedback" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
           <div id="feedbackheader">
@@ -251,49 +250,38 @@
               type: Object,
               value: {loading: false, title: "", body: ""}
           },
-          tempbackup: {
+          tempdata: {
               type: Object,
-              value: {}
+              value: {meta: {}, filename: ""}
           }
       },
 
       openbackup: function (event, data) {
           var mythis = this;
           var meta = data.meta;
-          this.set('tempbackup', meta);
+          this.set('tempdata.meta', meta);
           var name = 'uw-' + meta.fullname;
-          var backup = this.$.backup;
-          var firsttime = true;
           var confirm = this.$.confirm;
 
-          backup.value = null;
-          backup.nwworkingdir = App.configurator.getUserSetting('backuplocation');
-          backup.nwsaveas = backup.nwworkingdir + App.configurator.PATH_SEP + name;
-          backup.addEventListener("change", function (evt) {
-             // console.log('change');
-              if (firsttime) {
-                  firsttime = false;
-                  var filename = backup.value;
+          var filename = App.ipc.sendSync('save-as', {name: name});
+          this.set('tempdata.filename', filename);
 
-                  return App.projectsManager.fileExists(filename + ".tstudio")
-                      .then (function (stat) {
-                          if (stat) {
-                              confirm.open();
-                          } else {
-                              mythis.executebackup();
-                          }
-                      });
-              }
-          }, false);
-          backup.click();
+          return App.projectsManager.fileExists(filename + ".tstudio")
+              .then (function (stat) {
+                  if (stat) {
+                      confirm.open();
+                  } else if (filename) {
+                      mythis.executebackup();
+                  }
+              });
       },
 
       executebackup: function () {
           var mythis = this;
           var loading = this.$.loading;
-          var meta = this.tempbackup;
-          var backup = this.$.backup;
-          var filename = backup.value;
+          var meta = this.tempdata.meta;
+          var name = 'uw-' + meta.fullname;
+          var filename = this.tempdata.filename;
           var confirm = this.$.confirm;
 
           confirm.close();
@@ -324,7 +312,6 @@
           var chooser = this.$.restore;
           chooser.value = null;
           chooser.addEventListener('change', function(evt) {
-             // console.log('change');
               mythis.set('options.body', "Restoring.  Please wait...");
               mythis.set('options.loading', true);
               loading.open();
@@ -436,6 +423,8 @@
                   list[i].type_name = "Questions";
               } else if (list[i].project.type === "tw") {
                   list[i].type_name = "Words";
+              } else if (list[i].project.type === "ta") {
+                  list[i].type_name = "Academy";
               }
 
               if (list[i].resource_id === undefined) {
@@ -452,7 +441,7 @@
 
               var typeext = "";
 
-              if (list[i].project.type === "tw") {
+              if (list[i].project.type === "tw" || list[i].project.type === "ta") {
                   typeext = "";
               } else if (list[i].project.type !== "text") {
                   typeext = "_" + list[i].project.type;

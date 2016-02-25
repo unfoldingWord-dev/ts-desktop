@@ -402,61 +402,41 @@ function ProjectsManager(query, configurator) {
             });
         },
 
-        // NOTE: Old auto-backup implementation
-        // startAutoBackup: function(meta) {
-        //     var filePath = untildify(configurator.getUserSetting('backuplocation')),
-        //         name = 'uw-' + meta.fullname + '-backup',
-        //         myThis = this;
-
-        //     this.stopAutoBackup();
-
-        //     mkdirp(filePath)
-        //         .then(function() {
-        //             return myThis.backupTranslation(meta, path.join(filePath, name));
-        //         })
-        //         .then(function() {
-        //             backupTimer = setTimeout(myThis.startAutoBackup.bind(myThis, meta), 20000);
-        //         });
-        // },
-
-        // NOTE: Old auto-backup implementation
-        // stopAutoBackup: function() {
-        //     clearTimeout(backupTimer);
-        // },
-
+        /*
+         * Store projects in automatic backup folder if there's any change
+         * @param list: projectlist proeperty
+         */
         backupProjects: function(list) {
             let myThis = this,
                 dataPath = untildify(configurator.getUserSetting('datalocation')),
                 dataFolder = 'translationStudio\\automatic_backups';
 
+            let removeOtherFiles = function(td, fn) {
+                readdir(td).then(function(files) {
+                    files.forEach(function(f) {
+                        if (f !== fn + '.tstudio') {
+                            rm(path.join(td, f), function(err) {
+                                if (err) { console.log(err); }
+                            });
+                        }
+                    });
+                });
+            };
+
             list.forEach(function(meta) {
                 let sourceDir = myThis.getPaths(meta).projectDir,
                     projectFolder = 'uw-' + meta.fullname,
-                    targetPath = path.join(dataPath, dataFolder, projectFolder);
+                    targetDir = path.join(dataPath, dataFolder, projectFolder);
 
                 git.getHash(sourceDir).then(function(hash) {
                     let fileName = hash + '-backup',
-                        filePath = path.join(targetPath, fileName);
+                        filePath = path.join(targetDir, fileName);
 
-                    myThis.fileExists(filePath + '.tstudio')
-                        .then(function(exist) {
-                            return exist ? false : mkdirp(targetPath)
-                                .then(function() {
-                                    return myThis.backupTranslation(meta, filePath);
-                                })
-                                .then (function() {
-                                    console.log('Project ' + meta.fullname + ' is backed up');
-                                    readdir(targetPath).then(function(files) {
-                                        files.forEach(function(file) {
-                                            if (file !== fileName + '.tstudio') {
-                                                rm(path.join(targetPath, file), function(err) {
-                                                    console.log('rm returns:', err);
-                                                });
-                                            }
-                                        });
-                                    });
-                                });
-                        });
+                    myThis.fileExists(filePath + '.tstudio').then(function(exist) {
+                        return exist ? false : mkdirp(targetDir)
+                            .then(myThis.backupTranslation(meta, filePath))
+                            .then(removeOtherFiles(targetDir, fileName));
+                    });
                 });
             });
         },

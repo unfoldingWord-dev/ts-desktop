@@ -354,12 +354,17 @@ function ProjectsManager(query, configurator) {
 
         backupTranslation: function (meta, filePath) {
             var paths = this.getPaths(meta);
+            console.log('paths:', paths);
             var name = 'uw-' + meta.fullname;
+            console.log('name:', name);
             
             return new Promise(function(resolve, reject) {
                 var source = paths.projectDir;
+                console.log('source:', source);
                 var output = fs.createWriteStream(filePath + ".tstudio");
+                console.log('output:', output);
                 var archive = archiver.create('zip');
+                console.log('archive:', archive);
                 var timestamp = new Date().getTime();
                 var manifest = {
                     generator: {
@@ -423,20 +428,28 @@ function ProjectsManager(query, configurator) {
         //     clearTimeout(backupTimer);
         // },
 
-        backupProject: function(meta) {
-            console.log('backupProject called', meta);
-            var dataPath = untildify(configurator.getUserSetting('backuplocation')),
-                folderName = 'uw-' + meta.fullname,
-                filePath = path.join(dataPath, 'translationStudio/automatic_backups', folderName),
-                fileName,
-                myThis = this;
+        backupProjects: function(list) {
+            let myThis = this,
+                dataPath = untildify(configurator.getUserSetting('datalocation')),
+                dataFolder = 'translationStudio\\automatic_backups';
 
-            console.log('filePath is', filePath);
+            list.forEach(function(meta) {
+                let sourceDir = myThis.getPaths(meta).projectDir,
+                    projectFolder = 'uw-' + meta.fullname,
+                    targetPath = path.join(dataPath, dataFolder, projectFolder);
 
-            // mkdirp(filePath)
-            //     .then(function() {
-            //         return myThis.backupTranslation(meta, path.join(path, name));
-            //     });
+                git.getHash(sourceDir).then(function(hash) {
+                    let fileName = hash + '-backup';
+
+                    mkdirp(targetPath)
+                        .then(function() {
+                            return myThis.backupTranslation(meta, path.join(targetPath, fileName));
+                        })
+                        .then (function(ret) {
+                            console.log('project is backed up', ret);
+                        });
+                });
+            });
         },
 
         /**

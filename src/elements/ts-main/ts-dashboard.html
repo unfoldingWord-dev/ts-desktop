@@ -279,17 +279,19 @@
       executebackup: function () {
           var mythis = this;
           var loading = this.$.loading;
-          var meta = this.tempbackup;
-          var backup = this.$.backup;
-          var filename = backup.value;
+          // var backup = this.$.backup;
           var confirm = this.$.confirm;
+          // var meta = this.tempbackup;
+          // var filePath = backup.value;
+          var filePath = this.tempdata.filename;
+          var meta = this.tempdata.meta;
 
           confirm.close();
           mythis.set('options.body', "Creating Backup.  Please wait...");
           mythis.set('options.loading', true);
           loading.open();
 
-          return App.projectsManager.backupTranslation(meta, filename)
+          return App.projectsManager.backupTranslation(meta, filePath)
               .then(function () {
                   mythis.set('options.title', "Backup Complete");
                   mythis.set('options.body', "Your project has been successfully archived.  Thanks.");
@@ -461,7 +463,8 @@
       },
 
       setdefault: function () {
-          App.projectsManager.stopAutoBackup();
+          // NOTE: Old backup implementation
+          // App.projectsManager.stopAutoBackup();
           this.currentproject = {};
       },
 

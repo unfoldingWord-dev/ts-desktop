@@ -67,9 +67,9 @@
         "visible": true
     },
     {
-        "name": "backuplocation",
-        "mainText": "Backup Location",
-        "value": "~/translationStudio/backup/",
+        "name": "datalocation",
+        "mainText": "Data Location",
+        "value": "~",
         "group": "advanced",
         "enabled": true,
         "visible": true

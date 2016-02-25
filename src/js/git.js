@@ -79,7 +79,7 @@ function Git() {
         getHash: function(dir) {
             let hash = cmd().cd(dir).and.do('git rev-parse HEAD');
             return hash.run()
-                .then(function(data) { return data.stdout; })
+                .then(function(data) { return data.stdout.trim(); })
                 .catch(function(err) { console.error(err.stderr); })
             ;
         },

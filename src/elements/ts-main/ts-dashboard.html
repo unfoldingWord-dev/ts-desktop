@@ -385,6 +385,7 @@
           var mythis = this;
           App.projectsManager.loadTargetTranslationsList().then(function(list) {
               mythis.checklist(list);
+              App.projectsManager.backupProjects(mythis.projectlist);
           });
       },
 

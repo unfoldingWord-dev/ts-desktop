@@ -15,7 +15,7 @@ process.stdout.write = console.log.bind(console);
 (function () {
 
     let path = require('path'),
-        fs = require('fs'),
+        // fs = require('fs'),  // Never used?
         mkdirp = require('mkdirp'),
         ipcRenderer = require('electron').ipcRenderer,
         Reporter = require('../js/reporter').Reporter,

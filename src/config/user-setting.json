@@ -4,7 +4,9 @@
         "mainText": "GL Mode",
         "helpText": "Display additional translation options for gateway languages",
         "value": false,
-        "group": "general"
+        "group": "general",
+        "enabled": true,
+        "visible": true
     },
     {
         "name": "font",
@@ -65,9 +67,9 @@
         "visible": true
     },
     {
-        "name": "backuplocation",
-        "mainText": "Backup Location",
-        "value": "~/translationStudio/backup/",
+        "name": "datalocation",
+        "mainText": "Data Location",
+        "value": "~",
         "group": "advanced",
         "enabled": true,
         "visible": true

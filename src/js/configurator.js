@@ -236,7 +236,13 @@
                 var current = [];
                 try {
                     current = flattenUserSetting(JSON.parse(storage['user-setting']));
-                } catch (e) { console.error(e); }
+                } catch (e) {
+                    // NOTE: The first time the app is run, a SyntaxError will be logged
+                    //   because storage['user-setting'] is still empty. Once any change
+                    //   is made, it will not be empty anymore and the error message
+                    //   will not show anymore.
+                    console.error(e);
+                }
 
                 // Keep current values and remove non-existent settings
                 for (var i in current) {

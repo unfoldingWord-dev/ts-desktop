@@ -432,11 +432,10 @@ function ProjectsManager(query, configurator) {
                     let fileName = hash + '-backup',
                         filePath = path.join(targetDir, fileName);
 
-                    myThis.fileExists(filePath + '.tstudio').then(function(exist) {
-                        return exist ? false : mkdirp(targetDir)
-                            .then(myThis.backupTranslation(meta, filePath))
-                            .then(removeOtherFiles(targetDir, fileName));
-                    });
+                    myThis.fileExists(filePath + '.tstudio')
+                        .then(function(exist) { return exist ? false : mkdirp(targetDir); })
+                        .then(myThis.backupTranslation(meta, filePath))
+                        .then(removeOtherFiles(targetDir, fileName));
                 });
             });
         },

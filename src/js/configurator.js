@@ -234,9 +234,12 @@
             refreshUserSetting: function() {
                 var defaults = this._userSetting();
                 var current = [];
+                
                 try {
                     current = flattenUserSetting(JSON.parse(storage['user-setting']));
-                } catch (e) { console.error(e); }
+                } catch (e) {
+                    console.info('No user settings');
+                }
 
                 // Keep current values and remove non-existent settings
                 for (var i in current) {

@@ -201,7 +201,12 @@ function Printer() {
                                         //console.debug(frame);
                                         // TRICKY: right now all images are en
                                         var imgPath = path.join(imagePath, meta.resource_id + "-en-" + frame.meta.chapterid + "-" + frame.meta.frameid + ".jpg");
-                                        doc.image(imgPath, {width:doc.page.width - 72*2});
+                                        //check the position of the text on the page. 
+                                        // 792 (total ht of page) - 50 ( lower margin) - 263.25 (height of pic) = 478.75 (max amount of space used before image)
+                                        if(doc.y > 478.75){
+                                            doc.addPage();
+                                        }
+                                       doc.image(imgPath, {width:doc.page.width - 72*2});
                                     }
                                     doc.moveDown()
                                         .fontSize(10)

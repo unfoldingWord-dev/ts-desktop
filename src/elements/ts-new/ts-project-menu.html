@@ -149,11 +149,11 @@
       ],
 
       checkicon: function (name) {
-          return name === "Open Bible Stories" || name === "Bible Words" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
+          return name === "Open Bible Stories" || name === "translationWords" || name === "translationAcademy" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
       },
 
       checkmore: function (name) {
-          return name === "Open Bible Stories" || name === "Bible Words" ? '' : 'chevron-right';
+          return name === "Open Bible Stories" || name === "translationWords" || name === "translationAcademy" ? '' : 'chevron-right';
       },
 
       store: function(e) {
@@ -167,9 +167,13 @@
                   this.type = {name: "Text - Open Bible Stories", code: "text", resource: "obs", allowed: true};
                   this.fire('create');
               }
-          } else if (this.category.name === "Bible Words") {
+          } else if (this.category.name === "translationWords") {
               this.project = this.category.data[0];
               this.type = {name: "Words", code: "tw", resource: "", allowed: true};
+              this.fire('create');
+          } else if (this.category.name === "translationAcademy") {
+              this.project = this.category.data[0];
+              this.type = {name: "Academy", code: "ta", resource: "", allowed: true};
               this.fire('create');
           } else {
               this.selected = this.selected + 1;
@@ -191,7 +195,8 @@
               temparray.push(tempobject);
           });
           if (App.configurator.getUserSetting('glmode')) {
-              temparray.push({"name": "Bible Words", "data": [{name: "Bible Words", slug: "tw"}]});
+              temparray.push({"name": "translationWords", "data": [{name: "translationWords", slug: "tw"}]});
+              temparray.push({"name": "translationAcademy", "data": [{name: "translationAcademy", slug: "ta"}]});
           }
           this.categorylist = temparray;
       },

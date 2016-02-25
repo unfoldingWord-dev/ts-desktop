@@ -68,10 +68,10 @@
     },
     {
         "name": "datalocation",
-        "mainText": "Data Location",
+        "mainText": "Backup Location",
         "value": "~/translationStudio",
         "group": "advanced",
-        "enabled": true,
+        "enabled": false,
         "visible": true
     },
     {

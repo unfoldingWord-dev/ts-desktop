@@ -9,6 +9,7 @@
 
     let _ = require('lodash');
     let path = require('path');
+    let untildify = require('untildify');
     let userSetting = require('../config/user-setting');
 
     function Configurator () {
@@ -211,6 +212,14 @@
                     var list = _.find(s, {'list': [{'name': name}]}).list;
                     return _.find(list, {'name': name}).value;     
                 } catch (e) { console.error(e); }
+            },
+
+            // TODO: this needs to be refactored. This is due to needing the backup dirs in the UI side.
+            //  This might be an okay solution, but it needs to be examined.
+            getUserPath: function (key, arg1, arg2, arg3) {
+                var val = configurator.getUserSetting(key);
+
+                return val ? path.join(untildify(val), arg1 || '', arg2 || '', arg3 || '') : '';
             },
 
             /**

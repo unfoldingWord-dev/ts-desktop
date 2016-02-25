@@ -188,7 +188,7 @@
                 var us;
                 try {
                     us = JSON.parse(storage['user-setting']);
-                } catch (e) { }
+                } catch (e) { console.error(e); }
                 return us || mapUserSettings(this._userSetting());
             },
 
@@ -249,7 +249,9 @@
                     }
                 }
 
-                return mapUserSettings(defaults);
+                let mappedSettings = mapUserSettings(defaults);
+                this.saveUserSettingArr(mappedSettings);
+                return mappedSettings;
             },
 
             /**
@@ -271,6 +273,16 @@
                 // We may not need this as settings that affects behavior is most likely called
                 //    using the App.configurator.getUserSetting(key) API.
                 // console.log('Pretend to apply behavior');
+            },
+
+            /**
+             * 
+             */
+            getAppVersion: function() {
+                try {
+                    let p = require('../../package');
+                    return p.version;
+                } catch (e) { console.log(e); }
             },
 
             /**

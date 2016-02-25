@@ -358,7 +358,8 @@ function ProjectsManager(query, configurator) {
             
             return new Promise(function(resolve, reject) {
                 let source = paths.projectDir,
-                    output = fs.createWriteStream(filePath + ".tstudio"),
+                    backupName = filePath + '.tstudio',
+                    output = fs.createWriteStream(backupName),
                     archive = archiver.create('zip'),
                     timestamp = new Date().getTime(),
                     manifest = {
@@ -375,7 +376,10 @@ function ProjectsManager(query, configurator) {
                 archive.directory(source, name + "/");
                 archive.append(toJSON(manifest), {name: 'manifest.json'});
                 archive.finalize();
-                resolve(true);
+
+                console.info('Backed up ' + name + ' to', backupName);
+
+                resolve(backupName);
             });
         },
 
@@ -404,40 +408,52 @@ function ProjectsManager(query, configurator) {
 
         /*
          * Store projects in automatic backup folder if there's any change
-         * @param list: projectlist proeperty
+         * @param list: projectlist property
          */
         backupProjects: function(list) {
-            let myThis = this,
+            let _this = this,
                 dataPath = untildify(configurator.getUserSetting('datalocation')),
-                dataFolder = 'translationStudio\\automatic_backups';
+                backupDir = path.join(dataPath, 'automatic_backups');
 
-            let removeOtherFiles = function(td, fn) {
-                readdir(td).then(function(files) {
-                    files.forEach(function(f) {
-                        if (f !== fn + '.tstudio') {
-                            rm(path.join(td, f), function(err) {
-                                if (err) { console.log(err); }
-                            });
-                        }
-                    });
-                });
+            /*
+             * NOTE: We are removing *after* we backup so that a backup is already there.
+             *          Example scenario: App attempts to auto backup, deletes all the
+             *          generated auto backups, tries to backup, then crashes. In this
+             *          instance, the user is left without backups. So, instead, we
+             *          clear out any old files only after we are certain that there
+             *          is a new backup.
+             */
+
+            let removeOtherFiles = function(backupName) {
+                let paths = path.parse(backupName),
+                    dir = paths.dir,
+                    hash = paths.base.split('.')[0];
+
+                // N.B. Double check that we're in the backups folder before doing any remove/delete
+                return dir.startsWith(backupDir) ? rm(dir + '/!(' + hash + ')*') : false;
             };
 
-            list.forEach(function(meta) {
-                let sourceDir = myThis.getPaths(meta).projectDir,
-                    projectFolder = 'uw-' + meta.fullname,
-                    targetDir = path.join(dataPath, dataFolder, projectFolder);
+            let promises = _.map(list, function(meta) {
+                let sourceDir = _this.getPaths(meta).projectDir,
+                    projectFolder = path.basename(sourceDir),
+                    targetDir = path.join(backupDir, projectFolder),
+                    doBackup = _this.backupTranslation.bind(_this, meta);
 
-                git.getHash(sourceDir).then(function(hash) {
-                    let fileName = hash + '-backup',
-                        filePath = path.join(targetDir, fileName);
+                return mkdirp(targetDir)
+                    .then(function () {
+                        return git.getHash(sourceDir);
+                    })
+                    .then(function(hash) {
+                        let fileName = hash + '.backup',
+                            filePath = path.join(targetDir, fileName);
 
-                    myThis.fileExists(filePath + '.tstudio')
-                        .then(function(exist) { return exist ? false : mkdirp(targetDir); })
-                        .then(myThis.backupTranslation(meta, filePath))
-                        .then(removeOtherFiles(targetDir, fileName));
-                });
+                        return filePath;
+                    })
+                    .then(doBackup)
+                    .then(removeOtherFiles);
             });
+
+            return Promise.all(promises);
         },
 
         /**

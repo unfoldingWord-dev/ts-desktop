@@ -234,14 +234,11 @@
             refreshUserSetting: function() {
                 var defaults = this._userSetting();
                 var current = [];
+                
                 try {
                     current = flattenUserSetting(JSON.parse(storage['user-setting']));
                 } catch (e) {
-                    // NOTE: The first time the app is run, a SyntaxError will be logged
-                    //   because storage['user-setting'] is still empty. Once any change
-                    //   is made, it will not be empty anymore and the error message
-                    //   will not show anymore.
-                    console.error(e);
+                    console.info('No user settings');
                 }
 
                 // Keep current values and remove non-existent settings

@@ -69,7 +69,7 @@
     {
         "name": "datalocation",
         "mainText": "Data Location",
-        "value": "~",
+        "value": "~/translationStudio",
         "group": "advanced",
         "enabled": true,
         "visible": true

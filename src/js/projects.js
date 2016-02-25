@@ -353,28 +353,24 @@ function ProjectsManager(query, configurator) {
         },
 
         backupTranslation: function (meta, filePath) {
-            var paths = this.getPaths(meta);
-            console.log('paths:', paths);
-            var name = 'uw-' + meta.fullname;
-            console.log('name:', name);
+            let paths = this.getPaths(meta),
+                name = 'uw-' + meta.fullname;
             
             return new Promise(function(resolve, reject) {
-                var source = paths.projectDir;
-                console.log('source:', source);
-                var output = fs.createWriteStream(filePath + ".tstudio");
-                console.log('output:', output);
-                var archive = archiver.create('zip');
-                console.log('archive:', archive);
-                var timestamp = new Date().getTime();
-                var manifest = {
-                    generator: {
-                        name: 'ts-desktop',
-                        build: ''
-                    },
-                    package_version: 2,
-                    timestamp: timestamp,
-                    target_translations: [{path: name, id: name, commit_hash: '', direction: "ltr"}]
-                };
+                let source = paths.projectDir,
+                    output = fs.createWriteStream(filePath + ".tstudio"),
+                    archive = archiver.create('zip'),
+                    timestamp = new Date().getTime(),
+                    manifest = {
+                        generator: {
+                            name: 'ts-desktop',
+                            build: ''
+                        },
+                        package_version: 2,
+                        timestamp: timestamp,
+                        target_translations: [{path: name, id: name, commit_hash: '', direction: "ltr"}]
+                    };
+
                 archive.pipe(output);
                 archive.directory(source, name + "/");
                 archive.append(toJSON(manifest), {name: 'manifest.json'});
@@ -439,14 +435,27 @@ function ProjectsManager(query, configurator) {
                     targetPath = path.join(dataPath, dataFolder, projectFolder);
 
                 git.getHash(sourceDir).then(function(hash) {
-                    let fileName = hash + '-backup';
+                    let fileName = hash + '-backup',
+                        filePath = path.join(targetPath, fileName);
 
-                    mkdirp(targetPath)
-                        .then(function() {
-                            return myThis.backupTranslation(meta, path.join(targetPath, fileName));
-                        })
-                        .then (function(ret) {
-                            console.log('project is backed up', ret);
+                    myThis.fileExists(filePath + '.tstudio')
+                        .then(function(exist) {
+                            return exist ? false : mkdirp(targetPath)
+                                .then(function() {
+                                    return myThis.backupTranslation(meta, filePath);
+                                })
+                                .then (function() {
+                                    console.log('Project ' + meta.fullname + ' is backed up');
+                                    readdir(targetPath).then(function(files) {
+                                        files.forEach(function(file) {
+                                            if (file !== fileName + '.tstudio') {
+                                                rm(path.join(targetPath, file), function(err) {
+                                                    console.log('rm returns:', err);
+                                                });
+                                            }
+                                        });
+                                    });
+                                });
                         });
                 });
             });
@@ -713,8 +722,7 @@ function ProjectsManager(query, configurator) {
                 .then(makeChapterDirs(chunks))
                 .then(updateChunks(chunks))
                 .then(git.init.bind(git, paths.projectDir))
-                .then(git.stage.bind(git, paths.projectDir))
-                .then(this.backupProject(meta));
+                .then(git.stage.bind(git, paths.projectDir));
         },
 
         loadProjectsList: function () {

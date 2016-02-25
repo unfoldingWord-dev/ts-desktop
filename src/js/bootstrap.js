@@ -56,8 +56,10 @@ process.stdout.write = console.log.bind(console);
 
 
 
-    // TODO: where should this be?
+    // TODO: where should these be?
     mkdirp.sync(configurator.getValue('targetTranslationsDir'));
+    mkdirp.sync(configurator.getUserPath('datalocation', 'automatic_backups'));
+    mkdirp.sync(configurator.getUserPath('datalocation', 'backups'));
 
     var App = {
         appName: 'translationStudio',

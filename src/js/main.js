@@ -11,7 +11,7 @@ app.setPath('userData', (function (dataDir) {
     var base = process.env.LOCALAPPDATA ||
         (process.platform == 'darwin'
             ? path.join(process.env.HOME, 'Library', 'Application Support')
-            : path.join(process.env.HOME + '.config'));
+            : path.join(process.env.HOME, '.config'));
 
     return path.join(base, dataDir);
 })('translationstudio'));

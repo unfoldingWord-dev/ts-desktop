@@ -90,7 +90,7 @@
                 <div class="setting-group-body">
                     <template is="dom-repeat" items="{{item.list}}" as="setting" index-as="list">
                         <template is="dom-if" if="{{_isVisible(setting.visible)}}">
-                            <div id="{{setting.name}}" class="setting-group-item" on-tap="_runTapHandler" data-group="[[group]]" data-list="[[list]]">
+                            <div id="{{setting.name}}" class="setting-group-item" on-tap="_runTapHandler" data-enabled={{_isEnabled(setting.enabled)}} data-group="[[group]]" data-list="[[list]]">
                                 <div class="setting-text avoid-clicks">
                                     <div class="main-text">{{setting.mainText}}</div>
                                     <div class="help-text">{{_computeHelpText(setting.*)}}</div>
@@ -159,12 +159,18 @@
 
         ready: function() {
             this.settings = App.configurator.refreshUserSetting();
-            // TODO: Fix to work with electron
-            // this.$['data-location-browser'].nwworkingdir = App.configurator.getUserSetting('backuplocation');
+            this.settings = App.configurator.setUserSetting('appversion', App.configurator.getAppVersion());
+            this.settings = App.configurator.setUserSetting('datapath', App.configurator.getValue('rootdir'));
+            // TODO: get working with electron. (Read only in the meantime.)
+            // this.$['backup-location-browser'].nwworkingdir = App.configurator.getUserSetting('backuplocation');
         },
 
         back: function() {
             this.route = this.backto;
+        },
+
+        _isEnabled: function(bool) {
+            return bool ? true : false;
         },
 
         _isVisible: function(bool) {
@@ -194,6 +200,7 @@
         },
 
         _runTapHandler: function(event) {
+            if (!event.target.dataEnabled) { return false; }           
             var name = event.model.setting.name;
             var value = event.model.setting.value;
             if (name === 'developertools') {
@@ -234,7 +241,7 @@
             if (newPath) {
                 var oldPath = App.configurator.getUserSetting('datalocation');
                 this.settings = App.configurator.setUserSetting('datalocation', newPath);
-                // Why commented?
+                // TODO:
                 // App.projectsManager.migrateBackup(oldPath, newPath);
             }
         },

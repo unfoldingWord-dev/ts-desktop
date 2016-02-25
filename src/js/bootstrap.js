@@ -69,8 +69,16 @@ process.stdout.write = console.log.bind(console);
         ipc: ipcRenderer,
 
         get window () {
+            return this._window('main-window');
+        },
+
+        get academyWindow () {
+            return this._window('academy-window');
+        },
+
+        _window: function (windowName) {
             var ipc = ipcRenderer,
-                send = ipc.sendSync.bind(ipc, 'main-window');
+                send = ipc.sendSync.bind(ipc, windowName);
 
             return {
                 close: send.bind(ipc, 'close'),

@@ -64,10 +64,10 @@ function createWindow () {
 function createAcademyWindow () {
 
     academyWindow = new BrowserWindow({
-        width: 980,
-        height: 580,
-        minWidth: 800,
-        minHeight: 580,
+        width: 750,
+        height: 660,
+        minWidth: 400,
+        minHeight: 400,
         useContentSize: true,
         center: true,
         title: app.getName(),
@@ -131,9 +131,9 @@ app.on('ready', createWindow);
 app.on('window-all-closed', function () {
     // On OS X it is common for applications and their menu bar
     // to stay active until the user quits explicitly with Cmd + Q
-    if (process.platform !== 'darwin') {
+    // if (process.platform !== 'darwin') {
         app.quit();
-    }
+    // }
 });
 
 app.on('activate', function () {

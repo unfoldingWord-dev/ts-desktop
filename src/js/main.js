@@ -26,7 +26,7 @@ let academyWindow;
 function createSplashScreen() {
     splashScreen = new BrowserWindow({
         width: 400,
-        height: 165,
+        height: 170,
         resizable: false,
         autoHideMenuBar: true,
         frame: false,

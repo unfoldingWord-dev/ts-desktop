@@ -8,13 +8,11 @@ var _ = require('lodash'),
     AdmZip = require('adm-zip'),
     archiver = require('archiver'),
     utils = require('../js/lib/util'),
+    git = require('../js/git'),
     tstudioMigrator = require('../js/migration/tstudioMigrator'),
     targetTranslationMigrator = require('../js/migration/targetTranslationMigrator'),
     wrap = utils.promisify,
     guard = utils.guard;
-
-var Git = require('../js/git').Git;
-var git = new Git();
 
 function zipper (r) {
     return r.length ? _.map(r[0].values, _.zipObject.bind(_, r[0].columns)) : [];
@@ -713,8 +711,12 @@ function ProjectsManager(query, configurator) {
                 .then(writeFile(paths.manifest, manifest))
                 .then(makeChapterDirs(chunks))
                 .then(updateChunks(chunks))
-                .then(git.init.bind(git, paths.projectDir))
-                .then(git.stage.bind(git, paths.projectDir));
+                .then(function () {
+                    return git.init(paths.projectDir);
+                })
+                .then(function () {
+                    return git.stage(paths.projectDir);
+                });
         },
 
         loadProjectsList: function () {

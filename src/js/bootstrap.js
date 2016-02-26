@@ -23,7 +23,7 @@ process.stdout.write = console.log.bind(console);
         Uploader = require('../js/uploader').Uploader,
         Db = require('../js/lib/db').Db,
         ProjectsManager = require('../js/projects').ProjectsManager,
-        i18n = require('../js/i18n').Locale('./i18n'),
+        i18n = require('../js/i18n').Locale(path.resolve(path.join(__dirname, '..', '..', 'i18n'))),
         util = require('../js/lib/util'),
         printer = require('../js/printer').Printer();
 
@@ -104,8 +104,9 @@ process.stdout.write = console.log.bind(console);
 
         projectsManager: (function () {
             // TODO: should we move the location of these files/folders outside of the src folder?
-            var schemaPath = path.join('.', 'src', 'config', 'schema.sql'),
-                dbPath = path.join('.', 'src', 'index', 'index.sqlite'),
+            var srcDir = path.resolve(path.join(__dirname, '..')),
+                schemaPath = path.join(srcDir, 'config', 'schema.sql'),
+                dbPath = path.join(srcDir, 'index', 'index.sqlite'),
                 db = new Db(schemaPath, dbPath);
 
             return new ProjectsManager(db, configurator);

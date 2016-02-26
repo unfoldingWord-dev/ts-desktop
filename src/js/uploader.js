@@ -28,7 +28,7 @@ var net = require('net'),
 function Uploader() {
 
     var paths = {
-        sshPath: path.resolve('ssh'),
+        sshPath: path.resolve(path.join(__dirname, '..', '..', 'ssh')),
 
         publicKeyName: 'ts.pub',
 

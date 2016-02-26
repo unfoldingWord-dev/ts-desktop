@@ -26,7 +26,6 @@ gulp.task('clean', function () {
     rimraf.sync('src/logs');
     rimraf.sync('logs');
     rimraf.sync('ssh');
-    rimraf.sync('out/**/**');
 });
 
 // pass parameters like: gulp build --win --osx --linux
@@ -47,23 +46,20 @@ gulp.task('build', ['clean'], function (done) {
     var ignored = Object.keys(p['devDependencies']).concat([
         'unit_tests',
         'acceptance_tests',
-        'out'
-    ]).reduce(function (a, b) {
-        a[b] = true;
-        return a;
-    }, {});
+        'out',
+        'scripts',
+        '\\.'
+    ]).map(function (name) {
+        return new RegExp('(^/' + name + '|' + '^/node_modules/' + name + ')');
+    });
 
     packager({
         all: true,
         dir: '.',
         ignore: function (name) {
-            var parts = name.split(path.sep),
-                part;
-
-            for (var i = 0, len = parts.length; i < len; ++i) {
-                part = parts[i];
-
-                if (ignored[part]) {
+            for (var i = 0, len = ignored.length; i < len; ++i) {
+                if (ignored[i].test(name)) {
+                    console.log('\t(Ignoring)\t', name);
                     return true;
                 }
             }

@@ -9,6 +9,7 @@ var gulp = require('gulp'),
     rimraf = require('rimraf'),
     argv = require('yargs').argv,
     packager = require('electron-packager'),
+    path = require('path'),
     fs = require('fs');
 
 var APP_NAME = 'translationStudio',
@@ -23,11 +24,13 @@ gulp.task('test', function () {
 
 gulp.task('clean', function () {
     rimraf.sync('src/logs');
-    rimraf.sync('src/ssh');
+    rimraf.sync('logs');
+    rimraf.sync('ssh');
+    rimraf.sync('out/**/**');
 });
 
 // pass parameters like: gulp build --win --osx --linux
-gulp.task('build', ['clean'], function () {
+gulp.task('build', ['clean'], function (done) {
 
     var platforms = [];
     if(argv.win !== undefined) {
@@ -39,6 +42,39 @@ gulp.task('build', ['clean'], function () {
     } else {
         platforms = ['osx64', 'win64', 'linux64'];
     }
+
+    var p = require('./package');
+    var ignored = Object.keys(p['devDependencies']).concat([
+        'unit_tests',
+        'acceptance_tests',
+        'out'
+    ]).reduce(function (a, b) {
+        a[b] = true;
+        return a;
+    }, {});
+
+    packager({
+        all: true,
+        dir: '.',
+        ignore: function (name) {
+            var parts = name.split(path.sep),
+                part;
+
+            for (var i = 0, len = parts.length; i < len; ++i) {
+                part = parts[i];
+
+                if (ignored[part]) {
+                    return true;
+                }
+            }
+
+            return false;
+        },
+        out: 'out'
+    }, function () {
+        console.log('Done building...');
+        done();
+    });
 
     // TODO: figure out how to make the builder do this
     

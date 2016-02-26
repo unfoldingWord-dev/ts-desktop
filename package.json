@@ -27,7 +27,7 @@
     "md5": "^2.0.0",
     "mkdirp": "^0.5.1",
     "node-forge": "^0.6.39",
-    "nodegit": "^0.11.1",
+    "nodegit": "github:nodegit/nodegit",
     "pdfkit": "^0.7.2",
     "request": "^2.58.0",
     "rimraf": "^2.4.2",
@@ -36,15 +36,15 @@
   },
   "devDependencies": {
     "bower": "^1.7.7",
-    "electron-packager": "^5.2.1",
-    "electron-prebuilt": "^0.36.7",
+    "electron-packager": "github:maxogden/electron-packager",
+    "electron-prebuilt": "^0.36.8",
     "gulp": "^3.9.1",
     "gulp-mocha": "^2.2.0",
     "mocha": "^2.4.5",
     "yargs": "^3.17.1"
   },
   "engines": {
-    "electron": "0.36.7"
+    "electron": "0.36.8"
   },
   "scripts": {
     "start": "electron src/js/main.js"

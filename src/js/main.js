@@ -120,7 +120,7 @@ function createAppMenus() {
             ]
         },
         {
-            label: "Edit",
+            label: "View",
             submenu: [
                 {
                     label: "Toggle Developer Tools",
@@ -168,7 +168,10 @@ ipcMain.on('save-as', function (event, arg) {
     event.returnValue = input || false;
 });
 
-app.on('ready', createWindow);
+app.on('ready', function () {
+    createAppMenus();
+    createWindow();
+});
 
 app.on('window-all-closed', function () {
     // On OS X it is common for applications and their menu bar

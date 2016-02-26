@@ -1,6 +1,7 @@
 'use strict';
 
 var electron = require('electron'),
+    Menu = require('menu'),
     dialog = electron.dialog,
     path = require('path'),
     app = electron.app,
@@ -93,6 +94,47 @@ function createAcademyWindow () {
     });
 
     academyWindow.focus();
+}
+
+function createAppMenus() {
+    // Create the Application's main menu
+    var template = [
+        {
+            label: "Application",
+            submenu: [
+                { label: "About Application", selector: "orderFrontStandardAboutPanel:" },
+                { type: "separator" },
+                { label: "Quit", accelerator: "Command+Q", click: function() { app.quit(); }}
+            ]
+        },
+        {
+            label: "Edit",
+            submenu: [
+                { label: "Undo", accelerator: "CmdOrCtrl+Z", selector: "undo:" },
+                { label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", selector: "redo:" },
+                { type: "separator" },
+                { label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
+                { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
+                { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
+                { label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" }
+            ]
+        },
+        {
+            label: "Edit",
+            submenu: [
+                {
+                    label: "Toggle Developer Tools",
+                    accelerator: "Shift+CmdOrCtrl+I", 
+                    click: function () {
+                        var w = BrowserWindow.getFocusedWindow();
+                        w && w.webContents.openDevTools();
+                    }
+                }
+            ]
+        }
+    ];
+
+    Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
 
 ipcMain.on('main-window', function (event, arg) {

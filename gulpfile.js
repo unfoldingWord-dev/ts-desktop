@@ -32,15 +32,11 @@ gulp.task('clean', function () {
 gulp.task('build', ['clean'], function (done) {
 
     var platforms = [];
-    if(argv.win !== undefined) {
-        platforms = ['win64', 'win32'];
-    } else if(argv.osx !== undefined) {
-        platforms = ['osx64'];
-    } else if(argv.linux !== undefined) {
-        platforms = ['linux64', 'linux32'];
-    } else {
-        platforms = ['osx64', 'win64', 'linux64'];
-    }
+
+    if (argv.win) platforms.push('win32');
+    if (argv.osx) platforms.push('darwin');
+    if (argv.linux) platforms.push('linux');
+    if (!platforms.length) platforms.push('win32', 'darwin', 'linux');
 
     var p = require('./package');
     var ignored = Object.keys(p['devDependencies']).concat([
@@ -54,9 +50,10 @@ gulp.task('build', ['clean'], function (done) {
     });
 
     packager({
-        all: true,
-        dir: '.',
-        ignore: function (name) {
+        'arch': 'all',
+        'platform': platforms,
+        'dir': '.',
+        'ignore': function (name) {
             for (var i = 0, len = ignored.length; i < len; ++i) {
                 if (ignored[i].test(name)) {
                     console.log('\t(Ignoring)\t', name);
@@ -66,7 +63,9 @@ gulp.task('build', ['clean'], function (done) {
 
             return false;
         },
-        out: 'out'
+        'out': 'out',
+        'app-version': p.version,
+        'icon': './icons/icon'
     }, function () {
         console.log('Done building...');
         done();

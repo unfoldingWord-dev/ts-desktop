@@ -15,12 +15,11 @@ process.stdout.write = console.log.bind(console);
 (function () {
 
     let path = require('path'),
-        // fs = require('fs'),  // Never used?
         mkdirp = require('mkdirp'),
         ipcRenderer = require('electron').ipcRenderer,
         Reporter = require('../js/reporter').Reporter,
         Configurator = require('../js/configurator').Configurator,
-        Git = require('../js/git').Git,
+        git = require('../js/git'),
         Uploader = require('../js/uploader').Uploader,
         Db = require('../js/lib/db').Db,
         ProjectsManager = require('../js/projects').ProjectsManager,
@@ -99,7 +98,7 @@ process.stdout.write = console.log.bind(console);
 
         util: util,
 
-        git: new Git(),
+        git: git,
 
         printer: printer,
 

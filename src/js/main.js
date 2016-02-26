@@ -19,8 +19,27 @@ app.setPath('userData', (function (dataDir) {
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
+let splashScreen;
 let mainWindow;
 let academyWindow;
+
+function createSplashScreen() {
+    splashScreen = new BrowserWindow({
+        width: 400,
+        height: 165,
+        resizable: false,
+        autoHideMenuBar: true,
+        frame: false,
+        center: true,
+        title: 'translationStudio'
+    });
+
+    splashScreen.loadURL('file://' + __dirname + '/../views/splash-screen.html');
+
+    splashScreen.on('closed', function() {
+        splashScreen = null;
+    });
+}
 
 function createWindow () {
     // Create the browser window.
@@ -34,7 +53,8 @@ function createWindow () {
         title: 'translationStudio',
         backgroundColor: '#00796B',
         autoHideMenuBar: true,
-        frame: false
+        frame: false,
+        show: false
     });
 
     mainWindow.dataPath = app.getPath('userData');
@@ -168,9 +188,24 @@ ipcMain.on('save-as', function (event, arg) {
     event.returnValue = input || false;
 });
 
+ipcMain.on('loading-status', function (event, status) {
+    splashScreen && splashScreen.webContents.send('loading-status', status);
+});
+
+ipcMain.on('loading-done', function (event) {
+    if (splashScreen && mainWindow) {
+        splashScreen.close();
+        mainWindow.show();
+        mainWindow.focus();
+    }
+});
+
 app.on('ready', function () {
     createAppMenus();
-    createWindow();
+    createSplashScreen();
+    setTimeout(function () {
+        createWindow();
+    }, 500); 
 });
 
 app.on('window-all-closed', function () {

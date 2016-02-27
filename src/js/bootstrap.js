@@ -41,7 +41,7 @@ process.stdout.write = console.log.bind(console);
     setMsg('Loading DB...');
     let Db = require('../js/lib/db').Db;
 
-    setMsg('Loading ProjectsManager...');
+    setMsg('Loading Projects Manager...');
     let ProjectsManager = require('../js/projects').ProjectsManager;
 
     setMsg('Loading Locale...');
@@ -52,6 +52,8 @@ process.stdout.write = console.log.bind(console);
 
     setMsg('Loading Printer...');
     let printer = require('../js/printer').Printer();
+
+    setMsg('Initializing...');
 
     // TODO: refactor this so we can just pass an object to the constructor
     let configurator = (function () {

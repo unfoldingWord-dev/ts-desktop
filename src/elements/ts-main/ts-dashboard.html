@@ -263,10 +263,12 @@
           var name = 'uw-' + meta.fullname;
           var confirm = this.$.confirm;
 
-          var filename = App.ipc.sendSync('save-as', {name: name});
+          var backupPath = App.configurator.getUserPath('datalocation', 'backups', name);
+
+          var filename = App.ipc.sendSync('save-as', {name: backupPath});
           this.set('tempdata.filename', filename);
 
-          return App.projectsManager.fileExists(filename + ".tstudio")
+          return App.projectsManager.fileExists(filename + '.tstudio')
               .then (function (stat) {
                   if (stat) {
                       confirm.open();
@@ -279,17 +281,16 @@
       executebackup: function () {
           var mythis = this;
           var loading = this.$.loading;
-          var meta = this.tempdata.meta;
-          var name = 'uw-' + meta.fullname;
-          var filename = this.tempdata.filename;
           var confirm = this.$.confirm;
+          var filePath = this.tempdata.filename;
+          var meta = this.tempdata.meta;
 
           confirm.close();
           mythis.set('options.body', "Creating Backup.  Please wait...");
           mythis.set('options.loading', true);
           loading.open();
 
-          return App.projectsManager.backupTranslation(meta, filename, name)
+          return App.projectsManager.backupTranslation(meta, filePath)
               .then(function () {
                   mythis.set('options.title', "Backup Complete");
                   mythis.set('options.body', "Your project has been successfully archived.  Thanks.");
@@ -382,6 +383,7 @@
           var mythis = this;
           App.projectsManager.loadTargetTranslationsList().then(function(list) {
               mythis.checklist(list);
+              App.projectsManager.backupProjects(mythis.projectlist);
           });
       },
 
@@ -392,12 +394,14 @@
                   list[i].project = {id: '', name: '', type: ''};
                   list[i].project.id = list[i].project_id;
                   list[i].project.name = App.projectsManager.getProjectName(list[i].project.id)[0].name;
-                  if (list[i].project_type === undefined) {
+                  if (!list[i].project_type) {
                       list[i].project.type = "text";
                   } else {
                       list[i].project.type = list[i].project_type;
                   }
               }
+
+              list[i].project.type = list[i].project.type.toLowerCase();
 
               list[i].sources = [];
               var group = list[i].source_translations;
@@ -460,6 +464,8 @@
       },
 
       setdefault: function () {
+          // NOTE: Old backup implementation
+          // App.projectsManager.stopAutoBackup();
           this.currentproject = {};
       },
 

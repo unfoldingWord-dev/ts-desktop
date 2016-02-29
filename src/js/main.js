@@ -7,7 +7,14 @@ var electron = require('electron'),
     BrowserWindow = electron.BrowserWindow,
     ipcMain = electron.ipcMain;
 
-app.setPath('userData', path.join(process.env.localappdata, 'translationstudio'));
+app.setPath('userData', (function (dataDir) {
+    var base = process.env.LOCALAPPDATA ||
+        (process.platform == 'darwin'
+            ? path.join(process.env.HOME, 'Library', 'Application Support')
+            : path.join(process.env.HOME, '.config'));
+
+    return path.join(base, dataDir);
+})('translationstudio'));
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -23,7 +30,7 @@ function createWindow () {
         minHeight: 580,
         useContentSize: true,
         center: true,
-        title: app.getName(),
+        title: 'translationStudio',
         backgroundColor: '#00796B',
         autoHideMenuBar: true,
         frame: false
@@ -57,10 +64,10 @@ function createWindow () {
 function createAcademyWindow () {
 
     academyWindow = new BrowserWindow({
-        width: 980,
-        height: 580,
-        minWidth: 800,
-        minHeight: 580,
+        width: 750,
+        height: 660,
+        minWidth: 400,
+        minHeight: 400,
         useContentSize: true,
         center: true,
         title: app.getName(),
@@ -124,9 +131,9 @@ app.on('ready', createWindow);
 app.on('window-all-closed', function () {
     // On OS X it is common for applications and their menu bar
     // to stay active until the user quits explicitly with Cmd + Q
-    if (process.platform !== 'darwin') {
+    // if (process.platform !== 'darwin') {
         app.quit();
-    }
+    // }
 });
 
 app.on('activate', function () {

@@ -23,7 +23,6 @@ function zipper (r) {
 var map = guard('map'),
     indexBy = guard('indexBy'),
     flatten = guard('flatten'),
-    // filter = guard('filter'),  // Never used
     compact = guard('compact');
 
 /**
@@ -66,6 +65,8 @@ function ProjectsManager(query, configurator) {
         },
         toJSON = _.partialRight(JSON.stringify, null, '\t'),
         fromJSON = JSON.parse.bind(JSON),
+        // NOTE: Old auto-backup implementation
+        // backupTimer,
         config = (function (prefix) {
             var isUW = _.partial(_.startsWith, _, prefix, 0),
                 isChunk = function (filename) {
@@ -349,27 +350,34 @@ function ProjectsManager(query, configurator) {
             return write(paths.ready, (new Date()).toString());
         },
 
-        backupTranslation: function (meta, filename, name) {
-            var paths = this.getPaths(meta);
+        backupTranslation: function (meta, filePath) {
+            let paths = this.getPaths(meta),
+                name = 'uw-' + meta.fullname;
+            
             return new Promise(function(resolve, reject) {
-                var source = paths.projectDir;
-                var output = fs.createWriteStream(filename + ".tstudio");
-                var archive = archiver.create('zip');
-                var timestamp = new Date().getTime();
-                var manifest = {
-                    generator: {
-                        name: 'ts-desktop',
-                        build: ''
-                    },
-                    package_version: 2,
-                    timestamp: timestamp,
-                    target_translations: [{path: name, id: name, commit_hash: '', direction: "ltr"}]
-                };
+                let source = paths.projectDir,
+                    backupName = filePath + '.tstudio',
+                    output = fs.createWriteStream(backupName),
+                    archive = archiver.create('zip'),
+                    timestamp = new Date().getTime(),
+                    manifest = {
+                        generator: {
+                            name: 'ts-desktop',
+                            build: ''
+                        },
+                        package_version: 2,
+                        timestamp: timestamp,
+                        target_translations: [{path: name, id: name, commit_hash: '', direction: "ltr"}]
+                    };
+
                 archive.pipe(output);
                 archive.directory(source, name + "/");
                 archive.append(toJSON(manifest), {name: 'manifest.json'});
                 archive.finalize();
-                resolve(true);
+
+                console.info('Backed up ' + name + ' to', backupName);
+
+                resolve(backupName);
             });
         },
 
@@ -396,12 +404,53 @@ function ProjectsManager(query, configurator) {
             });
         },
 
-        startAutoBackup: function() {
+        /*
+         * Store projects in automatic backup folder if there's any change
+         * @param list: projectlist property
+         */
+        backupProjects: function(list) {
+            let _this = this,
+                backupDir = configurator.getUserPath('datalocation', 'automatic_backups');
 
-        },
+            /*
+             * NOTE: We are removing *after* we backup so that a backup is already there.
+             *          Example scenario: App attempts to auto backup, deletes all the
+             *          generated auto backups, tries to backup, then crashes. In this
+             *          instance, the user is left without backups. So, instead, we
+             *          clear out any old files only after we are certain that there
+             *          is a new backup.
+             */
 
-        stopAutoBackup: function(id) {
+            let removeOtherFiles = function(backupName) {
+                let paths = path.parse(backupName),
+                    dir = paths.dir,
+                    hash = paths.base.split('.')[0];
 
+                // N.B. Double check that we're in the backups folder before doing any remove/delete
+                return dir.startsWith(backupDir) ? rm(dir + '/!(' + hash + ')*') : false;
+            };
+
+            let promises = _.map(list, function(meta) {
+                let sourceDir = _this.getPaths(meta).projectDir,
+                    projectFolder = path.basename(sourceDir),
+                    targetDir = path.join(backupDir, projectFolder),
+                    doBackup = _this.backupTranslation.bind(_this, meta);
+
+                return mkdirp(targetDir)
+                    .then(function () {
+                        return git.getHash(sourceDir);
+                    })
+                    .then(function(hash) {
+                        let fileName = hash + '.backup',
+                            filePath = path.join(targetDir, fileName);
+
+                        return filePath;
+                    })
+                    .then(doBackup)
+                    .then(removeOtherFiles);
+            });
+
+            return Promise.all(promises);
         },
 
         /**
@@ -704,8 +753,10 @@ function ProjectsManager(query, configurator) {
 
         loadTargetTranslation: function (meta) {
             var paths = this.getPaths(meta);
-
             var isTranslation = this.isTranslation(meta);
+
+            // NOTE: Old auto-backup implementation
+            // this.startAutoBackup(meta);
 
             // read manifest, get object with finished frames
 

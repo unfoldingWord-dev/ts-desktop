@@ -764,7 +764,6 @@
                 var chapter = parseInt(chapterid);
                 var frameid = frames[i].verse;
                 var frame = parseInt(frameid);
-                var complexid = chapterid + '-' + frameid;
                 var title = frames[i].title;
                 var reference = frames[i].reference;
                 var format = frames[i].format;
@@ -820,6 +819,8 @@
                         frameid = "0" + frameid;
                     }
                 }
+
+                var complexid = chapterid + '-' + frameid;
 
                 if (name === "Open Bible Stories") {
                     chapterref = title;

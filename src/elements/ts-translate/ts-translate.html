@@ -971,6 +971,20 @@
                     transchunk.completed = rawdata.completed;
                     if (standard) {
                         transchunk.transcontent = rawdata.transcontent;
+                        while (test.test(transchunk.transcontent)) {
+                            transchunk.transcontent = transchunk.transcontent.replace(startstr, " \\v");
+                            transchunk.transcontent = transchunk.transcontent.replace(endstr, " ");
+                        }
+                        if (!transchunk.completed) {
+                            var textarray = transchunk.transcontent.split(" ");
+                            var returnstr = "";
+                            for (var t = 0; t < textarray.length; t++) {
+                                if (textarray[t].substring(0, 2) !== "\\v") {
+                                    returnstr += textarray[t] + " ";
+                                }
+                            }
+                            transchunk.transcontent = returnstr.trim();
+                        }
                     } else {
                         transchunk.helpscontent = rawdata.helpscontent;
                     }

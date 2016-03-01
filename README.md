@@ -42,4 +42,19 @@ The following commands are available from within the project directory:
 * `$ npm start` runs the application (without building it)
 * `$ DEBUG_MODE=1 npm start` same as above, but has live reloading (which is a bit unstable, hence "debug mode")
 
-> Note: You can open the Chrome Developer Tools while the app is running by pressing `Ctrl+Alt+I`
+> Note: You can open the Chrome Developer Tools while the app is running by pressing `Ctrl+Shift+I`
+
+##Nodegit integration
+This project requires nodegit. In order to run the application you must compile nodegit for the correct version of electron (defined in package.json).
+In order to do this first be sure to `npm install` everything else. Then remove the `nodegit` directory from the `node_modules` dir. Finally run the following to compile nodegit
+
+**Windows**
+```
+cmd /C "set BUILD_ONLY=true && set ELECTRON_VERSION=0.36.8 && npm install nodegit"
+```
+
+**OSX**
+nodegit is installed correctly from `npm install`.
+
+**Linux**
+nodegit is installed correctly from `npm install`.

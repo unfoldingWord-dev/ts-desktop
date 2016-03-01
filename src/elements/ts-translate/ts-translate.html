@@ -158,7 +158,7 @@
 
         #printpopup {
             width: 450px;
-            height: 240px;
+            height: 280px;
             font-size: 110%;
         }
 
@@ -307,6 +307,7 @@
             <div>
                 <p><paper-checkbox id="imagebox"></paper-checkbox><span>Include images</span></p>
                 <p><paper-checkbox id="chunkbox" checked="true"></paper-checkbox><span>Include incomplete chunks</span></p>
+                 <p><paper-checkbox id="doublespacebox"></paper-checkbox><span>Double space text</span></p>
             </div>
             <div id="printbuttons">
                 <paper-button dialog-dismiss>Cancel</paper-button>
@@ -1371,6 +1372,7 @@
         goprint: function () {
             this.$.chunkbox.checked = true;
             this.$.imagebox.checked = false;
+            this.$.doublespacebox.checked = false;
             this.$.printpopup.open();
         },
 
@@ -1412,7 +1414,7 @@
             var meta = this.currentproject.data;
             var translation = this.currentproject.translation;
             var filename = App.configurator.getValue("print-filename");
-            var options = {includeIncompleteFrames: this.$.chunkbox.checked, includeImages: this.$.imagebox.checked};
+            var options = {includeIncompleteFrames: this.$.chunkbox.checked, includeImages: this.$.imagebox.checked, doubleSpace: this.$.doublespacebox.checked};
             var confirm = this.$.confirm;
 
             var generatePdf = function(){

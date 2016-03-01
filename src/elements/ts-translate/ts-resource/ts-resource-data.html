@@ -1,4 +1,6 @@
 
+<link rel="import" href="../../../components/iron-signals/iron-signals.html">
+
 <dom-module id="ts-resource-data">
 
 	<style>
@@ -38,6 +40,8 @@
             <div id="textholder"></div>
         </template>
 
+        <iron-signals on-iron-signal-renderresource="renderresource"></iron-signals>
+
 	</template>
 
 </dom-module>
@@ -55,11 +59,7 @@
             }
 		},
 
-        observers: [
-            'rendertext(resource.*)'
-        ],
-
-        rendertext: function () {
+        renderresource: function () {
             if(!this.resource.array && this.resource.data.length) {
                 var textarray = this.resource.data[0].split(" ");
                 var numstr1 = "\<sup\>";
@@ -78,6 +78,7 @@
                 var textholder = this.querySelector("#textholder");
                 if (textholder) {
                     textholder.innerHTML = returnstr;
+                    this.fire('setheight');
                 }
             }
         },

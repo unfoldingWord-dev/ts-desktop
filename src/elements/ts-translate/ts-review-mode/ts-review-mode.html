@@ -160,7 +160,7 @@
 	<template>
 
         <div id="contain">
-            <iron-list id="reviewlist" items="{{chunks.data}}" as="chunk" on-scroll="setresources">
+            <iron-list id="reviewlist" items="{{chunks.data}}" as="chunk">
                 <template>
                     <ts-review-card id="{{createid(index)}}" chunk="{{chunk}}" on-updateheight="updateheight"></ts-review-card>
                 </template>
@@ -243,10 +243,6 @@
                 type: Array,
                 value: []
             }
-        },
-
-        setresources: function () {
-            this.fire('iron-signal', {name: 'selectresource'});
         },
 
         updateheight: function (e) {
@@ -358,8 +354,6 @@
 
         tomode: function () {
             this.setpreview();
-            this.setlocation();
-            this.setresources();
             this.setlocation();
             this.movein();
         },

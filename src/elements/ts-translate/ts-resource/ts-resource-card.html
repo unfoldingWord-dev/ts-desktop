@@ -82,7 +82,7 @@
                     <div class="bigspace"></div>
                     <template is="dom-repeat" items="{{chunk.resources}}" as="resource">
                         <div class="littlespace"></div>
-                        <div class="tab unselected" id="{{createtabid(resource.title)}}" on-tap="updatestate">{{resource.title}}</div>
+                        <div class$="[[tabclass(chunk.state.resource, index)]]" on-tap="updatestate">{{resource.title}}</div>
                         <div class="littlespace"></div>
                     </template>
                     <div class="bigspace"></div>
@@ -90,12 +90,10 @@
             </div>
             <div id="content">
                 <template is="dom-repeat" items="{{chunk.resources}}" as="resource">
-                    <ts-resource-data id="{{createpageid(resource.title)}}" class="hide" resource="[[resource]]"></ts-resource-data>
+                    <ts-resource-data class$="[[pageclass(chunk.state.resource, index)]]" resource="[[resource]]"></ts-resource-data>
                 </template>
             </div>
         </paper-material>
-
-        <iron-signals on-iron-signal-selectresource="selectresource"></iron-signals>
 
 	</template>
 
@@ -114,32 +112,12 @@
             }
 		},
 
-        selectresource: function () {
-            var index = this.chunk.state.resource;
-            for (var i = 0; i < this.chunk.resources.length; i++) {
-                var key = this.chunk.resources[i].title.toLowerCase();
-                var tab = document.getElementById(key + "tab" + this.chunk.index);
-                var page = document.getElementById(key + "page" + this.chunk.index);
-                if (i === index) {
-                    tab.classList.add('selected');
-                    tab.classList.remove('unselected');
-                    page.classList.remove('hide');
-                    page.rendertext();
-                } else {
-                    tab.classList.remove('selected');
-                    tab.classList.add('unselected');
-                    page.classList.add('hide');
-                }
-            }
-            this.fire('setheight');
+        tabclass: function (resource, index) {
+            return resource === index ? 'tab selected' : 'tab unselected';
         },
 
-        createtabid: function (title) {
-            return title.toLowerCase() + "tab" + this.chunk.index;
-        },
-
-        createpageid: function (title) {
-            return title.toLowerCase() + "page" + this.chunk.index;
+        pageclass: function (resource, index) {
+            return resource === index ? '' : 'hide';
         },
 
         updatestate: function (e) {
@@ -147,7 +125,7 @@
             var id = this.chunk.meta.chapterid + "-" + this.chunk.meta.frameid;
             this.set('chunk.state.resource', index);
             this.fire('iron-signal', {name: 'updatestate', data: {id: id, mode: "resource", value: index}});
-            this.selectresource();
+            this.fire('setheight');
         },
 
 		ready: function() {

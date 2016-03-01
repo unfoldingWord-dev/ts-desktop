@@ -55,8 +55,12 @@
             }
 		},
 
+        observers: [
+            'rendertext(resource.*)'
+        ],
+
         rendertext: function () {
-            if(!this.resource.array) {
+            if(!this.resource.array && this.resource.data.length) {
                 var textarray = this.resource.data[0].split(" ");
                 var numstr1 = "\<sup\>";
                 var numstr2 = "\<\/sup\>";
@@ -71,7 +75,10 @@
                         returnstr += textarray[i] + " ";
                     }
                 }
-                this.querySelector("#textholder").innerHTML = returnstr;
+                var textholder = this.querySelector("#textholder");
+                if (textholder) {
+                    textholder.innerHTML = returnstr;
+                }
             }
         },
 

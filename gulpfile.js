@@ -9,6 +9,7 @@ var gulp = require('gulp'),
     rimraf = require('rimraf'),
     argv = require('yargs').argv,
     packager = require('electron-packager'),
+    path = require('path'),
     fs = require('fs');
 
 var APP_NAME = 'translationStudio',
@@ -23,22 +24,52 @@ gulp.task('test', function () {
 
 gulp.task('clean', function () {
     rimraf.sync('src/logs');
-    rimraf.sync('src/ssh');
+    rimraf.sync('logs');
+    rimraf.sync('ssh');
 });
 
 // pass parameters like: gulp build --win --osx --linux
-gulp.task('build', ['clean'], function () {
+gulp.task('build', ['clean'], function (done) {
 
     var platforms = [];
-    if(argv.win !== undefined) {
-        platforms = ['win64', 'win32'];
-    } else if(argv.osx !== undefined) {
-        platforms = ['osx64'];
-    } else if(argv.linux !== undefined) {
-        platforms = ['linux64', 'linux32'];
-    } else {
-        platforms = ['osx64', 'win64', 'linux64'];
-    }
+
+    if (argv.win) platforms.push('win32');
+    if (argv.osx) platforms.push('darwin');
+    if (argv.linux) platforms.push('linux');
+    if (!platforms.length) platforms.push('win32', 'darwin', 'linux');
+
+    var p = require('./package');
+    var ignored = Object.keys(p['devDependencies']).concat([
+        'unit_tests',
+        'acceptance_tests',
+        'out',
+        'scripts',
+        '\\.'
+    ]).map(function (name) {
+        return new RegExp('(^/' + name + '|' + '^/node_modules/' + name + ')');
+    });
+
+    packager({
+        'arch': 'all',
+        'platform': platforms,
+        'dir': '.',
+        'ignore': function (name) {
+            for (var i = 0, len = ignored.length; i < len; ++i) {
+                if (ignored[i].test(name)) {
+                    console.log('\t(Ignoring)\t', name);
+                    return true;
+                }
+            }
+
+            return false;
+        },
+        'out': 'out',
+        'app-version': p.version,
+        'icon': './icons/icon'
+    }, function () {
+        console.log('Done building...');
+        done();
+    });
 
     // TODO: figure out how to make the builder do this
     

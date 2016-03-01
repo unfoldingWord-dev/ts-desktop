@@ -383,8 +383,15 @@
       updatelist: function () {
           var mythis = this;
           App.projectsManager.loadTargetTranslationsList().then(function(list) {
+              App.ipc.send('loading-status', 'Checking Project Versions...');
               mythis.checklist(list);
+
+              App.ipc.send('loading-status', 'Checking Auto Backups...');
               App.projectsManager.backupProjects(mythis.projectlist);
+
+              setTimeout(function() {
+                App.ipc.send('loading-done');
+              }, 100);
           });
       },
 
@@ -471,6 +478,7 @@
       },
 
       ready: function() {
+          App.ipc.send('loading-status', 'Loading Projects List...');
           this.updatelist();
           this.setdefault();
           var accepted = App.configurator.getValue("accepted");

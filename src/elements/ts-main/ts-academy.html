@@ -46,6 +46,15 @@
                 text += academy[i].text;
             }
             this.$.body.innerHTML = text;
+            
+            var links = this.$.body.getElementsByTagName('a');
+
+            for (var i = 0, len = links.length; i < len; ++i) {
+                links[i].addEventListener('click', function (event) {
+                    event.preventDefault();
+                    console.log(this.href);
+                });
+            }
         }
 
     });

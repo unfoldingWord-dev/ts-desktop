@@ -90,7 +90,7 @@
             </div>
             <div id="content">
                 <template is="dom-repeat" items="{{chunk.resources}}" as="resource">
-                    <ts-resource-data class$="[[pageclass(chunk.state.resource, index)]]" resource="[[resource]]"></ts-resource-data>
+                    <ts-resource-data class$="[[pageclass(chunk.state.resource, index)]]" resource="[[resource]]" on-setheight="setheight"></ts-resource-data>
                 </template>
             </div>
         </paper-material>
@@ -120,12 +120,17 @@
             return resource === index ? '' : 'hide';
         },
 
+        setheight: function () {
+            this.fire('setheight');
+        },
+
         updatestate: function (e) {
             var index = e.model.index;
             var id = this.chunk.meta.chapterid + "-" + this.chunk.meta.frameid;
             this.set('chunk.state.resource', index);
             this.fire('iron-signal', {name: 'updatestate', data: {id: id, mode: "resource", value: index}});
-            this.fire('setheight');
+            this.fire('iron-signal', {name: 'renderresource'});
+            this.setheight();
         },
 
 		ready: function() {

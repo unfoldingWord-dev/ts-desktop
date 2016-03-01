@@ -1,0 +1,98 @@
+
+<link rel="import" href="../../../components/iron-signals/iron-signals.html">
+
+<dom-module id="ts-resource-data">
+
+	<style>
+
+        :host {
+            flex: auto;
+        }
+
+        p {
+			line-height: 1.5;
+			margin: 0;
+		}
+
+        .link {
+            color: var(--accent-color);
+            font-weight: bold;
+            cursor: pointer;
+            padding-bottom: 10px;
+        }
+
+        #textholder {
+            line-height: 2;
+            margin-top: 0;
+            color: var(--primary-text-color);
+        }
+
+	</style>
+
+	<template>
+
+        <template is="dom-if" if="{{resource.array}}">
+            <template is="dom-repeat" items="{{resource.data}}" as="entry">
+                <p class="link" on-tap="opendata">{{entry.title}}</p>
+            </template>
+        </template>
+        <template is="dom-if" if="{{!resource.array}}">
+            <div id="textholder"></div>
+        </template>
+
+        <iron-signals on-iron-signal-renderresource="renderresource"></iron-signals>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+		is: 'ts-resource-data',
+
+		properties: {
+            resource: {
+                type: Object,
+                value: {}
+            }
+		},
+
+        renderresource: function () {
+            if(!this.resource.array && this.resource.data.length) {
+                var textarray = this.resource.data[0].split(" ");
+                var numstr1 = "\<sup\>";
+                var numstr2 = "\<\/sup\>";
+                var returnstr = "";
+                var verse = 0;
+
+                for (var i = 0; i < textarray.length; i++) {
+                    if (textarray[i].substring(0, 2) === "\\v") {
+                        verse = textarray[i].substring(2);
+                        returnstr += numstr1 + verse + numstr2;
+                    } else {
+                        returnstr += textarray[i] + " ";
+                    }
+                }
+                var textholder = this.querySelector("#textholder");
+                if (textholder) {
+                    textholder.innerHTML = returnstr;
+                    this.fire('setheight');
+                }
+            }
+        },
+
+        opendata: function (e) {
+            var content = e.model.entry;
+            content.type = this.resource.title;
+            this.fire('iron-signal', {name: 'openresource', data: {content: content}});
+        },
+
+		ready: function() {
+
+		}
+
+	});
+
+</script>

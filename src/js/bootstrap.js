@@ -13,22 +13,47 @@ process.stderr.write = console.error.bind(console);
 process.stdout.write = console.log.bind(console);
 
 (function () {
+    let ipcRenderer = require('electron').ipcRenderer;
+    let setMsg = ipcRenderer.send.bind(ipcRenderer, 'loading-status');
 
-    let path = require('path'),
-        // fs = require('fs'),  // Never used?
-        mkdirp = require('mkdirp'),
-        ipcRenderer = require('electron').ipcRenderer,
-        Reporter = require('../js/reporter').Reporter,
-        Configurator = require('../js/configurator').Configurator,
-        Git = require('../js/git').Git,
-        Uploader = require('../js/uploader').Uploader,
-        Db = require('../js/lib/db').Db,
-        ProjectsManager = require('../js/projects').ProjectsManager,
-        i18n = require('../js/i18n').Locale('./i18n'),
-        util = require('../js/lib/util'),
-        printer = require('../js/printer').Printer();
+    setMsg('Bootstrapping...');
 
     const DATA_PATH = ipcRenderer.sendSync('main-window', 'dataPath');
+
+    setMsg('Loading path...')
+    let path = require('path');
+
+    setMsg('Loading mkdirp...');
+    let mkdirp = require('mkdirp');
+
+    setMsg('Loading Reporter...');
+    let Reporter = require('../js/reporter').Reporter;
+
+    setMsg('Loading Configurator...');
+    let Configurator = require('../js/configurator').Configurator;
+
+    setMsg('Loading Git...');
+    let git = require('../js/git');
+
+    setMsg('Loading Uploader...');
+    let Uploader = require('../js/uploader').Uploader;
+
+    setMsg('Loading DB...');
+    let Db = require('../js/lib/db').Db;
+
+    setMsg('Loading Projects Manager...');
+    let ProjectsManager = require('../js/projects').ProjectsManager;
+
+    setMsg('Loading Locale...');
+    let i18n = require('../js/i18n').Locale(path.resolve(path.join(__dirname, '..', '..', 'i18n')));
+
+    setMsg('Loading Utils...');
+    let util = require('../js/lib/util');
+
+    setMsg('Loading Printer...');
+    let printer = require('../js/printer').Printer();
+
+    setMsg('Initializing...');
 
     // TODO: refactor this so we can just pass an object to the constructor
     let configurator = (function () {
@@ -99,14 +124,15 @@ process.stdout.write = console.log.bind(console);
 
         util: util,
 
-        git: new Git(),
+        git: git,
 
         printer: printer,
 
         projectsManager: (function () {
             // TODO: should we move the location of these files/folders outside of the src folder?
-            var schemaPath = path.join('.', 'src', 'config', 'schema.sql'),
-                dbPath = path.join('.', 'src', 'index', 'index.sqlite'),
+            var srcDir = path.resolve(path.join(__dirname, '..')),
+                schemaPath = path.join(srcDir, 'config', 'schema.sql'),
+                dbPath = path.join(srcDir, 'index', 'index.sqlite'),
                 db = new Db(schemaPath, dbPath);
 
             return new ProjectsManager(db, configurator);
@@ -138,6 +164,8 @@ process.stdout.write = console.log.bind(console);
     //          */
     //     });
     // });
+
+    setMsg('Loading UI...');
 
     window.App = App;
 

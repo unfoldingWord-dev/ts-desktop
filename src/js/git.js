@@ -1,132 +1,130 @@
-// git module
+// git interface module
 
 'use strict';
 
-var path = require('path'),
-    fs = require('fs'),
-    exec = require('child_process').exec,
+let Git = require('nodegit'),
     utils = require('../js/lib/util'),
-    log = utils.log,
-    logr = utils.logr;
+    wrap = utils.promisify,
+    logr = utils.logr,
+    fs = require('fs'),
+    readdir = wrap(fs, 'readdir');
 
-function Git() {
 
-    function cmd(s) {
-        var str = s || '';
 
-        return {
-            cd: function (dir) {
-                return cmd(str + 'cd "' + dir + '"');
-            },
+let gitInterface = {
 
-            get and () {
-                return cmd(str + ' && ');
-            },
-
-            get then () {
-                var c = process.platform === 'win32' ? '& ' : '; ';
-
-                return cmd(str + c);
-            },
-
-            get or () {
-                return cmd(str + ' || ');
-            },
-
-            set: function (name, val) {
-                var c = process.platform === 'win32' ?
-                            `set ${name}=${val} & ` :
-                            `${name}='${val}' `;
-
-                return cmd(str + c);
-            },
-
-            do: function (c) {
-                return cmd(str + c);
-            },
-
-            run: function () {
-                return new Promise(function (resolve, reject) {
-                    exec(str, function (err, stdout, stderr) {
-                        var ret = {
-                            stdout: stdout,
-                            stderr: stderr,
-                            error: err
-                        };
-
-                        (err && reject(ret)) || resolve(ret);
-                    });
-                });
-            },
-
-            toString: function () {
-                return str;
-            }
-        };
-    }
-
-    function readdir(dir) {
-        return new Promise(function (resolve, reject) {
-            fs.readdir(dir, function (err, files) {
-                (err && reject(err)) || resolve(files);
-            });
+    // Returns the last commit hash/id for the repo at dir
+    getHash: function (dir) {
+        return Git.Repository.open(dir).then(function (repo) {
+            return repo.getCurrentBranch();
+        }).then(function (ref) {
+            return ref.target().toString();
         });
+    },
+
+    init: function (dir) {
+        return readdir(dir).then(function (files) {
+            var hasGitFolder = (files.indexOf('.git') >= 0);
+
+            return !hasGitFolder ? Git.Repository.init(dir, 0) : false;
+        }).then(logr('Git is initialized'));
+    },
+
+    stage: function (dir, username, email) {
+        username = username || 'tsDesktop';
+        email = email || 'you@example.com';
+
+        let repo, index, oid;
+
+        return Git.Repository.open(dir)
+            .then(function(repoResult) {
+                repo = repoResult;
+                return repo.openIndex();
+            })
+            .then(function(indexResult) {
+                index = indexResult;
+                return index.read(1);
+            })
+            .then(function() {
+                // Get all added files
+                return index.addAll();
+            })
+            .then(function() {
+                // Get all changed/deleted files
+                return index.updateAll();
+            })
+            .then(function() {
+                return index.write();
+            })
+            .then(function() {
+                return index.writeTree();
+            })
+            .then(function(oidResult) {
+                oid = oidResult;
+
+                return repo.getHeadCommit();
+            })
+            .then(function(head) {
+                let parents = head ? [head] : [];
+
+                let author = Git.Signature.now(username, email);
+                let committer = Git.Signature.now(username, email);
+
+                return repo.createCommit("HEAD", author, committer, (new Date()).toString(), oid, parents);
+            })
+            .then(function(commitId) {
+                return commitId;
+            })
+            .then(logr('Files are staged'));
+    },
+
+    push: function (dir, repo, reg, config) {
+        let r;
+
+        return Git.Repository.open(dir)
+            .then(function(repoResult) {
+                r = repoResult;
+                return r.openIndex();
+            }).then(function() {
+                let remoteUrl = `ssh://${config.host}:${config.port}/tS/${reg.deviceId}/${repo}`;
+                return Git.Remote.create(r, 'origin', remoteUrl);
+            }).then(function (remote) {
+                return remote ? remote : r.getRemote('origin');
+            }).then(function(remote) {
+                let opts = {
+                    callbacks: {
+                        certificateCheck: function () {
+                            // no certificate check
+                            return 1;
+                        },
+                        credentials: function (url, userName) {
+                            return Git.Cred.sshKeyNew(
+                                userName,
+                                reg.paths.publicKeyPath,
+                                reg.paths.privateKeyPath,
+                                ""
+                            );
+                        }
+                    }
+                };
+
+                return remote.push(["+refs/heads/master:refs/heads/master"], opts);
+            }).then(logr('Files are pushed'));
+    },
+
+    clone: function() {
+        console.log('not implimented');
+    },
+
+    pull: function() {
+        console.log('not implimented');
     }
 
-    return {
+};
 
-        // Get the commit hash of a git folder
-        getHash: function(dir) {
-            let hash = cmd().cd(dir).and.do('git rev-parse HEAD');
-            return hash.run()
-                .then(function(data) { return data.stdout.trim(); })
-                .catch(function(err) { console.error(err.stderr); })
-            ;
-        },
-
-        // Initialize folder as git repository if it's not one already
-        init: function(dir) {
-            return readdir(dir).then(function (files) {
-                var init = cmd().cd(dir).and.do('git init'),
-                    hasGitFolder = (files.indexOf('.git') >= 0);
-
-                return !hasGitFolder && init.run();
-            }).then(logr('Git is initialized'));
-        },
-
-        // Add and commit all changed files with the given message
-        stage: function(dir) {
-            var msg = new Date(),
-                stage = cmd().cd(dir)
-                    .and.do('git config user.name "tsDesktop"')
-                    .and.do('git config user.email "you@example.com"')
-                    .and.do('git add --all')
-                    .and.do(`git commit -am "${msg}"`);
-
-            return stage.run()
-                .then(logr('Files are staged'))
-            ;
-        },
-
-        // Push staged files to remote repo
-        push: function(dir, repo, reg, config) {
-            // TODO: the host and port need to be retrieved from the configuration
-            // NOTE: DONE. host and port is configured in config param when called
-            var ssh = `ssh -i "${reg.paths.privateKeyPath}" -o "StrictHostKeyChecking no"`,
-                gitSshPush = `git push -u -f ssh://${config.host}:${config.port}/tS/${reg.deviceId}/${repo} master`,
-                push = cmd().cd(dir).and.set('GIT_SSH_COMMAND', ssh).do(gitSshPush);
-
-            log('Starting push to server...\n' + push);
-
-            return push.run().then(logr('Files are pushed'));
-        },
-
-        // Check for changes
-        diff: function(dir) {
-            var diff = cmd().cd(dir).and.do('git diff HEAD');
-            return diff.run().then(logr('Diff is run'));
-        },
-    };
-}
-
-module.exports.Git = Git;
+exports.getHash = gitInterface.getHash;
+exports.init = gitInterface.init;
+exports.clone = gitInterface.clone;
+exports.stage = gitInterface.stage;
+exports.pull = gitInterface.pull;
+exports.push = gitInterface.push;

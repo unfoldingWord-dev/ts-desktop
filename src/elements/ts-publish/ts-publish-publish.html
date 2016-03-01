@@ -332,8 +332,8 @@
                     mythis.set('options.loading', false);
                 })
                 .catch(function (err) {
-                    App.reporter.logError(err.stderr);
-                    if(err.stderr.indexOf('DENIED by fallthru')) {
+                    App.reporter.logError(err || 'failed to push');
+                    if(typeof err === 'string' && err.indexOf('DENIED by fallthru')) {
                         App.reporter.logNotice('Destroying invalid ssh keys');
                         App.uploader.destroyKeys();
                     }

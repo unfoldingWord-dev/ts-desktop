@@ -1,6 +1,7 @@
 'use strict';
 
 var electron = require('electron'),
+    Menu = require('menu'),
     dialog = electron.dialog,
     path = require('path'),
     app = electron.app,
@@ -18,8 +19,27 @@ app.setPath('userData', (function (dataDir) {
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
+let splashScreen;
 let mainWindow;
 let academyWindow;
+
+function createSplashScreen() {
+    splashScreen = new BrowserWindow({
+        width: 400,
+        height: 170,
+        resizable: false,
+        autoHideMenuBar: true,
+        frame: false,
+        center: true,
+        title: 'translationStudio'
+    });
+
+    splashScreen.loadURL('file://' + __dirname + '/../views/splash-screen.html');
+
+    splashScreen.on('closed', function() {
+        splashScreen = null;
+    });
+}
 
 function createWindow () {
     // Create the browser window.
@@ -33,7 +53,8 @@ function createWindow () {
         title: 'translationStudio',
         backgroundColor: '#00796B',
         autoHideMenuBar: true,
-        frame: false
+        frame: false,
+        show: false
     });
 
     mainWindow.dataPath = app.getPath('userData');
@@ -95,6 +116,47 @@ function createAcademyWindow () {
     academyWindow.focus();
 }
 
+function createAppMenus() {
+    // Create the Application's main menu
+    var template = [
+        {
+            label: "Application",
+            submenu: [
+                { label: "About Application", selector: "orderFrontStandardAboutPanel:" },
+                { type: "separator" },
+                { label: "Quit", accelerator: "Command+Q", click: function() { app.quit(); }}
+            ]
+        },
+        {
+            label: "Edit",
+            submenu: [
+                { label: "Undo", accelerator: "CmdOrCtrl+Z", selector: "undo:" },
+                { label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", selector: "redo:" },
+                { type: "separator" },
+                { label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
+                { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
+                { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
+                { label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" }
+            ]
+        },
+        {
+            label: "View",
+            submenu: [
+                {
+                    label: "Toggle Developer Tools",
+                    accelerator: "Shift+CmdOrCtrl+I", 
+                    click: function () {
+                        var w = BrowserWindow.getFocusedWindow();
+                        w && w.webContents.openDevTools();
+                    }
+                }
+            ]
+        }
+    ];
+
+    Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+}
+
 ipcMain.on('main-window', function (event, arg) {
     if (typeof mainWindow[arg] === 'function') {
         let ret = mainWindow[arg]();
@@ -126,7 +188,25 @@ ipcMain.on('save-as', function (event, arg) {
     event.returnValue = input || false;
 });
 
-app.on('ready', createWindow);
+ipcMain.on('loading-status', function (event, status) {
+    splashScreen && splashScreen.webContents.send('loading-status', status);
+});
+
+ipcMain.on('loading-done', function (event) {
+    if (splashScreen && mainWindow) {
+        splashScreen.close();
+        mainWindow.show();
+        mainWindow.focus();
+    }
+});
+
+app.on('ready', function () {
+    createAppMenus();
+    createSplashScreen();
+    setTimeout(function () {
+        createWindow();
+    }, 500); 
+});
 
 app.on('window-all-closed', function () {
     // On OS X it is common for applications and their menu bar

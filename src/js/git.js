@@ -110,6 +110,14 @@ let gitInterface = {
 
                 return remote.push(["+refs/heads/master:refs/heads/master"], opts);
             }).then(logr('Files are pushed'));
+    },
+
+    clone: function() {
+        console.log('not implimented');
+    },
+
+    pull: function() {
+        console.log('not implimented');
     }
 
 };

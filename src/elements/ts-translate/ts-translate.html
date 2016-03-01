@@ -699,6 +699,7 @@
                 mythis.createchunks();
                 mythis.createchapters();
                 mythis.savetofile();
+                mythis.fire('iron-signal', {name: 'renderresource'});
                 mythis.forceResize();
                 mythis.setlocation();
                 if (check) {
@@ -774,7 +775,18 @@
                 var questions = App.projectsManager.getFrameQuestions(id);
                 var words = App.projectsManager.getFrameWords(id);
                 var verses = [];
+                var resources = [];
                 var udbtext = null;
+
+                if (notes.length) {
+                    resources.push({title: "Notes", array: true, data: notes});
+                }
+                if (words.length) {
+                    resources.push({title: "Words", array: true, data: words});
+                }
+                if (questions.length) {
+                    resources.push({title: "Questions", array: true, data: questions});
+                }
 
                 if (currentsource.source === "ulb") {
                     udbtext = App.projectsManager.getFrameUdb(currentsource, chapterid, frameid)[0].chunk;
@@ -782,6 +794,7 @@
                         udbtext = udbtext.replace(startstr, " \\v");
                         udbtext = udbtext.replace(endstr, " ");
                     }
+                    resources.push({title: "UDB", array: false, data: [udbtext]});
                 }
 
                 for (var w = 0; w < words.length; w++) {
@@ -864,10 +877,7 @@
                         meta: bookmeta,
                         srccontent: name,
                         wordcontent: "",
-                        notes: [],
-                        words: [],
-                        questions: [],
-                        udbtext: null
+                        resources: []
                     };
                     source.push(srcchunk);
                     var rawbookdata = this.rawdata["00-title"];
@@ -900,10 +910,7 @@
                         meta: titlemeta,
                         srccontent: title,
                         wordcontent: "",
-                        notes: [],
-                        words: [],
-                        questions: [],
-                        udbtext: null
+                        resources: []
                     };
                     source.push(srcchunk);
 
@@ -938,10 +945,7 @@
                         meta: refmeta,
                         srccontent: reference,
                         wordcontent: "",
-                        notes: [],
-                        words: [],
-                        questions: [],
-                        udbtext: null
+                        resources: []
                     };
                     source.push(srcchunk);
                     var rawrefdata = this.rawdata[chapterid + "-reference"];
@@ -958,10 +962,7 @@
                     meta: meta,
                     srccontent: sourcedata,
                     wordcontent: "",
-                    notes: notes,
-                    words: words,
-                    questions: questions,
-                    udbtext: udbtext
+                    resources: resources
                 };
                 source.push(srcchunk);
 
@@ -1048,10 +1049,7 @@
                     meta: meta,
                     srccontent: body,
                     wordcontent: title,
-                    notes: [],
-                    words: [],
-                    questions: [],
-                    udbtext: null
+                    resources: []
                 };
                 source.push(srcchunk);
 
@@ -1248,17 +1246,6 @@
                     translation[i].state = statedata;
                 } else {
                     translation[i].state = {chunk: true, review: true, resource: 0};
-                    if (!source[i].notes.length) {
-                        if (!source[i].words.length) {
-                            if (!source[i].questions.length) {
-                                translation[i].state.resource = 0;
-                            } else {
-                                translation[i].state.resource = 2;
-                            }
-                        } else {
-                            translation[i].state.resource = 1;
-                        }
-                    }
                     this.currentproject.state[complexid] = translation[i].state;
                 }
             }
@@ -1267,7 +1254,7 @@
                 return {transcontent: chunk.transcontent, helpscontent: chunk.helpscontent, completed: chunk.completed, data: projectdata, index: index, state: chunk.state};
             });
             srcdata.data = source.map(function(chunk){
-                return {srccontent: chunk.srccontent, wordcontent: chunk.wordcontent, meta: chunk.meta, notes: chunk.notes, words: chunk.words, questions: chunk.questions, udbtext: chunk.udbtext};
+                return {srccontent: chunk.srccontent, wordcontent: chunk.wordcontent, meta: chunk.meta, resources: chunk.resources};
             });
             var merged = _.merge(srcdata, transdata);
             this.set('chunks', merged);

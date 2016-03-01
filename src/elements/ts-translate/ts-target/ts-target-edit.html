@@ -60,11 +60,12 @@
             margin-top: 0;
         }
 
-        #heading paper-icon-button {
+        #heading iron-icon {
             padding: 6px;
+            cursor: pointer;
         }
 
-        :host([chunkmode]) paper-icon-button {
+        :host([chunkmode]) iron-icon {
             display: none;
         }
 
@@ -81,7 +82,7 @@
                 <div>
                     <span>[[chunk.meta.chunkref]]</span><span>[[chunk.meta.refaddon]]</span>
                 </div>
-                <paper-icon-button icon="done" on-tap="review"></paper-icon-button>
+                <iron-icon icon="done" on-tap="review"></iron-icon>
             </div>
             <div id="content" class="editmode">
                 <iron-autogrow-textarea id="textbox" on-change="change" bind-value="{{chunk.transcontent}}" on-input="input"></iron-autogrow-textarea>

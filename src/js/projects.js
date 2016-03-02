@@ -294,17 +294,12 @@ function ProjectsManager(query, configurator) {
             return zipper(r);
         },
 
-        getAllWords: function (type) {
-            var hash = "";
-            if (type === "bible") {
-                hash = "eac63a2df6164f63f5168021f8abcb0e";
-            } else if (type === "obs") {
-                hash = "c7388c8549f8ca1aa10e5ad272b8bb0d";
-            }
-
+        getAllWords: function (source) {
+            var s = typeof source === 'object' ? source.id : source;
             var r = query([
                 "select w.id, w.slug, w.term 'title', w.definition 'body', w.definition_title 'deftitle' from translation_word w",
-                "where w.catalog_hash='" + hash + "'",
+                "join resource__translation_word r on r.translation_word_id=w.id",
+                "where r.resource_id='" + s + "'",
                 "order by w.term"
             ].join(' '));
 

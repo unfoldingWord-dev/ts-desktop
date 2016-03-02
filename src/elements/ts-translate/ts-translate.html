@@ -603,7 +603,6 @@
                 setTimeout(function() {
                     mythis.setmodestate();
                     mythis.checksources();
-                    mythis.fire('iron-signal', {name: 'adjustbar'});
                     if (type === "publish") {
                         mythis.gopublish();
                     }
@@ -704,9 +703,6 @@
                 if (check) {
                     mythis.checksources();
                 }
-                setTimeout(function() {
-                    mythis.fire('iron-signal', {name: 'adjustbar'});
-                }, 250);
             });
         },
 

@@ -72,7 +72,7 @@ gulp.task('build', ['clean'], function (done) {
     });
 
     // TODO: figure out how to make the builder do this
-    
+
     // // Adding app icon for linux64
     // if(fs.exists('./build/translationStudio/linux64')) {
     //     fs.stat('./build/translationStudio/linux64', function (err, stats) {

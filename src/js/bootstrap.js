@@ -120,7 +120,7 @@ process.stdout.write = console.log.bind(console);
             this.window.close();
         },
 
-        uploader: new Uploader(),
+        uploader: new Uploader(DATA_PATH),
 
         util: util,
 

@@ -25,10 +25,10 @@ var net = require('net'),
 
 // TODO: this module has diverged from it's original intent and how the name is misleading.
 // All this module is doing is registering with the authentication server
-function Uploader() {
+function Uploader(dataPath) {
 
     var paths = {
-        sshPath: path.resolve(path.join(__dirname, '..', '..', 'ssh')),
+        sshPath: path.resolve(path.join(dataPath, 'ssh')),
 
         publicKeyName: 'ts.pub',
 

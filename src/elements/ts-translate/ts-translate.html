@@ -799,8 +799,8 @@
                 for (var w = 0; w < words.length; w++) {
                     var worddata = this.worddata["01-" + words[w].slug];
                     if (worddata && worddata.helpscontent[0].body !== "" && worddata.helpscontent[0].title !== "") {
-                        words[w].term = worddata.helpscontent[0].title;
-                        words[w].definition = worddata.helpscontent[0].body;
+                        words[w].title = worddata.helpscontent[0].title;
+                        words[w].body = worddata.helpscontent[0].body;
                     }
                 }
 
@@ -1013,7 +1013,7 @@
             var translation = [];
 
             if (type === "tw") {
-                frames = App.projectsManager.getAllWords("bible");
+                frames = App.projectsManager.getAllWords(172);
             } else if (type === "ta") {
                 frames = App.projectsManager.getTa();
             }
@@ -1022,16 +1022,8 @@
                 var chapterid = "01";
                 var frameid = frames[i].slug;
                 var complexid = chapterid + '-' + frameid;
-                var title;
-                var body;
-
-                if (type === "tw") {
-                    title = frames[i].term;
-                    body = frames[i].definition;
-                } else if (type === "ta") {
-                    title = frames[i].title;
-                    body = frames[i].text;
-                }
+                var title = frames[i].title;
+                var body = frames[i].body;
 
                 var meta = {
                     chapterid: chapterid,

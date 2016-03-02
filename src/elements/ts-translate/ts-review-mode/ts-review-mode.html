@@ -266,10 +266,9 @@
             var content = "";
             var clear = [];
             var footer = this.$.footer;
-            var wordlist = "bible";
-            if (this.chunks.data[0].data.project.id === "obs") {
-                wordlist = "obs";
-            }
+            var projectdata = this.chunks.data[0].data;
+            var current = projectdata.currentsource;
+            var currentsource = projectdata.sources[current];
 
             if (data.type === "Notes") {
                 this.set('related', clear);
@@ -279,7 +278,7 @@
                 content = "\<h2 class='style-scope ts-review-mode'\>" + data.title + "\<\/h2\>\<p class='style-scope ts-review-mode'\>" + data.body + "\<\/p\>";
             }
             if (data.type === "Words") {
-                if (wordlist === "obs") {
+                if (projectdata.project.id === "obs") {
                     this.set('related', App.projectsManager.getRelatedWords(data.id));
                     this.set('examples', App.projectsManager.getWordExamples(data.id));
                 } else {
@@ -300,7 +299,7 @@
             if (data.type === "allwords") {
                 this.set('related', clear);
                 this.set('examples', clear);
-                this.set('allwords', App.projectsManager.getAllWords(wordlist));
+                this.set('allwords', App.projectsManager.getAllWords(currentsource));
                 footer.classList.add("hide");
                 content = "";
             }

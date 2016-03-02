@@ -158,9 +158,8 @@
         getlocation: function () {
             var list = this.$.readlist;
             var index = list.firstVisibleIndex;
-            var card = document.getElementById(this.modename + index);
 
-            this.set('modestatus.chapter', card.chunk.chapter);
+            this.set('modestatus.chapter', this.chapters.data[index].chapter);
             this.set('modestatus.index', -1);
         },
 

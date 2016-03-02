@@ -327,7 +327,7 @@ function ProjectsManager(query, configurator) {
 
         getTa: function () {
             var r = query([
-                "select t.id, t.slug, t.title, t.text, t.reference from translation_academy_article t"
+                "select t.id, t.slug, t.title, t.text 'body', t.reference from translation_academy_article t"
                 //"join frame__translation_word f on w.id=f.translation_word_id",
                 //"where f.frame_id='" + frameid + "'"
             ].join(' '));

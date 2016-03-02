@@ -162,7 +162,7 @@
         <div id="contain">
             <iron-list id="reviewlist" items="{{chunks.data}}" as="chunk">
                 <template>
-                    <ts-review-card id="{{createid(index)}}" chunk="{{chunk}}" on-updateheight="updateheight"></ts-review-card>
+                    <ts-review-card chunk="{{chunk}}" on-updateheight="updateheight"></ts-review-card>
                 </template>
             </iron-list>
 
@@ -226,10 +226,6 @@
                 type: Object,
                 value: {},
                 notify: true
-            },
-            modename: {
-                type: String,
-                value: "review"
             },
             related: {
                 type: Array,
@@ -323,14 +319,12 @@
             var chapter = example.chapter;
             var frame = example.frame;
             var list = this.$.reviewlist;
-            var card;
             var found = false;
             var i = 0;
 
             while (i < 10000 && !found) {
                 list.scrollToIndex(i);
-                card = document.getElementById(this.modename + i);
-                if (card.chunk.meta.chapter === chapter && card.chunk.meta.frame === frame) {
+                if (this.chunks.data[i].meta.chapter === chapter && this.chunks.data[i].meta.frame === frame) {
                     found = true;
                 }
                 i++;
@@ -389,16 +383,14 @@
 
         getlocation: function () {
             var list = this.$.reviewlist;
-            var index = list.firstVisibleIndex;
-            var card = document.getElementById(this.modename + index);
+            var index = list.firstVisibleIndex || 0;
 
-            this.set('modestatus.chapter', card.chunk.meta.chapter);
+            this.set('modestatus.chapter', this.chunks.data[index].meta.chapter);
             this.set('modestatus.index', index);
         },
 
         setlocation: function () {
             var list = this.$.reviewlist;
-            var card;
             var found = false;
             var i = 0;
             var index = this.modestatus.index;
@@ -408,17 +400,12 @@
             } else {
                 while (i < 10000 && !found) {
                     list.scrollToIndex(i);
-                    card = document.getElementById(this.modename + i);
-                    if (card.chunk.meta.chapter === this.modestatus.chapter) {
+                    if (this.chunks.data[i].meta.chapter === this.modestatus.chapter) {
                         found = true;
                     }
                     i++;
                 }
             }
-        },
-
-        createid: function (index) {
-            return this.modename + index;
         },
 
 		ready: function() {

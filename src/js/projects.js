@@ -168,12 +168,14 @@ function ProjectsManager(query, configurator) {
         },
 
         getSourceDetails: function (source) {
-            var id = source.split('-');
+            var first = source.indexOf("-");
+            var last = source.lastIndexOf("-");
+
             var r = query([
                 "select r.id, r.slug 'source', r.name, sl.name 'ln', sl.slug 'lc', p.slug 'project', r.checking_level 'level', r.version, r.modified_at 'date_modified' from resource r",
                 "join source_language sl on sl.id=r.source_language_id",
                 "join project p on p.id=sl.project_id",
-                "where p.slug='" + id[0] + "' and sl.slug='" + id[1] + "' and r.slug='" + id[2] + "'"
+                "where p.slug='" + source.substring(0, first) + "' and sl.slug='" + source.substring(first+1, last) + "' and r.slug='" + source.substring(last+1) + "'"
             ].join(' '));
             return zipper(r);
         },
@@ -353,7 +355,7 @@ function ProjectsManager(query, configurator) {
         backupTranslation: function (meta, filePath) {
             let paths = this.getPaths(meta),
                 name = 'uw-' + meta.fullname;
-            
+
             return new Promise(function(resolve, reject) {
                 let source = paths.projectDir,
                     backupName = filePath + '.tstudio',

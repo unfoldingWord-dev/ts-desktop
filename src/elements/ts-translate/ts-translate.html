@@ -1011,11 +1011,17 @@
             var srcchunk = {};
             var transchunk = {};
             var translation = [];
+            var volume;
 
             if (type === "tw") {
                 frames = App.projectsManager.getAllWords(172);
             } else if (type === "ta") {
-                frames = App.projectsManager.getTa();
+                if (this.currentproject.data.project.id === "ta") {
+                    volume = "%1";
+                } else {
+                    volume = "%" + this.currentproject.data.project.id.substring(2);
+                }
+                frames = App.projectsManager.getTa(volume);
             }
 
             for (var i = 0; i < frames.length; i++) {

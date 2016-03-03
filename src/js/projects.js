@@ -325,11 +325,12 @@ function ProjectsManager(query, configurator) {
             return zipper(r);
         },
 
-        getTa: function () {
+        getTa: function (volume) {
             var r = query([
-                "select t.id, t.slug, t.title, t.text 'body', t.reference from translation_academy_article t"
-                //"join frame__translation_word f on w.id=f.translation_word_id",
-                //"where f.frame_id='" + frameid + "'"
+                "select t.id, t.slug, t.title, t.text 'body', t.reference, m.title 'manual', v.title 'volume' from translation_academy_article t",
+                "join translation_academy_manual m on m.id=t.translation_academy_manual_id",
+                "join translation_academy_volume v on v.id=m.translation_academy_volume_id",
+                "where v.title like '" + volume + "'"
             ].join(' '));
 
             return zipper(r);

@@ -130,6 +130,15 @@
                     }
                 }
                 this.$.textholder.innerHTML = returnstr;
+
+                var links = this.$.textholder.getElementsByTagName('a');
+
+                for (var j = 0, len = links.length; j < len; ++j) {
+                    links[j].addEventListener('click', function (event) {
+                        event.preventDefault();
+                        console.log(this.href);
+                    });
+                }
             }
         },
 

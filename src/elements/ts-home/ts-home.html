@@ -364,7 +364,7 @@
         },
 
         checkicon: function (slug) {
-            return slug === "obs" || slug === "tw" || slug === "ta" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
+            return slug === "obs" || slug === "tw" || slug.substring(0, 2) === "ta" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
         },
 
         gopublish: function () {

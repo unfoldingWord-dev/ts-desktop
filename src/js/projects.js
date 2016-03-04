@@ -298,7 +298,7 @@ function ProjectsManager(query, configurator) {
                 "select w.id, w.slug, w.term 'title', w.definition 'body', w.definition_title 'deftitle' from translation_word w",
                 "join resource__translation_word r on r.translation_word_id=w.id",
                 "where r.resource_id='" + s + "'",
-                "order by w.term"
+                "order by lower(w.term)"
             ].join(' '));
 
             return zipper(r);

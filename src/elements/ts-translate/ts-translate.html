@@ -1017,9 +1017,9 @@
                 frames = App.projectsManager.getAllWords(172);
             } else if (type === "ta") {
                 if (this.currentproject.data.project.id === "ta") {
-                    volume = "%1";
+                    volume = "vol1";
                 } else {
-                    volume = "%" + this.currentproject.data.project.id.substring(2);
+                    volume = this.currentproject.data.project.id;
                 }
                 frames = App.projectsManager.getTa(volume);
             }

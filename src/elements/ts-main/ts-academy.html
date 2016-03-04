@@ -40,13 +40,13 @@
         },
 
         ready: function() {
-            var academy = App.projectsManager.getTa();
+            var academy = App.projectsManager.getTa("%");
             var text = "";
-            for (var i = 0; i < academy.length; i++) {
-                text += academy[i].text;
+            for (var j = 0; j < academy.length; j++) {
+                text += academy[j].body;
             }
             this.$.body.innerHTML = text;
-            
+
             var links = this.$.body.getElementsByTagName('a');
 
             for (var i = 0, len = links.length; i < len; ++i) {

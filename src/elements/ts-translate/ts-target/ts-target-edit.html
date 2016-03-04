@@ -26,13 +26,13 @@
             color: var(--secondary-text-color);
             display: flex;
             justify-content: space-between;
-            min-height: 48px;
+            flex: 0 0 48px;
             align-items: center;
             font-size: 88%;
             font-weight: 300;
             border-bottom: 1px solid var(--note-card-pink);
             letter-spacing: 1px;
-            padding: 0 10px 0 16px;
+            padding: 0 16px;
 		}
 
         #content {
@@ -60,11 +60,11 @@
             margin-top: 0;
         }
 
-        #heading paper-icon-button {
-            padding: 6px;
+        #heading iron-icon {
+            cursor: pointer;
         }
 
-        :host([chunkmode]) paper-icon-button {
+        :host([chunkmode]) iron-icon {
             display: none;
         }
 
@@ -81,7 +81,7 @@
                 <div>
                     <span>[[chunk.meta.chunkref]]</span><span>[[chunk.meta.refaddon]]</span>
                 </div>
-                <paper-icon-button icon="done" on-tap="review"></paper-icon-button>
+                <iron-icon icon="done" on-tap="review"></iron-icon>
             </div>
             <div id="content" class="editmode">
                 <iron-autogrow-textarea id="textbox" on-change="change" bind-value="{{chunk.transcontent}}" on-input="input"></iron-autogrow-textarea>

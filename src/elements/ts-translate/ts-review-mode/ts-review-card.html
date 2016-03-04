@@ -40,6 +40,10 @@
             flex: 1 0 400px;
         }
 
+        .hide {
+            display: none;
+        }
+
 	</style>
 
 	<template>
@@ -49,12 +53,8 @@
                 <ts-source-chunk class="left" reviewmode chunk="[[chunk]]"></ts-source-chunk>
                 <template is="dom-if" if="{{chunk.meta.standard}}">
                     <div class="middle">
-                        <template is="dom-if" if="{{chunk.state.review}}">
-                            <ts-target-review chunk="{{chunk}}" on-setheight="setheight"></ts-target-review>
-                        </template>
-                        <template is="dom-if" if="{{!chunk.state.review}}">
-                            <ts-target-edit chunk="{{chunk}}" on-setheight="setheight"></ts-target-edit>
-                        </template>
+                        <ts-target-review class$="[[reviewclass(chunk.state.review)]]" chunk="{{chunk}}" on-setheight="setheight"></ts-target-review>
+                        <ts-target-edit class$="[[editclass(chunk.state.review)]]" chunk="{{chunk}}" on-setheight="setheight"></ts-target-edit>
                     </div>
                 </template>
                 <template is="dom-if" if="{{!chunk.meta.standard}}">
@@ -65,7 +65,7 @@
                         <ts-target-helps chunk="{{chunk}}" on-setheight="setheight"></ts-target-helps>
                     </div>
                 </template>
-                <ts-resource-card class="right" chunk="[[chunk]]"></ts-resource-card>
+                <ts-resource-card class="right" chunk="[[chunk]]" on-setheight="setheight"></ts-resource-card>
             </template>
             <template is="dom-if" if="{{chunk.meta.words}}">
                 <ts-source-chunk class="left" reviewmode wordmode chunk="[[chunk]]"></ts-source-chunk>
@@ -94,6 +94,14 @@
                 notify: true
             }
 		},
+
+        reviewclass: function (state) {
+            return state ? '' : 'hide';
+        },
+
+        editclass: function (state) {
+            return state ? 'hide' : '';
+        },
 
         setheight: function () {
             this.fire('updateheight');

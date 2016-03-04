@@ -149,11 +149,11 @@
       ],
 
       checkicon: function (name) {
-          return name === "Open Bible Stories" || name === "translationWords" || name === "translationAcademy" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
+          return name === "Open Bible Stories" || name.substring(0, 11) === "translation" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
       },
 
       checkmore: function (name) {
-          return name === "Open Bible Stories" || name === "translationWords" || name === "translationAcademy" ? '' : 'chevron-right';
+          return name === "Open Bible Stories" || name.substring(0, 11) === "translation" ? '' : 'chevron-right';
       },
 
       store: function(e) {
@@ -171,7 +171,7 @@
               this.project = this.category.data[0];
               this.type = {name: "Words", code: "tw", resource: "", allowed: true};
               this.fire('create');
-          } else if (this.category.name === "translationAcademy") {
+          } else if (this.category.name.substring(0, 18) === "translationAcademy") {
               this.project = this.category.data[0];
               this.type = {name: "Academy", code: "ta", resource: "", allowed: true};
               this.fire('create');
@@ -196,7 +196,11 @@
           });
           if (App.configurator.getUserSetting('glmode')) {
               temparray.push({"name": "translationWords", "data": [{name: "translationWords", slug: "tw"}]});
-              temparray.push({"name": "translationAcademy", "data": [{name: "translationAcademy", slug: "ta"}]});
+              var volumes = App.projectsManager.getVolumes();
+              for (var i = 0; i < volumes.length; i++) {
+                  var name = "translationAcademy " + volumes[i].title;
+                  temparray.push({"name": name, "data": [{name: name, slug: volumes[i].slug}]});
+              }
           }
           this.categorylist = temparray;
       },

@@ -158,16 +158,14 @@
 
         getlocation: function () {
             var list = this.$.chunklist;
-            var index = list.firstVisibleIndex;
-            var card = document.getElementById(this.modename + index);
+            var index = list.firstVisibleIndex || 0;
 
-            this.set('modestatus.chapter', card.chunk.meta.chapter);
+            this.set('modestatus.chapter', this.chunks.data[index].meta.chapter);
             this.set('modestatus.index', index);
         },
 
         setlocation: function () {
             var list = this.$.chunklist;
-            var card;
             var found = false;
             var i = 0;
             var index = this.modestatus.index;
@@ -177,8 +175,7 @@
             } else {
                 while (i < 10000 && !found) {
                     list.scrollToIndex(i);
-                    card = document.getElementById(this.modename + i);
-                    if (card.chunk.meta.chapter === this.modestatus.chapter) {
+                    if (this.chunks.data[i].meta.chapter === this.modestatus.chapter) {
                         found = true;
                     }
                     i++;

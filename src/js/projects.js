@@ -166,12 +166,14 @@ function ProjectsManager(query, configurator) {
         },
 
         getSourceDetails: function (source) {
-            var id = source.split('-');
+            var first = source.indexOf("-");
+            var last = source.lastIndexOf("-");
+
             var r = query([
                 "select r.id, r.slug 'source', r.name, sl.name 'ln', sl.slug 'lc', p.slug 'project', r.checking_level 'level', r.version, r.modified_at 'date_modified' from resource r",
                 "join source_language sl on sl.id=r.source_language_id",
                 "join project p on p.id=sl.project_id",
-                "where p.slug='" + id[0] + "' and sl.slug='" + id[1] + "' and r.slug='" + id[2] + "'"
+                "where p.slug='" + source.substring(0, first) + "' and sl.slug='" + source.substring(first+1, last) + "' and r.slug='" + source.substring(last+1) + "'"
             ].join(' '));
             return zipper(r);
         },
@@ -271,7 +273,7 @@ function ProjectsManager(query, configurator) {
         getFrameWords: function (frameid) {
 
             var r = query([
-                "select w.id, w.slug, w.term, w.definition, w.definition_title 'title' from translation_word w",
+                "select w.id, w.slug, w.term 'title', w.definition 'body', w.definition_title 'deftitle' from translation_word w",
                 "join frame__translation_word f on w.id=f.translation_word_id",
                 "where f.frame_id='" + frameid + "'"
             ].join(' '));
@@ -282,7 +284,7 @@ function ProjectsManager(query, configurator) {
         getRelatedWords: function (wordid) {
 
             var r = query([
-                "select w.id, w.term, w.definition, w.definition_title 'title' from translation_word w",
+                "select w.id, w.term 'title', w.definition 'body', w.definition_title 'deftitle' from translation_word w",
                 "join translation_word_related r on w.slug=r.slug",
                 "where r.translation_word_id='" + wordid + "'"
             ].join(' '));
@@ -290,18 +292,13 @@ function ProjectsManager(query, configurator) {
             return zipper(r);
         },
 
-        getAllWords: function (type) {
-            var hash = "";
-            if (type === "bible") {
-                hash = "eac63a2df6164f63f5168021f8abcb0e";
-            } else if (type === "obs") {
-                hash = "c7388c8549f8ca1aa10e5ad272b8bb0d";
-            }
-
+        getAllWords: function (source) {
+            var s = typeof source === 'object' ? source.id : source;
             var r = query([
-                "select w.id, w.slug, w.term, w.definition, w.definition_title 'title' from translation_word w",
-                "where w.catalog_hash='" + hash + "'",
-                "order by w.term"
+                "select w.id, w.slug, w.term 'title', w.definition 'body', w.definition_title 'deftitle' from translation_word w",
+                "join resource__translation_word r on r.translation_word_id=w.id",
+                "where r.resource_id='" + s + "'",
+                "order by lower(w.term)"
             ].join(' '));
 
             return zipper(r);
@@ -320,7 +317,7 @@ function ProjectsManager(query, configurator) {
         getFrameQuestions: function (frameid) {
 
             var r = query([
-                "select q.question, q.answer from checking_question q",
+                "select q.question 'title', q.answer 'body' from checking_question q",
                 "join frame__checking_question f on q.id=f.checking_question_id",
                 "where f.frame_id='" + frameid + "'"
             ].join(' '));
@@ -328,11 +325,20 @@ function ProjectsManager(query, configurator) {
             return zipper(r);
         },
 
-        getTa: function () {
+        getTa: function (volume) {
             var r = query([
-                "select t.id, t.slug, t.title, t.text, t.reference from translation_academy_article t"
-                //"join frame__translation_word f on w.id=f.translation_word_id",
-                //"where f.frame_id='" + frameid + "'"
+                "select t.id, t.slug, t.title, t.text 'body', t.reference from translation_academy_article t",
+                "join translation_academy_manual m on m.id=t.translation_academy_manual_id",
+                "join translation_academy_volume v on v.id=m.translation_academy_volume_id",
+                "where v.slug like '" + volume + "'"
+            ].join(' '));
+
+            return zipper(r);
+        },
+
+        getVolumes: function () {
+            var r = query([
+                "select v.slug, v.title from translation_academy_volume v"
             ].join(' '));
 
             return zipper(r);
@@ -351,7 +357,7 @@ function ProjectsManager(query, configurator) {
         backupTranslation: function (meta, filePath) {
             let paths = this.getPaths(meta),
                 name = 'uw-' + meta.fullname;
-            
+
             return new Promise(function(resolve, reject) {
                 let source = paths.projectDir,
                     backupName = filePath + '.tstudio',

@@ -22,16 +22,15 @@
         }
 
         #heading {
-            padding: 0 0 8px 16px;
             color: var(--secondary-text-color);
             display: flex;
             justify-content: space-between;
-            min-height: 48px;
+            flex: 0 0 48px;
             align-items: center;
         }
 
         #content {
-            padding: 16px 16px 24px 16px;
+            padding: 24px 16px;
             flex: auto;
         }
 
@@ -43,6 +42,10 @@
 
         #ref {
             padding-right: 16px;
+            min-height: 46px;
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid var(--border-color);
         }
 
         :host([reviewmode]) #ref {
@@ -58,6 +61,10 @@
             margin: 0;
         }
 
+        #title {
+            margin-left: 16px;
+        }
+
 	</style>
 
 	<template>
@@ -71,7 +78,7 @@
                     </div>
                 </template>
                 <template is="dom-if" if="{{chunk.meta.words}}">
-                    <div>
+                    <div id="title">
                         <h2>[[chunk.wordcontent]]</h2>
                     </div>
                 </template>
@@ -123,6 +130,15 @@
                     }
                 }
                 this.$.textholder.innerHTML = returnstr;
+
+                var links = this.$.textholder.getElementsByTagName('a');
+
+                for (var j = 0, len = links.length; j < len; ++j) {
+                    links[j].addEventListener('click', function (event) {
+                        event.preventDefault();
+                        console.log(this.href);
+                    });
+                }
             }
         },
 

@@ -82,7 +82,7 @@ function Printer() {
          * @param translation an array of frames
          * @param meta the target translation manifest and other info
          * @param filename the path where the export will be saved
-         * @param options {includeIncompleteFrames: boolean, includeImages: boolean}
+         * @param options {includeIncompleteFrames: boolean, includeImages: boolean, doubleSpace: boolean}
          * @returns {Promise.<boolean>}
          */
         targetTranslationToPdf: function (translation, meta, filename, options) {
@@ -193,6 +193,9 @@ function Printer() {
                             chapter.page = doc.bufferedPageRange().count;
 
                             // frames
+                            if(options.doubleSpace === true){
+                                doc.lineGap(20);
+                            }
                             doc.addPage();
                             _.forEach(chapter.frames, function(frame) {
                                 if(options.includeIncompleteFrames === true || frame.completed === true) {
@@ -235,6 +238,7 @@ function Printer() {
                         doc.switchToPage(currTocPage);
                         // TODO: display correct title of TOC based on the project
                         doc.fontSize(25)
+                            .lineGap(0)
                             .text('Table of Contents', 72, 72)
                             .moveDown();
                         _.forEach(project.chapters, function(chapter) {

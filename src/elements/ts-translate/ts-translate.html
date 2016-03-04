@@ -158,7 +158,7 @@
 
         #printpopup {
             width: 450px;
-            height: 240px;
+            height: 280px;
             font-size: 110%;
         }
 
@@ -307,6 +307,7 @@
             <div>
                 <p><paper-checkbox id="imagebox"></paper-checkbox><span>Include images</span></p>
                 <p><paper-checkbox id="chunkbox" checked="true"></paper-checkbox><span>Include incomplete chunks</span></p>
+                 <p><paper-checkbox id="doublespacebox"></paper-checkbox><span>Double space text</span></p>
             </div>
             <div id="printbuttons">
                 <paper-button dialog-dismiss>Cancel</paper-button>
@@ -603,7 +604,6 @@
                 setTimeout(function() {
                     mythis.setmodestate();
                     mythis.checksources();
-                    mythis.fire('iron-signal', {name: 'adjustbar'});
                     if (type === "publish") {
                         mythis.gopublish();
                     }
@@ -698,14 +698,12 @@
                 mythis.createchunks();
                 mythis.createchapters();
                 mythis.savetofile();
+                mythis.fire('iron-signal', {name: 'renderresource'});
                 mythis.forceResize();
                 mythis.setlocation();
                 if (check) {
                     mythis.checksources();
                 }
-                setTimeout(function() {
-                    mythis.fire('iron-signal', {name: 'adjustbar'});
-                }, 250);
             });
         },
 
@@ -764,7 +762,6 @@
                 var chapter = parseInt(chapterid);
                 var frameid = frames[i].verse;
                 var frame = parseInt(frameid);
-                var complexid = chapterid + '-' + frameid;
                 var title = frames[i].title;
                 var reference = frames[i].reference;
                 var format = frames[i].format;
@@ -774,21 +771,36 @@
                 var questions = App.projectsManager.getFrameQuestions(id);
                 var words = App.projectsManager.getFrameWords(id);
                 var verses = [];
+                var resources = [];
                 var udbtext = null;
 
+                if (notes.length) {
+                    resources.push({title: "Notes", array: true, data: notes});
+                }
+                if (words.length) {
+                    resources.push({title: "Words", array: true, data: words});
+                }
+                if (questions.length) {
+                    resources.push({title: "Questions", array: true, data: questions});
+                }
+
                 if (currentsource.source === "ulb") {
-                    udbtext = App.projectsManager.getFrameUdb(currentsource, chapterid, frameid)[0].chunk;
-                    while (test.test(udbtext)) {
-                        udbtext = udbtext.replace(startstr, " \\v");
-                        udbtext = udbtext.replace(endstr, " ");
+                    var result = App.projectsManager.getFrameUdb(currentsource, chapterid, frameid)[0];
+                    if (result) {
+                        udbtext = result.chunk;
+                        while (test.test(udbtext)) {
+                            udbtext = udbtext.replace(startstr, " \\v");
+                            udbtext = udbtext.replace(endstr, " ");
+                        }
+                        resources.push({title: "UDB", array: false, data: [udbtext]});
                     }
                 }
 
                 for (var w = 0; w < words.length; w++) {
                     var worddata = this.worddata["01-" + words[w].slug];
                     if (worddata && worddata.helpscontent[0].body !== "" && worddata.helpscontent[0].title !== "") {
-                        words[w].term = worddata.helpscontent[0].title;
-                        words[w].definition = worddata.helpscontent[0].body;
+                        words[w].title = worddata.helpscontent[0].title;
+                        words[w].body = worddata.helpscontent[0].body;
                     }
                 }
 
@@ -820,6 +832,8 @@
                         frameid = "0" + frameid;
                     }
                 }
+
+                var complexid = chapterid + '-' + frameid;
 
                 if (name === "Open Bible Stories") {
                     chapterref = title;
@@ -862,10 +876,7 @@
                         meta: bookmeta,
                         srccontent: name,
                         wordcontent: "",
-                        notes: [],
-                        words: [],
-                        questions: [],
-                        udbtext: null
+                        resources: []
                     };
                     source.push(srcchunk);
                     var rawbookdata = this.rawdata["00-title"];
@@ -898,10 +909,7 @@
                         meta: titlemeta,
                         srccontent: title,
                         wordcontent: "",
-                        notes: [],
-                        words: [],
-                        questions: [],
-                        udbtext: null
+                        resources: []
                     };
                     source.push(srcchunk);
 
@@ -936,10 +944,7 @@
                         meta: refmeta,
                         srccontent: reference,
                         wordcontent: "",
-                        notes: [],
-                        words: [],
-                        questions: [],
-                        udbtext: null
+                        resources: []
                     };
                     source.push(srcchunk);
                     var rawrefdata = this.rawdata[chapterid + "-reference"];
@@ -956,10 +961,7 @@
                     meta: meta,
                     srccontent: sourcedata,
                     wordcontent: "",
-                    notes: notes,
-                    words: words,
-                    questions: questions,
-                    udbtext: udbtext
+                    resources: resources
                 };
                 source.push(srcchunk);
 
@@ -1009,27 +1011,25 @@
             var srcchunk = {};
             var transchunk = {};
             var translation = [];
+            var volume;
 
             if (type === "tw") {
-                frames = App.projectsManager.getAllWords("bible");
+                frames = App.projectsManager.getAllWords(172);
             } else if (type === "ta") {
-                frames = App.projectsManager.getTa();
+                if (this.currentproject.data.project.id === "ta") {
+                    volume = "vol1";
+                } else {
+                    volume = this.currentproject.data.project.id;
+                }
+                frames = App.projectsManager.getTa(volume);
             }
 
             for (var i = 0; i < frames.length; i++) {
                 var chapterid = "01";
                 var frameid = frames[i].slug;
                 var complexid = chapterid + '-' + frameid;
-                var title;
-                var body;
-
-                if (type === "tw") {
-                    title = frames[i].term;
-                    body = frames[i].definition;
-                } else if (type === "ta") {
-                    title = frames[i].title;
-                    body = frames[i].text;
-                }
+                var title = frames[i].title;
+                var body = frames[i].body;
 
                 var meta = {
                     chapterid: chapterid,
@@ -1046,10 +1046,7 @@
                     meta: meta,
                     srccontent: body,
                     wordcontent: title,
-                    notes: [],
-                    words: [],
-                    questions: [],
-                    udbtext: null
+                    resources: []
                 };
                 source.push(srcchunk);
 
@@ -1246,17 +1243,6 @@
                     translation[i].state = statedata;
                 } else {
                     translation[i].state = {chunk: true, review: true, resource: 0};
-                    if (!source[i].notes.length) {
-                        if (!source[i].words.length) {
-                            if (!source[i].questions.length) {
-                                translation[i].state.resource = 0;
-                            } else {
-                                translation[i].state.resource = 2;
-                            }
-                        } else {
-                            translation[i].state.resource = 1;
-                        }
-                    }
                     this.currentproject.state[complexid] = translation[i].state;
                 }
             }
@@ -1265,7 +1251,7 @@
                 return {transcontent: chunk.transcontent, helpscontent: chunk.helpscontent, completed: chunk.completed, data: projectdata, index: index, state: chunk.state};
             });
             srcdata.data = source.map(function(chunk){
-                return {srccontent: chunk.srccontent, wordcontent: chunk.wordcontent, meta: chunk.meta, notes: chunk.notes, words: chunk.words, questions: chunk.questions, udbtext: chunk.udbtext};
+                return {srccontent: chunk.srccontent, wordcontent: chunk.wordcontent, meta: chunk.meta, resources: chunk.resources};
             });
             var merged = _.merge(srcdata, transdata);
             this.set('chunks', merged);
@@ -1371,6 +1357,7 @@
         goprint: function () {
             this.$.chunkbox.checked = true;
             this.$.imagebox.checked = false;
+            this.$.doublespacebox.checked = false;
             this.$.printpopup.open();
         },
 
@@ -1412,7 +1399,7 @@
             var meta = this.currentproject.data;
             var translation = this.currentproject.translation;
             var filename = App.configurator.getValue("print-filename");
-            var options = {includeIncompleteFrames: this.$.chunkbox.checked, includeImages: this.$.imagebox.checked};
+            var options = {includeIncompleteFrames: this.$.chunkbox.checked, includeImages: this.$.imagebox.checked, doubleSpace: this.$.doublespacebox.checked};
             var confirm = this.$.confirm;
 
             var generatePdf = function(){

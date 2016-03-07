@@ -7,6 +7,7 @@
 <link rel="import" href="../../components/iron-icons/iron-icons.html">
 <link rel="import" href="../../components/iron-icons/notification-icons.html">
 
+<link rel="import" href="./ts-app-titlebar.html">
 <link rel="import" href="../ts-home/ts-home.html">
 <link rel="import" href="../ts-new/ts-new.html">
 <link rel="import" href="../ts-publish/ts-publish.html">
@@ -20,6 +21,7 @@
 
       :host {
           display: flex;
+          flex-direction: column;
           flex: auto;
       }
 
@@ -174,6 +176,8 @@
 
   <template>
 
+      <ts-app-titlebar currentuser="{{currentuser}}"></ts-app-titlebar>
+
       <template is="dom-if" if="{{accepted}}">
           <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
               <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]" backto="{{backto}}"></ts-home>
@@ -298,6 +302,10 @@
               type: Object,
               value: {login: true}
           },
+          currentuser: {
+              type: Object,
+              value: {}
+          },
           options: {
               type: Object,
               value: {loading: false, title: "", body: ""}
@@ -409,6 +417,8 @@
 
       sendlogin: function () {
           console.log("login sent");
+          this.set('currentuser', {active: true, username: this.newinfo.loginname});
+          this.$.login.close();
       },
 
       sendcreate: function () {
@@ -416,6 +426,7 @@
               this.set('newinfo.login', false);
           } else {
               console.log("create sent");
+              this.$.login.close();
           }
       },
 
@@ -561,6 +572,7 @@
           if (accepted) {
               this.accepted = true;
           }
+          this.set('currentuser', {active: false});
       }
 
   });

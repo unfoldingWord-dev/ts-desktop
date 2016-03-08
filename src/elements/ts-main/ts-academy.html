@@ -10,9 +10,11 @@
 
         #contain {
             flex: auto;
+            display: flex;
         }
 
         #body {
+            flex: auto;
             max-height: calc(100vh - 70px);
             background: var(--card-background-color);
             padding: 15px 45px;
@@ -42,19 +44,29 @@
         ready: function() {
             var academy = App.projectsManager.getTa("%");
             var text = "";
+            var str1 = '<a class="wikilink1" href="';
+            var test1 = new RegExp(str1 + "/");
+            var str2 = 'src="/assets';
+            var test2 = new RegExp(str2);
+            var str3 = 'src="assets';
+            var test3 = new RegExp(str3);
+            var replace = 'style="max-width:700px;" src="https://unfoldingword.org/assets';
+
             for (var j = 0; j < academy.length; j++) {
-                text += academy[j].body;
+                text += academy[j].body.replace("<h2 ", "<h2 id='" + academy[j].reference + "' ");
             }
+
+            while (test1.test(text)) {
+                text = text.replace(str1 + "/", str1 + "#/");
+            }
+            while (test2.test(text)) {
+                text = text.replace(str2, replace);
+            }
+            while (test3.test(text)) {
+                text = text.replace(str3, replace);
+            }
+
             this.$.body.innerHTML = text;
-
-            var links = this.$.body.getElementsByTagName('a');
-
-            for (var i = 0, len = links.length; i < len; ++i) {
-                links[i].addEventListener('click', function (event) {
-                    event.preventDefault();
-                    console.log(this.href);
-                });
-            }
         }
 
     });

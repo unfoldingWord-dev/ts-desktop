@@ -75,24 +75,6 @@
             padding: 0 1.5em;
         }
 
-        iron-list {
-            font-size: 110%;
-            max-height: 90vh;
-            width: 620px;
-            background: var(--card-background-color);
-            box-shadow: 0 2px 3px 2px var(--border-color);
-        }
-
-        .row {
-            display: flex;
-            border-bottom: 1px solid var(--border-color);
-            transition: background .3s, color .3s;
-            cursor: pointer;
-            min-height: 60px;
-            justify-content: flex-start;
-            align-items: center;
-        }
-
         #headings {
             flex: 0 0 50px;
             width: 620px;
@@ -101,9 +83,24 @@
         }
 
         #list {
-            flex: auto;
+            max-height: calc(100vh - 140px);
             display: flex;
             flex-direction: column;
+            font-size: 110%;
+            width: 620px;
+            box-shadow: 0 2px 3px 2px var(--border-color);
+            overflow-y: auto;
+        }
+
+        .row {
+            display: flex;
+            background: var(--card-background-color);
+            border-bottom: 1px solid var(--border-color);
+            transition: background .3s, color .3s;
+            cursor: pointer;
+            flex: 0 0 60px;
+            justify-content: flex-start;
+            align-items: center;
         }
 
         .row:hover {
@@ -249,22 +246,20 @@
                         <span>{{locale.progress}}</span>
                     </div>
                     <div id="list">
-                        <iron-list items="[[projectlist]]" as="proj">
-                            <template>
-                                <div class="row">
-                                    <div class="left" on-tap="openproject">
-                                        <span class="smallspan"><iron-icon class="smallicon" icon$="[[checkicon(proj.project.id)]]"></iron-icon></span>
-                                        <span class="bigspan">[[proj.project.name]]</span>
-                                        <span class="smallspan smalltext"><span>[[proj.type_name]]</span><span class="space">[[proj.resource_id]]</span></span>
-                                        <span class="smalltext bigspan">[[proj.target_language.name]]</span>
-                                        <span class="smallspan"><ts-completion-icon percent="[[proj.completion]]"></ts-completion-icon></span>
-                                    </div>
-                                    <div>
-                                        <span><paper-icon-button class="info" icon="info" on-tap="openinfo" title="details"></paper-icon-button></span>
-                                    </div>
+                        <template is="dom-repeat" items="[[projectlist]]" as="proj">
+                            <div class="row">
+                                <div class="left" on-tap="openproject">
+                                    <span class="smallspan"><iron-icon class="smallicon" icon$="[[checkicon(proj.project.id)]]"></iron-icon></span>
+                                    <span class="bigspan">[[proj.project.name]]</span>
+                                    <span class="smallspan smalltext"><span>[[proj.type_name]]</span><span class="space">[[proj.resource_id]]</span></span>
+                                    <span class="smalltext bigspan">[[proj.target_language.name]]</span>
+                                    <span class="smallspan"><ts-completion-icon percent="[[proj.completion]]"></ts-completion-icon></span>
                                 </div>
-                            </template>
-                        </iron-list>
+                                <div>
+                                    <span><paper-icon-button class="info" icon="info" on-tap="openinfo" title="details"></paper-icon-button></span>
+                                </div>
+                            </div>
+                        </template>
                     </div>
                 </div>
             </template>

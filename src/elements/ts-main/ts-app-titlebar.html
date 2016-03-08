@@ -36,6 +36,21 @@
             letter-spacing: 1px;
         }
 
+        .login {
+            font-size: 80%;
+        }
+
+        .link {
+            -webkit-app-region: no-drag;
+            margin-left: 10px;
+            cursor: pointer;
+            color: var(--primary-color-light);
+        }
+
+        .link:hover {
+            color: var(--reverse-text-color)
+        }
+
         .window-buttons {
             -webkit-app-region: no-drag;
             margin-right: 10px;
@@ -58,12 +73,17 @@
             color: var(--reverse-text-color);
         }
 
+        .hide {
+            display: none;
+        }
+
     </style>
 
     <template>
 
         <header>
             <span class="title">translationStudio</span>
+            <span class$="[[loginclass(currentuser.active)]]">Logged in as: <span>{{currentuser.username}}</span><span class="link" on-tap="logout">(Logout)</span></span>
             <div class="window-buttons">
                 <button on-tap="minimizeWindow">
                     <iron-icon icon="titlebar:minimize" title="minimize"></iron-icon>
@@ -87,6 +107,22 @@
 
         is: 'ts-app-titlebar',
 
+        properties: {
+            currentuser: {
+                type: Object,
+                value: {},
+                notify: true
+            }
+        },
+
+        loginclass: function (active) {
+            return active ? 'login' : 'hide';
+        },
+
+        logout: function () {
+            this.set('currentuser', {active: false});
+        },
+
         minimizeWindow: function() {
             App.window.minimize();
         },
@@ -106,7 +142,7 @@
             App.ipc.on('maximize', function () {
                 resize.icon = 'titlebar:restore';
             });
-            
+
             App.ipc.on('unmaximize', function() {
                 resize.icon = 'titlebar:maximize';
             });

@@ -99,19 +99,20 @@
         let resourceNames = {
             ulb: 'Unlocked Literal Bible',
             udb: 'Unlocked Dynamic Bible',
+            obs: 'Open Bible Stories',
             reg: 'Regular'
         };
         if(_.has(manifest, 'resource_id')) {
             let resourceId =_.get(manifest, 'resource_id', 'reg');
             delete manifest.resource_id;
             manifest.resource = {
-                id: resourceId,
+                id: _.has(resourceNames, resourceId) ? resourceId : 'reg',
                 name: _.get(resourceNames, resourceId, '')
             };
         } else if(!_.has(manifest, 'resource')) {
             // add missing resource
             if(_.get(manifest, 'type.id') === 'text') {
-                let resourceId =_.get(manifest, 'project.id') === 'obs' ? 'reg' : 'ulb';
+                let resourceId =_.get(manifest, 'project.id') === 'obs' ? 'obs' : 'reg';
                 manifest.resource = {
                     id: resourceId,
                     name: _.get(resourceNames, resourceId, '')
@@ -120,15 +121,15 @@
         }
 
         // update source translations
-        manifest.source_translations = _.values(_.mapKeys(manifest.source_translations, function(value, key) {
-            let parts = key.split('-', 2);
-            if(parts.length === 2) {
+        manifest.source_translations = _.values(_.mapValues(manifest.source_translations, function(value, key) {
+            let parts = key.split('-');
+            if(parts.length > 2) {
                 let languageResourceId = key.substring(parts[0].length + 1, key.length);
                 let pieces = languageResourceId.split('-');
                 if(pieces.length > 0) {
                     let resourceId = pieces[pieces.length - 1];
                     value.resource_id = resourceId;
-                    value.language_id = languageResourceId.substring(0, resourceId.length - 1);
+                    value.language_id = languageResourceId.substring(0, languageResourceId.length - resourceId.length - 1);
                 }
             }
             return value;

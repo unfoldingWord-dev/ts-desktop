@@ -21,6 +21,16 @@
             "checking_level": 3,
             "date_modified": 20150427,
             "version": "2.0.0-beta13"
+        },
+        "obs-de-obs": {
+            "checking_level": 3,
+            "date_modified": 20150427,
+            "version": "2.0.0-beta13"
+        },
+        "obs-pt-br-obs": {
+            "checking_level": 3,
+            "date_modified": 20150427,
+            "version": "2.0.0-beta13"
         }
     },
     "parent_draft_resource_id": "obs",

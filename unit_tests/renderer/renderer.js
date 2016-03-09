@@ -3,7 +3,7 @@
 ;(function () {
 
     let assert = require('assert');
-    let render = require('../../app/js/renderer');
+    let render = require('../../src/js/renderer');
     let sourceText = require('./data/source');
 
     describe('@Renderer', function () {

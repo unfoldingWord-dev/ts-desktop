@@ -20,7 +20,7 @@ process.stdout.write = console.log.bind(console);
 
     const DATA_PATH = ipcRenderer.sendSync('main-window', 'dataPath');
 
-    setMsg('Loading path...')
+    setMsg('Loading path...');
     let path = require('path');
 
     setMsg('Loading mkdirp...');

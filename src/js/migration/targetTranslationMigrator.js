@@ -136,10 +136,8 @@
 
         // update parent draft
         if(_.has(manifest, 'parent_draft_resource_id')) {
-            delete manifest.parent_draft_resource_id;
-            // we don't know what the draft status is so just leave blank.
-            // the app should identify this as unknown and ask the user to import again if they want
-            manifest.parent_draft_status = {
+            manifest.parent_draft = {
+                resource_id: manifest.parent_draft_resource_id,
                 checking_entity: '',
                 checking_level: '',
                 comments: 'The parent draft is unknown',
@@ -149,6 +147,7 @@
                 source_text_version: '',
                 version: ''
             };
+            delete manifest.parent_draft_resource_id;
         }
 
         // update finished chunks
@@ -178,6 +177,11 @@
             manifest.finished_chunks = _.unique(finishedChunks);
         });
         delete manifest.finished_project_components;
+
+        // add format
+        if(!_.has(manifest, 'format') || manifest.format === 'usx' || manifest.format === 'default') {
+            manifest.format = _.get(manifest, 'type.id', 'text') !== 'text' || _.get(manifest, 'project.id') === 'obs' ? 'markdown' : 'usfm';
+        }
 
         // update package version
         manifest.package_version = 5;

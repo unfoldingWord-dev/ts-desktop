@@ -178,6 +178,11 @@
         });
         delete manifest.finished_project_components;
 
+        // add format
+        if(!_.has(manifest, 'format') || manifest.format === 'usx' || manifest.format === 'default') {
+            manifest.format = _.get(manifest, 'type.id', 'text') !== 'text' || _.get(manifest, 'project.id') === 'obs' ? 'markdown' : 'usfm';
+        }
+
         // update package version
         manifest.package_version = 5;
 

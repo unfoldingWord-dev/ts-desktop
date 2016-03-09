@@ -14,7 +14,7 @@
         "name": "Open Bible Stories",
         "type": "text"
     },
-    "format": "markdown",
+    "format": "default",
     "resource_id": "obs",
     "source_translations": {
         "obs-en-obs": {

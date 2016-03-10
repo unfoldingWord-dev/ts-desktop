@@ -161,7 +161,7 @@
         <div id="main">
             <paper-material id="heading" elevation="1">
                 <div>
-                    <span>[[chunk.meta.chunkref]]</span><span>[[chunk.meta.refaddon]]</span> - <span>[[chunk.data.type_name]]</span>
+                    <span>[[chunk.meta.chunkref]]</span><span>[[chunk.meta.refaddon]]</span> - <span>[[chunk.data.type.name]]</span>
                 </div>
                 <template is="dom-if" if="{{!chunk.completed}}">
                     <paper-icon-button icon="add" on-tap="addhelp"></paper-icon-button>
@@ -170,7 +170,7 @@
             <div id="content" class="editmode">
                 <template is="dom-if" if="{{!chunk.helpscontent.length}}">
                     <div id="iconbox" on-tap="addhelp">
-                        <p>Click to add <span>[[chunk.data.type_name]]</span></p>
+                        <p>Click to add <span>[[chunk.data.type.name]]</span></p>
                         <paper-icon-button icon="add"></paper-icon-button>
                     </div>
                 </template>
@@ -179,11 +179,11 @@
                         <div class="leftbox">
                             <div class="contentheader">
                                 <p>{{help.title}}</p>
-                                <iron-autogrow-textarea bind-value="{{help.title}}" on-change="change" on-input="input" placeholder$="[[checktitle(chunk.data.project.type)]]"></iron-autogrow-textarea>
+                                <iron-autogrow-textarea bind-value="{{help.title}}" on-change="change" on-input="input" placeholder$="[[checktitle(chunk.data.type.id)]]"></iron-autogrow-textarea>
                             </div>
                             <div class="contentbody">
                                 <p>{{help.body}}</p>
-                                <iron-autogrow-textarea bind-value="{{help.body}}" on-change="change" on-input="input" placeholder$="[[checkbody(chunk.data.project.type)]]"></iron-autogrow-textarea>
+                                <iron-autogrow-textarea bind-value="{{help.body}}" on-change="change" on-input="input" placeholder$="[[checkbody(chunk.data.type.id)]]"></iron-autogrow-textarea>
                             </div>
                         </div>
                         <div class="rightbox">

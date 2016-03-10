@@ -629,7 +629,7 @@ function ProjectsManager(query, configurator) {
         },
 
         isTranslation: function (meta) {
-            return !meta.project.type || meta.project.type === 'text';
+            return !meta.type.id || meta.type.id === 'text';
         },
 
         saveTargetTranslation: function (translation, meta) {
@@ -734,6 +734,17 @@ function ProjectsManager(query, configurator) {
 
             return this.loadProjectsList()
                 .then(map(makePaths))
+                .then(function (list) {
+                    var migrated = _.map(list, function (paths) {
+                        return targetTranslationMigrator.migrate(paths.projectDir)
+                            .catch(function () {
+                                return true;
+                            });
+                    });
+                    return Promise.all(migrated).then(function () {
+                        return list;
+                    })
+                })
                 .then(map('manifest'))
                 .then(function (list) {
                     return _.filter(list, function (path) {

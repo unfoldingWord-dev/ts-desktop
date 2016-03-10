@@ -27,14 +27,14 @@ function Printer() {
     return {
 
         isTranslation: function (meta) {
-            return !meta.project.type || meta.project.type === 'text';
+            return !meta.type.id || meta.type.id === 'text';
         },
 
         getImages: function(meta){
             return new Promise(function(resolve, reject){
                 let App = window.App,
                     imageRoot = path.join(App.configurator.getValue('rootdir'), 'images'),
-                    imagePath = path.join(imageRoot, meta.resource_id);
+                    imagePath = path.join(imageRoot, meta.resource.id);
 
                 //check to see if we need to create the images directory;
                 if(!fs.existsSync(imagePath)){
@@ -93,7 +93,7 @@ function Printer() {
             let isTranslation = this.isTranslation(meta),
                 App = window.App,
                 imageRoot = path.join(App.configurator.getValue('rootdir'), "images"),
-                imagePath = path.join(imageRoot, meta.resource_id);
+                imagePath = path.join(imageRoot, meta.resource.id);
 
             return new Promise(function(resolve, reject) {
                 if(isTranslation) {
@@ -203,8 +203,8 @@ function Printer() {
                                         //console.debug(meta);
                                         //console.debug(frame);
                                         // TRICKY: right now all images are en
-                                        var imgPath = path.join(imagePath, meta.resource_id + "-en-" + frame.meta.chapterid + "-" + frame.meta.frameid + ".jpg");
-                                        //check the position of the text on the page. 
+                                        var imgPath = path.join(imagePath, meta.resource.id + "-en-" + frame.meta.chapterid + "-" + frame.meta.frameid + ".jpg");
+                                        //check the position of the text on the page.
                                         // 792 (total ht of page) - 50 ( lower margin) - 263.25 (height of pic) = 478.75 (max amount of space used before image)
                                         if(doc.y > 478.75){
                                             doc.addPage();

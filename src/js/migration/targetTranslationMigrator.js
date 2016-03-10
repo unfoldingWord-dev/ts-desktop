@@ -76,13 +76,20 @@
      */
     function v4(manifest, dir) {
         // translation type
-        let typeId = _.get(manifest, 'project.type', 'text');
+        let typeId = _.get(manifest, 'project.type', 'text').toLowerCase();
+        let typeNames = {
+            text: 'Text',
+            tn: 'Notes',
+            tq: 'Questions',
+            tw: 'Words',
+            ta: 'Academy'
+        };
         if(_.has(manifest, 'project.type')) {
             delete manifest.project.type;
         }
         manifest.type = {
             id: typeId,
-            name: ''
+            name: _.get(typeNames, typeId, '')
         };
 
         // update project
@@ -90,7 +97,7 @@
         if(_.has(manifest, 'project_id')) {
             manifest.project = {
                 id: manifest.project_id,
-                name: manifest.project_id.toUpperCase()
+                name: ""
             };
             delete manifest.project_id;
         }

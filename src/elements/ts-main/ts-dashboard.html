@@ -485,64 +485,24 @@
       checklist: function (list) {
           for (var i = 0; i < list.length; i++) {
 
-              if (list[i].project === undefined) {
-                  list[i].project = {id: '', name: '', type: ''};
-                  list[i].project.id = list[i].project_id;
+              if (list[i].project.name === "") {
                   list[i].project.name = App.projectsManager.getProjectName(list[i].project.id)[0].name;
-                  if (!list[i].project_type) {
-                      list[i].project.type = "text";
-                  } else {
-                      list[i].project.type = list[i].project_type;
-                  }
               }
 
-              list[i].project.type = list[i].project.type.toLowerCase();
-
-              list[i].sources = [];
-              var group = list[i].source_translations;
-              for (var item in group) {
-                  if (group.hasOwnProperty(item)) {
-                      list[i].sources.push(App.projectsManager.getSourceDetails(item)[0]);
-                  }
-              }
-              if (list[i].sources.length) {
+              if (list[i].source_translations.length) {
                   list[i].currentsource = 0;
               } else {
                   list[i].currentsource = null;
               }
 
-              if (list[i].project.type === "text") {
-                  list[i].type_name = "Text";
-              } else if (list[i].project.type === "tn") {
-                  list[i].type_name = "Notes";
-              } else if (list[i].project.type === "tq") {
-                  list[i].type_name = "Questions";
-              } else if (list[i].project.type === "tw") {
-                  list[i].type_name = "Words";
-              } else if (list[i].project.type === "ta") {
-                  list[i].type_name = "Academy";
-              }
-
-              if (list[i].resource_id === undefined) {
-                  if (list[i].project.type === "text") {
-                      if (list[i].project.id === "obs") {
-                          list[i].resource_id = "obs";
-                      } else {
-                          list[i].resource_id = "ulb";
-                      }
-                  } else {
-                      list[i].resource_id = "";
-                  }
-              }
-
               var typeext = "";
 
-              if (list[i].project.type === "tw" || list[i].project.type === "ta") {
+              if (list[i].type.id === "tw" || list[i].type.id === "ta") {
                   typeext = "";
-              } else if (list[i].project.type !== "text") {
-                  typeext = "_" + list[i].project.type;
-              } else if (list[i].resource_id !== "ulb" && list[i].resource_id !== "obs") {
-                  typeext = "_" + list[i].resource_id;
+              } else if (list[i].type.id !== "text") {
+                  typeext = "_" + list[i].type.id;
+              } else if (list[i].resource.id === "udb") {
+                  typeext = "_" + list[i].resource.id;
               }
               var fullname = list[i].project.id + typeext + "-" + list[i].target_language.id;
               list[i].basename = list[i].project.id + "-" + list[i].target_language.id;

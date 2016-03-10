@@ -59,12 +59,12 @@
             while (test1.test(text)) {
                 text = text.replace(str1 + "/", str1 + "#/");
             }
-            while (test2.test(text)) {
+            /*while (test2.test(text)) {
                 text = text.replace(str2, replace);
             }
             while (test3.test(text)) {
                 text = text.replace(str3, replace);
-            }
+            }*/
 
             this.$.body.innerHTML = text;
         }

@@ -523,10 +523,10 @@
             var sources = App.projectsManager.sources;
             var projectid = this.currentproject.data.project.id;
             if (this.currentproject.data.resource.id === "udb") {
-                modal.allSources = _.filter(sources, {'project': projectid, 'level': 3});
+                modal.allSources = _.filter(sources, {'project_id': projectid, 'checking_level': 3});
             } else {
                 modal.allSources = _.filter(sources, function(source) {
-                    return source.project === projectid && source.level === 3 && source.source !== "udb";
+                    return source.project_id === projectid && source.checking_level === 3 && source.resource_id !== "udb";
                 });
             }
             modal.sources = this.currentproject.data.source_translations;

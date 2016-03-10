@@ -115,7 +115,7 @@
                 <template is="dom-repeat" items="[[sources]]" as="source">
                     <div class="row" on-tap="removesource">
                         <div>
-                            <span>[[source.ln]]</span> - <span>[[source.name]]</span>
+                            <span>[[source.language_name]]</span> - <span>[[source.resource_name]]</span>
                         </div>
                         <paper-checkbox disabled checked></paper-checkbox>
                     </div>
@@ -125,7 +125,7 @@
                 <template is="dom-repeat" items="{{searchfilter(query, available)}}" as="source">
                     <div class="row" on-tap="addsource">
                         <div>
-                            <span>[[source.ln]]</span> - <span>[[source.name]]</span>
+                            <span>[[source.language_name]]</span> - <span>[[source.resource_name]]</span>
                         </div>
                         <paper-checkbox disabled></paper-checkbox>
                     </div>
@@ -184,7 +184,7 @@
             if (query) {
                 var search = App.util.startsWithBase.bind(null, query);
                 return available.filter(function(source) {
-                    return search(source.ln);
+                    return search(source.language_name);
                 });
             } else {
                 return available;

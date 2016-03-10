@@ -121,7 +121,7 @@
               value: {},
               notify: true
           },
-          type: {
+          typedata: {
               type: Object,
               value: {},
               notify: true
@@ -138,7 +138,7 @@
               this.fire('iron-signal', {name: 'createtypes'});
               this.selected = this.selected + 1;
           } else {
-              this.type = {name: "Text - Unlocked Literal Bible", code: "text", resource: "ulb", allowed: true};
+              this.typedata = {type: {id: "text", name: "Text"}, resource: {id: "reg", name: "Regular"}, format: "usfm", allowed: true};
               this.fire('create');
           }
       },

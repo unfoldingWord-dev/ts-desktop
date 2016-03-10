@@ -84,9 +84,9 @@
 
         <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
             <ts-language-menu id="languages" selected="{{selected}}" language="{{language}}"></ts-language-menu>
-            <ts-project-menu selected="{{selected}}" category="{{category}}" project="{{project}}" type="{{type}}" on-create="createproject"></ts-project-menu>
-            <ts-book-menu selected="{{selected}}" category="[[category]]" project="{{project}}" type="{{type}}" on-create="createproject"></ts-book-menu>
-            <ts-type-menu selected="{{selected}}" language="[[language]]" category="[[category]]" project="[[project]]" type="{{type}}" projectlist="[[projectlist]]" on-create="createproject"></ts-type-menu>
+            <ts-project-menu selected="{{selected}}" category="{{category}}" project="{{project}}" typedata="{{typedata}}" on-create="createproject"></ts-project-menu>
+            <ts-book-menu selected="{{selected}}" category="[[category]]" project="{{project}}" typedata="{{typedata}}" on-create="createproject"></ts-book-menu>
+            <ts-type-menu selected="{{selected}}" language="[[language]]" category="[[category]]" project="[[project]]" typedata="{{typedata}}" projectlist="[[projectlist]]" on-create="createproject"></ts-type-menu>
         </neon-animated-pages>
 
         <paper-dialog id="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -135,7 +135,7 @@
                 type: Object,
                 value: {}
             },
-            type: {
+            typedata: {
                 type: Object,
                 value: {}
             },
@@ -171,17 +171,17 @@
             var mythis = this;
             var project = this.project;
             var language = this.language;
-            var type = this.type;
+            var typedata = this.typedata;
             var typeext = "";
             var projectarray = this.projectlist;
             var popup = this.$.popup;
 
-            if (type.code === "tw" || type.code === "ta") {
+            if (typedata.type.id === "tw" || typedata.type.id === "ta") {
                 typeext = "";
-            } else if (type.code !== "text") {
-                typeext = "_" + type.code;
-            } else if (type.resource === "udb") {
-                typeext = "_" + type.resource;
+            } else if (typedata.type.id !== "text") {
+                typeext = "_" + typedata.type.id;
+            } else if (typedata.resource.id === "udb") {
+                typeext = "_" + typedata.resource.id;
             }
 
             var fullname = project.slug + typeext + "-" + language.id;
@@ -195,13 +195,27 @@
                 }
             }
 
-            if (!type.allowed) {
+            if (!typedata.allowed) {
                 this.set('options', {title: "No Translation", body: "Cannot start this project until a standard translation project exists"});
                 popup.open();
                 return;
             }
 
-            var newprojdata = {"project": {"id": project.slug, "name": project.name}, "type": {"id": type.code, "name": type.name}, "fullname": fullname, "basename": basename, "resource": {"id": type.resource, "name": ""}, "target_language": language, "translators": [], "sources": [], "completion": 0, "currentsource": null};
+            var newprojdata = {
+                "project": {"id": project.slug, "name": project.name},
+                "type": typedata.type,
+                "resource": typedata.resource,
+                "format": typedata.format,
+                "fullname": fullname,
+                "basename": basename,
+                "target_language": language,
+                "translators": [],
+                "source_translations": [],
+                "parent_draft": {},
+                "completion": 0,
+                "currentsource": null
+            };
+
             this.animationConfig.exit.name = 'slide-left-animation';
             App.projectsManager.saveTargetTranslation([], newprojdata).then(function() {
                 mythis.fire('iron-signal', {name: 'updatelist'});

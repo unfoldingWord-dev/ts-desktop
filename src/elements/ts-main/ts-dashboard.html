@@ -489,7 +489,13 @@
                   list[i].project.name = App.projectsManager.getProjectName(list[i].project.id)[0].name;
               }
 
-
+              for (var j = 0; j < list[i].source_translations.length; j++) {
+                  var details = App.projectsManager.getSourceDetails(list[i].project.id, list[i].source_translations[j].language_id, list[i].source_translations[j].resource_id)[0];
+                  list[i].source_translations[j].project_id = details.project_id;
+                  list[i].source_translations[j].id = details.id;
+                  list[i].source_translations[j].language_name = details.language_name;
+                  list[i].source_translations[j].resource_name = details.resource_name;
+              }
 
               if (list[i].source_translations.length) {
                   list[i].currentsource = 0;

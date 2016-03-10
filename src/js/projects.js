@@ -656,32 +656,31 @@ function ProjectsManager(query, configurator) {
 
             var finishedFrames = _.compact(_.map(chunks, prop('completed')));
 
-            var sources = _.chain(meta.sources)
-                .indexBy(function (r) {
-                    return [r.project, r.lc, r.source].join('-');
-                })
-                .mapValues(function (r) {
+            var sources = meta.source_translations.map(function (source) {
                     return {
-                        checking_level: r.level,
-                        date_modified: r.date_modified,
-                        version: r.version
+                        language_id: source.language_id,
+                        resource_id: source.resource_id,
+                        checking_level: source.level,
+                        date_modified: source.date_modified,
+                        version: source.version
                     };
-                })
-                .value();
+                });
 
             var manifest = {
                 generator: {
                     name: 'ts-desktop',
                     build: ''
                 },
-                package_version: 3,
+                package_version: 5,
+                format: meta.format,
                 target_language: meta.target_language,
                 project: meta.project,
-                resource_id: meta.resource_id,
+                type: meta.type,
+                resource: meta.resource,
                 source_translations: sources,
-                parent_draft_resource_id: '',
+                parent_draft_status: meta.parent_draft_status,
                 translators: meta.translators,
-                finished_frames: finishedFrames
+                finished_chunks: finishedFrames
             };
 
             var writeFile = function (name, data) {

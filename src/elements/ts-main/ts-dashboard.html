@@ -489,10 +489,16 @@
                   list[i].project.name = App.projectsManager.getProjectName(list[i].project.id)[0].name;
               }
 
+
+
               if (list[i].source_translations.length) {
                   list[i].currentsource = 0;
               } else {
                   list[i].currentsource = null;
+              }
+
+              if (list[i].resource.id === "reg") {
+                  list[i].resource.id = "";
               }
 
               var typeext = "";

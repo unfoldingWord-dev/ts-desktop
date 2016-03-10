@@ -529,7 +529,7 @@
                     return source.project === projectid && source.level === 3 && source.source !== "udb";
                 });
             }
-            modal.sources = this.currentproject.data.sources;
+            modal.sources = this.currentproject.data.source_translations;
             modal.selectedSource = this.currentproject.data.currentsource;
             this.$.sourcepopup.open();
         },
@@ -579,7 +579,7 @@
         retrievesource: function () {
             var key = "uw-" + this.currentproject.data.fullname;
             var source = App.configurator.getValue(key + "-source");
-            if (source !== undefined  && source !== "" && source < this.currentproject.data.sources.length) {
+            if (source !== undefined  && source !== "" && source < this.currentproject.data.source_translations.length) {
                 this.set('currentproject.data.currentsource', source);
             }
         },
@@ -676,7 +676,7 @@
         },
 
         updatesources: function (event, data) {
-            this.set('currentproject.data.sources', data.sources);
+            this.set('currentproject.data.source_translations', data.sources);
             this.set('currentproject.data.currentsource', data.selected);
             this.loaddata(true);
         },
@@ -730,7 +730,7 @@
             if (current === null || current === undefined) {
                 return;
             }
-            var currentsource = this.currentproject.data.sources[current];
+            var currentsource = this.currentproject.data.source_translations[current];
             var frames = App.projectsManager.getSourceFrames(currentsource);
             var name = this.currentproject.data.project.name;
             var language = this.currentproject.data.target_language.name;
@@ -1153,7 +1153,7 @@
 
         setmodestate: function () {
             var mythis = this;
-            var sources = this.currentproject.data.sources;
+            var sources = this.currentproject.data.source_translations;
             var key = "uw-" + this.currentproject.data.fullname;
             var type = this.currentproject.data.type.id;
             var index = App.configurator.getValue(key + "-index");
@@ -1190,7 +1190,7 @@
 
         checksources: function () {
             var mythis = this;
-            var sources = this.currentproject.data.sources;
+            var sources = this.currentproject.data.source_translations;
             var lastmode = this.modestatus.lastmode;
             var selected = this.selected;
             var type = this.currentproject.data.type.id;
@@ -1346,7 +1346,7 @@
 
         gopublish: function () {
             var type = this.currentproject.data.type.id;
-            if(this.currentproject.data.sources.length || type === "tw" || type === "ta") {
+            if(this.currentproject.data.source_translations.length || type === "tw" || type === "ta") {
                 this.savestate();
                 this.setleftanimation();
                 this.fire('iron-signal', {name: 'updatepublish'});

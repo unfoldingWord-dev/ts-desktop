@@ -180,7 +180,7 @@
                 typeext = "";
             } else if (type.code !== "text") {
                 typeext = "_" + type.code;
-            } else if (type.resource !== "ulb" && type.resource !== "obs") {
+            } else if (type.resource === "udb") {
                 typeext = "_" + type.resource;
             }
 
@@ -201,7 +201,7 @@
                 return;
             }
 
-            var newprojdata = {"project": {"id": project.slug, "name": project.name, "type": type.code}, "type_name": type.name, "fullname": fullname, "basename": basename, "resource_id": type.resource, "target_language": language, "translators": [], "sources": [], "completion": 0, "currentsource": null};
+            var newprojdata = {"project": {"id": project.slug, "name": project.name}, "type": {"id": type.code, "name": type.name}, "fullname": fullname, "basename": basename, "resource": {"id": type.resource, "name": ""}, "target_language": language, "translators": [], "sources": [], "completion": 0, "currentsource": null};
             this.animationConfig.exit.name = 'slide-left-animation';
             App.projectsManager.saveTargetTranslation([], newprojdata).then(function() {
                 mythis.fire('iron-signal', {name: 'updatelist'});

@@ -113,7 +113,7 @@
             let resourceId =_.get(manifest, 'resource_id', 'reg');
             delete manifest.resource_id;
             manifest.resource = {
-                id: _.has(resourceNames, resourceId) ? resourceId : 'reg',
+                id: resourceId,
                 name: _.get(resourceNames, resourceId, '')
             };
         } else if(!_.has(manifest, 'resource')) {

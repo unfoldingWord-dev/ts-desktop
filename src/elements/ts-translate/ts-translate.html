@@ -640,8 +640,15 @@
                 if (projdata.type.id === "tn" || projdata.type.id === "tq") {
                     var newmeta = false;
                     for (var i = 0; i < list.length; i++) {
-                        if (list[i].basename === projdata.basename && list[i].type.id === "text" && list[i].resource.id !== "udb") {
+                        if (list[i].basename === projdata.basename && (list[i].resource.id === "ulb" || list[i].resource.id === "obs")) {
                             newmeta = list[i];
+                        }
+                    }
+                    if (!newmeta) {
+                        for (i = 0; i < list.length; i++) {
+                            if (list[i].basename === projdata.basename && (list[i].resource.id === "udb" || list[i].resource.id === "reg")) {
+                                newmeta = list[i];
+                            }
                         }
                     }
                     if (newmeta) {
@@ -746,7 +753,7 @@
             var chunkref;
             var standard = this.standardproject;
             var refaddon = language;
-            if (resource !== "") {
+            if (resource === "ulb" || resource === "udb") {
                 refaddon += " (" + resource + ")";
             }
 
@@ -784,7 +791,7 @@
                     resources.push({title: "Questions", array: true, data: questions});
                 }
 
-                if (currentsource.source === "ulb") {
+                if (currentsource.resource_id === "ulb") {
                     var result = App.projectsManager.getFrameUdb(currentsource, chapterid, frameid)[0];
                     if (result) {
                         udbtext = result.chunk;

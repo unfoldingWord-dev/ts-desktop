@@ -522,14 +522,14 @@
             var modal = this.$.modal;
             var sources = App.projectsManager.sources;
             var projectid = this.currentproject.data.project.id;
-            if (this.currentproject.data.resource_id === "udb") {
-                modal.allSources = _.filter(sources, {'project': projectid, 'level': 3});
+            if (this.currentproject.data.resource.id === "udb") {
+                modal.allSources = _.filter(sources, {'project_id': projectid, 'checking_level': 3});
             } else {
                 modal.allSources = _.filter(sources, function(source) {
-                    return source.project === projectid && source.level === 3 && source.source !== "udb";
+                    return source.project_id === projectid && source.checking_level === 3 && source.resource_id !== "udb";
                 });
             }
-            modal.sources = this.currentproject.data.sources;
+            modal.sources = this.currentproject.data.source_translations;
             modal.selectedSource = this.currentproject.data.currentsource;
             this.$.sourcepopup.open();
         },
@@ -579,7 +579,7 @@
         retrievesource: function () {
             var key = "uw-" + this.currentproject.data.fullname;
             var source = App.configurator.getValue(key + "-source");
-            if (source !== undefined  && source !== "" && source < this.currentproject.data.sources.length) {
+            if (source !== undefined  && source !== "" && source < this.currentproject.data.source_translations.length) {
                 this.set('currentproject.data.currentsource', source);
             }
         },
@@ -592,7 +592,7 @@
             var list = this.projectlist;
 
             var loadsource = function () {
-                if (projdata.project.type === "tw" || projdata.project.type === "ta") {
+                if (projdata.type.id === "tw" || projdata.type.id === "ta") {
                     mythis.pulldata();
                     mythis.createchunks();
                 } else {
@@ -614,10 +614,10 @@
             };
 
             var loadwords = function () {
-                if (projdata.project.type !== "tw" && projdata.project.type !== "ta") {
+                if (projdata.type.id !== "tw" && projdata.type.id !== "ta") {
                     var wordmeta = false;
                     for (var i = 0; i < list.length; i++) {
-                        if (list[i].target_language.id === projdata.target_language.id && list[i].project.type === "tw") {
+                        if (list[i].target_language.id === projdata.target_language.id && list[i].type.id === "tw") {
                             wordmeta = list[i];
                         }
                     }
@@ -637,11 +637,18 @@
             };
 
             var loaddata2 = function () {
-                if (projdata.project.type === "tn" || projdata.project.type === "tq") {
+                if (projdata.type.id === "tn" || projdata.type.id === "tq") {
                     var newmeta = false;
                     for (var i = 0; i < list.length; i++) {
-                        if (list[i].basename === projdata.basename && list[i].project.type === "text" && list[i].resource_id !== "udb") {
+                        if (list[i].basename === projdata.basename && (list[i].resource.id === "ulb" || list[i].resource.id === "obs")) {
                             newmeta = list[i];
+                        }
+                    }
+                    if (!newmeta) {
+                        for (i = 0; i < list.length; i++) {
+                            if (list[i].basename === projdata.basename && (list[i].resource.id === "udb" || list[i].resource.id === "reg")) {
+                                newmeta = list[i];
+                            }
                         }
                     }
                     if (newmeta) {
@@ -676,7 +683,7 @@
         },
 
         updatesources: function (event, data) {
-            this.set('currentproject.data.sources', data.sources);
+            this.set('currentproject.data.source_translations', data.sources);
             this.set('currentproject.data.currentsource', data.selected);
             this.loaddata(true);
         },
@@ -721,7 +728,7 @@
         },
 
         checkstandard: function () {
-            var check = this.currentproject.data.project.type === "text";
+            var check = this.currentproject.data.type.id === "text";
             this.set('standardproject', check);
         },
 
@@ -730,11 +737,11 @@
             if (current === null || current === undefined) {
                 return;
             }
-            var currentsource = this.currentproject.data.sources[current];
+            var currentsource = this.currentproject.data.source_translations[current];
             var frames = App.projectsManager.getSourceFrames(currentsource);
             var name = this.currentproject.data.project.name;
             var language = this.currentproject.data.target_language.name;
-            var resource = this.currentproject.data.resource_id;
+            var resource = this.currentproject.data.resource.id;
             var source = [];
             var srcchunk = {};
             var transchunk = {};
@@ -746,7 +753,7 @@
             var chunkref;
             var standard = this.standardproject;
             var refaddon = language;
-            if (resource !== "") {
+            if (resource === "ulb" || resource === "udb") {
                 refaddon += " (" + resource + ")";
             }
 
@@ -784,7 +791,7 @@
                     resources.push({title: "Questions", array: true, data: questions});
                 }
 
-                if (currentsource.source === "ulb") {
+                if (currentsource.resource_id === "ulb") {
                     var result = App.projectsManager.getFrameUdb(currentsource, chapterid, frameid)[0];
                     if (result) {
                         udbtext = result.chunk;
@@ -1003,7 +1010,7 @@
         },
 
         pulldata: function () {
-            var type = this.currentproject.data.project.type;
+            var type = this.currentproject.data.type.id;
             var language = this.currentproject.data.target_language.name;
             var standard = this.standardproject;
             var frames;
@@ -1153,9 +1160,9 @@
 
         setmodestate: function () {
             var mythis = this;
-            var sources = this.currentproject.data.sources;
+            var sources = this.currentproject.data.source_translations;
             var key = "uw-" + this.currentproject.data.fullname;
-            var type = this.currentproject.data.project.type;
+            var type = this.currentproject.data.type.id;
             var index = App.configurator.getValue(key + "-index");
             var chapter = App.configurator.getValue(key + "-chapter");
             var selected = App.configurator.getValue(key + "-selected");
@@ -1190,10 +1197,10 @@
 
         checksources: function () {
             var mythis = this;
-            var sources = this.currentproject.data.sources;
+            var sources = this.currentproject.data.source_translations;
             var lastmode = this.modestatus.lastmode;
             var selected = this.selected;
-            var type = this.currentproject.data.project.type;
+            var type = this.currentproject.data.type.id;
 
             if (selected === 4) {
                 if (sources !== undefined && sources.length !== 0) {
@@ -1226,7 +1233,7 @@
 
         createchunks: function () {
             var current = this.currentproject.data.currentsource;
-            var type = this.currentproject.data.project.type;
+            var type = this.currentproject.data.type.id;
             if ((current === null || current === undefined) && type !== "tw" && type !== "ta") {
                 return;
             }
@@ -1345,8 +1352,8 @@
         },
 
         gopublish: function () {
-            var type = this.currentproject.data.project.type;
-            if(this.currentproject.data.sources.length || type === "tw" || type === "ta") {
+            var type = this.currentproject.data.type.id;
+            if(this.currentproject.data.source_translations.length || type === "tw" || type === "ta") {
                 this.savestate();
                 this.setleftanimation();
                 this.fire('iron-signal', {name: 'updatepublish'});

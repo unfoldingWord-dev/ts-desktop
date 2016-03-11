@@ -113,21 +113,13 @@
                 <paper-material class="users" elevation="1">
                     <div id="usergroup">
                         <template is="dom-repeat" items="{{currentproject.data.translators}}" as="user">
-                            <p>{{user.name}}</p>
+                            <p>{{user}}</p>
                         </template>
                     </div>
                 </paper-material>
             </template>
             <paper-material class="input" elevation="1">
-                <input is="iron-input" bind-value="{{newinfo.name}}" placeholder="Your Name">
-                <iron-icon class="right" icon="info" title="Info"></iron-icon>
-            </paper-material>
-            <paper-material class="input" elevation="1">
-                <input is="iron-input" bind-value="{{newinfo.email}}" placeholder="Your Email Address">
-                <iron-icon class="right" icon="info" title="Info"></iron-icon>
-            </paper-material>
-            <paper-material class="input" elevation="1">
-                <input is="iron-input" bind-value="{{newinfo.phone}}" placeholder="Your Phone Number">
+                <input is="iron-input" bind-value="{{newinfo.name}}" placeholder="Name or Pseudonym">
                 <iron-icon class="right" icon="info" title="Info"></iron-icon>
             </paper-material>
             <div id="buttons">
@@ -175,11 +167,10 @@
 
         add: function () {
             var name = this.newinfo.name;
-            var email = this.newinfo.email;
-            if (name === undefined || name === "" || email === undefined || email === "") {
+            if (name === undefined || name === "") {
                 this.$.popup.open();
             } else {
-                this.push('currentproject.data.translators', this.newinfo);
+                this.push('currentproject.data.translators', name);
                 this.fire('iron-signal', {name: 'savetofile'});
                 this.set('newinfo', {});
             }
@@ -187,11 +178,10 @@
 
         next: function () {
             var name = this.newinfo.name;
-            var email = this.newinfo.email;
             var length = this.currentproject.data.translators.length;
-            if ((name === undefined || name === "") && (email === undefined || email === "") && length) {
+            if ((name === undefined || name === "") && length) {
                 this.selected = this.selected + 1;
-            } else if (name !== undefined && name !== "" && email !== undefined && email !== "") {
+            } else if (name !== undefined && name !== "") {
                 this.add();
                 this.selected = this.selected + 1;
             } else {

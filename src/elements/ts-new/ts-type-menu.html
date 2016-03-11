@@ -100,11 +100,11 @@
       </div>
 
       <div id="contain">
-          <iron-list items="[[typelist]]" as="type">
+          <iron-list items="[[typelist]]" as="typedata">
               <template>
-                  <div class$="[[checkclass(type.allowed)]]" on-tap="store">
+                  <div class$="[[checkclass(typedata.allowed)]]" on-tap="store">
                       <div>
-                          <span>[[type.name]]</span>
+                          <span>[[typedata.type.name]]</span> - <span>[[typedata.resource.name]]</span>
                       </div>
                   </div>
               </template>
@@ -148,7 +148,7 @@
               type: Boolean,
               value: false
           },
-          type: {
+          typedata: {
               type: Object,
               value: {},
               notify: true
@@ -176,19 +176,19 @@
           var standardexists = false;
 
           for (var i = 0; i < projectarray.length; i++) {
-              if (projectarray[i].basename === basename && projectarray[i].project.type === "text") {
+              if (projectarray[i].basename === basename && projectarray[i].type.id === "text") {
                   standardexists = true;
               }
           }
 
           if (project === "obs") {
-              typearray.push({name: "Text - Open Bible Stories", code: "text", resource: "obs", allowed: true, fullname: basename});
+              typearray.push({type: {id: "text", name: "Text"}, resource: {id: "obs", name: "Open Bible Stories"}, format: "markdown", allowed: true, fullname: basename});
           } else {
-              typearray.push({name: "Text - Unlocked Literal Bible", code: "text", resource: "ulb", allowed: true, fullname: basename});
-              typearray.push({name: "Text - Unlocked Dynamic Bible", code: "text", resource: "udb", allowed: true, fullname: project + "_udb-" + language.id});
+              typearray.push({type: {id: "text", name: "Text"}, resource: {id: "ulb", name: "Unlocked Literal Bible"}, format: "usfm", allowed: true, fullname: basename});
+              typearray.push({type: {id: "text", name: "Text"}, resource: {id: "udb", name: "Unlocked Dynamic Bible"}, format: "usfm", allowed: true, fullname: project + "_udb-" + language.id});
           }
-          typearray.push({name: "Notes", code: "tn", resource: "", allowed: standardexists, fullname: project + "_tn-" + language.id});
-          typearray.push({name: "Questions", code: "tq", resource: "", allowed: standardexists, fullname: project + "_tq-" + language.id});
+          typearray.push({type: {id: "tn", name: "Notes"}, resource: {id: "", name: ""}, format: "markdown", allowed: standardexists, fullname: project + "_tn-" + language.id});
+          typearray.push({type: {id: "tq", name: "Questions"}, resource: {id: "", name: ""}, format: "markdown", allowed: standardexists, fullname: project + "_tq-" + language.id});
 
           for (i = 0; i < typearray.length; i++) {
               for (var k = 0; k < projectarray.length; k++) {
@@ -210,7 +210,7 @@
       },
 
       store: function(e) {
-          this.type = e.model.type;
+          this.typedata = e.model.typedata;
           this.fire('create');
       },
 

@@ -157,23 +157,20 @@ function ProjectsManager(query, configurator) {
 
         get sources () {
             var r = query([
-                    "select r.id, r.slug 'source', r.name, sl.name 'ln', sl.slug 'lc', p.slug 'project', r.checking_level 'level', r.version, r.modified_at 'date_modified' from resource r",
-                    "join source_language sl on sl.id=r.source_language_id",
-                    "join project p on p.id=sl.project_id",
+                    "select r.id, r.slug 'resource_id', r.name 'resource_name', l.name 'language_name', l.slug 'language_id', p.slug 'project_id', r.checking_level, r.version, r.modified_at 'date_modified' from resource r",
+                    "join source_language l on l.id=r.source_language_id",
+                    "join project p on p.id=l.project_id",
                     "order by r.name"
                 ].join(' '));
             return zipper(r);
         },
 
-        getSourceDetails: function (source) {
-            var first = source.indexOf("-");
-            var last = source.lastIndexOf("-");
-
+        getSourceDetails: function (project_id, language_id, resource_id) {
             var r = query([
-                "select r.id, r.slug 'source', r.name, sl.name 'ln', sl.slug 'lc', p.slug 'project', r.checking_level 'level', r.version, r.modified_at 'date_modified' from resource r",
-                "join source_language sl on sl.id=r.source_language_id",
-                "join project p on p.id=sl.project_id",
-                "where p.slug='" + source.substring(0, first) + "' and sl.slug='" + source.substring(first+1, last) + "' and r.slug='" + source.substring(last+1) + "'"
+                "select r.id, r.name 'resource_name', l.name 'language_name', p.slug 'project_id' from resource r",
+                "join source_language l on l.id=r.source_language_id",
+                "join project p on p.id=l.project_id",
+                "where p.slug='" + project_id + "' and l.slug='" + language_id + "' and r.slug='" + resource_id + "'"
             ].join(' '));
             return zipper(r);
         },
@@ -203,13 +200,13 @@ function ProjectsManager(query, configurator) {
 
         checkProject: function (project) {
             var allsources = this.sources;
-            var mysources = _.filter(allsources, 'project', project);
+            var mysources = _.filter(allsources, 'project_id', project);
             var combined = {};
             var sources = [];
             for (var i = 0; i < mysources.length; i++) {
-                var source = mysources[i].source;
+                var source = mysources[i].resource_id;
                 var frames = this.getSourceFrames(mysources[i]);
-                console.log("source:", source, "chunks:", frames.length);
+                console.log("resource:", source, "chunks:", frames.length);
                 combined[source] = frames;
                 sources.push(source);
             }
@@ -237,17 +234,17 @@ function ProjectsManager(query, configurator) {
 
         checkAllProjects: function () {
             var allsources = this.sources;
-            var ulbsources = _.filter(allsources, 'source', 'ulb');
+            var ulbsources = _.filter(allsources, 'resource_id', 'ulb');
             for (var i = 0; i < ulbsources.length; i++) {
-                console.log("Project Results              Name: " + ulbsources[i].project);
-                this.checkProject(ulbsources[i].project);
+                console.log("Project Results              Name: " + ulbsources[i].project_id);
+                this.checkProject(ulbsources[i].project_id);
                 console.log("---------------------------------------------------------------");
             }
         },
 
         getFrameUdb: function (source, chapterid, verseid) {
             var sources = this.sources;
-            var udbsource = _.filter(sources, {'lc': source.lc, 'project': source.project, 'level': 3, 'source': 'udb'});
+            var udbsource = _.filter(sources, {'language_id': source.language_id, 'project_id': source.project_id, 'checking_level': 3, 'resource_id': 'udb'});
             var s = udbsource[0].id,
                 r = query([
                     "select f.id, f.slug 'verse', f.body 'chunk', c.slug 'chapter', c.title, c.reference, f.format from frame f",
@@ -629,7 +626,7 @@ function ProjectsManager(query, configurator) {
         },
 
         isTranslation: function (meta) {
-            return !meta.project.type || meta.project.type === 'text';
+            return !meta.type.id || meta.type.id === 'text';
         },
 
         saveTargetTranslation: function (translation, meta) {
@@ -656,32 +653,31 @@ function ProjectsManager(query, configurator) {
 
             var finishedFrames = _.compact(_.map(chunks, prop('completed')));
 
-            var sources = _.chain(meta.sources)
-                .indexBy(function (r) {
-                    return [r.project, r.lc, r.source].join('-');
-                })
-                .mapValues(function (r) {
+            var sources = meta.source_translations.map(function (source) {
                     return {
-                        checking_level: r.level,
-                        date_modified: r.date_modified,
-                        version: r.version
+                        language_id: source.language_id,
+                        resource_id: source.resource_id,
+                        checking_level: source.checking_level,
+                        date_modified: source.date_modified,
+                        version: source.version
                     };
-                })
-                .value();
+                });
 
             var manifest = {
+                package_version: 5,
+                format: meta.format,
                 generator: {
                     name: 'ts-desktop',
                     build: ''
                 },
-                package_version: 3,
                 target_language: meta.target_language,
                 project: meta.project,
-                resource_id: meta.resource_id,
+                type: meta.type,
+                resource: meta.resource,
                 source_translations: sources,
-                parent_draft_resource_id: '',
+                parent_draft: meta.parent_draft,
                 translators: meta.translators,
-                finished_frames: finishedFrames
+                finished_chunks: finishedFrames
             };
 
             var writeFile = function (name, data) {
@@ -734,6 +730,17 @@ function ProjectsManager(query, configurator) {
 
             return this.loadProjectsList()
                 .then(map(makePaths))
+                .then(function (list) {
+                    var migrated = _.map(list, function (paths) {
+                        return targetTranslationMigrator.migrate(paths.projectDir)
+                            .catch(function () {
+                                return true;
+                            });
+                    });
+                    return Promise.all(migrated).then(function () {
+                        return list;
+                    })
+                })
                 .then(map('manifest'))
                 .then(function (list) {
                     return _.filter(list, function (path) {

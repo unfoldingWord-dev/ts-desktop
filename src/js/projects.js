@@ -761,7 +761,7 @@ function ProjectsManager(query, configurator) {
             var paths = config.makeProjectPaths(meta);
 
             return read(paths.manifest).then(function (manifest) {
-                var finishedFrames = fromJSON(manifest).finished_frames;
+                var finishedFrames = fromJSON(manifest).finished_chunks;
                 return _.indexBy(finishedFrames);
             });
         },

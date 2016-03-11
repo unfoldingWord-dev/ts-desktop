@@ -4,7 +4,7 @@
 
     let assert = require('assert');
     let fs = require('fs');
-    let User = require('../../app/js/user').User;
+    let User = require('../../src/js/user').User;
     let jsonfile = require('jsonfile');
     let md5 = require('md5');
 

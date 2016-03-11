@@ -7,9 +7,9 @@
     let assert = require('assert'),
         path = require('path'),
         rimraf = require('rimraf'),
-        Uploader = require('../../app/js/uploader').Uploader,
-        uploader = new Uploader(),
-        User = require('../../app/js/user').User;
+        Uploader = require('../../src/js/uploader').Uploader,
+        uploader = new Uploader('./unit_tests/uploader/data/'),
+        User = require('../../src/js/user').User;
 
     uploader.sshPath = path.resolve('unit_tests/uploader/ssh');
 

@@ -216,6 +216,10 @@
             padding-left: 5px;
         }
 
+        .hide {
+            display: none;
+        }
+
     </style>
 
     <template>
@@ -251,7 +255,7 @@
                                 <div class="left" on-tap="openproject">
                                     <span class="smallspan"><iron-icon class="smallicon" icon$="[[checkicon(proj.project.id)]]"></iron-icon></span>
                                     <span class="bigspan">[[proj.project.name]]</span>
-                                    <span class="smallspan smalltext"><span>[[proj.type.name]]</span><span class="space">[[proj.resource.id]]</span></span>
+                                    <span class="smallspan smalltext"><span>[[proj.type.name]]</span><span class$="[[typeclass(proj.resource.id)]]">[[proj.resource.id]]</span></span>
                                     <span class="smalltext bigspan">[[proj.target_language.name]]</span>
                                     <span class="smallspan"><ts-completion-icon percent="[[proj.completion]]"></ts-completion-icon></span>
                                 </div>
@@ -361,6 +365,10 @@
                     }
                 }
             }
+        },
+
+        typeclass: function (id) {
+            return id === "ulb" || id === "udb" ? 'space' : 'hide';
         },
 
         checkicon: function (slug) {

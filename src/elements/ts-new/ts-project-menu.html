@@ -133,7 +133,7 @@
               value: {},
               notify: true
           },
-          type: {
+          typedata: {
               type: Object,
               value: {},
               notify: true
@@ -164,16 +164,16 @@
                   this.fire('iron-signal', {name: 'createtypes'});
                   this.selected = this.selected + 2;
               } else {
-                  this.type = {name: "Text - Open Bible Stories", code: "text", resource: "obs", allowed: true};
+                  this.typedata = {type: {id: "text", name: "Text"}, resource: {id: "obs", name: "Open Bible Stories"}, format: "markdown", allowed: true};
                   this.fire('create');
               }
           } else if (this.category.name === "translationWords") {
               this.project = this.category.data[0];
-              this.type = {name: "Words", code: "tw", resource: "", allowed: true};
+              this.typedata = {type: {id: "tw", name: "Words"}, resource: {id: "", name: ""}, format: "markdown", allowed: true};
               this.fire('create');
           } else if (this.category.name.substring(0, 18) === "translationAcademy") {
               this.project = this.category.data[0];
-              this.type = {name: "Academy", code: "ta", resource: "", allowed: true};
+              this.typedata = {type: {id: "ta", name: "Academy"}, resource: {id: "", name: ""}, format: "markdown", allowed: true};
               this.fire('create');
           } else {
               this.selected = this.selected + 1;

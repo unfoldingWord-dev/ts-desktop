@@ -99,9 +99,9 @@
 		<div class="tabs">
             <div class="readspace"></div>
             <div class="bigspace"></div>
-            <template is="dom-repeat" items="[[projectdata.sources]]" as="source">
+            <template is="dom-repeat" items="[[projectdata.source_translations]]" as="source">
                 <div class="littlespace"></div>
-                <div class$="[[tabclass(projectdata.currentsource, index)]]" on-tap="choosesource"><span>{{source.ln}}</span><span class="upper">{{source.source}}</span></div>
+                <div class$="[[tabclass(projectdata.currentsource, index)]]" on-tap="choosesource"><span>{{source.language_name}}</span><span class="upper">{{source.resource_id}}</span></div>
                 <div class="littlespace"></div>
             </template>
             <div class="fillspace"></div>

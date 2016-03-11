@@ -132,11 +132,11 @@
                     <paper-material class="contentbox" elevation="1">
                         <div class="contentheader">
                             <p>{{help.title}}</p>
-                            <iron-autogrow-textarea bind-value="{{help.title}}" on-change="change" on-input="input" placeholder$="[[checktitle(chunk.data.project.type)]]"></iron-autogrow-textarea>
+                            <iron-autogrow-textarea bind-value="{{help.title}}" on-change="change" on-input="input" placeholder$="[[checktitle(chunk.data.type.id)]]"></iron-autogrow-textarea>
                         </div>
                         <div class="contentbody">
                             <p>{{help.body}}</p>
-                            <iron-autogrow-textarea bind-value="{{help.body}}" on-change="change" on-input="input" placeholder$="[[checkbody(chunk.data.project.type)]]"></iron-autogrow-textarea>
+                            <iron-autogrow-textarea bind-value="{{help.body}}" on-change="change" on-input="input" placeholder$="[[checkbody(chunk.data.type.id)]]"></iron-autogrow-textarea>
                         </div>
                     </paper-material>
                 </template>

@@ -4,17 +4,17 @@
 
     let assert = require('assert');
     let fs = require('fs');
-    let Reporter = require('../../app/js/reporter').Reporter;
+    let Reporter = require('../../src/js/reporter').Reporter;
     let version = require('../../package.json').version;
-    let Configurator = require('../../app/js/configurator').Configurator;
+    let Configurator = require('../../src/js/configurator').Configurator;
     let reporterConfigurator = new Configurator();
-    let reporterDefaultConfig = require('../../app/config/defaults');
+    let reporterDefaultConfig = require('../../src/config/defaults');
     let rimraf = require('rimraf');
     let jsonfile = require('jsonfile');
 
     reporterConfigurator.setStorage({});
     reporterConfigurator.loadConfig(reporterDefaultConfig);
-    let privateConfPath = './app/config/private.json';
+    let privateConfPath = './src/config/private.json';
     if (fs.existsSync(privateConfPath)) {
         let stats = fs.lstatSync(privateConfPath);
         if (stats.isFile()) {

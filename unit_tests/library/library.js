@@ -5,21 +5,22 @@
     let assert = require('assert');
     let path = require('path');
     //let rimraf = require('rimraf');
-    let SourceTranslation = require('../../app/js/core/sourcetranslation');
-    let Configurator = require('../../app/js/configurator').Configurator;
+    let SourceTranslation = require('../../src/js/core/sourcetranslation');
+    let Configurator = require('../../src/js/configurator').Configurator;
     let configurator = new Configurator();
-    let config = require('../../app/config/defaults');
+    let config = require('../../src/config/defaults');
     configurator.setStorage({});
     configurator.loadConfig(config);
 
-    let Library = require('../../app/js/library').Library;
-    let indexPath = './app/index/index.sqlite';
-    let library = new Library(path.resolve('./app/config/schema.sql'), indexPath, configurator.getValue('apiUrl'));
+    let Library = require('../../src/js/library').Library;
+    let dbPath = './src/index/index.sqlite';
+    let library = new Library(path.resolve('./src/config/schema.sql'), dbPath, configurator.getValue('apiUrl'));
 
-    describe('@Library', function () {
+    describe('@library', function () {
+        this.timeout(10000);
 
         describe('@GetProjects', function () {
-            it('should retrieve the catalog object', function () {
+            it('should return an array of projects', function () {
                 assert.equal(library.getProjects('en').length > 0, true);
             });
         });

@@ -1,0 +1,56 @@
+{
+    "generator": {
+        "name": "ts-android",
+        "build": 102
+    },
+    "package_version": 4,
+    "target_language": {
+        "direction": "ltr",
+        "id": "aa",
+        "name": "Afaraf"
+    },
+    "project": {
+        "id": "obs",
+        "name": "Open Bible Stories",
+        "type": "text"
+    },
+    "format": "default",
+    "resource_id": "obs",
+    "source_translations": {
+        "obs-en-obs": {
+            "checking_level": 3,
+            "date_modified": 20150427,
+            "version": "2.0.0-beta13"
+        },
+        "obs-de-obs": {
+            "checking_level": 3,
+            "date_modified": 20150427,
+            "version": "2.0.0-beta13"
+        },
+        "obs-pt-br-obs": {
+            "checking_level": 3,
+            "date_modified": 20150427,
+            "version": "2.0.0-beta13"
+        }
+    },
+    "parent_draft_resource_id": "obs",
+    "translators": [
+        "jondoe"
+    ],
+    "finished_frames": [
+        "01-01",
+        "01-02",
+        "02-01"
+    ],
+    "finished_titles": [
+        "01",
+        "02"
+    ],
+    "finished_references": [
+        "01",
+        "02"
+    ],
+    "finished_project_components": [
+        "title"
+    ]
+}

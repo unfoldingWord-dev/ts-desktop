@@ -253,7 +253,7 @@
                         <template is="dom-repeat" items="[[projectlist]]" as="proj">
                             <div class="row">
                                 <div class="left" on-tap="openproject">
-                                    <span class="smallspan"><iron-icon class="smallicon" icon$="[[checkicon(proj.project.id)]]"></iron-icon></span>
+                                    <span class="smallspan"><iron-icon class="smallicon" icon$="[[checkicon(proj)]]"></iron-icon></span>
                                     <span class="bigspan">[[proj.project.name]]</span>
                                     <span class="smallspan smalltext"><span>[[proj.type.name]]</span><span class$="[[typeclass(proj.resource.id)]]">[[proj.resource.id]]</span></span>
                                     <span class="smalltext bigspan">[[proj.target_language.name]]</span>
@@ -371,8 +371,8 @@
             return id === "ulb" || id === "udb" ? 'space' : 'hide';
         },
 
-        checkicon: function (slug) {
-            return slug === "obs" || slug === "tw" || slug.substring(0, 3) === "vol" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
+        checkicon: function (meta) {
+            return meta.project.id === "obs" || meta.project_type_class === "extant" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
         },
 
         gopublish: function () {

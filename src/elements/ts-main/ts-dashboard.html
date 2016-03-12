@@ -507,6 +507,19 @@
                   list[i].currentsource = null;
               }
 
+              if (list[i].type.id === "tw" || list[i].type.id === "ta") {
+                  list[i].project_type_class = "extant";
+              } else if (list[i].type.id === "tn" || list[i].type.id === "tq") {
+                  list[i].project_type_class = "helps";
+              } else {
+                  list[i].project_type_class = "standard";
+              }
+
+              list[i].unique_id = list[i].target_language.id + "_" + list[i].project.id + "_" + list[i].type.id;
+              if (list[i].resource.id !== "") {
+                  list[i].unique_id += "_" + list[i].resource.id;
+              }
+
               var typeext = "";
 
               if (list[i].type.id === "tw" || list[i].type.id === "ta") {

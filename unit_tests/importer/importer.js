@@ -78,13 +78,15 @@ describe('@Importer', function () {
     describe('@UsfmImport', function () {
         it('should import a sample ufsm file', function (done) {
             var file = {
-                name: "sample-usfm-file.txt",
+                name: "matthew.usfm",
                 path: path.resolve('unit_tests/importer/data/matthew.usfm')
             };
             try{
                 let importer = new Importer(config,pm);
 
-                importer.importUSFMFile(file,translation).catch(function(e){
+                importer.importUSFMFile(file,translation).then(function(){
+                    done();
+                }).catch(function(e){
                     console.log('there was an error', e);
                 });
 

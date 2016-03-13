@@ -3,9 +3,10 @@
 'use strict';
 
 var fs = require('fs'),
-    path = require('path');
+    path = require('path'),
+    Translator = new require('../js/translator').Translator;
 
-function Importer() {
+function Importer(configurator, pm) {
 
     return {
 
@@ -15,7 +16,7 @@ function Importer() {
          * @returns {Promise.<boolean>}
          */
         importUSFMFile: function (file,translation) {
-            console.log("importing USFM", file);
+            console.log("importing USFM", file, "to project",translation);
             var self = this;
             return new Promise(function (resolve, reject) {
                 let fileExt = file.name.split('.').pop().toLowerCase();
@@ -31,7 +32,11 @@ function Importer() {
                     });
                 } else {
                     console.log("running single file import");
-                    self.importSingleUSFMFile(file.path);
+                    self.importSingleUSFMFile(file.path,translation).then(function(data){
+                        resolve();
+                    }).catch(function(e){
+                        reject('There was an error importing the translation');
+                    });
                 }
             });
         },
@@ -54,29 +59,90 @@ function Importer() {
             });
         },
 
-        importSingleUSFMFile: function (usfmFile, translation) {
+        getVerseChunkFileNames: function(projdata){
 
-            //var projectPath = path.join(App.configurator.getValue('rootdir'),'targetTranslations','uw-mat-en');
-            //var data = fs.readFileSync(usfmFile,'utf8');
+            var frames = pm.getSourceFrames(projdata.sources[projdata.currentsource]);
+            var parsedFrames = [],
+                chapters = {};
 
-            console.log("about to import", usfmFile);
+            for(var i = 0;i < frames.length;i++){
+                var sourcedata = frames[i].chunk,
+                    verses = [],
+                    startstr = '<verse number="',
+                    endstr = '" style="v" />',
+                    test = new RegExp(startstr);;
 
-            /*var lineReader = require('readline').createInterface({
-                input: fs.createReadStream(usfmFile)
-            });
-
-            lineReader.on('line', function (line) {
-                if (isMarker(line)) {
-                    getMarker(line);
+                while (test.test(sourcedata)) {
+                    var versestr = sourcedata.substring(sourcedata.search(startstr) + 15, sourcedata.search(endstr));
+                    if (versestr.indexOf("-") < 0) {
+                        verses.push(parseInt(versestr));
+                    } else {
+                        var firstnum = parseInt(versestr.substring(0, versestr.search("-")));
+                        var lastnum = parseInt(versestr.substring(versestr.search("-") + 1));
+                        for (var j = firstnum; j <= lastnum; j++) {
+                            verses.push(j);
+                        }
+                    }
+                    sourcedata = sourcedata.replace(startstr, " \\v");
+                    sourcedata = sourcedata.replace(endstr, " ");
                 }
-            });*/
 
-            var parser = new UsfmParser();
-            parser.load(usfmFile).then(function(){
-                console.log("Done loading");
-                parser.parse();
+                var chuckFile = String("00" + verses[0]).slice(-2);
+
+                parsedFrames.push({filename:chuckFile,chapter:frames[i].chapter,verses:verses});
+            }
+            return parsedFrames;
+        },
+
+        importSingleUSFMFile: function (usfmFile, projdata) {
+            let self = this;
+            return new Promise(function(resolve,reject){
+                var chunkFileNames = self.getVerseChunkFileNames(projdata);
+
+                var parser = new UsfmParser();
+                parser.load(usfmFile).then(function(){
+
+                    var parsedData = parser.parse();
+                    for(var i = 0;i<chunkFileNames.length;i++){
+                        var chunk = chunkFileNames[i];
+                        var transcontent = '';
+
+                        for(var ci = 0;ci<chunk.verses.length;ci++){
+                            if(typeof parsedData[chunk.chapter] !== 'undefined' && typeof parsedData[chunk.chapter].verses[chunk.verses[ci]] !== 'undefined'){
+                                transcontent += '\\v' + parsedData[chunk.chapter].verses[chunk.verses[ci]].id + ' ' + parsedData[chunk.chapter].verses[chunk.verses[ci]].contents;
+                            }
+                        }
+                        chunkFileNames[i].meta = {
+                            chapterid: chunkFileNames[i].chapter,
+                            frameid: chunkFileNames[i].filename,
+                            helpscontent: []
+                        };
+                        chunkFileNames[i].completed = true;
+                        chunkFileNames[i].transcontent = transcontent;
+                    }
+
+
+                    //Pull in the title
+                    if(typeof parsedData['00'] !== 'undefined'){
+                        chunkFileNames.push({
+                            meta: {
+                                chapterid: '00',
+                                frameid: 'title',
+                                helpscontent: []
+                            },
+                            transcontent: parsedData['00'].contents,
+                            completed: true
+                        });
+                    }
+
+                    pm.saveTargetTranslation(chunkFileNames,projdata).then(function(){
+                        resolve();
+                    }).catch(function(e){
+                        reject('There was a problem importing this translation');
+                        console.log('Save Error: ', e);
+                    });
+                });
             });
-            //console.log(parser.contents);
 
 
         },
@@ -103,6 +169,11 @@ function UsfmParser (file) {
             regEx: /\\mt[0-9]*/,
             hasOptions: false,
             type: "majorTitle"
+        },
+        heading: {
+            regEx: /\\h[0-9]*/,
+            hasOptions: false,
+            type: "heading"
         },
         chapter: {
             regEx: /\\c/,
@@ -179,7 +250,7 @@ function UsfmParser (file) {
             console.log("Starting parse");
             try{
                 this.getMarkers();
-                this.buildChapters();
+                return this.buildChapters();
             } catch(e){
                 console.log(e.stack);
             }
@@ -220,23 +291,34 @@ function UsfmParser (file) {
             }
         },
         buildChapters: function(){
-            self.chapters = [];
+            self.chapters = {};
+            var chap;
             for(var m in self.markers){
                 var marker = self.markers[m];
                 if(marker.type === "chapter"){
-                    var chapter = {
-                        id: marker.options,
-                        verses: []
-                    }
-                    self.chapters.push(chapter);
+                    chap = String("00" + marker.options).slice(-2);
+                    var chapter =
+                    self.chapters[chap] = {
+                        id: chap,
+                        verses: {}
+                    };
+                    //self.chapters.push(chapter);
                 } else if(marker.type === "verse"){
-                    self.chapters[self.chapters.length - 1].verses.push({
+                    self.chapters[chap].verses[marker.options] = {
                         id: marker.options,
                         contents: marker.contents
-                    });
+                    }
+                } else if(marker.type === "heading"){
+                    self.chapters['00'] = {
+                        id: '00',
+                        verses: {},
+                        contents: marker.contents
+                    };
                 }
+
             }
             console.log("chapters",self.chapters);
+            return self.chapters;
         }
     }
 }

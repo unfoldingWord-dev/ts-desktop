@@ -220,7 +220,7 @@
       </template>
 
       <input id="restore" class="hide" type="file" accept=".tstudio" multiple />
-      <input id="import" class="hide" type="file" accept=".txt,.zip" />
+      <input id="import" class="hide" type="file" accept=".txt,.zip,.usfm" />
       <input id="backup" class="hide" type="file" nwsaveas="" />
 
       <paper-dialog id="feedback" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -490,7 +490,7 @@
           loading.open();
           for(var i=0; i < chooser.files.length; i ++) {
               var fileExt = chooser.files[i].name.split('.').pop().toLowerCase();
-              if(fileExt === "zip" || fileExt === "txt"){
+              if(fileExt === "zip" || fileExt === "txt" || fileExt === "usfm"){
                   App.importer.importUSFMFile(chooser.files[0],proj).then(function(){
                       mythis.set('options.title', "Import Complete");
                       mythis.set('options.body', "Your file has been imported successfully.  Thanks.");
@@ -498,6 +498,11 @@
                       setTimeout(function() {
                           mythis.updatelist();
                       }, 250);
+                  }).catch(function(e){
+                      console.log('Import Error: ', e);
+                      mythis.set('options.title', "Import Error");
+                      mythis.set('options.body', "Your file was not imported. It may not be in the correct format or it has already been imported.");
+                      mythis.set('options.loading', false);
                   });
               }
           }

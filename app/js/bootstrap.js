@@ -250,7 +250,7 @@
         },
 
         initializeImporter: function(){
-            this.importer = new Importer();
+            this.importer = new Importer(this.configurator, this.projectsManager);
         },
 
         /**

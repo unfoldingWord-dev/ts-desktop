@@ -3,8 +3,7 @@
 'use strict';
 
 var fs = require('fs'),
-    path = require('path'),
-    Translator = new require('../js/translator').Translator;
+    path = require('path');
 
 function Importer(configurator, pm) {
 
@@ -16,7 +15,7 @@ function Importer(configurator, pm) {
          * @returns {Promise.<boolean>}
          */
         importUSFMFile: function (file,translation) {
-            console.log("importing USFM", file, "to project",translation);
+            console.log("importing USFM", file, "to project", translation);
             var self = this;
             return new Promise(function (resolve, reject) {
                 let fileExt = file.name.split('.').pop().toLowerCase();
@@ -317,7 +316,7 @@ function UsfmParser (file) {
                 }
 
             }
-            console.log("chapters",self.chapters);
+            //console.log("chapters",self.chapters);
             return self.chapters;
         }
     }

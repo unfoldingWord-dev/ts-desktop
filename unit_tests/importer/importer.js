@@ -6,46 +6,56 @@ let fs = require('fs');
 let path = require('path');
 let ProjectsManager = require('../../app/js/projects').ProjectsManager;
 let Importer = require('../../app/js/importer').Importer;
-let importer = new Importer();
+let Library = require('../../app/js/library').Library;
+let library = new Library(path.join('./app', 'config', 'schema.sql'), './app/index/index.sqlite', 'https://api.unfoldingword.org/ts/txt/2/catalog.json');
 
-let targetDir = path.resolve('/Users/jeremymlane/Library/Application Support/translationstudio/targetTranslations');
-
+let targetDir = path.resolve('./unit_tests/importer/data');
 
 let translation = {
-    "generator":{
-        "name":"ts-desktop",
-        "build":""
+    "generator": {
+        "name": "ts-desktop",
+        "build": ""
     },
-    "package_version":3,
-    "target_language":{
-        "id":"en",
-        "name":"English",
-        "direction":"ltr"
+    "package_version": 3,
+    "target_language": {
+        "id": "es",
+        "name": "español",
+        "direction": "ltr"
     },
-    "project":{
-        "id":"gen",
-        "name":"Genesis",
-        "type":"text"
+    "project": {
+        "id": "mat",
+        "name": "Matthew",
+        "type": "text"
     },
-    "resource_id":"ulb",
-    "source_translations":{
-
+    "resource_id": "ulb",
+    "source_translations": {
+        "mat-en-ulb": {
+            "checking_level": 3,
+            "date_modified": 20151217,
+            "version": "3"
+        }
     },
-    "parent_draft_resource_id":"",
-    "translators":[
-
+    "parent_draft_resource_id": "",
+    "translators": [],
+    "finished_frames": [],
+    "sources": [
+        {
+            "id": 136,
+            "source": "ulb",
+            "name": "Unlocked Literal Bible",
+            "ln": "English",
+            "lc": "en",
+            "project": "mat",
+            "level": 3,
+            "version": "3",
+            "date_modified": 20151217
+        }
     ],
-    "finished_frames":[
-
-    ],
-    "sources":[
-
-    ],
-    "currentsource":null,
-    "type_name":"Text",
-    "basename":"gen-en",
-    "fullname":"gen-en",
-    "completion":0
+    "currentsource": 0,
+    "type_name": "Text",
+    "basename": "mat-es",
+    "fullname": "mat-es",
+    "completion": 99
 }
 
 let config = {
@@ -58,8 +68,10 @@ let config = {
 };
 
 let query = function () { return []; };
+let db = library.indexer.db;
 
-let pm = new ProjectsManager(query, config);
+
+let pm = new ProjectsManager(db.exec.bind(db), config);
 
 describe('@Importer', function () {
 
@@ -67,26 +79,18 @@ describe('@Importer', function () {
         it('should import a sample ufsm file', function (done) {
             var file = {
                 name: "sample-usfm-file.txt",
-                path: path.resolve('unit_tests/importer/data/sample-usfm-file.txt')
+                path: path.resolve('unit_tests/importer/data/matthew.usfm')
             };
             try{
-                pm.loadTargetTranslation(translation).then(function(proj){
-                    console.log("project",proj);
+                let importer = new Importer(config,pm);
 
-                    /*importer.importUSFMFile(file,proj).then(function(){
-
-
-                        done()
-                    }).catch(function(e){
-                        console.log(e.stack);
-                    });*/
+                importer.importUSFMFile(file,translation).catch(function(e){
+                    console.log('there was an error', e);
                 });
 
-
-                /* var test = pm.loadProjectsList().then(function(data){
-                    console.log("project list",data);
+                /*pm.loadTargetTranslation(translation).then(function(proj) {
+                    console.log("project", proj);
                 });*/
-                //console.log("test",test);
             } catch( e ){
                 console.log(e.stack);
             }

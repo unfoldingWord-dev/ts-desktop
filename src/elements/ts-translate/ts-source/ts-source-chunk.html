@@ -21,7 +21,7 @@
             border-radius: 3px;
         }
 
-        #heading {
+        .heading {
             color: var(--secondary-text-color);
             display: flex;
             justify-content: space-between;
@@ -65,23 +65,25 @@
             margin-left: 16px;
         }
 
+        .hide {
+            display: none;
+        }
+
 	</style>
 
 	<template>
 
         <paper-material elevation="1">
-            <div id="heading">
-                <template is="dom-if" if="{{!chunk.meta.words}}">
-                    <ts-source-tab projectdata="[[chunk.data]]"></ts-source-tab>
-                    <div id="ref">
-                        <span>[[chunk.meta.chunkref]]</span>
-                    </div>
-                </template>
-                <template is="dom-if" if="{{chunk.meta.words}}">
-                    <div id="title">
-                        <h2>[[chunk.wordcontent]]</h2>
-                    </div>
-                </template>
+            <div class$="[[noextantclass(chunk.data.project_type_class)]]">
+                <ts-source-tab projectdata="[[chunk.data]]"></ts-source-tab>
+                <div id="ref">
+                    <span>[[chunk.meta.chunkref]]</span>
+                </div>
+            </div>
+            <div class$="[[extantclass(chunk.data.project_type_class)]]">
+                <div id="title">
+                    <h2>[[chunk.wordcontent]]</h2>
+                </div>
             </div>
             <div id="content">
                 <div id="textholder"></div>
@@ -112,6 +114,14 @@
         observers: [
             'rendertext(chunk.*)'
         ],
+
+        noextantclass: function (typeclass) {
+            return typeclass !== "extant" ? 'heading' : 'hide';
+        },
+
+        extantclass: function (typeclass) {
+            return typeclass === "extant" ? 'heading' : 'hide';
+        },
 
         rendertext: function () {
             if(this.chunk && this.chunk.srccontent) {

@@ -522,7 +522,7 @@
 
               var typeext = "";
 
-              if (list[i].type.id === "tw" || list[i].type.id === "ta") {
+              if (list[i].project_type_class === "extant") {
                   typeext = "";
               } else if (list[i].type.id !== "text") {
                   typeext = "_" + list[i].type.id;

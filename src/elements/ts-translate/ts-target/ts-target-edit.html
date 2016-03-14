@@ -114,7 +114,7 @@
         rendertext: function () {
             if(this.chunk && this.chunk.srccontent) {
                 var completed = this.chunk.completed;
-                var standard = this.chunk.meta.standard;
+                var typeclass = this.chunk.data.project_type_class;
                 var contentbox = this.$.content;
                 var textbox = this.$.textbox;
                 var textholder = this.$.textholder;
@@ -124,7 +124,7 @@
                 var returnstr = "";
                 var verse = 0;
 
-                if (completed || !standard) {
+                if (completed || typeclass !== "standard") {
                     for (var i = 0; i < textarray.length; i++) {
                         if (textarray[i].substring(0, 2) === "\\v") {
                             verse = textarray[i].substring(2);

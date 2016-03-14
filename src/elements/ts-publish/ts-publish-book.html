@@ -83,6 +83,7 @@
             var transchapters = [];
             var translation = _.cloneDeep(this.currentproject.translation);
             var name = this.currentproject.data.project.name;
+            var typeclass = this.currentproject.data.project_type_class;
 
             var transdata = translation.map(function(chunk, index){
                 var start;
@@ -90,19 +91,19 @@
                 if (chunk.meta.verses.length) {
                     start = chunk.meta.verses[0];
                     end = chunk.meta.verses[chunk.meta.verses.length-1];
-                } else if (name === "Bible Words") {
+                } else if (typeclass === "extant") {
                     start = chunk.meta.frameid;
                     end = chunk.meta.frameid;
                 } else {
                     start = chunk.meta.frame;
                     end = chunk.meta.frame;
                 }
-                return {transcontent: chunk.transcontent, helpscontent: chunk.helpscontent, completed: chunk.completed, meta: chunk.meta, index: index, start: start, end: end, combined: false};
+                return {transcontent: chunk.transcontent, helpscontent: chunk.helpscontent, completed: chunk.completed, meta: chunk.meta, index: index, start: start, end: end, combined: false, typeclass: typeclass};
             });
 
             for (var i = 0; i < transdata.length; i++) {
                 if (transdata[i].index > 0 && transdata[i].meta.frame !== 0 && transdata[i-1].meta.frame !== 0 && transdata[i].completed === true && transdata[i-1].completed === true && transdata[i].meta.chapter === transdata[i-1].meta.chapter) {
-                    if (name === "Bible Words") {
+                    if (typeclass === "extant") {
                         transdata[i-1].meta.chunkref = transdata[i-1].start + " – " + transdata[i].end;
                     } else {
                         transdata[i-1].meta.chunkref = transdata[i].meta.chapterref + ":" + transdata[i-1].start + "–" + transdata[i].end;
@@ -121,7 +122,7 @@
                 var reference;
                 if (chapter === 0) {
                     reference = "Project Details";
-                } else if (name === "Bible Words") {
+                } else if (typeclass === "extant") {
                     reference = name;
                 } else {
                     reference = name + " " + chapter;

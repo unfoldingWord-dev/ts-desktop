@@ -548,7 +548,7 @@
 
         savestate: function () {
             if (this.route === "translate") {
-                var key = "uw-" + this.currentproject.data.fullname;
+                var key = this.currentproject.data.unique_id;
                 this.getlocation();
                 App.configurator.setValue(key + "-chapter", this.modestatus.chapter);
                 App.configurator.setValue(key + "-index", this.modestatus.index);
@@ -557,13 +557,13 @@
         },
 
         savecompletion: function () {
-            var key = "uw-" + this.currentproject.data.fullname;
+            var key = this.currentproject.data.unique_id;
             var completion = this.currentproject.data.completion;
             App.configurator.setValue(key + "-completion", completion);
         },
 
         savesource: function () {
-            var key = "uw-" + this.currentproject.data.fullname;
+            var key = this.currentproject.data.unique_id;
             var source = this.currentproject.data.currentsource;
             if (source !== null) {
                 App.configurator.setValue(key + "-source", source);
@@ -573,7 +573,7 @@
         },
 
         retrievesource: function () {
-            var key = "uw-" + this.currentproject.data.fullname;
+            var key = this.currentproject.data.unique_id;
             var source = App.configurator.getValue(key + "-source");
             if (source !== undefined  && source !== "" && source < this.currentproject.data.source_translations.length) {
                 this.set('currentproject.data.currentsource', source);
@@ -636,13 +636,13 @@
                 if (projdata.project_type_class === "helps") {
                     var newmeta = false;
                     for (var i = 0; i < list.length; i++) {
-                        if (list[i].basename === projdata.basename && (list[i].resource.id === "ulb" || list[i].resource.id === "obs")) {
+                        if (list[i].project.id === projdata.project.id && list[i].target_language.id === projdata.target_language.id && (list[i].resource.id === "ulb" || list[i].resource.id === "obs")) {
                             newmeta = list[i];
                         }
                     }
                     if (!newmeta) {
                         for (i = 0; i < list.length; i++) {
-                            if (list[i].basename === projdata.basename && (list[i].resource.id === "udb" || list[i].resource.id === "reg")) {
+                            if (list[i].project.id === projdata.project.id && list[i].target_language.id === projdata.target_language.id && (list[i].resource.id === "udb" || list[i].resource.id === "reg")) {
                                 newmeta = list[i];
                             }
                         }
@@ -1140,7 +1140,7 @@
         setmodestate: function () {
             var mythis = this;
             var sources = this.currentproject.data.source_translations;
-            var key = "uw-" + this.currentproject.data.fullname;
+            var key = this.currentproject.data.unique_id;
             var type = this.currentproject.data.type.id;
             var index = App.configurator.getValue(key + "-index");
             var chapter = App.configurator.getValue(key + "-chapter");
@@ -1361,8 +1361,7 @@
 
         print: function () {
             var mythis = this;
-            var meta = this.currentproject.data;
-            var name = 'uw-' + meta.fullname;
+            var name = this.currentproject.data.unique_id;
             var confirm = this.$.confirm;
 
             this.$.printpopup.close();

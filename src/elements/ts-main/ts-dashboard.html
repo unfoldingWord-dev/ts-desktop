@@ -328,7 +328,7 @@
           var mythis = this;
           var meta = data.meta;
           this.set('tempdata.meta', meta);
-          var name = 'uw-' + meta.fullname;
+          var name = meta.unique_id;
           var confirm = this.$.confirm;
 
           var backupPath = App.configurator.getUserPath('datalocation', 'backups', name);
@@ -529,10 +529,10 @@
               } else if (list[i].resource.id === "udb") {
                   typeext = "_" + list[i].resource.id;
               }
-              var fullname = list[i].project.id + typeext + "-" + list[i].target_language.id;
-              list[i].basename = list[i].project.id + "-" + list[i].target_language.id;
-              list[i].fullname = fullname;
-              var key = "uw-" + fullname;
+
+              list[i].fullname = list[i].project.id + typeext + "-" + list[i].target_language.id;
+
+              var key = list[i].unique_id;
               var completion = App.configurator.getValue(key + "-completion");
               if (completion !== undefined  && completion !== "") {
                   list[i].completion = completion;
@@ -544,8 +544,6 @@
       },
 
       setdefault: function () {
-          // NOTE: Old backup implementation
-          // App.projectsManager.stopAutoBackup();
           this.currentproject = {};
       },
 

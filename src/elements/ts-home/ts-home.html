@@ -420,7 +420,7 @@
         deleteproject: function () {
             var mythis = this;
             var projectdata = this.currentinfo;
-            var key = "uw-" + projectdata.fullname;
+            var key = projectdata.unique_id;
             App.projectsManager.deleteTargetTranslation(projectdata).then(function() {
                 App.configurator.unsetValue(key + "-chapter");
                 App.configurator.unsetValue(key + "-index");

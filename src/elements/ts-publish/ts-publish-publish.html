@@ -248,7 +248,7 @@
             var meta = this.currentproject.data;
             var translation = this.currentproject.translation;
             var extension = '.txt';
-            var name = 'uw-' + meta.fullname;
+            var name = meta.unique_id;
             var confirm = this.$.confirm;
 
             if(translation[0].meta.format === 'default'){
@@ -304,7 +304,7 @@
             var mythis = this;
             var meta = this.currentproject.data;
             var paths = App.projectsManager.getPaths(meta);
-            var repo = 'uw-' + meta.fullname;
+            var repo = meta.unique_id;
 
             this.set('options.body', "Uploading Project.  Please wait...");
             this.set('options.loading', true);

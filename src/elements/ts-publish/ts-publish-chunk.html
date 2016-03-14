@@ -78,6 +78,10 @@
             font-size: 80%;
         }
 
+        .hide {
+            display: none;
+        }
+
     </style>
 
     <template>
@@ -104,12 +108,8 @@
                 </div>
                 <template is="dom-if" if="{{!chunk.completed}}">
                     <div class="body">
-                        <template is="dom-if" if="{{chunk.meta.standard}}">
-                            <p>[[chunk.transcontent]]</p>
-                        </template>
-                        <template is="dom-if" if="{{!chunk.meta.standard}}">
-                            <p>[[chunk.helpscontent.0.title]]</p>
-                        </template>
+                        <p class$="[[standardclass(chunk.typeclass)]]">[[chunk.transcontent]]</p>
+                        <p class$="[[notstandardclass(chunk.typeclass)]]">[[chunk.helpscontent.0.title]]</p>
                     </div>
                 </template>
             </paper-material>
@@ -137,6 +137,14 @@
                 type: Object,
                 value: {}
             }
+        },
+
+        standardclass: function (typeclass) {
+            return typeclass === "standard" ? '' : 'hide';
+        },
+
+        notstandardclass: function (typeclass) {
+            return typeclass === "standard" ? 'hide' : '';
         },
 
         gotochunk: function () {

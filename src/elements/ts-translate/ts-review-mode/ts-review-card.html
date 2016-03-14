@@ -18,7 +18,7 @@
             display: flex;
         }
 
-        #contain {
+        .contain {
             display: flex;
             margin-top: 16px;
             flex: auto;
@@ -48,29 +48,27 @@
 
 	<template>
 
-        <div id="contain">
-            <template is="dom-if" if="{{!chunk.meta.words}}">
-                <ts-source-chunk class="left" reviewmode chunk="[[chunk]]"></ts-source-chunk>
-                <template is="dom-if" if="{{chunk.meta.standard}}">
-                    <div class="middle">
-                        <ts-target-review class$="[[reviewclass(chunk.state.review)]]" chunk="{{chunk}}" on-setheight="setheight"></ts-target-review>
-                        <ts-target-edit class$="[[editclass(chunk.state.review)]]" chunk="{{chunk}}" on-setheight="setheight"></ts-target-edit>
-                    </div>
-                </template>
-                <template is="dom-if" if="{{!chunk.meta.standard}}">
-                    <div class="middle">
-                        <ts-target-edit chunkmode chunk="{{chunk}}"></ts-target-edit>
-                    </div>
-                    <div class="middle">
-                        <ts-target-helps chunk="{{chunk}}" on-setheight="setheight"></ts-target-helps>
-                    </div>
-                </template>
-                <ts-resource-card class="right" chunk="[[chunk]]" on-setheight="setheight"></ts-resource-card>
-            </template>
-            <template is="dom-if" if="{{chunk.meta.words}}">
-                <ts-source-chunk class="left" reviewmode wordmode chunk="[[chunk]]"></ts-source-chunk>
-                <ts-target-words class="middle" chunk="[[chunk]]" on-setheight="setheight"></ts-target-words>
-            </template>
+        <div class$="[[standardclass(chunk.data.project_type_class)]]">
+            <ts-source-chunk class="left" reviewmode chunk="[[chunk]]"></ts-source-chunk>
+            <div class="middle">
+                <ts-target-review class$="[[reviewclass(chunk.state.review)]]" chunk="{{chunk}}" on-setheight="setheight"></ts-target-review>
+                <ts-target-edit class$="[[editclass(chunk.state.review)]]" chunk="{{chunk}}" on-setheight="setheight"></ts-target-edit>
+            </div>
+            <ts-resource-card class="right" chunk="[[chunk]]" on-setheight="setheight"></ts-resource-card>
+        </div>
+        <div class$="[[helpsclass(chunk.data.project_type_class)]]">
+            <ts-source-chunk class="left" reviewmode chunk="[[chunk]]"></ts-source-chunk>
+            <div class="middle">
+                <ts-target-edit chunkmode chunk="{{chunk}}"></ts-target-edit>
+            </div>
+            <div class="middle">
+                <ts-target-helps chunk="{{chunk}}" on-setheight="setheight"></ts-target-helps>
+            </div>
+            <ts-resource-card class="right" chunk="[[chunk]]" on-setheight="setheight"></ts-resource-card>
+        </div>
+        <div class$="[[extantclass(chunk.data.project_type_class)]]">
+            <ts-source-chunk class="left" reviewmode wordmode chunk="[[chunk]]"></ts-source-chunk>
+            <ts-target-words class="middle" chunk="[[chunk]]" on-setheight="setheight"></ts-target-words>
         </div>
 
 	</template>
@@ -94,6 +92,18 @@
                 notify: true
             }
 		},
+
+        extantclass: function (typeclass) {
+            return typeclass === "extant" ? 'contain' : 'hide';
+        },
+
+        helpsclass: function (typeclass) {
+            return typeclass === "helps" ? 'contain' : 'hide';
+        },
+
+        standardclass: function (typeclass) {
+            return typeclass === "standard" ? 'contain' : 'hide';
+        },
 
         reviewclass: function (state) {
             return state ? '' : 'hide';

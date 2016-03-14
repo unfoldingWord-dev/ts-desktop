@@ -244,7 +244,7 @@
 
     <template>
 
-        <ts-translate-sidebar selected="{{selected}}" standardproject="[[standardproject]]" on-gohome="gohome" on-gopublish="gopublish" on-gobackup="gobackup" on-goprint="goprint" on-gosettings="gosettings"></ts-translate-sidebar>
+        <ts-translate-sidebar selected="{{selected}}" currentproject="[[currentproject]]" on-gohome="gohome" on-gopublish="gopublish" on-gobackup="gobackup" on-goprint="goprint" on-gosettings="gosettings"></ts-translate-sidebar>
 
         <div id="pages">
             <ts-read-mode id="readmode" chapters="[[chapters]]" modestatus="{{modestatus}}"></ts-read-mode>
@@ -415,10 +415,6 @@
                 type: Object,
                 value: {},
                 notify: true
-            },
-            standardproject: {
-                type: Boolean,
-                value: true
             },
             rawdata: {
                 type: Object,
@@ -592,7 +588,7 @@
             var list = this.projectlist;
 
             var loadsource = function () {
-                if (projdata.type.id === "tw" || projdata.type.id === "ta") {
+                if (projdata.project_type_class === "extant") {
                     mythis.pulldata();
                     mythis.createchunks();
                 } else {
@@ -614,7 +610,7 @@
             };
 
             var loadwords = function () {
-                if (projdata.type.id !== "tw" && projdata.type.id !== "ta") {
+                if (projdata.project_type_class !== "extant") {
                     var wordmeta = false;
                     for (var i = 0; i < list.length; i++) {
                         if (list[i].target_language.id === projdata.target_language.id && list[i].type.id === "tw") {
@@ -637,7 +633,7 @@
             };
 
             var loaddata2 = function () {
-                if (projdata.type.id === "tn" || projdata.type.id === "tq") {
+                if (projdata.project_type_class === "helps") {
                     var newmeta = false;
                     for (var i = 0; i < list.length; i++) {
                         if (list[i].basename === projdata.basename && (list[i].resource.id === "ulb" || list[i].resource.id === "obs")) {
@@ -672,7 +668,6 @@
                 load.open();
                 setTimeout(function() {
                     mythis.set('currentproject', {data: projdata, state: {}, source: [], translation: []});
-                    mythis.checkstandard();
                     mythis.retrievesource();
                     App.projectsManager.loadTargetTranslation(projdata).then(function (translation) {
                         mythis.set('rawdata', translation);
@@ -727,11 +722,6 @@
             });
         },
 
-        checkstandard: function () {
-            var check = this.currentproject.data.type.id === "text";
-            this.set('standardproject', check);
-        },
-
         pullsource: function () {
             var current = this.currentproject.data.currentsource;
             if (current === null || current === undefined) {
@@ -742,6 +732,7 @@
             var name = this.currentproject.data.project.name;
             var language = this.currentproject.data.target_language.name;
             var resource = this.currentproject.data.resource.id;
+            var typeclass = this.currentproject.data.project_type_class;
             var source = [];
             var srcchunk = {};
             var transchunk = {};
@@ -751,7 +742,6 @@
             var test = new RegExp(startstr);
             var chapterref;
             var chunkref;
-            var standard = this.standardproject;
             var refaddon = language;
             if (resource === "ulb" || resource === "udb") {
                 refaddon += " (" + resource + ")";
@@ -861,12 +851,10 @@
                     chapterref: chapterref,
                     chunkref: chunkref,
                     refaddon: " — " + refaddon,
-                    standard: standard,
-                    words: false,
                     format: format
                 };
 
-                if (complexid === "01-01" && standard) {
+                if (complexid === "01-01" && typeclass === "standard") {
                     var bookmeta = {
                         chapter: 0,
                         frame: 0,
@@ -874,8 +862,6 @@
                         frameid: "title",
                         chunkref: "Project Title",
                         refaddon: " — " + refaddon,
-                        standard: standard,
-                        words: false,
                         verses: [],
                         format: format
                     };
@@ -906,12 +892,10 @@
                     verses: [],
                     chunkref: "Story Title",
                     refaddon: " — " + refaddon,
-                    standard: standard,
-                    words: false,
                     format: format
                 };
 
-                if (frameid === "01" && standard && title !== "") {
+                if (frameid === "01" && typeclass === "standard" && title !== "") {
                     srcchunk = {
                         meta: titlemeta,
                         srccontent: title,
@@ -941,12 +925,10 @@
                     verses: [],
                     chunkref: "Story Reference",
                     refaddon: " — " + refaddon,
-                    standard: standard,
-                    words: false,
                     format: format
                 };
 
-                if (frameid === "01" && standard && reference !== "") {
+                if (frameid === "01" && typeclass === "standard" && reference !== "") {
                     srcchunk = {
                         meta: refmeta,
                         srccontent: reference,
@@ -978,7 +960,7 @@
 
                 if (rawdata) {
                     transchunk.completed = rawdata.completed;
-                    if (standard) {
+                    if (typeclass === "standard") {
                         transchunk.transcontent = rawdata.transcontent;
                         while (test.test(transchunk.transcontent)) {
                             transchunk.transcontent = transchunk.transcontent.replace(startstr, " \\v");
@@ -998,7 +980,7 @@
                         transchunk.helpscontent = rawdata.helpscontent;
                     }
                 }
-                if (rawdata2 && !standard) {
+                if (rawdata2 && typeclass !== "standard") {
                     transchunk.transcontent = rawdata2.transcontent;
                 }
 
@@ -1012,7 +994,6 @@
         pulldata: function () {
             var type = this.currentproject.data.type.id;
             var language = this.currentproject.data.target_language.name;
-            var standard = this.standardproject;
             var frames;
             var source = [];
             var srcchunk = {};
@@ -1044,9 +1025,7 @@
                     frameid: frameid,
                     verses: [],
                     chunkref: title,
-                    refaddon: " — " + language,
-                    standard: standard,
-                    words: true
+                    refaddon: " — " + language
                 };
 
                 srcchunk = {
@@ -1166,7 +1145,7 @@
             var index = App.configurator.getValue(key + "-index");
             var chapter = App.configurator.getValue(key + "-chapter");
             var selected = App.configurator.getValue(key + "-selected");
-            var standard = this.standardproject;
+            var typeclass = this.currentproject.data.project_type_class;
 
             if (chapter > 0) {
                 mythis.set('modestatus.chapter', chapter);
@@ -1174,7 +1153,7 @@
             if (index >= 0) {
                 mythis.set('modestatus.index', index);
             }
-            if (standard) {
+            if (typeclass === "standard") {
                 mythis.set('modestatus.lastmode', 1);
             } else {
                 mythis.set('modestatus.lastmode', 3);
@@ -1185,7 +1164,7 @@
                     if (selected > 0) {
                         mythis.set('selected', selected);
                     } else {
-                        if (standard) {
+                        if (typeclass === "standard") {
                             mythis.set('selected', 1);
                         } else {
                             mythis.set('selected', 3);

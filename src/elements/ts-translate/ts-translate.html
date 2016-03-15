@@ -761,7 +761,6 @@
                 var frame = parseInt(frameid);
                 var title = frames[i].title;
                 var reference = frames[i].reference;
-                var format = frames[i].format;
                 var id = frames[i].id;
                 var sourcedata = frames[i].chunk;
                 var notes = App.projectsManager.getFrameNotes(id);
@@ -850,8 +849,7 @@
                     verses: verses,
                     chapterref: chapterref,
                     chunkref: chunkref,
-                    refaddon: " — " + refaddon,
-                    format: format
+                    refaddon: " — " + refaddon
                 };
 
                 if (complexid === "01-01" && typeclass === "standard") {
@@ -862,8 +860,7 @@
                         frameid: "title",
                         chunkref: "Project Title",
                         refaddon: " — " + refaddon,
-                        verses: [],
-                        format: format
+                        verses: []
                     };
                     srcchunk = {
                         meta: bookmeta,
@@ -891,8 +888,7 @@
                     frameid: "title",
                     verses: [],
                     chunkref: "Story Title",
-                    refaddon: " — " + refaddon,
-                    format: format
+                    refaddon: " — " + refaddon
                 };
 
                 if (frameid === "01" && typeclass === "standard" && title !== "") {
@@ -924,8 +920,7 @@
                     frameid: "reference",
                     verses: [],
                     chunkref: "Story Reference",
-                    refaddon: " — " + refaddon,
-                    format: format
+                    refaddon: " — " + refaddon
                 };
 
                 if (frameid === "01" && typeclass === "standard" && reference !== "") {

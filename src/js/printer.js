@@ -106,14 +106,12 @@ function Printer() {
                             //console.debug('map chapter keys', obj);
                             return obj.meta.frameid;
                         });
-                        //console.debug('forming chapter', frames);
-                        let formatReference = getFirstPropValue(frames); // refer to one of the frames for the format
-                        //console.debug(formatReference);
+
                         let chapterObj = {
                             id: key,
                             title: frames.title || key,
                             reference: frames.reference === undefined ? null : frames.reference,
-                            format: formatReference.meta.format
+                            format: meta.format
                         };
                         delete frames.reference;
                         delete frames.title;
@@ -126,7 +124,7 @@ function Printer() {
                         return chapterObj;
                     });
                     let project = {
-                        format: chapters['00'].format,
+                        format: meta.format,
                         title: chapters['00'].title
                     };
                     delete chapters['00'];
@@ -135,8 +133,8 @@ function Printer() {
                     }), 'id');
                     chapters = null;
 
-                    if(project.format === 'default') {
-                        // the default format is currently dokuwiki
+                    if(project.format === 'markdown') {
+
                         let doc = new PDFDocument({
                             bufferPages: true,
                             margins:{
@@ -260,7 +258,6 @@ function Printer() {
                         doc.end();
                         resolve(true);
                     } else {
-                        // we don't support anything but dokuwiki right now
                         reject('We only support printing OBS projects for now');
                     }
                 } else {

@@ -246,12 +246,11 @@
         export: function () {
             var mythis = this;
             var meta = this.currentproject.data;
-            var translation = this.currentproject.translation;
             var extension = '.txt';
             var name = meta.unique_id;
             var confirm = this.$.confirm;
 
-            if(translation[0].meta.format === 'default'){
+            if(meta.format === 'markdown'){
                 extension = '.zip';
             }
 

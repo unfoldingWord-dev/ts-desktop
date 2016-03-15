@@ -471,9 +471,9 @@ function ProjectsManager(query, configurator) {
 
             return new Promise(function(resolve, reject) {
                 if(isTranslation) {
-                    // TRICKY: look into the first frame to see the format
-                    if(translation[0].meta.format === 'default') {
-                        // the default format is currently dokuwiki
+
+                    if(meta.format === 'markdown') {
+
                         let chapterContent = '',
                             currentChapter = -1,
                             zip = archiver.create('zip'),
@@ -526,7 +526,7 @@ function ProjectsManager(query, configurator) {
                         zip.finalize();
                         resolve(true);
                     }
-                    else if(translation[0].meta.format === 'usx'){
+                    else if(meta.format === 'usfm'){
                          let
                             currentChapter = 1,
                             numFinishedFrames = 0,
@@ -535,9 +535,9 @@ function ProjectsManager(query, configurator) {
                             // build chapter header
                             if(chapterContent === '') {
                                 //add in USFM header elements
-                                chapterContent += '\n\\\id ' + meta.project.id.toUpperCase() + ' ' + meta.sources[0].name + '\n';
+                                chapterContent += '\n\\\id ' + meta.project.id.toUpperCase() + ' ' + meta.source_translations[0].resource_name + '\n';
 
-                                chapterContent += '\\\ide ' + frame.meta.format + '\n';
+                                chapterContent += '\\\ide ' + meta.format + '\n';
 
                                 chapterContent += '\\\h ' + meta.project.name.toUpperCase() + '\n';
 
@@ -564,12 +564,11 @@ function ProjectsManager(query, configurator) {
                         fs.writeFile(filename + '.txt', new Buffer(chapterContent));
                         resolve(true);
                     } else {
-                        // we don't support anything but dokuwiki and usx right now
-                        reject('We only support exporting OBS and USX projects for now');
+                        reject("We do not support exporting this project format yet");
                     }
                 } else {
                     // TODO: support exporting other target translation types if needed e.g. notes, words, questions
-                    reject('We do not support exporting that project type yet');
+                    reject('We do not support exporting this project type yet');
                 }
             });
         },

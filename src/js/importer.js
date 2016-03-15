@@ -15,7 +15,7 @@ function Importer(configurator, pm) {
          * @returns {Promise.<boolean>}
          */
         importUSFMFile: function (file,translation) {
-            console.log("importing USFM", file, "to project", translation);
+            //console.log("importing USFM", file, "to project", translation);
             var self = this;
             return new Promise(function (resolve, reject) {
                 let fileExt = file.name.split('.').pop().toLowerCase();

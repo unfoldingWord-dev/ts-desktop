@@ -4,19 +4,21 @@ process.env.NODE_ENV = 'test';
 
 let fs = require('fs');
 let path = require('path');
-let ProjectsManager = require('../../app/js/projects').ProjectsManager;
-let Importer = require('../../app/js/importer').Importer;
-let Library = require('../../app/js/library').Library;
-let library = new Library(path.join('./app', 'config', 'schema.sql'), './app/index/index.sqlite', 'https://api.unfoldingword.org/ts/txt/2/catalog.json');
+let rimraf = require('rimraf');
+let assert = require('assert');
+let ProjectsManager = require('../../src/js/projects').ProjectsManager;
+let Importer = require('../../src/js/importer').Importer;
+let Db = require('../../src/js/lib/db').Db;
 
 let targetDir = path.resolve('./unit_tests/importer/data');
 
 let translation = {
+    "package_version": 5,
+    "format": "usfm",
     "generator": {
         "name": "ts-desktop",
         "build": ""
     },
-    "package_version": 3,
     "target_language": {
         "id": "es",
         "name": "español",
@@ -24,39 +26,37 @@ let translation = {
     },
     "project": {
         "id": "mat",
-        "name": "Matthew",
-        "type": "text"
+        "name": "Matthew"
     },
-    "resource_id": "ulb",
-    "source_translations": {
-        "mat-en-ulb": {
-            "checking_level": 3,
-            "date_modified": 20151217,
-            "version": "3"
-        }
+    "type": {
+        "id": "text",
+        "name": "Text"
     },
-    "parent_draft_resource_id": "",
-    "translators": [],
-    "finished_frames": [],
-    "sources": [
+    "resource": {
+        "id": "reg",
+        "name": "Regular"
+    },
+    "source_translations": [
         {
-            "id": 136,
-            "source": "ulb",
-            "name": "Unlocked Literal Bible",
-            "ln": "English",
-            "lc": "en",
-            "project": "mat",
-            "level": 3,
-            "version": "3",
-            "date_modified": 20151217
+            "language_id": "en",
+            "resource_id": "ulb",
+            "checking_level": 3,
+            "date_modified": 20160223,
+            "version": "4",
+            "project_id": "mat",
+            "id": 139,
+            "language_name": "English",
+            "resource_name": "Unlocked Literal Bible"
         }
     ],
+    "parent_draft": {},
+    "translators": [],
+    "finished_chunks": [],
     "currentsource": 0,
-    "type_name": "Text",
     "basename": "mat-es",
     "fullname": "mat-es",
-    "completion": 99
-}
+    "completion": 0
+};
 
 let config = {
     getValue: function (k) {
@@ -67,16 +67,21 @@ let config = {
     }
 };
 
-let query = function () { return []; };
-let db = library.indexer.db;
+var p = path.resolve('.'),
+    schemaPath = path.join(p,'src','config','schema.sql'),
+    dbPath = path.join(p,'src','index','index.sqlite'),
+    tempProjPath = path.join(p, 'unit_tests', 'importer', 'data', 'uw-mat-es'),
+    expectedFile = path.join(tempProjPath, '28', '18.txt');
 
-
-let pm = new ProjectsManager(db.exec.bind(db), config);
+let db = new Db(schemaPath, dbPath);
+let pm = new ProjectsManager(db, config);
 
 describe('@Importer', function () {
 
     describe('@UsfmImport', function () {
         it('should import a sample ufsm file', function (done) {
+            rimraf.sync(tempProjPath, fs);
+
             var file = {
                 name: "matthew.usfm",
                 path: path.resolve('unit_tests/importer/data/matthew.usfm')
@@ -85,14 +90,13 @@ describe('@Importer', function () {
                 let importer = new Importer(config,pm);
 
                 importer.importUSFMFile(file,translation).then(function(){
+                    var data = fs.readFileSync(expectedFile, {encoding: 'utf-8'});
+                    assert.equal(data, '\\v18 Jesus veio para eles e falou, "Toda autoridade foi dada para mim no céu e na terra. \\v19 Por isso vão e façam discípulos de todas as nações. Batize-os no nome do Pai, do Filho e do Espírito Santo.    ');
+
                     done();
                 }).catch(function(e){
                     console.log('there was an error', e);
                 });
-
-                /*pm.loadTargetTranslation(translation).then(function(proj) {
-                    console.log("project", proj);
-                });*/
             } catch( e ){
                 console.log(e.stack);
             }

@@ -35,6 +35,7 @@ function Importer(configurator, pm) {
                     self.importSingleUSFMFile(file.path,translation).then(function(data){
                         resolve();
                     }).catch(function(e){
+                        console.log('Error', e.stack);
                         reject('There was an error importing the translation');
                     });
                 }
@@ -96,86 +97,100 @@ function Importer(configurator, pm) {
         },*/
 
         getVerseChunkFileNames: function(projdata){
+            return new Promise(function(resolve,reject){
+                var frames = pm.getSourceFrames(projdata.source_translations[projdata.currentsource]);
+                var parsedFrames = [],
+                    chapters = {};
 
-            var frames = pm.getSourceFrames(projdata.source_translations[projdata.currentsource]);
-            var parsedFrames = [],
-                chapters = {};
+                for(var i = 0;i < frames.length;i++){
+                    var sourcedata = frames[i].chunk,
+                        verses = [],
+                        startstr = '<verse number="',
+                        endstr = '" style="v" />',
+                        test = new RegExp(startstr);;
 
-            for(var i = 0;i < frames.length;i++){
-                var sourcedata = frames[i].chunk,
-                    verses = [],
-                    startstr = '<verse number="',
-                    endstr = '" style="v" />',
-                    test = new RegExp(startstr);;
-
-                while (test.test(sourcedata)) {
-                    var versestr = sourcedata.substring(sourcedata.search(startstr) + 15, sourcedata.search(endstr));
-                    if (versestr.indexOf("-") < 0) {
-                        verses.push(parseInt(versestr));
-                    } else {
-                        var firstnum = parseInt(versestr.substring(0, versestr.search("-")));
-                        var lastnum = parseInt(versestr.substring(versestr.search("-") + 1));
-                        for (var j = firstnum; j <= lastnum; j++) {
-                            verses.push(j);
+                    while (test.test(sourcedata)) {
+                        var versestr = sourcedata.substring(sourcedata.search(startstr) + 15, sourcedata.search(endstr));
+                        if (versestr.indexOf("-") < 0) {
+                            verses.push(parseInt(versestr));
+                        } else {
+                            var firstnum = parseInt(versestr.substring(0, versestr.search("-")));
+                            var lastnum = parseInt(versestr.substring(versestr.search("-") + 1));
+                            for (var j = firstnum; j <= lastnum; j++) {
+                                verses.push(j);
+                            }
                         }
+                        sourcedata = sourcedata.replace(startstr, " \\v");
+                        sourcedata = sourcedata.replace(endstr, " ");
                     }
-                    sourcedata = sourcedata.replace(startstr, " \\v");
-                    sourcedata = sourcedata.replace(endstr, " ");
+
+                    var chuckFile = String("00" + verses[0]).slice(-2);
+
+                    parsedFrames.push({filename:chuckFile,chapter:frames[i].chapter,verses:verses});
                 }
-
-                var chuckFile = String("00" + verses[0]).slice(-2);
-
-                parsedFrames.push({filename:chuckFile,chapter:frames[i].chapter,verses:verses});
-            }
-            return parsedFrames;
+                resolve(parsedFrames);
+            });
         },
 
         importSingleUSFMFile: function (usfmFile, projdata) {
             let self = this;
             return new Promise(function(resolve,reject){
                 //var chunkFileNames = self.getVerseChunkFileNames(projdata);
-                self.getVerseChunkFileNames(projdata).then(function(chunkFileNames){
-                    var parser = new UsfmParser();
-                    parser.load(usfmFile).then(function(){
+                pm.loadTargetTranslation(projdata).then(function(curProj){
+                    console.log('curProj', curProj);
+                    self.getVerseChunkFileNames(projdata).then(function(chunkFileNames){
+                        var parser = new UsfmParser();
+                        parser.load(usfmFile).then(function(){
 
-                        var parsedData = parser.parse();
-                        for(var i = 0;i<chunkFileNames.length;i++){
-                            var chunk = chunkFileNames[i];
-                            var transcontent = '';
+                            var parsedData = parser.parse();
+                            for(var i = 0;i<chunkFileNames.length;i++){
+                                var chunk = chunkFileNames[i];
+                                var transcontent = '';
 
-                            for(var ci = 0;ci<chunk.verses.length;ci++){
-                                if(typeof parsedData[chunk.chapter] !== 'undefined' && typeof parsedData[chunk.chapter].verses[chunk.verses[ci]] !== 'undefined'){
-                                    transcontent += '\\v' + parsedData[chunk.chapter].verses[chunk.verses[ci]].id + ' ' + parsedData[chunk.chapter].verses[chunk.verses[ci]].contents;
+                                for(var ci = 0;ci<chunk.verses.length;ci++){
+                                    if(typeof parsedData[chunk.chapter] !== 'undefined' && typeof parsedData[chunk.chapter].verses[chunk.verses[ci]] !== 'undefined'){
+                                        transcontent += '\\v' + parsedData[chunk.chapter].verses[chunk.verses[ci]].id + ' ' + parsedData[chunk.chapter].verses[chunk.verses[ci]].contents;
+                                    }
+                                }
+                                chunkFileNames[i].meta = {
+                                    chapterid: chunkFileNames[i].chapter,
+                                    frameid: chunkFileNames[i].filename,
+                                    helpscontent: []
+                                };
+                                if(transcontent === ''){
+                                    var existing = curProj[chunkFileNames[i].chapter + '-' + chunkFileNames[i].filename];
+                                    if(existing){
+                                        chunkFileNames[i].completed = existing.completed;
+                                        chunkFileNames[i].transcontent = existing.transcontent;
+                                    } else {
+                                        chunkFileNames[i].transcontent = null;
+                                    }
+                                } else {
+                                    chunkFileNames[i].completed = true;
+                                    chunkFileNames[i].transcontent = transcontent;
                                 }
                             }
-                            chunkFileNames[i].meta = {
-                                chapterid: chunkFileNames[i].chapter,
-                                frameid: chunkFileNames[i].filename,
-                                helpscontent: []
-                            };
-                            chunkFileNames[i].completed = true;
-                            chunkFileNames[i].transcontent = transcontent;
-                        }
 
 
-                        //Pull in the title
-                        if(typeof parsedData['00'] !== 'undefined'){
-                            chunkFileNames.push({
-                                meta: {
-                                    chapterid: '00',
-                                    frameid: 'title',
-                                    helpscontent: []
-                                },
-                                transcontent: parsedData['00'].contents,
-                                completed: true
+                            //Pull in the title
+                            if(typeof parsedData['00'] !== 'undefined'){
+                                chunkFileNames.push({
+                                    meta: {
+                                        chapterid: '00',
+                                        frameid: 'title',
+                                        helpscontent: []
+                                    },
+                                    transcontent: parsedData['00'].contents,
+                                    completed: true
+                                });
+                            }
+
+                            pm.saveTargetTranslation(chunkFileNames,projdata).then(function(){
+                                resolve();
+                            }).catch(function(e){
+                                reject('There was a problem importing this translation');
+                                console.log('Save Error: ', e);
                             });
-                        }
-
-                        pm.saveTargetTranslation(chunkFileNames,projdata).then(function(){
-                            resolve();
-                        }).catch(function(e){
-                            reject('There was a problem importing this translation');
-                            console.log('Save Error: ', e);
                         });
                     });
                 });

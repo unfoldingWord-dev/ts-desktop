@@ -1,0 +1,142 @@
+
+<link rel="import" href="../../../components/paper-material/paper-material.html">
+<link rel="import" href="../../../components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../../../components/iron-pages/iron-pages.html">
+
+<link rel="import" href="./ts-resource-data.html">
+
+<dom-module id="ts-resource-card">
+
+	<style>
+
+        :host {
+            flex: auto;
+            display: flex;
+        }
+
+        paper-material {
+            flex: auto;
+            display: flex;
+            background: var(--card-background-color);
+            flex-direction: column;
+            border-radius: 3px;
+        }
+
+		#heading {
+            display: flex;
+            flex: 0 0 48px;
+		}
+
+        .tab {
+            flex: auto;
+            margin-top: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--secondary-text-color);
+            border-top: 2px solid var(--border-color);
+            border-left: 2px solid var(--border-color);
+            border-right: 2px solid var(--border-color);
+            border-radius: 5px 5px 0 0;
+            cursor: pointer;
+        }
+
+        .tab.unselected {
+            font-size: 80%;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .tab.selected {
+            font-size: 90%;
+            font-weight: bold;
+            border-bottom: none;
+        }
+
+        .bigspace {
+            border-bottom: 2px solid var(--border-color);
+            flex: 0 0 16px;
+        }
+
+        .littlespace {
+            border-bottom: 2px solid var(--border-color);
+            flex: 0 0 8px;
+        }
+
+        #content {
+			padding: 24px 16px;
+            flex: auto;
+            display: flex;
+		}
+
+        .hide {
+            display: none;
+        }
+
+	</style>
+
+	<template>
+
+        <paper-material elevation="1">
+            <div id="heading">
+                <template is="dom-if" if="{{chunk.resources.length}}">
+                    <div class="bigspace"></div>
+                    <template is="dom-repeat" items="{{chunk.resources}}" as="resource">
+                        <div class="littlespace"></div>
+                        <div class$="[[tabclass(chunk.state.resource, index)]]" on-tap="updatestate">{{resource.title}}</div>
+                        <div class="littlespace"></div>
+                    </template>
+                    <div class="bigspace"></div>
+                </template>
+            </div>
+            <div id="content">
+                <template is="dom-repeat" items="{{chunk.resources}}" as="resource">
+                    <ts-resource-data class$="[[pageclass(chunk.state.resource, index)]]" resource="[[resource]]" on-setheight="setheight"></ts-resource-data>
+                </template>
+            </div>
+        </paper-material>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+		is: 'ts-resource-card',
+
+		properties: {
+            chunk: {
+                type: Object,
+                value: {}
+            }
+		},
+
+        tabclass: function (resource, index) {
+            return resource === index ? 'tab selected' : 'tab unselected';
+        },
+
+        pageclass: function (resource, index) {
+            return resource === index ? '' : 'hide';
+        },
+
+        setheight: function () {
+            this.fire('setheight');
+        },
+
+        updatestate: function (e) {
+            var index = e.model.index;
+            var id = this.chunk.meta.chapterid + "-" + this.chunk.meta.frameid;
+            this.set('chunk.state.resource', index);
+            this.fire('iron-signal', {name: 'updatestate', data: {id: id, mode: "resource", value: index}});
+            this.fire('iron-signal', {name: 'renderresource'});
+            this.setheight();
+        },
+
+		ready: function() {
+
+		}
+
+	});
+
+</script>

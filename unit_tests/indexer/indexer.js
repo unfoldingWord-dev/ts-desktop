@@ -5,8 +5,8 @@
     let path = require('path');
     let assert = require('assert');
     let rimraf = require('rimraf');
-    let Indexer = require('../../app/js/indexer').Indexer;
-    let Configurator = require('../../app/js/configurator').Configurator;
+    let Indexer = require('../../src/js/indexer').Indexer;
+    let Configurator = require('../../src/js/configurator').Configurator;
     let configurator = new Configurator();
 
     //import comparison data
@@ -25,12 +25,12 @@
     let chapterCatalogJson = JSON.stringify(require('./data/chapter.json'));
     let frameCatalogJson = JSON.stringify(require('./data/01.json'));
 
-    let config = require('../../app/config/defaults');
+    let config = require('../../src/config/defaults');
     configurator.setStorage({});
     configurator.loadConfig(config);
 
     let indexDir = './unit_tests/indexer/index/';
-    let testIndexer = new Indexer(path.resolve('./app/config/schema.sql'), path.join(indexDir, 'index.sqlite'));
+    let testIndexer = new Indexer(path.resolve('./src/config/schema.sql'), path.join(indexDir, 'index.sqlite'));
 
     describe('@Indexer', function () {
 
@@ -48,7 +48,7 @@
 
         describe('@DataTools', function() {
             this.timeout(4000);
-            let index = new Indexer(path.resolve('./app/config/schema.sql'), './app/index/index.sqlite');
+            let index = new Indexer(path.resolve('./src/config/schema.sql'), './src/index/index.sqlite');
 
             it('should have projects', function() {
                 assert.equal(

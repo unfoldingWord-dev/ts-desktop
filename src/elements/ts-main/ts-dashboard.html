@@ -1,0 +1,706 @@
+
+<link rel="import" href="../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../components/iron-signals/iron-signals.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/iron-input/iron-input.html">
+<link rel="import" href="../../components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../components/iron-icons/notification-icons.html">
+
+<link rel="import" href="./ts-app-titlebar.html">
+<link rel="import" href="../ts-home/ts-home.html">
+<link rel="import" href="../ts-new/ts-new.html">
+<link rel="import" href="../ts-publish/ts-publish.html">
+<link rel="import" href="../ts-translate/ts-translate.html">
+<link rel="import" href="../ts-settings/ts-settings.html">
+<link rel="import" href="./ts-terms.html">
+
+<dom-module id="ts-dashboard">
+
+  <style>
+
+      :host {
+          display: flex;
+          flex-direction: column;
+          flex: auto;
+      }
+
+      neon-animated-pages {
+          flex: auto;
+          display: flex;
+      }
+
+      neon-animated-pages > * {
+          flex: auto;
+      }
+
+      .popup {
+          position: fixed;
+          top: 0;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          margin: auto;
+      }
+
+      .popup paper-button:hover {
+          color: var(--accent-color);
+      }
+
+      #feedback {
+          display: flex;
+          flex-direction: column;
+          width: 500px;
+          height: 300px;
+      }
+
+      #feedbackheader {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+      }
+
+      #feedbackbody {
+          display: flex;
+          flex-direction: column;
+          border-bottom: 1px solid var(--border-color);
+          border-top: 1px solid var(--border-color);
+          padding: 20px;
+      }
+
+      #feedbackbuttons {
+          display: flex;
+          justify-content: flex-end;
+          padding: 0 20px;
+      }
+
+      input {
+          border: none;
+          font-size: 120%;
+          padding: 10px;
+          color: var(--secondary-text-color);
+      }
+
+      #login {
+          display: flex;
+          flex-direction: column;
+          width: 500px;
+          height: 450px;
+      }
+
+      #loginheader {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+      }
+
+      #loginbody {
+          display: flex;
+          flex-direction: column;
+          border-bottom: 1px solid var(--border-color);
+          border-top: 1px solid var(--border-color);
+          padding: 20px;
+      }
+
+      #loginbuttons {
+          display: flex;
+          justify-content: flex-end;
+          padding: 0 20px;
+      }
+
+      #loading {
+          width: 320px;
+          height: 220px;
+          color: var(--primary-text-color);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          font-size: 110%;
+      }
+
+      #buttonbox {
+          display: flex;
+          justify-content: center;
+          color: var(--secondary-text-color);
+      }
+
+      #buttonbox paper-button:hover {
+          color: var(--accent-color);
+      }
+
+      paper-progress {
+          --paper-progress-active-color: var(--accent-color);
+          width: 250px;
+      }
+
+      #bar {
+          display: flex;
+          justify-content: center;
+          margin-bottom: 40px;
+      }
+
+      #text {
+          text-align: center;
+      }
+
+      #loading h2 {
+          color: var(--accent-color);
+      }
+
+      #confirm {
+          width: 350px;
+          height: 175px;
+      }
+
+      #confirm p {
+          font-size: 110%;
+      }
+
+      #confirmbuttons {
+          display: flex;
+          justify-content: flex-end;
+          padding: 0 50px;
+          color: var(--secondary-text-color);
+      }
+
+      #confirmbuttons paper-button:hover {
+          color: var(--accent-color);
+      }
+
+      #headings {
+          flex: 0 0 50px;
+          width: 100%;
+          display: flex;
+          align-items: center;
+      }
+
+      #import-dialog {
+          width: 450px;
+          height: 375px;
+      }
+
+      .row {
+          display: flex;
+          border-bottom: 1px solid var(--border-color);
+          transition: background .3s, color .3s;
+          cursor: pointer;
+          min-height: 60px;
+          justify-content: flex-start;
+          align-items: center;
+      }
+
+      .smalltext {
+          font-size: 75%;
+          color: var(--secondary-text-color);
+      }
+
+      .left {
+          display: flex;
+          align-items: center;
+      }
+
+      .smallspan {
+          width: 70px;
+          display: inline-flex;
+          justify-content: center;
+      }
+
+      .bigspan {
+          width: 160px;
+          display: inline-block;
+      }
+
+      .row:hover {
+          background: var(--accent-color-light);
+      }
+
+      .space {
+          padding-left: 5px;
+      }
+
+      #list {
+          flex: auto;
+          display: flex;
+          flex-direction: column;
+          max-height: 200px;
+          overflow-x: scroll;
+      }
+
+      .hide {
+          display: none;
+      }
+
+  </style>
+
+  <template>
+
+      <ts-app-titlebar currentuser="{{currentuser}}"></ts-app-titlebar>
+
+      <template is="dom-if" if="{{accepted}}">
+          <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
+              <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]" backto="{{backto}}" currentuser="{{currentuser}}"></ts-home>
+              <ts-new data-route="new" route="{{route}}" projectlist="[[projectlist]]"></ts-new>
+              <ts-translate data-route="translate" route="{{route}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" backto="{{backto}}"></ts-translate>
+              <ts-publish data-route="publish" route="{{route}}" currentproject="{{currentproject}}"></ts-publish>
+              <ts-settings data-route="settings" route="{{route}}" backto="[[backto]]"></ts-settings>
+          </neon-animated-pages>
+      </template>
+      <template is="dom-if" if="{{!accepted}}">
+          <ts-terms accepted="{{accepted}}"></ts-terms>
+      </template>
+
+      <input id="restore" class="hide" type="file" accept=".tstudio" multiple />
+      <input id="import" class="hide" type="file" accept=".txt,.zip,.usfm" />
+
+      <paper-dialog id="feedback" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <div id="feedbackheader">
+              <h2>Feedback</h2>
+              <p><iron-icon icon="notification:wifi"></iron-icon> This will use your internet connection</p>
+          </div>
+          <div id="feedbackbody">
+              <input is="iron-input" bind-value="{{feedback}}" placeholder="Describe the problem you are experiencing">
+          </div>
+          <div id="feedbackbuttons">
+              <paper-button on-tap="closefeedback">Cancel</paper-button>
+              <paper-button on-tap="sendfeedback">Confirm</paper-button>
+          </div>
+      </paper-dialog>
+
+      <paper-dialog id="login" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <div id="loginheader">
+              <h2>Login to Server</h2>
+              <p><iron-icon icon="notification:wifi"></iron-icon> This will use your internet connection</p>
+          </div>
+          <div id="loginbody">
+              <input is="iron-input" bind-value="{{newinfo.loginname}}" placeholder="Username or Email" class$="[[loginclass(newinfo.login)]]">
+              <input is="iron-input" bind-value="{{newinfo.username}}" placeholder="Username" class$="[[createclass(newinfo.login)]]">
+              <input is="iron-input" bind-value="{{newinfo.email}}" placeholder="Email" class$="[[createclass(newinfo.login)]]">
+              <input is="iron-input" bind-value="{{newinfo.phone}}" placeholder="Phone" class$="[[createclass(newinfo.login)]]">
+              <input is="iron-input" bind-value="{{newinfo.password}}" placeholder="Password" type="password">
+              <input is="iron-input" bind-value="{{newinfo.password2}}" placeholder="Verify Password" type="password" class$="[[createclass(newinfo.login)]]">
+          </div>
+          <div id="loginbuttons">
+              <paper-button on-tap="sendlogin" class$="[[loginclass(newinfo.login)]]">Login</paper-button>
+              <paper-button on-tap="sendcreate">Create Account</paper-button>
+              <paper-button dialog-dismiss>Cancel</paper-button>
+          </div>
+      </paper-dialog>
+
+      <paper-dialog id="loading" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <template is="dom-if" if="{{options.loading}}">
+              <p>{{options.body}}</p>
+              <div id="bar">
+                  <paper-progress indeterminate="true"></paper-progress>
+              </div>
+          </template>
+          <template is="dom-if" if="{{!options.loading}}">
+              <h2>{{options.title}}</h2>
+              <div id="text">
+                  <p>{{options.body}}</p>
+              </div>
+              <div id="buttonbox">
+                  <paper-button dialog-dismiss>Close</paper-button>
+              </div>
+          </template>
+      </paper-dialog>
+
+      <paper-dialog id="confirm" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <h2>Overwrite?</h2>
+          <div>
+              <p>This file already exists. Overwrite?</p>
+          </div>
+          <div id="confirmbuttons">
+              <paper-button dialog-dismiss>No</paper-button>
+              <paper-button on-tap="executebackup">Confirm</paper-button>
+          </div>
+      </paper-dialog>
+
+      <paper-dialog id="import-dialog" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <h2>Choose Translation</h2>
+          <div>
+              <template is="dom-if" if="{{projectlist.length}}">
+                  <div class="contain">
+                      <div id="headings" class="smalltext">
+                          <span class="smallspan"></span>
+                          <span class="bigspan">{{locale.project}}</span>
+                          <span class="smallspan">{{locale.type}}</span>
+                          <span class="bigspan">{{locale.language}}</span>
+                      </div>
+                      <div id="list">
+                          <iron-list items="[[projectlist]]" as="proj">
+                              <template>
+                                  <div class="row">
+                                      <div class="left" on-tap="startimport">
+                                          <span class="smallspan"><iron-icon class="smallicon" icon$="[[checkicon(proj.project.id)]]"></iron-icon></span>
+                                          <span class="bigspan">[[proj.project.name]]</span>
+                                          <span class="smallspan smalltext"><span>[[proj.type_name]]</span><span class="space">[[proj.resource_id]]</span></span>
+                                          <span class="smalltext bigspan">[[proj.target_language.name]]</span>
+                                      </div>
+                                  </div>
+                              </template>
+                          </iron-list>
+                      </div>
+                  </div>
+              </template>
+          </div>
+          <div id="importbuttons">
+              <paper-button dialog-dismiss>Cancel</paper-button>
+          </div>
+      </paper-dialog>
+
+      <iron-signals on-iron-signal-updatelist="updatelist"></iron-signals>
+      <iron-signals on-iron-signal-setdefault="setdefault"></iron-signals>
+      <iron-signals on-iron-signal-openfeedback="openfeedback"></iron-signals>
+      <iron-signals on-iron-signal-openlogin="openlogin"></iron-signals>
+      <iron-signals on-iron-signal-openrestore="openrestore"></iron-signals>
+      <iron-signals on-iron-signal-openimport="openimport"></iron-signals>
+      <iron-signals on-iron-signal-openbackup="openbackup"></iron-signals>
+
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+      is: 'ts-dashboard',
+
+      properties: {
+          route: {
+              type: String,
+              value: 'home',
+              observer: '_routeChanged'
+          },
+          projectlist: {
+              type: Array,
+              value: []
+          },
+          currentproject: {
+              type: Object,
+              value: {}
+          },
+          accepted: {
+              type: Boolean,
+              value: false
+          },
+          backto: {
+            type: String,
+            value: ""
+          },
+          feedback: {
+              type: String,
+              value: ""
+          },
+          newinfo: {
+              type: Object,
+              value: {login: true}
+          },
+          currentuser: {
+              type: Object,
+              value: {}
+          },
+
+          backuptimerid: {
+              type: Number,
+              value: -1
+          },
+          locale: {
+              type: Object,
+              value: {}
+          },
+
+          options: {
+              type: Object,
+                  value: {loading: false, title: "", body: ""}
+          },
+          tempdata: {
+              type: Object,
+                  value: {meta: {}, filename: ""}
+          }
+      },
+
+      checkicon: function (slug) {
+          return slug === "obs" || slug === "tw" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
+      },
+
+      loginclass: function (login) {
+          return login ? '' : 'hide';
+      },
+
+      createclass: function (login) {
+          return login ? 'hide' : '';
+      },
+
+      openbackup: function (event, data) {
+          var mythis = this;
+          var meta = data.meta;
+          this.set('tempdata.meta', meta);
+          var name = 'uw-' + meta.fullname;
+          var confirm = this.$.confirm;
+
+          var backupPath = App.configurator.getUserPath('datalocation', 'backups', name);
+
+          var filename = App.ipc.sendSync('save-as', {name: backupPath});
+          this.set('tempdata.filename', filename);
+
+          return App.projectsManager.fileExists(filename + '.tstudio')
+              .then (function (stat) {
+                  if (stat) {
+                      confirm.open();
+                  } else if (filename) {
+                      mythis.executebackup();
+                  }
+              });
+      },
+
+      executebackup: function () {
+          var mythis = this;
+          var loading = this.$.loading;
+          var confirm = this.$.confirm;
+          var filePath = this.tempdata.filename;
+          var meta = this.tempdata.meta;
+
+          confirm.close();
+          mythis.set('options.body', "Creating Backup.  Please wait...");
+          mythis.set('options.loading', true);
+          loading.open();
+
+          return App.projectsManager.backupTranslation(meta, filePath)
+              .then(function () {
+                  mythis.set('options.title', "Backup Complete");
+                  mythis.set('options.body', "Your project has been successfully archived.  Thanks.");
+                  mythis.set('options.loading', false);
+              })
+              .catch(function (err) {
+                  var errmessage = "We're sorry.  An error occurred while trying to backup your project";
+                  if(err !== null) {
+                      errmessage = err;
+                  }
+                  mythis.set('options.title', "Backup Failed");
+                  mythis.set('options.body', errmessage);
+                  mythis.set('options.loading', false);
+              });
+      },
+
+      openrestore: function() {
+          var mythis = this;
+          var loading = this.$.loading;
+          var chooser = this.$.restore;
+          chooser.value = null;
+          chooser.addEventListener('change', function(evt) {
+              mythis.set('options.body', "Restoring.  Please wait...");
+              mythis.set('options.loading', true);
+              loading.open();
+              for(var i=0; i < this.files.length; i ++) {
+                  if(this.files[i].name.split('.').pop().toLowerCase() === 'tstudio') {
+                      App.projectsManager.restoreTargetTranslation(this.files[i])
+                          .then(function() {
+                              mythis.set('options.title', "Restore Complete");
+                              mythis.set('options.body', "Your project(s) has been successfully restored.  Thanks.");
+                              mythis.set('options.loading', false);
+                              setTimeout(function() {
+                                  mythis.updatelist();
+                              }, 250);
+                          })
+                          .catch(function(err) {
+                              var errmessage = "We're sorry.  An error occurred while trying to restore your project";
+                              if(err !== null) {
+                                  errmessage = err;
+                              }
+                              mythis.set('options.title', "Restore Failed");
+                              mythis.set('options.body', errmessage);
+                              mythis.set('options.loading', false);
+                          });
+                  }
+              }
+          }, false);
+          chooser.click();
+      },
+
+      openlogin: function () {
+          this.newinfo = {login: true};
+          this.$.login.open();
+      },
+
+      sendlogin: function () {
+          console.log("login sent");
+          this.set('currentuser', {active: true, username: this.newinfo.loginname});
+          this.$.login.close();
+      },
+
+      sendcreate: function () {
+          if (this.newinfo.login) {
+              this.set('newinfo.login', false);
+          } else {
+              console.log("create sent");
+              this.$.login.close();
+          }
+      },
+
+      openimport: function () {
+          //this.set('currentinfo', e.model.proj);
+
+
+          console.log("opening import");
+          console.log("project list",this.projectlist);
+          var mythis = this;
+          var chooser = this.$.import;
+          chooser.value = null;
+          chooser.addEventListener('change', function(evt) {
+              mythis.$['import-dialog'].open();
+          }, false);
+          chooser.click();
+      },
+
+      startimport: function(e){
+          var loading = this.$.loading;
+          var mythis = this;
+          var chooser = this.$.import;
+          var proj = e.model.proj;
+          this.$['import-dialog'].close();
+          console.log("selected project",proj);
+          mythis.set('options.body', "Importing.  Please wait...");
+          mythis.set('options.loading', true);
+          loading.open();
+          for(var i=0; i < chooser.files.length; i ++) {
+              var fileExt = chooser.files[i].name.split('.').pop().toLowerCase();
+              if(fileExt === "zip" || fileExt === "txt" || fileExt === "usfm"){
+                  App.importer.importUSFMFile(chooser.files[0],proj).then(function(){
+                      mythis.set('options.title', "Import Complete");
+                      mythis.set('options.body', "Your file has been imported successfully.  Thanks.");
+                      mythis.set('options.loading', false);
+                      setTimeout(function() {
+                          mythis.updatelist();
+                      }, 250);
+                  }).catch(function(e){
+                      console.log('Import Error: ', e);
+                      mythis.set('options.title', "Import Error");
+                      mythis.set('options.body', "Your file was not imported. It may not be in the correct format or it has already been imported.");
+                      mythis.set('options.loading', false);
+                  });
+              }
+          }
+      },
+
+      openfeedback: function () {
+          this.feedback = "";
+          this.$.feedback.open();
+      },
+
+      closefeedback: function () {
+          this.$.feedback.close();
+      },
+
+      sendfeedback: function () {
+          var message = this.feedback;
+          var mythis = this;
+
+          this.set('options.body', "Sending Feedback.  Please wait...");
+          this.set('options.loading', true);
+          this.closefeedback();
+          this.$.loading.open();
+
+          if (App.reporter.canReportToGithub()) {
+              App.reporter.reportBug(message, function (res) {
+                  mythis.set('options.title', "Feedback Sent");
+                  mythis.set('options.body', "Your feedback has been successfully sent.  Thanks.");
+                  mythis.set('options.loading', false);
+              });
+          } else {
+              mythis.set('options.title', "Feedback Failed");
+              mythis.set('options.body', "You are not set up with a token to send feedback.");
+              mythis.set('options.loading', false);
+          }
+      },
+
+      _routeChanged: function (event) {
+          var el = this.querySelector('[data-route="' + this.route + '"]');
+          // The async delay prevents a flicker. It's a UI thing, not a logic thing.
+          el && el.forceResize && this.async(el.forceResize.bind(el), 30);
+      },
+
+      updatelist: function () {
+          var mythis = this;
+          App.projectsManager.loadTargetTranslationsList().then(function(list) {
+              App.ipc.send('loading-status', 'Checking Project Versions...');
+              mythis.checklist(list);
+
+              App.ipc.send('loading-status', 'Checking Auto Backups...');
+              App.projectsManager.backupProjects(mythis.projectlist);
+
+              setTimeout(function() {
+                App.ipc.send('loading-done');
+              }, 100);
+          });
+      },
+
+      checklist: function (list) {
+          for (var i = 0; i < list.length; i++) {
+
+              if (list[i].project.name === "") {
+                  list[i].project.name = App.projectsManager.getProjectName(list[i].project.id)[0].name;
+              }
+
+              if (list[i].type.name === "" && list[i].type.id === "text") {
+                  list[i].type.name = "Text";
+              }
+
+              for (var j = 0; j < list[i].source_translations.length; j++) {
+                  var details = App.projectsManager.getSourceDetails(list[i].project.id, list[i].source_translations[j].language_id, list[i].source_translations[j].resource_id)[0];
+                  list[i].source_translations[j].project_id = details.project_id;
+                  list[i].source_translations[j].id = details.id;
+                  list[i].source_translations[j].language_name = details.language_name;
+                  list[i].source_translations[j].resource_name = details.resource_name;
+              }
+
+              if (list[i].source_translations.length) {
+                  list[i].currentsource = 0;
+              } else {
+                  list[i].currentsource = null;
+              }
+
+              var typeext = "";
+
+              if (list[i].type.id === "tw" || list[i].type.id === "ta") {
+                  typeext = "";
+              } else if (list[i].type.id !== "text") {
+                  typeext = "_" + list[i].type.id;
+              } else if (list[i].resource.id === "udb") {
+                  typeext = "_" + list[i].resource.id;
+              }
+              var fullname = list[i].project.id + typeext + "-" + list[i].target_language.id;
+              list[i].basename = list[i].project.id + "-" + list[i].target_language.id;
+              list[i].fullname = fullname;
+              var key = "uw-" + fullname;
+              var completion = App.configurator.getValue(key + "-completion");
+              if (completion !== undefined  && completion !== "") {
+                  list[i].completion = completion;
+              } else {
+                  list[i].completion = 0;
+              }
+          }
+          this.set('projectlist', list);
+      },
+
+      setdefault: function () {
+          // NOTE: Old backup implementation
+          // App.projectsManager.stopAutoBackup();
+          this.currentproject = {};
+      },
+
+      ready: function() {
+          App.ipc.send('loading-status', 'Loading Projects List...');
+          this.updatelist();
+          this.setdefault();
+          var accepted = App.configurator.getValue("accepted");
+          if (accepted) {
+              this.accepted = true;
+          }
+          this.locale = App.locale.dictionary;
+          this.set('currentuser', {active: false});
+      }
+
+  });
+
+</script>

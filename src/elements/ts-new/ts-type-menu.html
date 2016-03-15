@@ -1,0 +1,230 @@
+
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../components/iron-list/iron-list.html">
+
+<dom-module id="ts-type-menu">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #contain {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #header {
+            color: var(--secondary-text-color);
+            font-size: 110%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            min-height: 60px;
+        }
+
+        #header > div {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            padding-left: 20px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--card-background-color);
+            width: 430px;
+            box-shadow: 0 -1px 2px 1px var(--primary-color-dark);
+        }
+
+        iron-list {
+            font-size: 110%;
+            max-height: calc(100vh - 145px);
+            width: 450px;
+            color: var(--primary-text-color);
+            box-shadow: 0 2px 3px 2px var(--border-color);
+        }
+
+        .row {
+            display: block;
+            margin: 0;
+            padding: 1em;
+            background: var(--card-background-color);
+            border-bottom: 1px solid var(--border-color);
+            transition: background .3s, color .3s;
+            cursor: pointer;
+        }
+
+        .row.unavailable {
+            background: var(--border-color);
+            border-bottom: 1px solid var(--card-background-color);
+        }
+
+        .row:hover {
+            background: var(--accent-color-light);
+        }
+
+        .row.unavailable:hover {
+            background: var(--border-color);
+            border-bottom: 1px solid var(--card-background-color);
+        }
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        #header iron-icon {
+            padding: 0 10px;
+        }
+
+        .click {
+            cursor: pointer;
+        }
+
+    </style>
+
+  <template>
+
+      <div id="header">
+          <div>
+              <span class="click" on-tap="togroup">[[category.name]]</span>
+              <iron-icon icon="chevron-right"></iron-icon>
+              <template is="dom-if" if="{{!obs}}">
+                  <span class="click" on-tap="tobook">[[project.name]]</span>
+                  <iron-icon icon="chevron-right"></iron-icon>
+              </template>
+              <em>Choose a type</em>
+          </div>
+      </div>
+
+      <div id="contain">
+          <iron-list items="[[typelist]]" as="typedata">
+              <template>
+                  <div class$="[[checkclass(typedata.allowed)]]" on-tap="store">
+                      <div>
+                          <span>[[typedata.type.name]]</span> - <span>[[typedata.resource.name]]</span>
+                      </div>
+                  </div>
+              </template>
+          </iron-list>
+      </div>
+
+      <iron-signals on-iron-signal-createtypes="createtypes"></iron-signals>
+
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+    is: 'ts-type-menu',
+
+      properties: {
+          selected: {
+              type: Number,
+              value: 0,
+              notify: true
+          },
+          language: {
+              type: Object,
+              value: {}
+          },
+          category: {
+              type: Object,
+              value: {}
+          },
+          project: {
+              type: Object,
+              value: {}
+          },
+          projectlist: {
+              type: Array,
+              value: []
+          },
+          obs: {
+              type: Boolean,
+              value: false
+          },
+          typedata: {
+              type: Object,
+              value: {},
+              notify: true
+          },
+          typelist: {
+              type: Array,
+              value: []
+          }
+      },
+
+      behaviors: [
+          Polymer.IronResizableBehavior
+      ],
+
+      observers: [
+          'checkobs(category.name)'
+      ],
+
+      createtypes: function () {
+          var project = this.project.slug;
+          var typearray = [];
+          var language = this.language;
+          var projectarray = this.projectlist;
+          var basename = project + "-" + language.id;
+          var standardexists = false;
+
+          for (var i = 0; i < projectarray.length; i++) {
+              if (projectarray[i].basename === basename && projectarray[i].type.id === "text") {
+                  standardexists = true;
+              }
+          }
+
+          if (project === "obs") {
+              typearray.push({type: {id: "text", name: "Text"}, resource: {id: "obs", name: "Open Bible Stories"}, format: "markdown", allowed: true, fullname: basename});
+          } else {
+              typearray.push({type: {id: "text", name: "Text"}, resource: {id: "ulb", name: "Unlocked Literal Bible"}, format: "usfm", allowed: true, fullname: basename});
+              typearray.push({type: {id: "text", name: "Text"}, resource: {id: "udb", name: "Unlocked Dynamic Bible"}, format: "usfm", allowed: true, fullname: project + "_udb-" + language.id});
+          }
+          typearray.push({type: {id: "tn", name: "Notes"}, resource: {id: "", name: ""}, format: "markdown", allowed: standardexists, fullname: project + "_tn-" + language.id});
+          typearray.push({type: {id: "tq", name: "Questions"}, resource: {id: "", name: ""}, format: "markdown", allowed: standardexists, fullname: project + "_tq-" + language.id});
+
+          for (i = 0; i < typearray.length; i++) {
+              for (var k = 0; k < projectarray.length; k++) {
+                  if (projectarray[k].fullname === typearray[i].fullname) {
+                      typearray[i].allowed = false;
+                  }
+              }
+          }
+
+          this.set('typelist', typearray);
+      },
+
+      checkclass: function (allowed) {
+          return allowed ? 'row' : 'row unavailable';
+      },
+
+      checkobs: function (name) {
+          this.obs = name === "Open Bible Stories";
+      },
+
+      store: function(e) {
+          this.typedata = e.model.typedata;
+          this.fire('create');
+      },
+
+      togroup: function () {
+          this.selected = 1;
+      },
+
+      tobook: function () {
+          this.selected = 2;
+      },
+
+    ready: function() {
+
+    }
+  });
+
+</script>

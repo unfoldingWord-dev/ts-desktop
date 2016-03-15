@@ -1,0 +1,151 @@
+
+<link rel="import" href="../../../components/paper-material/paper-material.html">
+<link rel="import" href="../../../components/iron-signals/iron-signals.html">
+
+<link rel="import" href="./ts-source-tab.html">
+
+<dom-module id="ts-source-chunk">
+
+	<style>
+
+        :host {
+            flex: auto;
+            display: flex;
+        }
+
+        paper-material {
+            flex: auto;
+            display: flex;
+            background: var(--card-background-color);
+            flex-direction: column;
+            border-radius: 3px;
+        }
+
+        #heading {
+            color: var(--secondary-text-color);
+            display: flex;
+            justify-content: space-between;
+            flex: 0 0 48px;
+            align-items: center;
+        }
+
+        #content {
+            padding: 24px 16px;
+            flex: auto;
+        }
+
+        #textholder {
+            line-height: 2;
+            margin-top: 0;
+            color: var(--primary-text-color);
+        }
+
+        #ref {
+            padding-right: 16px;
+            min-height: 46px;
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        :host([reviewmode]) #ref {
+            display: none;
+        }
+
+        :host([reviewmode]) ts-source-tab {
+            justify-content: space-between;
+        }
+
+        :host([wordmode]) #heading h2 {
+            color: var(--primary-text-color);
+            margin: 0;
+        }
+
+        #title {
+            margin-left: 16px;
+        }
+
+	</style>
+
+	<template>
+
+        <paper-material elevation="1">
+            <div id="heading">
+                <template is="dom-if" if="{{!chunk.meta.words}}">
+                    <ts-source-tab projectdata="[[chunk.data]]"></ts-source-tab>
+                    <div id="ref">
+                        <span>[[chunk.meta.chunkref]]</span>
+                    </div>
+                </template>
+                <template is="dom-if" if="{{chunk.meta.words}}">
+                    <div id="title">
+                        <h2>[[chunk.wordcontent]]</h2>
+                    </div>
+                </template>
+            </div>
+            <div id="content">
+                <div id="textholder"></div>
+            </div>
+        </paper-material>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+		is: 'ts-source-chunk',
+
+        behaviors: [
+            Polymer.IronResizableBehavior
+        ],
+
+		properties: {
+            chunk: {
+                type: Object,
+                value: {}
+            }
+		},
+
+        observers: [
+            'rendertext(chunk.*)'
+        ],
+
+        rendertext: function () {
+            if(this.chunk && this.chunk.srccontent) {
+                var textarray = this.chunk.srccontent.split(" ");
+                var numstr1 = "\<sup\>";
+                var numstr2 = "\<\/sup\>";
+                var returnstr = "";
+                var verse = 0;
+
+                for (var i = 0; i < textarray.length; i++) {
+                    if (textarray[i].substring(0, 2) === "\\v") {
+                        verse = textarray[i].substring(2);
+                        returnstr += numstr1 + verse + numstr2;
+                    } else {
+                        returnstr += textarray[i] + " ";
+                    }
+                }
+                this.$.textholder.innerHTML = returnstr;
+
+                var links = this.$.textholder.getElementsByTagName('a');
+
+                for (var j = 0, len = links.length; j < len; ++j) {
+                    links[j].addEventListener('click', function (event) {
+                        event.preventDefault();
+                        console.log(this.href);
+                    });
+                }
+            }
+        },
+
+		ready: function() {
+
+		}
+
+	});
+
+</script>

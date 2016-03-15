@@ -1,0 +1,169 @@
+
+<link rel="import" href="../../../components/paper-material/paper-material.html">
+<link rel="import" href="../../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../../components/iron-autogrow-textarea/iron-autogrow-textarea.html">
+<link rel="import" href="../../../components/iron-signals/iron-signals.html">
+
+<dom-module id="ts-target-edit">
+
+	<style>
+
+        :host {
+            flex: auto;
+            display: flex;
+        }
+
+        paper-material {
+            flex: auto;
+            display: flex;
+            background: var(--card-background-color);
+            flex-direction: column;
+            color: var(--primary-text-color);
+            border-radius: 3px;
+        }
+
+		#heading {
+            color: var(--secondary-text-color);
+            display: flex;
+            justify-content: space-between;
+            flex: 0 0 48px;
+            align-items: center;
+            font-size: 88%;
+            font-weight: 300;
+            border-bottom: 1px solid var(--note-card-pink);
+            letter-spacing: 1px;
+            padding: 0 16px;
+		}
+
+        #content {
+            margin-top: 24px;
+			padding: 0 16px;
+            flex: auto;
+            display: flex;
+		}
+
+        #content.editmode {
+            background-size: 100% 32px;
+            background-image: -webkit-linear-gradient(var(--card-background-color) 27px, var(--border-color) 27px, var(--border-color) 28px, var(--card-background-color) 28px);
+            border-radius: 3px;
+        }
+
+        #content iron-autogrow-textarea {
+			line-height: 2;
+            border: none;
+			margin: 0;
+            width: 100%;
+		}
+
+        #content p {
+            line-height: 2;
+            margin-top: 0;
+        }
+
+        #heading iron-icon {
+            cursor: pointer;
+        }
+
+        :host([chunkmode]) iron-icon {
+            display: none;
+        }
+
+        .hide {
+            display: none;
+        }
+
+	</style>
+
+	<template>
+
+        <paper-material elevation="1">
+            <div id="heading">
+                <div>
+                    <span>[[chunk.meta.chunkref]]</span><span>[[chunk.meta.refaddon]]</span>
+                </div>
+                <iron-icon icon="done" on-tap="review"></iron-icon>
+            </div>
+            <div id="content" class="editmode">
+                <iron-autogrow-textarea id="textbox" on-change="change" bind-value="{{chunk.transcontent}}" on-input="input"></iron-autogrow-textarea>
+                <p id="textholder"></p>
+            </div>
+        </paper-material>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+		is: 'ts-target-edit',
+
+		properties: {
+            chunk: {
+                type: Object,
+                value: {},
+                notify: true
+            }
+		},
+
+        observers: [
+            'rendertext(chunk.*)'
+        ],
+
+        rendertext: function () {
+            if(this.chunk && this.chunk.srccontent) {
+                var completed = this.chunk.completed;
+                var standard = this.chunk.meta.standard;
+                var contentbox = this.$.content;
+                var textbox = this.$.textbox;
+                var textholder = this.$.textholder;
+                var textarray = this.chunk.transcontent.split(" ");
+                var numstr1 = "\<sup\>";
+                var numstr2 = "\<\/sup\>";
+                var returnstr = "";
+                var verse = 0;
+
+                if (completed || !standard) {
+                    for (var i = 0; i < textarray.length; i++) {
+                        if (textarray[i].substring(0, 2) === "\\v") {
+                            verse = textarray[i].substring(2);
+                            returnstr += numstr1 + verse + numstr2;
+                        } else if (textarray[i].substring(0, 2) !== "\\c") {
+                            returnstr += textarray[i] + " ";
+                        }
+                    }
+                    textholder.innerHTML = returnstr;
+                    textholder.classList.remove("hide");
+                    textbox.classList.add("hide");
+                    contentbox.classList.remove("editmode");
+                } else {
+                    textholder.classList.add("hide");
+                    textbox.classList.remove("hide");
+                    contentbox.classList.add("editmode");
+                }
+            }
+        },
+
+        change: function () {
+            this.fire('iron-signal', {name: 'updatetranslation'});
+        },
+
+        review: function () {
+            var id = this.chunk.meta.chapterid + "-" + this.chunk.meta.frameid;
+            this.set('chunk.state.review', true);
+            this.fire('setheight');
+            this.fire('iron-signal', {name: 'updatestate', data: {id: id, mode: "review", value: true}});
+        },
+
+        input: function () {
+            this.fire('setheight');
+        },
+
+		ready: function() {
+
+		}
+
+	});
+
+</script>

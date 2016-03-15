@@ -3,9 +3,9 @@
 ;(function () {
 
     let rimraf = require('rimraf');
-    let TargetLanguage = require('../../app/js/core/targetlanguage');
-    let TargetTranslation = require('../../app/js/core/targettranslation');
-    let Translator = require('../../app/js/translator').Translator;
+    let TargetLanguage = require('../../src/js/core/targetlanguage');
+    let TargetTranslation = require('../../src/js/core/targettranslation');
+    let Translator = require('../../src/js/translator').Translator;
     let assert = require('assert');
 
     let translationDir = './unit_tests/translator/data/';

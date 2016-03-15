@@ -1,0 +1,153 @@
+
+<link rel="import" href="../../../components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../../components/iron-signals/iron-signals.html">
+<link rel="import" href="../../../components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../../components/neon-animation/neon-animation.html">
+
+<link rel="import" href="../../ts-icons/ts-icons.html">
+
+<dom-module id="ts-source-tab">
+
+	<style>
+
+        :host {
+            flex: auto;
+            display: flex;
+            min-height: 48px;
+        }
+
+        .tabs {
+            flex: auto;
+            display: flex;
+        }
+
+        :host([readmode]) .tabs {
+        	justify-content: center;
+        }
+
+        .tab {
+            padding: 0 5px;
+            margin-top: 8px;
+            flex: 0 1 110px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--secondary-text-color);
+            border-top: 2px solid var(--border-color);
+            border-left: 2px solid var(--border-color);
+            border-right: 2px solid var(--border-color);
+            border-radius: 5px 5px 0 0;
+            cursor: pointer;
+        }
+
+        .tab.unselected {
+            font-size: 80%;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .tab.selected {
+            font-size: 90%;
+            font-weight: bold;
+            border-bottom: none;
+        }
+
+        .littlespace {
+            border-bottom: 2px solid var(--border-color);
+            flex: 0 0 8px;
+        }
+
+        .bigspace {
+            border-bottom: 2px solid var(--border-color);
+            flex: 0 0 16px;
+        }
+
+        :host([readmode]) .bigspace {
+            flex: auto;
+        }
+
+        :host([readmode]) .readspace {
+            border-bottom: 2px solid var(--border-color);
+            flex: 0 0 64px;
+        }
+
+        .fillspace {
+            border-bottom: 2px solid var(--border-color);
+            flex: auto;
+        }
+
+        .iconbutton {
+        	display: flex;
+            padding-right: 16px;
+            border-bottom: 2px solid var(--border-color);
+			flex: 0 0 48px;
+			justify-content: center;
+			align-items: center;
+			cursor: pointer;
+            color: var(--border-color);
+        }
+
+        .upper {
+            text-transform: uppercase;
+            padding-left: 5px;
+        }
+
+	</style>
+
+	<template>
+
+		<div class="tabs">
+            <div class="readspace"></div>
+            <div class="bigspace"></div>
+            <template is="dom-repeat" items="[[projectdata.source_translations]]" as="source">
+                <div class="littlespace"></div>
+                <div class$="[[tabclass(projectdata.currentsource, index)]]" on-tap="choosesource"><span>{{source.language_name}}</span><span class="upper">{{source.resource_id}}</span></div>
+                <div class="littlespace"></div>
+            </template>
+            <div class="fillspace"></div>
+		</div>
+		<div class="iconbutton">
+            <paper-icon-button icon="uw-tab-small:uw-tab-small" on-tap="openmodal"></paper-icon-button>
+		</div>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+        is: 'ts-source-tab',
+
+        behaviors: [
+            Polymer.IronResizableBehavior
+        ],
+
+        properties: {
+            projectdata: {
+                type: Object,
+                value: {}
+            }
+        },
+
+        tabclass: function (source, index) {
+            return source === index ? 'tab selected' : 'tab unselected';
+        },
+
+        openmodal: function() {
+            this.fire('iron-signal', {name: 'opensource'});
+        },
+
+        choosesource: function(e) {
+            var selected = e.model.index;
+            this.fire('iron-signal', {name: 'updateselected', data: {selected: selected}});
+        },
+
+        ready: function() {
+
+        }
+
+    });
+
+</script>

@@ -1,0 +1,255 @@
+
+<link rel="import" href="../../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../../components/paper-button/paper-button.html">
+<link rel="import" href="../../../components/paper-checkbox/paper-checkbox.html">
+
+<dom-module id="ts-source-modal">
+
+    <style>
+
+        :host {
+            box-sizing: border-box;
+            display: flex;
+            flex: auto;
+        }
+
+        #contain {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+            color: var(--primary-text-color);
+            overflow: hidden;
+            background: var(--card-background-color);
+            font-size: 110%;
+        }
+
+        [icon="search"] {
+            padding: 0;
+        }
+
+        .header {
+            flex: 0 0 50px;
+            color: var(--secondary-text-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        input {
+            border: none;
+            font-size: 110%;
+            font-style: italic;
+            width: 100%;
+        }
+
+        input:focus {
+            outline: none;
+        }
+
+        .body {
+            flex: auto;
+            overflow-y: auto;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            margin: 0;
+            padding: 1em;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .row:hover {
+            background: var(--accent-color-light);
+            cursor: pointer;
+        }
+
+        .row-header {
+            margin: 0;
+            padding: 0.25em 1em;
+            background-color: var(--border-color);
+            text-transform: uppercase;
+            font-size: 80%;
+            font-weight: 500;
+            color: var(--secondary-text-color);
+        }
+
+        .footer {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            flex: 0 0 50px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        paper-button {
+            color: var(--secondary-text-color);
+        }
+
+        paper-button:hover {
+            color: var(--accent-color);
+        }
+
+        paper-checkbox {
+            --paper-checkbox-checked-color: var(--accent-color-dark);
+            --paper-checkbox-unchecked-color: var(--accent-color-dark);
+        }
+
+        paper-checkbox[disabled]::shadow #checkbox.paper-checkbox {
+            opacity: 1;
+        }
+
+    </style>
+
+    <template>
+
+        <div id="contain">
+            <div class="header">
+                <input is="iron-input" bind-value="{{query}}" placeholder="Choose source translations">
+                <paper-icon-button icon="search" title="Search Languages"></paper-icon-button>
+            </div>
+
+            <div class="body">
+                <div class="row-header">Selected</div>
+                <template is="dom-repeat" items="[[sources]]" as="source">
+                    <div class="row" on-tap="removesource">
+                        <div>
+                            <span>[[source.language_name]]</span> - <span>[[source.resource_name]]</span>
+                        </div>
+                        <paper-checkbox disabled checked></paper-checkbox>
+                    </div>
+                </template>
+
+                <div class="row-header">Available</div>
+                <template is="dom-repeat" items="{{searchfilter(query, available)}}" as="source">
+                    <div class="row" on-tap="addsource">
+                        <div>
+                            <span>[[source.language_name]]</span> - <span>[[source.resource_name]]</span>
+                        </div>
+                        <paper-checkbox disabled></paper-checkbox>
+                    </div>
+                </template>
+            </div>
+
+            <div class="footer">
+                <paper-button on-tap="cancel">Cancel</paper-button>
+                <paper-button on-tap="confirm">Confirm</paper-button>
+            </div>
+
+        </div>
+
+   </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-source-modal',
+
+        behaviors: [
+            Polymer.IronResizableBehavior
+        ],
+
+        properties: {
+            allSources: {
+                type: Array,
+                value: []
+            },
+            sources: {
+                type: Array,
+                value: []
+            },
+            available: {
+                type: Array,
+                value: []
+            },
+            selectedSource: {
+                type: Number,
+                value: null
+            },
+            query: {
+                type: String,
+                value: ""
+            }
+        },
+
+        observers: [
+            'updateavailable(allSources.*, sources.*)'
+        ],
+
+        searchfilter: function(query, available) {
+            if (query) {
+                var search = App.util.startsWithBase.bind(null, query);
+                return available.filter(function(source) {
+                    return search(source.language_name);
+                });
+            } else {
+                return available;
+            }
+        },
+
+        updateavailable: function() {
+            var all = this.allSources;
+            var selected = this.sources;
+            var available = [];
+            var check;
+
+            for (var i = 0; i < all.length; i++) {
+                check = false;
+                for (var j = 0; j < selected.length; j++) {
+                    if (all[i].id === selected[j].id) {
+                        check = true;
+                    }
+                }
+                if (!check) {
+                    available.push(all[i]);
+                }
+            }
+            this.set('available', available);
+        },
+
+        cancel: function() {
+            this.query = "";
+            this.fire('close');
+        },
+
+        confirm: function() {
+            var sources = this.sources;
+            var selected = this.selectedSource;
+            this.query = "";
+            this.fire('iron-signal', {name: 'updatesources', data: {sources: sources, selected: selected}});
+            this.fire('close');
+        },
+
+        addsource: function(event) {
+            var source = event.model.source;
+            this.push('sources', source);
+            this.selectedSource = this.sources.indexOf(source);
+        },
+
+        removesource: function(event) {
+            var index = event.model.index;
+            this.splice('sources', index, 1);
+            if (this.selectedSource === index) {
+                if (this.sources.length === 0) {
+                    this.selectedSource = null;
+                }
+                else if (index >= this.sources.length - 1) {
+                    this.selectedSource = (this.sources.length - 1);
+                }
+            }
+            else if (index < this.selectedSource) {
+                this.selectedSource -= 1;
+            }
+        },
+
+        ready: function () {
+
+        }
+
+    });
+
+</script>

@@ -1,0 +1,282 @@
+<link rel="import" href="../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="./ts-setting-modal.html">
+
+<dom-module id="ts-settings">
+
+    <style>
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
+        neon-animated-pages {
+            flex: none;
+            display: flex;
+            transform: translateY(-60px);
+            height: calc(100% - 45px);
+        }
+        neon-animated-pages > * {
+            flex: auto;
+        }
+        .header {
+            background-color: var(--primary-color);
+            min-height: 50px;
+        }
+        .heading {
+            font-size: 125%;
+            color: var(--reverse-text-color);
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 45px;
+        }
+        [icon="arrow-back"] {
+            margin: 0 1em 0 .2em;
+        }
+        .body {
+            padding: 0 4rem;
+            overflow-y: auto;
+            background-color: var(--card-background-color);
+        }
+        .setting-group-header {
+            color: var(--primary-color);
+            margin: 1.5rem 0 1rem;
+            font-size: 105%;
+        }
+        .setting-group-item {
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            cursor: pointer;
+        }
+        .setting-text {
+            flex: 1 1 auto;
+        }
+        .main-text {
+            color: var(--primary-text-color);
+        }
+        .help-text {
+            color: var(--secondary-text-color);
+            line-height: 1.6;
+        }
+        .setting-checkbox {
+            flex: 0 0 48px;
+        }
+        .avoid-clicks {
+            pointer-events: none;
+        }
+        paper-checkbox {
+            --paper-checkbox-checked-color: var(--accent-color-dark);
+            --paper-checkbox-unchecked-color: var(--accent-color-dark);
+        }
+        .hide {
+            display: none;
+        }
+    </style>
+
+    <template>
+
+        <div class="header">
+            <div class="heading">
+                <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
+                <span>Settings</span>
+            </div>
+        </div>
+
+        <div class="body">
+
+            <template is="dom-repeat" items="[[settings]]" index-as="group">
+                <div class="setting-group-header">{{_capitalize(item.group)}}</div>
+                <div class="setting-group-body">
+                    <template is="dom-repeat" items="{{item.list}}" as="setting" index-as="list">
+                        <template is="dom-if" if="{{_isVisible(setting.visible)}}">
+                            <div id="{{setting.name}}" class="setting-group-item" on-tap="_runTapHandler" data-enabled={{_isEnabled(setting.enabled)}} data-group="[[group]]" data-list="[[list]]">
+                                <div class="setting-text avoid-clicks">
+                                    <div class="main-text">{{setting.mainText}}</div>
+                                    <div class="help-text">{{_computeHelpText(setting.*)}}</div>
+                                </div>
+                                <template is="dom-if" if="{{_isBoolean(setting.value)}}">
+                                    <div class="setting-checkbox avoid-clicks">
+                                        <paper-checkbox class="right" checked="{{setting.value}}"></paper-checkbox>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </template>
+                </div>
+            </template>
+
+        </div>
+
+        <!-- TODO: Fix to work with electron -->
+        <input id="data-location-browser" name="data-location-browser" class="hide" type="file" nwdirectory directory on-change="_updateDataLocation"/>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-settings',
+
+        behaviors: [
+            Polymer.NeonAnimatableBehavior
+        ],
+
+        properties: {
+            route: {
+                type: String,
+                notify: true
+            },
+            animationConfig: {
+                value: function () {
+                    return {
+                        'entry': {
+                            name: 'slide-from-right-animation',
+                            node: this
+                        },
+                        'exit': {
+                            name: 'slide-right-animation',
+                            node: this
+                        }
+                    }
+                }
+            },
+            backto: {
+                type: String
+            },
+            settings: {
+                type: Array,
+                value: []
+            },
+            settingsObj: {
+                type: Object,
+                value: {}
+            }
+        },
+
+        ready: function() {
+            this.settings = App.configurator.refreshUserSetting();
+            this.settings = App.configurator.setUserSetting('appversion', App.configurator.getAppVersion());
+            this.settings = App.configurator.setUserSetting('datapath', App.configurator.getValue('rootdir'));
+            // TODO: get working with electron. (Read only in the meantime.)
+            // this.$['backup-location-browser'].nwworkingdir = App.configurator.getUserSetting('backuplocation');
+        },
+
+        back: function() {
+            this.route = this.backto;
+        },
+
+        _isEnabled: function(bool) {
+            return bool ? true : false;
+        },
+
+        _isVisible: function(bool) {
+            if (bool === undefined) { bool = true; }
+            return bool;
+        },
+
+        _capitalize: function(text) {
+            return text.charAt(0).toUpperCase() + text.slice(1).replace(/( [a-z])/g, function(match) {
+                return match.toUpperCase();
+            });
+        },
+
+        _computeHelpText: function(setting) {
+            var text;
+            if (typeof setting.base.value === "number" && setting.base.helpText) {
+                text = setting.base.helpText.replace("<int>", setting.base.value);
+            }
+            else {
+                text = setting.base.helpText || setting.base.value || setting.base.nullText;
+            }
+            return text;
+        },
+
+        _isBoolean: function(value) {
+            return typeof value === 'boolean';
+        },
+
+        _runTapHandler: function(event) {
+            if (!event.target.dataEnabled) { return false; }           
+            var name = event.model.setting.name;
+            var value = event.model.setting.value;
+            if (name === 'developertools') {
+                App.showDevTools();
+            }
+            else if (name === "refreshsettings") {
+                this.settings = App.configurator.refreshUserSetting();
+                this.saveSettings();
+            }
+            else if (name === "datalocation") {
+                document.querySelector('#data-location-browser').click();
+            }
+            else if (typeof value === 'boolean') {
+                var path = 'settings.' + event.target.dataGroup + '.list.' + event.target.dataList + '.value';
+                this.set(path, !value);
+                this.saveSettings();
+            }
+            else {
+                this.openSettingModal(event);
+            }
+        },
+
+        _onSettingConfirm: function(path, name) {
+            var value = document.querySelector('ts-setting-modal').selected || document.querySelector('ts-setting-modal').text;
+            this.set(path, value);
+            this.closeSettingModal();
+            this.saveSettings();
+            App.configurator.applyPrefAppearance();
+            App.configurator.applyPrefBehavior();
+        },
+
+        _onSettingCancel: function() {
+            this.closeSettingModal();
+        },
+
+        _updateDataLocation: function() {
+            var newPath = this.$['data-location-browser'].value;
+            if (newPath) {
+                var oldPath = App.configurator.getUserSetting('datalocation');
+                this.settings = App.configurator.setUserSetting('datalocation', newPath);
+                // TODO:
+                // App.projectsManager.migrateBackup(oldPath, newPath);
+            }
+        },
+
+        openSettingModal: function(event) {
+            var modal = document.createElement('ts-setting-modal');
+            var path = 'settings.' + event.target.dataGroup + '.list.' + event.target.dataList + '.value';
+            modal.id = "setting-modal";
+            modal.style.display = 'block';
+            modal.heading = event.model.setting.mainText;
+            // The following assignments will determine what kind of interface the modal
+            // will have (Edit for text, select for selected.)
+            if (event.model.setting.options) {
+                modal.options = event.model.setting.options;
+                modal.selected = event.model.setting.value;
+            }
+            else {
+                modal.text = event.model.setting.value;
+            }
+            this.appendChild(modal);
+            modal.fire('open');
+            modal.addEventListener('setting-confirm', this._onSettingConfirm.bind(this, path, event.target.id));
+            modal.addEventListener('setting-cancel', this._onSettingCancel.bind(this));
+            return modal;
+        },
+
+        closeSettingModal: function() {
+            var modal = document.querySelector('ts-setting-modal');
+            this.removeChild(modal);
+        },
+
+        saveSettings: function() {
+            App.configurator.saveUserSettingArr(this.settings);
+        }
+
+    });
+
+</script>

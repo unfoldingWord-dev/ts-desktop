@@ -3,7 +3,8 @@
 'use strict';
 
 var fs = require('fs'),
-    path = require('path');
+    path = require('path'),
+    request = require('request');
 
 function Importer(configurator, pm) {
 
@@ -58,6 +59,42 @@ function Importer(configurator, pm) {
             });
         },
 
+        /*getVerseChunkFileNames: function(projdata){
+            return new Promise(function(resolve,reject){
+                var book = projdata.project.id;
+                var chunkDescUrl = "https://api.unfoldingword.org/bible/txt/1/" + book + "/chunks.json";
+                var chunks = [];
+                request(chunkDescUrl,function(err, resp, body){
+                    if(!err){
+                        var chunkDesc = JSON.parse(body);
+                        for(var i = 0;i<chunkDesc.length;i++){
+                            var chunk = chunkDesc[i],
+                                verses = [];
+                            if(typeof chunkDesc[i+1] !== 'undefined'){
+                                if(chunkDesc[i+1].chp === chunk.chp){
+                                    var lastVs = chunkDesc[i+1].firstvs - 1;
+                                    for(var v = parseInt(chunk.firstvs);v<=lastVs;v++){
+                                        verses.push(v);
+                                    }
+                                }
+                            } else {
+                                verses.push(chunk.firstvs);
+                            }
+                            var chk = {
+                                filename: chunk.firstvs,
+                                chapter: chunk.chp,
+                                verses: verses
+                            };
+                            chunks.push(chk);
+                        }
+                        resolve(chunks);
+                    } else {
+                        reject(err);
+                    }
+                });
+            });
+        },*/
+
         getVerseChunkFileNames: function(projdata){
 
             var frames = pm.getSourceFrames(projdata.source_translations[projdata.currentsource]);
@@ -96,49 +133,50 @@ function Importer(configurator, pm) {
         importSingleUSFMFile: function (usfmFile, projdata) {
             let self = this;
             return new Promise(function(resolve,reject){
-                var chunkFileNames = self.getVerseChunkFileNames(projdata);
+                //var chunkFileNames = self.getVerseChunkFileNames(projdata);
+                self.getVerseChunkFileNames(projdata).then(function(chunkFileNames){
+                    var parser = new UsfmParser();
+                    parser.load(usfmFile).then(function(){
 
-                var parser = new UsfmParser();
-                parser.load(usfmFile).then(function(){
+                        var parsedData = parser.parse();
+                        for(var i = 0;i<chunkFileNames.length;i++){
+                            var chunk = chunkFileNames[i];
+                            var transcontent = '';
 
-                    var parsedData = parser.parse();
-                    for(var i = 0;i<chunkFileNames.length;i++){
-                        var chunk = chunkFileNames[i];
-                        var transcontent = '';
-
-                        for(var ci = 0;ci<chunk.verses.length;ci++){
-                            if(typeof parsedData[chunk.chapter] !== 'undefined' && typeof parsedData[chunk.chapter].verses[chunk.verses[ci]] !== 'undefined'){
-                                transcontent += '\\v' + parsedData[chunk.chapter].verses[chunk.verses[ci]].id + ' ' + parsedData[chunk.chapter].verses[chunk.verses[ci]].contents;
+                            for(var ci = 0;ci<chunk.verses.length;ci++){
+                                if(typeof parsedData[chunk.chapter] !== 'undefined' && typeof parsedData[chunk.chapter].verses[chunk.verses[ci]] !== 'undefined'){
+                                    transcontent += '\\v' + parsedData[chunk.chapter].verses[chunk.verses[ci]].id + ' ' + parsedData[chunk.chapter].verses[chunk.verses[ci]].contents;
+                                }
                             }
-                        }
-                        chunkFileNames[i].meta = {
-                            chapterid: chunkFileNames[i].chapter,
-                            frameid: chunkFileNames[i].filename,
-                            helpscontent: []
-                        };
-                        chunkFileNames[i].completed = true;
-                        chunkFileNames[i].transcontent = transcontent;
-                    }
-
-
-                    //Pull in the title
-                    if(typeof parsedData['00'] !== 'undefined'){
-                        chunkFileNames.push({
-                            meta: {
-                                chapterid: '00',
-                                frameid: 'title',
+                            chunkFileNames[i].meta = {
+                                chapterid: chunkFileNames[i].chapter,
+                                frameid: chunkFileNames[i].filename,
                                 helpscontent: []
-                            },
-                            transcontent: parsedData['00'].contents,
-                            completed: true
-                        });
-                    }
+                            };
+                            chunkFileNames[i].completed = true;
+                            chunkFileNames[i].transcontent = transcontent;
+                        }
 
-                    pm.saveTargetTranslation(chunkFileNames,projdata).then(function(){
-                        resolve();
-                    }).catch(function(e){
-                        reject('There was a problem importing this translation');
-                        console.log('Save Error: ', e);
+
+                        //Pull in the title
+                        if(typeof parsedData['00'] !== 'undefined'){
+                            chunkFileNames.push({
+                                meta: {
+                                    chapterid: '00',
+                                    frameid: 'title',
+                                    helpscontent: []
+                                },
+                                transcontent: parsedData['00'].contents,
+                                completed: true
+                            });
+                        }
+
+                        pm.saveTargetTranslation(chunkFileNames,projdata).then(function(){
+                            resolve();
+                        }).catch(function(e){
+                            reject('There was a problem importing this translation');
+                            console.log('Save Error: ', e);
+                        });
                     });
                 });
             });

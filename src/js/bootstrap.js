@@ -53,6 +53,9 @@ process.stdout.write = console.log.bind(console);
     setMsg('Loading Printer...');
     let printer = require('../js/printer').Printer();
 
+    setMsg('Loading Importer...');
+    let Importer = require('../js/importer').Importer;
+
     setMsg('Initializing...');
 
     // TODO: refactor this so we can just pass an object to the constructor
@@ -77,6 +80,16 @@ process.stdout.write = console.log.bind(console);
         c.setValue('indexDir', path.join(DATA_PATH, 'index'), {'mutable':false});
 
         return c;
+    })();
+
+    let pm = (function () {
+        // TODO: should we move the location of these files/folders outside of the src folder?
+        var srcDir = path.resolve(path.join(__dirname, '..')),
+            schemaPath = path.join(srcDir, 'config', 'schema.sql'),
+            dbPath = path.join(srcDir, 'index', 'index.sqlite'),
+            db = new Db(schemaPath, dbPath);
+
+        return new ProjectsManager(db, configurator);
     })();
 
 
@@ -128,15 +141,9 @@ process.stdout.write = console.log.bind(console);
 
         printer: printer,
 
-        projectsManager: (function () {
-            // TODO: should we move the location of these files/folders outside of the src folder?
-            var srcDir = path.resolve(path.join(__dirname, '..')),
-                schemaPath = path.join(srcDir, 'config', 'schema.sql'),
-                dbPath = path.join(srcDir, 'index', 'index.sqlite'),
-                db = new Db(schemaPath, dbPath);
+        projectsManager: pm,
 
-            return new ProjectsManager(db, configurator);
-        })(),
+        importer: new Importer(configurator, pm),
 
         reporter: new Reporter({
             logPath: path.join(configurator.getValue('rootDir'), 'log.txt'),

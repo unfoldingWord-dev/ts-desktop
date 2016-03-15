@@ -60,7 +60,7 @@ function Importer(configurator, pm) {
 
         getVerseChunkFileNames: function(projdata){
 
-            var frames = pm.getSourceFrames(projdata.sources[projdata.currentsource]);
+            var frames = pm.getSourceFrames(projdata.source_translations[projdata.currentsource]);
             var parsedFrames = [],
                 chapters = {};
 

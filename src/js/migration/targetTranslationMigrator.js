@@ -32,6 +32,8 @@
                                 manifest = v4(manifest, dir);
                             case 5:
                                 manifest = v5(manifest);
+                            case 6:
+                                manifest = v6(manifest);
                                 break;
                             default:
                                 reject('unsupported package version "' + packageVersion + '"');
@@ -63,6 +65,10 @@
      * @param manifest {JSON}
      * @retusn {JSON}
      */
+    function v6(manifest) {
+        return manifest;
+    }
+
     function v5(manifest) {
         return manifest;
     }

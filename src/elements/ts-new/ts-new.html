@@ -172,27 +172,23 @@
             var project = this.project;
             var language = this.language;
             var typedata = this.typedata;
-            var typeext = "";
             var projectarray = this.projectlist;
             var popup = this.$.popup;
-
-            if (typedata.type.id === "tw" || typedata.type.id === "ta") {
-                typeext = "";
-            } else if (typedata.type.id !== "text") {
-                typeext = "_" + typedata.type.id;
-            } else if (typedata.resource.id === "udb") {
-                typeext = "_" + typedata.resource.id;
-            }
-
-            var fullname = project.slug + typeext + "-" + language.id;
-
-            var unique_id = language.id + "_" + project.slug + "_" + typedata.type.id;
-            if (typedata.resource.id !== "") {
-                unique_id += "_" + typedata.resource.id;
-            }
+            var newprojectmanifest = {
+                "package_version": 6,
+                "project": {"id": project.slug, "name": project.name},
+                "type": typedata.type,
+                "resource": typedata.resource,
+                "format": typedata.format,
+                "target_language": language,
+                "translators": [],
+                "source_translations": [],
+                "parent_draft": {}
+            };
+            var newprojectmeta = App.projectsManager.updateManifestToMeta(newprojectmanifest);
 
             for (var i = 0; i < projectarray.length; i++) {
-                if (projectarray[i].unique_id === unique_id) {
+                if (projectarray[i].unique_id === newprojectmeta.unique_id) {
                     this.set('options', {title: "Duplicate Found", body: "This project already exists"});
                     popup.open();
                     return;
@@ -205,22 +201,10 @@
                 return;
             }
 
-            var newprojdata = {
-                "project": {"id": project.slug, "name": project.name},
-                "type": typedata.type,
-                "resource": typedata.resource,
-                "format": typedata.format,
-                "fullname": fullname,
-                "target_language": language,
-                "translators": [],
-                "source_translations": [],
-                "parent_draft": {}
-            };
-
             this.animationConfig.exit.name = 'slide-left-animation';
-            App.projectsManager.saveTargetTranslation([], newprojdata).then(function() {
+            App.projectsManager.saveTargetTranslation([], newprojectmeta).then(function() {
                 mythis.fire('iron-signal', {name: 'updatelist'});
-                mythis.fire('iron-signal', {name: 'loadproject', data: {projdata: newprojdata, type: "new"}});
+                mythis.fire('iron-signal', {name: 'loadproject', data: {projdata: newprojectmeta, type: "new"}});
                 mythis.selected = 0;
             });
         },

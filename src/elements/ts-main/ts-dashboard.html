@@ -471,7 +471,10 @@
           var mythis = this;
           App.projectsManager.loadTargetTranslationsList().then(function(list) {
               App.ipc.send('loading-status', 'Checking Project Versions...');
-              mythis.checklist(list);
+              for (var i = 0; i < list.length; i++) {
+                  list[i] = App.projectsManager.updateManifestToMeta(list[i]);
+              }
+              mythis.set('projectlist', list);
 
               App.ipc.send('loading-status', 'Checking Auto Backups...');
               App.projectsManager.backupProjects(mythis.projectlist);
@@ -480,67 +483,6 @@
                 App.ipc.send('loading-done');
               }, 100);
           });
-      },
-
-      checklist: function (list) {
-          for (var i = 0; i < list.length; i++) {
-
-              if (list[i].project.name === "") {
-                  list[i].project.name = App.projectsManager.getProjectName(list[i].project.id)[0].name;
-              }
-
-              if (list[i].type.name === "" && list[i].type.id === "text") {
-                  list[i].type.name = "Text";
-              }
-
-              for (var j = 0; j < list[i].source_translations.length; j++) {
-                  var details = App.projectsManager.getSourceDetails(list[i].project.id, list[i].source_translations[j].language_id, list[i].source_translations[j].resource_id)[0];
-                  list[i].source_translations[j].project_id = details.project_id;
-                  list[i].source_translations[j].id = details.id;
-                  list[i].source_translations[j].language_name = details.language_name;
-                  list[i].source_translations[j].resource_name = details.resource_name;
-              }
-
-              if (list[i].source_translations.length) {
-                  list[i].currentsource = 0;
-              } else {
-                  list[i].currentsource = null;
-              }
-
-              if (list[i].type.id === "tw" || list[i].type.id === "ta") {
-                  list[i].project_type_class = "extant";
-              } else if (list[i].type.id === "tn" || list[i].type.id === "tq") {
-                  list[i].project_type_class = "helps";
-              } else {
-                  list[i].project_type_class = "standard";
-              }
-
-              list[i].unique_id = list[i].target_language.id + "_" + list[i].project.id + "_" + list[i].type.id;
-              if (list[i].resource.id !== "") {
-                  list[i].unique_id += "_" + list[i].resource.id;
-              }
-
-              var typeext = "";
-
-              if (list[i].project_type_class === "extant") {
-                  typeext = "";
-              } else if (list[i].type.id !== "text") {
-                  typeext = "_" + list[i].type.id;
-              } else if (list[i].resource.id === "udb") {
-                  typeext = "_" + list[i].resource.id;
-              }
-
-              list[i].fullname = list[i].project.id + typeext + "-" + list[i].target_language.id;
-
-              var key = list[i].unique_id;
-              var completion = App.configurator.getValue(key + "-completion");
-              if (completion !== undefined  && completion !== "") {
-                  list[i].completion = completion;
-              } else {
-                  list[i].completion = 0;
-              }
-          }
-          this.set('projectlist', list);
       },
 
       setdefault: function () {

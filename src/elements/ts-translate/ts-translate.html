@@ -1136,7 +1136,6 @@
             var mythis = this;
             var sources = this.currentproject.data.source_translations;
             var key = this.currentproject.data.unique_id;
-            var type = this.currentproject.data.type.id;
             var index = App.configurator.getValue(key + "-index");
             var chapter = App.configurator.getValue(key + "-chapter");
             var selected = App.configurator.getValue(key + "-selected");
@@ -1154,7 +1153,7 @@
                 mythis.set('modestatus.lastmode', 3);
             }
 
-            if ((sources !== undefined && sources.length !== 0) || type === "tw" || type === "ta") {
+            if ((sources !== undefined && sources.length !== 0) || typeclass === "extant") {
                 setTimeout(function() {
                     if (selected > 0) {
                         mythis.set('selected', selected);
@@ -1174,14 +1173,14 @@
             var sources = this.currentproject.data.source_translations;
             var lastmode = this.modestatus.lastmode;
             var selected = this.selected;
-            var type = this.currentproject.data.type.id;
+            var typeclass = this.currentproject.data.project_type_class;
 
             if (selected === 4) {
                 if (sources !== undefined && sources.length !== 0) {
                     mythis.set('selected', lastmode);
                 }
             } else {
-                if ((sources === undefined || sources.length === 0) && type !== "tw" && type !== "ta") {
+                if ((sources === undefined || sources.length === 0) && typeclass !== "extant") {
                     setTimeout(function() {
                         mythis.set('selected', 4);
                     }, 500);
@@ -1207,8 +1206,8 @@
 
         createchunks: function () {
             var current = this.currentproject.data.currentsource;
-            var type = this.currentproject.data.type.id;
-            if ((current === null || current === undefined) && type !== "tw" && type !== "ta") {
+            var typeclass = this.currentproject.data.project_type_class;
+            if ((current === null || current === undefined) && typeclass !== "extant") {
                 return;
             }
             var transdata = {};
@@ -1326,8 +1325,8 @@
         },
 
         gopublish: function () {
-            var type = this.currentproject.data.type.id;
-            if(this.currentproject.data.source_translations.length || type === "tw" || type === "ta") {
+            var typeclass = this.currentproject.data.project_type_class;
+            if(this.currentproject.data.source_translations.length || typeclass === "extant") {
                 this.savestate();
                 this.setleftanimation();
                 this.fire('iron-signal', {name: 'updatepublish'});

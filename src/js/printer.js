@@ -259,9 +259,70 @@ function Printer() {
 
                         doc.end();
                         resolve(true);
+                    } else if(project.format === 'usx'){
+
+                         let doc = new PDFDocument({
+                            bufferPages: true,
+                            margins:{
+                                top: 72,
+                                bottom: 50,
+                                left: 72,
+                                right: 72
+                            }
+                        });
+                        doc.pipe(fs.createWriteStream(filename + '.pdf'));
+
+                        //set the title 
+                        doc.info.Title = translation[0].transcontent || meta.project.name;
+                        doc.fontSize(25)
+                            .text(translation[0].transcontent, 72, doc.page.height / 2, {align: 'center'})
+                            .addPage();
+
+                             // book body
+                        _.forEach(project.chapters, function(chapter) {
+
+                            //list chapters (remove leading zeros in the numbers)
+                            var chapterNum = chapter.id.replace(/\b0+/, '');
+                            doc.fontSize(20)
+                                .lineGap(10)
+                                .text(chapterNum + ' ', {continued: true});
+                            chapter.page = doc.bufferedPageRange().count;
+
+                            // frames
+                            if(options.doubleSpace === true){
+                                doc.lineGap(20);
+                            }
+
+                            _.forEach(chapter.frames, function(frame) {
+                                if(options.includeIncompleteFrames === true || frame.completed === true) {
+                                    var content = frame.transcontent.split(/[\\||\/][v]([0-9]+)/g);
+
+                                    _.forEach(content, function(info){
+                                        let output = info;
+                                       //superscript for verses not supported by pdfkit: https://github.com/devongovett/pdfkit/issues/15
+                                       output = output.replace(/[\\][\\c][0-9]+ /g, '');
+                                        doc.fontSize(10)
+                                            .text(output + ' ',  { continued: true});
+                                    });
+                                }
+                                doc.moveDown()
+                                    .text("");
+                            });
+                        });
+
+                        // number pages
+                        let range = doc.bufferedPageRange();
+                        for(let i = range.start; i < range.start + range.count; i ++) {
+                            doc.switchToPage(i);
+                            doc.fontSize(10)
+                                .text(i + 1, 72, doc.page.height - 50 - 12, {align: 'center'});
+                        }
+
+                        doc.end();
+                        resolve(true);
                     } else {
                         // we don't support anything but dokuwiki right now
-                        reject('We only support printing OBS projects for now');
+                        reject('We only support printing OBS and Bible projects for now');
                     }
                 } else {
                     // TODO: support exporting other target translation types if needed e.g. notes, words, questions

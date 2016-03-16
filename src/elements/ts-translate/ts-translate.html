@@ -1362,11 +1362,12 @@
         },
 
         goprint: function () {
-            var type = this.currentproject.data.resource.id;
             this.$.chunkbox.checked = true;
             this.$.imagebox.checked = false;
             this.$.doublespacebox.checked = false;
-            if(type === 'ulb' || type === 'udb')
+            
+            var type = this.currentproject.data.resource.id;
+            if(type === 'reg')
             {
                 this.$.imagebox.hidden = true;
                 this.$.imagetext.hidden = true;

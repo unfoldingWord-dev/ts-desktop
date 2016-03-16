@@ -796,30 +796,17 @@ function ProjectsManager(query, configurator) {
                 .then(map(makePaths))
                 .then(function (list) {
                     var migrated = _.map(list, function (paths) {
-                        return targetTranslationMigrator.migrate(paths.projectDir)
+                        return targetTranslationMigrator.migrate(paths)
                             .catch(function (err) {
                                 console.log(err);
-                                return true;
+                                return false;
                             });
                     });
-                    return Promise.all(migrated).then(function () {
-                        return list;
+                    return Promise.all(migrated).then(function (result) {
+                        return _.compact(result);
                     })
                 })
                 .then(map('manifest'))
-                .then(function (list) {
-                    return _.filter(list, function (path) {
-                        try {
-                            var test = fs.statSync(path);
-                        } catch (e) {
-                            test = false;
-                        }
-                        return test;
-                    })
-                })
-                .then(map(read))
-                .then(Promise.all.bind(Promise))
-                .then(map(fromJSON));
         },
 
         loadFinishedFramesList: function (meta) {

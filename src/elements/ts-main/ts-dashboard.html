@@ -470,7 +470,7 @@
       updatelist: function () {
           var mythis = this;
           App.projectsManager.loadTargetTranslationsList().then(function(list) {
-              App.ipc.send('loading-status', 'Checking Project Versions...');
+              App.ipc.send('loading-status', 'Updating Manifest Files...');
               for (var i = 0; i < list.length; i++) {
                   list[i] = App.projectsManager.updateManifestToMeta(list[i]);
               }

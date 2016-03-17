@@ -359,7 +359,7 @@ function ProjectsManager(query, configurator) {
 
         backupTranslation: function (meta, filePath) {
             let paths = this.getPaths(meta),
-                name = 'uw-' + meta.fullname;
+                name = meta.unique_id;
 
             return new Promise(function(resolve, reject) {
                 let source = paths.projectDir,
@@ -589,7 +589,7 @@ function ProjectsManager(query, configurator) {
                 if (!relativePaths.length) {
                     throw 'The archive is empty or not supported';
                 }
-                let zip = new AdmZip(file.path);
+                let zip = new AdmZip(file);
                 let move = utils.promisify(null, utils.move);
                 return _.map(relativePaths, function(tpath) {
                     let outputDir = path.join(configurator.getValue('tempDir'), tpath);
@@ -600,6 +600,8 @@ function ProjectsManager(query, configurator) {
                 });
             }).then(function (list) {
                 return Promise.all(list);
+            }).then(function () {
+                return rm(configurator.getValue('tempDir'));
             });
         },
 

@@ -188,6 +188,11 @@ ipcMain.on('save-as', function (event, arg) {
     event.returnValue = input || false;
 });
 
+ipcMain.on('open-file', function (event, arg) {
+    var input = dialog.showOpenDialog(mainWindow, arg.options);
+    event.returnValue = input || false;
+});
+
 ipcMain.on('loading-status', function (event, status) {
     splashScreen && splashScreen.webContents.send('loading-status', status);
 });

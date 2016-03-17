@@ -33,7 +33,12 @@
                 _.forEach(manifest.target_translations, function(item) {
                     paths.push(item.path);
                 });
-                resolve(paths);
+
+                if (!paths.length) {
+                    reject('The archive is empty or not supported');
+                } else {
+                    resolve(paths);
+                }
             } catch (err) {
                 reject('failed to migrate tstudio archive: ' + err);
             }

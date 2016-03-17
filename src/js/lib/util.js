@@ -4,7 +4,7 @@
     'use strict';
 
     var diacritics = require('./diacritics'),
-        fs = require('fs'),
+        fs = require('fs-extra'),
         https = require('https'),
         http = require('http'),
         _ = require('lodash');
@@ -136,42 +136,6 @@
     }
 
     /**
-     * Moves a file/directory with a copy fallback
-     * http://stackoverflow.com/questions/8579055/how-i-move-files-on-node-js/29105404#29105404
-     * @param oldPath
-     * @param newPath
-     * @param callback
-     */
-    function move (oldPath, newPath, callback) {
-        fs.rename(oldPath, newPath, function (err) {
-            if (err) {
-                if (err.code === 'EXDEV' || err.code === 'EPERM') {
-                    copy();
-                } else {
-                    callback(err);
-                }
-                return;
-            }
-            callback();
-        });
-
-        function copy () {
-            var readStream = fs.createReadStream(oldPath);
-            var writeStream = fs.createWriteStream(newPath);
-
-            readStream.on('error', callback);
-            writeStream.on('error', callback);
-            readStream.on('close', function () {
-
-                fs.unlink(oldPath, callback);
-            });
-
-            readStream.pipe(writeStream);
-
-        }
-    }
-
-    /**
      * Performs a file download over https
      * @param url the url to download
      * @param dest the location where the file will be downloaded
@@ -205,6 +169,6 @@
     exports.guard = guard;
     exports.log = log;
     exports.logr = logr;
-    exports.move = move;
+    exports.move = promisify(fs, 'move');
 
 }());

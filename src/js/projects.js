@@ -394,20 +394,21 @@ function ProjectsManager(query, configurator) {
          * @param newPath: target backup directory
          */
         migrateBackup: function(oldPath, newPath) {
-            var tstudioFiles = [];
-            readdir(oldPath, function(err, files) {
-                if (err) { console.log(err); }
-                tstudioFiles = files.filter(function(f) {
+            return readdir(oldPath).then(function(files) {
+                return _.filter(files, function(f) {
                     // Only return files with .tstudio extensions
                     return f.split('.').pop() === 'tstudio';
                 });
-                tstudioFiles.forEach(function(f) {
-                    var oldFilePath = oldPath + path.sep + f;
-                    var newFilePath = newPath + path.sep + f;
-                    utils.move(oldFilePath, newFilePath, function(err) {
-                        if (err) { console.log(err); }
-                    });
+            })
+            .then(function (tstudioFiles) {
+                return _.map(tstudioFiles, function(f) {
+                    var oldFilePath = path.join(oldPath, f);
+                    var newFilePath = path.join(newPath, f);
+                    return utils.move(oldFilePath, newFilePath);
                 });
+            })
+            .then(function (moves) {
+                return Promise.all(moves);
             });
         },
 
@@ -581,28 +582,36 @@ function ProjectsManager(query, configurator) {
 
         /**
          * Imports a tstudio archive
-         * @param file {File} the path to the archive
-         * @returns {Promise.<boolean>}
+         * @param filePath {String} the path to the archive
+         * @returns {Promise}
          */
-        restoreTargetTranslation: function(file) {
-            return tstudioMigrator.listTargetTranslations(file).then(function(relativePaths) {
-                if (!relativePaths.length) {
-                    throw 'The archive is empty or not supported';
-                }
-                let zip = new AdmZip(file);
-                let move = utils.promisify(null, utils.move);
-                return _.map(relativePaths, function(tpath) {
-                    let outputDir = path.join(configurator.getValue('tempDir'), tpath);
-                    zip.extractAllTo(outputDir, true);
-                    let newpath = path.join(configurator.getValue('targetTranslationsDir'), tpath);
-                    return move(outputDir + "/" + tpath, newpath);
+        restoreTargetTranslation: function(filePath) {
+            let zip = new AdmZip(filepath),
+                tmpDir = configurator.getValue('tempDir'),
+                targetDir = configurator.getValue('targetTranslationsDir'),
+                basename = path.basename(filePath, '.tstudio'),
+                extractPath = path.join(tmpDir, basename);
 
+            return tstudioMigrator.listTargetTranslations(filePath)
+                .then(function(targetPaths) {
+                    // NOTE: this will eventually be async
+                    zip.extractAllTo(extractPath, true);
+                    return targetPaths;
+                })
+                .then(function (targetPaths) {
+                    return _.map(targetPaths, function(p) {
+                        let tmpPath = path.join(extractPath, p),
+                            targetPath = path.join(targetDir, p);
+
+                        return utils.move(tmpPath, targetPath);
+                    });
+                })
+                .then(function (list) {
+                    return Promise.all(list);
+                })
+                .then(function () {
+                    return rm(tmpDir);
                 });
-            }).then(function (list) {
-                return Promise.all(list);
-            }).then(function () {
-                return rm(configurator.getValue('tempDir'));
-            });
         },
 
         fileExists: function (file) {

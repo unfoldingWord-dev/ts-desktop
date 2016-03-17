@@ -5,6 +5,7 @@
     let _ = require('lodash'),
         path = require('path'),
         fs = require('fs'),
+        rimraf = require('rimraf'),
         utils = require('../../js/lib/util'),
         jsonfile = require('jsonfile');
     /**
@@ -80,18 +81,34 @@
     function v5(project) {
         let manifest = project.manifest;
         let paths = project.paths;
-
+        let oldname = paths.projectDir.substring(paths.projectDir.lastIndexOf("\\") + 1);
+        if (manifest.project.id === "tw") {
+            manifest.project.id = "bible";
+            manifest.project.name = "translationWords";
+        }
+        if (manifest.project.id === "ta") {
+            manifest.project.id = "vol1";
+            manifest.project.name = "translationAcademy Vol 1";
+        }
         let unique_id = manifest.target_language.id + "_" + manifest.project.id + "_" + manifest.type.id;
         if (manifest.resource.id !== "") {
             unique_id += "_" + manifest.resource.id;
         }
+        let newpath = path.join(paths.parentDir, unique_id);
+        let localstorageitems = ["-chapter", "-index", "-selected", "-completion", "-source"];
+        let backupDir = App.configurator.getUserPath('datalocation', 'automatic_backups');
+        let oldbackup = path.join(backupDir, oldname);
 
-        var newpath = path.join(paths.parentDir, unique_id);
-
+        rimraf.sync(oldbackup);
         fs.renameSync(paths.projectDir, newpath);
+
+        for (var i = 0; i < localstorageitems.length; i++) {
+            App.configurator.setValue(unique_id + localstorageitems[i], App.configurator.getValue(oldname + localstorageitems[i]));
+            App.configurator.unsetValue(oldname + localstorageitems[i]);
+        }
+
         paths.projectDir = newpath;
         paths.manifest = path.join(newpath, 'manifest.json');
-
 
         // update package version
         manifest.package_version = 6;

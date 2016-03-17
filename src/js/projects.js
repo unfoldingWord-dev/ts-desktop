@@ -585,40 +585,21 @@ function ProjectsManager(query, configurator) {
          * @returns {Promise.<boolean>}
          */
         restoreTargetTranslation: function(file) {
-            console.log('importing archive', file);
-            return new Promise(function(resolve, reject) {
-                tstudioMigrator.listTargetTranslations(file).then(function(relativePaths) {
-                    if(relativePaths.length > 0) {
-                        // proceed to import
-                        let zip = new AdmZip(file.path);
-                        _.forEach(relativePaths, function(tpath) {
-                            let outputDir = path.join(configurator.getValue('tempDir'), tpath);
-                            //zip.extractEntryTo(tpath + '/*', outputDir, false, true);
-                            zip.extractAllTo(outputDir, true);
-                             targetTranslationMigrator.migrate(outputDir + "/" + tpath).then(function() {
-                                // import the target translation
-                                // TODO: need to use the id not the path
-                                utils.move(outputDir + "/" + tpath, path.join(configurator.getValue('targetTranslationsDir'), tpath), function(err) {
-                                    if(err) {
-                                        console.log(err);
-                                    } else {
-                                        console.log('finished importing target translation');
-                                    }
-                                });
-                            })
-                            .catch(function(err) {
-                                console.log(err);
-                            });
-                        });
-                        console.log('finished importing');
-                        resolve(true);
-                    } else {
-                        reject('The archive is empty or not supported');
-                    }
-                })
-                .catch(function(err) {
-                    reject(err);
+            return tstudioMigrator.listTargetTranslations(file).then(function(relativePaths) {
+                if (!relativePaths.length) {
+                    throw 'The archive is empty or not supported';
+                }
+                let zip = new AdmZip(file.path);
+                let move = utils.promisify(null, utils.move);
+                return _.map(relativePaths, function(tpath) {
+                    let outputDir = path.join(configurator.getValue('tempDir'), tpath);
+                    zip.extractAllTo(outputDir, true);
+                    let newpath = path.join(configurator.getValue('targetTranslationsDir'), tpath);
+                    return move(outputDir + "/" + tpath, newpath);
+
                 });
+            }).then(function (list) {
+                return Promise.all(list);
             });
         },
 

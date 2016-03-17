@@ -102,8 +102,7 @@ function ProjectsManager(query, configurator) {
                     return {
                         parentDir: targetDir,
                         projectDir: projectDir,
-                        manifest: path.join(projectDir, 'manifest.json'),
-                        ready: path.join(projectDir, 'READY')
+                        manifest: path.join(projectDir, 'manifest.json')
                     };
 
                 }
@@ -351,12 +350,6 @@ function ProjectsManager(query, configurator) {
             return config.makeProjectPaths(meta);
         },
 
-        createReadyFile: function (meta) {
-            var paths = this.getPaths(meta);
-
-            return write(paths.ready, (new Date()).toString());
-        },
-
         backupTranslation: function (meta, filePath) {
             let paths = this.getPaths(meta),
                 name = meta.unique_id;
@@ -586,7 +579,7 @@ function ProjectsManager(query, configurator) {
          * @returns {Promise}
          */
         restoreTargetTranslation: function(filePath) {
-            let zip = new AdmZip(filepath),
+            let zip = new AdmZip(filePath),
                 tmpDir = configurator.getValue('tempDir'),
                 targetDir = configurator.getValue('targetTranslationsDir'),
                 basename = path.basename(filePath, '.tstudio'),
@@ -603,7 +596,7 @@ function ProjectsManager(query, configurator) {
                         let tmpPath = path.join(extractPath, p),
                             targetPath = path.join(targetDir, p);
 
-                        return utils.move(tmpPath, targetPath);
+                        return utils.move(tmpPath, targetPath, {clobber: true});
                     });
                 })
                 .then(function (list) {

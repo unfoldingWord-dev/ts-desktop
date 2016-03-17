@@ -305,7 +305,7 @@
                 <p><span>[[currentproject.data.project.name]]</span> - <span>[[currentproject.data.target_language.name]]</span></p>
             </div>
             <div>
-                <p><paper-checkbox id="imagebox"></paper-checkbox><span>Include images</span></p>
+                <p><paper-checkbox id="imagebox"></paper-checkbox><span id="imagetext">Include images</span></p>
                 <p><paper-checkbox id="chunkbox" checked="true"></paper-checkbox><span>Include incomplete chunks</span></p>
                  <p><paper-checkbox id="doublespacebox"></paper-checkbox><span>Double space text</span></p>
             </div>
@@ -1338,6 +1338,18 @@
             this.$.chunkbox.checked = true;
             this.$.imagebox.checked = false;
             this.$.doublespacebox.checked = false;
+            
+            var type = this.currentproject.data.resource.id;
+            if(type === 'reg')
+            {
+                this.$.imagebox.hidden = true;
+                this.$.imagetext.hidden = true;
+            }
+            else{
+                this.$.imagebox.hidden = false;
+                this.$.imagetext.hidden = false;
+            }
+            
             this.$.printpopup.open();
         },
 

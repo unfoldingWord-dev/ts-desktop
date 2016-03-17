@@ -73,7 +73,7 @@
     function promisify (module, fn) {
         var f = module ? module[fn] : fn;
 
-        return function (arg1, arg2) {
+        return function (arg1, arg2, arg3) {
             var args = (function () {
                 var narg = function (arg) { return typeof arg === 'undefined'; };
 
@@ -83,7 +83,10 @@
                 if (narg(arg2)) {
                     return [arg1];
                 }
-                return [arg1, arg2];
+                if (narg(arg3)) {
+                    return [arg1, arg2];
+                }
+                return [arg1, arg2, arg3];
             })();
 
             return new Promise(function (resolve, reject) {

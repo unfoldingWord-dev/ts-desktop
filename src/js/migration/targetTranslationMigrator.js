@@ -73,7 +73,9 @@
     }
 
     /**
-     * renaming the folder with new file naming convention
+     * renaming the folder with new file naming convention, remove ready file,
+     * update tw and ta id's, update local storage values to new naming, remove
+     * backups with old names
      * @param project {object}
      * @returns {object}
      */
@@ -98,7 +100,9 @@
         let localstorageitems = ["-chapter", "-index", "-selected", "-completion", "-source"];
         let backupDir = App.configurator.getUserPath('datalocation', 'automatic_backups');
         let oldbackup = path.join(backupDir, oldname);
+        let readyfile = path.join(paths.projectDir, 'READY');
 
+        rimraf.sync(readyfile);
         rimraf.sync(oldbackup);
         fs.renameSync(paths.projectDir, newpath);
 

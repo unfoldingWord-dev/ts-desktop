@@ -191,8 +191,6 @@
           <ts-terms accepted="{{accepted}}"></ts-terms>
       </template>
 
-      <input id="restore" class="hide" type="file" accept=".tstudio" />
-
       <paper-dialog id="feedback" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
           <div id="feedbackheader">
               <h2>Feedback</h2>
@@ -227,7 +225,7 @@
           </div>
       </paper-dialog>
 
-      <paper-dialog id="loading" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+      <paper-dialog id="loading" class="popup" modal="true" exit-animation="scale-down-animation">
           <template is="dom-if" if="{{options.loading}}">
               <p>{{options.body}}</p>
               <div id="bar">
@@ -378,36 +376,34 @@
       openrestore: function() {
           var mythis = this;
           var loading = this.$.loading;
-          var chooser = this.$.restore;
-          chooser.value = null;
-          chooser.addEventListener('change', function(evt) {
-              mythis.set('options.body', "Restoring.  Please wait...");
-              mythis.set('options.loading', true);
-              loading.open();
-              for(var i=0; i < this.files.length; i ++) {
-                  if(this.files[i].name.split('.').pop().toLowerCase() === 'tstudio') {
-                      App.projectsManager.restoreTargetTranslation(this.files[i])
-                          .then(function() {
-                              mythis.set('options.title', "Restore Complete");
-                              mythis.set('options.body', "Your project(s) has been successfully restored.  Thanks.");
-                              mythis.set('options.loading', false);
-                              setTimeout(function() {
-                                  mythis.updatelist();
-                              }, 250);
-                          })
-                          .catch(function(err) {
-                              var errmessage = "We're sorry.  An error occurred while trying to restore your project";
-                              if(err !== null) {
-                                  errmessage = err;
-                              }
-                              mythis.set('options.title', "Restore Failed");
-                              mythis.set('options.body', errmessage);
-                              mythis.set('options.loading', false);
-                          });
-                  }
-              }
-          }, false);
-          chooser.click();
+          var backupDir = App.configurator.getUserPath('datalocation', 'backups');
+
+          var filename = App.ipc.sendSync('open-file', {options: {defaultPath: backupDir, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}], properties: ['openFile']}});
+
+          mythis.set('options.body', "Restoring.  Please wait...");
+          mythis.set('options.loading', true);
+          loading.open();
+
+          setTimeout(function() {
+              App.projectsManager.restoreTargetTranslation(filename[0])
+                  .then(function() {
+                      mythis.set('options.title', "Restore Complete");
+                      mythis.set('options.body', "Your project(s) has been successfully restored.  Thanks.");
+                      mythis.set('options.loading', false);
+                      setTimeout(function() {
+                          mythis.updatelist();
+                      }, 250);
+                  })
+                  .catch(function(err) {
+                      var errmessage = "We're sorry.  An error occurred while trying to restore your project";
+                      if(err !== null) {
+                          errmessage = err;
+                      }
+                      mythis.set('options.title', "Restore Failed");
+                      mythis.set('options.body', errmessage);
+                      mythis.set('options.loading', false);
+                  });
+          }, 250);
       },
 
       openlogin: function () {

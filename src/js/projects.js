@@ -449,26 +449,23 @@ function ProjectsManager(query, configurator) {
          *
          * @param translation an array of frames
          * @param meta the target translation manifest and other info
-         * @param filename the path where the export will be saved
+         * @param filePath the path where the export will be saved
          * @param mediaServer is the location of the media files
          * @returns {Promise.<boolean>}
          */
-        exportTranslation: function (translation, meta, filename, mediaServer) {
-            // validate input
-            if(filename === null || filename === '') {
-                return Promise.reject('The filename is empty');
-            }
+        exportTranslation: function (translation, meta, filePath, mediaServer) {
+
             var isTranslation = this.isTranslation(meta);
 
             return new Promise(function(resolve, reject) {
-                if(isTranslation) {
+                if (isTranslation) {
 
-                    if(meta.format === 'markdown') {
+                    if (meta.format === 'markdown') {
 
                         let chapterContent = '',
                             currentChapter = -1,
                             zip = archiver.create('zip'),
-                            output = fs.createWriteStream(filename + ".zip"),
+                            output = fs.createWriteStream(filePath),
                             numFinishedFrames = 0;
                         zip.pipe(output);
                         for(let frame of translation) {
@@ -516,8 +513,7 @@ function ProjectsManager(query, configurator) {
                         }
                         zip.finalize();
                         resolve(true);
-                    }
-                    else if(meta.format === 'usfm'){
+                    } else if (meta.format === 'usfm') {
                          let
                             currentChapter = 1,
                             numFinishedFrames = 0,
@@ -552,7 +548,7 @@ function ProjectsManager(query, configurator) {
                             }
                         }
 
-                        fs.writeFile(filename + '.txt', new Buffer(chapterContent));
+                        fs.writeFile(filePath, new Buffer(chapterContent));
                         resolve(true);
                     } else {
                         reject("We do not support exporting this project format yet");
@@ -598,8 +594,8 @@ function ProjectsManager(query, configurator) {
                 });
         },
 
-        fileExists: function (file) {
-            return stat(file).then(function (){
+        fileExists: function (filePath) {
+            return stat(filePath).then(function (){
                 return true;
             }).catch(function () {
                 return false;

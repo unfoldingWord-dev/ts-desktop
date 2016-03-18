@@ -297,7 +297,7 @@
 
           mythis.set('options.body', "Creating Backup.  Please wait...");
           mythis.set('options.loading', true);
-          this.$.loading.open();
+          mythis.$.loading.open();
 
           setTimeout(function() {
               App.projectsManager.backupTranslation(data.meta, filePath)

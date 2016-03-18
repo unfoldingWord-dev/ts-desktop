@@ -284,7 +284,7 @@
             return App.projectsManager.exportTranslation(translation, meta, filename, mediaServer)
                 .then(function () {
                     mythis.set('options.title', "Project Exported");
-                    mythis.set('options.body', "Your project has been successfully saved to a file.  Thanks.");
+                    mythis.set('options.body', "Your project has been successfully exported to a file.  Thanks.");
                     mythis.set('options.loading', false);
                 })
                 .catch(function (err) {

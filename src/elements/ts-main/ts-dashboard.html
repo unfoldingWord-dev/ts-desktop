@@ -359,7 +359,7 @@
           return App.projectsManager.backupTranslation(meta, filePath)
               .then(function () {
                   mythis.set('options.title', "Backup Complete");
-                  mythis.set('options.body', "Your project has been successfully archived.  Thanks.");
+                  mythis.set('options.body', "Your project has been successfully backed up.  Thanks.");
                   mythis.set('options.loading', false);
               })
               .catch(function (err) {

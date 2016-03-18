@@ -184,7 +184,7 @@ ipcMain.on('openacademy', function (event, arg) {
 });
 
 ipcMain.on('save-as', function (event, arg) {
-    var input = dialog.showSaveDialog(mainWindow, {defaultPath: arg.name});
+    var input = dialog.showSaveDialog(mainWindow, arg.options);
     event.returnValue = input || false;
 });
 

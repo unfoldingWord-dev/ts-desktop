@@ -355,27 +355,22 @@ function ProjectsManager(query, configurator) {
                 name = meta.unique_id;
 
             return new Promise(function(resolve, reject) {
-                let source = paths.projectDir,
-                    backupName = filePath + '.tstudio',
-                    output = fs.createWriteStream(backupName),
+                let output = fs.createWriteStream(filePath),
                     archive = archiver.create('zip'),
-                    timestamp = new Date().getTime(),
                     manifest = {
                         generator: {
                             name: 'ts-desktop',
                             build: ''
                         },
                         package_version: 2,
-                        timestamp: timestamp,
+                        timestamp: new Date().getTime(),
                         target_translations: [{path: name, id: name, commit_hash: '', direction: "ltr"}]
                     };
-
                 archive.pipe(output);
-                archive.directory(source, name + "/");
+                archive.directory(paths.projectDir, name + "/");
                 archive.append(toJSON(manifest), {name: 'manifest.json'});
                 archive.finalize();
-
-                resolve(backupName);
+                resolve(filePath);
             });
         },
 
@@ -440,10 +435,8 @@ function ProjectsManager(query, configurator) {
                         return git.getHash(sourceDir);
                     })
                     .then(function(hash) {
-                        let fileName = hash + '.backup',
-                            filePath = path.join(targetDir, fileName);
-
-                        return filePath;
+                        let fileName = hash + '.backup.tstudio';
+                        return path.join(targetDir, fileName);
                     })
                     .then(doBackup)
                     .then(removeOtherFiles);

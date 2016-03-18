@@ -148,26 +148,6 @@
           color: var(--accent-color);
       }
 
-      #confirm {
-          width: 350px;
-          height: 175px;
-      }
-
-      #confirm p {
-          font-size: 110%;
-      }
-
-      #confirmbuttons {
-          display: flex;
-          justify-content: flex-end;
-          padding: 0 50px;
-          color: var(--secondary-text-color);
-      }
-
-      #confirmbuttons paper-button:hover {
-          color: var(--accent-color);
-      }
-
       .hide {
           display: none;
       }
@@ -243,17 +223,6 @@
           </template>
       </paper-dialog>
 
-      <paper-dialog id="confirm" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-          <h2>Overwrite?</h2>
-          <div>
-              <p>This file already exists. Overwrite?</p>
-          </div>
-          <div id="confirmbuttons">
-              <paper-button dialog-dismiss>No</paper-button>
-              <paper-button on-tap="executebackup">Confirm</paper-button>
-          </div>
-      </paper-dialog>
-
       <iron-signals on-iron-signal-updatelist="updatelist"></iron-signals>
       <iron-signals on-iron-signal-setdefault="setdefault"></iron-signals>
       <iron-signals on-iron-signal-openfeedback="openfeedback"></iron-signals>
@@ -307,10 +276,6 @@
           options: {
               type: Object,
               value: {loading: false, title: "", body: ""}
-          },
-          tempdata: {
-              type: Object,
-              value: {meta: {}, filename: ""}
           }
       },
 
@@ -324,68 +289,43 @@
 
       openbackup: function (event, data) {
           var mythis = this;
-          var meta = data.meta;
-          this.set('tempdata.meta', meta);
-          var name = meta.unique_id;
-          var confirm = this.$.confirm;
+          var defaultPath = App.configurator.getUserPath('datalocation', 'backups', data.meta.unique_id);
+          var filePath = App.ipc.sendSync('save-as', {options: {defaultPath: defaultPath, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}]}});
 
-          var backupPath = App.configurator.getUserPath('datalocation', 'backups', name);
-
-          var filename = App.ipc.sendSync('save-as', {name: backupPath});
-          this.set('tempdata.filename', filename);
-
-          return App.projectsManager.fileExists(filename + '.tstudio')
-              .then (function (stat) {
-                  if (stat) {
-                      confirm.open();
-                  } else if (filename) {
-                      mythis.executebackup();
-                  }
-              });
-      },
-
-      executebackup: function () {
-          var mythis = this;
-          var loading = this.$.loading;
-          var confirm = this.$.confirm;
-          var filePath = this.tempdata.filename;
-          var meta = this.tempdata.meta;
-
-          confirm.close();
           mythis.set('options.body', "Creating Backup.  Please wait...");
           mythis.set('options.loading', true);
-          loading.open();
+          this.$.loading.open();
 
-          return App.projectsManager.backupTranslation(meta, filePath)
-              .then(function () {
-                  mythis.set('options.title', "Backup Complete");
-                  mythis.set('options.body', "Your project has been successfully backed up.  Thanks.");
-                  mythis.set('options.loading', false);
-              })
-              .catch(function (err) {
-                  var errmessage = "We're sorry.  An error occurred while trying to backup your project";
-                  if(err !== null) {
-                      errmessage = err;
-                  }
-                  mythis.set('options.title', "Backup Failed");
-                  mythis.set('options.body', errmessage);
-                  mythis.set('options.loading', false);
-              });
+          setTimeout(function() {
+              App.projectsManager.backupTranslation(data.meta, filePath)
+                  .then(function () {
+                      mythis.set('options.title', "Backup Complete");
+                      mythis.set('options.body', "Your project has been successfully backed up.  Thanks.");
+                      mythis.set('options.loading', false);
+                  })
+                  .catch(function (err) {
+                      var errmessage = "We're sorry.  An error occurred while trying to backup your project";
+                      if(err !== null) {
+                          errmessage = err;
+                      }
+                      mythis.set('options.title', "Backup Failed");
+                      mythis.set('options.body', errmessage);
+                      mythis.set('options.loading', false);
+                  });
+          }, 500);
       },
 
       openrestore: function() {
           var mythis = this;
-          var loading = this.$.loading;
-          var backupDir = App.configurator.getUserPath('datalocation', 'backups');
-
-          var filename = App.ipc.sendSync('open-file', {options: {defaultPath: backupDir, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}], properties: ['openFile']}});
+          var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
+          var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}], properties: ['openFile']}});
 
           mythis.set('options.body', "Restoring.  Please wait...");
           mythis.set('options.loading', true);
-          loading.open();
+          this.$.loading.open();
 
           setTimeout(function() {
-              App.projectsManager.restoreTargetTranslation(filename[0])
+              App.projectsManager.restoreTargetTranslation(filePath[0])
                   .then(function() {
                       mythis.set('options.title', "Restore Complete");
                       mythis.set('options.body', "Your project(s) has been successfully restored.  Thanks.");
@@ -403,7 +343,7 @@
                       mythis.set('options.body', errmessage);
                       mythis.set('options.loading', false);
                   });
-          }, 250);
+          }, 500);
       },
 
       openlogin: function () {

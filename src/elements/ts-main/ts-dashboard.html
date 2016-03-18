@@ -291,6 +291,9 @@
           var mythis = this;
           var defaultPath = App.configurator.getUserPath('datalocation', 'backups', data.meta.unique_id);
           var filePath = App.ipc.sendSync('save-as', {options: {defaultPath: defaultPath, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}]}});
+          if (!filePath) {
+              return;
+          }
 
           mythis.set('options.body', "Creating Backup.  Please wait...");
           mythis.set('options.loading', true);
@@ -319,6 +322,9 @@
           var mythis = this;
           var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
           var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}], properties: ['openFile']}});
+          if (!filePath) {
+              return;
+          }
 
           mythis.set('options.body', "Restoring.  Please wait...");
           mythis.set('options.loading', true);

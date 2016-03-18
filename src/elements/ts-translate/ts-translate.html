@@ -220,26 +220,6 @@
             color: var(--accent-color);
         }
 
-        #confirm {
-            width: 350px;
-            height: 175px;
-        }
-
-        #confirm p {
-            font-size: 110%;
-        }
-
-        #confirmbuttons {
-            display: flex;
-            justify-content: flex-end;
-            padding: 0 50px;
-            color: var(--secondary-text-color);
-        }
-
-        #confirmbuttons paper-button:hover {
-            color: var(--accent-color);
-        }
-
     </style>
 
     <template>
@@ -350,17 +330,6 @@
                     <paper-button dialog-dismiss>Close</paper-button>
                 </div>
             </template>
-        </paper-dialog>
-
-        <paper-dialog id="confirm" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <h2>Overwrite?</h2>
-            <div>
-                <p>This file already exists. Overwrite?</p>
-            </div>
-            <div id="confirmbuttons">
-                <paper-button dialog-dismiss>No</paper-button>
-                <paper-button on-tap="executeprint">Confirm</paper-button>
-            </div>
         </paper-dialog>
 
         <iron-signals on-iron-signal-frompublish="frompublish"></iron-signals>
@@ -1363,59 +1332,43 @@
 
         print: function () {
             var mythis = this;
-            var name = this.currentproject.data.unique_id;
-            var confirm = this.$.confirm;
-
-            this.$.printpopup.close();
-            var filename = App.ipc.sendSync('save-as', {name: name});
-            App.configurator.setValue("print-filename", filename);
-
-            return App.projectsManager.fileExists(filename + ".pdf")
-                .then (function (stat) {
-                    if (stat) {
-                        confirm.open();
-                    } else if (filename) {
-                        mythis.executeprint();
-                    }
-                });
-        },
-
-        executeprint: function () {
-            var mythis = this;
-            var loading = this.$.loading;
             var meta = this.currentproject.data;
             var translation = this.currentproject.translation;
-            var filename = App.configurator.getValue("print-filename");
+            var name = this.currentproject.data.unique_id;
             var options = {includeIncompleteFrames: this.$.chunkbox.checked, includeImages: this.$.imagebox.checked, doubleSpace: this.$.doublespacebox.checked};
-            var confirm = this.$.confirm;
-
+            var filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'PDF Files', extensions: ['pdf']}]}});
+            if (!filePath) {
+                return;
+            }
             var generatePdf = function(){
                 mythis.set('options.body', "Creating PDF. Please wait...");
-                return App.printer.targetTranslationToPdf(translation, meta, filename, options)
-                    .then(function () {
-                        mythis.set('options.title', "PDF Created");
-                        mythis.set('options.body', "Your project has been successfully saved to a PDF.  Thanks.");
-                        mythis.set('options.loading', false);
-                    })
-                    .catch(function (err) {
-                        var errmessage = "We're sorry.  An error occurred while trying to save your project";
-                        if(err !== null) {
-                            errmessage = err;
-                        }
-                        mythis.set('options.title', "Print Failed");
-                        mythis.set('options.body', errmessage);
-                        mythis.set('options.loading', false);
-                    });
+                setTimeout(function() {
+                    App.printer.targetTranslationToPdf(translation, meta, filePath, options)
+                        .then(function () {
+                            mythis.set('options.title', "PDF Created");
+                            mythis.set('options.body', "Your project has been successfully saved to a PDF.  Thanks.");
+                            mythis.set('options.loading', false);
+                        })
+                        .catch(function (err) {
+                            var errmessage = "We're sorry.  An error occurred while trying to save your project";
+                            if(err !== null) {
+                                errmessage = err;
+                            }
+                            mythis.set('options.title', "Print Failed");
+                            mythis.set('options.body', errmessage);
+                            mythis.set('options.loading', false);
+                        });
+                }, 500);
             };
 
-            confirm.close();
+            this.$.printpopup.close();
             mythis.set('options.loading', true);
-            loading.open();
+            this.$.loading.open();
 
-            if(options.includeImages){
+            if (options.includeImages) {
                 mythis.set('options.body', "Downloading Images. Please wait...");
-                return App.printer.getImages(meta).then(function(){
-                    return generatePdf();
+                App.printer.getImages(meta).then(function(){
+                    generatePdf();
                 }).catch(function(err){
                     var message = "We're sorry.  An error occurred while trying to download images for this project";
                     if(err !== null) {
@@ -1426,7 +1379,7 @@
                     mythis.set('options.loading', false);
                 });
             } else {
-                return generatePdf();
+                generatePdf();
             }
         },
 

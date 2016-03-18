@@ -81,15 +81,12 @@ function Printer() {
          * Generates a pdf of the target translation
          * @param translation an array of frames
          * @param meta the target translation manifest and other info
-         * @param filename the path where the export will be saved
+         * @param filePath the path where the export will be saved
          * @param options {includeIncompleteFrames: boolean, includeImages: boolean, doubleSpace: boolean}
          * @returns {Promise.<boolean>}
          */
-        targetTranslationToPdf: function (translation, meta, filename, options) {
-            // validate input
-            if(filename === null || filename === '') {
-                return Promise.reject('The filename is empty');
-            }
+        targetTranslationToPdf: function (translation, meta, filePath, options) {
+
             let isTranslation = this.isTranslation(meta),
                 App = window.App,
                 imageRoot = path.join(App.configurator.getValue('rootdir'), "images"),
@@ -144,7 +141,7 @@ function Printer() {
                                 right: 72
                             }
                         });
-                        doc.pipe(fs.createWriteStream(filename + '.pdf'));
+                        doc.pipe(fs.createWriteStream(filePath));
 
                         // default meta
                         doc.info.Title = project.title.transcontent || meta.project.name;
@@ -268,7 +265,7 @@ function Printer() {
                                 right: 72
                             }
                         });
-                        doc.pipe(fs.createWriteStream(filename + '.pdf'));
+                        doc.pipe(fs.createWriteStream(filePath));
 
                         //set the title
                         doc.info.Title = translation[0].transcontent || meta.project.name;

@@ -375,8 +375,6 @@ function ProjectsManager(query, configurator) {
                 archive.append(toJSON(manifest), {name: 'manifest.json'});
                 archive.finalize();
 
-                console.info('Backed up ' + name + ' to', backupName);
-
                 resolve(backupName);
             });
         },

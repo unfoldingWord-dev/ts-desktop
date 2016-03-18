@@ -1338,18 +1338,14 @@
             this.$.chunkbox.checked = true;
             this.$.imagebox.checked = false;
             this.$.doublespacebox.checked = false;
-            
-            var type = this.currentproject.data.resource.id;
-            if(type === 'reg')
-            {
+            var project = this.currentproject.data.project.id;
+            if (project === 'obs') {
+                this.$.imagebox.hidden = false;
+                this.$.imagetext.hidden = false;
+            } else {
                 this.$.imagebox.hidden = true;
                 this.$.imagetext.hidden = true;
             }
-            else{
-                this.$.imagebox.hidden = false;
-                this.$.imagetext.hidden = false;
-            }
-            
             this.$.printpopup.open();
         },
 

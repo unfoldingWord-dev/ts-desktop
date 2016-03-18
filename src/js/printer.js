@@ -257,7 +257,7 @@ function Printer() {
 
                         doc.end();
                         resolve(true);
-                    } else if(project.format === 'usx'){
+                    } else if (project.format === 'usfm') {
 
                          let doc = new PDFDocument({
                             bufferPages: true,
@@ -306,11 +306,12 @@ function Printer() {
                                 doc.moveDown()
                                     .text("");
                             });
+                            doc.addPage();
                         });
 
                         // number pages
                         let range = doc.bufferedPageRange();
-                        for(let i = range.start; i < range.start + range.count; i ++) {
+                        for (let i = range.start; i < range.start + range.count; i ++) {
                             doc.switchToPage(i);
                             doc.fontSize(10)
                                 .text(i + 1, 72, doc.page.height - 50 - 12, {align: 'center'});

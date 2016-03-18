@@ -314,7 +314,7 @@
             <p>Loading project. Please wait...</p>
         </paper-dialog>
 
-        <paper-dialog id="loading" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+        <paper-dialog id="loading" class="popup" modal="true" exit-animation="scale-down-animation">
             <template is="dom-if" if="{{options.loading}}">
                 <p>{{options.body}}</p>
                 <div id="bar">
@@ -1361,9 +1361,9 @@
                 }, 500);
             };
 
-            this.$.printpopup.close();
+            mythis.$.printpopup.close();
             mythis.set('options.loading', true);
-            this.$.loading.open();
+            mythis.$.loading.open();
 
             if (options.includeImages) {
                 mythis.set('options.body', "Downloading Images. Please wait...");

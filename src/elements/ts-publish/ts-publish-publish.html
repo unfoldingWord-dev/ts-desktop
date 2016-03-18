@@ -75,26 +75,6 @@
             margin: auto;
         }
 
-        #confirm {
-            width: 350px;
-            height: 175px;
-        }
-
-        #confirm p {
-            font-size: 110%;
-        }
-
-        #confirmbuttons {
-            display: flex;
-            justify-content: flex-end;
-            padding: 0 50px;
-            color: var(--secondary-text-color);
-        }
-
-        #confirmbuttons paper-button:hover {
-            color: var(--accent-color);
-        }
-
         #loading {
             width: 320px;
             height: 220px;
@@ -172,7 +152,7 @@
             </div>
         </div>
 
-        <paper-dialog id="loading" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+        <paper-dialog id="loading" class="popup" modal="true" exit-animation="scale-down-animation">
             <template is="dom-if" if="{{options.loading}}">
                 <p>{{options.body}}</p>
                 <div id="bar">
@@ -188,17 +168,6 @@
                     <paper-button dialog-confirm on-tap="gohome">Return Home</paper-button>
                 </div>
             </template>
-        </paper-dialog>
-
-        <paper-dialog id="confirm" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <h2>Overwrite?</h2>
-            <div>
-                <p>This file already exists. Overwrite?</p>
-            </div>
-            <div id="confirmbuttons">
-                <paper-button dialog-dismiss>No</paper-button>
-                <paper-button on-tap="executeexport">Confirm</paper-button>
-            </div>
         </paper-dialog>
 
     </template>
@@ -246,56 +215,41 @@
         export: function () {
             var mythis = this;
             var meta = this.currentproject.data;
-            var extension = '.txt';
+            var translation = this.currentproject.translation;
+            var mediaServer = App.configurator.getUserSetting('mediaserver');
             var name = meta.unique_id;
-            var confirm = this.$.confirm;
+            var filePath;
 
-            if(meta.format === 'markdown'){
-                extension = '.zip';
+            if (meta.format === 'markdown') {
+                filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'Zip Files', extensions: ['zip']}]}});
+            } else {
+                filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'Text Files', extensions: ['txt']}]}});
+            }
+            if (!filePath) {
+                return;
             }
 
-            var filename = App.ipc.sendSync('save-as', {name: name});
-            App.configurator.setValue("export-filename", filename);
-
-            return App.projectsManager.fileExists(filename + extension)
-                .then (function (stat) {
-                    if (stat) {
-                        confirm.open();
-                    } else if (filename) {
-                        mythis.executeexport();
-                    }
-                });
-        },
-
-        executeexport: function () {
-            var mythis = this;
-            var loading = this.$.loading;
-            var translation = this.currentproject.translation;
-            var meta = this.currentproject.data;
-            var filename = App.configurator.getValue("export-filename");
-            var confirm = this.$.confirm;
-            var mediaServer = App.configurator.getUserSetting('mediaserver');
-
-            confirm.close();
             mythis.set('options.body', "Exporting Project.  Please wait...");
             mythis.set('options.loading', true);
-            loading.open();
+            mythis.$.loading.open();
 
-            return App.projectsManager.exportTranslation(translation, meta, filename, mediaServer)
-                .then(function () {
-                    mythis.set('options.title', "Project Exported");
-                    mythis.set('options.body', "Your project has been successfully exported to a file.  Thanks.");
-                    mythis.set('options.loading', false);
-                })
-                .catch(function (err) {
-                    var errmessage = "We're sorry.  An error occurred while trying to save your project";
-                    if(err !== null) {
-                        errmessage = err;
-                    }
-                    mythis.set('options.title', "Export Failed");
-                    mythis.set('options.body', errmessage);
-                    mythis.set('options.loading', false);
-                });
+            setTimeout(function() {
+                App.projectsManager.exportTranslation(translation, meta, filePath, mediaServer)
+                    .then(function () {
+                        mythis.set('options.title', "Project Exported");
+                        mythis.set('options.body', "Your project has been successfully exported to a file.  Thanks.");
+                        mythis.set('options.loading', false);
+                    })
+                    .catch(function (err) {
+                        var errmessage = "We're sorry.  An error occurred while trying to export your project";
+                        if(err !== null) {
+                            errmessage = err;
+                        }
+                        mythis.set('options.title', "Export Failed");
+                        mythis.set('options.body', errmessage);
+                        mythis.set('options.loading', false);
+                    });
+            }, 500);
         },
 
         upload: function() {

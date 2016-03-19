@@ -71,7 +71,7 @@
         "mainText": "Backup Location",
         "value": "~/translationStudio",
         "group": "advanced",
-        "enabled": false,
+        "enabled": true,
         "visible": true
     },
     {

@@ -380,22 +380,8 @@ function ProjectsManager(query, configurator) {
          * @param newPath: target backup directory
          */
         migrateBackup: function(oldPath, newPath) {
-            return readdir(oldPath).then(function(files) {
-                return _.filter(files, function(f) {
-                    // Only return files with .tstudio extensions
-                    return f.split('.').pop() === 'tstudio';
-                });
-            })
-            .then(function (tstudioFiles) {
-                return _.map(tstudioFiles, function(f) {
-                    var oldFilePath = path.join(oldPath, f);
-                    var newFilePath = path.join(newPath, f);
-                    return utils.move(oldFilePath, newFilePath);
-                });
-            })
-            .then(function (moves) {
-                return Promise.all(moves);
-            });
+            utils.move(path.join(oldPath, 'automatic_backups'), path.join(newPath, 'automatic_backups'), {clobber: true});
+            utils.move(path.join(oldPath, 'backups'), path.join(newPath, 'backups'), {clobber: true});
         },
 
         /*

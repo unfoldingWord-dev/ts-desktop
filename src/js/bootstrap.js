@@ -120,6 +120,10 @@ process.stdout.write = console.log.bind(console);
             this.window.close();
         },
 
+        showDevTools: function () {
+            require('remote').getCurrentWindow().toggleDevTools();
+        },
+
         uploader: new Uploader(DATA_PATH),
 
         util: util,

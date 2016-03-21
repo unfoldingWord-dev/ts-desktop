@@ -594,60 +594,64 @@ function ProjectsManager(query, configurator) {
 
         updateManifestToMeta: function (manifest) {
             var meta = manifest;
-            if (manifest.project.name === "") {
-                meta.project.name = this.getProjectName(manifest.project.id)[0].name;
+            try {
+                if (manifest.project.name === "") {
+                    meta.project.name = this.getProjectName(manifest.project.id)[0].name;
+                }
+
+                if (manifest.type.name === "" && manifest.type.id === "text") {
+                    meta.type.name = "Text";
+                }
+
+                for (var j = 0; j < manifest.source_translations.length; j++) {
+                    var details = this.getSourceDetails(manifest.project.id, manifest.source_translations[j].language_id, manifest.source_translations[j].resource_id)[0];
+                    meta.source_translations[j].project_id = details.project_id;
+                    meta.source_translations[j].id = details.id;
+                    meta.source_translations[j].language_name = details.language_name;
+                    meta.source_translations[j].resource_name = details.resource_name;
+                }
+
+                if (manifest.source_translations.length) {
+                    meta.currentsource = 0;
+                } else {
+                    meta.currentsource = null;
+                }
+
+                if (manifest.type.id === "tw" || manifest.type.id === "ta") {
+                    meta.project_type_class = "extant";
+                } else if (manifest.type.id === "tn" || manifest.type.id === "tq") {
+                    meta.project_type_class = "helps";
+                } else {
+                    meta.project_type_class = "standard";
+                }
+
+                meta.unique_id = manifest.target_language.id + "_" + manifest.project.id + "_" + manifest.type.id;
+                if (manifest.resource.id !== "") {
+                    meta.unique_id += "_" + manifest.resource.id;
+                }
+
+                var typeext = "";
+
+                if (meta.project_type_class === "extant") {
+                    typeext = "";
+                } else if (manifest.type.id !== "text") {
+                    typeext = "_" + manifest.type.id;
+                } else if (manifest.resource.id === "udb") {
+                    typeext = "_" + manifest.resource.id;
+                }
+
+                meta.fullname = manifest.project.id + typeext + "-" + manifest.target_language.id;
+
+                var completion = App.configurator.getValue(meta.unique_id + "-completion");
+                if (completion !== undefined && completion !== "") {
+                    meta.completion = completion;
+                } else {
+                    meta.completion = 0;
+                }
+            } catch (err) {
+                App.reporter.logError(err);
+                return null;
             }
-
-            if (manifest.type.name === "" && manifest.type.id === "text") {
-                meta.type.name = "Text";
-            }
-
-            for (var j = 0; j < manifest.source_translations.length; j++) {
-                var details = this.getSourceDetails(manifest.project.id, manifest.source_translations[j].language_id, manifest.source_translations[j].resource_id)[0];
-                meta.source_translations[j].project_id = details.project_id;
-                meta.source_translations[j].id = details.id;
-                meta.source_translations[j].language_name = details.language_name;
-                meta.source_translations[j].resource_name = details.resource_name;
-            }
-
-            if (manifest.source_translations.length) {
-                meta.currentsource = 0;
-            } else {
-                meta.currentsource = null;
-            }
-
-            if (manifest.type.id === "tw" || manifest.type.id === "ta") {
-                meta.project_type_class = "extant";
-            } else if (manifest.type.id === "tn" || manifest.type.id === "tq") {
-                meta.project_type_class = "helps";
-            } else {
-                meta.project_type_class = "standard";
-            }
-
-            meta.unique_id = manifest.target_language.id + "_" + manifest.project.id + "_" + manifest.type.id;
-            if (manifest.resource.id !== "") {
-                meta.unique_id += "_" + manifest.resource.id;
-            }
-
-            var typeext = "";
-
-            if (meta.project_type_class === "extant") {
-                typeext = "";
-            } else if (manifest.type.id !== "text") {
-                typeext = "_" + manifest.type.id;
-            } else if (manifest.resource.id === "udb") {
-                typeext = "_" + manifest.resource.id;
-            }
-
-            meta.fullname = manifest.project.id + typeext + "-" + manifest.target_language.id;
-
-            var completion = App.configurator.getValue(meta.unique_id + "-completion");
-            if (completion !== undefined  && completion !== "") {
-                meta.completion = completion;
-            } else {
-                meta.completion = 0;
-            }
-
             return meta;
         },
 

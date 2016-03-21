@@ -109,7 +109,7 @@
         },
 
         loginclass: function (active) {
-            return active ? 'hide' : 'hide';
+            return active ? 'hide' : '';
         },
 
         settings: function () {
@@ -122,7 +122,7 @@
         },
 
         login: function() {
-            this.fire('iron-signal', {name: 'openlogin'});
+            this.route = "login";
         },
 
         logout: function () {

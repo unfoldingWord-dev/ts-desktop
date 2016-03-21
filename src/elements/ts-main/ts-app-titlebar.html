@@ -83,7 +83,7 @@
 
         <header>
             <span class="title">translationStudio</span>
-            <span class$="[[loginclass(currentuser.active)]]">Logged in as: <span>{{currentuser.username}}</span><span class="link" on-tap="logout">(Logout)</span></span>
+            <span class$="[[loginclass(currentuser.active)]]">Current User: <span>{{currentuser.name}}</span> Status:<span class="link" on-tap="logout">(Logout)</span></span>
             <div class="window-buttons">
                 <button on-tap="minimizeWindow">
                     <iron-icon icon="titlebar:minimize" title="minimize"></iron-icon>

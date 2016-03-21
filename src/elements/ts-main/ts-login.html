@@ -1,0 +1,192 @@
+
+<link rel="import" href="../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/iron-input/iron-input.html">
+<link rel="import" href="../../components/iron-icons/notification-icons.html">
+
+<dom-module id="ts-login">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #header {
+            background-color: var(--primary-color);
+            min-height: 50px;
+        }
+
+        #heading {
+            font-size: 125%;
+            color: var(--reverse-text-color);
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 45px;
+        }
+
+        [icon="arrow-back"] {
+            margin: 0 1em 0 .2em;
+        }
+
+        #body {
+            overflow-y: auto;
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .optionbox {
+            background-color: var(--card-background-color);
+            display: flex;
+            flex-direction: column;
+            margin: 30px 30px 0;
+        }
+
+        .optionheader {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0 50px;
+        }
+
+        .optionbody {
+            display: flex;
+            flex-direction: column;
+            border-bottom: 1px solid var(--border-color);
+            border-top: 1px solid var(--border-color);
+            padding: 20px 50px;
+        }
+
+        .optionbuttons {
+            display: flex;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        input {
+            border: none;
+            font-size: 120%;
+            padding: 10px;
+            color: var(--secondary-text-color);
+        }
+
+        paper-button {
+            color: var(--secondary-text-color);
+        }
+
+        paper-button:hover {
+            color: var(--accent-color);
+        }
+
+        .hide {
+            display: none;
+        }
+
+    </style>
+
+    <template>
+
+        <div id="header">
+            <div id="heading">
+                <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
+                <span>User Profile</span>
+            </div>
+        </div>
+        <div id="body">
+            <div class="optionbox">
+                <div class="optionheader">
+                    <h2>Option 1 - Local Login - required to use the app</h2>
+                    <p>Enter your full name or pseudonym.  This name will be added to the contributor list of all projects you work on.  This name will be visible to others.</p>
+                </div>
+                <div class="optionbody">
+                    <input is="iron-input" bind-value="{{newinfo.name}}" placeholder="Full Name or Pseudonym">
+                </div>
+                <div class="optionbuttons">
+                    <paper-button on-tap="adduser">Ok</paper-button>
+                </div>
+            </div>
+            <div class="optionbox">
+                <div class="optionheader">
+                    <h2>Option 2 - Server Login - required to publish projects</h2>
+                    <p><iron-icon icon="notification:wifi"></iron-icon> This will use your internet connection</p>
+                </div>
+                <div class="optionbody">
+                    <input is="iron-input" bind-value="{{newinfo.loginname}}" placeholder="Username or Email" class$="[[loginclass(newinfo.login)]]">
+                    <input is="iron-input" bind-value="{{newinfo.username}}" placeholder="Username" class$="[[createclass(newinfo.login)]]">
+                    <input is="iron-input" bind-value="{{newinfo.email}}" placeholder="Email" class$="[[createclass(newinfo.login)]]">
+                    <input is="iron-input" bind-value="{{newinfo.name}}" placeholder="Full Name or Pseudonym" class$="[[createclass(newinfo.login)]]">
+                    <input is="iron-input" bind-value="{{newinfo.phone}}" placeholder="Phone" class$="[[createclass(newinfo.login)]]">
+                    <input is="iron-input" bind-value="{{newinfo.password}}" placeholder="Password" type="password">
+                    <input is="iron-input" bind-value="{{newinfo.password2}}" placeholder="Verify Password" type="password" class$="[[createclass(newinfo.login)]]">
+                </div>
+                <div class="optionbuttons">
+                    <paper-button on-tap="sendlogin" class$="[[loginclass(newinfo.login)]]">Login</paper-button>
+                    <paper-button on-tap="sendcreate">Create Account</paper-button>
+                </div>
+            </div>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-login',
+
+        behaviors: [
+            Polymer.NeonAnimatableBehavior
+        ],
+
+        properties: {
+            route: {
+                type: String,
+                notify: true
+            },
+            newinfo: {
+                type: Object,
+                value: {login: true}
+            },
+            animationConfig: {
+                value: function () {
+                    return {
+                        'entry': {
+                            name: 'slide-from-right-animation',
+                            node: this
+                        },
+                        'exit': {
+                            name: 'slide-right-animation',
+                            node: this
+                        }
+                    }
+                }
+            },
+            backto: {
+                type: String
+            }
+        },
+
+        loginclass: function (login) {
+            return login ? '' : 'hide';
+        },
+
+        createclass: function (login) {
+            return login ? 'hide' : '';
+        },
+
+        ready: function() {
+
+        },
+
+        back: function() {
+            this.route = this.backto;
+        }
+
+    });
+
+</script>

@@ -8,6 +8,7 @@
 <link rel="import" href="../../components/iron-icons/notification-icons.html">
 
 <link rel="import" href="./ts-app-titlebar.html">
+<link rel="import" href="./ts-login.html">
 <link rel="import" href="../ts-home/ts-home.html">
 <link rel="import" href="../ts-new/ts-new.html">
 <link rel="import" href="../ts-publish/ts-publish.html">
@@ -81,33 +82,6 @@
           color: var(--secondary-text-color);
       }
 
-      #login {
-          display: flex;
-          flex-direction: column;
-          width: 500px;
-          height: 450px;
-      }
-
-      #loginheader {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-      }
-
-      #loginbody {
-          display: flex;
-          flex-direction: column;
-          border-bottom: 1px solid var(--border-color);
-          border-top: 1px solid var(--border-color);
-          padding: 20px;
-      }
-
-      #loginbuttons {
-          display: flex;
-          justify-content: flex-end;
-          padding: 0 20px;
-      }
-
       #loading {
           width: 320px;
           height: 220px;
@@ -165,6 +139,7 @@
               <ts-translate data-route="translate" route="{{route}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" backto="{{backto}}"></ts-translate>
               <ts-publish data-route="publish" route="{{route}}" currentproject="{{currentproject}}"></ts-publish>
               <ts-settings data-route="settings" route="{{route}}" backto="[[backto]]"></ts-settings>
+              <ts-login data-route="login" route="{{route}}"></ts-login>
           </neon-animated-pages>
       </template>
       <template is="dom-if" if="{{!accepted}}">
@@ -182,26 +157,6 @@
           <div id="feedbackbuttons">
               <paper-button on-tap="closefeedback">Cancel</paper-button>
               <paper-button on-tap="sendfeedback">Confirm</paper-button>
-          </div>
-      </paper-dialog>
-
-      <paper-dialog id="login" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-          <div id="loginheader">
-              <h2>Login to Server</h2>
-              <p><iron-icon icon="notification:wifi"></iron-icon> This will use your internet connection</p>
-          </div>
-          <div id="loginbody">
-              <input is="iron-input" bind-value="{{newinfo.loginname}}" placeholder="Username or Email" class$="[[loginclass(newinfo.login)]]">
-              <input is="iron-input" bind-value="{{newinfo.username}}" placeholder="Username" class$="[[createclass(newinfo.login)]]">
-              <input is="iron-input" bind-value="{{newinfo.email}}" placeholder="Email" class$="[[createclass(newinfo.login)]]">
-              <input is="iron-input" bind-value="{{newinfo.phone}}" placeholder="Phone" class$="[[createclass(newinfo.login)]]">
-              <input is="iron-input" bind-value="{{newinfo.password}}" placeholder="Password" type="password">
-              <input is="iron-input" bind-value="{{newinfo.password2}}" placeholder="Verify Password" type="password" class$="[[createclass(newinfo.login)]]">
-          </div>
-          <div id="loginbuttons">
-              <paper-button on-tap="sendlogin" class$="[[loginclass(newinfo.login)]]">Login</paper-button>
-              <paper-button on-tap="sendcreate">Create Account</paper-button>
-              <paper-button dialog-dismiss>Cancel</paper-button>
           </div>
       </paper-dialog>
 
@@ -226,7 +181,6 @@
       <iron-signals on-iron-signal-updatelist="updatelist"></iron-signals>
       <iron-signals on-iron-signal-setdefault="setdefault"></iron-signals>
       <iron-signals on-iron-signal-openfeedback="openfeedback"></iron-signals>
-      <iron-signals on-iron-signal-openlogin="openlogin"></iron-signals>
       <iron-signals on-iron-signal-openrestore="openrestore"></iron-signals>
       <iron-signals on-iron-signal-openbackup="openbackup"></iron-signals>
 
@@ -277,14 +231,6 @@
               type: Object,
               value: {loading: false, title: "", body: ""}
           }
-      },
-
-      loginclass: function (login) {
-          return login ? '' : 'hide';
-      },
-
-      createclass: function (login) {
-          return login ? 'hide' : '';
       },
 
       openbackup: function (event, data) {
@@ -350,11 +296,6 @@
                       mythis.set('options.loading', false);
                   });
           }, 500);
-      },
-
-      openlogin: function () {
-          this.newinfo = {login: true};
-          this.$.login.open();
       },
 
       sendlogin: function () {

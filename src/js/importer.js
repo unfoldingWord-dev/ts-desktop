@@ -4,7 +4,8 @@
 
 var fs = require('fs'),
     path = require('path'),
-    request = require('request');
+    request = require('request'),
+    AdmZip = require('adm-zip');
 
 function Importer(configurator, pm) {
 
@@ -24,11 +25,20 @@ function Importer(configurator, pm) {
                 if (fileExt === "zip") {
                     self.getTxtFilesFromZip(file).then(function (files) {
                         console.log("got files", files);
-                        for (var i = 0; i < files.length; i++) {
-                            let txtFile = files[i];
-                            console.log("txt file", txtFile);
-                            self.importSingleUSFMFile(txtFile,translation);
+                        let txtFile = files[0];
+                        var promise = self.importSingleUSFMFile(txtFile,translation);
+                        for (var i = 1; i < files.length; i++) {
+                            txtFile = files[i];
+                            promise = promise.then(function(){
+                                return self.importSingleUSFMFile(txtFile,translation);
+                            });
                         }
+                        promise.then(function(){
+                            resolve();
+                        }).catch(function(e){
+                            console.log('Error', e.stack);
+                            reject('There was an error importing the translation');
+                        });;
                     });
                 } else {
                     console.log("running single file import");
@@ -60,7 +70,7 @@ function Importer(configurator, pm) {
             });
         },
 
-        /*getVerseChunkFileNames: function(projdata){
+        getVerseChunkFileNames: function(projdata){
             return new Promise(function(resolve,reject){
                 var book = projdata.project.id;
                 var chunkDescUrl = "https://api.unfoldingword.org/bible/txt/1/" + book + "/chunks.json";
@@ -70,16 +80,22 @@ function Importer(configurator, pm) {
                         var chunkDesc = JSON.parse(body);
                         for(var i = 0;i<chunkDesc.length;i++){
                             var chunk = chunkDesc[i],
-                                verses = [];
-                            if(typeof chunkDesc[i+1] !== 'undefined'){
-                                if(chunkDesc[i+1].chp === chunk.chp){
-                                    var lastVs = chunkDesc[i+1].firstvs - 1;
-                                    for(var v = parseInt(chunk.firstvs);v<=lastVs;v++){
-                                        verses.push(v);
-                                    }
+                                verses = [],
+                                nextChunkChapter = typeof chunkDesc[i + 1] !== 'undefined' ? chunkDesc[i + 1].chp : false;
+
+                            //if the next chunk exists and it's the same chapter as the current chunk...
+                            if (nextChunkChapter === chunk.chp) {
+                                var lastVs = chunkDesc[i + 1].firstvs - 1;
+                                for (var v = parseInt(chunk.firstvs); v <= lastVs; v++) {
+                                    verses.push(v);
                                 }
+
+                            //if it doesn't exist or it's not the same chapter as the current chunk, add 100 verses so we make sure to get everything being imported.
                             } else {
-                                verses.push(chunk.firstvs);
+                                var v = parseInt(chunk.firstvs), max = v + 100;
+                                for(v;v<max;v++){
+                                    verses.push(v);
+                                }
                             }
                             var chk = {
                                 filename: chunk.firstvs,
@@ -94,9 +110,9 @@ function Importer(configurator, pm) {
                     }
                 });
             });
-        },*/
+        },
 
-        getVerseChunkFileNames: function(projdata){
+        /*getVerseChunkFileNames: function(projdata){
             return new Promise(function(resolve,reject){
                 var frames = pm.getSourceFrames(projdata.source_translations[projdata.currentsource]);
                 var parsedFrames = [],
@@ -130,7 +146,7 @@ function Importer(configurator, pm) {
                 }
                 resolve(parsedFrames);
             });
-        },
+        },*/
 
         importSingleUSFMFile: function (usfmFile, projdata) {
             let self = this;

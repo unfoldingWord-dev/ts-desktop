@@ -186,6 +186,11 @@
                 "parent_draft": {}
             };
             var newprojectmeta = App.projectsManager.updateManifestToMeta(newprojectmanifest);
+            if(newprojectmeta === null) {
+                this.set('options', {title: "Unknown Error", body: "The project information is corrupt"});
+                popup.open();
+                return;
+            }
 
             for (var i = 0; i < projectarray.length; i++) {
                 if (projectarray[i].unique_id === newprojectmeta.unique_id) {

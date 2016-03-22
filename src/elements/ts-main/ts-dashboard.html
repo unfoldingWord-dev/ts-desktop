@@ -354,7 +354,8 @@
               for (var i = 0; i < list.length; i++) {
                   list[i] = App.projectsManager.updateManifestToMeta(list[i]);
               }
-              mythis.set('projectlist', list);
+              // TRICKY: remove invalid manifests (null)
+              mythis.set('projectlist', _.compact(list));
 
               App.ipc.send('loading-status', 'Checking Auto Backups...');
               App.projectsManager.backupProjects(mythis.projectlist);

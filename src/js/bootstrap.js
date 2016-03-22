@@ -33,7 +33,7 @@ process.stdout.write = console.log.bind(console);
     let Configurator = require('../js/configurator').Configurator;
 
     setMsg('Loading Git...');
-    let git = require('../js/git');
+    let Git = require('../js/git');
 
     setMsg('Loading Uploader...');
     let Uploader = require('../js/uploader').Uploader;
@@ -128,7 +128,9 @@ process.stdout.write = console.log.bind(console);
 
         util: util,
 
-        git: git,
+        git: Git({
+            token: configurator.getValue('gogs-token')
+        }),
 
         printer: printer,
 
@@ -144,7 +146,7 @@ process.stdout.write = console.log.bind(console);
 
         reporter: new Reporter({
             logPath: path.join(configurator.getValue('rootDir'), 'log.txt'),
-            oauthToken: configurator.getValue("github-oauth"),
+            oauthToken: configurator.getValue('github-oauth'),
             repoOwner: configurator.getValue('repoOwner'),
             repo: configurator.getValue('repo'),
             maxLogFileKb: configurator.getValue('maxLogFileKb'),

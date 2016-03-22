@@ -38,13 +38,14 @@
             flex: auto;
             display: flex;
             flex-direction: column;
+            align-items: center;
         }
 
         .optionbox {
-            background-color: var(--card-background-color);
             display: flex;
             flex-direction: column;
-            margin: 30px 30px 0;
+            margin: 30px 0;
+            width: 600px;
         }
 
         .optionheader {
@@ -52,20 +53,25 @@
             flex-direction: column;
             align-items: center;
             padding: 0 50px;
+            background-color: var(--card-background-color);
+        }
+
+        .optionheader p {
+            margin-top: 0;
         }
 
         .optionbody {
             display: flex;
             flex-direction: column;
-            border-bottom: 1px solid var(--border-color);
             border-top: 1px solid var(--border-color);
             padding: 20px 50px;
+            background-color: var(--card-background-color);
         }
 
         .optionbuttons {
             display: flex;
-            justify-content: center;
-            padding: 10px;
+            justify-content: flex-end;
+            padding: 20px;
         }
 
         input {
@@ -75,11 +81,17 @@
             color: var(--secondary-text-color);
         }
 
-        paper-button {
+        .fill {
+            background: var(--accent-color);
+            color: var(--reverse-text-color);
+            text-transform: uppercase;
+        }
+
+        .nofill {
             color: var(--secondary-text-color);
         }
 
-        paper-button:hover {
+        .nofill:hover {
             color: var(--accent-color);
         }
 
@@ -98,35 +110,50 @@
             </div>
         </div>
         <div id="body">
-            <div class="optionbox">
+            <div id="local" class="optionbox">
                 <div class="optionheader">
-                    <h2>Option 1 - Local Login - required to use the app</h2>
+                    <h2>Local Login</h2>
+                    <p>Required to use the app.</p>
                     <p>Enter your full name or pseudonym.  This name will be added to the contributor list of all projects you work on.  This name will be visible to others.</p>
                 </div>
                 <div class="optionbody">
                     <input is="iron-input" bind-value="{{newinfo.fullname}}" placeholder="Full Name or Pseudonym">
                 </div>
                 <div class="optionbuttons">
-                    <paper-button on-tap="adduser">Ok</paper-button>
+                    <paper-button class="nofill" on-tap="openserver">Login with Server Account</paper-button>
+                    <paper-button raised class="fill" on-tap="adduser">Ok</paper-button>
                 </div>
             </div>
-            <div class="optionbox">
+            <div id="server" class="optionbox hide">
                 <div class="optionheader">
-                    <h2>Option 2 - Server Login - required to publish projects</h2>
+                    <h2>Server Login</h2>
+                    <p>Required to publish projects.</p>
                     <p><iron-icon icon="notification:wifi"></iron-icon> This will use your internet connection</p>
                 </div>
                 <div class="optionbody">
-                    <input is="iron-input" bind-value="{{newinfo.loginname}}" placeholder="Username or Email" class$="[[loginclass(newinfo.login)]]">
-                    <input is="iron-input" bind-value="{{newinfo.username}}" placeholder="Username" class$="[[createclass(newinfo.login)]]">
-                    <input is="iron-input" bind-value="{{newinfo.email}}" placeholder="Email" class$="[[createclass(newinfo.login)]]">
-                    <input is="iron-input" bind-value="{{newinfo.fullname}}" placeholder="Full Name or Pseudonym" class$="[[createclass(newinfo.login)]]">
-                    <input is="iron-input" bind-value="{{newinfo.phone}}" placeholder="Phone" class$="[[createclass(newinfo.login)]]">
+                    <input is="iron-input" bind-value="{{newinfo.loginname}}" placeholder="Username or Email">
                     <input is="iron-input" bind-value="{{newinfo.password}}" placeholder="Password" type="password">
-                    <input is="iron-input" bind-value="{{newinfo.password2}}" placeholder="Verify Password" type="password" class$="[[createclass(newinfo.login)]]">
                 </div>
                 <div class="optionbuttons">
-                    <paper-button on-tap="sendlogin" class$="[[loginclass(newinfo.login)]]">Login</paper-button>
-                    <paper-button on-tap="sendcreate">Create Account</paper-button>
+                    <paper-button class="nofill" on-tap="opencreate">Create a New Account</paper-button>
+                    <paper-button raised class="fill" on-tap="sendlogin">Login</paper-button>
+                </div>
+            </div>
+            <div id="create" class="optionbox hide">
+                <div class="optionheader">
+                    <h2>Server Account Creation</h2>
+                    <p><iron-icon icon="notification:wifi"></iron-icon> This will use your internet connection</p>
+                </div>
+                <div class="optionbody">
+                    <input is="iron-input" bind-value="{{newinfo.username}}" placeholder="Username">
+                    <input is="iron-input" bind-value="{{newinfo.email}}" placeholder="Email">
+                    <input is="iron-input" bind-value="{{newinfo.fullname}}" placeholder="Full Name or Pseudonym">
+                    <input is="iron-input" bind-value="{{newinfo.phone}}" placeholder="Phone">
+                    <input is="iron-input" bind-value="{{newinfo.password}}" placeholder="Password" type="password">
+                    <input is="iron-input" bind-value="{{newinfo.password2}}" placeholder="Verify Password" type="password">
+                </div>
+                <div class="optionbuttons">
+                    <paper-button raised class="fill" on-tap="sendcreate">Submit</paper-button>
                 </div>
             </div>
         </div>
@@ -148,7 +175,7 @@
         properties: {
             newinfo: {
                 type: Object,
-                value: {login: true}
+                value: {}
             },
             route: {
                 type: String,
@@ -175,20 +202,23 @@
             }
         },
 
-        loginclass: function (login) {
-            return login ? '' : 'hide';
-        },
-
-        createclass: function (login) {
-            return login ? 'hide' : '';
-        },
-
         backclass: function (fullname) {
             return fullname ? '' : 'hide';
         },
 
+        openserver: function () {
+            this.$.server.classList.remove('hide');
+            this.$.local.classList.add('hide');
+        },
+
+        opencreate: function () {
+            this.$.create.classList.remove('hide');
+            this.$.server.classList.add('hide');
+        },
+
         adduser: function () {
             this.fire('iron-signal', {name: 'updateuser', data: {fullname: this.newinfo.fullname, token: false, accepted: false}});
+            this.newinfo = {};
         },
 
         sendlogin: function () {
@@ -197,12 +227,8 @@
         },
 
         sendcreate: function () {
-            if (this.newinfo.login) {
-                this.set('newinfo.login', false);
-            } else {
-                console.log("create sent");
-                //this.set('currentuser', {fullname: this.newinfo.fullname});
-            }
+            console.log("create sent");
+            //this.set('currentuser', {fullname: this.newinfo.fullname});
         },
 
         back: function() {

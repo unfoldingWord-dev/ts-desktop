@@ -224,7 +224,7 @@
 
     <template>
 
-        <ts-home-sidebar route="{{route}}" selected="{{selected}}" backto="{{backto}}" currentuser="{{currentuser}}"></ts-home-sidebar>
+        <ts-home-sidebar route="{{route}}" backto="{{backto}}"></ts-home-sidebar>
 
         <div id="main">
             <div id="header">
@@ -333,11 +333,6 @@
             currentinfo: {
                 type: Object,
                 value: {}
-            },
-            currentuser: {
-                type: Object,
-                value: {},
-                notify: true
             },
             projectlist: {
                 type: Array,

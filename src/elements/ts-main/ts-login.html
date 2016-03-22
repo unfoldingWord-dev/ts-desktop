@@ -102,7 +102,7 @@
                     <p>Enter your full name or pseudonym.  This name will be added to the contributor list of all projects you work on.  This name will be visible to others.</p>
                 </div>
                 <div class="optionbody">
-                    <input is="iron-input" bind-value="{{newinfo.name}}" placeholder="Full Name or Pseudonym">
+                    <input is="iron-input" bind-value="{{newinfo.fullname}}" placeholder="Full Name or Pseudonym">
                 </div>
                 <div class="optionbuttons">
                     <paper-button on-tap="adduser">Ok</paper-button>
@@ -117,7 +117,7 @@
                     <input is="iron-input" bind-value="{{newinfo.loginname}}" placeholder="Username or Email" class$="[[loginclass(newinfo.login)]]">
                     <input is="iron-input" bind-value="{{newinfo.username}}" placeholder="Username" class$="[[createclass(newinfo.login)]]">
                     <input is="iron-input" bind-value="{{newinfo.email}}" placeholder="Email" class$="[[createclass(newinfo.login)]]">
-                    <input is="iron-input" bind-value="{{newinfo.name}}" placeholder="Full Name or Pseudonym" class$="[[createclass(newinfo.login)]]">
+                    <input is="iron-input" bind-value="{{newinfo.fullname}}" placeholder="Full Name or Pseudonym" class$="[[createclass(newinfo.login)]]">
                     <input is="iron-input" bind-value="{{newinfo.phone}}" placeholder="Phone" class$="[[createclass(newinfo.login)]]">
                     <input is="iron-input" bind-value="{{newinfo.password}}" placeholder="Password" type="password">
                     <input is="iron-input" bind-value="{{newinfo.password2}}" placeholder="Verify Password" type="password" class$="[[createclass(newinfo.login)]]">
@@ -152,6 +152,11 @@
                 type: Object,
                 value: {login: true}
             },
+            currentuser: {
+                type: Object,
+                value: {},
+                notify: true
+            },
             animationConfig: {
                 value: function () {
                     return {
@@ -177,6 +182,27 @@
 
         createclass: function (login) {
             return login ? 'hide' : '';
+        },
+
+        adduser: function () {
+            this.set('currentuser', {local: true, server: false, fullname: this.newinfo.fullname});
+            this.set('route', 'home');
+        },
+
+        sendlogin: function () {
+            console.log("login sent");
+            this.set('currentuser', {local: true, server: true, fullname: this.newinfo.loginname});
+            this.set('route', 'home');
+        },
+
+        sendcreate: function () {
+            if (this.newinfo.login) {
+                this.set('newinfo.login', false);
+            } else {
+                console.log("create sent");
+                this.set('currentuser', {local: true, server: true, fullname: this.newinfo.fullname});
+                this.set('route', 'home');
+            }
         },
 
         ready: function() {

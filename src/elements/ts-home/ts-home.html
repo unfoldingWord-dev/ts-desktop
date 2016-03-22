@@ -224,7 +224,7 @@
 
     <template>
 
-        <ts-home-sidebar route="{{route}}" backto="{{backto}}"></ts-home-sidebar>
+        <ts-home-sidebar route="{{route}}"></ts-home-sidebar>
 
         <div id="main">
             <div id="header">
@@ -341,10 +341,6 @@
             locale: {
                 type: Object,
                 value: {}
-            },
-            backto: {
-                type: String,
-                notify: true
             },
             animationConfig: {
                 value: function () {

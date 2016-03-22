@@ -86,16 +86,11 @@
                 type: String,
                 value: '',
                 notify: true
-            },
-            backto: {
-                type: String,
-                value: '',
-                notify: true
             }
         },
 
         settings: function () {
-            this.backto = this.route;
+            App.configurator.setValue("backto", this.route);
             this.route = 'settings';
         },
 
@@ -104,6 +99,7 @@
         },
 
         login: function() {
+            App.configurator.setValue("backto", this.route);
             this.route = "login";
         },
 

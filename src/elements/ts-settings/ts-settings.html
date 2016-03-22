@@ -141,9 +141,6 @@
                     }
                 }
             },
-            backto: {
-                type: String
-            },
             settings: {
                 type: Array,
                 value: []
@@ -164,7 +161,7 @@
         },
 
         back: function() {
-            this.route = this.backto;
+            this.route = App.configurator.getValue("backto");
         },
 
         _isEnabled: function(bool) {

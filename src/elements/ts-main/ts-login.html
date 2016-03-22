@@ -24,11 +24,13 @@
             display: flex;
             justify-content: flex-start;
             align-items: center;
-            min-height: 45px;
+            min-height: 50px;
         }
 
-        [icon="arrow-back"] {
-            margin: 0 1em 0 .2em;
+        #button {
+            width: 60px;
+            display: flex;
+            justify-content: center;
         }
 
         #body {
@@ -91,7 +93,7 @@
 
         <div id="header">
             <div id="heading">
-                <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
+                <span id="button"><paper-icon-button class$="[[backclass(currentuser.fullname)]]" icon="arrow-back" title="Back" on-tap="back"></paper-icon-button></span>
                 <span>User Profile</span>
             </div>
         </div>
@@ -148,6 +150,15 @@
                 type: Object,
                 value: {login: true}
             },
+            route: {
+                type: String,
+                value: '',
+                notify: true
+            },
+            currentuser: {
+                type: Object,
+                value: {}
+            },
             animationConfig: {
                 value: function () {
                     return {
@@ -172,6 +183,10 @@
             return login ? 'hide' : '';
         },
 
+        backclass: function (fullname) {
+            return fullname ? '' : 'hide';
+        },
+
         adduser: function () {
             this.fire('iron-signal', {name: 'updateuser', data: {fullname: this.newinfo.fullname, token: false, accepted: false}});
         },
@@ -188,6 +203,10 @@
                 console.log("create sent");
                 //this.set('currentuser', {fullname: this.newinfo.fullname});
             }
+        },
+
+        back: function() {
+            this.route = App.configurator.getValue("backto");
         },
 
         ready: function() {

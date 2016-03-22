@@ -144,18 +144,9 @@
         ],
 
         properties: {
-            route: {
-                type: String,
-                notify: true
-            },
             newinfo: {
                 type: Object,
                 value: {login: true}
-            },
-            currentuser: {
-                type: Object,
-                value: {},
-                notify: true
             },
             animationConfig: {
                 value: function () {
@@ -170,9 +161,6 @@
                         }
                     }
                 }
-            },
-            backto: {
-                type: String
             }
         },
 
@@ -185,14 +173,12 @@
         },
 
         adduser: function () {
-            this.set('currentuser', {local: true, server: false, fullname: this.newinfo.fullname});
-            this.set('route', 'home');
+            this.fire('iron-signal', {name: 'updateuser', data: {fullname: this.newinfo.fullname, token: false, accepted: false}});
         },
 
         sendlogin: function () {
             console.log("login sent");
-            this.set('currentuser', {local: true, server: true, fullname: this.newinfo.loginname});
-            this.set('route', 'home');
+            //this.set('currentuser', {fullname: this.newinfo.loginname});
         },
 
         sendcreate: function () {
@@ -200,17 +186,12 @@
                 this.set('newinfo.login', false);
             } else {
                 console.log("create sent");
-                this.set('currentuser', {local: true, server: true, fullname: this.newinfo.fullname});
-                this.set('route', 'home');
+                //this.set('currentuser', {fullname: this.newinfo.fullname});
             }
         },
 
         ready: function() {
 
-        },
-
-        back: function() {
-            this.route = this.backto;
         }
 
     });

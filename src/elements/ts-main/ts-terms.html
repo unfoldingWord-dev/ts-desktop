@@ -126,17 +126,31 @@
     Polymer({
         is: 'ts-terms',
 
+        behaviors: [
+            Polymer.NeonAnimatableBehavior
+        ],
+
         properties: {
-            accepted: {
-                type: Boolean,
-                value: false,
-                notify: true
+            animationConfig: {
+                value: function () {
+                    return {
+                        'entry': {
+                            name: 'slide-from-left-animation',
+                            node: this
+                        },
+                        'exit': {
+                            name: 'slide-right-animation',
+                            node: this
+                        }
+                    }
+                }
             }
         },
 
         accept: function () {
-            this.accepted = true;
-            App.configurator.setValue("accepted", true);
+            var fullname = App.configurator.getValue("username");
+            var token = App.configurator.getValue("usertoken");
+            this.fire('iron-signal', {name: 'updateuser', data: {fullname: fullname, token: token, accepted: true}});
         },
 
         close: function () {

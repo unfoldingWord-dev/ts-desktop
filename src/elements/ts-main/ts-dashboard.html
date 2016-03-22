@@ -130,21 +130,16 @@
 
   <template>
 
-      <ts-app-titlebar currentuser="{{currentuser}}"></ts-app-titlebar>
-
-      <template is="dom-if" if="{{accepted}}">
-          <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
-              <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]" backto="{{backto}}" currentuser="{{currentuser}}"></ts-home>
-              <ts-new data-route="new" route="{{route}}" projectlist="[[projectlist]]"></ts-new>
-              <ts-translate data-route="translate" route="{{route}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" backto="{{backto}}"></ts-translate>
-              <ts-publish data-route="publish" route="{{route}}" currentproject="{{currentproject}}"></ts-publish>
-              <ts-settings data-route="settings" route="{{route}}" backto="[[backto]]"></ts-settings>
-              <ts-login data-route="login" route="{{route}}" currentuser="{{currentuser}}"></ts-login>
-          </neon-animated-pages>
-      </template>
-      <template is="dom-if" if="{{!accepted}}">
-          <ts-terms accepted="{{accepted}}"></ts-terms>
-      </template>
+      <ts-app-titlebar currentuser="[[currentuser]]"></ts-app-titlebar>
+      <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
+          <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]" backto="{{backto}}"></ts-home>
+          <ts-new data-route="new" route="{{route}}" projectlist="[[projectlist]]"></ts-new>
+          <ts-translate data-route="translate" route="{{route}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" backto="{{backto}}"></ts-translate>
+          <ts-publish data-route="publish" route="{{route}}" currentproject="{{currentproject}}"></ts-publish>
+          <ts-settings data-route="settings" route="{{route}}" backto="[[backto]]"></ts-settings>
+          <ts-login data-route="login"></ts-login>
+          <ts-terms data-route="terms"></ts-terms>
+      </neon-animated-pages>
 
       <paper-dialog id="feedback" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
           <div id="feedbackheader">
@@ -183,6 +178,7 @@
       <iron-signals on-iron-signal-openfeedback="openfeedback"></iron-signals>
       <iron-signals on-iron-signal-openrestore="openrestore"></iron-signals>
       <iron-signals on-iron-signal-openbackup="openbackup"></iron-signals>
+      <iron-signals on-iron-signal-updateuser="updateuser"></iron-signals>
 
   </template>
 
@@ -196,7 +192,7 @@
       properties: {
           route: {
               type: String,
-              value: 'home',
+              value: '',
               observer: '_routeChanged'
           },
           projectlist: {
@@ -206,10 +202,6 @@
           currentproject: {
               type: Object,
               value: {}
-          },
-          accepted: {
-              type: Boolean,
-              value: false
           },
           backto: {
             type: String,
@@ -229,12 +221,30 @@
           }
       },
 
-      observers: [
-          'gotologin(currentuser.local)'
-      ],
+      updateuser: function (event, data) {
+          App.configurator.setValue("username", data.fullname);
+          App.configurator.setValue("usertoken", data.token);
+          App.configurator.setValue("accepted", data.accepted);
+          this.retrieveuser();
+      },
 
-      gotologin: function (local) {
-          if (!local) {
+      retrieveuser: function () {
+          var user = {};
+          user.fullname = App.configurator.getValue("username");
+          user.token = App.configurator.getValue("usertoken");
+          user.accepted = App.configurator.getValue("accepted");
+          this.checkuser(user);
+      },
+
+      checkuser: function (user) {
+          this.set('currentuser', user);
+          if (user.fullname) {
+              if (user.accepted) {
+                  this.set('route', 'home');
+              } else {
+                  this.set('route', 'terms');
+              }
+          } else {
               this.set('route', 'login');
           }
       },
@@ -367,11 +377,8 @@
           App.ipc.send('loading-status', 'Loading Projects List...');
           this.updatelist();
           this.setdefault();
-          var accepted = App.configurator.getValue("accepted");
-          if (accepted) {
-              this.accepted = true;
-          }
-          this.set('currentuser', {local: false, server: false});
+          App.ipc.send('loading-status', 'Retrieving User Info...');
+          this.retrieveuser();
       }
 
   });

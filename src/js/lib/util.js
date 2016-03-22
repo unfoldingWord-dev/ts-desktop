@@ -90,9 +90,13 @@
             })();
 
             return new Promise(function (resolve, reject) {
-                f.apply(module, args.concat(function (err, data) {
-                    return err ? reject(err) : resolve(data);
-                }));
+                try {
+                    f.apply(module, args.concat(function (err, data) {
+                        return err ? reject(err) : resolve(data);
+                    }));
+                } catch (err) {
+                    reject(err);
+                }
             });
         };
     }

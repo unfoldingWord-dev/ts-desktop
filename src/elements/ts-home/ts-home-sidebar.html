@@ -61,8 +61,8 @@
         <paper-menu-button horizontal-offset="10" vertical-offset="10" vertical-align="bottom">
             <paper-icon-button class="dropdown-trigger" icon="more-vert" title="options"></paper-icon-button>
             <paper-menu class="dropdown-content">
-                <paper-item on-tap="login" class$="[[loginclass(currentuser.active)]]"><iron-icon class="smallicon" icon="perm-identity"></iron-icon>Login</paper-item>
-                <paper-item on-tap="logout" class$="[[logoutclass(currentuser.active)]]"><iron-icon class="smallicon" icon="perm-identity"></iron-icon>Logout</paper-item>
+                <paper-item on-tap="login" class$="[[loginclass(currentuser.server)]]"><iron-icon class="smallicon" icon="perm-identity"></iron-icon>Login</paper-item>
+                <paper-item on-tap="logout"><iron-icon class="smallicon" icon="perm-identity"></iron-icon>Logout</paper-item>
                 <paper-item class="hide"><iron-icon class="smallicon" icon="maps:local-library"></iron-icon>Update</paper-item>
                 <paper-item class="hide"><iron-icon class="smallicon" icon="file-download"></iron-icon>Import</paper-item>
                 <paper-item on-tap="restore"><iron-icon class="smallicon" icon="file-download"></iron-icon>Restore</paper-item>
@@ -104,10 +104,6 @@
             }
         },
 
-        logoutclass: function (active) {
-            return active ? '' : 'hide';
-        },
-
         loginclass: function (active) {
             return active ? 'hide' : '';
         },
@@ -126,7 +122,7 @@
         },
 
         logout: function () {
-            this.set('currentuser', {active: false});
+            this.set('currentuser', {local: false, server: false});
         },
 
         restore: function() {

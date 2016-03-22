@@ -139,7 +139,7 @@
               <ts-translate data-route="translate" route="{{route}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" backto="{{backto}}"></ts-translate>
               <ts-publish data-route="publish" route="{{route}}" currentproject="{{currentproject}}"></ts-publish>
               <ts-settings data-route="settings" route="{{route}}" backto="[[backto]]"></ts-settings>
-              <ts-login data-route="login" route="{{route}}"></ts-login>
+              <ts-login data-route="login" route="{{route}}" currentuser="{{currentuser}}"></ts-login>
           </neon-animated-pages>
       </template>
       <template is="dom-if" if="{{!accepted}}">
@@ -219,10 +219,6 @@
               type: String,
               value: ""
           },
-          newinfo: {
-              type: Object,
-              value: {login: true}
-          },
           currentuser: {
               type: Object,
               value: {}
@@ -230,6 +226,16 @@
           options: {
               type: Object,
               value: {loading: false, title: "", body: ""}
+          }
+      },
+
+      observers: [
+          'gotologin(currentuser.local)'
+      ],
+
+      gotologin: function (local) {
+          if (!local) {
+              this.set('route', 'login');
           }
       },
 
@@ -296,21 +302,6 @@
                       mythis.set('options.loading', false);
                   });
           }, 500);
-      },
-
-      sendlogin: function () {
-          console.log("login sent");
-          this.set('currentuser', {active: true, username: this.newinfo.loginname});
-          this.$.login.close();
-      },
-
-      sendcreate: function () {
-          if (this.newinfo.login) {
-              this.set('newinfo.login', false);
-          } else {
-              console.log("create sent");
-              this.$.login.close();
-          }
       },
 
       openfeedback: function () {
@@ -380,7 +371,7 @@
           if (accepted) {
               this.accepted = true;
           }
-          this.set('currentuser', {active: false});
+          this.set('currentuser', {local: false, server: false});
       }
 
   });

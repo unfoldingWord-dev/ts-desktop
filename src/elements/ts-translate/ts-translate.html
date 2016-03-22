@@ -401,11 +401,6 @@
                 type: Object,
                 value: {}
             },
-            backto: {
-                type: String,
-                value: "",
-                notify: true
-            },
             chapters: {
                 type: Object,
                 value: {}
@@ -1326,7 +1321,7 @@
         gosettings: function () {
             this.savestate();
             this.setleftanimation();
-            this.backto = this.route;
+            App.configurator.setValue("backto", this.route);
             this.route = "settings";
         },
 

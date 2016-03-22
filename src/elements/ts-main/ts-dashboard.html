@@ -132,12 +132,12 @@
 
       <ts-app-titlebar currentuser="[[currentuser]]"></ts-app-titlebar>
       <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
-          <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]" backto="{{backto}}"></ts-home>
+          <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]"></ts-home>
           <ts-new data-route="new" route="{{route}}" projectlist="[[projectlist]]"></ts-new>
-          <ts-translate data-route="translate" route="{{route}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" backto="{{backto}}"></ts-translate>
+          <ts-translate data-route="translate" route="{{route}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}"></ts-translate>
           <ts-publish data-route="publish" route="{{route}}" currentproject="{{currentproject}}"></ts-publish>
-          <ts-settings data-route="settings" route="{{route}}" backto="[[backto]]"></ts-settings>
-          <ts-login data-route="login"></ts-login>
+          <ts-settings data-route="settings" route="{{route}}"></ts-settings>
+          <ts-login data-route="login" route="{{route}}" currentuser="[[currentuser]]"></ts-login>
           <ts-terms data-route="terms"></ts-terms>
       </neon-animated-pages>
 
@@ -202,10 +202,6 @@
           currentproject: {
               type: Object,
               value: {}
-          },
-          backto: {
-            type: String,
-            value: ""
           },
           feedback: {
               type: String,

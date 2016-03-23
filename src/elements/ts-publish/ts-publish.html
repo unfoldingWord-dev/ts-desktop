@@ -122,7 +122,7 @@
             <ts-publish-book selected="{{selected}}" currentproject="[[currentproject]]"></ts-publish-book>
             <ts-publish-profile selected="{{selected}}" currentproject="{{currentproject}}"></ts-publish-profile>
             <ts-publish-review selected="{{selected}}" currentproject="[[currentproject]]"></ts-publish-review>
-            <ts-publish-publish route="{{route}}" selected="{{selected}}" currentproject="[[currentproject]]"></ts-publish-publish>
+            <ts-publish-publish route="{{route}}" selected="{{selected}}" currentproject="[[currentproject]]" currentuser="[[currentuser]]"></ts-publish-publish>
         </neon-animated-pages>
 
     </template>
@@ -158,6 +158,10 @@
                 type: Array,
                 value: [],
                 computed: 'createlist(selected)'
+            },
+            currentuser: {
+                type: Object,
+                value: {}
             },
             animationConfig: {
                 value: function () {

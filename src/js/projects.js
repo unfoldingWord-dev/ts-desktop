@@ -655,7 +655,7 @@ function ProjectsManager(query, configurator) {
             return meta;
         },
 
-        saveTargetTranslation: function (translation, meta) {
+        saveTargetTranslation: function (translation, meta, user) {
             var paths = this.getPaths(meta);
 
             // translation is an array
@@ -743,7 +743,7 @@ function ProjectsManager(query, configurator) {
                     return git.init(paths.projectDir);
                 })
                 .then(function () {
-                    return git.stage(paths.projectDir);
+                    return git.stage(user, paths.projectDir);
                 });
         },
 

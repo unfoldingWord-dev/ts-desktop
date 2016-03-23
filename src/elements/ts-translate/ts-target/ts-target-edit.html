@@ -111,6 +111,10 @@
             'rendertext(chunk.*)'
         ],
 
+        focustextbox: function () {
+            this.$.textbox.textarea.focus();
+        },
+
         rendertext: function () {
             if(this.chunk && this.chunk.srccontent) {
                 var completed = this.chunk.completed;

@@ -51,8 +51,8 @@
         <div class$="[[standardclass(chunk.data.project_type_class)]]">
             <ts-source-chunk class="left" reviewmode chunk="[[chunk]]"></ts-source-chunk>
             <div class="middle">
-                <ts-target-review class$="[[reviewclass(chunk.state.review)]]" chunk="{{chunk}}" on-setheight="setheight"></ts-target-review>
-                <ts-target-edit class$="[[editclass(chunk.state.review)]]" chunk="{{chunk}}" on-setheight="setheight"></ts-target-edit>
+                <ts-target-review class$="[[reviewclass(chunk.state.review)]]" chunk="{{chunk}}" on-setheight="setheight" on-edit="focustextbox"></ts-target-review>
+                <ts-target-edit id="targetedit" class$="[[editclass(chunk.state.review)]]" chunk="{{chunk}}" on-setheight="setheight"></ts-target-edit>
             </div>
             <ts-resource-card class="right" chunk="[[chunk]]" on-setheight="setheight"></ts-resource-card>
         </div>
@@ -115,6 +115,10 @@
 
         setheight: function () {
             this.fire('updateheight');
+        },
+
+        focustextbox: function () {
+            this.$.targetedit.focustextbox();
         },
 
 		ready: function() {

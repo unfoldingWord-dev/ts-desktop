@@ -219,23 +219,18 @@
       },
 
       updateuser: function (event, data) {
-          App.configurator.setValue("username", data.fullname);
-          App.configurator.setValue("usertoken", data.token);
-          App.configurator.setValue("accepted", data.accepted);
-          this.retrieveuser();
+          App.configurator.setValue("userdata", data);
+          this.checkuser(data);
       },
 
       retrieveuser: function () {
-          var user = {};
-          user.fullname = App.configurator.getValue("username");
-          user.token = App.configurator.getValue("usertoken");
-          user.accepted = App.configurator.getValue("accepted");
+          var user = App.configurator.getValue("userdata");
           this.checkuser(user);
       },
 
       checkuser: function (user) {
           this.set('currentuser', user);
-          if (user.fullname) {
+          if (user.full_name) {
               if (user.accepted) {
                   this.set('route', 'home');
               } else {

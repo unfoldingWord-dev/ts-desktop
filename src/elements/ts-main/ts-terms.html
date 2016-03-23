@@ -148,9 +148,9 @@
         },
 
         accept: function () {
-            var fullname = App.configurator.getValue("username");
-            var token = App.configurator.getValue("usertoken");
-            this.fire('iron-signal', {name: 'updateuser', data: {fullname: fullname, token: token, accepted: true}});
+            var user = App.configurator.getValue("userdata");
+            user.accepted = true;
+            this.fire('iron-signal', {name: 'updateuser', data: user});
         },
 
         close: function () {

@@ -694,7 +694,7 @@
         },
 
         addcontributor: function () {
-            var user = this.currentuser.fullname;
+            var user = this.currentuser.full_name;
             var array = this.currentproject.data.translators;
             if (array.indexOf(user) === -1) {
                 this.push('currentproject.data.translators', user);

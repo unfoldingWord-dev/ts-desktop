@@ -53,7 +53,7 @@
                 return;
             }
             key = key.toLowerCase();
-            value = typeof value === 'boolean' || typeof value === 'number' ? value : value.toString();
+            value = (typeof value === 'boolean' || typeof value === 'number' || typeof value === 'object') ? value : value.toString();
 
             //return if read-only
             let mutable = getMetaValue(key, 'mutable');

@@ -29,9 +29,9 @@ function GitInterface(auth) {
             });
         },
 
-        login: function (username, password) {
-            return api.getUser({ username, password }, auth).then(function (user) {
-                return api.listTokens(_.merge({ password }, user))
+        login: function (userObj) {
+            return api.getUser(userObj, auth).then(function (user) {
+                return api.listTokens(_.merge({ password:  userObj.password }, user))
                     .then(function (tokens) {
                         return _.find(tokens, tokenStub);
                     })

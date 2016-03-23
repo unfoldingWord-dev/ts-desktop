@@ -195,6 +195,10 @@
                 type: Object,
                 value: {}
             },
+            currentuser: {
+                type: Object,
+                value: {}
+            },
             options: {
                 type: Object,
                 value: {loading: false, title: "", body: ""}
@@ -263,7 +267,7 @@
             this.set('options.loading', true);
             loading.open();
 
-            return App.git.stage(paths.projectDir)
+            return App.git.stage(this.currentuser, paths.projectDir)
                 .then(function () {
                     return App.uploader.register({
                         'host': App.configurator.getUserSetting('authserver'),

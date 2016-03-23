@@ -147,6 +147,10 @@
                 type: Array,
                 value: []
             },
+            currentuser: {
+                type: Object,
+                value: {}
+            },
             animationConfig: {
                 value: function () {
                     return {
@@ -207,7 +211,7 @@
             }
 
             this.animationConfig.exit.name = 'slide-left-animation';
-            App.projectsManager.saveTargetTranslation([], newprojectmeta).then(function() {
+            App.projectsManager.saveTargetTranslation([], newprojectmeta, this.currentuser).then(function() {
                 mythis.fire('iron-signal', {name: 'updatelist'});
                 mythis.fire('iron-signal', {name: 'loadproject', data: {projdata: newprojectmeta, type: "new"}});
                 mythis.selected = 0;

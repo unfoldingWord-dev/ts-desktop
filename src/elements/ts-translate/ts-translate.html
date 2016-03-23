@@ -688,7 +688,7 @@
 
         savetofile: function () {
             var mythis = this;
-            App.projectsManager.saveTargetTranslation(this.currentproject.translation, this.currentproject.data).then(function() {
+            App.projectsManager.saveTargetTranslation(this.currentproject.translation, this.currentproject.data, this.currentuser).then(function() {
                 mythis.fire('iron-signal', {name: 'updatelist'});
             });
         },

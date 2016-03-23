@@ -120,7 +120,7 @@
                     <input is="iron-input" bind-value="{{newinfo.fullname}}" placeholder="Full Name or Pseudonym">
                 </div>
                 <div class="optionbuttons">
-                    <paper-button class="hide nofill" on-tap="openserver">Login with Server Account</paper-button>
+                    <paper-button class="nofill" on-tap="openserver">Login with Server Account</paper-button>
                     <paper-button raised class="fill" on-tap="adduser">Ok</paper-button>
                 </div>
             </div>
@@ -131,7 +131,7 @@
                     <p><iron-icon icon="notification:wifi"></iron-icon> This will use your internet connection</p>
                 </div>
                 <div class="optionbody">
-                    <input is="iron-input" bind-value="{{newinfo.loginname}}" placeholder="Username or Email">
+                    <input is="iron-input" bind-value="{{newinfo.username}}" placeholder="Username">
                     <input is="iron-input" bind-value="{{newinfo.password}}" placeholder="Password" type="password">
                 </div>
                 <div class="optionbuttons">
@@ -147,8 +147,7 @@
                 <div class="optionbody">
                     <input is="iron-input" bind-value="{{newinfo.username}}" placeholder="Username">
                     <input is="iron-input" bind-value="{{newinfo.email}}" placeholder="Email">
-                    <input is="iron-input" bind-value="{{newinfo.fullname}}" placeholder="Full Name or Pseudonym">
-                    <input is="iron-input" bind-value="{{newinfo.phone}}" placeholder="Phone">
+                    <input is="iron-input" bind-value="{{newinfo.full_name}}" placeholder="Full Name or Pseudonym">
                     <input is="iron-input" bind-value="{{newinfo.password}}" placeholder="Password" type="password">
                     <input is="iron-input" bind-value="{{newinfo.password2}}" placeholder="Verify Password" type="password">
                 </div>
@@ -222,13 +221,29 @@
         },
 
         sendlogin: function () {
-            console.log("login sent");
-            //this.set('currentuser', {fullname: this.newinfo.loginname});
+            var mythis = this;
+            var user = this.newinfo;
+
+            App.git.login(user).then(function (user) {
+                console.log(user);
+                mythis.fire('iron-signal', {name: 'updateuser', data: {fullname: user.username, token: user.token, accepted: false}});
+            }).catch(function (err) {
+                console.log(err);
+            });
         },
 
         sendcreate: function () {
-            console.log("create sent");
-            //this.set('currentuser', {fullname: this.newinfo.fullname});
+            var mythis = this;
+            var user = this.newinfo;
+
+            App.git.createAccount(user).then(function (user) {
+                console.log(user);
+                mythis.fire('iron-signal', {name: 'updateuser', data: {fullname: user.username, token: user.token, accepted: false}});
+            }).catch(function (err) {
+                console.log(err);
+            });
+
+
         },
 
         back: function() {

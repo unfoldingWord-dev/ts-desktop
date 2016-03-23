@@ -706,7 +706,6 @@
             var array = this.currentproject.data.translators;
             if (array.indexOf(user) === -1) {
                 this.push('currentproject.data.translators', user);
-                this.savetofile();
             }
         },
 
@@ -1317,7 +1316,7 @@
             if(this.currentproject.data.source_translations.length || typeclass === "extant") {
                 this.savestate();
                 this.setleftanimation();
-                this.addcontributor();
+                this.updatetranslation();
                 this.fire('iron-signal', {name: 'updatepublish'});
                 this.route = "publish";
             }

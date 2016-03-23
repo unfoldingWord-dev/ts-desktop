@@ -262,12 +262,13 @@
             var meta = this.currentproject.data;
             var paths = App.projectsManager.getPaths(meta);
             var repo = meta.unique_id;
+            var user = this.currentuser;
 
             this.set('options.body', "Uploading Project.  Please wait...");
             this.set('options.loading', true);
             loading.open();
 
-            return App.git.stage(this.currentuser, paths.projectDir)
+            return App.git.stage(user, paths.projectDir)
                 .then(function () {
                     return App.uploader.register({
                         'host': App.configurator.getUserSetting('authserver'),
@@ -275,7 +276,8 @@
                     });
                 })
                 .then(function (reg) {
-                    return App.git.push(paths.projectDir, repo, reg, {
+                    user.reg = reg;
+                    return App.git.push(user, paths.projectDir, repo, {
                         'host': App.configurator.getUserSetting('dataserver'),
                         'port': App.configurator.getUserSetting('dataserverport')
                     });

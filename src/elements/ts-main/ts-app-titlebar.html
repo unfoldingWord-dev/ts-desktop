@@ -120,6 +120,8 @@
 
         logout: function () {
             this.fire('iron-signal', {name: 'updateuser', data: {}});
+            this.fire('iron-signal', {name: 'setdefault'});
+            this.fire('iron-signal', {name: 'reset'});
         },
 
         minimizeWindow: function() {

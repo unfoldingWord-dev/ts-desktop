@@ -220,6 +220,10 @@
             color: var(--accent-color);
         }
 
+        .nodisplay {
+            display: none;
+        }
+
     </style>
 
     <template>
@@ -237,7 +241,7 @@
             <h2>Chunk Checklist</h2>
             <div>
                 <p id="spaced">Are you sure you're Done with this chunk?</p>
-                <p>I have placed the verses correctly</p>
+                <p class$="[[versecheck(currentproject.data)]]">I have placed the verses correctly</p>
                 <p>I have reviewed the words and meanings</p>
                 <p>I have reviewed the translationQuestions</p>
             </div>
@@ -429,6 +433,10 @@
                     }
                 }
             }
+        },
+
+        versecheck: function (data) {
+            return data && data.project.id === "obs" ? 'nodisplay' : '';
         },
 
         opennodata: function () {

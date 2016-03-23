@@ -9,8 +9,10 @@ let assert = require('assert');
 let ProjectsManager = require('../../src/js/projects').ProjectsManager;
 let Importer = require('../../src/js/importer').Importer;
 let Db = require('../../src/js/lib/db').Db;
+let mkdirp = require('mkdirp');
 
-let targetDir = path.resolve('./unit_tests/importer/data');
+let targetDir = path.resolve('./unit_tests/importer/data/tmp/projects');
+let tempDir = path.resolve('./unit_tests/importer/data/tmp');
 
 let translation = {
     "package_version": 5,
@@ -61,7 +63,8 @@ let translation = {
 let config = {
     getValue: function (k) {
         let i = {
-            'targetTranslationsDir': targetDir
+            'targetTranslationsDir': targetDir,
+            'tempDir': tempDir
         };
         return i[k];
     }
@@ -70,7 +73,8 @@ let config = {
 var p = path.resolve('.'),
     schemaPath = path.join(p,'src','config','schema.sql'),
     dbPath = path.join(p,'src','index','index.sqlite'),
-    tempProjPath = path.join(p, 'unit_tests', 'importer', 'data', 'uw-mat-es'),
+    tempProjPath = path.join(p, 'unit_tests', 'importer', 'data', 'tmp' , 'projects', 'uw-mat-es'),
+    projTemplatePath = path.join(p, 'unit_tests', 'importer', 'data', '_template', 'manifest.json'),
     expectedFile = path.join(tempProjPath, '28', '18.txt');
 
 let db = new Db(schemaPath, dbPath);
@@ -79,27 +83,45 @@ let pm = new ProjectsManager(db, config);
 describe('@Importer', function () {
 
     describe('@UsfmImport', function () {
-        it('should import a sample ufsm file', function (done) {
+        it('should import a sample ufsm text file', function (done) {
             rimraf.sync(tempProjPath, fs);
+            mkdirp.sync(tempProjPath);
+            fs.createReadStream(projTemplatePath).pipe(fs.createWriteStream(tempProjPath + '/manifest.json'));
 
             var file = {
                 name: "matthew.usfm",
                 path: path.resolve('unit_tests/importer/data/matthew.usfm')
             };
-            try{
-                let importer = new Importer(config,pm);
+            let importer = new Importer(config,pm);
+            importer.importUSFMFile(file,translation).then(function(){
+                var data = fs.readFileSync(expectedFile, {encoding: 'utf-8'});
+                assert.equal(data, '\\v18 Jesus veio para eles e falou, "Toda autoridade foi dada para mim no céu e na terra. \\v19 Por isso vão e façam discípulos de todas as nações. Batize-os no nome do Pai, do Filho e do Espírito Santo.    ');
 
-                importer.importUSFMFile(file,translation).then(function(){
-                    var data = fs.readFileSync(expectedFile, {encoding: 'utf-8'});
-                    assert.equal(data, '\\v18 Jesus veio para eles e falou, "Toda autoridade foi dada para mim no céu e na terra. \\v19 Por isso vão e façam discípulos de todas as nações. Batize-os no nome do Pai, do Filho e do Espírito Santo.    ');
+                done();
+            }).catch(function(e){
+                console.log('there was an error', e);
+            });
 
-                    done();
-                }).catch(function(e){
-                    console.log('there was an error', e);
-                });
-            } catch( e ){
-                console.log(e.stack);
-            }
+        });
+
+        it('should import a sample ufsm zip file', function (done) {
+            rimraf.sync(tempProjPath, fs);
+            mkdirp.sync(tempProjPath);
+            fs.createReadStream(projTemplatePath).pipe(fs.createWriteStream(tempProjPath + '/manifest.json'));
+
+            var file = {
+                name: "matthew.zip",
+                path: path.resolve('unit_tests/importer/data/matthew.zip')
+            };
+            let importer = new Importer(config,pm);
+            importer.importUSFMFile(file,translation).then(function(){
+                var data = fs.readFileSync(expectedFile, {encoding: 'utf-8'});
+                assert.equal(data, '\\v18 Jesus veio para eles e falou, "Toda autoridade foi dada para mim no céu e na terra. \\v19 Por isso vão e façam discípulos de todas as nações. Batize-os no nome do Pai, do Filho e do Espírito Santo.    ');
+
+                done();
+            }).catch(function(e){
+                console.log('there was an error', e);
+            });
 
         });
 

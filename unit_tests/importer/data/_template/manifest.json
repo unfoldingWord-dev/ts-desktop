@@ -1,0 +1,37 @@
+{
+    "package_version": 5,
+    "format": "usfm",
+    "generator": {
+        "name": "ts-desktop",
+        "build": ""
+    },
+    "target_language": {
+        "id": "es",
+        "name": "español",
+        "direction": "ltr"
+    },
+    "project": {
+        "id": "mat",
+        "name": "Matthew"
+    },
+    "type": {
+        "id": "text",
+        "name": "Text"
+    },
+    "resource": {
+        "id": "reg",
+        "name": "Regular"
+    },
+    "source_translations": [
+        {
+            "language_id": "en",
+            "resource_id": "ulb",
+            "checking_level": 3,
+            "date_modified": 20160223,
+            "version": "4"
+        }
+    ],
+    "parent_draft": {},
+    "translators": [],
+    "finished_chunks": []
+}

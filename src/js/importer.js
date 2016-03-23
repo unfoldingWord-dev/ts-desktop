@@ -17,14 +17,14 @@ function Importer(configurator, pm) {
          * @returns {Promise.<boolean>}
          */
         importUSFMFile: function (file,translation) {
-            //console.log("importing USFM", file, "to project", translation);
+            //console.log("importing USFM", JSON.stringify(file), "to project", JSON.stringify(translation));
             var self = this;
             return new Promise(function (resolve, reject) {
                 let fileExt = file.name.split('.').pop().toLowerCase();
-                console.log("File Extension: ", fileExt);
+                //console.log("File Extension: ", fileExt);
                 if (fileExt === "zip") {
                     self.getTxtFilesFromZip(file).then(function (files) {
-                        console.log("got files", files);
+                        //console.log("got files", files);
                         let txtFile = files[0];
                         var promise = self.importSingleUSFMFile(txtFile,translation);
                         for (var i = 1; i < files.length; i++) {
@@ -41,7 +41,7 @@ function Importer(configurator, pm) {
                         });;
                     });
                 } else {
-                    console.log("running single file import");
+                    //console.log("running single file import");
                     self.importSingleUSFMFile(file.path,translation).then(function(data){
                         resolve();
                     }).catch(function(e){
@@ -53,12 +53,10 @@ function Importer(configurator, pm) {
         },
 
         getTxtFilesFromZip: function (zipFile) {
-            console.log("getting txt files from zip");
             var tempDir = path.join(configurator.getValue('tempDir'), "usfm-import");
 
             return new Promise(function (resolve, reject) {
                 let zip = new AdmZip(zipFile.path);
-                console.log("zip object", zip);
                 zip.extractAllTo(tempDir, true);
                 var files = fs.readdirSync(tempDir),
                     output = [];
@@ -153,7 +151,7 @@ function Importer(configurator, pm) {
             return new Promise(function(resolve,reject){
                 //var chunkFileNames = self.getVerseChunkFileNames(projdata);
                 pm.loadTargetTranslation(projdata).then(function(curProj){
-                    console.log('curProj', curProj);
+                    //console.log('curProj', curProj);
                     self.getVerseChunkFileNames(projdata).then(function(chunkFileNames){
                         var parser = new UsfmParser();
                         parser.load(usfmFile).then(function(){
@@ -209,7 +207,10 @@ function Importer(configurator, pm) {
                             });
                         });
                     });
+                }).catch(function(e){
+                    console.log('error', e);
                 });
+
             });
 
 
@@ -296,7 +297,7 @@ function UsfmParser (file) {
             self.file = file;
 
             return new Promise(function(resolve,reject){
-                console.log('about to read',self.file);
+                //console.log('about to read',self.file);
 
                 var lineReader = require('readline').createInterface({
                     input: fs.createReadStream(self.file)
@@ -315,7 +316,7 @@ function UsfmParser (file) {
             });
         },
         parse: function(){
-            console.log("Starting parse");
+            //console.log("Starting parse");
             try{
                 this.getMarkers();
                 return this.buildChapters();

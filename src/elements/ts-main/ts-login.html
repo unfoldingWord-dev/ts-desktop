@@ -147,7 +147,7 @@
 
         <div id="header">
             <div id="heading">
-                <span id="button"><paper-icon-button class$="[[backclass(currentuser.fullname)]]" icon="arrow-back" title="Back" on-tap="back"></paper-icon-button></span>
+                <span id="button"><paper-icon-button class$="[[backclass(currentuser.full_name)]]" icon="arrow-back" title="Back" on-tap="back"></paper-icon-button></span>
                 <span>User Profile</span>
             </div>
         </div>
@@ -266,18 +266,20 @@
             }
         },
 
-        backclass: function (fullname) {
-            return fullname ? '' : 'hide';
+        backclass: function (name) {
+            return name ? '' : 'hide';
         },
 
         openserver: function () {
             this.$.server.classList.remove('hide');
             this.$.local.classList.add('hide');
+            this.newinfo = {};
         },
 
         opencreate: function () {
             this.$.create.classList.remove('hide');
             this.$.server.classList.add('hide');
+            this.newinfo = {};
         },
 
         reset: function () {
@@ -289,7 +291,8 @@
         },
 
         adduser: function () {
-            this.fire('iron-signal', {name: 'updateuser', data: {fullname: this.newinfo.full_name, token: false, accepted: false}});
+            var user = this.newinfo;
+            this.fire('iron-signal', {name: 'updateuser', data: user});
             this.reset();
         },
 
@@ -311,8 +314,9 @@
 
             App.git.login(user).then(function (user) {
                 mythis.set('options.body', "Login Verified");
+                user.full_name = user.username;
                 setTimeout(function() {
-                    mythis.fire('iron-signal', {name: 'updateuser', data: {fullname: user.username, token: user.token, accepted: false}});
+                    mythis.fire('iron-signal', {name: 'updateuser', data: user});
                     mythis.reset();
                 }, 500);
             }).catch(function (err) {
@@ -355,8 +359,9 @@
 
             App.git.createAccount(user).then(function (user) {
                 mythis.set('options.body', "Account Created");
+                user.full_name = user.username;
                 setTimeout(function() {
-                    mythis.fire('iron-signal', {name: 'updateuser', data: {fullname: user.username, token: user.token, accepted: false}});
+                    mythis.fire('iron-signal', {name: 'updateuser', data: user});
                     mythis.reset();
                 }, 500);
             }).catch(function (err) {

@@ -62,9 +62,10 @@ function GitInterface(auth) {
             }).then(logr('Git is initialized'));
         },
 
-        stage: function (dir, username, email) {
-            username = username || 'tsDesktop';
-            email = email || 'you@example.com';
+        stage: function (user, dir) {
+            if (!user.username || !user.email) {
+                return Promise.reject('User must have a username and email');
+            }
 
             let repo, index, oid;
 
@@ -99,10 +100,10 @@ function GitInterface(auth) {
                 .then(function(head) {
                     let parents = head ? [head] : [];
 
-                    let author = Git.Signature.now(username, email);
-                    let committer = Git.Signature.now(username, email);
+                    let author = Git.Signature.now(user.username, user.email);
+                    let committer = Git.Signature.now(user.username, user.email);
 
-                    return repo.createCommit("HEAD", author, committer, (new Date()).toString(), oid, parents);
+                    return repo.createCommit('HEAD', author, committer, (new Date()).toString(), oid, parents);
                 })
                 .then(function(commitId) {
                     return commitId;
@@ -110,46 +111,40 @@ function GitInterface(auth) {
                 .then(logr('Files are staged'));
         },
 
-        push: function (dir, repo, reg, config) {
-            let r;
+        push: function (user, dir, reponame, config) {
+            let repo;
 
             return Git.Repository.open(dir)
                 .then(function(repoResult) {
-                    r = repoResult;
-                    return r.openIndex();
-                }).then(function() {
-                    let remoteUrl = `ssh://${config.host}:${config.port}/tS/${reg.deviceId}/${repo}`;
-                    return Git.Remote.create(r, 'origin', remoteUrl);
-                }).then(function (remote) {
-                    return remote ? remote : r.getRemote('origin');
-                }).then(function(remote) {
-                    let opts = {
+                    repo = repoResult;
+                    return repo.openIndex();
+                })
+                .then(function() {
+                    let remoteUrl = `https://${user.username}:${user.password}@${config.host}/${user.username}/${reponame}`;
+                    return Git.Remote.createAnonymous(repo, remoteUrl);
+                })
+                .then(function(remote) {
+                    return remote.push(['+refs/heads/master:refs/heads/master'], {
                         callbacks: {
                             certificateCheck: function () {
-                                // no certificate check
-                                return 1;
+                                // no certificate check, let it pass thru
+                                return true;
                             },
-                            credentials: function (url, userName) {
-                                return Git.Cred.sshKeyNew(
-                                    userName,
-                                    reg.paths.publicKeyPath,
-                                    reg.paths.privateKeyPath,
-                                    ""
-                                );
+                            credentials: function () {
+                                return Git.Cred.userpassPlaintextNew(user.username, user.password);
                             }
                         }
-                    };
-
-                    return remote.push(["+refs/heads/master:refs/heads/master"], opts);
-                }).then(logr('Files are pushed'));
+                    });
+                })
+                .then(logr('Files are pushed'));
         },
 
         clone: function() {
-            console.log('not implemented');
+            throw 'Not implemented';
         },
 
         pull: function() {
-            console.log('not implemented');
+            throw 'Not implemented';
         }
 
     };

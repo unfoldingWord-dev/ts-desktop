@@ -57,7 +57,7 @@
     },
     {
         "name": "dataServer",
-        "value": "gitolite3@ts.door43.org",
+        "value": "git.door43.org",
         "meta":{
             "mutable": false,
             "type": "string"

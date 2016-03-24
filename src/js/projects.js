@@ -102,7 +102,8 @@ function ProjectsManager(query, configurator) {
                     return {
                         parentDir: targetDir,
                         projectDir: projectDir,
-                        manifest: path.join(projectDir, 'manifest.json')
+                        manifest: path.join(projectDir, 'manifest.json'),
+                        license: path.join(projectDir, 'LICENSE.md')
                     };
 
                 }
@@ -706,6 +707,13 @@ function ProjectsManager(query, configurator) {
                 finished_chunks: finishedFrames
             };
 
+            var license = "License\n\nThis work is made available under a Creative Commons Attribution-ShareAlike 4.0 International License (http://creativecommons.org/licenses/by-sa/4.0/).";
+            license += "\n\nYou are free to:\n\nShare — copy and redistribute the material in any medium or format";
+            license += "\n\nAdapt — remix, transform, and build upon the material for any purpose, even commercially.";
+            license += '\n\nUnder the following conditions:\n\nAttribution — You must attribute the work as follows: "Original work available at https://door43.org/." ';
+            license += "Attribution statements in derivative works should not in any way suggest that we endorse you or your use of this work.";
+            license += "\n\nShareAlike — If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original.";
+
             var writeFile = function (name, data) {
                 return function () {
                     return write(name, toJSON(data));
@@ -736,6 +744,7 @@ function ProjectsManager(query, configurator) {
             };
 
             return mkdirp(paths.projectDir)
+                .then(write(paths.license, license))
                 .then(writeFile(paths.manifest, manifest))
                 .then(makeChapterDirs(chunks))
                 .then(updateChunks(chunks))

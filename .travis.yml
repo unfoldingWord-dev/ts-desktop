@@ -2,7 +2,7 @@ language: node_js
 cache:
   directories:
   - $HOME/build/unfoldingWord-dev/ts-desktop/node_modules
-sudo: false
+#sudo: false
 node_js:
 - '5.1'
 before_script:

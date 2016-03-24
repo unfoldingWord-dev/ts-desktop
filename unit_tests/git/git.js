@@ -1,22 +1,39 @@
-//'use strict';
-//
-//process.env.NODE_ENV = 'test';
-//
-//let assert = require('assert');
-//let rimraf = require('rimraf');
-//let path = require('path');
-//let mkdirp = require('mkdirp');
-//let Uploader = require('../../src/js/uploader').Uploader;
-//let fs = require('fs');
-//let _ = require('lodash');
-//let Git = require('../../src/js/git');
-//let git = new Git();
-//let uploader = new Uploader();
+'use strict';
+
+process.env.NODE_ENV = 'test';
+
+let assert = require('assert');
+// let rimraf = require('rimraf');
+// let path = require('path');
+// let mkdirp = require('mkdirp');
+// let Uploader = require('../../src/js/uploader').Uploader;
+// let fs = require('fs');
+// let _ = require('lodash');
+let Git = require('../../src/js/git');
+
+var config = {};
+try {
+    config = require('./config');
+} catch (e) {
+    console.info('Please provide ./unit_tests/git/config.json to run git tests');
+    return;
+}
+
+let git = new Git({
+    token: config.token
+});
+
+// TRICKY: for some reason nodegit does not play nice.
+// So you must comment out the nodegit require in the git module when running these tests
+
 //
 //uploader.sshPath = path.resolve('unit_tests/git/ssh');
 //
-//describe('@Git', function () {
-//    this.timeout(60000);
+describe('@Git', function () {
+   this.timeout(6000);
+
+
+
 //
 //    let repoDir = path.resolve('unit_tests/git/testrepo'),
 //        testFileName = 'sample.txt',
@@ -57,7 +74,23 @@
 //    function deleteProject (cb) {
 //        rimraf(repoDir, cb);
 //    }
-//
+
+    describe('@Login', function() {
+       it('should log in with the user credentials', function(done) {
+           git.login(config.user).then(function(user) {
+               assert(true);
+           }).then(done, done);
+       });
+    });
+
+    describe('@CreateAccount', function() {
+        it('should create a new gogs account', function(done) {
+            git.createAccount(config.newUser).then(function(user) {
+                assert(true);
+            }).then(done, done);
+        });
+    });
+
 //    describe('@GitBasic', function () {
 //
 //        before(createDummyProject);
@@ -136,4 +169,4 @@
 //            });
 //        });
 //    });
-//});
+});

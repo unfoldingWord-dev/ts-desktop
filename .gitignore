@@ -13,6 +13,7 @@ testdata
 resources
 results.txt
 unit_tests/report.txt
+unit_tests/*/config.json
 ssh
 acceptance_tests/report.txt
 src/config/private.json

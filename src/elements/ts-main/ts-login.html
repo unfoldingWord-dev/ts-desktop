@@ -314,7 +314,7 @@
 
             App.git.login(user).then(function (user) {
                 mythis.set('options.body', "Login Verified");
-                user.full_name = user.username;
+                user.full_name = user.full_name === '' ? user.username : user.full_name;
                 setTimeout(function() {
                     mythis.fire('iron-signal', {name: 'updateuser', data: user});
                     mythis.reset();
@@ -359,7 +359,7 @@
 
             App.git.createAccount(user).then(function (user) {
                 mythis.set('options.body', "Account Created");
-                user.full_name = user.username;
+                user.full_name = user.full_name === '' ? user.username : user.full_name;
                 setTimeout(function() {
                     mythis.fire('iron-signal', {name: 'updateuser', data: user});
                     mythis.reset();

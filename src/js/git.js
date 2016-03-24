@@ -6,6 +6,7 @@ let Git = require('nodegit'),
     utils = require('../js/lib/util'),
     wrap = utils.promisify,
     logr = utils.logr,
+    _ = require('lodash'),
     fs = require('fs'),
     readdir = wrap(fs, 'readdir'),
     Gogs = require('gogs-client');
@@ -31,12 +32,12 @@ function GitInterface(auth) {
 
         login: function (userObj) {
             return api.getUser(userObj, auth).then(function (user) {
-                return api.listTokens(_.merge({ password:  userObj.password }, user))
+                return api.listTokens(userObj)
                     .then(function (tokens) {
                         return _.find(tokens, tokenStub);
                     })
                     .then(function (token) {
-                        return token ? token : api.createToken(tokenStub, user);
+                        return token ? token : api.createToken(tokenStub, userObj);
                     })
                     .then(function (token) {
                         user.token = token;

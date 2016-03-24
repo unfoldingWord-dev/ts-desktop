@@ -1,0 +1,13 @@
+{
+    "token": "some gogs token from an admin account",
+    "user": {
+        "username": "a valid username",
+        "password": "a valid password"
+    },
+    "newUser": {
+        "username": "jondoe",
+        "email": "jon@example.com",
+        "full_name": "Jon Doe",
+        "password": "sillypassword"
+    }
+}

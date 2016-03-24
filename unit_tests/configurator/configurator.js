@@ -5,7 +5,7 @@
     let assert = require('assert');
 
     function getConfigurator () {
-        let Configurator = require('../../app/js/configurator').Configurator;
+        let Configurator = require('../../src/js/configurator').Configurator;
         let configurator = new Configurator();
         let config = require('./data/ts-config');
         configurator.setStorage({});

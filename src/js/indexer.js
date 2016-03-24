@@ -197,10 +197,10 @@
 
             //get existing slug: id list
             let existingItems = {};
-            let results = db.select(table, ['slug', 'id']);
+            let results = zipper(db('SELECT `slug`, `id` FROM ' + table));
             if (results !== null) {
                 for (let result of results) {
-                    existingItems[result[0]] = result[1];
+                    existingItems[_.get(result, 'slug')] = _.get(result, 'id');
                 }
             }
 
@@ -216,21 +216,31 @@
                     sort: 'sort',
                     languageCatalog: 'source_language_catalog_url'
                 };
-                let values = new ContentValues();
+                let query = "INSERT INTO `" + table + "` (";
+
+                let values = [];
                 for (let key in apiProps) {
                     if (apiProps.hasOwnProperty(key) && typeof dbFields[key] !== 'undefined') {
-                        values.set(dbFields[key], _.get(item, apiProps[key]));
+                        query += dbFields[key] + ',';
+                        values.push(_.get(item, apiProps[key]));
                     }
                 }
+                query = query.replace(/,$/, '') + ') VALUES (';
+                for(let v of values) {
+                    query += '?,';
+                }
+                query = query.replace(/,$/, '') + ')';
+
                 if (itemId === null) {
-                    itemId = db.insert(table, values);
+                    itemId = zipper(db(prepare(query, values)));
                     existingItems[itemSlug] = itemId;
                 } else {
                     db.update(table, values, '`id`=?', [itemId]);
                 }
 
                 //reset relational links
-                db.delete(table + '__category', '`' + table + '_id`=?', [itemId]);
+                db(prepare('DELETE FROM `' + table + '__category ` WHERE `' + table + '_id`=?', [itemId]));
+                // db.delete(table + '__category', '`' + table + '_id`=?', [itemId]);
 
                 //add categories
                 let categorySlugs = _.get(item, apiProps.categorySlugs);

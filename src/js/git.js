@@ -19,15 +19,18 @@ function GitInterface(auth) {
     return {
 
         createAccount: function (user) {
-            return api.createUser(user, auth).then(function (newUser) {
-                // Merge the user objects temporarily so that we get the 'password' field
-                var mergedUser = _.merge(user, newUser);
-
-                return api.createToken(tokenStub, mergedUser).then(function(token) {
-                    newUser.token = token;
-                    return newUser;
+            return api.createUser(user, auth, true)
+                .then(function (newUser) {
+                    // TRICKY: we must edit the user to set full_name
+                    return api.editUser(user, auth)
+                        .then(function(updatedUser) {
+                            return api.createToken(tokenStub, user)
+                                .then(function(token) {
+                                    updatedUser.token = token;
+                                    return updatedUser;
+                                });
+                        });
                 });
-            });
         },
 
         login: function (userObj) {

@@ -55,12 +55,6 @@
             key = key.toLowerCase();
             value = (typeof value === 'boolean' || typeof value === 'number' || typeof value === 'object') ? value : value.toString();
 
-            //return if read-only
-            let mutable = getMetaValue(key, 'mutable');
-            if (mutable !== undefined && mutable === false) {
-                return;
-            }
-
             //load value object or create new empty value object
             let emptyStorageObj = {'value': value, 'meta': {'mutable': true, 'type': typeof value, 'default': ''}};
             let valueObj = storage[key] !== undefined ? JSON.parse(storage[key]) : emptyStorageObj;

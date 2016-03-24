@@ -128,7 +128,7 @@ process.stdout.write = console.log.bind(console);
 
         util: util,
 
-        git: Git({
+        git: new Git({
             token: configurator.getValue('gogs-token')
         }),
 

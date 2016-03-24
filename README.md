@@ -1,6 +1,5 @@
 [![Crowdin](https://d322cqt584bo4o.cloudfront.net/translation-studio/localized.png)](https://crowdin.com/project/translation-studio)
 [![Build Status](https://travis-ci.org/unfoldingWord-dev/ts-desktop.svg?branch=develop)](https://travis-ci.org/unfoldingWord-dev/ts-desktop)
-[![io.js supported](https://img.shields.io/badge/io.js-supported-green.svg?style=flat)](https://iojs.org)
 
 translationStudio Desktop
 --

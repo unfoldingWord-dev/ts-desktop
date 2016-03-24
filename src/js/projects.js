@@ -566,6 +566,31 @@ function ProjectsManager(query, configurator) {
                     return targetPaths;
                 })
                 .then(function (targetPaths) {
+                    return _.map(targetPaths, function (targetPath) {
+                        var parentDir = extractPath;
+                        var projectDir = path.join(extractPath, targetPath);
+                        var manifest = path.join(projectDir, 'manifest.json');
+                        return {parentDir, projectDir, manifest};
+                    });
+                })
+                .then(function (list) {
+                    var migrated = _.map(list, function (paths) {
+                        return targetTranslationMigrator.migrate(paths)
+                            .catch(function (err) {
+                                console.log(err);
+                                return false;
+                            });
+                    });
+                    return Promise.all(migrated).then(function (result) {
+                        return _.compact(result);
+                    })
+                })
+                .then(function (results) {
+                    return _.map(results, function (result) {
+                        return result.paths.projectDir.substring(result.paths.projectDir.lastIndexOf(path.sep) + 1);
+                    });
+                })
+                .then(function (targetPaths) {
                     return _.map(targetPaths, function(p) {
                         let tmpPath = path.join(extractPath, p),
                             targetPath = path.join(targetDir, p);

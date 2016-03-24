@@ -83,7 +83,7 @@
     function v5(project) {
         let manifest = project.manifest;
         let paths = project.paths;
-        let oldname = paths.projectDir.substring(paths.projectDir.lastIndexOf("\\") + 1);
+        let oldname = paths.projectDir.substring(paths.projectDir.lastIndexOf(path.sep) + 1);
         if (manifest.project.id === "tw") {
             manifest.project.id = "bible";
             manifest.project.name = "translationWords";

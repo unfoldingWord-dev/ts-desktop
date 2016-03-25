@@ -684,9 +684,6 @@ function ProjectsManager(query, configurator, srcDir) {
         saveTargetTranslation: function (translation, meta, user) {
             var paths = this.getPaths(meta);
 
-            // translation is an array
-            // translation[0].meta.frameid
-
             var makeComplexId = function (c) {
                 return c.meta.chapterid + '-' + c.meta.frameid;
             };
@@ -748,6 +745,22 @@ function ProjectsManager(query, configurator, srcDir) {
                 };
             };
 
+            var cleanChapterDir = function (data, chapter) {
+                var chapterpath = path.join(paths.projectDir, chapter);
+                return readdir(chapterpath).then(function (dir) {
+                    return !dir.length ? rm(chapterpath): true;
+                });
+            };
+
+            var cleanChapterDirs = function () {
+                return function () {
+                    var data = _.groupBy(translation, function (chunks) {
+                        return chunks.meta.chapterid;
+                    });
+                    return Promise.all(_.map(data, cleanChapterDir));
+                };
+            };
+
             var updateChunk = function (c) {
                 var f = path.join(paths.projectDir, c.meta.chapterid, c.meta.frameid + '.txt'),
                     hasContent = isTranslation ? !!c.transcontent : !!c.helpscontent.length;
@@ -773,6 +786,7 @@ function ProjectsManager(query, configurator, srcDir) {
                 .then(writeFile(paths.manifest, manifest))
                 .then(makeChapterDirs(chunks))
                 .then(updateChunks(chunks))
+                .then(cleanChapterDirs())
                 .then(function () {
                     return git.init(paths.projectDir);
                 })

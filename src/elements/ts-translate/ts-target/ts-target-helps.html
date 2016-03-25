@@ -317,7 +317,7 @@
 
         completehelp: function (event, data) {
             var index = data.index;
-            if (this.chunk.index === index) {
+            if (this.chunk.index === index && this.chunk.data.project_type_class === "helps") {
                 this.set('chunk.completed', true);
                 this.$.helptoggle.checked = true;
                 this.fire('iron-signal', {name: 'updatetranslation'});

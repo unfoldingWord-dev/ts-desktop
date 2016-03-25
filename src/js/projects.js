@@ -102,7 +102,8 @@ function ProjectsManager(query, configurator) {
                     return {
                         parentDir: targetDir,
                         projectDir: projectDir,
-                        manifest: path.join(projectDir, 'manifest.json')
+                        manifest: path.join(projectDir, 'manifest.json'),
+                        license: path.join(projectDir, 'LICENSE.md')
                     };
 
                 }
@@ -565,6 +566,31 @@ function ProjectsManager(query, configurator) {
                     return targetPaths;
                 })
                 .then(function (targetPaths) {
+                    return _.map(targetPaths, function (targetPath) {
+                        var parentDir = extractPath;
+                        var projectDir = path.join(extractPath, targetPath);
+                        var manifest = path.join(projectDir, 'manifest.json');
+                        return {parentDir, projectDir, manifest};
+                    });
+                })
+                .then(function (list) {
+                    var migrated = _.map(list, function (paths) {
+                        return targetTranslationMigrator.migrate(paths)
+                            .catch(function (err) {
+                                console.log(err);
+                                return false;
+                            });
+                    });
+                    return Promise.all(migrated).then(function (result) {
+                        return _.compact(result);
+                    })
+                })
+                .then(function (results) {
+                    return _.map(results, function (result) {
+                        return result.paths.projectDir.substring(result.paths.projectDir.lastIndexOf(path.sep) + 1);
+                    });
+                })
+                .then(function (targetPaths) {
                     return _.map(targetPaths, function(p) {
                         let tmpPath = path.join(extractPath, p),
                             targetPath = path.join(targetDir, p);
@@ -706,6 +732,13 @@ function ProjectsManager(query, configurator) {
                 finished_chunks: finishedFrames
             };
 
+            var license = "License\n\nThis work is made available under a Creative Commons Attribution-ShareAlike 4.0 International License (http://creativecommons.org/licenses/by-sa/4.0/).";
+            license += "\n\nYou are free to:\n\nShare — copy and redistribute the material in any medium or format";
+            license += "\n\nAdapt — remix, transform, and build upon the material for any purpose, even commercially.";
+            license += '\n\nUnder the following conditions:\n\nAttribution — You must attribute the work as follows: "Original work available at https://door43.org/." ';
+            license += "Attribution statements in derivative works should not in any way suggest that we endorse you or your use of this work.";
+            license += "\n\nShareAlike — If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original.";
+
             var writeFile = function (name, data) {
                 return function () {
                     return write(name, toJSON(data));
@@ -736,6 +769,7 @@ function ProjectsManager(query, configurator) {
             };
 
             return mkdirp(paths.projectDir)
+                .then(write(paths.license, license))
                 .then(writeFile(paths.manifest, manifest))
                 .then(makeChapterDirs(chunks))
                 .then(updateChunks(chunks))

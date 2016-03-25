@@ -125,6 +125,25 @@ describe('@Importer', function () {
 
         });
 
+        it('should import a bad ufsm text file', function (done) {
+            rimraf.sync(tempProjPath, fs);
+            mkdirp.sync(tempProjPath);
+            fs.createReadStream(projTemplatePath).pipe(fs.createWriteStream(tempProjPath + '/manifest.json'));
+
+            var file = {
+                name: "failing_file.usfm",
+                path: path.resolve('unit_tests/importer/data/failing_file.usfm')
+            };
+            let importer = new Importer(config,pm);
+            importer.importUSFMFile(file,translation).then(function(){
+                assert.equal(1,2);
+            }).catch(function(e){
+                assert.equal('This is not a valid USFM file.',e.message);
+                done();
+            });
+
+        });
+
     });
 
     //cleanup

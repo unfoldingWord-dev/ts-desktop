@@ -19,37 +19,25 @@ function Importer(configurator, pm) {
         importUSFMFile: function (file,translation) {
             //console.log("importing USFM", JSON.stringify(file), "to project", JSON.stringify(translation));
             var self = this;
-            return new Promise(function (resolve, reject) {
-                let fileExt = file.name.split('.').pop().toLowerCase();
-                //console.log("File Extension: ", fileExt);
-                if (fileExt === "zip") {
-                    self.getTxtFilesFromZip(file).then(function (files) {
-                        //console.log("got files", files);
-                        let txtFile = files[0];
-                        var promise = self.importSingleUSFMFile(txtFile,translation);
-                        for (var i = 1; i < files.length; i++) {
-                            txtFile = files[i];
-                            promise = promise.then(function(){
-                                return self.importSingleUSFMFile(txtFile,translation);
-                            });
-                        }
-                        promise.then(function(){
-                            resolve();
-                        }).catch(function(e){
-                            console.log('Error', e.stack);
-                            reject('There was an error importing the translation');
-                        });;
-                    });
-                } else {
-                    //console.log("running single file import");
-                    self.importSingleUSFMFile(file.path,translation).then(function(data){
-                        resolve();
-                    }).catch(function(e){
-                        console.log('Error', e.stack);
-                        reject('There was an error importing the translation');
-                    });
-                }
-            });
+            let fileExt = file.name.split('.').pop().toLowerCase();
+            //console.log("File Extension: ", fileExt);
+            if (fileExt === "zip") {
+                return self.getTxtFilesFromZip(file).then(function (files) {
+                    //console.log("got files", files);
+                    let txtFile = files[0];
+                    var promise = self.importSingleUSFMFile(txtFile,translation);
+                    for (var i = 1; i < files.length; i++) {
+                        txtFile = files[i];
+                        promise = promise.then(function(){
+                            return self.importSingleUSFMFile(txtFile,translation);
+                        });
+                    }
+                    return promise;
+                });
+            } else {
+                //console.log("running single file import");
+                return self.importSingleUSFMFile(file.path,translation);
+            }
         },
 
         getTxtFilesFromZip: function (zipFile) {
@@ -148,69 +136,68 @@ function Importer(configurator, pm) {
 
         importSingleUSFMFile: function (usfmFile, projdata) {
             let self = this;
-            return new Promise(function(resolve,reject){
-                //var chunkFileNames = self.getVerseChunkFileNames(projdata);
-                pm.loadTargetTranslation(projdata).then(function(curProj){
-                    //console.log('curProj', curProj);
-                    self.getVerseChunkFileNames(projdata).then(function(chunkFileNames){
-                        var parser = new UsfmParser();
-                        parser.load(usfmFile).then(function(){
+            return pm.loadTargetTranslation(projdata).then(function(curProj){
+                //console.log('curProj', curProj);
+                return self.getVerseChunkFileNames(projdata).then(function(chunkFileNames){
+                    var parser = new UsfmParser();
+                    return parser.load(usfmFile).then(function(){
+                        var parsedData = parser.parse();
 
-                            var parsedData = parser.parse();
-                            for(var i = 0;i<chunkFileNames.length;i++){
-                                var chunk = chunkFileNames[i];
-                                var transcontent = '';
+                        //if there was no data in the file, it's most likely the wrong format.
+                        if(JSON.stringify(parsedData) === JSON.stringify({})){
+                            throw new Error('This is not a valid USFM file.');
+                        }
 
-                                for(var ci = 0;ci<chunk.verses.length;ci++){
-                                    if(typeof parsedData[chunk.chapter] !== 'undefined' && typeof parsedData[chunk.chapter].verses[chunk.verses[ci]] !== 'undefined'){
-                                        transcontent += '\\v' + parsedData[chunk.chapter].verses[chunk.verses[ci]].id + ' ' + parsedData[chunk.chapter].verses[chunk.verses[ci]].contents;
-                                    }
+                        for(var i = 0;i<chunkFileNames.length;i++){
+                            var chunk = chunkFileNames[i];
+                            var transcontent = '';
+
+                            for(var ci = 0;ci<chunk.verses.length;ci++){
+                                if(typeof parsedData[chunk.chapter] !== 'undefined' && typeof parsedData[chunk.chapter].verses[chunk.verses[ci]] !== 'undefined'){
+                                    transcontent += '\\v' + parsedData[chunk.chapter].verses[chunk.verses[ci]].id + ' ' + parsedData[chunk.chapter].verses[chunk.verses[ci]].contents;
                                 }
-                                chunkFileNames[i].meta = {
-                                    chapterid: chunkFileNames[i].chapter,
-                                    frameid: chunkFileNames[i].filename,
-                                    helpscontent: []
-                                };
-                                if(transcontent === ''){
-                                    var existing = curProj[chunkFileNames[i].chapter + '-' + chunkFileNames[i].filename];
-                                    if(existing){
-                                        chunkFileNames[i].completed = existing.completed;
-                                        chunkFileNames[i].transcontent = existing.transcontent;
-                                    } else {
-                                        chunkFileNames[i].transcontent = null;
-                                    }
+                            }
+                            chunkFileNames[i].meta = {
+                                chapterid: chunkFileNames[i].chapter,
+                                frameid: chunkFileNames[i].filename,
+                                helpscontent: []
+                            };
+                            var existing = curProj[chunkFileNames[i].chapter + '-' + chunkFileNames[i].filename];
+                            if(transcontent === ''){
+                                if(existing){
+                                    chunkFileNames[i].completed = existing.completed;
+                                    chunkFileNames[i].transcontent = existing.transcontent;
+                                } else {
+                                    chunkFileNames[i].transcontent = null;
+                                }
+                            } else {
+                                if(existing && existing.completed){
+                                    chunkFileNames[i].completed = existing.completed;
+                                    chunkFileNames[i].transcontent = existing.transcontent;
                                 } else {
                                     chunkFileNames[i].completed = true;
                                     chunkFileNames[i].transcontent = transcontent;
                                 }
                             }
+                        }
 
 
-                            //Pull in the title
-                            if(typeof parsedData['00'] !== 'undefined'){
-                                chunkFileNames.push({
-                                    meta: {
-                                        chapterid: '00',
-                                        frameid: 'title',
-                                        helpscontent: []
-                                    },
-                                    transcontent: parsedData['00'].contents,
-                                    completed: true
-                                });
-                            }
-
-                            pm.saveTargetTranslation(chunkFileNames,projdata).then(function(){
-                                resolve();
-                            }).catch(function(e){
-                                reject('There was a problem importing this translation');
-                                console.log('Save Error: ', e);
+                        //Pull in the title
+                        if(typeof parsedData['00'] !== 'undefined'){
+                            chunkFileNames.push({
+                                meta: {
+                                    chapterid: '00',
+                                    frameid: 'title',
+                                    helpscontent: []
+                                },
+                                transcontent: parsedData['00'].contents,
+                                completed: true
                             });
-                        });
-                    });
-                }).catch(function(e){
-                    console.log('error', e);
-                });
+                        }
 
+                        return pm.saveTargetTranslation(chunkFileNames,projdata);
+                    });
+                });
             });
 
 
@@ -316,13 +303,8 @@ function UsfmParser (file) {
             });
         },
         parse: function(){
-            //console.log("Starting parse");
-            try{
-                this.getMarkers();
-                return this.buildChapters();
-            } catch(e){
-                console.log(e.stack);
-            }
+            this.getMarkers();
+            return this.buildChapters();
         },
         getMarkers: function () {
             self.markers = [];
@@ -345,18 +327,14 @@ function UsfmParser (file) {
                             self.markers[self.markerCount].options = lineArray[c + 1];
                             c++;
                         }
-                        var currentMarker = self.markers[self.markerCount];
+                        currentMarker = self.markers[self.markerCount];
                         self.markerCount++;
                     } else {
-                        currentMarker.contents += section + " ";
+                        if(currentMarker){
+                            currentMarker.contents += section + " ";
+                        }
                     }
                 }
-                /**
-                 * THIS IS WHERE YOU LEFT OFF JEREMY!
-                 */
-
-
-
             }
         },
         buildChapters: function(){

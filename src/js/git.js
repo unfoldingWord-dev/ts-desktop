@@ -14,7 +14,8 @@ let Git = require('nodegit'),
 function GitInterface(auth) {
 
     let api = new Gogs('https://git.door43.org/api/v1'),
-        tokenStub = { name: 'ts-desktop' };
+        tokenStub = {name: 'ts-desktop'},
+        keyStub = {title: 'ts-desktop'};
 
     return {
 
@@ -49,6 +50,17 @@ function GitInterface(auth) {
             });
         },
 
+        register: function (user) {
+            return api.listPublicKeys(user).then(function (keys) {
+                return _.find(keys, keyStub);
+            }).then(function (key) {
+                return key ? key : api.createPublicKey({
+                    title: keyStub.title,
+                    key: user.reg.keys.public
+                }, user);
+            });
+        },
+
         // Returns the last commit hash/id for the repo at dir
         getHash: function (dir) {
             return Git.Repository.open(dir).then(function (repo) {
@@ -67,9 +79,8 @@ function GitInterface(auth) {
         },
 
         stage: function (user, dir) {
-            if (!user.username || !user.email) {
-                return Promise.reject('User must have a username and email');
-            }
+            let author = Git.Signature.now(user.username || 'tsDesktop', user.email || 'you@example.com'),
+                committer = author;
 
             let repo, index, oid;
 
@@ -104,9 +115,6 @@ function GitInterface(auth) {
                 .then(function(head) {
                     let parents = head ? [head] : [];
 
-                    let author = Git.Signature.now(user.username, user.email);
-                    let committer = Git.Signature.now(user.username, user.email);
-
                     return repo.createCommit('HEAD', author, committer, (new Date()).toString(), oid, parents);
                 })
                 .then(function(commitId) {
@@ -116,7 +124,8 @@ function GitInterface(auth) {
         },
 
         push: function (user, dir, reponame, config) {
-            let repo;
+            let repo,
+                isSSH = !!user.reg;
 
             return Git.Repository.open(dir)
                 .then(function(repoResult) {
@@ -124,7 +133,10 @@ function GitInterface(auth) {
                     return repo.openIndex();
                 })
                 .then(function() {
-                    let remoteUrl = `https://${user.username}:${user.password}@${config.host}/${user.username}/${reponame}`;
+                    let remoteUrl = isSSH ? 
+                        `ssh://${config.host}:${config.port}/${user.reg.username}/${reponame}` :
+                        `https://${user.username}:${user.password}@${config.host}/${user.username}/${reponame}`;
+
                     return Git.Remote.createAnonymous(repo, remoteUrl);
                 })
                 .then(function(remote) {
@@ -135,6 +147,16 @@ function GitInterface(auth) {
                                 return true;
                             },
                             credentials: function () {
+
+                                if (isSSH) {
+                                    return Git.Cred.sshKeyNew(
+                                        user.username,
+                                        user.reg.paths.publicKeyPath,
+                                        user.reg.paths.privateKeyPath,
+                                        ''
+                                    );
+                                }
+
                                 return Git.Cred.userpassPlaintextNew(user.username, user.password);
                             }
                         }

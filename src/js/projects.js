@@ -29,7 +29,7 @@ var map = guard('map'),
  *  e.g. var pm = App.projectsManager;
  */
 
-function ProjectsManager(query, configurator) {
+function ProjectsManager(query, configurator, srcDir) {
 
     // var puts = console.log.bind(console),  // Never used
     var write = wrap(fs, 'writeFile'),
@@ -102,7 +102,8 @@ function ProjectsManager(query, configurator) {
                     return {
                         parentDir: targetDir,
                         projectDir: projectDir,
-                        manifest: path.join(projectDir, 'manifest.json')
+                        manifest: path.join(projectDir, 'manifest.json'),
+                        license: path.join(projectDir, 'LICENSE.md')
                     };
 
                 }
@@ -565,6 +566,31 @@ function ProjectsManager(query, configurator) {
                     return targetPaths;
                 })
                 .then(function (targetPaths) {
+                    return _.map(targetPaths, function (targetPath) {
+                        var parentDir = extractPath;
+                        var projectDir = path.join(extractPath, targetPath);
+                        var manifest = path.join(projectDir, 'manifest.json');
+                        return {parentDir, projectDir, manifest};
+                    });
+                })
+                .then(function (list) {
+                    var migrated = _.map(list, function (paths) {
+                        return targetTranslationMigrator.migrate(paths)
+                            .catch(function (err) {
+                                console.log(err);
+                                return false;
+                            });
+                    });
+                    return Promise.all(migrated).then(function (result) {
+                        return _.compact(result);
+                    })
+                })
+                .then(function (results) {
+                    return _.map(results, function (result) {
+                        return result.paths.projectDir.substring(result.paths.projectDir.lastIndexOf(path.sep) + 1);
+                    });
+                })
+                .then(function (targetPaths) {
                     return _.map(targetPaths, function(p) {
                         let tmpPath = path.join(extractPath, p),
                             targetPath = path.join(targetDir, p);
@@ -658,9 +684,6 @@ function ProjectsManager(query, configurator) {
         saveTargetTranslation: function (translation, meta, user) {
             var paths = this.getPaths(meta);
 
-            // translation is an array
-            // translation[0].meta.frameid
-
             var makeComplexId = function (c) {
                 return c.meta.chapterid + '-' + c.meta.frameid;
             };
@@ -722,6 +745,22 @@ function ProjectsManager(query, configurator) {
                 };
             };
 
+            var cleanChapterDir = function (data, chapter) {
+                var chapterpath = path.join(paths.projectDir, chapter);
+                return readdir(chapterpath).then(function (dir) {
+                    return !dir.length ? rm(chapterpath): true;
+                });
+            };
+
+            var cleanChapterDirs = function () {
+                return function () {
+                    var data = _.groupBy(translation, function (chunks) {
+                        return chunks.meta.chapterid;
+                    });
+                    return Promise.all(_.map(data, cleanChapterDir));
+                };
+            };
+
             var updateChunk = function (c) {
                 var f = path.join(paths.projectDir, c.meta.chapterid, c.meta.frameid + '.txt'),
                     hasContent = isTranslation ? !!c.transcontent : !!c.helpscontent.length;
@@ -735,10 +774,19 @@ function ProjectsManager(query, configurator) {
                 };
             };
 
+            var setLicense = function () {
+                return read(path.join(srcDir, 'assets', 'LICENSE.md'))
+                    .then(function(data) {
+                        return write(paths.license, data);
+                    });
+            };
+
             return mkdirp(paths.projectDir)
+                .then(setLicense())
                 .then(writeFile(paths.manifest, manifest))
                 .then(makeChapterDirs(chunks))
                 .then(updateChunks(chunks))
+                .then(cleanChapterDirs())
                 .then(function () {
                     return git.init(paths.projectDir);
                 })

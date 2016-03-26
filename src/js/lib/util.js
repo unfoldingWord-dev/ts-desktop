@@ -7,7 +7,8 @@
         mkdirP = require('mkdirp'),
         rimraf = require('rimraf'),
         getmac = require('getmac'),
-        fs = require('fs-extra'),
+        fs = require('fs'),
+        fse = require('fs-extra'),
         https = require('https'),
         http = require('http'),
         _ = require('lodash');
@@ -64,8 +65,8 @@
          */
         startsWithBase: function (a, b) {
             let rm = diacritics.removeDiacritics,
-                aBase = rm(a.toLowerCase()),
-                bBase = rm(b.toLowerCase());
+                aBase = utils.rm(a.toLowerCase()),
+                bBase = utils.rm(b.toLowerCase());
             return bBase.startsWith(aBase);
         },
 
@@ -308,6 +309,7 @@
      *  which should be available in utils.fs, etc.
      */
 
+    utils.move = utils.promisify(fse, 'move');
     utils.mkdirp = utils.promisify(null, mkdirP);
     utils.rm = utils.promisify(null, rimraf);
 

@@ -65,8 +65,8 @@
          */
         startsWithBase: function (a, b) {
             let rm = diacritics.removeDiacritics,
-                aBase = utils.rm(a.toLowerCase()),
-                bBase = utils.rm(b.toLowerCase());
+                aBase = rm(a.toLowerCase()),
+                bBase = rm(b.toLowerCase());
             return bBase.startsWith(aBase);
         },
 

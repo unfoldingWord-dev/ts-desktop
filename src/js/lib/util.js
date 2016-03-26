@@ -126,10 +126,10 @@
 
             return Object.keys(m).filter(function (key) {
                 return (typeof m[key] === 'function' && !key.startsWith('_') && key[0].toUpperCase() !== key[0]);
-            }).map(function (methodName) {
-                return utils.promisify(m, methodName);
-            });
-
+            }).reduce(function (a, methodName) {
+                a[methodName] = utils.promisify(m, methodName);
+                return a;
+            }, {});
         },
 
         /**

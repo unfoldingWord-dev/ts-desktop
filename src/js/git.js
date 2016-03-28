@@ -23,13 +23,13 @@ function GitInterface(auth) {
             return api.createUser(user, auth, true)
                 .then(function (newUser) {
                     // TRICKY: we must edit the user to set full_name
-                    return api.editUser(user, auth)
-                        .then(function(updatedUser) {
-                            return api.createToken(tokenStub, user)
-                                .then(function(token) {
-                                    updatedUser.token = token;
-                                    return updatedUser;
-                                });
+                    return api.editUser(user, auth);
+                })
+                .then(function(updatedUser) {
+                    return api.createToken(tokenStub, user)
+                        .then(function(token) {
+                            updatedUser.token = token.sha1;
+                            return updatedUser;
                         });
                 });
         },
@@ -44,7 +44,7 @@ function GitInterface(auth) {
                         return token ? token : api.createToken(tokenStub, userObj);
                     })
                     .then(function (token) {
-                        user.token = token;
+                        user.token = token.sha1;
                         return user;
                     });
             });
@@ -57,6 +57,18 @@ function GitInterface(auth) {
                 return key ? key : api.createPublicKey({
                     title: keyStub.title,
                     key: user.reg.keys.public
+                }, user);
+            });
+        },
+
+        createRepo: function (user, reponame) {
+            return api.listRepos(user).then(function (repos) {
+                return _.find(repos, {full_name: user.username + '/' + reponame});
+            }).then(function (repo) {
+                return repo ? repo : api.createRepo({
+                    name: reponame,
+                    description: 'ts-desktop: ' + reponame,
+                    private: false
                 }, user);
             });
         },

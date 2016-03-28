@@ -277,6 +277,9 @@
                     return App.git.register(user);
                 })
                 .then(function () {
+                    return App.git.createRepo(user, repo);
+                })
+                .then(function () {
                     return App.git.push(user, paths.projectDir, repo, {
                         'host': App.configurator.getUserSetting('dataserver'),
                         'port': App.configurator.getUserSetting('dataserverport')

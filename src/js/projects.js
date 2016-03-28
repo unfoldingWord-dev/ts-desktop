@@ -570,7 +570,8 @@ function ProjectsManager(query, configurator, srcDir) {
                         var parentDir = extractPath;
                         var projectDir = path.join(extractPath, targetPath);
                         var manifest = path.join(projectDir, 'manifest.json');
-                        return {parentDir, projectDir, manifest};
+                        var license = path.join(projectDir, 'LICENSE.md');
+                        return {parentDir, projectDir, manifest, license};
                     });
                 })
                 .then(function (list) {

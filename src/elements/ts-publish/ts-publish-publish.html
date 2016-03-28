@@ -281,10 +281,7 @@
                 })
                 .then(function (repo) {
                     console.log("start push");
-                    return App.git.push(user, paths.projectDir, repo, {
-                        'host': App.configurator.getUserSetting('dataserver'),
-                        'port': App.configurator.getUserSetting('dataserverport')
-                    });
+                    return App.git.push(user, paths.projectDir, repo);
                 })
                 .then(function () {
                     mythis.set('options.title', "Project Published");

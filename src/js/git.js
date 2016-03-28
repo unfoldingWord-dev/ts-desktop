@@ -140,7 +140,7 @@ function GitInterface(auth) {
                 .then(logr('Files are staged'));
         },
 
-        push: function (user, dir, repo, config) {
+        push: function (user, dir, repo) {
             let localrepo,
                 isSSH = !!user.reg;
 

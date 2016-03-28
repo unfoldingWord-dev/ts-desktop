@@ -58,6 +58,8 @@ function GitInterface(auth) {
                     title: keyStub.title,
                     key: user.reg.keys.public
                 }, user);
+            }).then(function (key) {
+                console.log(key);
             });
         },
 
@@ -70,6 +72,9 @@ function GitInterface(auth) {
                     description: 'ts-desktop: ' + reponame,
                     private: false
                 }, user);
+            }).then(function (repo) {
+                console.log(repo);
+                return repo;
             });
         },
 
@@ -135,21 +140,19 @@ function GitInterface(auth) {
                 .then(logr('Files are staged'));
         },
 
-        push: function (user, dir, reponame, config) {
-            let repo,
+        push: function (user, dir, repo, config) {
+            let localrepo,
                 isSSH = !!user.reg;
 
             return Git.Repository.open(dir)
                 .then(function(repoResult) {
-                    repo = repoResult;
-                    return repo.openIndex();
+                    localrepo = repoResult;
+                    return localrepo.openIndex();
                 })
                 .then(function() {
-                    let remoteUrl = isSSH ?
-                        `ssh://${config.host}:${config.port}/${user.reg.username}/${reponame}` :
-                        `https://${user.username}:${user.password}@${config.host}/${user.username}/${reponame}`;
+                    let remoteUrl = isSSH ? repo.ssh_url : repo.html_url;
 
-                    return Git.Remote.createAnonymous(repo, remoteUrl);
+                    return Git.Remote.createAnonymous(localrepo, remoteUrl);
                 })
                 .then(function(remote) {
                     return remote.push(['+refs/heads/master:refs/heads/master'], {
@@ -158,11 +161,13 @@ function GitInterface(auth) {
                                 // no certificate check, let it pass thru
                                 return true;
                             },
-                            credentials: function () {
+                            credentials: function (url, username) {
+                                console.log(arguments);
+                                console.log(user);
 
                                 if (isSSH) {
                                     return Git.Cred.sshKeyNew(
-                                        user.username,
+                                        username,
                                         user.reg.paths.publicKeyPath,
                                         user.reg.paths.privateKeyPath,
                                         ''

@@ -45,7 +45,7 @@
     {
         "name": "dataserver",
         "mainText": "Data Server",
-        "value": "gitolite3@ts.door43.org",
+        "value": "git.door43.org",
         "group": "upload",
         "enabled": true,
         "visible": true

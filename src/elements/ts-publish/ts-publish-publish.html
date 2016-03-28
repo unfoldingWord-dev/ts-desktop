@@ -270,13 +270,16 @@
 
             return App.git.stage(user, paths.projectDir)
                 .then(function () {
+                    console.log("start generate");
                     return App.uploader.generateKeys();
                 })
                 .then(function (reg) {
+                    console.log("start register");
                     user.reg = reg;
                     return App.git.register(user);
                 })
                 .then(function () {
+                    console.log("start push");
                     return App.git.push(user, paths.projectDir, repo, {
                         'host': App.configurator.getUserSetting('dataserver'),
                         'port': App.configurator.getUserSetting('dataserverport')

@@ -27,7 +27,7 @@ function GitInterface(auth) {
                         .then(function(updatedUser) {
                             return api.createToken(tokenStub, user)
                                 .then(function(token) {
-                                    updatedUser.token = token;
+                                    updatedUser.token = token.sha1;
                                     return updatedUser;
                                 });
                         });
@@ -44,7 +44,7 @@ function GitInterface(auth) {
                         return token ? token : api.createToken(tokenStub, userObj);
                     })
                     .then(function (token) {
-                        user.token = token;
+                        user.token = token.sha1;
                         return user;
                     });
             });
@@ -133,7 +133,7 @@ function GitInterface(auth) {
                     return repo.openIndex();
                 })
                 .then(function() {
-                    let remoteUrl = isSSH ? 
+                    let remoteUrl = isSSH ?
                         `ssh://${config.host}:${config.port}/${user.reg.username}/${reponame}` :
                         `https://${user.username}:${user.password}@${config.host}/${user.username}/${reponame}`;
 

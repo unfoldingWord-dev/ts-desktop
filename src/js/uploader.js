@@ -14,6 +14,7 @@ var net = require('net'),
 // TODO: this module has diverged from it's original intent and how the name is misleading.
 // All this module is doing is registering with the authentication server
 function Uploader(dataPath) {
+    console.log("path is", dataPath);
 
     var paths = {
         sshPath: path.resolve(path.join(dataPath, 'ssh')),
@@ -108,7 +109,7 @@ function Uploader(dataPath) {
         destroyKeys: function () {
             return utils.rm(paths.sshPath);
         }
-        
+
     };
 }
 

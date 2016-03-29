@@ -153,6 +153,11 @@
         },
 
         change: function () {
+            var text = this.chunk.transcontent;
+            var test = new RegExp(/\n/g);
+            var replace = " \n ";
+            text = text.replace(test, replace);
+            this.set('chunk.transcontent', text);
             this.fire('iron-signal', {name: 'updatetranslation'});
         },
 

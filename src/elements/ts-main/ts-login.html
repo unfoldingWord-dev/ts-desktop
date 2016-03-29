@@ -29,10 +29,8 @@
             min-height: 50px;
         }
 
-        #button {
-            width: 60px;
-            display: flex;
-            justify-content: center;
+        #title {
+            margin-left: 60px;
         }
 
         #body {
@@ -147,8 +145,7 @@
 
         <div id="header">
             <div id="heading">
-                <span id="button"><paper-icon-button class$="[[backclass(currentuser.full_name)]]" icon="arrow-back" title="Back" on-tap="back"></paper-icon-button></span>
-                <span>User Profile</span>
+                <span id="title">User Login</span>
             </div>
         </div>
         <div id="body">
@@ -237,11 +234,6 @@
                 type: Object,
                 value: {}
             },
-            route: {
-                type: String,
-                value: '',
-                notify: true
-            },
             currentuser: {
                 type: Object,
                 value: {}
@@ -266,10 +258,6 @@
             }
         },
 
-        backclass: function (name) {
-            return name ? '' : 'hide';
-        },
-
         openserver: function () {
             this.$.server.classList.remove('hide');
             this.$.local.classList.add('hide');
@@ -292,6 +280,7 @@
 
         adduser: function () {
             var user = this.newinfo;
+            user.type = "Local User";
             this.fire('iron-signal', {name: 'updateuser', data: user});
             this.reset();
         },
@@ -315,6 +304,7 @@
             App.git.login(user).then(function (user) {
                 mythis.set('options.body', "Login Verified");
                 user.full_name = user.full_name === '' ? user.username : user.full_name;
+                user.type = "Server User";
                 setTimeout(function() {
                     mythis.fire('iron-signal', {name: 'updateuser', data: user});
                     mythis.reset();
@@ -360,6 +350,7 @@
             App.git.createAccount(user).then(function (user) {
                 mythis.set('options.body', "Account Created");
                 user.full_name = user.full_name === '' ? user.username : user.full_name;
+                user.type = "Server User";
                 setTimeout(function() {
                     mythis.fire('iron-signal', {name: 'updateuser', data: user});
                     mythis.reset();
@@ -373,11 +364,6 @@
                 mythis.set('options.body', errmessage);
                 mythis.set('options.loading', false);
             });
-        },
-
-        back: function() {
-            this.route = App.configurator.getValue("backto");
-            this.reset();
         },
 
         ready: function() {

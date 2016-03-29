@@ -129,7 +129,10 @@
             var id = this.chunk.meta.chapterid + "-" + this.chunk.meta.frameid;
             this.set('chunk.state.resource', index);
             this.fire('iron-signal', {name: 'updatestate', data: {id: id, mode: "resource", value: index}});
-            this.fire('iron-signal', {name: 'renderresource'});
+            var data = this.querySelectorAll('ts-resource-data');
+            for (var i = 0; i < data.length; i++) {
+                data[i].renderresource();
+            }
             this.setheight();
         },
 

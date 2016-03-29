@@ -224,8 +224,9 @@
          */
 
         logr: function (...args) {
-            return function (...data) {
-                return utils.log.apply(null, args.concat(data));
+            return function (data) {
+                utils.log.apply(null, args.concat(data));
+                return data;
             };
         },
 

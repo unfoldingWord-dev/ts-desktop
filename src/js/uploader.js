@@ -6,7 +6,7 @@ var net = require('net'),
     path = require('path'),
     utils = require('../js/lib/util'),
     _ = utils._,
-    log = utils.log,
+    logr = utils.logr,
     fs = utils.fs,
     keypair = require('keypair'),
     forge = require('node-forge');
@@ -46,9 +46,9 @@ function Uploader(dataPath) {
                 public: publicSsh,
                 private: privateSsh
             };
-        }).then(function (keys) {
-            log('Keys created!');
-
+        })
+        .then(logr('Keys created!'))
+        .then(function (keys) {
             var writePublicKey = fs.writeFile(paths.publicKeyPath, keys.public),
                 writePrivateKey = fs.writeFile(paths.privateKeyPath, keys.private).then(function () {
                     return fs.chmod(paths.privateKeyPath, '600');
@@ -56,16 +56,6 @@ function Uploader(dataPath) {
 
             return Promise.all([writePublicKey, writePrivateKey]).then(utils.ret(keys));
         });
-    };
-
-    var hasKeyPair = function () {
-        return fs.readdir(paths.sshPath).then(function (files) {
-            var hasPubKey = _.includes(files, paths.publicKeyName),
-                hasPrivateKey = _.includes(files, paths.privateKeyName),
-                hasBoth = hasPubKey && hasPrivateKey;
-
-            return hasBoth;
-        })
     };
 
     var readKeyPair = function () {

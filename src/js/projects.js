@@ -29,7 +29,7 @@ var map = guard('map'),
  *  e.g. var pm = App.projectsManager;
  */
 
-function ProjectsManager(query, configurator) {
+function ProjectsManager(query, configurator, srcDir) {
 
     // var puts = console.log.bind(console),  // Never used
     var write = wrap(fs, 'writeFile'),
@@ -683,9 +683,7 @@ function ProjectsManager(query, configurator) {
 
         saveTargetTranslation: function (translation, meta, user) {
             var paths = this.getPaths(meta);
-
-            // translation is an array
-            // translation[0].meta.frameid
+            var projectClass = meta.project_type_class;
 
             var makeComplexId = function (c) {
                 return c.meta.chapterid + '-' + c.meta.frameid;
@@ -696,8 +694,6 @@ function ProjectsManager(query, configurator) {
                     return v[prop] ? k : false;
                 };
             };
-
-            var isTranslation = this.isTranslation(meta);
 
             var chunks = _.chain(translation)
                 .indexBy(makeComplexId)
@@ -732,13 +728,6 @@ function ProjectsManager(query, configurator) {
                 finished_chunks: finishedFrames
             };
 
-            var license = "License\n\nThis work is made available under a Creative Commons Attribution-ShareAlike 4.0 International License (http://creativecommons.org/licenses/by-sa/4.0/).";
-            license += "\n\nYou are free to:\n\nShare — copy and redistribute the material in any medium or format";
-            license += "\n\nAdapt — remix, transform, and build upon the material for any purpose, even commercially.";
-            license += '\n\nUnder the following conditions:\n\nAttribution — You must attribute the work as follows: "Original work available at https://door43.org/." ';
-            license += "Attribution statements in derivative works should not in any way suggest that we endorse you or your use of this work.";
-            license += "\n\nShareAlike — If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original.";
-
             var writeFile = function (name, data) {
                 return function () {
                     return write(name, toJSON(data));
@@ -755,11 +744,35 @@ function ProjectsManager(query, configurator) {
                 };
             };
 
-            var updateChunk = function (c) {
-                var f = path.join(paths.projectDir, c.meta.chapterid, c.meta.frameid + '.txt'),
-                    hasContent = isTranslation ? !!c.transcontent : !!c.helpscontent.length;
+            var cleanChapterDir = function (data, chapter) {
+                var chapterpath = path.join(paths.projectDir, chapter);
+                return readdir(chapterpath).then(function (dir) {
+                    return !dir.length ? rm(chapterpath): true;
+                });
+            };
 
-                return hasContent ? write(f, isTranslation ? c.transcontent : toJSON(c.helpscontent)) : rm(f);
+            var cleanChapterDirs = function () {
+                return function () {
+                    var data = _.groupBy(translation, function (chunks) {
+                        return chunks.meta.chapterid;
+                    });
+                    return Promise.all(_.map(data, cleanChapterDir));
+                };
+            };
+
+            var updateChunk = function (chunk) {
+                var file = path.join(paths.projectDir, chunk.meta.chapterid, chunk.meta.frameid + '.txt');
+                var hasContent = false;
+                if (projectClass === "standard") {
+                    hasContent = !!chunk.transcontent;
+                }
+                if (projectClass === "helps") {
+                    hasContent = !!chunk.helpscontent.length;
+                }
+                if (projectClass === "extant" && (!!chunk.helpscontent[0].title || !!chunk.helpscontent[0].body)) {
+                    hasContent = true;
+                }
+                return hasContent ? write(file, projectClass === "standard" ? chunk.transcontent : toJSON(chunk.helpscontent)) : rm(file);
             };
 
             var updateChunks = function (data) {
@@ -768,11 +781,19 @@ function ProjectsManager(query, configurator) {
                 };
             };
 
+            var setLicense = function () {
+                return read(path.join(srcDir, 'assets', 'LICENSE.md'))
+                    .then(function(data) {
+                        return write(paths.license, data);
+                    });
+            };
+
             return mkdirp(paths.projectDir)
-                .then(write(paths.license, license))
+                .then(setLicense())
                 .then(writeFile(paths.manifest, manifest))
                 .then(makeChapterDirs(chunks))
                 .then(updateChunks(chunks))
+                .then(cleanChapterDirs())
                 .then(function () {
                     return git.init(paths.projectDir);
                 })

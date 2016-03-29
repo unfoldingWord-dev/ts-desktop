@@ -2,7 +2,7 @@
 
 'use strict';
 
-let Git = require('nodegit'),
+let Git,
     utils = require('../js/lib/util'),
     wrap = utils.promisify,
     logr = utils.logr,
@@ -10,6 +10,14 @@ let Git = require('nodegit'),
     fs = require('fs'),
     readdir = wrap(fs, 'readdir'),
     Gogs = require('gogs-client');
+
+try {
+    Git = require('nodegit');
+} catch(e) {
+    if(process.env.NODE_ENV !== 'test') {
+        throw e;
+    }
+}
 
 function GitInterface(auth) {
 
@@ -19,6 +27,22 @@ function GitInterface(auth) {
 
     return {
 
+        /**
+         * Deletes a users' account
+         * @param user {object} the user to be deleted. Requires username
+         * @returns {Promise} resolves if successful
+         */
+        deleteAccount: function (user) {
+            return api.deleteUser(user, auth);
+        },
+
+        /**
+         * Creates a new user account.
+         * The users' full name will be added to their gogs profile
+         * and an access token will be created and attached to the returned user object
+         * @param user {object} the user to be created. Requires username, full_name, email, password
+         * @returns {Promise.<object>} the newly created user
+         */
         createAccount: function (user) {
             return api.createUser(user, auth, true)
                 .then(function (newUser) {
@@ -34,6 +58,12 @@ function GitInterface(auth) {
                 });
         },
 
+        /**
+         * Logs in to a gogs account.
+         *
+         * @param userObj the user to log in as. Requires username, password
+         * @returns {Promise.<object>} the user object
+         */
         login: function (userObj) {
             return api.getUser(userObj, auth).then(function (user) {
                 return api.listTokens(userObj)
@@ -82,6 +112,13 @@ function GitInterface(auth) {
         },
 
         // Returns the last commit hash/id for the repo at dir
+        //
+        /**
+         * Returns the last commit hash/id for the repo at dir
+         * @param dir {string} the path to the git repository
+         * @returns {Promise.<string>}
+         */
+
         getHash: function (dir) {
             return Git.Repository.open(dir).then(function (repo) {
                 return repo.getCurrentBranch();

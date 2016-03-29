@@ -570,7 +570,8 @@ function ProjectsManager(query, configurator, srcDir) {
                         var parentDir = extractPath;
                         var projectDir = path.join(extractPath, targetPath);
                         var manifest = path.join(projectDir, 'manifest.json');
-                        return {parentDir, projectDir, manifest};
+                        var license = path.join(projectDir, 'LICENSE.md');
+                        return {parentDir, projectDir, manifest, license};
                     });
                 })
                 .then(function (list) {
@@ -683,6 +684,7 @@ function ProjectsManager(query, configurator, srcDir) {
 
         saveTargetTranslation: function (translation, meta, user) {
             var paths = this.getPaths(meta);
+            var projectClass = meta.project_type_class;
 
             var makeComplexId = function (c) {
                 return c.meta.chapterid + '-' + c.meta.frameid;
@@ -693,8 +695,6 @@ function ProjectsManager(query, configurator, srcDir) {
                     return v[prop] ? k : false;
                 };
             };
-
-            var isTranslation = this.isTranslation(meta);
 
             var chunks = _.chain(translation)
                 .indexBy(makeComplexId)
@@ -761,11 +761,19 @@ function ProjectsManager(query, configurator, srcDir) {
                 };
             };
 
-            var updateChunk = function (c) {
-                var f = path.join(paths.projectDir, c.meta.chapterid, c.meta.frameid + '.txt'),
-                    hasContent = isTranslation ? !!c.transcontent : !!c.helpscontent.length;
-
-                return hasContent ? write(f, isTranslation ? c.transcontent : toJSON(c.helpscontent)) : rm(f);
+            var updateChunk = function (chunk) {
+                var file = path.join(paths.projectDir, chunk.meta.chapterid, chunk.meta.frameid + '.txt');
+                var hasContent = false;
+                if (projectClass === "standard") {
+                    hasContent = !!chunk.transcontent;
+                }
+                if (projectClass === "helps") {
+                    hasContent = !!chunk.helpscontent.length;
+                }
+                if (projectClass === "extant" && (!!chunk.helpscontent[0].title || !!chunk.helpscontent[0].body)) {
+                    hasContent = true;
+                }
+                return hasContent ? write(file, projectClass === "standard" ? chunk.transcontent : toJSON(chunk.helpscontent)) : rm(file);
             };
 
             var updateChunks = function (data) {

@@ -83,7 +83,7 @@
     function v5(project) {
         let manifest = project.manifest;
         let paths = project.paths;
-        let oldname = paths.projectDir.substring(paths.projectDir.lastIndexOf("\\") + 1);
+        let oldname = paths.projectDir.substring(paths.projectDir.lastIndexOf(path.sep) + 1);
         if (manifest.project.id === "tw") {
             manifest.project.id = "bible";
             manifest.project.name = "translationWords";
@@ -101,7 +101,10 @@
         let backupDir = App.configurator.getUserPath('datalocation', 'automatic_backups');
         let oldbackup = path.join(backupDir, oldname);
         let readyfile = path.join(paths.projectDir, 'READY');
+        let srcDir = path.resolve(path.join(__dirname, '../..'));
+        let license = fs.readFileSync(path.join(srcDir, 'assets', 'LICENSE.md'));
 
+        fs.writeFileSync(paths.license, license);
         rimraf.sync(readyfile);
         rimraf.sync(oldbackup);
         fs.renameSync(paths.projectDir, newpath);

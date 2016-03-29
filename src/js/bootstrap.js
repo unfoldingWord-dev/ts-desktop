@@ -141,7 +141,7 @@ process.stdout.write = console.log.bind(console);
                 dbPath = path.join(srcDir, 'index', 'index.sqlite'),
                 db = new Db(schemaPath, dbPath);
 
-            return new ProjectsManager(db, configurator);
+            return new ProjectsManager(db, configurator, srcDir);
         })(),
 
         reporter: new Reporter({

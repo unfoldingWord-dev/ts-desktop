@@ -270,7 +270,16 @@
 
             return App.git.stage(user, paths.projectDir)
                 .then(function () {
-                    return App.uploader.generateKeys();
+                    return App.util.getDeviceId();
+                })
+                .then(function (deviceId) {
+                    var getreg = App.uploader.getRegistrationInfo.bind(App.uploader, deviceId),
+                        genreg = App.uploader.generateRegistrationInfo.bind(App.uploader, deviceId),
+                        rereg = function () {
+                            return App.git.unregister(user).then(genreg);
+                        };
+
+                    return getreg().catch(rereg);
                 })
                 .then(function (reg) {
                     user.reg = reg;
@@ -280,7 +289,6 @@
                     return App.git.createRepo(user, repo);
                 })
                 .then(function (repo) {
-                    console.log("start push");
                     return App.git.push(user, paths.projectDir, repo);
                 })
                 .then(function () {
@@ -289,6 +297,7 @@
                     mythis.set('options.loading', false);
                 })
                 .catch(function (err) {
+                    console.log(err);
                     App.reporter.logError(err || 'failed to push');
                     if(typeof err === 'string' && err.indexOf('DENIED by fallthru')) {
                         App.reporter.logNotice('Destroying invalid ssh keys');

@@ -58,26 +58,23 @@ function Uploader(dataPath) {
         });
     };
 
-    var readKeyPair = function () {
+    var hasKeyPair = function () {
         return fs.readdir(paths.sshPath).then(function (files) {
             var hasPubKey = _.includes(files, paths.publicKeyName),
                 hasPrivateKey = _.includes(files, paths.privateKeyName),
                 hasBoth = hasPubKey && hasPrivateKey;
 
-            if (!hasBoth) {
-                throw 'No keypair found';
-            }
-
             return hasBoth;
         })
-        .then(function() {
+    };
+
+    var readKeyPair = function () {
             var readPubKey = fs.readFile(paths.publicKeyPath),
                 readSecKey = fs.readFile(paths.privateKeyPath);
 
-            return Promise.all([readPubKey, readSecKey]);
-        })
-        .then(utils.map(String))
-        .then(_.zipObject.bind(_, ['public', 'private']));
+        return Promise.all([readPubKey, readSecKey])
+            .then(utils.map(String))
+            .then(_.zipObject.bind(_, ['public', 'private']));
     };
 
     return {
@@ -90,15 +87,15 @@ function Uploader(dataPath) {
             paths.sshPath = path;
         },
 
-        generateKeys: function (opts) {
-            var getDeviceId = (opts && opts.deviceId) ? Promise.resolve(opts.deviceId) : utils.getDeviceId();
+        getRegistrationInfo: function (deviceId) {
+            return readKeyPair().then(function (keys) {
+                return {keys, deviceId, paths};
+            });
+        },
 
-            return getDeviceId.then(function (deviceId) {
-                return readKeyPair().catch(function (err) {
-                    return createKeyPair(deviceId);
-                }).then(function (keys) {
-                    return {keys, deviceId, paths};
-                });
+        generateRegistrationInfo: function (deviceId) {
+            return createKeyPair(deviceId).then(function (keys) {
+                return {keys, deviceId, paths};
             });
         },
 
@@ -108,7 +105,6 @@ function Uploader(dataPath) {
         destroyKeys: function () {
             return utils.rm(paths.sshPath);
         }
-
     };
 }
 

@@ -195,10 +195,11 @@
          *  A wrapper for console.log that can be silenced based on the NODE_ENV.
          *   This is useful for running grunt/gulp tests, so that no output shows.
          */
-        log: function () {
+        log: function (...args) {
             if (process.env.NODE_ENV !== 'test') {
-                console.log.apply(console, arguments);
+                console.log.apply(console, args);
             }
+            return args;
         },
 
         /**
@@ -222,11 +223,9 @@
          *      });
          */
 
-        logr: function (msg) {
-            return function () {
-                var data = arguments.length === 1 ? arguments[0] : arguments;
-                utils.log(msg, data);
-                return data;
+        logr: function (...args) {
+            return function (...data) {
+                return utils.log.apply(null, args.concat(data));
             };
         },
 

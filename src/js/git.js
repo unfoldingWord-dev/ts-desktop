@@ -58,8 +58,14 @@ function GitInterface(auth) {
                     title: keyStub.title,
                     key: user.reg.keys.public
                 }, user);
+            });
+        },
+
+        unregister: function (user) {
+            return api.listPublicKeys(user).then(function (keys) {
+                return _.find(keys, keyStub);
             }).then(function (key) {
-                console.log(key);
+                return key ? api.deletePublicKey(key, user) : false;
             });
         },
 
@@ -72,9 +78,6 @@ function GitInterface(auth) {
                     description: 'ts-desktop: ' + reponame,
                     private: false
                 }, user);
-            }).then(function (repo) {
-                console.log(repo);
-                return repo;
             });
         },
 
@@ -162,9 +165,6 @@ function GitInterface(auth) {
                                 return true;
                             },
                             credentials: function (url, username) {
-                                console.log(arguments);
-                                console.log(user);
-
                                 if (isSSH) {
                                     return Git.Cred.sshKeyNew(
                                         username,
@@ -179,7 +179,7 @@ function GitInterface(auth) {
                         }
                     });
                 })
-                .then(logr('Files are pushed'));
+                .then(logr('Files are pushed', repo));
         },
 
         clone: function() {

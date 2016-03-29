@@ -101,7 +101,10 @@
         let backupDir = App.configurator.getUserPath('datalocation', 'automatic_backups');
         let oldbackup = path.join(backupDir, oldname);
         let readyfile = path.join(paths.projectDir, 'READY');
+        let srcDir = path.resolve(path.join(__dirname, '../..'));
+        let license = fs.readFileSync(path.join(srcDir, 'assets', 'LICENSE.md'));
 
+        fs.writeFileSync(paths.license, license);
         rimraf.sync(readyfile);
         rimraf.sync(oldbackup);
         fs.renameSync(paths.projectDir, newpath);

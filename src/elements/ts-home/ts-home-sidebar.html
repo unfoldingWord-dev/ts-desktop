@@ -105,6 +105,7 @@
 
         logout: function () {
             this.fire('iron-signal', {name: 'updateuser', data: {}});
+            App.uploader.destroyKeys();
         },
 
         restore: function() {

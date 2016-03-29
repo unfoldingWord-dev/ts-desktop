@@ -580,6 +580,42 @@ function ProjectsManager(query, configurator) {
                 });
         },
 
+        importTargetTranslation: function (filePath) {
+
+            let targetDir = configurator.getValue('targetTranslationsDir'),
+                basename = path.basename(filePath, '.tstudio'),
+                extractPath = path.join(tmpDir, basename);
+
+            var project = makeProjectPathsForProject(basename);
+
+            //first make sure that the Target Translation is migrated
+            targetTranslationMigrator.migrate(project)
+                .catch(function (err) {
+                     console.log(err);
+                    return false;
+            });
+
+
+            //if the translation does no exist yet, just place it in    
+                if(!fileExists(extractPath)){
+                   this.restoreTargetTranslation(filePath); 
+                }
+                else{//translation already exists so changes need to be merged
+                    /*
+                        1Commit any outstanding changes to the Target Translations.
+                        2Add/Replace a new remote on the local target translation that points to the file path of the target translation that will be imported.
+                        3Create/replace a new branch on the local target translation that points to new/master.
+                        4Merge the new branch into the master branch (make sure you have master checked out) without fast forward. e.g. git merge new --no-ff.
+                        5Manually merge (not with git) the original manifest.json in the imported Target Translation (the version before the merge) into the original manifest.json of the local target translation (the version before the merge). We just want to merge translators, finished_chunks, parent_draft_status, and source_translations. The rest of the local manifest will remain the same. Save these changes into the local Target Translation.
+                        6Optionally remove the new remote and new branch from the local Target Translation repository.
+                        7Delete the imported target translation (unless you need it for something else).
+                        8Update the generator information in the local target translation manifest.json.
+
+                        If any of the above steps fails the changes to the local target translation should be rolled back.
+                    */
+                }
+        },
+
         fileExists: function (filePath) {
             return stat(filePath).then(function (){
                 return true;

@@ -195,7 +195,7 @@ function GitInterface(auth) {
                     return Git.Remote.createAnonymous(localrepo, remoteUrl);
                 })
                 .then(function(remote) {
-                    return remote.push(['+refs/heads/*:refs/heads/*'], {
+                    return remote.push(['+refs/heads/master:refs/heads/master'], {
                         callbacks: {
                             certificateCheck: function () {
                                 // no certificate check, let it pass thru

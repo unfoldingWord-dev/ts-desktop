@@ -145,7 +145,7 @@
 
         <div id="header">
             <div id="heading">
-                <span id="title">User Login</span>
+                <span id="title">Login Options</span>
             </div>
         </div>
         <div id="body">
@@ -159,13 +159,13 @@
                     <input is="iron-input" bind-value="{{newinfo.full_name}}" placeholder="Full Name or Pseudonym">
                 </div>
                 <div class="optionbuttons">
-                    <paper-button class="nofill" on-tap="openserver">Login with Server Account</paper-button>
+                    <paper-button class="nofill" on-tap="openserver">Login with Door43 Account</paper-button>
                     <paper-button raised class="fill" on-tap="adduser">Ok</paper-button>
                 </div>
             </div>
             <div id="server" class="optionbox hide">
                 <div class="optionheader">
-                    <h2>Server Login</h2>
+                    <h2>Door43 Login</h2>
                     <p>Required to publish projects.</p>
                     <p><iron-icon icon="notification:wifi"></iron-icon> This will use your internet connection</p>
                 </div>
@@ -180,7 +180,7 @@
             </div>
             <div id="create" class="optionbox hide">
                 <div class="optionheader">
-                    <h2>Server Account Creation</h2>
+                    <h2>Door43 Account Creation</h2>
                     <p><iron-icon icon="notification:wifi"></iron-icon> This will use your internet connection</p>
                 </div>
                 <div class="optionbody">
@@ -280,7 +280,7 @@
 
         adduser: function () {
             var user = this.newinfo;
-            user.type = "Local User";
+            user.type = "Local Login";
             this.fire('iron-signal', {name: 'updateuser', data: user});
             this.reset();
         },
@@ -304,7 +304,7 @@
             App.git.login(user).then(function (user) {
                 mythis.set('options.body', "Login Verified");
                 user.full_name = user.full_name === '' ? user.username : user.full_name;
-                user.type = "Server User";
+                user.type = "Door43 Login";
                 setTimeout(function() {
                     mythis.fire('iron-signal', {name: 'updateuser', data: user});
                     mythis.reset();
@@ -350,7 +350,7 @@
             App.git.createAccount(user).then(function (user) {
                 mythis.set('options.body', "Account Created");
                 user.full_name = user.full_name === '' ? user.username : user.full_name;
-                user.type = "Server User";
+                user.type = "Door43 Login";
                 setTimeout(function() {
                     mythis.fire('iron-signal', {name: 'updateuser', data: user});
                     mythis.reset();

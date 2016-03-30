@@ -166,6 +166,7 @@
                 </div>
                 <div id="buttonbox">
                     <paper-button dialog-confirm on-tap="gohome">Return Home</paper-button>
+                    <paper-button dialog-dismiss>Close</paper-button>
                 </div>
             </template>
         </paper-dialog>
@@ -300,7 +301,7 @@
                     var errmessage = "We're sorry.  An error occurred while trying to upload your project.";
                     var logmessage = "";
                     if(err.status === 401) {
-                        errmessage = "Cannot publish as a local user.  Please login with a server account.";
+                        errmessage = "Cannot publish with a local login.  Please login with a Door43 account.";
                     }
                     if (err.status) {
                         logmessage = "Error: " + err.status + " " + err.data;

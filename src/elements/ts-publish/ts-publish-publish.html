@@ -297,14 +297,19 @@
                     mythis.set('options.loading', false);
                 })
                 .catch(function (err) {
-                    console.log(err);
-                    App.reporter.logError(err || 'failed to push');
-                    if(typeof err === 'string' && err.indexOf('DENIED by fallthru')) {
-                        App.reporter.logNotice('Destroying invalid ssh keys');
-                        App.uploader.destroyKeys();
+                    var errmessage = "We're sorry.  An error occurred while trying to upload your project.";
+                    var logmessage = "";
+                    if(err.status === 401) {
+                        errmessage = "Cannot publish as a local user.  Please login with a server account.";
                     }
+                    if (err.status) {
+                        logmessage = "Error: " + err.status + " " + err.data;
+                    } else {
+                        logmessage = err;
+                    }
+                    App.reporter.logError(logmessage);
                     mythis.set('options.title', "Publish Failed");
-                    mythis.set('options.body', "We're sorry.  An error occurred while trying to upload your project. Please try again.");
+                    mythis.set('options.body', errmessage);
                     mythis.set('options.loading', false);
                 });
         }

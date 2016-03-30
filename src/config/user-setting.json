@@ -27,35 +27,11 @@
         "visible": true
     },
     {
-        "name": "authserver",
-        "mainText": "Authentication Server",
-        "value": "ts.door43.org",
-        "group": "upload",
-        "enabled": true,
-        "visible": true
-    },
-    {
-        "name": "authserverport",
-        "mainText": "Authentication Server Port",
-        "value": "9095",
-        "group": "upload",
-        "enabled": true,
-        "visible": true
-    },
-    {
         "name": "dataserver",
         "mainText": "Data Server",
-        "value": "gitolite3@ts.door43.org",
+        "value": "git.door43.org",
         "group": "upload",
-        "enabled": true,
-        "visible": true
-    },
-    {
-        "name": "dataserverport",
-        "mainText": "Data Server Port",
-        "value": "9299",
-        "group": "upload",
-        "enabled": true,
+        "enabled": false,
         "visible": true
     },
     {

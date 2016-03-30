@@ -21,7 +21,7 @@
     "async": "^1.4.2",
     "fs-extra": "^0.26.7",
     "getmac": "^1.0.7",
-    "gogs-client": "0.0.7",
+    "gogs-client": "0.0.8",
     "jsonfile": "^2.2.1",
     "keypair": "^1.0.0",
     "locale": "0.0.20",

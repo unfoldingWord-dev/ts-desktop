@@ -195,7 +195,8 @@
          *  A wrapper for console.log that can be silenced based on the NODE_ENV.
          *   This is useful for running grunt/gulp tests, so that no output shows.
          */
-        log: function (...args) {
+        log: function () {
+            var args = [].slice.apply(arguments);
             if (process.env.NODE_ENV !== 'test') {
                 console.log.apply(console, args);
             }
@@ -223,7 +224,9 @@
          *      });
          */
 
-        logr: function (...args) {
+        logr: function () {
+            var args = [].slice.apply(arguments);
+            
             return function (data) {
                 utils.log.apply(null, args.concat(data));
                 return data;

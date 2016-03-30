@@ -101,10 +101,13 @@
 
                 if (completed) {
                     for (i = 0; i < textarray.length; i++) {
-                        if (textarray[i].substring(0, 2) === "\\v") {
-                            verse = textarray[i].substring(2);
+                        if (textarray[i] === "\\v") {
+                            verse = textarray[i+1];
                             returnstr += numstr1 + verse + numstr2;
-                        } else if (textarray[i].substring(0, 2) !== "\\c") {
+                            i++;
+                        } else if (textarray[i] === "\\c") {
+                            i++;
+                        } else {
                             returnstr += textarray[i] + " ";
                         }
                     }
@@ -112,7 +115,9 @@
                     contentbox.classList.remove("editmode");
                 } else {
                     for (i = 0; i < textarray.length; i++) {
-                        if (textarray[i].substring(0, 2) !== "\\v" && textarray[i].substring(0, 2) !== "\\c") {
+                        if (textarray[i] === "\\v" || textarray[i] === "\\c") {
+                            i++
+                        } else {
                             returnstr += textarray[i] + " ";
                         }
                     }

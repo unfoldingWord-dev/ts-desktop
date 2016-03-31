@@ -15,7 +15,7 @@ let targetDir = path.resolve('./unit_tests/importer/data/tmp/projects');
 let tempDir = path.resolve('./unit_tests/importer/data/tmp');
 
 let translation = {
-    "package_version": 5,
+    "package_version": 6,
     "format": "usfm",
     "generator": {
         "name": "ts-desktop",
@@ -55,7 +55,8 @@ let translation = {
     "translators": [],
     "finished_chunks": [],
     "currentsource": 0,
-    "basename": "mat-es",
+    "project_type_class": "standard",
+    "unique_id": "es_mat_text_reg",
     "fullname": "mat-es",
     "completion": 0
 };
@@ -70,15 +71,21 @@ let config = {
     }
 };
 
+let user = {
+    username: 'test',
+    email: 'test@test.com'
+};
+
 var p = path.resolve('.'),
-    schemaPath = path.join(p,'src','config','schema.sql'),
-    dbPath = path.join(p,'src','index','index.sqlite'),
-    tempProjPath = path.join(p, 'unit_tests', 'importer', 'data', 'tmp' , 'projects', 'uw-mat-es'),
+    srcPath = path.join(p,'src'),
+    schemaPath = path.join(srcPath,'config','schema.sql'),
+    dbPath = path.join(srcPath,'index','index.sqlite'),
+    tempProjPath = path.join(p, 'unit_tests', 'importer', 'data', 'tmp' , 'projects', 'es_mat_text_reg'),
     projTemplatePath = path.join(p, 'unit_tests', 'importer', 'data', '_template', 'manifest.json'),
     expectedFile = path.join(tempProjPath, '28', '18.txt');
 
 let db = new Db(schemaPath, dbPath);
-let pm = new ProjectsManager(db, config);
+let pm = new ProjectsManager(db, config, srcPath);
 
 describe('@Importer', function () {
 
@@ -93,7 +100,7 @@ describe('@Importer', function () {
                 path: path.resolve('unit_tests/importer/data/matthew.usfm')
             };
             let importer = new Importer(config,pm);
-            importer.importUSFMFile(file,translation).then(function(){
+            importer.importUSFMFile(file,translation,user).then(function(){
                 var data = fs.readFileSync(expectedFile, {encoding: 'utf-8'});
                 assert.equal(data, '\\v18 Jesus veio para eles e falou, "Toda autoridade foi dada para mim no céu e na terra. \\v19 Por isso vão e façam discípulos de todas as nações. Batize-os no nome do Pai, do Filho e do Espírito Santo.    ');
 
@@ -114,7 +121,7 @@ describe('@Importer', function () {
                 path: path.resolve('unit_tests/importer/data/matthew.zip')
             };
             let importer = new Importer(config,pm);
-            importer.importUSFMFile(file,translation).then(function(){
+            importer.importUSFMFile(file,translation,user).then(function(){
                 var data = fs.readFileSync(expectedFile, {encoding: 'utf-8'});
                 assert.equal(data, '\\v18 Jesus veio para eles e falou, "Toda autoridade foi dada para mim no céu e na terra. \\v19 Por isso vão e façam discípulos de todas as nações. Batize-os no nome do Pai, do Filho e do Espírito Santo.    ');
 
@@ -135,7 +142,7 @@ describe('@Importer', function () {
                 path: path.resolve('unit_tests/importer/data/failing_file.usfm')
             };
             let importer = new Importer(config,pm);
-            importer.importUSFMFile(file,translation).then(function(){
+            importer.importUSFMFile(file,translation,user).then(function(){
                 assert.equal(1,2);
             }).catch(function(e){
                 assert.equal('This is not a valid USFM file.',e.message);

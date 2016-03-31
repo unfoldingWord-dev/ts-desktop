@@ -16,7 +16,7 @@ function Importer(configurator, pm) {
          * @param file {File} the path to the archive or txt file
          * @returns {Promise.<boolean>}
          */
-        importUSFMFile: function (file,translation) {
+        importUSFMFile: function (file, translation, user) {
             //console.log("importing USFM", JSON.stringify(file), "to project", JSON.stringify(translation));
             var self = this;
             let fileExt = file.name.split('.').pop().toLowerCase();
@@ -25,18 +25,18 @@ function Importer(configurator, pm) {
                 return self.getTxtFilesFromZip(file).then(function (files) {
                     //console.log("got files", files);
                     let txtFile = files[0];
-                    var promise = self.importSingleUSFMFile(txtFile,translation);
+                    var promise = self.importSingleUSFMFile(txtFile,translation,user);
                     for (var i = 1; i < files.length; i++) {
                         txtFile = files[i];
                         promise = promise.then(function(){
-                            return self.importSingleUSFMFile(txtFile,translation);
+                            return self.importSingleUSFMFile(txtFile,translation,user);
                         });
                     }
                     return promise;
                 });
             } else {
                 //console.log("running single file import");
-                return self.importSingleUSFMFile(file.path,translation);
+                return self.importSingleUSFMFile(file.path,translation,user);
             }
         },
 
@@ -134,7 +134,7 @@ function Importer(configurator, pm) {
             });
         },*/
 
-        importSingleUSFMFile: function (usfmFile, projdata) {
+        importSingleUSFMFile: function (usfmFile, projdata, user) {
             let self = this;
             return pm.loadTargetTranslation(projdata).then(function(curProj){
                 //console.log('curProj', curProj);
@@ -195,7 +195,7 @@ function Importer(configurator, pm) {
                             });
                         }
 
-                        return pm.saveTargetTranslation(chunkFileNames,projdata);
+                        return pm.saveTargetTranslation(chunkFileNames,projdata,user);
                     });
                 });
             });

@@ -481,7 +481,7 @@
           for(var i=0; i < chooser.files.length; i ++) {
               var fileExt = chooser.files[i].name.split('.').pop().toLowerCase();
               if(fileExt === "zip" || fileExt === "txt" || fileExt === "usfm"){
-                  App.importer.importUSFMFile(chooser.files[0],proj).then(function(){
+                  App.importer.importUSFMFile(chooser.files[0],proj,this.currentuser).then(function(){
                       mythis.set('options.title', "Import Complete");
                       mythis.set('options.body', "Your file has been imported successfully.  Thanks.");
                       mythis.set('options.loading', false);

@@ -40,38 +40,6 @@
         }
     },
     {
-        "name": "authServer",
-        "value": "ts.door43.org",
-        "meta":{
-            "mutable": false,
-            "type": "string"
-        }
-    },
-    {
-        "name": "authServerPort",
-        "value": "9095",
-        "meta":{
-            "mutable": false,
-            "type": "string"
-        }
-    },
-    {
-        "name": "dataServer",
-        "value": "gitolite3@ts.door43.org",
-        "meta":{
-            "mutable": false,
-            "type": "string"
-        }
-    },
-    {
-        "name": "dataServerPort",
-        "value": "9299",
-        "meta":{
-            "mutable": false,
-            "type": "string"
-        }
-    },
-    {
         "name": "mediaServer",
         "value": "https://api.unfoldingword.org",
         "meta":{

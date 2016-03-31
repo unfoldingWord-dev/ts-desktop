@@ -75,26 +75,6 @@
             margin: auto;
         }
 
-        #confirm {
-            width: 350px;
-            height: 175px;
-        }
-
-        #confirm p {
-            font-size: 110%;
-        }
-
-        #confirmbuttons {
-            display: flex;
-            justify-content: flex-end;
-            padding: 0 50px;
-            color: var(--secondary-text-color);
-        }
-
-        #confirmbuttons paper-button:hover {
-            color: var(--accent-color);
-        }
-
         #loading {
             width: 320px;
             height: 220px;
@@ -172,7 +152,7 @@
             </div>
         </div>
 
-        <paper-dialog id="loading" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+        <paper-dialog id="loading" class="popup" modal="true" exit-animation="scale-down-animation">
             <template is="dom-if" if="{{options.loading}}">
                 <p>{{options.body}}</p>
                 <div id="bar">
@@ -186,19 +166,9 @@
                 </div>
                 <div id="buttonbox">
                     <paper-button dialog-confirm on-tap="gohome">Return Home</paper-button>
+                    <paper-button dialog-dismiss>Close</paper-button>
                 </div>
             </template>
-        </paper-dialog>
-
-        <paper-dialog id="confirm" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <h2>Overwrite?</h2>
-            <div>
-                <p>This file already exists. Overwrite?</p>
-            </div>
-            <div id="confirmbuttons">
-                <paper-button dialog-dismiss>No</paper-button>
-                <paper-button on-tap="executeexport">Confirm</paper-button>
-            </div>
         </paper-dialog>
 
     </template>
@@ -226,6 +196,10 @@
                 type: Object,
                 value: {}
             },
+            currentuser: {
+                type: Object,
+                value: {}
+            },
             options: {
                 type: Object,
                 value: {loading: false, title: "", body: ""}
@@ -247,56 +221,40 @@
             var mythis = this;
             var meta = this.currentproject.data;
             var translation = this.currentproject.translation;
-            var extension = '.txt';
-            var name = 'uw-' + meta.fullname;
-            var confirm = this.$.confirm;
+            var mediaServer = App.configurator.getUserSetting('mediaserver');
+            var name = meta.unique_id;
+            var filePath;
 
-            if(translation[0].meta.format === 'default'){
-                extension = '.zip';
+            if (meta.format === 'markdown') {
+                filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'Zip Files', extensions: ['zip']}]}});
+            } else {
+                filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'Text Files', extensions: ['txt']}]}});
+            }
+            if (!filePath) {
+                return;
             }
 
-            var filename = App.ipc.sendSync('save-as', {name: name});
-            App.configurator.setValue("export-filename", filename);
-
-            return App.projectsManager.fileExists(filename + extension)
-                .then (function (stat) {
-                    if (stat) {
-                        confirm.open();
-                    } else if (filename) {
-                        mythis.executeexport();
-                    }
-                });
-        },
-
-        executeexport: function () {
-            var mythis = this;
-            var loading = this.$.loading;
-            var translation = this.currentproject.translation;
-            var meta = this.currentproject.data;
-            var filename = App.configurator.getValue("export-filename");
-            var confirm = this.$.confirm;
-            var mediaServer = App.configurator.getUserSetting('mediaserver');
-
-            confirm.close();
             mythis.set('options.body', "Exporting Project.  Please wait...");
             mythis.set('options.loading', true);
-            loading.open();
+            mythis.$.loading.open();
 
-            return App.projectsManager.exportTranslation(translation, meta, filename, mediaServer)
-                .then(function () {
-                    mythis.set('options.title', "Project Exported");
-                    mythis.set('options.body', "Your project has been successfully saved to a file.  Thanks.");
-                    mythis.set('options.loading', false);
-                })
-                .catch(function (err) {
-                    var errmessage = "We're sorry.  An error occurred while trying to save your project";
-                    if(err !== null) {
-                        errmessage = err;
-                    }
-                    mythis.set('options.title', "Export Failed");
-                    mythis.set('options.body', errmessage);
-                    mythis.set('options.loading', false);
-                });
+            setTimeout(function() {
+                App.projectsManager.exportTranslation(translation, meta, filePath, mediaServer)
+                    .then(function () {
+                        mythis.set('options.title', "Project Exported");
+                        mythis.set('options.body', "Your project has been successfully exported to a file.  Thanks.");
+                        mythis.set('options.loading', false);
+                    })
+                    .catch(function (err) {
+                        var errmessage = "We're sorry.  An error occurred while trying to export your project";
+                        if(err !== null) {
+                            errmessage = err;
+                        }
+                        mythis.set('options.title', "Export Failed");
+                        mythis.set('options.body', errmessage);
+                        mythis.set('options.loading', false);
+                    });
+            }, 500);
         },
 
         upload: function() {
@@ -304,27 +262,35 @@
             var mythis = this;
             var meta = this.currentproject.data;
             var paths = App.projectsManager.getPaths(meta);
-            var repo = 'uw-' + meta.fullname;
+            var repo = meta.unique_id;
+            var user = this.currentuser;
 
             this.set('options.body', "Uploading Project.  Please wait...");
             this.set('options.loading', true);
             loading.open();
 
-            return App.projectsManager.createReadyFile(meta)
+            return App.git.stage(user, paths.projectDir)
                 .then(function () {
-                    return App.git.stage(paths.projectDir);
+                    return App.util.getDeviceId();
                 })
-                .then(function () {
-                    return App.uploader.register({
-                        'host': App.configurator.getUserSetting('authserver'),
-                        'port': App.configurator.getUserSetting('authserverport')
-                    });
+                .then(function (deviceId) {
+                    var getreg = App.uploader.getRegistrationInfo.bind(App.uploader, deviceId),
+                        genreg = App.uploader.generateRegistrationInfo.bind(App.uploader, deviceId),
+                        rereg = function () {
+                            return App.git.unregister(user).then(genreg);
+                        };
+
+                    return getreg().catch(rereg);
                 })
                 .then(function (reg) {
-                    return App.git.push(paths.projectDir, repo, reg, {
-                        'host': App.configurator.getUserSetting('dataserver'),
-                        'port': App.configurator.getUserSetting('dataserverport')
-                    });
+                    user.reg = reg;
+                    return App.git.register(user);
+                })
+                .then(function () {
+                    return App.git.createRepo(user, repo);
+                })
+                .then(function (repo) {
+                    return App.git.push(user, paths.projectDir, repo);
                 })
                 .then(function () {
                     mythis.set('options.title', "Project Published");
@@ -332,13 +298,19 @@
                     mythis.set('options.loading', false);
                 })
                 .catch(function (err) {
-                    App.reporter.logError(err || 'failed to push');
-                    if(typeof err === 'string' && err.indexOf('DENIED by fallthru')) {
-                        App.reporter.logNotice('Destroying invalid ssh keys');
-                        App.uploader.destroyKeys();
+                    var errmessage = "We're sorry.  An error occurred while trying to upload your project.";
+                    var logmessage = "";
+                    if(err.status === 401) {
+                        errmessage = "Cannot publish with a local login.  Please login with a Door43 account.";
                     }
+                    if (err.status) {
+                        logmessage = "Error: " + err.status + " " + err.data;
+                    } else {
+                        logmessage = err;
+                    }
+                    App.reporter.logError(logmessage);
                     mythis.set('options.title', "Publish Failed");
-                    mythis.set('options.body', "We're sorry.  An error occurred while trying to upload your project. Please try again.");
+                    mythis.set('options.body', errmessage);
                     mythis.set('options.loading', false);
                 });
         }

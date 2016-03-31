@@ -1,22 +1,43 @@
-//'use strict';
-//
-//process.env.NODE_ENV = 'test';
-//
-//let assert = require('assert');
-//let rimraf = require('rimraf');
-//let path = require('path');
-//let mkdirp = require('mkdirp');
-//let Uploader = require('../../src/js/uploader').Uploader;
-//let fs = require('fs');
-//let _ = require('lodash');
-//let Git = require('../../src/js/git');
-//let git = new Git();
-//let uploader = new Uploader();
+'use strict';
+
+process.env.NODE_ENV = 'test';
+
+let assert = require('assert');
+// let rimraf = require('rimraf');
+// let path = require('path');
+// let mkdirp = require('mkdirp');
+// let Uploader = require('../../src/js/uploader').Uploader;
+// let fs = require('fs');
+// let _ = require('lodash');
+let Git = require('../../src/js/git');
+let Gogs = require('gogs-client');
+
+var config = {};
+try {
+    config = require('./config');
+} catch (e) {
+    console.log('Please provide ./unit_tests/git/config.json to run git tests');
+    return;
+}
+
+let git = new Git({
+    token: config.token
+});
+let newUser = config.newUser;
+let createdUser = null;
+
+
+// TRICKY: for some reason nodegit does not play nice.
+// So you must comment out the nodegit require in the git module when running these tests
+
 //
 //uploader.sshPath = path.resolve('unit_tests/git/ssh');
 //
-//describe('@Git', function () {
-//    this.timeout(60000);
+describe('@Git', function () {
+   this.timeout(6000);
+
+
+
 //
 //    let repoDir = path.resolve('unit_tests/git/testrepo'),
 //        testFileName = 'sample.txt',
@@ -57,7 +78,43 @@
 //    function deleteProject (cb) {
 //        rimraf(repoDir, cb);
 //    }
-//
+
+    before(function(done) {
+        git.deleteAccount(newUser).then(done, function() {
+            done();
+        });
+    });
+    after(function(done) {
+        git.deleteAccount(newUser).then(done, function() {
+            done();
+        });
+    });
+
+    describe('@CreateAccount', function() {
+        it('should create a new gogs account', function(done) {
+            git.createAccount(newUser).then(function(user) {
+                createdUser = user;
+                assert(true);
+            }).then(done, done);
+        });
+    });
+
+    describe('@Login', function() {
+       it('should log in with the user credentials', function(done) {
+           git.login(newUser).then(function(user) {
+               assert(true);
+           }).then(done, done);
+       });
+    });
+
+    describe('@DeleteAccount', function() {
+        it('should delete the user account', function(done) {
+            git.deleteAccount(createdUser).then(function() {
+                assert(true);
+            }).then(done, done);
+        });
+    });
+
 //    describe('@GitBasic', function () {
 //
 //        before(createDummyProject);
@@ -136,4 +193,4 @@
 //            });
 //        });
 //    });
-//});
+});

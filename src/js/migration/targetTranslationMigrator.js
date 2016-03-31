@@ -5,48 +5,53 @@
     let _ = require('lodash'),
         path = require('path'),
         fs = require('fs'),
+        rimraf = require('rimraf'),
         utils = require('../../js/lib/util'),
         jsonfile = require('jsonfile');
     /**
      * Performs the nessesary migrations on a target translation.
      * Migrations should always pass through in order to collect all needed updates
      * without having to always update past migrations.
-     * @param dir {string} the target translation directory
+     * @param paths {object}
      * @returns {Promise.<boolean>} true if migration was successful
      */
-    function migrate (dir) {
+    function migrate (paths) {
         return new Promise(function(resolve, reject) {
             try {
-                let manifestFile = path.join(dir, 'manifest.json');
-                jsonfile.readFile(manifestFile, function(readErr, manifest) {
+
+                jsonfile.readFile(paths.manifest, function(readErr, manifest) {
                     if(readErr !== null) {
                         reject('failed to read the manifest ' + readErr);
                     } else {
-                        let packageVersion = manifest.package_version;
+                        let project = {manifest: manifest, paths: paths};
+                        let packageVersion = project.manifest.package_version;
                         switch (packageVersion) {
                             case 2:
-                                manifest = v2(manifest);
+                                project = v2(project);
                             case 3:
-                                manifest = v3(manifest);
+                                project = v3(project);
                             case 4:
-                                manifest = v4(manifest, dir);
+                                project = v4(project);
                             case 5:
-                                manifest = v5(manifest);
+                                project = v5(project);
+                            case 6:
+                                project = v6(project);
                                 break;
                             default:
                                 reject('unsupported package version "' + packageVersion + '"');
                         }
 
                         // update generator
-                        manifest.generator.name = 'ts-desktop';
+                        project.manifest.generator.name = 'ts-desktop';
                         // TODO: update build number
 
                         // save manifest
-                        jsonfile.writeFile(manifestFile, manifest, {spaces:2}, function (writeErr) {
+
+                        jsonfile.writeFile(project.paths.manifest, project.manifest, {spaces:2}, function (writeErr) {
                             if(writeErr !== null) {
                                 reject('failed to update the manifest: ' + writeErr);
                             } else {
-                                resolve(true);
+                                resolve(project);
                             }
                         });
                     }
@@ -60,21 +65,73 @@
 
     /**
      * current version
-     * @param manifest {JSON}
-     * @retusn {JSON}
+     * @param project {object}
+     * @retusn {object}
      */
-    function v5(manifest) {
-        return manifest;
+    function v6(project) {
+        return project;
+    }
+
+    /**
+     * renaming the folder with new file naming convention, remove ready file,
+     * update tw and ta id's, update local storage values to new naming, remove
+     * backups with old names
+     * @param project {object}
+     * @returns {object}
+     */
+
+    function v5(project) {
+        let manifest = project.manifest;
+        let paths = project.paths;
+        let oldname = paths.projectDir.substring(paths.projectDir.lastIndexOf(path.sep) + 1);
+        if (manifest.project.id === "tw") {
+            manifest.project.id = "bible";
+            manifest.project.name = "translationWords";
+        }
+        if (manifest.project.id === "ta") {
+            manifest.project.id = "vol1";
+            manifest.project.name = "translationAcademy Vol 1";
+        }
+        let unique_id = manifest.target_language.id + "_" + manifest.project.id + "_" + manifest.type.id;
+        if (manifest.resource.id !== "") {
+            unique_id += "_" + manifest.resource.id;
+        }
+        let newpath = path.join(paths.parentDir, unique_id);
+        let localstorageitems = ["-chapter", "-index", "-selected", "-completion", "-source"];
+        let backupDir = App.configurator.getUserPath('datalocation', 'automatic_backups');
+        let oldbackup = path.join(backupDir, oldname);
+        let readyfile = path.join(paths.projectDir, 'READY');
+        let srcDir = path.resolve(path.join(__dirname, '../..'));
+        let license = fs.readFileSync(path.join(srcDir, 'assets', 'LICENSE.md'));
+
+        fs.writeFileSync(paths.license, license);
+        rimraf.sync(readyfile);
+        rimraf.sync(oldbackup);
+        fs.renameSync(paths.projectDir, newpath);
+
+        for (var i = 0; i < localstorageitems.length; i++) {
+            App.configurator.setValue(unique_id + localstorageitems[i], App.configurator.getValue(oldname + localstorageitems[i]));
+            App.configurator.unsetValue(oldname + localstorageitems[i]);
+        }
+
+        paths.projectDir = newpath;
+        paths.manifest = path.join(newpath, 'manifest.json');
+
+        // update package version
+        manifest.package_version = 6;
+
+        return {manifest: manifest, paths: paths};
     }
 
     /**
      * major restructuring of the manifest to provide better support for future front/back matter, drafts, rendering,
      * and solves issues between desktop and android platforms.
-     * @param manifest {JSON}
-     * @param dir {string} the path to the target translation
-     * @returns {JSON}
+     * @param project {object}
+     * @returns {object}
      */
-    function v4(manifest, dir) {
+    function v4(project) {
+        let manifest = project.manifest;
+        let dir = project.paths.projectDir;
         // translation type
         let typeId = _.get(manifest, 'project.type', 'text').toLowerCase();
         let typeNames = {
@@ -209,31 +266,33 @@
             fs.unlink(oldProjectTitlePath);
         }
 
-        return manifest;
+        return {manifest: manifest, paths: project.paths};
     }
 
     /**
      * We changed how translator information is stored
-     * we no longer store sensitive infromation like email an dphone number
+     * we no longer store sensitive information like email and phone number
      * we added a project_type
-     * @param manifest {JSON}
-     * @returns {JSON}
+     * @param project {object}
+     * @returns {object}
      */
-    function v3(manifest) {
+    function v3(project) {
+        let manifest = project.manifest;
         // flatten translators to an array of names
         manifest.translators = _.unique(_.map(_.values(manifest.translators), function(obj) {
             return typeof obj === 'string' ? obj : obj.name;
         }));
-        return manifest;
+        return {manifest: manifest, paths: project.paths};
     }
 
     /**
      * updated structure of finished frames, chapter titles/references, project id, and target language id
      *
-     * @param manifest {JSON}
-     * @returns {JSON} the migrated manifest or null
+     * @param project {object}
+     * @returns {object} the migrated manifest or null
      */
-    function v2(manifest) {
+    function v2(project) {
+        let manifest = project.manifest;
 
         // finished frames
         manifest.finished_frames = [];
@@ -274,7 +333,7 @@
             manifest.source_translations = {};
         }
 
-        return manifest;
+        return {manifest: manifest, paths: project.paths};
     }
 
     exports.migrate = migrate;

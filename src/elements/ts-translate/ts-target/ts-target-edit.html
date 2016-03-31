@@ -55,9 +55,9 @@
             width: 100%;
 		}
 
-        #content p {
+        #textholder p {
             line-height: 2;
-            margin-top: 0;
+            margin: 0;
         }
 
         #heading iron-icon {
@@ -85,7 +85,7 @@
             </div>
             <div id="content" class="editmode">
                 <iron-autogrow-textarea id="textbox" on-change="change" bind-value="{{chunk.transcontent}}" on-input="input"></iron-autogrow-textarea>
-                <p id="textholder"></p>
+                <div id="textholder"></div>
             </div>
         </paper-material>
 
@@ -111,28 +111,43 @@
             'rendertext(chunk.*)'
         ],
 
+        focustextbox: function () {
+            this.$.textbox.textarea.focus();
+        },
+
         rendertext: function () {
             if(this.chunk && this.chunk.srccontent) {
                 var completed = this.chunk.completed;
-                var standard = this.chunk.meta.standard;
+                var typeclass = this.chunk.data.project_type_class;
                 var contentbox = this.$.content;
                 var textbox = this.$.textbox;
                 var textholder = this.$.textholder;
-                var textarray = this.chunk.transcontent.split(" ");
+                var linearray = this.chunk.transcontent.split("\n");
                 var numstr1 = "\<sup\>";
                 var numstr2 = "\<\/sup\>";
+                var startp = "\<p class='style-scope ts-target-edit'\>";
+                var endp = "\<\/p\>";
                 var returnstr = "";
                 var verse = 0;
 
-                if (completed || !standard) {
-                    for (var i = 0; i < textarray.length; i++) {
-                        if (textarray[i].substring(0, 2) === "\\v") {
-                            verse = textarray[i].substring(2);
-                            returnstr += numstr1 + verse + numstr2;
-                        } else if (textarray[i].substring(0, 2) !== "\\c") {
-                            returnstr += textarray[i] + " ";
+                if (completed || typeclass !== "standard") {
+                    for (var j = 0; j < linearray.length; j++) {
+                        returnstr += startp;
+                        var wordarray = linearray[j].split(" ");
+                        for (var i = 0; i < wordarray.length; i++) {
+                            if (wordarray[i] === "\\v") {
+                                verse = wordarray[i+1];
+                                returnstr += numstr1 + verse + numstr2;
+                                i++;
+                            } else if (wordarray[i] === "\\c") {
+                                i++;
+                            } else {
+                                returnstr += wordarray[i] + " ";
+                            }
                         }
+                        returnstr += endp;
                     }
+
                     textholder.innerHTML = returnstr;
                     textholder.classList.remove("hide");
                     textbox.classList.add("hide");

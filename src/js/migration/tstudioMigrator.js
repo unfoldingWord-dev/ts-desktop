@@ -16,7 +16,7 @@
     function listTargetTranslations (file) {
         return new Promise(function(resolve, reject) {
             try {
-                let zip = new AdmZip(file.path);
+                let zip = new AdmZip(file);
                 let manifest = JSON.parse(zip.readAsText('manifest.json'));
                 let packageVersion = manifest.package_version;
                 switch (packageVersion) {
@@ -28,16 +28,17 @@
                     default:
                         reject('unsupported package version "' + packageVersion + '"');
                 }
-                // update archive to keep things pretty
-                zip.updateFile('manifest.json', JSON.stringify(manifest));
-                // TODO: writing back to the zip is broken. See https://github.com/cthackers/adm-zip/issues/64
-                //zip.writeZip(file.path);
-                // return paths
+
                 let paths = [];
                 _.forEach(manifest.target_translations, function(item) {
                     paths.push(item.path);
                 });
-                resolve(paths);
+
+                if (!paths.length) {
+                    reject('The archive is empty or not supported');
+                } else {
+                    resolve(paths);
+                }
             } catch (err) {
                 reject('failed to migrate tstudio archive: ' + err);
             }

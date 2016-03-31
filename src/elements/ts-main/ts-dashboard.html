@@ -6,8 +6,10 @@
 <link rel="import" href="../../components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../components/iron-icons/iron-icons.html">
 <link rel="import" href="../../components/iron-icons/notification-icons.html">
+<link rel="import" href="../../components/paper-progress/paper-progress.html">
 
 <link rel="import" href="./ts-app-titlebar.html">
+<link rel="import" href="./ts-login.html">
 <link rel="import" href="../ts-home/ts-home.html">
 <link rel="import" href="../ts-new/ts-new.html">
 <link rel="import" href="../ts-publish/ts-publish.html">
@@ -79,33 +81,6 @@
           font-size: 120%;
           padding: 10px;
           color: var(--secondary-text-color);
-      }
-
-      #login {
-          display: flex;
-          flex-direction: column;
-          width: 500px;
-          height: 450px;
-      }
-
-      #loginheader {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-      }
-
-      #loginbody {
-          display: flex;
-          flex-direction: column;
-          border-bottom: 1px solid var(--border-color);
-          border-top: 1px solid var(--border-color);
-          padding: 20px;
-      }
-
-      #loginbuttons {
-          display: flex;
-          justify-content: flex-end;
-          padding: 0 20px;
       }
 
       #loading {
@@ -235,22 +210,16 @@
 
   <template>
 
-      <ts-app-titlebar currentuser="{{currentuser}}"></ts-app-titlebar>
-
-      <template is="dom-if" if="{{accepted}}">
-          <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
-              <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]" backto="{{backto}}" currentuser="{{currentuser}}"></ts-home>
-              <ts-new data-route="new" route="{{route}}" projectlist="[[projectlist]]"></ts-new>
-              <ts-translate data-route="translate" route="{{route}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" backto="{{backto}}"></ts-translate>
-              <ts-publish data-route="publish" route="{{route}}" currentproject="{{currentproject}}"></ts-publish>
-              <ts-settings data-route="settings" route="{{route}}" backto="[[backto]]"></ts-settings>
-          </neon-animated-pages>
-      </template>
-      <template is="dom-if" if="{{!accepted}}">
-          <ts-terms accepted="{{accepted}}"></ts-terms>
-      </template>
-
-      <input id="restore" class="hide" type="file" accept=".tstudio" multiple />
+      <ts-app-titlebar currentuser="[[currentuser]]"></ts-app-titlebar>
+      <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
+          <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]"></ts-home>
+          <ts-new data-route="new" route="{{route}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]"></ts-new>
+          <ts-translate data-route="translate" route="{{route}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]"></ts-translate>
+          <ts-publish data-route="publish" route="{{route}}" currentproject="{{currentproject}}" currentuser="[[currentuser]]"></ts-publish>
+          <ts-settings data-route="settings" route="{{route}}"></ts-settings>
+          <ts-login data-route="login" currentuser="[[currentuser]]"></ts-login>
+          <ts-terms data-route="terms"></ts-terms>
+      </neon-animated-pages>
       <input id="import" class="hide" type="file" accept=".txt,.zip,.usfm" />
 
       <paper-dialog id="feedback" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -267,27 +236,7 @@
           </div>
       </paper-dialog>
 
-      <paper-dialog id="login" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-          <div id="loginheader">
-              <h2>Login to Server</h2>
-              <p><iron-icon icon="notification:wifi"></iron-icon> This will use your internet connection</p>
-          </div>
-          <div id="loginbody">
-              <input is="iron-input" bind-value="{{newinfo.loginname}}" placeholder="Username or Email" class$="[[loginclass(newinfo.login)]]">
-              <input is="iron-input" bind-value="{{newinfo.username}}" placeholder="Username" class$="[[createclass(newinfo.login)]]">
-              <input is="iron-input" bind-value="{{newinfo.email}}" placeholder="Email" class$="[[createclass(newinfo.login)]]">
-              <input is="iron-input" bind-value="{{newinfo.phone}}" placeholder="Phone" class$="[[createclass(newinfo.login)]]">
-              <input is="iron-input" bind-value="{{newinfo.password}}" placeholder="Password" type="password">
-              <input is="iron-input" bind-value="{{newinfo.password2}}" placeholder="Verify Password" type="password" class$="[[createclass(newinfo.login)]]">
-          </div>
-          <div id="loginbuttons">
-              <paper-button on-tap="sendlogin" class$="[[loginclass(newinfo.login)]]">Login</paper-button>
-              <paper-button on-tap="sendcreate">Create Account</paper-button>
-              <paper-button dialog-dismiss>Cancel</paper-button>
-          </div>
-      </paper-dialog>
-
-      <paper-dialog id="loading" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+      <paper-dialog id="loading" class="popup" modal="true" exit-animation="scale-down-animation">
           <template is="dom-if" if="{{options.loading}}">
               <p>{{options.body}}</p>
               <div id="bar">
@@ -352,10 +301,10 @@
       <iron-signals on-iron-signal-updatelist="updatelist"></iron-signals>
       <iron-signals on-iron-signal-setdefault="setdefault"></iron-signals>
       <iron-signals on-iron-signal-openfeedback="openfeedback"></iron-signals>
-      <iron-signals on-iron-signal-openlogin="openlogin"></iron-signals>
       <iron-signals on-iron-signal-openrestore="openrestore"></iron-signals>
       <iron-signals on-iron-signal-openimport="openimport"></iron-signals>
       <iron-signals on-iron-signal-openbackup="openbackup"></iron-signals>
+      <iron-signals on-iron-signal-updateuser="updateuser"></iron-signals>
 
   </template>
 
@@ -369,7 +318,7 @@
       properties: {
           route: {
               type: String,
-              value: 'home',
+              value: '',
               observer: '_routeChanged'
           },
           projectlist: {
@@ -380,21 +329,9 @@
               type: Object,
               value: {}
           },
-          accepted: {
-              type: Boolean,
-              value: false
-          },
-          backto: {
-            type: String,
-            value: ""
-          },
           feedback: {
               type: String,
               value: ""
-          },
-          newinfo: {
-              type: Object,
-              value: {login: true}
           },
           currentuser: {
               type: Object,
@@ -412,11 +349,11 @@
 
           options: {
               type: Object,
-                  value: {loading: false, title: "", body: ""}
+              value: {loading: false, title: "", body: ""}
           },
           tempdata: {
               type: Object,
-                  value: {meta: {}, filename: ""}
+              value: {meta: {}, filename: ""}
           }
       },
 
@@ -428,114 +365,92 @@
           return login ? '' : 'hide';
       },
 
-      createclass: function (login) {
-          return login ? 'hide' : '';
+      updateuser: function (event, data) {
+          App.configurator.setValue("userdata", data);
+          this.checkuser(data);
+      },
+
+      retrieveuser: function () {
+          var user = App.configurator.getValue("userdata");
+          this.checkuser(user);
+      },
+
+      checkuser: function (user) {
+          this.set('currentuser', user);
+          if (user.full_name) {
+              if (user.accepted) {
+                  this.set('route', 'home');
+              } else {
+                  this.set('route', 'terms');
+              }
+          } else {
+              this.set('route', 'login');
+          }
       },
 
       openbackup: function (event, data) {
           var mythis = this;
-          var meta = data.meta;
-          this.set('tempdata.meta', meta);
-          var name = 'uw-' + meta.fullname;
-          var confirm = this.$.confirm;
+          var defaultPath = App.configurator.getUserPath('datalocation', 'backups', data.meta.unique_id);
+          var filePath = App.ipc.sendSync('save-as', {options: {defaultPath: defaultPath, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}]}});
+          if (!filePath) {
+              return;
+          }
 
-          var backupPath = App.configurator.getUserPath('datalocation', 'backups', name);
-
-          var filename = App.ipc.sendSync('save-as', {name: backupPath});
-          this.set('tempdata.filename', filename);
-
-          return App.projectsManager.fileExists(filename + '.tstudio')
-              .then (function (stat) {
-                  if (stat) {
-                      confirm.open();
-                  } else if (filename) {
-                      mythis.executebackup();
-                  }
-              });
-      },
-
-      executebackup: function () {
-          var mythis = this;
-          var loading = this.$.loading;
-          var confirm = this.$.confirm;
-          var filePath = this.tempdata.filename;
-          var meta = this.tempdata.meta;
-
-          confirm.close();
           mythis.set('options.body', "Creating Backup.  Please wait...");
           mythis.set('options.loading', true);
-          loading.open();
+          mythis.$.loading.open();
 
-          return App.projectsManager.backupTranslation(meta, filePath)
-              .then(function () {
-                  mythis.set('options.title', "Backup Complete");
-                  mythis.set('options.body', "Your project has been successfully archived.  Thanks.");
-                  mythis.set('options.loading', false);
-              })
-              .catch(function (err) {
-                  var errmessage = "We're sorry.  An error occurred while trying to backup your project";
-                  if(err !== null) {
-                      errmessage = err;
-                  }
-                  mythis.set('options.title', "Backup Failed");
-                  mythis.set('options.body', errmessage);
-                  mythis.set('options.loading', false);
-              });
+          setTimeout(function() {
+              App.projectsManager.backupTranslation(data.meta, filePath)
+                  .then(function () {
+                      mythis.set('options.title', "Backup Complete");
+                      mythis.set('options.body', "Your project has been successfully backed up.  Thanks.");
+                      mythis.set('options.loading', false);
+                  })
+                  .catch(function (err) {
+                      var errmessage = "We're sorry.  An error occurred while trying to backup your project";
+                      if(err !== null) {
+                          errmessage = err;
+                      }
+                      mythis.set('options.title', "Backup Failed");
+                      mythis.set('options.body', errmessage);
+                      mythis.set('options.loading', false);
+                  });
+          }, 500);
       },
 
       openrestore: function() {
           var mythis = this;
-          var loading = this.$.loading;
-          var chooser = this.$.restore;
-          chooser.value = null;
-          chooser.addEventListener('change', function(evt) {
-              mythis.set('options.body', "Restoring.  Please wait...");
-              mythis.set('options.loading', true);
-              loading.open();
-              for(var i=0; i < this.files.length; i ++) {
-                  if(this.files[i].name.split('.').pop().toLowerCase() === 'tstudio') {
-                      App.projectsManager.restoreTargetTranslation(this.files[i])
-                          .then(function() {
-                              mythis.set('options.title', "Restore Complete");
-                              mythis.set('options.body', "Your project(s) has been successfully restored.  Thanks.");
-                              mythis.set('options.loading', false);
-                              setTimeout(function() {
-                                  mythis.updatelist();
-                              }, 250);
-                          })
-                          .catch(function(err) {
-                              var errmessage = "We're sorry.  An error occurred while trying to restore your project";
-                              if(err !== null) {
-                                  errmessage = err;
-                              }
-                              mythis.set('options.title', "Restore Failed");
-                              mythis.set('options.body', errmessage);
-                              mythis.set('options.loading', false);
-                          });
-                  }
-              }
-          }, false);
-          chooser.click();
-      },
-
-      openlogin: function () {
-          this.newinfo = {login: true};
-          this.$.login.open();
-      },
-
-      sendlogin: function () {
-          console.log("login sent");
-          this.set('currentuser', {active: true, username: this.newinfo.loginname});
-          this.$.login.close();
-      },
-
-      sendcreate: function () {
-          if (this.newinfo.login) {
-              this.set('newinfo.login', false);
-          } else {
-              console.log("create sent");
-              this.$.login.close();
+          var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
+          var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}], properties: ['openFile']}});
+          if (!filePath) {
+              return;
           }
+
+          mythis.set('options.body', "Restoring.  Please wait...");
+          mythis.set('options.loading', true);
+          this.$.loading.open();
+
+          setTimeout(function() {
+              App.projectsManager.restoreTargetTranslation(filePath[0])
+                  .then(function() {
+                      mythis.set('options.title', "Restore Complete");
+                      mythis.set('options.body', "Your project(s) has been successfully restored.  Thanks.");
+                      mythis.set('options.loading', false);
+                      setTimeout(function() {
+                          mythis.updatelist();
+                      }, 250);
+                  })
+                  .catch(function(err) {
+                      var errmessage = "We're sorry.  An error occurred while trying to restore your project";
+                      if(err !== null) {
+                          errmessage = err;
+                      }
+                      mythis.set('options.title', "Restore Failed");
+                      mythis.set('options.body', errmessage);
+                      mythis.set('options.loading', false);
+                  });
+          }, 500);
       },
 
       openimport: function () {
@@ -623,8 +538,12 @@
       updatelist: function () {
           var mythis = this;
           App.projectsManager.loadTargetTranslationsList().then(function(list) {
-              App.ipc.send('loading-status', 'Checking Project Versions...');
-              mythis.checklist(list);
+              App.ipc.send('loading-status', 'Updating Manifest Files...');
+              for (var i = 0; i < list.length; i++) {
+                  list[i] = App.projectsManager.updateManifestToMeta(list[i]);
+              }
+              // TRICKY: remove invalid manifests (null)
+              mythis.set('projectlist', _.compact(list));
 
               App.ipc.send('loading-status', 'Checking Auto Backups...');
               App.projectsManager.backupProjects(mythis.projectlist);
@@ -635,57 +554,7 @@
           });
       },
 
-      checklist: function (list) {
-          for (var i = 0; i < list.length; i++) {
-
-              if (list[i].project.name === "") {
-                  list[i].project.name = App.projectsManager.getProjectName(list[i].project.id)[0].name;
-              }
-
-              if (list[i].type.name === "" && list[i].type.id === "text") {
-                  list[i].type.name = "Text";
-              }
-
-              for (var j = 0; j < list[i].source_translations.length; j++) {
-                  var details = App.projectsManager.getSourceDetails(list[i].project.id, list[i].source_translations[j].language_id, list[i].source_translations[j].resource_id)[0];
-                  list[i].source_translations[j].project_id = details.project_id;
-                  list[i].source_translations[j].id = details.id;
-                  list[i].source_translations[j].language_name = details.language_name;
-                  list[i].source_translations[j].resource_name = details.resource_name;
-              }
-
-              if (list[i].source_translations.length) {
-                  list[i].currentsource = 0;
-              } else {
-                  list[i].currentsource = null;
-              }
-
-              var typeext = "";
-
-              if (list[i].type.id === "tw" || list[i].type.id === "ta") {
-                  typeext = "";
-              } else if (list[i].type.id !== "text") {
-                  typeext = "_" + list[i].type.id;
-              } else if (list[i].resource.id === "udb") {
-                  typeext = "_" + list[i].resource.id;
-              }
-              var fullname = list[i].project.id + typeext + "-" + list[i].target_language.id;
-              list[i].basename = list[i].project.id + "-" + list[i].target_language.id;
-              list[i].fullname = fullname;
-              var key = "uw-" + fullname;
-              var completion = App.configurator.getValue(key + "-completion");
-              if (completion !== undefined  && completion !== "") {
-                  list[i].completion = completion;
-              } else {
-                  list[i].completion = 0;
-              }
-          }
-          this.set('projectlist', list);
-      },
-
       setdefault: function () {
-          // NOTE: Old backup implementation
-          // App.projectsManager.stopAutoBackup();
           this.currentproject = {};
       },
 
@@ -693,12 +562,9 @@
           App.ipc.send('loading-status', 'Loading Projects List...');
           this.updatelist();
           this.setdefault();
-          var accepted = App.configurator.getValue("accepted");
-          if (accepted) {
-              this.accepted = true;
-          }
           this.locale = App.locale.dictionary;
-          this.set('currentuser', {active: false});
+          App.ipc.send('loading-status', 'Retrieving User Info...');
+          this.retrieveuser();
       }
 
   });

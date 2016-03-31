@@ -226,8 +226,10 @@
 
         addsource: function(event) {
             var source = event.model.source;
-            this.push('sources', source);
-            this.selectedSource = this.sources.indexOf(source);
+            if (this.sources.length < 3) {
+                this.push('sources', source);
+                this.selectedSource = this.sources.indexOf(source);
+            }
         },
 
         removesource: function(event) {

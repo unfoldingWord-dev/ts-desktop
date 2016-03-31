@@ -8,7 +8,7 @@ var _ = require('lodash'),
     AdmZip = require('adm-zip'),
     archiver = require('archiver'),
     utils = require('../js/lib/util'),
-    git = require('../js/git'),
+    git = require('../js/git')(),
     tstudioMigrator = require('../js/migration/tstudioMigrator'),
     targetTranslationMigrator = require('../js/migration/targetTranslationMigrator'),
     wrap = utils.promisify,
@@ -29,7 +29,7 @@ var map = guard('map'),
  *  e.g. var pm = App.projectsManager;
  */
 
-function ProjectsManager(query, configurator) {
+function ProjectsManager(query, configurator, srcDir) {
 
     // var puts = console.log.bind(console),  // Never used
     var write = wrap(fs, 'writeFile'),
@@ -84,7 +84,15 @@ function ProjectsManager(query, configurator) {
 
 
                 makeProjectPaths: function (meta) {
-                    return this.makeProjectPathsForProject(prefix + meta.fullname);
+                    var filename;
+
+                    if (meta.package_version < 6) {
+                        filename = prefix + meta.fullname;
+                    } else {
+                        filename = meta.unique_id;
+                    }
+
+                    return this.makeProjectPathsForProject(filename);
                 },
 
                 makeProjectPathsForProject: function (project) {
@@ -95,9 +103,7 @@ function ProjectsManager(query, configurator) {
                         parentDir: targetDir,
                         projectDir: projectDir,
                         manifest: path.join(projectDir, 'manifest.json'),
-                        translation: path.join(projectDir, 'translation.json'),
-                        ready: path.join(projectDir, 'READY'),
-                        project: path.join(projectDir, 'project.json')
+                        license: path.join(projectDir, 'LICENSE.md')
                     };
 
                 }
@@ -345,40 +351,27 @@ function ProjectsManager(query, configurator) {
             return config.makeProjectPaths(meta);
         },
 
-        createReadyFile: function (meta) {
-            var paths = this.getPaths(meta);
-
-            return write(paths.ready, (new Date()).toString());
-        },
-
         backupTranslation: function (meta, filePath) {
             let paths = this.getPaths(meta),
-                name = 'uw-' + meta.fullname;
+                name = meta.unique_id;
 
             return new Promise(function(resolve, reject) {
-                let source = paths.projectDir,
-                    backupName = filePath + '.tstudio',
-                    output = fs.createWriteStream(backupName),
+                let output = fs.createWriteStream(filePath),
                     archive = archiver.create('zip'),
-                    timestamp = new Date().getTime(),
                     manifest = {
                         generator: {
                             name: 'ts-desktop',
                             build: ''
                         },
                         package_version: 2,
-                        timestamp: timestamp,
+                        timestamp: new Date().getTime(),
                         target_translations: [{path: name, id: name, commit_hash: '', direction: "ltr"}]
                     };
-
                 archive.pipe(output);
-                archive.directory(source, name + "/");
+                archive.directory(paths.projectDir, name + "/");
                 archive.append(toJSON(manifest), {name: 'manifest.json'});
                 archive.finalize();
-
-                console.info('Backed up ' + name + ' to', backupName);
-
-                resolve(backupName);
+                resolve(filePath);
             });
         },
 
@@ -388,21 +381,8 @@ function ProjectsManager(query, configurator) {
          * @param newPath: target backup directory
          */
         migrateBackup: function(oldPath, newPath) {
-            var tstudioFiles = [];
-            readdir(oldPath, function(err, files) {
-                if (err) { console.log(err); }
-                tstudioFiles = files.filter(function(f) {
-                    // Only return files with .tstudio extensions
-                    return f.split('.').pop() === 'tstudio';
-                });
-                tstudioFiles.forEach(function(f) {
-                    var oldFilePath = oldPath + path.sep + f;
-                    var newFilePath = newPath + path.sep + f;
-                    utils.move(oldFilePath, newFilePath, function(err) {
-                        if (err) { console.log(err); }
-                    });
-                });
-            });
+            utils.move(path.join(oldPath, 'automatic_backups'), path.join(newPath, 'automatic_backups'), {clobber: true});
+            utils.move(path.join(oldPath, 'backups'), path.join(newPath, 'backups'), {clobber: true});
         },
 
         /*
@@ -442,10 +422,8 @@ function ProjectsManager(query, configurator) {
                         return git.getHash(sourceDir);
                     })
                     .then(function(hash) {
-                        let fileName = hash + '.backup',
-                            filePath = path.join(targetDir, fileName);
-
-                        return filePath;
+                        let fileName = hash + '.backup.tstudio';
+                        return path.join(targetDir, fileName);
                     })
                     .then(doBackup)
                     .then(removeOtherFiles);
@@ -458,26 +436,23 @@ function ProjectsManager(query, configurator) {
          *
          * @param translation an array of frames
          * @param meta the target translation manifest and other info
-         * @param filename the path where the export will be saved
+         * @param filePath the path where the export will be saved
          * @param mediaServer is the location of the media files
          * @returns {Promise.<boolean>}
          */
-        exportTranslation: function (translation, meta, filename, mediaServer) {
-            // validate input
-            if(filename === null || filename === '') {
-                return Promise.reject('The filename is empty');
-            }
+        exportTranslation: function (translation, meta, filePath, mediaServer) {
+
             var isTranslation = this.isTranslation(meta);
 
             return new Promise(function(resolve, reject) {
-                if(isTranslation) {
-                    // TRICKY: look into the first frame to see the format
-                    if(translation[0].meta.format === 'default') {
-                        // the default format is currently dokuwiki
+                if (isTranslation) {
+
+                    if (meta.format === 'markdown') {
+
                         let chapterContent = '',
                             currentChapter = -1,
                             zip = archiver.create('zip'),
-                            output = fs.createWriteStream(filename + ".zip"),
+                            output = fs.createWriteStream(filePath),
                             numFinishedFrames = 0;
                         zip.pipe(output);
                         for(let frame of translation) {
@@ -525,8 +500,7 @@ function ProjectsManager(query, configurator) {
                         }
                         zip.finalize();
                         resolve(true);
-                    }
-                    else if(translation[0].meta.format === 'usx'){
+                    } else if (meta.format === 'usfm') {
                          let
                             currentChapter = 1,
                             numFinishedFrames = 0,
@@ -535,9 +509,9 @@ function ProjectsManager(query, configurator) {
                             // build chapter header
                             if(chapterContent === '') {
                                 //add in USFM header elements
-                                chapterContent += '\n\\\id ' + meta.project.id.toUpperCase() + ' ' + meta.sources[0].name + '\n';
+                                chapterContent += '\n\\\id ' + meta.project.id.toUpperCase() + ' ' + meta.source_translations[0].resource_name + '\n';
 
-                                chapterContent += '\\\ide ' + frame.meta.format + '\n';
+                                chapterContent += '\\\ide ' + meta.format + '\n';
 
                                 chapterContent += '\\\h ' + meta.project.name.toUpperCase() + '\n';
 
@@ -561,64 +535,80 @@ function ProjectsManager(query, configurator) {
                             }
                         }
 
-                        fs.writeFile(filename + '.txt', new Buffer(chapterContent));
+                        fs.writeFile(filePath, new Buffer(chapterContent));
                         resolve(true);
                     } else {
-                        // we don't support anything but dokuwiki and usx right now
-                        reject('We only support exporting OBS and USX projects for now');
+                        reject("We do not support exporting this project format yet");
                     }
                 } else {
                     // TODO: support exporting other target translation types if needed e.g. notes, words, questions
-                    reject('We do not support exporting that project type yet');
+                    reject('We do not support exporting this project type yet');
                 }
             });
         },
 
         /**
          * Imports a tstudio archive
-         * @param file {File} the path to the archive
-         * @returns {Promise.<boolean>}
+         * @param filePath {String} the path to the archive
+         * @returns {Promise}
          */
-        restoreTargetTranslation: function(file) {
-            console.log('importing archive', file);
-            return new Promise(function(resolve, reject) {
-                tstudioMigrator.listTargetTranslations(file).then(function(relativePaths) {
-                    if(relativePaths.length > 0) {
-                        // proceed to import
-                        let zip = new AdmZip(file.path);
-                        _.forEach(relativePaths, function(tpath) {
-                            let outputDir = path.join(configurator.getValue('tempDir'), tpath);
-                            //zip.extractEntryTo(tpath + '/*', outputDir, false, true);
-                            zip.extractAllTo(outputDir, true);
-                             targetTranslationMigrator.migrate(outputDir + "/" + tpath).then(function() {
-                                // import the target translation
-                                // TODO: need to use the id not the path
-                                utils.move(outputDir + "/" + tpath, path.join(configurator.getValue('targetTranslationsDir'), tpath), function(err) {
-                                    if(err) {
-                                        console.log(err);
-                                    } else {
-                                        console.log('finished importing target translation');
-                                    }
-                                });
-                            })
-                            .catch(function(err) {
-                                console.log(err);
-                            });
-                        });
-                        console.log('finished importing');
-                        resolve(true);
-                    } else {
-                        reject('The archive is empty or not supported');
-                    }
+        restoreTargetTranslation: function(filePath) {
+            let zip = new AdmZip(filePath),
+                tmpDir = configurator.getValue('tempDir'),
+                targetDir = configurator.getValue('targetTranslationsDir'),
+                basename = path.basename(filePath, '.tstudio'),
+                extractPath = path.join(tmpDir, basename);
+
+            return tstudioMigrator.listTargetTranslations(filePath)
+                .then(function(targetPaths) {
+                    // NOTE: this will eventually be async
+                    zip.extractAllTo(extractPath, true);
+                    return targetPaths;
                 })
-                .catch(function(err) {
-                    reject(err);
+                .then(function (targetPaths) {
+                    return _.map(targetPaths, function (targetPath) {
+                        var parentDir = extractPath;
+                        var projectDir = path.join(extractPath, targetPath);
+                        var manifest = path.join(projectDir, 'manifest.json');
+                        var license = path.join(projectDir, 'LICENSE.md');
+                        return {parentDir, projectDir, manifest, license};
+                    });
+                })
+                .then(function (list) {
+                    var migrated = _.map(list, function (paths) {
+                        return targetTranslationMigrator.migrate(paths)
+                            .catch(function (err) {
+                                console.log(err);
+                                return false;
+                            });
+                    });
+                    return Promise.all(migrated).then(function (result) {
+                        return _.compact(result);
+                    })
+                })
+                .then(function (results) {
+                    return _.map(results, function (result) {
+                        return result.paths.projectDir.substring(result.paths.projectDir.lastIndexOf(path.sep) + 1);
+                    });
+                })
+                .then(function (targetPaths) {
+                    return _.map(targetPaths, function(p) {
+                        let tmpPath = path.join(extractPath, p),
+                            targetPath = path.join(targetDir, p);
+
+                        return utils.move(tmpPath, targetPath, {clobber: true});
+                    });
+                })
+                .then(function (list) {
+                    return Promise.all(list);
+                })
+                .then(function () {
+                    return rm(tmpDir);
                 });
-            });
         },
 
-        fileExists: function (file) {
-            return stat(file).then(function (){
+        fileExists: function (filePath) {
+            return stat(filePath).then(function (){
                 return true;
             }).catch(function () {
                 return false;
@@ -629,11 +619,72 @@ function ProjectsManager(query, configurator) {
             return !meta.type.id || meta.type.id === 'text';
         },
 
-        saveTargetTranslation: function (translation, meta) {
-            var paths = this.getPaths(meta);
+        updateManifestToMeta: function (manifest) {
+            var meta = manifest;
+            try {
+                if (manifest.project.name === "") {
+                    meta.project.name = this.getProjectName(manifest.project.id)[0].name;
+                }
 
-            // translation is an array
-            // translation[0].meta.frameid
+                if (manifest.type.name === "" && manifest.type.id === "text") {
+                    meta.type.name = "Text";
+                }
+
+                for (var j = 0; j < manifest.source_translations.length; j++) {
+                    var details = this.getSourceDetails(manifest.project.id, manifest.source_translations[j].language_id, manifest.source_translations[j].resource_id)[0];
+                    meta.source_translations[j].project_id = details.project_id;
+                    meta.source_translations[j].id = details.id;
+                    meta.source_translations[j].language_name = details.language_name;
+                    meta.source_translations[j].resource_name = details.resource_name;
+                }
+
+                if (manifest.source_translations.length) {
+                    meta.currentsource = 0;
+                } else {
+                    meta.currentsource = null;
+                }
+
+                if (manifest.type.id === "tw" || manifest.type.id === "ta") {
+                    meta.project_type_class = "extant";
+                } else if (manifest.type.id === "tn" || manifest.type.id === "tq") {
+                    meta.project_type_class = "helps";
+                } else {
+                    meta.project_type_class = "standard";
+                }
+
+                meta.unique_id = manifest.target_language.id + "_" + manifest.project.id + "_" + manifest.type.id;
+                if (manifest.resource.id !== "") {
+                    meta.unique_id += "_" + manifest.resource.id;
+                }
+
+                var typeext = "";
+
+                if (meta.project_type_class === "extant") {
+                    typeext = "";
+                } else if (manifest.type.id !== "text") {
+                    typeext = "_" + manifest.type.id;
+                } else if (manifest.resource.id === "udb") {
+                    typeext = "_" + manifest.resource.id;
+                }
+
+                meta.fullname = manifest.project.id + typeext + "-" + manifest.target_language.id;
+
+                var completion = App.configurator.getValue(meta.unique_id + "-completion");
+                if (completion !== undefined && completion !== "") {
+                    meta.completion = completion;
+                } else {
+                    meta.completion = 0;
+                }
+            } catch (err) {
+                App.reporter.logError(err);
+                return null;
+            }
+            return meta;
+        },
+
+        saveTargetTranslation: function (translation, meta, user) {
+            var paths = this.getPaths(meta);
+            var projectClass = meta.project_type_class;
 
             var makeComplexId = function (c) {
                 return c.meta.chapterid + '-' + c.meta.frameid;
@@ -644,8 +695,6 @@ function ProjectsManager(query, configurator) {
                     return v[prop] ? k : false;
                 };
             };
-
-            var isTranslation = this.isTranslation(meta);
 
             var chunks = _.chain(translation)
                 .indexBy(makeComplexId)
@@ -664,7 +713,7 @@ function ProjectsManager(query, configurator) {
                 });
 
             var manifest = {
-                package_version: 5,
+                package_version: meta.package_version,
                 format: meta.format,
                 generator: {
                     name: 'ts-desktop',
@@ -696,11 +745,35 @@ function ProjectsManager(query, configurator) {
                 };
             };
 
-            var updateChunk = function (c) {
-                var f = path.join(paths.projectDir, c.meta.chapterid, c.meta.frameid + '.txt'),
-                    hasContent = isTranslation ? !!c.transcontent : !!c.helpscontent.length;
+            var cleanChapterDir = function (data, chapter) {
+                var chapterpath = path.join(paths.projectDir, chapter);
+                return readdir(chapterpath).then(function (dir) {
+                    return !dir.length ? rm(chapterpath): true;
+                });
+            };
 
-                return hasContent ? write(f, isTranslation ? c.transcontent : toJSON(c.helpscontent)) : rm(f);
+            var cleanChapterDirs = function () {
+                return function () {
+                    var data = _.groupBy(translation, function (chunks) {
+                        return chunks.meta.chapterid;
+                    });
+                    return Promise.all(_.map(data, cleanChapterDir));
+                };
+            };
+
+            var updateChunk = function (chunk) {
+                var file = path.join(paths.projectDir, chunk.meta.chapterid, chunk.meta.frameid + '.txt');
+                var hasContent = false;
+                if (projectClass === "standard") {
+                    hasContent = !!chunk.transcontent;
+                }
+                if (projectClass === "helps") {
+                    hasContent = !!chunk.helpscontent.length;
+                }
+                if (projectClass === "extant" && (!!chunk.helpscontent[0].title || !!chunk.helpscontent[0].body)) {
+                    hasContent = true;
+                }
+                return hasContent ? write(file, projectClass === "standard" ? chunk.transcontent : toJSON(chunk.helpscontent)) : rm(file);
             };
 
             var updateChunks = function (data) {
@@ -709,20 +782,29 @@ function ProjectsManager(query, configurator) {
                 };
             };
 
+            var setLicense = function () {
+                return read(path.join(srcDir, 'assets', 'LICENSE.md'))
+                    .then(function(data) {
+                        return write(paths.license, data);
+                    });
+            };
+
             return mkdirp(paths.projectDir)
+                .then(setLicense())
                 .then(writeFile(paths.manifest, manifest))
                 .then(makeChapterDirs(chunks))
                 .then(updateChunks(chunks))
+                .then(cleanChapterDirs())
                 .then(function () {
                     return git.init(paths.projectDir);
                 })
                 .then(function () {
-                    return git.stage(paths.projectDir);
+                    return git.stage(user, paths.projectDir);
                 });
         },
 
         loadProjectsList: function () {
-            return readdir(config.targetDir).then(config.filterProjects);
+            return readdir(config.targetDir);
         },
 
         loadTargetTranslationsList: function () {
@@ -732,29 +814,17 @@ function ProjectsManager(query, configurator) {
                 .then(map(makePaths))
                 .then(function (list) {
                     var migrated = _.map(list, function (paths) {
-                        return targetTranslationMigrator.migrate(paths.projectDir)
-                            .catch(function () {
-                                return true;
+                        return targetTranslationMigrator.migrate(paths)
+                            .catch(function (err) {
+                                console.log(err);
+                                return false;
                             });
                     });
-                    return Promise.all(migrated).then(function () {
-                        return list;
+                    return Promise.all(migrated).then(function (result) {
+                        return _.compact(result);
                     })
                 })
                 .then(map('manifest'))
-                .then(function (list) {
-                    return _.filter(list, function (path) {
-                        try {
-                            var test = fs.statSync(path);
-                        } catch (e) {
-                            test = false;
-                        }
-                        return test;
-                    })
-                })
-                .then(map(read))
-                .then(Promise.all.bind(Promise))
-                .then(map(fromJSON));
         },
 
         loadFinishedFramesList: function (meta) {

@@ -83,7 +83,7 @@
 
         <header>
             <span class="title">translationStudio</span>
-            <span class$="[[loginclass(currentuser.active)]]">Logged in as: <span>{{currentuser.username}}</span><span class="link" on-tap="logout">(Logout)</span></span>
+            <span class$="[[loginclass(currentuser.full_name)]]"><span>{{currentuser.type}}</span>: <span>{{currentuser.full_name}}</span><span class="link" on-tap="logout">(Logout)</span></span>
             <div class="window-buttons">
                 <button on-tap="minimizeWindow">
                     <iron-icon icon="titlebar:minimize" title="minimize"></iron-icon>
@@ -110,17 +110,19 @@
         properties: {
             currentuser: {
                 type: Object,
-                value: {},
-                notify: true
+                value: {}
             }
         },
 
-        loginclass: function (active) {
-            return active ? 'login' : 'hide';
+        loginclass: function (name) {
+            return name ? 'login' : 'hide';
         },
 
         logout: function () {
-            this.set('currentuser', {active: false});
+            this.fire('iron-signal', {name: 'updateuser', data: {}});
+            this.fire('iron-signal', {name: 'setdefault'});
+            this.fire('iron-signal', {name: 'reset'});
+            App.uploader.destroyKeys();
         },
 
         minimizeWindow: function() {

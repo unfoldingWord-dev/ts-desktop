@@ -143,6 +143,7 @@
                     src.classList.remove("down");
                     mythis.set('chunk.state.chunk', false);
                     mythis.fire('iron-signal', {name: 'updatestate', data: {id: id, mode: "chunk", value: false}});
+                    trans.focustextbox();
                 }, 1000);
             } else if (completed) {
                 this.fire('iron-signal', {name: 'openedit', data: {index: index}});

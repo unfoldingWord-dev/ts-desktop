@@ -75,7 +75,6 @@ process.stdout.write = console.log.bind(console);
         c.setValue('targetTranslationsDir', path.join(DATA_PATH, 'targetTranslations'), {'mutable':false});
         c.setValue('tempDir', path.join(DATA_PATH, 'temp'), {'mutable':false});
         c.setValue('indexDir', path.join(DATA_PATH, 'index'), {'mutable':false});
-
         return c;
     })();
 

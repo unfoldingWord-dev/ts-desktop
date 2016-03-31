@@ -373,6 +373,8 @@
           this.setdefault();
           App.ipc.send('loading-status', 'Retrieving User Info...');
           this.retrieveuser();
+          App.configurator.applyPrefAppearance();
+          App.configurator.applyPrefBehavior();
           App.ipc.send('loading-status', 'Loading Projects List...');
           this.updatelist();
       }

@@ -21,7 +21,7 @@
         "name": "fontsize",
         "mainText": "Font Size",
         "value": "Normal",
-        "options": ["Smaller", "Small", "Normal", "Large", "Larger"],
+        "options": ["Small", "Normal", "Large"],
         "group": "general",
         "enabled": true,
         "visible": true

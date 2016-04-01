@@ -29,7 +29,7 @@ var map = guard('map'),
  *  e.g. var pm = App.projectsManager;
  */
 
-function ProjectsManager(query, configurator) {
+function ProjectsManager(query, configurator, srcDir) {
 
     // var puts = console.log.bind(console),  // Never used
     var write = wrap(fs, 'writeFile'),
@@ -102,7 +102,8 @@ function ProjectsManager(query, configurator) {
                     return {
                         parentDir: targetDir,
                         projectDir: projectDir,
-                        manifest: path.join(projectDir, 'manifest.json')
+                        manifest: path.join(projectDir, 'manifest.json'),
+                        license: path.join(projectDir, 'LICENSE.md')
                     };
 
                 }
@@ -565,6 +566,27 @@ function ProjectsManager(query, configurator) {
                     return targetPaths;
                 })
                 .then(function (targetPaths) {
+                    return _.map(targetPaths, function (targetPath) {
+                        var parentDir = extractPath;
+                        var projectDir = path.join(extractPath, targetPath);
+                        var manifest = path.join(projectDir, 'manifest.json');
+                        var license = path.join(projectDir, 'LICENSE.md');
+                        return {parentDir, projectDir, manifest, license};
+                    });
+                })
+                .then(targetTranslationMigrator.migrateAll)
+                .then(function (results) {
+                    if (!results.length) {
+                        throw new Error ("Could not restore this project");
+                    }
+                    return results;
+                })
+                .then(function (results) {
+                    return _.map(results, function (result) {
+                        return result.paths.projectDir.substring(result.paths.projectDir.lastIndexOf(path.sep) + 1);
+                    });
+                })
+                .then(function (targetPaths) {
                     return _.map(targetPaths, function(p) {
                         let tmpPath = path.join(extractPath, p),
                             targetPath = path.join(targetDir, p);
@@ -657,9 +679,7 @@ function ProjectsManager(query, configurator) {
 
         saveTargetTranslation: function (translation, meta, user) {
             var paths = this.getPaths(meta);
-
-            // translation is an array
-            // translation[0].meta.frameid
+            var projectClass = meta.project_type_class;
 
             var makeComplexId = function (c) {
                 return c.meta.chapterid + '-' + c.meta.frameid;
@@ -670,8 +690,6 @@ function ProjectsManager(query, configurator) {
                     return v[prop] ? k : false;
                 };
             };
-
-            var isTranslation = this.isTranslation(meta);
 
             var chunks = _.chain(translation)
                 .indexBy(makeComplexId)
@@ -722,11 +740,35 @@ function ProjectsManager(query, configurator) {
                 };
             };
 
-            var updateChunk = function (c) {
-                var f = path.join(paths.projectDir, c.meta.chapterid, c.meta.frameid + '.txt'),
-                    hasContent = isTranslation ? !!c.transcontent : !!c.helpscontent.length;
+            var cleanChapterDir = function (data, chapter) {
+                var chapterpath = path.join(paths.projectDir, chapter);
+                return readdir(chapterpath).then(function (dir) {
+                    return !dir.length ? rm(chapterpath): true;
+                });
+            };
 
-                return hasContent ? write(f, isTranslation ? c.transcontent : toJSON(c.helpscontent)) : rm(f);
+            var cleanChapterDirs = function () {
+                return function () {
+                    var data = _.groupBy(translation, function (chunks) {
+                        return chunks.meta.chapterid;
+                    });
+                    return Promise.all(_.map(data, cleanChapterDir));
+                };
+            };
+
+            var updateChunk = function (chunk) {
+                var file = path.join(paths.projectDir, chunk.meta.chapterid, chunk.meta.frameid + '.txt');
+                var hasContent = false;
+                if (projectClass === "standard") {
+                    hasContent = !!chunk.transcontent;
+                }
+                if (projectClass === "helps") {
+                    hasContent = !!chunk.helpscontent.length;
+                }
+                if (projectClass === "extant" && (!!chunk.helpscontent[0].title || !!chunk.helpscontent[0].body)) {
+                    hasContent = true;
+                }
+                return hasContent ? write(file, projectClass === "standard" ? chunk.transcontent : toJSON(chunk.helpscontent)) : rm(file);
             };
 
             var updateChunks = function (data) {
@@ -735,10 +777,19 @@ function ProjectsManager(query, configurator) {
                 };
             };
 
+            var setLicense = function () {
+                return read(path.join(srcDir, 'assets', 'LICENSE.md'))
+                    .then(function(data) {
+                        return write(paths.license, data);
+                    });
+            };
+
             return mkdirp(paths.projectDir)
+                .then(setLicense())
                 .then(writeFile(paths.manifest, manifest))
                 .then(makeChapterDirs(chunks))
                 .then(updateChunks(chunks))
+                .then(cleanChapterDirs())
                 .then(function () {
                     return git.init(paths.projectDir);
                 })
@@ -756,19 +807,28 @@ function ProjectsManager(query, configurator) {
 
             return this.loadProjectsList()
                 .then(map(makePaths))
+                .then(map('manifest'))
                 .then(function (list) {
-                    var migrated = _.map(list, function (paths) {
-                        return targetTranslationMigrator.migrate(paths)
-                            .catch(function (err) {
-                                console.log(err);
-                                return false;
-                            });
-                    });
-                    return Promise.all(migrated).then(function (result) {
-                        return _.compact(result);
+                    return _.filter(list, function (path) {
+                        try {
+                            var test = fs.statSync(path);
+                        } catch (e) {
+                            test = false;
+                        }
+                        return test;
                     })
                 })
-                .then(map('manifest'))
+                .then(map(read))
+                .then(Promise.all.bind(Promise))
+                .then(map(fromJSON))
+        },
+
+        migrateTargetTranslationsList: function () {
+            var makePaths = config.makeProjectPathsForProject.bind(config);
+
+            return this.loadProjectsList()
+                .then(map(makePaths))
+                .then(targetTranslationMigrator.migrateAll)
         },
 
         loadFinishedFramesList: function (meta) {

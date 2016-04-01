@@ -22,7 +22,8 @@ try {
 function GitInterface(auth) {
 
     let api = new Gogs('https://git.door43.org/api/v1'),
-        tokenStub = { name: 'ts-desktop' };
+        tokenStub = {name: 'ts-desktop'},
+        keyStub = {title: 'ts-desktop'};
 
     return {
 
@@ -46,20 +47,20 @@ function GitInterface(auth) {
             return api.createUser(user, auth, true)
                 .then(function (newUser) {
                     // TRICKY: we must edit the user to set full_name
-                    return api.editUser(user, auth)
-                        .then(function(updatedUser) {
-                            return api.createToken(tokenStub, user)
-                                .then(function(token) {
-                                    updatedUser.token = token.sha1;
-                                    return updatedUser;
-                                });
+                    return api.editUser(user, auth);
+                })
+                .then(function(updatedUser) {
+                    return api.createToken(tokenStub, user)
+                        .then(function(token) {
+                            updatedUser.token = token.sha1;
+                            return updatedUser;
                         });
                 });
         },
 
         /**
          * Logs in to a gogs account.
-         * 
+         *
          * @param userObj the user to log in as. Requires username, password
          * @returns {Promise.<object>} the user object
          */
@@ -73,18 +74,51 @@ function GitInterface(auth) {
                         return token ? token : api.createToken(tokenStub, userObj);
                     })
                     .then(function (token) {
-                        user.token = token;
+                        user.token = token.sha1;
                         return user;
                     });
             });
         },
 
-        // 
+        register: function (user) {
+            return api.listPublicKeys(user).then(function (keys) {
+                return _.find(keys, keyStub);
+            }).then(function (key) {
+                return key ? key : api.createPublicKey({
+                    title: keyStub.title,
+                    key: user.reg.keys.public
+                }, user);
+            });
+        },
+
+        unregister: function (user) {
+            return api.listPublicKeys(user).then(function (keys) {
+                return _.find(keys, keyStub);
+            }).then(function (key) {
+                return key ? api.deletePublicKey(key, user) : false;
+            });
+        },
+
+        createRepo: function (user, reponame) {
+            return api.listRepos(user).then(function (repos) {
+                return _.find(repos, {full_name: user.username + '/' + reponame});
+            }).then(function (repo) {
+                return repo ? repo : api.createRepo({
+                    name: reponame,
+                    description: 'ts-desktop: ' + reponame,
+                    private: false
+                }, user);
+            });
+        },
+
+        // Returns the last commit hash/id for the repo at dir
+        //
         /**
          * Returns the last commit hash/id for the repo at dir
          * @param dir {string} the path to the git repository
          * @returns {Promise.<string>}
          */
+
         getHash: function (dir) {
             return Git.Repository.open(dir).then(function (repo) {
                 return repo.getCurrentBranch();
@@ -102,9 +136,8 @@ function GitInterface(auth) {
         },
 
         stage: function (user, dir) {
-            if (!user.username || !user.email) {
-                return Promise.reject('User must have a username and email');
-            }
+            let author = Git.Signature.now(user.username || 'tsDesktop', user.email || 'you@example.com'),
+                committer = author;
 
             let repo, index, oid;
 
@@ -139,9 +172,6 @@ function GitInterface(auth) {
                 .then(function(head) {
                     let parents = head ? [head] : [];
 
-                    let author = Git.Signature.now(user.username, user.email);
-                    let committer = Git.Signature.now(user.username, user.email);
-
                     return repo.createCommit('HEAD', author, committer, (new Date()).toString(), oid, parents);
                 })
                 .then(function(commitId) {
@@ -149,18 +179,20 @@ function GitInterface(auth) {
                 })
                 .then(logr('Files are staged'));
         },
-        
-        push: function (user, dir, reponame, config) {
-            let repo;
+
+        push: function (user, dir, repo) {
+            let localrepo,
+                isSSH = !!user.reg;
 
             return Git.Repository.open(dir)
                 .then(function(repoResult) {
-                    repo = repoResult;
-                    return repo.openIndex();
+                    localrepo = repoResult;
+                    return localrepo.openIndex();
                 })
                 .then(function() {
-                    let remoteUrl = `https://${user.username}:${user.password}@${config.host}/${user.username}/${reponame}`;
-                    return Git.Remote.createAnonymous(repo, remoteUrl);
+                    let remoteUrl = isSSH ? repo.ssh_url : repo.html_url;
+
+                    return Git.Remote.createAnonymous(localrepo, remoteUrl);
                 })
                 .then(function(remote) {
                     return remote.push(['+refs/heads/master:refs/heads/master'], {
@@ -169,13 +201,22 @@ function GitInterface(auth) {
                                 // no certificate check, let it pass thru
                                 return true;
                             },
-                            credentials: function () {
+                            credentials: function (url, username) {
+                                if (isSSH) {
+                                    return Git.Cred.sshKeyNew(
+                                        username,
+                                        user.reg.paths.publicKeyPath,
+                                        user.reg.paths.privateKeyPath,
+                                        ''
+                                    );
+                                }
+
                                 return Git.Cred.userpassPlaintextNew(user.username, user.password);
                             }
                         }
                     });
                 })
-                .then(logr('Files are pushed'));
+                .then(logr('Files are pushed', repo));
         },
 
         clone: function() {

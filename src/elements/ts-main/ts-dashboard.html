@@ -138,7 +138,7 @@
           <ts-translate data-route="translate" route="{{route}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]"></ts-translate>
           <ts-publish data-route="publish" route="{{route}}" currentproject="{{currentproject}}" currentuser="[[currentuser]]"></ts-publish>
           <ts-settings data-route="settings" route="{{route}}"></ts-settings>
-          <ts-login data-route="login" route="{{route}}" currentuser="[[currentuser]]"></ts-login>
+          <ts-login data-route="login" currentuser="[[currentuser]]"></ts-login>
           <ts-terms data-route="terms"></ts-terms>
       </neon-animated-pages>
 
@@ -345,12 +345,15 @@
 
       updatelist: function () {
           var mythis = this;
-          App.projectsManager.loadTargetTranslationsList().then(function(list) {
+          App.projectsManager.migrateTargetTranslationsList()
+              .then(function () {
+                  return App.projectsManager.loadTargetTranslationsList()
+              })
+              .then(function(list) {
               App.ipc.send('loading-status', 'Updating Manifest Files...');
               for (var i = 0; i < list.length; i++) {
                   list[i] = App.projectsManager.updateManifestToMeta(list[i]);
               }
-              // TRICKY: remove invalid manifests (null)
               mythis.set('projectlist', _.compact(list));
 
               App.ipc.send('loading-status', 'Checking Auto Backups...');
@@ -367,11 +370,13 @@
       },
 
       ready: function() {
-          App.ipc.send('loading-status', 'Loading Projects List...');
-          this.updatelist();
           this.setdefault();
           App.ipc.send('loading-status', 'Retrieving User Info...');
           this.retrieveuser();
+          App.configurator.applyPrefAppearance();
+          App.configurator.applyPrefBehavior();
+          App.ipc.send('loading-status', 'Loading Projects List...');
+          this.updatelist();
       }
 
   });

@@ -17,6 +17,7 @@ try {
     config = require('./config');
 } catch (e) {
     console.log('Please provide ./unit_tests/git/config.json to run git tests');
+    return;
 }
 
 let git = new Git({

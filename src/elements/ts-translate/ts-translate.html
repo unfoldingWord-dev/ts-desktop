@@ -678,7 +678,6 @@
                 mythis.createchunks();
                 mythis.createchapters();
                 mythis.savetofile();
-                mythis.fire('iron-signal', {name: 'renderresource'});
                 mythis.forceResize();
                 mythis.setlocation();
                 if (check) {
@@ -772,7 +771,7 @@
                     if (result) {
                         udbtext = result.chunk;
                         while (test.test(udbtext)) {
-                            udbtext = udbtext.replace(startstr, " \\v");
+                            udbtext = udbtext.replace(startstr, " \\v ");
                             udbtext = udbtext.replace(endstr, " ");
                         }
                         resources.push({title: "UDB", array: false, data: [udbtext]});
@@ -804,7 +803,7 @@
                             verses.push(j);
                         }
                     }
-                    sourcedata = sourcedata.replace(startstr, " \\v");
+                    sourcedata = sourcedata.replace(startstr, " \\v ");
                     sourcedata = sourcedata.replace(endstr, " ");
                 }
 
@@ -938,21 +937,36 @@
 
                 var rawdata = this.rawdata[complexid];
                 var rawdata2 = this.rawdata2[complexid];
+                var vtest1 = new RegExp(/\\v/g);
+                var vtest2 = new RegExp(/\/v/g);
+                var ctest = new RegExp(/\\c/g);
+                var stest = new RegExp(/  /g);
+                var vreplace = "\\v ";
+                var creplace = "\\c ";
+                var sreplace = " ";
                 transchunk = {transcontent: "", helpscontent: [], completed: false, meta: meta, state: {}};
 
                 if (rawdata) {
                     transchunk.completed = rawdata.completed;
                     if (typeclass === "standard") {
                         transchunk.transcontent = rawdata.transcontent;
+
+                        transchunk.transcontent = transchunk.transcontent.replace(vtest1, vreplace);
+                        transchunk.transcontent = transchunk.transcontent.replace(vtest2, vreplace);
+                        transchunk.transcontent = transchunk.transcontent.replace(ctest, creplace);
+                        transchunk.transcontent = transchunk.transcontent.replace(stest, sreplace);
+
                         while (test.test(transchunk.transcontent)) {
-                            transchunk.transcontent = transchunk.transcontent.replace(startstr, " \\v");
+                            transchunk.transcontent = transchunk.transcontent.replace(startstr, " \\v ");
                             transchunk.transcontent = transchunk.transcontent.replace(endstr, " ");
                         }
                         if (!transchunk.completed) {
                             var textarray = transchunk.transcontent.split(" ");
                             var returnstr = "";
                             for (var t = 0; t < textarray.length; t++) {
-                                if (textarray[t].substring(0, 2) !== "\\v") {
+                                if (textarray[t] === "\\v") {
+                                    i++;
+                                } else {
                                     returnstr += textarray[t] + " ";
                                 }
                             }

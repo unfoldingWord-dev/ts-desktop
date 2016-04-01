@@ -574,17 +574,12 @@ function ProjectsManager(query, configurator, srcDir) {
                         return {parentDir, projectDir, manifest, license};
                     });
                 })
-                .then(function (list) {
-                    var migrated = _.map(list, function (paths) {
-                        return targetTranslationMigrator.migrate(paths)
-                            .catch(function (err) {
-                                console.log(err);
-                                return false;
-                            });
-                    });
-                    return Promise.all(migrated).then(function (result) {
-                        return _.compact(result);
-                    })
+                .then(targetTranslationMigrator.migrateAll)
+                .then(function (results) {
+                    if (!results.length) {
+                        throw new Error ("Could not restore this project");
+                    }
+                    return results;
                 })
                 .then(function (results) {
                     return _.map(results, function (result) {
@@ -848,19 +843,28 @@ function ProjectsManager(query, configurator, srcDir) {
 
             return this.loadProjectsList()
                 .then(map(makePaths))
+                .then(map('manifest'))
                 .then(function (list) {
-                    var migrated = _.map(list, function (paths) {
-                        return targetTranslationMigrator.migrate(paths)
-                            .catch(function (err) {
-                                console.log(err);
-                                return false;
-                            });
-                    });
-                    return Promise.all(migrated).then(function (result) {
-                        return _.compact(result);
+                    return _.filter(list, function (path) {
+                        try {
+                            var test = fs.statSync(path);
+                        } catch (e) {
+                            test = false;
+                        }
+                        return test;
                     })
                 })
-                .then(map('manifest'))
+                .then(map(read))
+                .then(Promise.all.bind(Promise))
+                .then(map(fromJSON))
+        },
+
+        migrateTargetTranslationsList: function () {
+            var makePaths = config.makeProjectPathsForProject.bind(config);
+
+            return this.loadProjectsList()
+                .then(map(makePaths))
+                .then(targetTranslationMigrator.migrateAll)
         },
 
         loadFinishedFramesList: function (meta) {

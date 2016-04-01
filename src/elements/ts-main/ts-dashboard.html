@@ -345,12 +345,15 @@
 
       updatelist: function () {
           var mythis = this;
-          App.projectsManager.loadTargetTranslationsList().then(function(list) {
+          App.projectsManager.migrateTargetTranslationsList()
+              .then(function () {
+                  return App.projectsManager.loadTargetTranslationsList()
+              })
+              .then(function(list) {
               App.ipc.send('loading-status', 'Updating Manifest Files...');
               for (var i = 0; i < list.length; i++) {
                   list[i] = App.projectsManager.updateManifestToMeta(list[i]);
               }
-              // TRICKY: remove invalid manifests (null)
               mythis.set('projectlist', _.compact(list));
 
               App.ipc.send('loading-status', 'Checking Auto Backups...');
@@ -367,11 +370,13 @@
       },
 
       ready: function() {
-          App.ipc.send('loading-status', 'Loading Projects List...');
-          this.updatelist();
           this.setdefault();
           App.ipc.send('loading-status', 'Retrieving User Info...');
           this.retrieveuser();
+          App.configurator.applyPrefAppearance();
+          App.configurator.applyPrefBehavior();
+          App.ipc.send('loading-status', 'Loading Projects List...');
+          this.updatelist();
       }
 
   });

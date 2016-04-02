@@ -385,8 +385,8 @@
         },
 
         openproject: function (e) {
-            var projectdata = e.model.proj;
-            this.fire('iron-signal', {name: 'loadproject', data: {projdata: projectdata, type: "home"}});
+            var projectmeta = e.model.proj;
+            this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, type: "home"}});
         },
 
         openinfo: function (e) {

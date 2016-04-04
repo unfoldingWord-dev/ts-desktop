@@ -625,7 +625,9 @@
             setTimeout(function() {
                 load.open();
                 setTimeout(function() {
-                    mythis.set('currentproject', {projectmeta: projectmeta, statedata: {}, rawdata: {}, chunks: [], chapters: []});
+                    mythis.set('currentproject.projectmeta', projectmeta);
+                    mythis.set('currentproject.statedata', {});
+                    mythis.set('currentproject.rawdata', {});
                     mythis.retrievesource();
                     App.projectsManager.loadTargetTranslation(projectmeta).then(function (translation) {
                         mythis.set('currentproject.rawdata.main', translation);
@@ -1230,9 +1232,8 @@
 
         gohome: function () {
             this.savestate();
-            this.fire('iron-signal', {name: 'setdefault'});
-            this.reset();
             this.route = "home";
+            this.reset();
         },
 
         gopublish: function () {

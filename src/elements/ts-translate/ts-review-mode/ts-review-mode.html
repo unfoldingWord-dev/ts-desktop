@@ -160,7 +160,7 @@
 	<template>
 
         <div id="contain">
-            <iron-list id="reviewlist" items="{{chunks.data}}" as="chunk">
+            <iron-list id="reviewlist" items="{{chunks}}" as="chunk">
                 <template>
                     <ts-review-card chunk="{{chunk}}" on-updateheight="updateheight"></ts-review-card>
                 </template>
@@ -182,7 +182,7 @@
                         <h3>Examples:</h3>
                         <template is="dom-repeat" items="{{examples}}" as="example">
                             <div id="examples">
-                                <p class="link" on-tap="examplescroll"><span>{{chunks.data.0.data.project.name}}</span> <span>{{example.chapter}}</span>:<span>{{example.frame}}</span></p>
+                                <p class="link" on-tap="examplescroll"><span>{{chunks.0.projectmeta.project.name}}</span> <span>{{example.chapter}}</span>:<span>{{example.frame}}</span></p>
                                 <p>{{example.body}}</p>
                             </div>
                         </template>
@@ -218,8 +218,8 @@
 
         properties: {
             chunks: {
-                type: Object,
-                value: {},
+                type: Array,
+                value: [],
                 notify: true
             },
             modestatus: {
@@ -262,7 +262,7 @@
             var content = "";
             var clear = [];
             var footer = this.$.footer;
-            var projectdata = this.chunks.data[0].data;
+            var projectdata = this.chunks[0].projectmeta;
             var current = projectdata.currentsource;
             var currentsource = projectdata.source_translations[current];
 
@@ -324,7 +324,7 @@
 
             while (i < 10000 && !found) {
                 list.scrollToIndex(i);
-                if (this.chunks.data[i].meta.chapter === chapter && this.chunks.data[i].meta.frame === frame) {
+                if (this.chunks[i].chunkmeta.chapter === chapter && this.chunks[i].chunkmeta.frame === frame) {
                     found = true;
                 }
                 i++;
@@ -384,7 +384,7 @@
             var list = this.$.reviewlist;
             var index = list.firstVisibleIndex || 0;
 
-            this.set('modestatus.chapter', this.chunks.data[index].meta.chapter);
+            this.set('modestatus.chapter', this.chunks[index].chunkmeta.chapter);
             this.set('modestatus.index', index);
         },
 
@@ -399,7 +399,7 @@
             } else {
                 while (i < 10000 && !found) {
                     list.scrollToIndex(i);
-                    if (this.chunks.data[i].meta.chapter === this.modestatus.chapter) {
+                    if (this.chunks[i].chunkmeta.chapter === this.modestatus.chapter) {
                         found = true;
                     }
                     i++;

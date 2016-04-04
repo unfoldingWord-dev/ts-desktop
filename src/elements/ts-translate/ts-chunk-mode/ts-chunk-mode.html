@@ -61,7 +61,7 @@
     <template>
 
         <div id="contain">
-            <iron-list id="chunklist" items="{{chunks.data}}" as="chunk" on-scroll="setheights">
+            <iron-list id="chunklist" items="{{chunks}}" as="chunk" on-scroll="setheights">
                 <template>
                     <ts-chunk-card id="{{createid(index)}}" chunk="{{chunk}}" on-updateheight="updateheight"></ts-chunk-card>
                 </template>
@@ -84,8 +84,8 @@
 
         properties: {
             chunks: {
-                type: Object,
-                value: {},
+                type: Array,
+                value: [],
                 notify: true
             },
             modestatus: {
@@ -106,7 +106,7 @@
         },
 
         setheights: function () {
-            for (var i = 0; i < this.chunks.data.length; i++) {
+            for (var i = 0; i < this.chunks.length; i++) {
                 var card = document.getElementById(this.modename + i);
                 if (card !== null) {
                     card.setheight();
@@ -160,7 +160,7 @@
             var list = this.$.chunklist;
             var index = list.firstVisibleIndex || 0;
 
-            this.set('modestatus.chapter', this.chunks.data[index].meta.chapter);
+            this.set('modestatus.chapter', this.chunks[index].chunkmeta.chapter);
             this.set('modestatus.index', index);
         },
 
@@ -175,7 +175,7 @@
             } else {
                 while (i < 10000 && !found) {
                     list.scrollToIndex(i);
-                    if (this.chunks.data[i].meta.chapter === this.modestatus.chapter) {
+                    if (this.chunks[i].chunkmeta.chapter === this.modestatus.chapter) {
                         found = true;
                     }
                     i++;

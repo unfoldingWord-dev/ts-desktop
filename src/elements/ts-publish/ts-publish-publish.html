@@ -219,8 +219,8 @@
 
         export: function () {
             var mythis = this;
-            var meta = this.currentproject.data;
-            var translation = this.currentproject.translation;
+            var meta = this.currentproject.projectmeta;
+            var translation = this.currentproject.chunks;
             var mediaServer = App.configurator.getUserSetting('mediaserver');
             var name = meta.unique_id;
             var filePath;
@@ -260,7 +260,7 @@
         upload: function() {
             var loading = this.$.loading;
             var mythis = this;
-            var meta = this.currentproject.data;
+            var meta = this.currentproject.projectmeta;
             var paths = App.projectsManager.getPaths(meta);
             var repo = meta.unique_id;
             var user = this.currentuser;

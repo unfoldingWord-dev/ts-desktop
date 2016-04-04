@@ -219,13 +219,13 @@
 
         export: function () {
             var mythis = this;
-            var meta = this.currentproject.projectmeta;
+            var projectmeta = this.currentproject.projectmeta;
             var translation = this.currentproject.chunks;
             var mediaServer = App.configurator.getUserSetting('mediaserver');
-            var name = meta.unique_id;
+            var name = projectmeta.unique_id;
             var filePath;
 
-            if (meta.format === 'markdown') {
+            if (projectmeta.format === 'markdown') {
                 filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'Zip Files', extensions: ['zip']}]}});
             } else {
                 filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'Text Files', extensions: ['txt']}]}});
@@ -239,7 +239,7 @@
             mythis.$.loading.open();
 
             setTimeout(function() {
-                App.projectsManager.exportTranslation(translation, meta, filePath, mediaServer)
+                App.projectsManager.exportTranslation(translation, projectmeta, filePath, mediaServer)
                     .then(function () {
                         mythis.set('options.title', "Project Exported");
                         mythis.set('options.body', "Your project has been successfully exported to a file.  Thanks.");
@@ -260,9 +260,9 @@
         upload: function() {
             var loading = this.$.loading;
             var mythis = this;
-            var meta = this.currentproject.projectmeta;
-            var paths = App.projectsManager.getPaths(meta);
-            var repo = meta.unique_id;
+            var projectmeta = this.currentproject.projectmeta;
+            var paths = App.projectsManager.getPaths(projectmeta);
+            var repo = projectmeta.unique_id;
             var user = this.currentuser;
 
             this.set('options.body', "Uploading Project.  Please wait...");

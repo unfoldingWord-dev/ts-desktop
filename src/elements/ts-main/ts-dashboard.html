@@ -175,7 +175,6 @@
       </paper-dialog>
 
       <iron-signals on-iron-signal-updatelist="updatelist"></iron-signals>
-      <iron-signals on-iron-signal-setdefault="setdefault"></iron-signals>
       <iron-signals on-iron-signal-openfeedback="openfeedback"></iron-signals>
       <iron-signals on-iron-signal-openrestore="openrestore"></iron-signals>
       <iron-signals on-iron-signal-openbackup="openbackup"></iron-signals>
@@ -365,12 +364,7 @@
           });
       },
 
-      setdefault: function () {
-          this.currentproject = {};
-      },
-
       ready: function() {
-          this.setdefault();
           App.ipc.send('loading-status', 'Retrieving User Info...');
           this.retrieveuser();
           App.configurator.applyPrefAppearance();

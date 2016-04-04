@@ -211,10 +211,9 @@
         },
 
         gohome: function () {
-            this.fire('iron-signal', {name: 'setdefault'});
-            this.fire('iron-signal', {name: 'reset'});
             this.route = "home";
             this.selected = 0;
+            this.fire('iron-signal', {name: 'reset'});
         },
 
         export: function () {

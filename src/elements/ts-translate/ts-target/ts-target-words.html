@@ -124,7 +124,7 @@
         <div id="main">
             <paper-material id="heading" elevation="1">
                 <div>
-                    <span>[[chunk.meta.chunkref]]</span><span>[[chunk.meta.refaddon]]</span>
+                    <span>[[chunk.chunkmeta.chunkref]]</span><span>[[chunk.chunkmeta.refaddon]]</span>
                 </div>
             </paper-material>
             <div id="content" class="editmode">
@@ -132,11 +132,11 @@
                     <paper-material class="contentbox" elevation="1">
                         <div class="contentheader">
                             <p>{{help.title}}</p>
-                            <iron-autogrow-textarea bind-value="{{help.title}}" on-change="change" on-input="input" placeholder$="[[checktitle(chunk.data.type.id)]]"></iron-autogrow-textarea>
+                            <iron-autogrow-textarea bind-value="{{help.title}}" on-change="change" on-input="input" placeholder$="[[checktitle(chunk.projectmeta.type.id)]]"></iron-autogrow-textarea>
                         </div>
                         <div class="contentbody">
                             <p>{{help.body}}</p>
-                            <iron-autogrow-textarea bind-value="{{help.body}}" on-change="change" on-input="input" placeholder$="[[checkbody(chunk.data.type.id)]]"></iron-autogrow-textarea>
+                            <iron-autogrow-textarea bind-value="{{help.body}}" on-change="change" on-input="input" placeholder$="[[checkbody(chunk.projectmeta.type.id)]]"></iron-autogrow-textarea>
                         </div>
                     </paper-material>
                 </template>
@@ -219,7 +219,7 @@
 
         completehelp: function (event, data) {
             var index = data.index;
-            if (this.chunk.index === index && this.chunk.data.project_type_class === "extant") {
+            if (this.chunk.index === index && this.chunk.projectmeta.project_type_class === "extant") {
                 this.set('chunk.completed', true);
                 this.$.helptoggle.checked = true;
                 this.fire('iron-signal', {name: 'updatetranslation'});

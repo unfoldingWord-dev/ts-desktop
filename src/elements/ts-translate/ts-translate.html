@@ -232,8 +232,8 @@
 
         <div id="pages">
             <ts-read-mode id="readmode" chapters="[[chapters]]" modestatus="{{modestatus}}"></ts-read-mode>
-            <ts-chunk-mode id="chunkmode" chunks="{{chunks}}" modestatus="{{modestatus}}"></ts-chunk-mode>
-            <ts-review-mode id="reviewmode" chunks="{{chunks}}" modestatus="{{modestatus}}"></ts-review-mode>
+            <ts-chunk-mode id="chunkmode" chunks="{{currentproject.chunks}}" modestatus="{{modestatus}}"></ts-chunk-mode>
+            <ts-review-mode id="reviewmode" chunks="{{currentproject.chunks}}" modestatus="{{modestatus}}"></ts-review-mode>
             <ts-nosource-mode id="nosourcemode" projectdata="[[currentproject.projectmeta]]"></ts-nosource-mode>
         </div>
 
@@ -1176,7 +1176,7 @@
 
         upload: function () {
             var update = this.chunks.data.map(function(chunk){
-                return {meta: chunk.meta, transcontent: chunk.transcontent, helpscontent: chunk.helpscontent, completed: chunk.completed};
+                return {meta: chunk.chunkmeta, transcontent: chunk.transcontent, helpscontent: chunk.helpscontent, completed: chunk.completed};
             });
             var count = 0;
             for (var i = 0; i < update.length; i++) {

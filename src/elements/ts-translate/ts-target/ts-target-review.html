@@ -91,7 +91,7 @@
         <paper-material id="main" elevation="1">
             <div id="heading">
                 <div>
-                    <span>[[chunk.meta.chunkref]]</span><span>[[chunk.meta.refaddon]]</span>
+                    <span>[[chunk.chunkmeta.chunkref]]</span><span>[[chunk.chunkmeta.refaddon]]</span>
                 </div>
                 <iron-icon class$="[[iconclass(chunk.completed)]]" icon="create" on-tap="edit"></iron-icon>
             </div>
@@ -135,8 +135,8 @@
 
         rendertext: function () {
             if(this.chunk && this.chunk.srccontent) {
-                var verses = this.chunk.meta.verses;
-                var chap = this.chunk.meta.chapter;
+                var verses = this.chunk.chunkmeta.verses;
+                var chap = this.chunk.chunkmeta.chapter;
                 var completed = this.chunk.completed;
                 var textholder = this.$.textholder;
                 var linearray = this.chunk.transcontent.split("\n");
@@ -204,8 +204,8 @@
                 var versenum = 0;
                 var returnstr = "";
 
-                if (this.chunk.meta.frame === 1 && this.chunk.data.project.id !== "obs") {
-                    returnstr += "\\c " + this.chunk.meta.chapter + " ";
+                if (this.chunk.chunkmeta.frame === 1 && this.chunk.projectmeta.project.id !== "obs") {
+                    returnstr += "\\c " + this.chunk.chunkmeta.chapter + " ";
                 }
 
                 for (var j = 0; j < paragraphs.length; j++) {
@@ -288,7 +288,7 @@
         },
 
         edit: function () {
-            var id = this.chunk.meta.chapterid + "-" + this.chunk.meta.frameid;
+            var id = this.chunk.chunkmeta.chapterid + "-" + this.chunk.chunkmeta.frameid;
             this.set('chunk.state.review', false);
             this.fire('setheight');
             this.fire('iron-signal', {name: 'updatestate', data: {id: id, mode: "review", value: false}});

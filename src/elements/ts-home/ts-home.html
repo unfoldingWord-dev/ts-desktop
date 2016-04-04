@@ -250,14 +250,14 @@
                         <span>{{locale.progress}}</span>
                     </div>
                     <div id="list">
-                        <template is="dom-repeat" items="[[projectlist]]" as="proj">
+                        <template is="dom-repeat" items="[[projectlist]]" as="project">
                             <div class="row">
                                 <div class="left" on-tap="openproject">
-                                    <span class="smallspan"><iron-icon class="smallicon" icon$="[[checkicon(proj)]]"></iron-icon></span>
-                                    <span class="bigspan">[[proj.project.name]]</span>
-                                    <span class="smallspan smalltext"><span>[[proj.type.name]]</span><span class$="[[typeclass(proj.resource.id)]]">[[proj.resource.id]]</span></span>
-                                    <span class="smalltext bigspan">[[proj.target_language.name]]</span>
-                                    <span class="smallspan"><ts-completion-icon percent="[[proj.completion]]"></ts-completion-icon></span>
+                                    <span class="smallspan"><iron-icon class="smallicon" icon$="[[checkicon(project)]]"></iron-icon></span>
+                                    <span class="bigspan">[[project.project.name]]</span>
+                                    <span class="smallspan smalltext"><span>[[project.type.name]]</span><span class$="[[typeclass(project.resource.id)]]">[[project.resource.id]]</span></span>
+                                    <span class="smalltext bigspan">[[project.target_language.name]]</span>
+                                    <span class="smallspan"><ts-completion-icon percent="[[project.completion]]"></ts-completion-icon></span>
                                 </div>
                                 <div>
                                     <span><paper-icon-button class="info" icon="info" on-tap="openinfo" title="details"></paper-icon-button></span>
@@ -367,15 +367,15 @@
         },
 
         gopublish: function () {
-            var projectdata = this.currentinfo;
+            var projectmeta = this.currentinfo;
             this.closeinfo();
-            this.fire('iron-signal', {name: 'loadproject', data: {projdata: projectdata, type: "publish"}});
+            this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, type: "publish"}});
         },
 
         goprint: function () {
-            var projectdata = this.currentinfo;
+            var projectmeta = this.currentinfo;
             this.closeinfo();
-            this.fire('iron-signal', {name: 'loadproject', data: {projdata: projectdata, type: "print"}});
+            this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, type: "print"}});
         },
 
         gobackup: function () {
@@ -385,12 +385,12 @@
         },
 
         openproject: function (e) {
-            var projectmeta = e.model.proj;
+            var projectmeta = e.model.project;
             this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, type: "home"}});
         },
 
         openinfo: function (e) {
-            this.set('currentinfo', e.model.proj);
+            this.set('currentinfo', e.model.project);
             this.$.info.open();
         },
 
@@ -410,9 +410,9 @@
 
         deleteproject: function () {
             var mythis = this;
-            var projectdata = this.currentinfo;
-            var key = projectdata.unique_id;
-            App.projectsManager.deleteTargetTranslation(projectdata).then(function() {
+            var projectmeta = this.currentinfo;
+            var key = projectmeta.unique_id;
+            App.projectsManager.deleteTargetTranslation(projectmeta).then(function() {
                 App.configurator.unsetValue(key + "-chapter");
                 App.configurator.unsetValue(key + "-index");
                 App.configurator.unsetValue(key + "-selected");

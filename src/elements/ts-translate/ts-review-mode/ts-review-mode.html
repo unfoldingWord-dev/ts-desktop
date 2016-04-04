@@ -262,9 +262,9 @@
             var content = "";
             var clear = [];
             var footer = this.$.footer;
-            var projectdata = this.chunks[0].projectmeta;
-            var current = projectdata.currentsource;
-            var currentsource = projectdata.source_translations[current];
+            var projectmeta = this.chunks[0].projectmeta;
+            var current = projectmeta.currentsource;
+            var currentsource = projectmeta.source_translations[current];
 
             if (data.type === "Notes") {
                 this.set('related', clear);
@@ -274,7 +274,7 @@
                 content = "\<h2 class='style-scope ts-review-mode'\>" + data.title + "\<\/h2\>\<p class='style-scope ts-review-mode'\>" + data.body + "\<\/p\>";
             }
             if (data.type === "Words") {
-                if (projectdata.project.id === "obs") {
+                if (projectmeta.project.id === "obs") {
                     this.set('related', App.projectsManager.getRelatedWords(data.id));
                     this.set('examples', App.projectsManager.getWordExamples(data.id));
                 } else {

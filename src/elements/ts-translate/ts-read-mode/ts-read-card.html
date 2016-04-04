@@ -83,8 +83,8 @@
     <template>
 
         <div id="contain">
-            <ts-source-card id="srccard" class$="[[sourceclass(chunk.state)]]" on-tap="srctop" chunk="[[chunk]]"></ts-source-card>
-            <ts-target-view id="transcard" class$="[[transclass(chunk.state)]]" on-tap="transtop" chunk="[[chunk]]"></ts-target-view>
+            <ts-source-card id="srccard" class$="[[sourceclass(chunk.state.read)]]" on-tap="srctop" chunk="[[chunk]]"></ts-source-card>
+            <ts-target-view id="transcard" class$="[[transclass(chunk.state.read)]]" on-tap="transtop" chunk="[[chunk]]"></ts-target-view>
         </div>
 
     </template>
@@ -126,15 +126,15 @@
             var trans = this.$.transcard;
             var src = this.$.srccard;
             var mythis = this;
-            var id = this.chunk.chapterid;
+            var id = this.chunk.chaptermeta.chapterid;
 
-            if(this.chunk.state) {
+            if(this.chunk.state.read) {
                 trans.classList.add("up");
                 src.classList.add("down");
                 setTimeout(function () {
                     trans.classList.remove("up");
                     src.classList.remove("down");
-                    mythis.set('chunk.state', false);
+                    mythis.set('chunk.state.read', false);
                     mythis.fire('iron-signal', {name: 'updatestate', data: {id: id, mode: "read", value: false}});
                 }, 1000);
             }
@@ -144,15 +144,15 @@
             var trans = this.$.transcard;
             var src = this.$.srccard;
             var mythis = this;
-            var id = this.chunk.chapterid;
+            var id = this.chunk.chaptermeta.chapterid;
 
-            if(!this.chunk.state) {
+            if(!this.chunk.state.read) {
                 trans.classList.add("down");
                 src.classList.add("up");
                 setTimeout(function () {
                     trans.classList.remove("down");
                     src.classList.remove("up");
-                    mythis.set('chunk.state', true);
+                    mythis.set('chunk.state.read', true);
                     mythis.fire('iron-signal', {name: 'updatestate', data: {id: id, mode: "read", value: true}});
                 }, 1000);
             }

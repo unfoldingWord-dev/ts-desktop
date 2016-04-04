@@ -681,8 +681,8 @@ function ProjectsManager(query, configurator, srcDir) {
             var paths = this.getPaths(meta);
             var projectClass = meta.project_type_class;
 
-            var makeComplexId = function (c) {
-                return c.meta.chapterid + '-' + c.meta.frameid;
+            var makeComplexId = function (chunk) {
+                return chunk.chunkmeta.chapterid + '-' + chunk.chunkmeta.frameid;
             };
 
             var prop = function (prop) {
@@ -730,8 +730,8 @@ function ProjectsManager(query, configurator, srcDir) {
                 };
             };
 
-            var makeChapterDir = function (c) {
-                return mkdirp(path.join(paths.projectDir, c.meta.chapterid));
+            var makeChapterDir = function (chunk) {
+                return mkdirp(path.join(paths.projectDir, chunk.chunkmeta.chapterid));
             };
 
             var makeChapterDirs = function (data) {
@@ -749,15 +749,15 @@ function ProjectsManager(query, configurator, srcDir) {
 
             var cleanChapterDirs = function () {
                 return function () {
-                    var data = _.groupBy(translation, function (chunks) {
-                        return chunks.meta.chapterid;
+                    var data = _.groupBy(translation, function (chunk) {
+                        return chunk.chunkmeta.chapterid;
                     });
                     return Promise.all(_.map(data, cleanChapterDir));
                 };
             };
 
             var updateChunk = function (chunk) {
-                var file = path.join(paths.projectDir, chunk.meta.chapterid, chunk.meta.frameid + '.txt');
+                var file = path.join(paths.projectDir, chunk.chunkmeta.chapterid, chunk.chunkmeta.frameid + '.txt');
                 var hasContent = false;
                 if (projectClass === "standard") {
                     hasContent = !!chunk.transcontent;

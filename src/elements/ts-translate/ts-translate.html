@@ -652,11 +652,11 @@
 
         loaddata: function (check) {
             var mythis = this;
-            var meta = mythis.currentproject.projectmeta;
+            var projectmeta = mythis.currentproject.projectmeta;
 
             mythis.savesource();
             mythis.getlocation();
-            App.projectsManager.loadTargetTranslation(meta).then(function (translation) {
+            App.projectsManager.loadTargetTranslation(projectmeta).then(function (translation) {
                 mythis.set('currentproject.rawdata.main', translation);
                 mythis.createchunks();
                 mythis.createchapters();
@@ -951,7 +951,7 @@
         },
 
         createProjectTitleFrame: function (chunkmeta, projectmeta, index) {
-            var meta = {
+            var titlemeta = {
                 chapter: 0,
                 frame: 0,
                 chapterid: "00",
@@ -960,9 +960,9 @@
                 refaddon: chunkmeta.refaddon,
                 verses: []
             };
-            var chunk = this.getFrameData(meta, projectmeta);
+            var chunk = this.getFrameData(titlemeta, projectmeta);
             chunk.projectmeta = projectmeta;
-            chunk.chunkmeta = meta;
+            chunk.chunkmeta = titlemeta;
             chunk.srccontent = projectmeta.project.name;
             chunk.wordcontent = "";
             chunk.resources = [];
@@ -971,7 +971,7 @@
         },
 
         createChapterTitleFrame: function (chunkmeta, projectmeta, index) {
-            var meta = {
+            var titlemeta = {
                 chapter: chunkmeta.chapter,
                 frame: 0,
                 title: chunkmeta.title,
@@ -982,9 +982,9 @@
                 chunkref: "Story Title",
                 refaddon: chunkmeta.refaddon
             };
-            var chunk = this.getFrameData(meta, projectmeta);
+            var chunk = this.getFrameData(titlemeta, projectmeta);
             chunk.projectmeta = projectmeta;
-            chunk.chunkmeta = meta;
+            chunk.chunkmeta = titlemeta;
             chunk.srccontent = chunkmeta.title;
             chunk.wordcontent = "";
             chunk.resources = [];
@@ -993,7 +993,7 @@
         },
 
         createChapterRefFrame: function (chunkmeta, projectmeta, index) {
-            var meta = {
+            var refmeta = {
                 chapter: chunkmeta.chapter,
                 frame: 0,
                 title: chunkmeta.title,
@@ -1004,9 +1004,9 @@
                 chunkref: "Story Reference",
                 refaddon: chunkmeta.refaddon
             };
-            var chunk = this.getFrameData(meta, projectmeta);
+            var chunk = this.getFrameData(refmeta, projectmeta);
             chunk.projectmeta = projectmeta;
-            chunk.chunkmeta = meta;
+            chunk.chunkmeta = refmeta;
             chunk.srccontent = chunkmeta.reference;
             chunk.wordcontent = "";
             chunk.resources = [];
@@ -1262,8 +1262,8 @@
         },
 
         gobackup: function () {
-            var meta = this.currentproject.projectmeta;
-            this.fire('iron-signal', {name: 'openbackup', data: {meta: meta}});
+            var projectmeta = this.currentproject.projectmeta;
+            this.fire('iron-signal', {name: 'openbackup', data: {projectmeta: projectmeta}});
         },
 
         gosettings: function () {

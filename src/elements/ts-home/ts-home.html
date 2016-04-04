@@ -362,8 +362,8 @@
             return id === "ulb" || id === "udb" ? 'space' : 'hide';
         },
 
-        checkicon: function (meta) {
-            return meta.project.id === "obs" || meta.project_type_class === "extant" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
+        checkicon: function (projectmeta) {
+            return projectmeta.project.id === "obs" || projectmeta.project_type_class === "extant" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
         },
 
         gopublish: function () {
@@ -379,9 +379,9 @@
         },
 
         gobackup: function () {
-            var meta = this.currentinfo;
+            var projectmeta = this.currentinfo;
             this.closeinfo();
-            this.fire('iron-signal', {name: 'openbackup', data: {meta: meta}});
+            this.fire('iron-signal', {name: 'openbackup', data: {projectmeta: projectmeta}});
         },
 
         openproject: function (e) {

@@ -97,11 +97,11 @@ function Printer() {
                     // normalize input
                     let chapters = _.mapValues(_.groupBy(translation, function(obj) {
                         //console.debug('map chapter values', obj);
-                        return obj.meta.chapterid;
+                        return obj.chunkmeta.chapterid;
                     }), function(chapter, key) {
                         let frames = _.mapKeys(chapter, function(obj) {
                             //console.debug('map chapter keys', obj);
-                            return obj.meta.frameid;
+                            return obj.chunkmeta.frameid;
                         });
 
                         let chapterObj = {
@@ -116,7 +116,7 @@ function Printer() {
                             return o.transcontent !== '';
                         }), function(f) {
                             //console.debug('sort frames',f);
-                            return f.meta.frame;
+                            return f.chunkmeta.frame;
                         });
                         return chapterObj;
                     });
@@ -184,7 +184,7 @@ function Printer() {
                             // chapter title
                             doc.addPage();
                             doc.fontSize(20)
-                                .text(chapter.title.transcontent || chapter.title.meta.title, 72, doc.page.height / 2, {align: 'center'});
+                                .text(chapter.title.transcontent || chapter.title.chunkmeta.title, 72, doc.page.height / 2, {align: 'center'});
                             chapter.page = doc.bufferedPageRange().count;
 
                             // frames
@@ -198,7 +198,7 @@ function Printer() {
                                         //console.debug(meta);
                                         //console.debug(frame);
                                         // TRICKY: right now all images are en
-                                        var imgPath = path.join(imagePath, meta.resource.id + "-en-" + frame.meta.chapterid + "-" + frame.meta.frameid + ".jpg");
+                                        var imgPath = path.join(imagePath, meta.resource.id + "-en-" + frame.chunkmeta.chapterid + "-" + frame.chunkmeta.frameid + ".jpg");
                                         //check the position of the text on the page.
                                         // 792 (total ht of page) - 50 ( lower margin) - 263.25 (height of pic) = 478.75 (max amount of space used before image)
                                         if(doc.y > 478.75){
@@ -246,7 +246,7 @@ function Printer() {
                             }
                             doc.switchToPage(currTocPage);
                             doc.fontSize(10)
-                                .text(chapter.title.transcontent || chapter.title.meta.title)
+                                .text(chapter.title.transcontent || chapter.title.chunkmeta.title)
                                 .moveUp()
                                 .text(chapter.page + '', {align: 'right'})
                                 .moveDown();

@@ -458,14 +458,14 @@ function ProjectsManager(query, configurator, srcDir) {
                         for(let frame of translation) {
 
                             // close chapter chapter
-                            if(frame.meta.chapter !== currentChapter) {
+                            if(frame.chunkmeta.chapter !== currentChapter) {
                                 if(chapterContent !== '' && numFinishedFrames > 0) {
                                     // TODO: we need to get the chapter reference and insert it here
                                     chapterContent += '////\n';
                                     //console.log('chapter ' + currentChapter, chapterContent);
                                     zip.append(new Buffer(chapterContent), {name: currentChapter + '.txt'});
                                 }
-                                currentChapter = frame.meta.chapter;
+                                currentChapter = frame.chunkmeta.chapter;
                                 chapterContent = '';
                                 numFinishedFrames = 0;
                             }
@@ -485,12 +485,12 @@ function ProjectsManager(query, configurator, srcDir) {
                                 chapterContent += '//\n\n';
 
                                 chapterContent += '//\n';
-                                chapterContent += frame.meta.title + '\n';
+                                chapterContent += frame.chunkmeta.title + '\n';
                                 chapterContent += '//\n\n';
                             }
 
                             // add frame
-                            chapterContent += '{{' + mediaServer + meta.project.id + '/jpg/1/en/360px/' + meta.project.id + '-' + meta.target_language.id + '-' + frame.meta.chapterid + '-' + frame.meta.frameid + '.jpg}}\n\n';
+                            chapterContent += '{{' + mediaServer + meta.project.id + '/jpg/1/en/360px/' + meta.project.id + '-' + meta.target_language.id + '-' + frame.chunkmeta.chapterid + '-' + frame.chunkmeta.frameid + '.jpg}}\n\n';
                             chapterContent += frame.transcontent + '\n\n';
                         }
                         if(chapterContent !== '' && numFinishedFrames > 0) {
@@ -523,11 +523,11 @@ function ProjectsManager(query, configurator, srcDir) {
 
                                 chapterContent += '\\\mt1 ' + meta.project.name.toUpperCase() + '\n';
 
-                                chapterContent += '\\\c ' + frame.meta.chapter + '\n';
+                                chapterContent += '\\\c ' + frame.chunkmeta.chapter + '\n';
                             }
-                            if(currentChapter !== frame.meta.chapter){
-                                chapterContent += '\\\c ' + frame.meta.chapter + '\n';
-                                currentChapter = frame.meta.chapter;
+                            if(currentChapter !== frame.chunkmeta.chapter){
+                                chapterContent += '\\\c ' + frame.chunkmeta.chapter + '\n';
+                                currentChapter = frame.chunkmeta.chapter;
                             }
                             // add frame
                             if(frame.transcontent !== ''){

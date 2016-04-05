@@ -512,12 +512,17 @@
         },
 
         savecompletion: function () {
-            var projectmeta = this.currentproject.projectmeta;
-            var key = projectmeta.unique_id;
-            var completed = projectmeta.finished_chunks.length;
-            var total = this.currentproject.chunks.length;
-            var completion = Math.round((completed / total) * 100);
+            var key = this.currentproject.projectmeta.unique_id;
+            var chunks = this.currentproject.chunks;
+            var finished = [];
 
+            for (var i = 0; i < chunks.length; i++) {
+                if (chunks[i].completed) {
+                    finished.push(chunks[i].chunkmeta.chapterid + "-" + chunks[i].chunkmeta.frameid);
+                }
+            }
+            var completion = Math.round((finished.length / chunks.length) * 100);
+            this.set('currentproject.projectmeta.finished_chunks', finished);
             this.set('currentproject.projectmeta.completion', completion);
             App.configurator.setValue(key + "-completion", completion);
         },

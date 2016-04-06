@@ -667,7 +667,7 @@
                 var sourcedata = this.convertVerseMarkers(frames[i].chunk);
                 var chunkmeta = this.createFrameMeta(frames[i], projectmeta, sourcedata.verses);
                 var chunk = this.getFrameData(chunkmeta, projectmeta);
-                chunk.srccontent = sourcedata.text;
+                chunk.srccontent = this.renderMarkersAsSuper(sourcedata.text);
                 chunk.wordcontent = "";
                 chunk.resources = resources;
                 if (projectmeta.project_type_class === "standard" && chunkmeta.frameid === "01") {
@@ -799,6 +799,7 @@
                 var result = App.projectsManager.getFrameUdb(currentsource, frame.chapter, frame.verse)[0];
                 if (result) {
                     udbtext = this.convertVerseMarkers(result.chunk).text;
+                    udbtext = this.renderMarkersAsSuper(udbtext);
                     resources.push({title: "UDB", array: false, data: [udbtext]});
                 }
             }
@@ -939,6 +940,25 @@
             }
 
             return returnstr.trim();
+        },
+
+        renderMarkersAsSuper: function (text) {
+            var textarray = text.split(" ");
+            var numstr1 = "\<sup\>";
+            var numstr2 = "\<\/sup\>";
+            var returnstr = "";
+            var verse = 0;
+
+            for (var i = 0; i < textarray.length; i++) {
+                if (textarray[i] === "\\v") {
+                    verse = textarray[i+1];
+                    returnstr += numstr1 + verse + numstr2;
+                    i++;
+                } else {
+                    returnstr += textarray[i] + " ";
+                }
+            }
+            return returnstr;
         },
 
         createProjectTitleFrame: function (chunkmeta, projectmeta, index) {

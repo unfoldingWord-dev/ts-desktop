@@ -44,6 +44,9 @@ process.stdout.write = console.log.bind(console);
     setMsg('Loading Projects Manager...');
     let ProjectsManager = require('../js/projects').ProjectsManager;
 
+    setMsg('Loading Data Manager...');
+    let DataManager = require('../js/database').DataManager;
+
     setMsg('Loading Locale...');
     let i18n = require('../js/i18n').Locale(path.resolve(path.join(__dirname, '..', '..', 'i18n')));
 
@@ -141,6 +144,16 @@ process.stdout.write = console.log.bind(console);
                 db = new Db(schemaPath, dbPath);
 
             return new ProjectsManager(db, configurator, srcDir);
+        })(),
+
+        dataManager: (function () {
+            // TODO: should we move the location of these files/folders outside of the src folder?
+            var srcDir = path.resolve(path.join(__dirname, '..')),
+                schemaPath = path.join(srcDir, 'config', 'schema.sql'),
+                dbPath = path.join(srcDir, 'index', 'index.sqlite'),
+                db = new Db(schemaPath, dbPath);
+
+            return new DataManager(db, configurator);
         })(),
 
         reporter: new Reporter({

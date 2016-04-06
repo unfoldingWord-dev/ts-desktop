@@ -647,20 +647,10 @@
         },
 
         updatesources: function (event, data) {
-            this.set('currentproject.projectmeta.source_translations', data.sources);
-            this.set('currentproject.projectmeta.currentsource', data.selected);
-            this.loaddata(true);
-        },
-
-        updateselected: function (event, data) {
-            this.set('currentproject.projectmeta.currentsource', data.selected);
-            this.loaddata(false);
-        },
-
-        loaddata: function (check) {
             var mythis = this;
+            mythis.set('currentproject.projectmeta.source_translations', data.sources);
+            mythis.set('currentproject.projectmeta.currentsource', data.selected);
             var projectmeta = mythis.currentproject.projectmeta;
-
             mythis.savesource();
             mythis.getlocation();
             App.projectsManager.loadTargetTranslation(projectmeta).then(function (translation) {
@@ -670,7 +660,7 @@
                 mythis.savetofile();
                 mythis.forceResize();
                 mythis.setlocation();
-                if (check) {
+                if (data.full) {
                     mythis.checksources();
                 }
             });
@@ -721,7 +711,7 @@
                 var sourcedata = this.convertVerseMarkers(frames[i].chunk);
                 var chunkmeta = this.createFrameMeta(frames[i], projectmeta, sourcedata.verses);
                 var chunk = this.getFrameData(chunkmeta, projectmeta);
-                chunk.projectmeta = projectmeta;
+                chunk.projectmeta = _.cloneDeep(projectmeta);
                 chunk.chunkmeta = chunkmeta;
                 chunk.srccontent = sourcedata.text;
                 chunk.wordcontent = "";
@@ -781,7 +771,7 @@
                     mythis.currentproject.statedata[chaptermeta.chapterid] = statedata;
                 }
                 if (chaptermeta.chapter > 0) {
-                    chapters.push({completed: chapcomplete, transcontent: transcontent, srccontent: srccontent, projectmeta: projectmeta, chaptermeta: chaptermeta, state: statedata});
+                    chapters.push({completed: chapcomplete, transcontent: transcontent, srccontent: srccontent, projectmeta: _.cloneDeep(projectmeta), chaptermeta: chaptermeta, state: statedata});
                 }
             });
             this.set('currentproject.chapters', chapters);

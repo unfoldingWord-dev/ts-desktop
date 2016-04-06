@@ -220,7 +220,7 @@
             var sources = this.sources;
             var selected = this.selectedSource;
             this.query = "";
-            this.fire('iron-signal', {name: 'updatesources', data: {sources: sources, selected: selected}});
+            this.fire('iron-signal', {name: 'updatesources', data: {sources: sources, selected: selected, full: true}});
             this.fire('close');
         },
 

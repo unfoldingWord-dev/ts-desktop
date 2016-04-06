@@ -1,7 +1,6 @@
 
 <link rel="import" href="../../../components/paper-material/paper-material.html">
 <link rel="import" href="../../../components/paper-toggle-button/paper-toggle-button.html">
-<link rel="import" href="../../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../../components/iron-icons/iron-icons.html">
 <link rel="import" href="../../../components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../../components/neon-animation/neon-animation.html">
@@ -35,8 +34,9 @@
             border-radius: 3px;
 		}
 
-        #heading paper-icon-button {
+        #heading iron-icon {
             padding: 6px;
+            cursor: pointer;
         }
 
         .contentbox {
@@ -57,11 +57,12 @@
             padding: 5px 0;
         }
 
-        .rightbox paper-icon-button {
+        .rightbox iron-icon {
             padding: 0;
             width: 24px;
             height: 24px;
             color: var(--secondary-text-color);
+            cursor: pointer;
         }
 
         .leftbox {
@@ -154,6 +155,10 @@
             cursor: pointer;
         }
 
+        .hide {
+            display: none;
+        }
+
 	</style>
 
 	<template>
@@ -163,15 +168,13 @@
                 <div>
                     <span>[[chunk.chunkmeta.chunkref]]</span><span>[[chunk.chunkmeta.refaddon]]</span> - <span>[[chunk.projectmeta.type.name]]</span>
                 </div>
-                <template is="dom-if" if="{{!chunk.completed}}">
-                    <paper-icon-button icon="add" on-tap="addhelp"></paper-icon-button>
-                </template>
+                <iron-icon class$="[[iconclass(chunk.completed)]]" icon="add" on-tap="addhelp"></iron-icon>
             </paper-material>
             <div id="content" class="editmode">
                 <template is="dom-if" if="{{!chunk.helpscontent.length}}">
                     <div id="iconbox" on-tap="addhelp">
                         <p>Click to add <span>[[chunk.projectmeta.type.name]]</span></p>
-                        <paper-icon-button icon="add"></paper-icon-button>
+                        <iron-icon icon="add"></iron-icon>
                     </div>
                 </template>
                 <template is="dom-repeat" items="{{chunk.helpscontent}}" as="help">
@@ -187,9 +190,9 @@
                             </div>
                         </div>
                         <div class="rightbox">
-                            <paper-icon-button icon="close" on-tap="checkdelete"></paper-icon-button>
-                            <paper-icon-button icon="arrow-drop-up" on-tap="moveup"></paper-icon-button>
-                            <paper-icon-button icon="arrow-drop-down" on-tap="movedown"></paper-icon-button>
+                            <iron-icon icon="close" on-tap="checkdelete"></iron-icon>
+                            <iron-icon icon="arrow-drop-up" on-tap="moveup"></iron-icon>
+                            <iron-icon icon="arrow-drop-down" on-tap="movedown"></iron-icon>
                         </div>
                     </paper-material>
                 </template>
@@ -224,6 +227,10 @@
         observers: [
             'rendertext(chunk.*)'
         ],
+
+        iconclass: function (complete) {
+            return complete ? 'hide' : '';
+        },
 
         checktitle: function (type) {
             var text = "";

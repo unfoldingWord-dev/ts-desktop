@@ -421,7 +421,7 @@
         opensource: function () {
             var projectmeta = this.currentproject.projectmeta;
             var modal = this.$.modal;
-            var sources = App.projectsManager.sources;
+            var sources = App.dataManager.getSources;
             var projectid = projectmeta.project.id;
             if (projectmeta.resource.id === "udb") {
                 modal.allSources = _.filter(sources, {'project_id': projectid, 'checking_level': 3});
@@ -651,7 +651,7 @@
                 return;
             }
             var currentsource = projectmeta.source_translations[current];
-            var frames = App.projectsManager.getSourceFrames(currentsource);
+            var frames = App.dataManager.getSourceFrames(currentsource);
             var chunkarray = [];
             var index = 0;
 
@@ -740,12 +740,12 @@
             var chunkarray = [];
 
             if (type === "tw") {
-                frames = App.projectsManager.getAllWords(172);
+                frames = App.dataManager.getAllWords(172);
             } else if (type === "ta") {
                 if (projectmeta.project.id !== "ta") {
                     volume = projectmeta.project.id;
                 }
-                frames = App.projectsManager.getTa(volume);
+                frames = App.dataManager.getTa(volume);
             }
 
             for (var i = 0; i < frames.length; i++) {
@@ -768,9 +768,9 @@
         },
 
         getFrameResources: function (frame, currentsource) {
-            var notes = App.projectsManager.getFrameNotes(frame.id);
-            var words = App.projectsManager.getFrameWords(frame.id);
-            var questions = App.projectsManager.getFrameQuestions(frame.id);
+            var notes = App.dataManager.getFrameNotes(frame.id);
+            var words = App.dataManager.getFrameWords(frame.id);
+            var questions = App.dataManager.getFrameQuestions(frame.id);
             var udbtext = null;
             var resources = [];
 
@@ -796,7 +796,7 @@
                 resources.push({title: "Questions", array: true, data: questions});
             }
             if (currentsource.resource_id === "ulb") {
-                var result = App.projectsManager.getFrameUdb(currentsource, frame.chapter, frame.verse)[0];
+                var result = App.dataManager.getFrameUdb(currentsource, frame.chapter, frame.verse)[0];
                 if (result) {
                     udbtext = this.convertVerseMarkers(result.chunk).text;
                     udbtext = this.renderMarkersAsSuper(udbtext);

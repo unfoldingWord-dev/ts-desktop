@@ -1,104 +1,15 @@
 'use strict';
 
-var _ = require('lodash'),
-    fs = require('fs'),
-    path = require('path'),
-    mkdirP = require('mkdirp'),
-    rimraf = require('rimraf'),
-    AdmZip = require('adm-zip'),
-    archiver = require('archiver'),
-    utils = require('../js/lib/util'),
-    git = require('../js/git')(),
-    tstudioMigrator = require('../js/migration/tstudioMigrator'),
-    targetTranslationMigrator = require('../js/migration/targetTranslationMigrator'),
-    wrap = utils.promisify,
-    guard = utils.guard;
+var _ = require('lodash');
 
 function zipper (r) {
     return r.length ? _.map(r[0].values, _.zipObject.bind(_, r[0].columns)) : [];
 }
 
-var map = guard('map'),
-    indexBy = guard('indexBy'),
-    flatten = guard('flatten'),
-    compact = guard('compact');
-
-function DataManager(query, configurator) {
-
-    var write = wrap(fs, 'writeFile'),
-        read = wrap(fs, 'readFile'),
-        mkdirp = wrap(null, mkdirP),
-        rm = wrap(null, rimraf),
-        readdir = wrap(fs, 'readdir'),
-        stat = wrap(fs, 'stat'),
-        isDir = function (f) {
-            return stat(f).then(function (s) {
-                return s.isDirectory();
-            });
-        },
-        isVisibleDir = function (f) {
-            return isDir(f).then(function (isFolder) {
-                var name = path.parse(f).name,
-                    isHidden = /^\..*/.test(name);
-
-                return (isFolder && !isHidden) ? f : false;
-            });
-        },
-        filterDirs = function (dirs) {
-            return Promise.all(_.map(dirs, isVisibleDir)).then(compact());
-        },
-        readdirs = function (dirs) {
-            return Promise.all(_.map(dirs, function (d) {
-                return readdir(d).then(map(function (f) {
-                    return path.join(d, f);
-                }));
-            }));
-        },
-        toJSON = _.partialRight(JSON.stringify, null, '\t'),
-        fromJSON = JSON.parse.bind(JSON),
-        // NOTE: Old auto-backup implementation
-        // backupTimer,
-        config = (function (prefix) {
-            var isUW = _.partial(_.startsWith, _, prefix, 0),
-                isChunk = function (filename) {
-                    return _.endsWith(filename, '.txt');
-                };
-
-            return {
-                filterProjects: _.partial(_.filter, _, isUW),
-
-                filterChapters: filterDirs,
-
-                filterChunks: _.partial(_.filter, _, isChunk),
-
-                get targetDir () {
-                    return configurator.getValue('targetTranslationsDir');
-                },
-
-
-                makeProjectPaths: function (meta) {
-                    var filename = meta.unique_id;
-                    return this.makeProjectPathsForProject(filename);
-                },
-
-                makeProjectPathsForProject: function (project) {
-                    var targetDir = this.targetDir,
-                        projectDir = path.join(targetDir, project);
-
-                    return {
-                        parentDir: targetDir,
-                        projectDir: projectDir,
-                        manifest: path.join(projectDir, 'manifest.json'),
-                        license: path.join(projectDir, 'LICENSE.md')
-                    };
-
-                }
-            };
-        })('uw-');
-
+function DataManager(query) {
     return {
 
-        get targetLanguages () {
+        getTargetLanguages: function () {
             var r = query("select slug 'id', name, direction from target_language order by slug");
             return zipper(r);
         },
@@ -123,7 +34,7 @@ function DataManager(query, configurator) {
             return zipper(r);
         },
 
-        get sources () {
+        getSources: function () {
             var r = query([
                     "select r.id, r.slug 'resource_id', r.name 'resource_name', l.name 'language_name', l.slug 'language_id', p.slug 'project_id', r.checking_level, r.version, r.modified_at 'date_modified' from resource r",
                     "join source_language l on l.id=r.source_language_id",

@@ -275,8 +275,8 @@
             }
             if (data.type === "Words") {
                 if (projectmeta.project.id === "obs") {
-                    this.set('related', App.projectsManager.getRelatedWords(data.id));
-                    this.set('examples', App.projectsManager.getWordExamples(data.id));
+                    this.set('related', App.dataManager.getRelatedWords(data.id));
+                    this.set('examples', App.dataManager.getWordExamples(data.id));
                 } else {
                     this.set('related', clear);
                     this.set('examples', clear);
@@ -295,7 +295,7 @@
             if (data.type === "allwords") {
                 this.set('related', clear);
                 this.set('examples', clear);
-                this.set('allwords', App.projectsManager.getAllWords(currentsource));
+                this.set('allwords', App.dataManager.getAllWords(currentsource));
                 footer.classList.add("hide");
                 content = "";
             }

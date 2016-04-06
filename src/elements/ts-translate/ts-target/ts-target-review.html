@@ -196,7 +196,7 @@
         completechunk: function (event, data) {
             var index = data.index;
 
-            if (this.chunk.index === index) {
+            if (this.chunk.index === index && this.chunk.projectmeta.project_type_class === "standard") {
                 var textholder = this.$.textholder;
                 var paragraphs = textholder.children;
                 var type = "";

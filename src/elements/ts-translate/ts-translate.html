@@ -60,23 +60,6 @@
             color: var(--accent-color);
         }
 
-        #helpchecklistpopup {
-            width: 350px;
-            height: 225px;
-            text-align: center;
-            color: var(--primary-text-color);
-        }
-
-        #helpchecklistpopup .buttons {
-            display: flex;
-            justify-content: center;
-            color: var(--secondary-text-color);
-        }
-
-        #helpchecklistpopup .buttons paper-button:hover {
-            color: var(--accent-color);
-        }
-
         #editpopup {
             width: 350px;
             height: 175px;
@@ -243,22 +226,11 @@
                 <p id="spaced">Are you sure you're Done with this chunk?</p>
                 <p class$="[[versecheck(currentproject.projectmeta)]]">I have placed the verses correctly</p>
                 <p>I have reviewed the words and meanings</p>
-                <p>I have reviewed the translationQuestions</p>
+                <p class$="[[standardcheck(currentproject.projectmeta)]]">I have reviewed the translationQuestions</p>
             </div>
             <div class="buttons">
                 <paper-button dialog-dismiss>Cancel</paper-button>
                 <paper-button dialog-confirm on-tap="closechecklist">Confirm</paper-button>
-            </div>
-        </paper-dialog>
-
-        <paper-dialog id="helpchecklistpopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <h2>Chunk Checklist</h2>
-            <div>
-                <p>Are you sure you're Done with this chunk?</p>
-            </div>
-            <div class="buttons">
-                <paper-button dialog-dismiss>Cancel</paper-button>
-                <paper-button dialog-confirm on-tap="closehelpchecklist">Confirm</paper-button>
             </div>
         </paper-dialog>
 
@@ -342,7 +314,6 @@
         <iron-signals on-iron-signal-loadproject="loadproject"></iron-signals>
         <iron-signals on-iron-signal-updatetranslation="updatetranslation"></iron-signals>
         <iron-signals on-iron-signal-openchecklist="openchecklist"></iron-signals>
-        <iron-signals on-iron-signal-openhelpchecklist="openhelpchecklist"></iron-signals>
         <iron-signals on-iron-signal-opendelete="opendelete"></iron-signals>
         <iron-signals on-iron-signal-openedit="openedit"></iron-signals>
         <iron-signals on-iron-signal-opennodata="opennodata"></iron-signals>
@@ -416,7 +387,11 @@
         },
 
         versecheck: function (data) {
-            return data && data.project.id === "obs" ? 'nodisplay' : '';
+            return data && data.project_type_class === "standard" && data.project.id !== "obs" ? '' : 'nodisplay';
+        },
+
+        standardcheck: function (data) {
+            return data && data.project_type_class === "standard" ? '' : 'nodisplay';
         },
 
         opennodata: function () {
@@ -431,16 +406,6 @@
         closechecklist: function () {
             var index = this.modestatus.index;
             this.fire('iron-signal', {name: 'completechunk', data: {index: index}});
-        },
-
-        openhelpchecklist: function (event, data) {
-            this.modestatus.index = data.index;
-            this.$.helpchecklistpopup.open();
-        },
-
-        closehelpchecklist: function () {
-            var index = this.modestatus.index;
-            this.fire('iron-signal', {name: 'completehelp', data: {index: index}});
         },
 
         opendelete: function (event, data) {

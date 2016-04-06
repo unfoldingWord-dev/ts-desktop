@@ -25,18 +25,18 @@ function Importer(configurator, pm) {
                 return self.getTxtFilesFromZip(file).then(function (files) {
                     //console.log("got files", files);
                     let txtFile = files[0];
-                    var promise = self.importSingleUSFMFile(txtFile,translation,user);
+                    var promise = self.importSingleUSFMFile(txtFile, translation, user);
                     for (var i = 1; i < files.length; i++) {
                         txtFile = files[i];
                         promise = promise.then(function(){
-                            return self.importSingleUSFMFile(txtFile,translation,user);
+                            return self.importSingleUSFMFile(txtFile, translation, user);
                         });
                     }
                     return promise;
                 });
             } else {
                 //console.log("running single file import");
-                return self.importSingleUSFMFile(file.path,translation,user);
+                return self.importSingleUSFMFile(file.path, translation, user);
             }
         },
 
@@ -57,14 +57,14 @@ function Importer(configurator, pm) {
         },
 
         getVerseChunkFileNames: function(projdata){
-            return new Promise(function(resolve,reject){
+            return new Promise(function(resolve, reject){
                 var book = projdata.project.id;
                 var chunkDescUrl = "https://api.unfoldingword.org/bible/txt/1/" + book + "/chunks.json";
                 var chunks = [];
                 request(chunkDescUrl,function(err, resp, body){
                     if(!err){
                         var chunkDesc = JSON.parse(body);
-                        for(var i = 0;i<chunkDesc.length;i++){
+                        for(var i = 0; i<chunkDesc.length; i++){
                             var chunk = chunkDesc[i],
                                 verses = [],
                                 nextChunkChapter = typeof chunkDesc[i + 1] !== 'undefined' ? chunkDesc[i + 1].chp : false;
@@ -79,7 +79,7 @@ function Importer(configurator, pm) {
                             //if it doesn't exist or it's not the same chapter as the current chunk, add 100 verses so we make sure to get everything being imported.
                             } else {
                                 var v = parseInt(chunk.firstvs), max = v + 100;
-                                for(v;v<max;v++){
+                                for(v; v<max; v++){
                                     verses.push(v);
                                 }
                             }
@@ -99,7 +99,7 @@ function Importer(configurator, pm) {
         },
 
         /*getVerseChunkFileNames: function(projdata){
-            return new Promise(function(resolve,reject){
+            return new Promise(function(resolve, reject){
                 var frames = pm.getSourceFrames(projdata.source_translations[projdata.currentsource]);
                 var parsedFrames = [],
                     chapters = {};
@@ -109,7 +109,7 @@ function Importer(configurator, pm) {
                         verses = [],
                         startstr = '<verse number="',
                         endstr = '" style="v" />',
-                        test = new RegExp(startstr);;
+                        test = new RegExp(startstr);
 
                     while (test.test(sourcedata)) {
                         var versestr = sourcedata.substring(sourcedata.search(startstr) + 15, sourcedata.search(endstr));
@@ -128,7 +128,7 @@ function Importer(configurator, pm) {
 
                     var chuckFile = String("00" + verses[0]).slice(-2);
 
-                    parsedFrames.push({filename:chuckFile,chapter:frames[i].chapter,verses:verses});
+                    parsedFrames.push({filename:chuckFile, chapter:frames[i].chapter, verses:verses});
                 }
                 resolve(parsedFrames);
             });
@@ -148,11 +148,11 @@ function Importer(configurator, pm) {
                             throw new Error('This is not a valid USFM file.');
                         }
 
-                        for(var i = 0;i<chunkFileNames.length;i++){
+                        for(var i = 0; i<chunkFileNames.length; i++){
                             var chunk = chunkFileNames[i];
                             var transcontent = '';
 
-                            for(var ci = 0;ci<chunk.verses.length;ci++){
+                            for(var ci = 0; ci<chunk.verses.length; ci++){
                                 if(typeof parsedData[chunk.chapter] !== 'undefined' && typeof parsedData[chunk.chapter].verses[chunk.verses[ci]] !== 'undefined'){
                                     transcontent += '\\v' + parsedData[chunk.chapter].verses[chunk.verses[ci]].id + ' ' + parsedData[chunk.chapter].verses[chunk.verses[ci]].contents;
                                 }
@@ -195,7 +195,7 @@ function Importer(configurator, pm) {
                             });
                         }
 
-                        return pm.saveTargetTranslation(chunkFileNames,projdata,user);
+                        return pm.saveTargetTranslation(chunkFileNames, projdata, user);
                     });
                 });
             });
@@ -283,7 +283,7 @@ function UsfmParser (file) {
         load: function (file) {
             self.file = file;
 
-            return new Promise(function(resolve,reject){
+            return new Promise(function(resolve, reject){
                 //console.log('about to read',self.file);
 
                 var lineReader = require('readline').createInterface({
@@ -313,7 +313,7 @@ function UsfmParser (file) {
             for (var i = 0; i < self.contents.length; i++) {
                 var line = self.contents[i];
                 var lineArray = line.split(" ");
-                for(var c=0;c<lineArray.length;c++){
+                for(var c=0; c<lineArray.length; c++){
                     var section = lineArray[c];
                     var marker = getMarker(section);
 

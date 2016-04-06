@@ -99,15 +99,11 @@ describe('@Importer', function () {
                 name: "matthew.usfm",
                 path: path.resolve('unit_tests/importer/data/matthew.usfm')
             };
-            let importer = new Importer(config,pm);
-            importer.importUSFMFile(file,translation,user).then(function(){
+            let importer = new Importer(config, pm);
+            importer.importUSFMFile(file, translation, user).then(function(){
                 var data = fs.readFileSync(expectedFile, {encoding: 'utf-8'});
                 assert.equal(data, '\\v18 Jesus veio para eles e falou, "Toda autoridade foi dada para mim no céu e na terra. \\v19 Por isso vão e façam discípulos de todas as nações. Batize-os no nome do Pai, do Filho e do Espírito Santo.    ');
-
-                done();
-            }).catch(function(e){
-                console.log('there was an error', e);
-            });
+            }).then(done, done);
 
         });
 
@@ -120,15 +116,11 @@ describe('@Importer', function () {
                 name: "matthew.zip",
                 path: path.resolve('unit_tests/importer/data/matthew.zip')
             };
-            let importer = new Importer(config,pm);
-            importer.importUSFMFile(file,translation,user).then(function(){
+            let importer = new Importer(config, pm);
+            importer.importUSFMFile(file, translation, user).then(function(){
                 var data = fs.readFileSync(expectedFile, {encoding: 'utf-8'});
                 assert.equal(data, '\\v18 Jesus veio para eles e falou, "Toda autoridade foi dada para mim no céu e na terra. \\v19 Por isso vão e façam discípulos de todas as nações. Batize-os no nome do Pai, do Filho e do Espírito Santo.    ');
-
-                done();
-            }).catch(function(e){
-                console.log('there was an error', e);
-            });
+            }).then(done, done);
 
         });
 
@@ -141,8 +133,8 @@ describe('@Importer', function () {
                 name: "failing_file.usfm",
                 path: path.resolve('unit_tests/importer/data/failing_file.usfm')
             };
-            let importer = new Importer(config,pm);
-            importer.importUSFMFile(file,translation,user).then(function(){
+            let importer = new Importer(config, pm);
+            importer.importUSFMFile(file, translation, user).then(function(){
                 assert.equal(1,2);
             }).catch(function(e){
                 assert.equal('This is not a valid USFM file.',e.message);

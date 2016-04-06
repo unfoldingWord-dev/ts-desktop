@@ -554,7 +554,7 @@
 
             var loadsource = function () {
                 if (projectmeta.project_type_class === "extant") {
-                    mythis.pulldata();
+                    mythis.createextantchunks();
                 } else {
                     mythis.createchunks();
                     mythis.createchapters();
@@ -711,8 +711,6 @@
                 var sourcedata = this.convertVerseMarkers(frames[i].chunk);
                 var chunkmeta = this.createFrameMeta(frames[i], projectmeta, sourcedata.verses);
                 var chunk = this.getFrameData(chunkmeta, projectmeta);
-                chunk.projectmeta = _.cloneDeep(projectmeta);
-                chunk.chunkmeta = chunkmeta;
                 chunk.srccontent = sourcedata.text;
                 chunk.wordcontent = "";
                 chunk.resources = resources;
@@ -775,6 +773,42 @@
                 }
             });
             this.set('currentproject.chapters', chapters);
+        },
+
+        createextantchunks: function () {
+            var projectmeta = this.currentproject.projectmeta;
+            var type = projectmeta.type.id;
+            var language = projectmeta.target_language.name;
+            var frames;
+            var volume = "vol1";
+            var chunkarray = [];
+
+            if (type === "tw") {
+                frames = App.projectsManager.getAllWords(172);
+            } else if (type === "ta") {
+                if (projectmeta.project.id !== "ta") {
+                    volume = projectmeta.project.id;
+                }
+                frames = App.projectsManager.getTa(volume);
+            }
+
+            for (var i = 0; i < frames.length; i++) {
+                var chunkmeta = {
+                    chapterid: "01",
+                    chapter: 1,
+                    frameid: frames[i].slug,
+                    verses: [],
+                    chunkref: frames[i].title,
+                    refaddon: " — " + language
+                };
+                var chunk = this.getFrameData(chunkmeta, projectmeta);
+                chunk.srccontent = frames[i].body;
+                chunk.wordcontent = frames[i].title;
+                chunk.resources = [];
+                chunk.index = i;
+                chunkarray.push(chunk);
+            }
+            this.set('currentproject.chunks', chunkarray);
         },
 
         getFrameResources: function (frame, currentsource) {
@@ -893,6 +927,10 @@
             var transcontent = "";
             var helpscontent = [];
 
+            if (typeclass === "extant") {
+                helpscontent = [{title: "", body: ""}];
+            }
+
             if (maindata) {
                 completed = maindata.completed;
                 if (typeclass === "standard") {
@@ -912,7 +950,7 @@
                 statedata = {chunk: true, review: true, resource: 0};
                 this.currentproject.statedata[complexid] = statedata;
             }
-            return {transcontent: transcontent, helpscontent: helpscontent, completed: completed, state: statedata};
+            return {projectmeta: _.cloneDeep(projectmeta), chunkmeta: chunkmeta, transcontent: transcontent, helpscontent: helpscontent, completed: completed, state: statedata};
         },
 
         migrateMarkers: function (text) {
@@ -1009,64 +1047,6 @@
             chunk.resources = [];
             chunk.index = index;
             return chunk;
-        },
-
-        pulldata: function () {
-            var type = this.currentproject.projectmeta.type.id;
-            var language = this.currentproject.projectmeta.target_language.name;
-            var frames;
-            var source = [];
-            var srcchunk = {};
-            var transchunk = {};
-            var translation = [];
-            var volume;
-
-            if (type === "tw") {
-                frames = App.projectsManager.getAllWords(172);
-            } else if (type === "ta") {
-                if (this.currentproject.projectmeta.project.id === "ta") {
-                    volume = "vol1";
-                } else {
-                    volume = this.currentproject.projectmeta.project.id;
-                }
-                frames = App.projectsManager.getTa(volume);
-            }
-
-            for (var i = 0; i < frames.length; i++) {
-                var chapterid = "01";
-                var frameid = frames[i].slug;
-                var complexid = chapterid + '-' + frameid;
-                var title = frames[i].title;
-                var body = frames[i].body;
-
-                var meta = {
-                    chapterid: chapterid,
-                    chapter: 1,
-                    frameid: frameid,
-                    verses: [],
-                    chunkref: title,
-                    refaddon: " — " + language
-                };
-
-                srcchunk = {
-                    meta: meta,
-                    srccontent: body,
-                    wordcontent: title,
-                    resources: []
-                };
-                source.push(srcchunk);
-
-                var rawdata = this.rawdata[complexid];
-                transchunk = {transcontent: "", helpscontent: [{title: "", body: ""}], completed: false, meta: meta, state: {}};
-                if (rawdata) {
-                    transchunk.completed = rawdata.completed;
-                    transchunk.helpscontent = rawdata.helpscontent;
-                }
-                translation.push(transchunk);
-            }
-
-            this.set('currentproject.source', source);
-            this.set('currentproject.translation', translation);
         },
 
         modechange: function (tomode, frommode) {

@@ -134,11 +134,9 @@
         /**
          */
         let fontSizeMap = {
+            'small': '50%',
             'normal': '100%',
-            'small': '90%',
-            'smaller': '80%',
-            'large': '110%',
-            'larger': '120%'
+            'large': '150%'
         };
 
 

@@ -141,7 +141,8 @@
 
         choosesource: function(e) {
             var selected = e.model.index;
-            this.fire('iron-signal', {name: 'updateselected', data: {selected: selected}});
+            var sources = this.projectmeta.source_translations;
+            this.fire('iron-signal', {name: 'updatesources', data: {sources: sources, selected: selected, full: false}});
         },
 
         ready: function() {

@@ -125,29 +125,11 @@
 
         rendertext: function () {
             if(this.chunk && this.chunk.srccontent) {
-                var textarray = this.chunk.srccontent.split(" ");
-                var numstr1 = "\<sup\>";
-                var numstr2 = "\<\/sup\>";
-                var returnstr = "";
-                var verse = 0;
-
-                for (var i = 0; i < textarray.length; i++) {
-                    if (textarray[i] === "\\v") {
-                        verse = textarray[i+1];
-                        returnstr += numstr1 + verse + numstr2;
-                        i++;
-                    } else {
-                        returnstr += textarray[i] + " ";
-                    }
-                }
-                this.$.textholder.innerHTML = returnstr;
-
+                this.$.textholder.innerHTML = this.chunk.srccontent;
                 var links = this.$.textholder.getElementsByTagName('a');
-
                 for (var j = 0, len = links.length; j < len; ++j) {
                     links[j].addEventListener('click', function (event) {
                         event.preventDefault();
-                        //console.log(this.href);
                     });
                 }
             }

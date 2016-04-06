@@ -84,14 +84,7 @@ function ProjectsManager(query, configurator, srcDir) {
 
 
                 makeProjectPaths: function (meta) {
-                    var filename;
-
-                    if (meta.package_version < 6) {
-                        filename = prefix + meta.fullname;
-                    } else {
-                        filename = meta.unique_id;
-                    }
-
+                    var filename = meta.unique_id;
                     return this.makeProjectPathsForProject(filename);
                 },
 
@@ -652,23 +645,16 @@ function ProjectsManager(query, configurator, srcDir) {
                     meta.unique_id += "_" + manifest.resource.id;
                 }
 
-                var typeext = "";
-
-                if (meta.project_type_class === "extant") {
-                    typeext = "";
-                } else if (manifest.type.id !== "text") {
-                    typeext = "_" + manifest.type.id;
-                } else if (manifest.resource.id === "udb") {
-                    typeext = "_" + manifest.resource.id;
-                }
-
-                meta.fullname = manifest.project.id + typeext + "-" + manifest.target_language.id;
-
                 var completion = App.configurator.getValue(meta.unique_id + "-completion");
                 if (completion !== undefined && completion !== "") {
                     meta.completion = completion;
                 } else {
-                    meta.completion = 0;
+                    if (manifest.source_translations.length) {
+                        var frames = this.getSourceFrames(manifest.source_translations[0]);
+                        meta.completion = Math.round((meta.finished_chunks.length / frames.length) * 100);
+                    } else {
+                        meta.completion = 0;
+                    }
                 }
             } catch (err) {
                 App.reporter.logError(err);

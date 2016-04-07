@@ -1238,7 +1238,7 @@
             var generatePdf = function(){
                 mythis.set('options.body', "Creating PDF. Please wait...");
                 setTimeout(function() {
-                    App.printer.targetTranslationToPdf(translation, projectmeta, filePath, options)
+                    App.printManager.targetTranslationToPdf(translation, projectmeta, filePath, options)
                         .then(function () {
                             mythis.set('options.title', "PDF Created");
                             mythis.set('options.body', "Your project has been successfully saved to a PDF.  Thanks.");
@@ -1262,7 +1262,7 @@
 
             if (options.includeImages) {
                 mythis.set('options.body', "Downloading Images. Please wait...");
-                App.printer.getImages(projectmeta).then(function(){
+                App.printManager.getImages(projectmeta).then(function(){
                     generatePdf();
                 }).catch(function(err){
                     var message = "We're sorry.  An error occurred while trying to download images for this project";

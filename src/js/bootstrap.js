@@ -60,7 +60,7 @@ process.stdout.write = console.log.bind(console);
     let utils = require('../js/lib/utils');
 
     setMsg('Loading Printer...');
-    let printer = require('../js/printer').Printer();
+    let PrintManager = require('../js/printer').PrintManager;
 
     setMsg('Initializing...');
 
@@ -157,7 +157,9 @@ process.stdout.write = console.log.bind(console);
             token: configurator.getValue('gogs-token')
         }),
 
-        printer: printer,
+        printManager: (function () {
+            return new PrintManager(configurator);
+        })(),
 
         projectsManager: (function () {
             return new ProjectsManager(dataManager, configurator, reporter);

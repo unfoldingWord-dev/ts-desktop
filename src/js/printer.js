@@ -3,42 +3,25 @@
 var _ = require('lodash'),
     fs = require('fs'),
     path = require('path'),
-    mkdirP = require('mkdirp'),
+    utils = require('../js/lib/utils'),
     AdmZip = require('adm-zip'),
     https = require('https'),
-    download = require('../js/lib/utils').download,
-    _ = require('lodash'),
     PDFDocument = require('pdfkit');
 
+function PrintManager(configurator) {
 
-function Printer() {
-
-    /**
-     * Returns the value of the first property found in the object.
-     * If the object has no properties null is returned
-     * @param obj
-     * @returns {}
-     */
-    function getFirstPropValue(obj) {
-        let values = _.values(obj);
-        return values.length ? values[0] : null;
-    }
+    var download = utils.download;
 
     return {
 
-        isTranslation: function (meta) {
-            return !meta.type.id || meta.type.id === 'text';
-        },
-
         getImages: function(meta){
             return new Promise(function(resolve, reject){
-                let App = window.App,
-                    imageRoot = path.join(App.configurator.getValue('rootdir'), 'images'),
+                let imageRoot = path.join(configurator.getValue('rootdir'), 'images'),
                     imagePath = path.join(imageRoot, meta.resource.id);
 
                 //check to see if we need to create the images directory;
                 if(!fs.existsSync(imagePath)){
-                    mkdirP.sync(imagePath);
+                    utils.fs.mkdirs(imagePath);
                 }
 
                 //if the zip file isn't downloaded yet, go get it.
@@ -46,7 +29,7 @@ function Printer() {
                 if(!fs.existsSync(dest)) {
                     //let out = fs.createWriteStream(dest);
                     // TRICKY: right now we have to hard code the urls until the api is updated
-                    let url = App.configurator.getValue("mediaServer") + '/obs/jpg/1/en/obs-images-360px.zip';
+                    let url = configurator.getValue("mediaServer") + '/obs/jpg/1/en/obs-images-360px.zip';
                     console.log('downloading images from', url);
                     download(url, dest, true).then(function() {
                         let zip = new AdmZip(dest);
@@ -77,23 +60,13 @@ function Printer() {
             });
         },
 
-        /**
-         * Generates a pdf of the target translation
-         * @param translation an array of frames
-         * @param meta the target translation manifest and other info
-         * @param filePath the path where the export will be saved
-         * @param options {includeIncompleteFrames: boolean, includeImages: boolean, doubleSpace: boolean}
-         * @returns {Promise.<boolean>}
-         */
         targetTranslationToPdf: function (translation, meta, filePath, options) {
 
-            let isTranslation = this.isTranslation(meta),
-                App = window.App,
-                imageRoot = path.join(App.configurator.getValue('rootdir'), "images"),
+            let imageRoot = path.join(configurator.getValue('rootdir'), "images"),
                 imagePath = path.join(imageRoot, meta.resource.id);
 
             return new Promise(function(resolve, reject) {
-                if(isTranslation) {
+                if(meta.project_type_class === "standard") {
                     // normalize input
                     let chapters = _.mapValues(_.groupBy(translation, function(obj) {
                         //console.debug('map chapter values', obj);
@@ -328,4 +301,4 @@ function Printer() {
     };
 }
 
-module.exports.Printer = Printer;
+module.exports.PrintManager = PrintManager;

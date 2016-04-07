@@ -3,6 +3,7 @@
 var _ = require('lodash'),
     path = require('path'),
     archiver = require('archiver'),
+    fs = require('fs'),
     utils = require('../js/lib/utils'),
     git = require('../js/git')();
 

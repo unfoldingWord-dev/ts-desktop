@@ -8,7 +8,8 @@
         fs = require('fs'),
         fse = require('fs-extra'),
         https = require('https'),
-        http = require('http');
+        http = require('http'),
+        _ = require('lodash');
 
     var utils = {
         /**
@@ -39,7 +40,7 @@
                     return filter(obj[key], key, obj);
                 });
             }
- 
+
             return keys.reduce(function (a, key) {
                 a[key] = visit(obj[key], key, obj);
                 return a;
@@ -113,7 +114,7 @@
                     /**
                      * Filter out functions that aren't 'public' and aren't 'methods' and aren't asynchronous.
                      *  This is mostly educated guess work based on de facto naming standards for js.
-                     * 
+                     *
                      * e.g.
                      *      valid:        'someFunctionName' or 'some_function_name' or 'someFunctionAsync'
                      *      not valid:    'SomeConstructor' or '_someFunctionName' or 'someFunctionSync'
@@ -151,7 +152,7 @@
                     /**
                      * Filter out functions that aren't 'public' and aren't 'methods'.
                      *  This is mostly educated guess work based on de facto naming standards for js.
-                     * 
+                     *
                      * e.g.
                      *      valid:        'someFunctionName' or 'some_function_name'
                      *      not valid:    'SomeConstructor' or '_someFunctionName'

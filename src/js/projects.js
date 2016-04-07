@@ -2,7 +2,7 @@
 
 var _ = require('lodash'),
     path = require('path'),
-    utils = require('lib/utils'),
+    utils = require('../js/lib/utils'),
     git = require('../js/git')(),
     migrator = require('../js/migrator');
 

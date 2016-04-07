@@ -5,16 +5,14 @@
     let _ = require('lodash'),
         AdmZip = require('adm-zip'),
         path = require('path'),
-        fs = require('fs'),
-        rimraf = require('rimraf'),
-        utils = require('lib/utils'),
+        utils = require('../js/lib/utils'),
         jsonfile = require('jsonfile'),
         readjson = utils.promisify(jsonfile, 'readFile'),
         writejson = utils.promisify(jsonfile, 'writeFile');
 
     function migrateAll (list) {
-        let p = Promise.resolve(false);
-        let results = [];
+        var p = Promise.resolve(false);
+        var results = [];
         _.forEach(list, function (paths) {
             p = p.then(function () {
                 return migrate(paths)
@@ -32,13 +30,6 @@
         })
     }
 
-    /**
-     * Performs the nessesary migrations on a target translation.
-     * Migrations should always pass through in order to collect all needed updates
-     * without having to always update past migrations.
-     * @param paths {object}
-     * @returns {Promise.<boolean>} true if migration was successful
-     */
     function migrate (paths) {
 
         var readManifest = function (paths) {
@@ -241,12 +232,12 @@
                 let newProjectTitlePath = path.join(projectTranslationDir, 'title.txt');
                 if(fs.existsSync(oldProjectTitlePath)) {
                     try {
-                        fs.mkdirSync(projectTranslationDir);
+                        utils.fs.mkdirs(projectTranslationDir);
                     } catch (e) {
                         console.log(e);
                     }
-                    let projectTitle = fs.readFileSync(oldProjectTitlePath).toString();
-                    fs.writeFileSync(newProjectTitlePath, projectTitle);
+                    let projectTitle = utils.fs.readFile(oldProjectTitlePath).toString();
+                    utils.fs.outputFile(newProjectTitlePath, projectTitle);
                     fs.unlinkSync(oldProjectTitlePath);
                 }
             }
@@ -279,11 +270,11 @@
                 let oldbackup = path.join(backupDir, oldname);
                 let readyfile = path.join(paths.projectDir, 'READY');
                 let srcDir = path.resolve(path.join(__dirname, '..'));
-                let license = fs.readFileSync(path.join(srcDir, 'assets', 'LICENSE.md'));
+                let license = utils.fs.readFile(path.join(srcDir, 'assets', 'LICENSE.md'));
 
-                fs.writeFileSync(paths.license, license);
-                rimraf.sync(readyfile);
-                rimraf.sync(oldbackup);
+                utils.fs.outputFile(paths.license, license);
+                utils.fs.remove(readyfile);
+                utils.fs.remove(oldbackup);
 
                 for (var i = 0; i < localstorageitems.length; i++) {
                     App.configurator.setValue(unique_id + localstorageitems[i], App.configurator.getValue(oldname + localstorageitems[i]));
@@ -346,15 +337,6 @@
 
     }
 
-    /**
-     * Returns a list of target translations in the archive
-     *
-     * This will perform the nessesary migrations on a tstudio archive.
-     * Migrations should always pass through in order to collect all needed updates
-     * without having to always update past migrations.
-     * @param file {File} the tstudio archive file
-     * @returns {Promise.<string[]>} an array of paths in the archive to target translations
-     */
     function listTargetTranslations (file) {
         return new Promise(function(resolve, reject) {
             try {

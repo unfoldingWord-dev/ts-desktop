@@ -4,7 +4,7 @@
 
 var net = require('net'),
     path = require('path'),
-    utils = require('lib/utils'),
+    utils = require('../js/lib/utils'),
     _ = utils._,
     logr = utils.logr,
     fs = utils.fs,

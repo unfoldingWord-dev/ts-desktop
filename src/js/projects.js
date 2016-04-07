@@ -9,8 +9,7 @@ var _ = require('lodash'),
     archiver = require('archiver'),
     utils = require('../js/lib/util'),
     git = require('../js/git')(),
-    tstudioMigrator = require('../js/migration/tstudioMigrator'),
-    targetTranslationMigrator = require('../js/migration/targetTranslationMigrator'),
+    migrator = require('../js/migrator'),
     wrap = utils.promisify,
     guard = utils.guard;
 
@@ -559,7 +558,7 @@ function ProjectsManager(dataManager, configurator, srcDir) {
 
             return this.loadProjectsList()
                 .then(map(makePaths))
-                .then(targetTranslationMigrator.migrateAll)
+                .then(migrator.migrateAll)
         },
 
         loadFinishedFramesList: function (meta) {

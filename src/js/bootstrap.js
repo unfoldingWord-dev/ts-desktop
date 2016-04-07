@@ -47,6 +47,9 @@ process.stdout.write = console.log.bind(console);
     setMsg('Loading Data Manager...');
     let DataManager = require('../js/database').DataManager;
 
+    setMsg('Loading Import Manager...');
+    let ImportManager = require('../js/importer').ImportManager;
+
     setMsg('Loading Locale...');
     let i18n = require('../js/i18n').Locale(path.resolve(path.join(__dirname, '..', '..', 'i18n')));
 
@@ -150,6 +153,10 @@ process.stdout.write = console.log.bind(console);
         })(),
 
         dataManager: dataManager,
+
+        importManager: (function () {
+            return new ImportManager(configurator);
+        })(),
 
         reporter: new Reporter({
             logPath: path.join(configurator.getValue('rootDir'), 'log.txt'),

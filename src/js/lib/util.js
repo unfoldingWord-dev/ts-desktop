@@ -4,62 +4,13 @@
     'use strict';
 
     var diacritics = require('./diacritics'),
-        mkdirP = require('mkdirp'),
-        rimraf = require('rimraf'),
         getmac = require('getmac'),
         fs = require('fs'),
         fse = require('fs-extra'),
         https = require('https'),
-        http = require('http'),
-        _ = require('lodash');
-
-    // TODO: Should this use Prototypes? How can we create this so it's only instantiated once?
+        http = require('http');
 
     var utils = {
-
-        /**
-         *  Lodash or equivalent library
-         */
-        _: _,
-
-        /**
-         * NOTE: Determines if a string is a valid path
-         * @param string: the string to be tested
-         */
-        isValidPath: function (string) {
-            string = string.replace(/\//g, '\\');
-            var os = process.platform;
-            var win_path = /^(((\\\\([^\\/:\*\?"\|<>\. ]+))|([a-zA-Z]:\\))(([^\\/:\*\?"\|<>\. ]*)([\\]*))*)$/;
-            var linux_path = /^[\/]*([^\/\\ \:\*\?"<\>\|\.][^\/\\\:\*\?\"<\>\|]{0,63}\/)*$/;
-            var isValid = false;
-
-            if (os === 'win64' || os === 'win32') {
-                isValid = win_path.test(string);
-            } else if (os === 'linux' || os === 'darwin') {
-                isValid = linux_path.test(string);
-            } else {
-                console.warn('OS is not recognized', os);
-            }
-
-            return isValid;
-        },
-
-        /**
-         * Raises an exception along with some context to provide better debugging
-         * @param e the exception to be raised
-         * @param args arguments to be added to the exception message
-         */
-        raiseWithContext: function (e, args) {
-            e.message += '\nException Context:';
-            for (let prop in args) {
-                if (args.hasOwnProperty(prop)) {
-                    e.message += '\n\t' + prop + '=' + args[prop];
-                }
-            }
-            e.message += '\n';
-            throw e;
-        },
-
         /**
          * Ignores diacritics and ignores case.
          */
@@ -80,34 +31,65 @@
             }).replace(/\s+/g, '');
         },
 
+        mapObject: function (obj, visit, filter) {
+            var keys = Object.getOwnPropertyNames(obj);
+
+            if (filter) {
+                keys = keys.filter(function (key) {
+                    return filter(obj[key], key, obj);
+                });
+            }
+ 
+            return keys.reduce(function (a, key) {
+                a[key] = visit(obj[key], key, obj);
+                return a;
+            }, {});
+        },
+
         /**
          * Turns a standard callback method into a promise-style method.
+         *  Assumes standard node.js style:
+         *      someFunction(arg1, arg2, function(err, data) { ... })
+         *
+         *  This will pass the proper number of arguments and convert
+         *      the callback structure to a Promise.
          *
          * e.g. var readdir = promisify(fs, 'readdir'),
          *          readdir('something').then(someFunction);
+         *
+         *      var rm = promisify(rimraf),
+         *          rm('something').then(someFunction);
          */
         promisify: function (module, fn) {
-            var f = module ? module[fn] : fn;
+            var hasModule = typeof module !== 'function',
+                f = hasModule ? module[fn] : module,
+                mod = hasModule ? module : null;
 
-            return function (arg1, arg2, arg3) {
-                var args = (function () {
-                    var narg = function (arg) { return typeof arg === 'undefined'; };
+            return function () {
+                var args = [],
+                    i = arguments.length;
 
-                    if (narg(arg1) && narg(arg2)) {
-                        return [];
-                    }
-                    if (narg(arg2)) {
-                        return [arg1];
-                    }
-                    if (narg(arg3)) {
-                        return [arg1, arg2];
-                    }
-                    return [arg1, arg2, arg3];
-                })();
+                /**
+                 *  Don't pass an arguments list that has undefined values at the end.
+                 *      This is so the callback for function gets passed in the right slot.
+                 *
+                 *      If the function gets passed:
+                 *          f(arg1, arg2, undefined, cb)
+                 *
+                 *      ...it will think it got an undefined cb.
+                 *
+                 *      We instead want it to get passed:
+                 *          f(arg1, arg2, cb)
+                 *
+                 *      Before:    [arg1, null, undefined, arg2, undefined, undefined]
+                 *      After:     [arg1, null, undefined, arg2]
+                 */
+                while (--i > 0 && typeof arguments[i] !== 'undefined') {};
+                while (i > 0) { args.unshift(arguments[i--]); }
 
                 return new Promise(function (resolve, reject) {
                     try {
-                        f.apply(module, args.concat(function (err, data) {
+                        f.apply(mod, args.concat(function (err, data) {
                             return err ? reject(err) : resolve(data);
                         }));
                     } catch (err) {
@@ -119,50 +101,71 @@
 
         /**
          * Calls promisify on all valid functions on a module.
-         * Returns an Array.
+         *  Ignores certain properties on a modules so the return values is not polluted.
+         *  (This can be configured by passing in a filter function via opts.isValid.)
+         *
+         *  E.g.    var myFs = promisifyAll(fs),
+         *              myFs.readdir('somedir').then(doSomething);
          */
-        promisifyAll: function (module) {
-            var m = module;
+        promisifyAll: function (module, opts) {
+            var config = opts || {},
+                isValid = config.isValid || function (f, fn, mod) {
+                    /**
+                     * Filter out functions that aren't 'public' and aren't 'methods' and aren't asynchronous.
+                     *  This is mostly educated guess work based on de facto naming standards for js.
+                     * 
+                     * e.g.
+                     *      valid:        'someFunctionName' or 'some_function_name' or 'someFunctionAsync'
+                     *      not valid:    'SomeConstructor' or '_someFunctionName' or 'someFunctionSync'
+                     *
+                     *  As there may be exceptions to these rules for certain modules,
+                     *   you can pass in a function via opts.isValid which will override this.
+                     */
+                    return typeof f === 'function' && fn[0] !== '_' && fn[0].toUpperCase() !== fn[0] && !fn.endsWith('Sync');
+                };
 
-            return Object.keys(m).filter(function (key) {
-                return (typeof m[key] === 'function' && !key.startsWith('_') && key[0].toUpperCase() !== key[0]);
-            }).reduce(function (a, methodName) {
-                a[methodName] = utils.promisify(m, methodName);
-                return a;
-            }, {});
+            return utils.mapObject(module, function (f, fn, mod) {
+                return utils.promisify(mod, fn);
+            }, isValid);
         },
 
         /**
          * NOTE: This is super meta.
          *
-         * Reverses the order of arguments for a lodash (or equivalent) method,
+         * Reverses the order of arguments for a module's method,
          *  and creates a curried function.
          *
          */
-        guard: function (method) {
+        guard: function (module, fn) {
             return function (cb) {
                 var visit = typeof cb === 'function' ? function (v) { return cb(v); } : cb;
                 return function (collection) {
-                    return utils._[method](collection, visit);
+                    return module[fn](collection, visit);
                 };
             };
         },
 
-        /**
-         * Alias for binding console.log. Useful in Promises.
-         *  See also, 'logr'
-         *
-         *  Before:
-         *
-         *     somePromise.then(function (result) {
-         *         console.log(result);
-         *     });
-         *
-         *  After:
-         *
-         *     somePromise.then(puts);
-         */
-        puts: console.log.bind(console),
+        guardAll: function (module, opts) {
+            var config = opts || {},
+                isValid = config.isValid || function (f, fn, mod) {
+                    /**
+                     * Filter out functions that aren't 'public' and aren't 'methods'.
+                     *  This is mostly educated guess work based on de facto naming standards for js.
+                     * 
+                     * e.g.
+                     *      valid:        'someFunctionName' or 'some_function_name'
+                     *      not valid:    'SomeConstructor' or '_someFunctionName'
+                     *
+                     *  As there may be exceptions to these rules for certain modules,
+                     *   you can pass in a function via opts.isValid which will override this.
+                     */
+                    return typeof f === 'function' && fn[0] !== '_' && fn[0].toUpperCase() !== fn[0];
+                };
+
+            return utils.mapObject(module, function (f, fn, mod) {
+                return utils.guard(mod, fn);
+            }, isValid);
+        },
 
         /**
          * Creates a function that returns the data when called.
@@ -194,6 +197,28 @@
         /**
          *  A wrapper for console.log that can be silenced based on the NODE_ENV.
          *   This is useful for running grunt/gulp tests, so that no output shows.
+         *
+         *  This function can be useful in Promises, although it will break the chain.
+         *
+         *  To log without breaking the Promise chain, see: logr
+         *
+         *  Before:
+         *
+         *     if (!testEnv) {
+         *         console.log('hi there');
+         *     }
+         *
+         *     somePromise.then(function (result) {
+         *         if (!testEnv) {
+         *             console.log(result);
+         *         }
+         *     });
+         *
+         *  After:
+         *
+         *     log('hi there');
+         *
+         *     somePromise.then(log);
          */
         log: function () {
             var args = [].slice.apply(arguments);
@@ -226,9 +251,10 @@
 
         logr: function () {
             var args = [].slice.apply(arguments);
-            
+
             return function (data) {
-                utils.log.apply(null, args.concat(data));
+                var d = Array.isArray(data) ? [data] : data; // so it concats the array itself
+                utils.log.apply(null, args.concat(d));
                 return data;
             };
         },
@@ -275,46 +301,8 @@
     /**
      * See note on 'promisify' function for example usage.
      */
-    utils.fs = utils.promisifyAll(fs);
-
-    /**
-     * Some functions that are commonly guarded for use in a Promise chain.
-     *  e.g. Normally, you'd have to do this:
-     *
-     *      somePromise.then(function (data) {
-     *          return _.map(data, function (item) {
-     *              return doSomethingToItem(item);
-     *          })
-     *      });
-     *
-     *  Now, you can just do this (same as above):
-     *
-     *      somePromise.then(map(function(item) {
-     *          return doSomethingToItem(item);
-     *      }));
-     *
-     *  Or, even better:
-     *
-     *      somePromise.then(map(doSomethingToItem));
-     */
-
-    utils.map = utils.guard('map');
-    utils.indexBy = utils.guard('indexBy');
-    utils.flatten = utils.guard('flatten');
-    utils.compact = utils.guard('compact');
-
-    // TODO: Add more guard functions, like _.find, and test them
-    // TODO: Add some Promise utils, like Promise.every, etc.
-
-    /**
-     * NOTE: These are deprecated.
-     *  The functions in fs-extra or elsewhere should replace these,
-     *  which should be available in utils.fs, etc.
-     */
-
-    utils.move = utils.promisify(fse, 'move');
-    utils.mkdirp = utils.promisify(null, mkdirP);
-    utils.rm = utils.promisify(null, rimraf);
+    utils.fs = utils.promisifyAll(fse);
+    utils._ = utils.guardAll(_);
 
     module.exports = utils;
 }());

@@ -421,7 +421,7 @@
         opensource: function () {
             var projectmeta = this.currentproject.projectmeta;
             var modal = this.$.modal;
-            var sources = App.dataManager.getSources;
+            var sources = App.dataManager.getSources();
             var projectid = projectmeta.project.id;
             if (projectmeta.resource.id === "udb") {
                 modal.allSources = _.filter(sources, {'project_id': projectid, 'checking_level': 3});

@@ -1,114 +1,32 @@
 'use strict';
 
 var _ = require('lodash'),
-    fs = require('fs'),
     path = require('path'),
-    mkdirP = require('mkdirp'),
-    rimraf = require('rimraf'),
-    AdmZip = require('adm-zip'),
-    archiver = require('archiver'),
-    utils = require('../js/lib/util'),
+    utils = require('lib/utils'),
     git = require('../js/git')(),
-    migrator = require('../js/migrator'),
-    wrap = utils.promisify,
-    guard = utils.guard;
+    migrator = require('../js/migrator');
 
-var map = guard('map'),
-    indexBy = guard('indexBy'),
-    flatten = guard('flatten'),
-    compact = guard('compact');
+function ProjectsManager(dataManager, configurator, reporter) {
 
-/**
- *  var pm = ProjectsManager(query);
- *
- *  e.g. var pm = App.projectsManager;
- */
-
-function ProjectsManager(dataManager, configurator) {
-
-    // var puts = console.log.bind(console),  // Never used
-    var write = wrap(fs, 'writeFile'),
-        read = wrap(fs, 'readFile'),
-        mkdirp = wrap(null, mkdirP),
-        rm = wrap(null, rimraf),
-        readdir = wrap(fs, 'readdir'),
-        stat = wrap(fs, 'stat'),
-        isDir = function (f) {
-            return stat(f).then(function (s) {
-                return s.isDirectory();
-            });
-        },
-        isVisibleDir = function (f) {
-            return isDir(f).then(function (isFolder) {
-                var name = path.parse(f).name,
-                    isHidden = /^\..*/.test(name);
-
-                return (isFolder && !isHidden) ? f : false;
-            });
-        },
-        filterDirs = function (dirs) {
-            return Promise.all(_.map(dirs, isVisibleDir)).then(compact());
-        },
-        readdirs = function (dirs) {
-            return Promise.all(_.map(dirs, function (d) {
-                return readdir(d).then(map(function (f) {
-                    return path.join(d, f);
-                }));
-            }));
-        },
+    var targetDir = configurator.getValue('targetTranslationsDir'),
+        write = utils.fs.outputFile,
+        read = utils.fs.readFile,
+        mkdirp = utils.fs.mkdirs,
+        rm = utils.fs.remove,
+        readdir = utils.fs.readdir,
+        map = utils.lodash.map,
+        flatten = utils.lodash.flatten,
         toJSON = _.partialRight(JSON.stringify, null, '\t'),
-        fromJSON = JSON.parse.bind(JSON),
-        // NOTE: Old auto-backup implementation
-        // backupTimer,
-        config = (function (prefix) {
-            var isUW = _.partial(_.startsWith, _, prefix, 0),
-                isChunk = function (filename) {
-                    return _.endsWith(filename, '.txt');
-                };
-
-            return {
-                filterProjects: _.partial(_.filter, _, isUW),
-
-                filterChapters: filterDirs,
-
-                filterChunks: _.partial(_.filter, _, isChunk),
-
-                get targetDir () {
-                    return configurator.getValue('targetTranslationsDir');
-                },
-
-
-                makeProjectPaths: function (meta) {
-                    var filename = meta.unique_id;
-                    return this.makeProjectPathsForProject(filename);
-                },
-
-                makeProjectPathsForProject: function (project) {
-                    var targetDir = this.targetDir,
-                        projectDir = path.join(targetDir, project);
-
-                    return {
-                        parentDir: targetDir,
-                        projectDir: projectDir,
-                        manifest: path.join(projectDir, 'manifest.json'),
-                        license: path.join(projectDir, 'LICENSE.md')
-                    };
-
-                }
-            };
-        })('uw-');
+        fromJSON = JSON.parse.bind(JSON);
 
     return {
 
-        getPaths: function(meta) {
-            return config.makeProjectPaths(meta);
+        moveBackups: function(oldPath, newPath) {
+            utils.fs.move(path.join(oldPath, 'automatic_backups'), path.join(newPath, 'automatic_backups'), {clobber: true});
+            utils.fs.move(path.join(oldPath, 'backups'), path.join(newPath, 'backups'), {clobber: true});
         },
 
-        migrateBackup: function(oldPath, newPath) {
-            utils.move(path.join(oldPath, 'automatic_backups'), path.join(newPath, 'automatic_backups'), {clobber: true});
-            utils.move(path.join(oldPath, 'backups'), path.join(newPath, 'backups'), {clobber: true});
-        },
-
+        //look at getting rid of this
         isTranslation: function (meta) {
             return !meta.type.id || meta.type.id === 'text';
         },
@@ -151,7 +69,7 @@ function ProjectsManager(dataManager, configurator) {
                     meta.unique_id += "_" + manifest.resource.id;
                 }
 
-                var completion = App.configurator.getValue(meta.unique_id + "-completion");
+                var completion = configurator.getValue(meta.unique_id + "-completion");
                 if (completion !== undefined && completion !== "") {
                     meta.completion = completion;
                 } else {
@@ -163,14 +81,14 @@ function ProjectsManager(dataManager, configurator) {
                     }
                 }
             } catch (err) {
-                App.reporter.logError(err);
+                reporter.logError(err);
                 return null;
             }
             return meta;
         },
 
         saveTargetTranslation: function (translation, meta, user) {
-            var paths = this.getPaths(meta);
+            var paths = utils.makeProjectPaths(targetDir, meta);
             var projectClass = meta.project_type_class;
 
             var sources = meta.source_translations.map(function (source) {
@@ -276,19 +194,20 @@ function ProjectsManager(dataManager, configurator) {
         },
 
         loadProjectsList: function () {
-            return readdir(config.targetDir);
+            return readdir(targetDir);
         },
 
         loadTargetTranslationsList: function () {
-            var makePaths = config.makeProjectPathsForProject.bind(config);
+            var paths = utils.makeProjectPaths.bind(utils, targetDir);
 
             return this.loadProjectsList()
-                .then(map(makePaths))
+                .then(map(paths))
                 .then(map('manifest'))
                 .then(function (list) {
                     return _.filter(list, function (path) {
                         try {
-                            var test = fs.statSync(path);
+                            // this needs changed
+                            var test = require('fs').statSync(path);
                         } catch (e) {
                             test = false;
                         }
@@ -301,15 +220,15 @@ function ProjectsManager(dataManager, configurator) {
         },
 
         migrateTargetTranslationsList: function () {
-            var makePaths = config.makeProjectPathsForProject.bind(config);
+            var paths = utils.makeProjectPaths.bind(utils, targetDir);
 
             return this.loadProjectsList()
-                .then(map(makePaths))
+                .then(map(paths))
                 .then(migrator.migrateAll)
         },
 
         loadFinishedFramesList: function (meta) {
-            var paths = config.makeProjectPaths(meta);
+            var paths = utils.makeProjectPaths(targetDir, meta);
 
             return read(paths.manifest).then(function (manifest) {
                 var finishedFrames = fromJSON(manifest).finished_chunks;
@@ -318,7 +237,7 @@ function ProjectsManager(dataManager, configurator) {
         },
 
         loadTargetTranslation: function (meta) {
-            var paths = this.getPaths(meta);
+            var paths = utils.makeProjectPaths(targetDir, meta);
             var isTranslation = this.isTranslation(meta);
 
             var parseChunkName = function (f) {
@@ -367,8 +286,10 @@ function ProjectsManager(dataManager, configurator) {
 
             return readdir(paths.projectDir)
                 .then(map(makeFullPath(paths.projectDir)))
+                //this will not work...refactor
                 .then(config.filterChapters)
                 .then(flatten())
+                //this won't work either
                 .then(readdirs)
                 .then(flatten())
                 .then(map(readChunk))
@@ -380,7 +301,7 @@ function ProjectsManager(dataManager, configurator) {
         },
 
         deleteTargetTranslation: function (meta) {
-            var paths = this.getPaths(meta);
+            var paths = utils.makeProjectPaths(targetDir, meta);
             return rm(paths.projectDir);
         }
     };

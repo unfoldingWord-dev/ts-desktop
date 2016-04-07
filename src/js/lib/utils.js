@@ -296,6 +296,20 @@
             return getMac().then(function (mac) {
                 return mac.replace(/-|:/g, '');
             });
+        },
+
+        makeProjectPaths: function (baseDir, project) {
+            var targetDir = baseDir,
+                projectName = typeof project === 'object' ? project.unique_id : project,
+                projectDir = path.join(targetDir, projectName);
+
+            return {
+                parentDir: targetDir,
+                projectDir: projectDir,
+                manifest: path.join(projectDir, 'manifest.json'),
+                license: path.join(projectDir, 'LICENSE.md')
+            };
+
         }
     };
 
@@ -303,7 +317,7 @@
      * See note on 'promisify' function for example usage.
      */
     utils.fs = utils.promisifyAll(fse);
-    utils._ = utils.guardAll(_);
+    utils.lodash = utils.guardAll(_);
 
     module.exports = utils;
 }());

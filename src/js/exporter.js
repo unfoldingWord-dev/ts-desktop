@@ -6,7 +6,7 @@ var _ = require('lodash'),
     mkdirP = require('mkdirp'),
     rimraf = require('rimraf'),
     archiver = require('archiver'),
-    utils = require('../js/lib/util'),
+    utils = require('lib/utils'),
     git = require('../js/git')(),
     wrap = utils.promisify,
     guard = utils.guard;
@@ -116,16 +116,6 @@ function ExportManager(configurator) {
                 archive.finalize();
                 resolve(filePath);
             });
-        },
-
-        /*
-         * Moves (using utils function) .tstudio files from the old to the new path
-         * @param oldPath: source backup directory
-         * @param newPath: target backup directory
-         */
-        migrateBackup: function(oldPath, newPath) {
-            utils.move(path.join(oldPath, 'automatic_backups'), path.join(newPath, 'automatic_backups'), {clobber: true});
-            utils.move(path.join(oldPath, 'backups'), path.join(newPath, 'backups'), {clobber: true});
         },
 
         /*

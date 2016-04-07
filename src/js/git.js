@@ -3,7 +3,7 @@
 'use strict';
 
 let Git,
-    utils = require('../js/lib/util'),
+    utils = require('lib/utils'),
     wrap = utils.promisify,
     logr = utils.logr,
     _ = require('lodash'),

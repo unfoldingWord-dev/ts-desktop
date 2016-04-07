@@ -26,11 +26,6 @@ function ProjectsManager(dataManager, configurator, reporter) {
             utils.fs.move(path.join(oldPath, 'backups'), path.join(newPath, 'backups'), {clobber: true});
         },
 
-        //look at getting rid of this
-        isTranslation: function (meta) {
-            return !meta.type.id || meta.type.id === 'text';
-        },
-
         updateManifestToMeta: function (manifest) {
             var meta = manifest;
             try {
@@ -238,7 +233,6 @@ function ProjectsManager(dataManager, configurator, reporter) {
 
         loadTargetTranslation: function (meta) {
             var paths = utils.makeProjectPaths(targetDir, meta);
-            var isTranslation = this.isTranslation(meta);
 
             var parseChunkName = function (f) {
                 var p = path.parse(f),
@@ -253,7 +247,7 @@ function ProjectsManager(dataManager, configurator, reporter) {
                         name: parseChunkName(f)
                     };
 
-                    if (isTranslation) {
+                    if (meta.project_type_class === "standard") {
                         parsed['transcontent'] = c.toString();
                     } else {
                         parsed['helpscontent'] = JSON.parse(c);
@@ -269,7 +263,7 @@ function ProjectsManager(dataManager, configurator, reporter) {
                         var mapped = {
                             completed: !!finished[name]
                         },
-                        key = isTranslation ? 'transcontent' : 'helpscontent';
+                        key = meta.project_type_class === "standard" ? 'transcontent' : 'helpscontent';
 
                         mapped[key] = c[key];
 

@@ -57,7 +57,7 @@ process.stdout.write = console.log.bind(console);
     let i18n = require('../js/i18n').Locale(path.resolve(path.join(__dirname, '..', '..', 'i18n')));
 
     setMsg('Loading Utils...');
-    let util = require('../js/lib/util');
+    let utils = require('../js/lib/utils');
 
     setMsg('Loading Printer...');
     let printer = require('../js/printer').Printer();
@@ -86,6 +86,15 @@ process.stdout.write = console.log.bind(console);
         c.setValue('indexDir', path.join(DATA_PATH, 'index'), {'mutable':false});
         return c;
     })();
+
+    let reporter = new Reporter({
+        logPath: path.join(configurator.getValue('rootDir'), 'log.txt'),
+        oauthToken: configurator.getValue('github-oauth'),
+        repoOwner: configurator.getValue('repoOwner'),
+        repo: configurator.getValue('repo'),
+        maxLogFileKb: configurator.getValue('maxLogFileKb'),
+        appVersion: require('../../package.json').version
+    });
 
     let dataManager = (function () {
         // TODO: should we move the location of these files/folders outside of the src folder?
@@ -142,7 +151,7 @@ process.stdout.write = console.log.bind(console);
 
         uploader: new Uploader(DATA_PATH),
 
-        util: util,
+        utils: utils,
 
         git: new Git({
             token: configurator.getValue('gogs-token')
@@ -151,7 +160,7 @@ process.stdout.write = console.log.bind(console);
         printer: printer,
 
         projectsManager: (function () {
-            return new ProjectsManager(dataManager, configurator);
+            return new ProjectsManager(dataManager, configurator, reporter);
         })(),
 
         dataManager: dataManager,
@@ -164,14 +173,7 @@ process.stdout.write = console.log.bind(console);
             return new ExportManager(configurator);
         })(),
 
-        reporter: new Reporter({
-            logPath: path.join(configurator.getValue('rootDir'), 'log.txt'),
-            oauthToken: configurator.getValue('github-oauth'),
-            repoOwner: configurator.getValue('repoOwner'),
-            repo: configurator.getValue('repo'),
-            maxLogFileKb: configurator.getValue('maxLogFileKb'),
-            appVersion: require('../../package.json').version
-        })
+        reporter: reporter
     };
 
     // hook up global exception handler

@@ -7,7 +7,7 @@
         path = require('path'),
         fs = require('fs'),
         rimraf = require('rimraf'),
-        utils = require('../js/lib/util'),
+        utils = require('lib/utils'),
         jsonfile = require('jsonfile'),
         readjson = utils.promisify(jsonfile, 'readFile'),
         writejson = utils.promisify(jsonfile, 'writeFile');

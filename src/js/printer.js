@@ -6,7 +6,7 @@ var _ = require('lodash'),
     mkdirP = require('mkdirp'),
     AdmZip = require('adm-zip'),
     https = require('https'),
-    download = require('../js/lib/util').download,
+    download = require('lib/utils').download,
     _ = require('lodash'),
     PDFDocument = require('pdfkit');
 

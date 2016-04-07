@@ -24,7 +24,7 @@ var map = guard('map'),
  *  e.g. var pm = App.projectsManager;
  */
 
-function ProjectsManager(dataManager, configurator, srcDir) {
+function ProjectsManager(dataManager, configurator) {
 
     // var puts = console.log.bind(console),  // Never used
     var write = wrap(fs, 'writeFile'),
@@ -254,6 +254,7 @@ function ProjectsManager(dataManager, configurator, srcDir) {
             };
 
             var setLicense = function () {
+                var srcDir = path.resolve(path.join(__dirname, '..'));
                 return read(path.join(srcDir, 'assets', 'LICENSE.md'))
                     .then(function(data) {
                         return write(paths.license, data);

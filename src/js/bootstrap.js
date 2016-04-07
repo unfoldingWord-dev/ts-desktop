@@ -151,8 +151,7 @@ process.stdout.write = console.log.bind(console);
         printer: printer,
 
         projectsManager: (function () {
-            var srcDir = path.resolve(path.join(__dirname, '..'));
-            return new ProjectsManager(dataManager, configurator, srcDir);
+            return new ProjectsManager(dataManager, configurator);
         })(),
 
         dataManager: dataManager,

@@ -7,7 +7,7 @@
         path = require('path'),
         fs = require('fs'),
         rimraf = require('rimraf'),
-        utils = require('../../js/lib/util'),
+        utils = require('../js/lib/util'),
         jsonfile = require('jsonfile'),
         readjson = utils.promisify(jsonfile, 'readFile'),
         writejson = utils.promisify(jsonfile, 'writeFile');
@@ -278,7 +278,7 @@
                 let backupDir = App.configurator.getUserPath('datalocation', 'automatic_backups');
                 let oldbackup = path.join(backupDir, oldname);
                 let readyfile = path.join(paths.projectDir, 'READY');
-                let srcDir = path.resolve(path.join(__dirname, '../..'));
+                let srcDir = path.resolve(path.join(__dirname, '..'));
                 let license = fs.readFileSync(path.join(srcDir, 'assets', 'LICENSE.md'));
 
                 fs.writeFileSync(paths.license, license);

@@ -81,7 +81,15 @@ process.stdout.write = console.log.bind(console);
         return c;
     })();
 
+    let dataManager = (function () {
+        // TODO: should we move the location of these files/folders outside of the src folder?
+        var srcDir = path.resolve(path.join(__dirname, '..')),
+            schemaPath = path.join(srcDir, 'config', 'schema.sql'),
+            dbPath = path.join(srcDir, 'index', 'index.sqlite'),
+            db = new Db(schemaPath, dbPath);
 
+        return new DataManager(db);
+    })();
 
     // TODO: where should these be?
     mkdirp.sync(configurator.getValue('targetTranslationsDir'));
@@ -137,24 +145,11 @@ process.stdout.write = console.log.bind(console);
         printer: printer,
 
         projectsManager: (function () {
-            // TODO: should we move the location of these files/folders outside of the src folder?
-            var srcDir = path.resolve(path.join(__dirname, '..')),
-                schemaPath = path.join(srcDir, 'config', 'schema.sql'),
-                dbPath = path.join(srcDir, 'index', 'index.sqlite'),
-                db = new Db(schemaPath, dbPath);
-
-            return new ProjectsManager(db, configurator, srcDir);
+            var srcDir = path.resolve(path.join(__dirname, '..'));
+            return new ProjectsManager(dataManager, configurator, srcDir);
         })(),
 
-        dataManager: (function () {
-            // TODO: should we move the location of these files/folders outside of the src folder?
-            var srcDir = path.resolve(path.join(__dirname, '..')),
-                schemaPath = path.join(srcDir, 'config', 'schema.sql'),
-                dbPath = path.join(srcDir, 'index', 'index.sqlite'),
-                db = new Db(schemaPath, dbPath);
-
-            return new DataManager(db);
-        })(),
+        dataManager: dataManager,
 
         reporter: new Reporter({
             logPath: path.join(configurator.getValue('rootDir'), 'log.txt'),

@@ -68,52 +68,8 @@ function DataManager(query) {
             return zipper(r);
         },
 
-        checkProject: function (project) {
-            var allsources = this.sources;
-            var mysources = _.filter(allsources, 'project_id', project);
-            var combined = {};
-            var sources = [];
-            for (var i = 0; i < mysources.length; i++) {
-                var source = mysources[i].resource_id;
-                var frames = this.getSourceFrames(mysources[i]);
-                console.log("resource:", source, "chunks:", frames.length);
-                combined[source] = frames;
-                sources.push(source);
-            }
-            var match = true;
-            var j = 0;
-            while (match && j < combined[sources[0]].length) {
-                var testref = combined[sources[0]][j].chapter + combined[sources[0]][j].verse;
-                for (var k = 1; k < sources.length; k++) {
-                    var checkref = combined[sources[k]][j].chapter + combined[sources[k]][j].verse;
-                    if (testref !== checkref) {
-                        match = false;
-                        var firsterror = testref;
-                    }
-                }
-                j++;
-            }
-            if (match) {
-                console.log("                             ALL CHUNKS LINE UP!");
-            } else {
-                console.log("                             First error occurs at " + firsterror);
-            }
-            console.log("Data:");
-            console.log(combined);
-        },
-
-        checkAllProjects: function () {
-            var allsources = this.sources;
-            var ulbsources = _.filter(allsources, 'resource_id', 'ulb');
-            for (var i = 0; i < ulbsources.length; i++) {
-                console.log("Project Results              Name: " + ulbsources[i].project_id);
-                this.checkProject(ulbsources[i].project_id);
-                console.log("---------------------------------------------------------------");
-            }
-        },
-
         getFrameUdb: function (source, chapterid, verseid) {
-            var sources = this.sources;
+            var sources = this.getSources();
             var udbsource = _.filter(sources, {'language_id': source.language_id, 'project_id': source.project_id, 'checking_level': 3, 'resource_id': 'udb'});
             var s = udbsource[0].id,
                 r = query([
@@ -204,6 +160,50 @@ function DataManager(query) {
             ].join(' '));
 
             return zipper(r);
+        },
+
+        checkProject: function (project) {
+            var allsources = this.getSources();
+            var mysources = _.filter(allsources, 'project_id', project);
+            var combined = {};
+            var sources = [];
+            for (var i = 0; i < mysources.length; i++) {
+                var source = mysources[i].resource_id;
+                var frames = this.getSourceFrames(mysources[i]);
+                console.log("resource:", source, "chunks:", frames.length);
+                combined[source] = frames;
+                sources.push(source);
+            }
+            var match = true;
+            var j = 0;
+            while (match && j < combined[sources[0]].length) {
+                var testref = combined[sources[0]][j].chapter + combined[sources[0]][j].verse;
+                for (var k = 1; k < sources.length; k++) {
+                    var checkref = combined[sources[k]][j].chapter + combined[sources[k]][j].verse;
+                    if (testref !== checkref) {
+                        match = false;
+                        var firsterror = testref;
+                    }
+                }
+                j++;
+            }
+            if (match) {
+                console.log("                             ALL CHUNKS LINE UP!");
+            } else {
+                console.log("                             First error occurs at " + firsterror);
+            }
+            console.log("Data:");
+            console.log(combined);
+        },
+
+        checkAllProjects: function () {
+            var allsources = this.getSources();
+            var ulbsources = _.filter(allsources, 'resource_id', 'ulb');
+            for (var i = 0; i < ulbsources.length; i++) {
+                console.log("Project Results              Name: " + ulbsources[i].project_id);
+                this.checkProject(ulbsources[i].project_id);
+                console.log("---------------------------------------------------------------");
+            }
         }
     };
 }

@@ -3,7 +3,7 @@
 var _ = require('lodash'),
     path = require('path'),
     archiver = require('archiver'),
-    utils = require('lib/utils'),
+    utils = require('../js/lib/utils'),
     git = require('../js/git')();
 
 function ExportManager(configurator) {

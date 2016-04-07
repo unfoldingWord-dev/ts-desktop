@@ -3,7 +3,7 @@
 var _ = require('lodash'),
     path = require('path'),
     AdmZip = require('adm-zip'),
-    utils = require('lib/utils'),
+    utils = require('../js/lib/utils'),
     migrator = require('../js/migrator');
 
 function ImportManager(configurator) {

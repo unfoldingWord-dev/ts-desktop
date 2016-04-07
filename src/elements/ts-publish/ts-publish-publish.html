@@ -238,7 +238,7 @@
             mythis.$.loading.open();
 
             setTimeout(function() {
-                App.projectsManager.exportTranslation(translation, projectmeta, filePath, mediaServer)
+                App.exportManager.exportTranslation(translation, projectmeta, filePath, mediaServer)
                     .then(function () {
                         mythis.set('options.title', "Project Exported");
                         mythis.set('options.body', "Your project has been successfully exported to a file.  Thanks.");

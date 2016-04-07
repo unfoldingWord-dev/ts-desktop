@@ -185,7 +185,7 @@
         },
 
         chain: function (visit, onFail, opts) {
-            var fail = onFail ? onFail : utils.ret(false)
+            var fail = onFail ? onFail : utils.ret(false),
                 config = opts || { compact: true };
 
             return function (list) {

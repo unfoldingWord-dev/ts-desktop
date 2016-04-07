@@ -50,6 +50,9 @@ process.stdout.write = console.log.bind(console);
     setMsg('Loading Import Manager...');
     let ImportManager = require('../js/importer').ImportManager;
 
+    setMsg('Loading Export Manager...');
+    let ExportManager = require('../js/exporter').ExportManager;
+
     setMsg('Loading Locale...');
     let i18n = require('../js/i18n').Locale(path.resolve(path.join(__dirname, '..', '..', 'i18n')));
 
@@ -156,6 +159,10 @@ process.stdout.write = console.log.bind(console);
 
         importManager: (function () {
             return new ImportManager(configurator);
+        })(),
+
+        exportManager: (function () {
+            return new ExportManager(configurator);
         })(),
 
         reporter: new Reporter({

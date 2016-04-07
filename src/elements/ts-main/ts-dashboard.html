@@ -253,7 +253,7 @@
           mythis.$.loading.open();
 
           setTimeout(function() {
-              App.projectsManager.backupTranslation(data.projectmeta, filePath)
+              App.exportManager.backupTranslation(data.projectmeta, filePath)
                   .then(function () {
                       mythis.set('options.title', "Backup Complete");
                       mythis.set('options.body', "Your project has been successfully backed up.  Thanks.");
@@ -356,7 +356,7 @@
               mythis.set('projectlist', _.compact(list));
 
               App.ipc.send('loading-status', 'Checking Auto Backups...');
-              App.projectsManager.backupProjects(mythis.projectlist);
+              App.exportManager.backupProjects(mythis.projectlist);
 
               setTimeout(function() {
                 App.ipc.send('loading-done');

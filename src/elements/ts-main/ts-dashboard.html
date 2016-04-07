@@ -284,7 +284,7 @@
           this.$.loading.open();
 
           setTimeout(function() {
-              App.projectsManager.restoreTargetTranslation(filePath[0])
+              App.importManager.restoreTargetTranslation(filePath[0])
                   .then(function() {
                       mythis.set('options.title', "Restore Complete");
                       mythis.set('options.body', "Your project(s) has been successfully restored.  Thanks.");

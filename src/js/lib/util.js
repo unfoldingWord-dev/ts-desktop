@@ -167,6 +167,50 @@
             }, isValid);
         },
 
+        every: function (visit, onFail, opts) {
+            var action = utils.wrap(visit),
+                fail = onFail ? onFail : utils.ret(false),
+                config = opts || { compact: true };
+
+            return function (list) {
+                var promises = list.map(action).map(function (promise) {
+                    return promise.catch(fail);
+                });
+
+                return Promise.all(promises).then(function (results) {
+                    return config.compact ? results.filter(Boolean) : results;
+                });
+            };
+        },
+
+        chain: function (visit, onFail, opts) {
+            var fail = onFail ? onFail : utils.ret(false)
+                config = opts || { compact: true };
+
+            return function (list) {
+                var p = Promise.resolve(false),
+                    results = [];
+
+                list.forEach(function (l) {
+                    p = p.then(visit)
+                         .catch(fail)
+                         .then(function (result) {
+                             results.push(result);
+                         });
+                });
+
+                return p.then(function () {
+                    return config.compact ? results.filter(Boolean) : results;
+                });
+            };
+        },
+
+        wrap: function (fn) {
+            return function (arg) {
+                return fn(arg);
+            };
+        },
+
         /**
          * Creates a function that returns the data when called.
          *  E.g.

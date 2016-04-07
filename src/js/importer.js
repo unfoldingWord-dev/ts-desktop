@@ -1,32 +1,15 @@
 'use strict';
 
 var _ = require('lodash'),
-    fs = require('fs'),
     path = require('path'),
-    rimraf = require('rimraf'),
     AdmZip = require('adm-zip'),
-    archiver = require('archiver'),
     utils = require('lib/utils'),
-    migrator = require('../js/migrator'),
-    wrap = utils.promisify,
-    guard = utils.guard;
-
-var map = guard('map'),
-    indexBy = guard('indexBy'),
-    flatten = guard('flatten'),
-    compact = guard('compact');
+    migrator = require('../js/migrator');
 
 function ImportManager(configurator) {
 
-    var rm = wrap(null, rimraf);
-
     return {
 
-        /**
-         * Imports a tstudio archive
-         * @param filePath {String} the path to the archive
-         * @returns {Promise}
-         */
         restoreTargetTranslation: function(filePath) {
             let zip = new AdmZip(filePath),
                 tmpDir = configurator.getValue('tempDir'),
@@ -42,11 +25,7 @@ function ImportManager(configurator) {
                 })
                 .then(function (targetPaths) {
                     return _.map(targetPaths, function (targetPath) {
-                        var parentDir = extractPath;
-                        var projectDir = path.join(extractPath, targetPath);
-                        var manifest = path.join(projectDir, 'manifest.json');
-                        var license = path.join(projectDir, 'LICENSE.md');
-                        return {parentDir, projectDir, manifest, license};
+                        return utils.makeProjectPaths(extractPath, targetPath);
                     });
                 })
                 .then(migrator.migrateAll)
@@ -66,17 +45,16 @@ function ImportManager(configurator) {
                         let tmpPath = path.join(extractPath, p),
                             targetPath = path.join(targetDir, p);
 
-                        return utils.move(tmpPath, targetPath, {clobber: true});
+                        return utils.fs.move(tmpPath, targetPath, {clobber: true});
                     });
                 })
                 .then(function (list) {
                     return Promise.all(list);
                 })
                 .then(function () {
-                    return rm(tmpDir);
+                    return utils.fs.remove(tmpDir);
                 });
         }
-
     };
 }
 

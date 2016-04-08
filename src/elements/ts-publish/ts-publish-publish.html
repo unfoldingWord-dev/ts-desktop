@@ -276,17 +276,17 @@
                     var getreg = App.keyManager.getRegistrationInfo.bind(App.keyManager, deviceId),
                         genreg = App.keyManager.generateRegistrationInfo.bind(App.keyManager, deviceId),
                         rereg = function () {
-                            return App.git.unregister(user).then(genreg);
+                            return App.userManager.unregister(user).then(genreg);
                         };
 
                     return getreg().catch(rereg);
                 })
                 .then(function (reg) {
                     user.reg = reg;
-                    return App.git.register(user);
+                    return App.userManager.register(user);
                 })
                 .then(function () {
-                    return App.git.createRepo(user, repo);
+                    return App.userManager.createRepo(user, repo);
                 })
                 .then(function (repo) {
                     return App.git.push(user, paths.projectDir, repo);

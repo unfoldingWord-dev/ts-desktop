@@ -50,6 +50,9 @@ process.stdout.write = console.log.bind(console);
     setMsg('Loading Data Manager...');
     let DataManager = require('../js/database').DataManager;
 
+    setMsg('Loading User Manager...');
+    let UserManager = require('../js/user').UserManager;
+
     setMsg('Loading Import Manager...');
     let ImportManager = require('../js/importer').ImportManager;
 
@@ -171,6 +174,12 @@ process.stdout.write = console.log.bind(console);
         })(),
 
         dataManager: dataManager,
+
+        userManager: (function () {
+            return new UserManager({
+                token: configurator.getValue('gogs-token')
+            });
+        })(),
 
         importManager: (function () {
             return new ImportManager(configurator);

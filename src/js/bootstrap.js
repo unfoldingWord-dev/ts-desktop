@@ -32,8 +32,8 @@ process.stdout.write = console.log.bind(console);
     setMsg('Loading Configurator...');
     let Configurator = require('../js/configurator').Configurator;
 
-    setMsg('Loading Git...');
-    let Git = require('../js/git');
+    setMsg('Loading Git Manager...');
+    let GitManager = require('../js/git').GitManager;
 
     setMsg('Loading Key Manager...');
     let KeyManager = require('../js/keys').KeyManager;
@@ -161,9 +161,9 @@ process.stdout.write = console.log.bind(console);
 
         utils: utils,
 
-        git: new Git({
-            token: configurator.getValue('gogs-token')
-        }),
+        gitManager: (function () {
+            return new GitManager();
+        })(),
 
         printManager: (function () {
             return new PrintManager(configurator);

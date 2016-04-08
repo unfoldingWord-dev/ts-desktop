@@ -104,6 +104,17 @@
             </div>
         </paper-dialog>
 
+        <paper-dialog id="confirm" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <h2>Overwrite?</h2>
+            <div>
+                <p>This target translation already exists. Overwrite?</p>
+            </div>
+            <div id="confirmbuttons">
+                <paper-button dialog-dismiss>No</paper-button>
+                <paper-button on-tap="startimport">Confirm</paper-button>
+            </div>
+        </paper-dialog>
+
     </template>
 
 </dom-module>
@@ -152,6 +163,10 @@
                 type: Boolean,
                 value: false
             },
+            importmeta: {
+                type: Object,
+                value: {}
+            },
             projectlist: {
                 type: Array,
                 value: []
@@ -187,6 +202,7 @@
             var typedata = this.typedata;
             var projectarray = this.projectlist;
             var popup = this.$.popup;
+            var confirmImport = this.$.confirm;
             var newprojectmanifest = {
                 "package_version": 6,
                 "project": {"id": project.slug, "name": project.name},
@@ -199,6 +215,11 @@
                 "parent_draft": {}
             };
             var newprojectmeta = App.projectsManager.updateManifestToMeta(newprojectmanifest);
+
+            if(this.importing){
+                this.importmeta = newprojectmeta;
+            }
+
             if(newprojectmeta === null) {
                 this.set('options', {title: "Unknown Error", body: "The project information is corrupt"});
                 popup.open();
@@ -207,9 +228,14 @@
 
             for (var i = 0; i < projectarray.length; i++) {
                 if (projectarray[i].unique_id === newprojectmeta.unique_id) {
-                    this.set('options', {title: "Duplicate Found", body: "This project already exists"});
-                    popup.open();
-                    return;
+                    if(!this.importing){
+                        this.set('options', {title: "Duplicate Found", body: "This project already exists"});
+                        popup.open();
+                        return;
+                    } else {
+                        confirmImport.open();
+                        return;
+                    }
                 }
             }
 
@@ -222,9 +248,7 @@
             this.animationConfig.exit.name = 'slide-left-animation';
 
             if(mythis.importing){
-                mythis.fire('importfalse');
-                mythis.fire('iron-signal', {name: 'importproject', data: {projdata: newprojectmeta, type: "new"}});
-                mythis.selected = 0;
+                mythis.startimport(newprojectmeta);
             } else {
                 App.projectsManager.saveTargetTranslation([], newprojectmeta, this.currentuser).then(function() {
                     mythis.fire('iron-signal', {name: 'updatelist'});
@@ -233,6 +257,13 @@
                 });
             }
 
+        },
+
+        startimport: function() {
+            this.$.confirm.close();
+            this.fire('importfalse');
+            this.fire('iron-signal', {name: 'importproject', data: {projdata: this.importmeta, type: "new"}});
+            this.selected = 0;
         },
 
         back: function () {

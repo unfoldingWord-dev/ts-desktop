@@ -2,12 +2,7 @@
 
 var path = require('path'),
     utils = require('../js/lib/utils'),
-
-
-    _ = utils._,
-    fs = utils.fs,
-
-
+    _ = require('lodash'),
     keypair = require('keypair'),
     forge = require('node-forge');
 
@@ -33,7 +28,7 @@ function KeyManager(dataPath) {
 
         let keyPath = path.join(paths.sshPath, paths.privateKeyName);
 
-        return utils.mkdirp(paths.sshPath).then(function () {
+        return utils.fs.mkdirs(paths.sshPath).then(function () {
             var pair = keypair(),
                 publicKey = forge.pki.publicKeyFromPem(pair.public),
                 publicSsh = forge.ssh.publicKeyToOpenSSH(publicKey, deviceId),
@@ -47,9 +42,9 @@ function KeyManager(dataPath) {
         })
         .then(utils.logr('Keys created!'))
         .then(function (keys) {
-            var writePublicKey = fs.writeFile(paths.publicKeyPath, keys.public),
-                writePrivateKey = fs.writeFile(paths.privateKeyPath, keys.private).then(function () {
-                    return fs.chmod(paths.privateKeyPath, '600');
+            var writePublicKey = utils.fs.outputFile(paths.publicKeyPath, keys.public),
+                writePrivateKey = utils.fs.outputFile(paths.privateKeyPath, keys.private).then(function () {
+                    return utils.fs.chmod(paths.privateKeyPath, '600');
                 });
 
             return Promise.all([writePublicKey, writePrivateKey]).then(utils.ret(keys));
@@ -57,11 +52,11 @@ function KeyManager(dataPath) {
     };
 
     var readKeyPair = function () {
-            var readPubKey = fs.readFile(paths.publicKeyPath),
-                readSecKey = fs.readFile(paths.privateKeyPath);
+            var readPubKey = utils.fs.readFile(paths.publicKeyPath),
+                readSecKey = utils.fs.readFile(paths.privateKeyPath);
 
         return Promise.all([readPubKey, readSecKey])
-            .then(utils.map(String))
+            .then(utils.lodash.map(String))
             .then(_.zipObject.bind(_, ['public', 'private']));
     };
 

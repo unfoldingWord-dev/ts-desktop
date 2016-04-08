@@ -112,6 +112,14 @@ process.stdout.write = console.log.bind(console);
         return new DataManager(db);
     })();
 
+    let gitManager = (function () {
+        return new GitManager();
+    })();
+
+    let migrateManager = (function () {
+        return new MigrateManager(configurator);
+    })();
+
     // TODO: where should these be?
     mkdirp.sync(configurator.getValue('targetTranslationsDir'));
     mkdirp.sync(configurator.getUserPath('datalocation', 'automatic_backups'));
@@ -161,12 +169,12 @@ process.stdout.write = console.log.bind(console);
 
         dataManager: dataManager,
 
+        gitManager: gitManager,
+
+        migrateManager: migrateManager,
+
         keyManager: (function () {
             return new KeyManager(DATA_PATH);
-        })(),
-
-        gitManager: (function () {
-            return new GitManager();
         })(),
 
         printManager: (function () {
@@ -174,7 +182,7 @@ process.stdout.write = console.log.bind(console);
         })(),
 
         projectsManager: (function () {
-            return new ProjectsManager(dataManager, configurator, reporter);
+            return new ProjectsManager(dataManager, configurator, reporter, gitManager, migrateManager);
         })(),
 
         userManager: (function () {
@@ -184,15 +192,11 @@ process.stdout.write = console.log.bind(console);
         })(),
 
         importManager: (function () {
-            return new ImportManager(configurator);
-        })(),
-
-        migrateManager: (function () {
-            return new MigrateManager(configurator);
+            return new ImportManager(configurator, migrateManager);
         })(),
 
         exportManager: (function () {
-            return new ExportManager(configurator);
+            return new ExportManager(configurator, gitManager);
         })()
     };
 

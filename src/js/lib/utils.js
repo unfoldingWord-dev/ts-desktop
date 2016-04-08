@@ -6,6 +6,7 @@
     var diacritics = require('./diacritics'),
         getmac = require('getmac'),
         fs = require('fs'),
+        path = require('path'),
         fse = require('fs-extra'),
         https = require('https'),
         http = require('http'),
@@ -68,7 +69,7 @@
 
             return function () {
                 var args = [],
-                    i = arguments.length;
+                    i = arguments.length - 1;
 
                 /**
                  *  Don't pass an arguments list that has undefined values at the end.
@@ -85,8 +86,13 @@
                  *      Before:    [arg1, null, undefined, arg2, undefined, undefined]
                  *      After:     [arg1, null, undefined, arg2]
                  */
-                while (--i > 0 && typeof arguments[i] !== 'undefined') {}
-                while (i > 0) { args.unshift(arguments[i--]); }
+                while (i >= 0 && typeof arguments[i] === 'undefined') {
+                    --i;
+                }
+                while (i >= 0) {
+                    args.unshift(arguments[i]);
+                    --i;
+                }
 
                 return new Promise(function (resolve, reject) {
                     try {
@@ -193,7 +199,7 @@
                     results = [];
 
                 list.forEach(function (l) {
-                    p = p.then(visit)
+                    p = p.then(visit.bind(null, l))
                          .catch(fail)
                          .then(function (result) {
                              results.push(result);

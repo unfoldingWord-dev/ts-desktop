@@ -268,7 +268,7 @@
             this.set('options.loading', true);
             loading.open();
 
-            return App.git.stage(user, paths.projectDir)
+            return App.gitManager.stage(user, paths.projectDir)
                 .then(function () {
                     return App.util.getDeviceId();
                 })
@@ -289,7 +289,7 @@
                     return App.userManager.createRepo(user, repo);
                 })
                 .then(function (repo) {
-                    return App.git.push(user, paths.projectDir, repo);
+                    return App.gitManager.push(user, paths.projectDir, repo);
                 })
                 .then(function () {
                     mythis.set('options.title', "Project Published");

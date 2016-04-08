@@ -26,8 +26,6 @@ function KeyManager(dataPath) {
 
     var createKeyPair = function (deviceId) {
 
-        let keyPath = path.join(paths.sshPath, paths.privateKeyName);
-
         return utils.fs.mkdirs(paths.sshPath).then(function () {
             var pair = keypair(),
                 publicKey = forge.pki.publicKeyFromPem(pair.public),

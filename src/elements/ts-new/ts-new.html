@@ -217,7 +217,10 @@
             var newprojectmeta = App.projectsManager.updateManifestToMeta(newprojectmanifest);
 
             if(this.importing){
-                this.importmeta = newprojectmeta;
+                this.importmeta = {
+                    proj: newprojectmeta,
+                    overwriting: false
+                };
             }
 
             if(newprojectmeta === null) {
@@ -233,6 +236,7 @@
                         popup.open();
                         return;
                     } else {
+                        this.importmeta.overwriting = true;
                         confirmImport.open();
                         return;
                     }
@@ -262,7 +266,7 @@
         startimport: function() {
             this.$.confirm.close();
             this.fire('importfalse');
-            this.fire('iron-signal', {name: 'importproject', data: {projdata: this.importmeta, type: "new"}});
+            this.fire('iron-signal', {name: 'importproject', data: {projdata: this.importmeta.proj, overwriting: this.importmeta.overwriting}});
             this.selected = 0;
         },
 

@@ -26,6 +26,9 @@ process.stdout.write = console.log.bind(console);
     setMsg('Loading mkdirp...');
     let mkdirp = require('mkdirp');
 
+    setMsg('Loading DB...');
+    let Db = require('../js/lib/db').Db;
+
     setMsg('Loading Reporter...');
     let Reporter = require('../js/reporter').Reporter;
 
@@ -37,9 +40,6 @@ process.stdout.write = console.log.bind(console);
 
     setMsg('Loading Key Manager...');
     let KeyManager = require('../js/keys').KeyManager;
-
-    setMsg('Loading DB...');
-    let Db = require('../js/lib/db').Db;
 
     setMsg('Loading Projects Manager...');
     let ProjectsManager = require('../js/projects').ProjectsManager;
@@ -59,14 +59,14 @@ process.stdout.write = console.log.bind(console);
     setMsg('Loading Export Manager...');
     let ExportManager = require('../js/exporter').ExportManager;
 
+    setMsg('Loading Print Manager...');
+    let PrintManager = require('../js/printer').PrintManager;
+
     setMsg('Loading Locale...');
     let i18n = require('../js/i18n').Locale(path.resolve(path.join(__dirname, '..', '..', 'i18n')));
 
     setMsg('Loading Utils...');
     let utils = require('../js/lib/utils');
-
-    setMsg('Loading Printer...');
-    let PrintManager = require('../js/printer').PrintManager;
 
     setMsg('Initializing...');
 
@@ -122,8 +122,6 @@ process.stdout.write = console.log.bind(console);
 
         locale: i18n,
 
-        configurator: configurator,
-
         ipc: ipcRenderer,
 
         get window () {
@@ -155,11 +153,17 @@ process.stdout.write = console.log.bind(console);
             require('remote').getCurrentWindow().toggleDevTools();
         },
 
+        utils: utils,
+
+        configurator: configurator,
+
+        reporter: reporter,
+
+        dataManager: dataManager,
+
         keyManager: (function () {
             return new KeyManager(DATA_PATH);
         })(),
-
-        utils: utils,
 
         gitManager: (function () {
             return new GitManager();
@@ -172,8 +176,6 @@ process.stdout.write = console.log.bind(console);
         projectsManager: (function () {
             return new ProjectsManager(dataManager, configurator, reporter);
         })(),
-
-        dataManager: dataManager,
 
         userManager: (function () {
             return new UserManager({
@@ -191,9 +193,7 @@ process.stdout.write = console.log.bind(console);
 
         exportManager: (function () {
             return new ExportManager(configurator);
-        })(),
-
-        reporter: reporter
+        })()
     };
 
     // hook up global exception handler

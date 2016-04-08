@@ -278,17 +278,44 @@ function ProjectsManager(dataManager, configurator, reporter) {
                 };
             };
 
+            var readdirs = function (dirs) {
+                return Promise.all(_.map(dirs, function (d) {
+                    return readdir(d).then(map(function (f) {
+                        return path.join(d, f);
+                    }));
+                }));
+            };
+
+            var isDir = function (f) {
+                return utils.fs.stat(f).then(function (s) {
+                    return s.isDirectory();
+                });
+            };
+
+            var isVisibleDir = function (f) {
+                return isDir(f).then(function (isFolder) {
+                    var name = path.parse(f).name,
+                        isHidden = /^\..*/.test(name);
+
+                    return (isFolder && !isHidden) ? f : false;
+                });
+            };
+
+            var filterDirs = function (dirs) {
+                return Promise.all(_.map(dirs, isVisibleDir)).then(compact());
+            };
+
+
+
             return readdir(paths.projectDir)
                 .then(map(makeFullPath(paths.projectDir)))
-                //this will not work...refactor
-                .then(config.filterChapters)
+                .then(filterDirs)
                 .then(flatten())
-                //this won't work either
                 .then(readdirs)
                 .then(flatten())
                 .then(map(readChunk))
                 .then(Promise.all.bind(Promise))
-                .then(indexBy('name'))
+                .then(utils.lodash.indexBy('name'))
                 .then(function (chunks) {
                     return this.loadFinishedFramesList(meta).then(markFinished(chunks));
                 }.bind(this));

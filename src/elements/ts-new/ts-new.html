@@ -78,15 +78,20 @@
         <div id="header">
             <div id="title">
                 <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
-                <span>New Project</span>
+                <template is="dom-if" if="{{importing}}">
+                    <span>Import Project</span>
+                </template>
+                <template is="dom-if" if="{{!importing}}">
+                    <span>New Project</span>
+                </template>
             </div>
         </div>
 
         <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
             <ts-language-menu id="languages" selected="{{selected}}" language="{{language}}"></ts-language-menu>
-            <ts-project-menu selected="{{selected}}" category="{{category}}" project="{{project}}" typedata="{{typedata}}" on-create="createproject"></ts-project-menu>
+            <ts-project-menu selected="{{selected}}" importing="{{importing}}" category="{{category}}" project="{{project}}" typedata="{{typedata}}" on-create="createproject"></ts-project-menu>
             <ts-book-menu selected="{{selected}}" category="[[category]]" project="{{project}}" typedata="{{typedata}}" on-create="createproject"></ts-book-menu>
-            <ts-type-menu selected="{{selected}}" language="[[language]]" category="[[category]]" project="[[project]]" typedata="{{typedata}}" projectlist="[[projectlist]]" on-create="createproject"></ts-type-menu>
+            <ts-type-menu selected="{{selected}}" importing="{{importing}}" language="[[language]]" category="[[category]]" project="[[project]]" typedata="{{typedata}}" projectlist="[[projectlist]]" on-create="createproject"></ts-type-menu>
         </neon-animated-pages>
 
         <paper-dialog id="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -142,6 +147,10 @@
             options: {
                 type: Object,
                 value: {title: "", body: ""}
+            },
+            importing: {
+                type: Boolean,
+                value: false
             },
             projectlist: {
                 type: Array,
@@ -211,14 +220,27 @@
             }
 
             this.animationConfig.exit.name = 'slide-left-animation';
-            App.projectsManager.saveTargetTranslation([], newprojectmeta, this.currentuser).then(function() {
-                mythis.fire('iron-signal', {name: 'updatelist'});
-                mythis.fire('iron-signal', {name: 'loadproject', data: {projdata: newprojectmeta, type: "new"}});
+
+            if(mythis.importing){
+                mythis.fire('importfalse');
+                mythis.fire('iron-signal', {name: 'importproject', data: {projdata: newprojectmeta, type: "new"}});
                 mythis.selected = 0;
-            });
+            } else {
+                App.projectsManager.saveTargetTranslation([], newprojectmeta, this.currentuser).then(function() {
+                    mythis.fire('iron-signal', {name: 'updatelist'});
+                    mythis.fire('iron-signal', {name: 'loadproject', data: {projdata: newprojectmeta, type: "new"}});
+                    mythis.selected = 0;
+                });
+            }
+
         },
 
         back: function () {
+            //set import to false if we go back to the homescreen
+            if(this.selected === 0){
+                this.fire('importfalse');
+            }
+
             this.animationConfig.exit.name = 'slide-right-animation';
             this.selected === 0 ? this.route = "home" : this.selected = this.selected - 1;
         },

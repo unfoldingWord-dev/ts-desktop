@@ -213,7 +213,7 @@
       <ts-app-titlebar currentuser="[[currentuser]]"></ts-app-titlebar>
       <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
           <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]"></ts-home>
-          <ts-new data-route="new" route="{{route}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]"></ts-new>
+          <ts-new data-route="new" route="{{route}}" importing="{{importing}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]" on-importfalse="resetimport"></ts-new>
           <ts-translate data-route="translate" route="{{route}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]"></ts-translate>
           <ts-publish data-route="publish" route="{{route}}" currentproject="{{currentproject}}" currentuser="[[currentuser]]"></ts-publish>
           <ts-settings data-route="settings" route="{{route}}"></ts-settings>
@@ -305,6 +305,7 @@
       <iron-signals on-iron-signal-openimport="openimport"></iron-signals>
       <iron-signals on-iron-signal-openbackup="openbackup"></iron-signals>
       <iron-signals on-iron-signal-updateuser="updateuser"></iron-signals>
+      <iron-signals on-iron-signal-importproject="importproject"></iron-signals>
 
   </template>
 
@@ -351,9 +352,15 @@
               type: Object,
               value: {loading: false, title: "", body: ""}
           },
+
           tempdata: {
               type: Object,
               value: {meta: {}, filename: ""}
+          },
+
+          importing: {
+              type: Boolean,
+              value: false
           }
       },
 
@@ -463,39 +470,54 @@
           var chooser = this.$.import;
           chooser.value = null;
           chooser.addEventListener('change', function(evt) {
-              mythis.$['import-dialog'].open();
+              mythis.importing = true;
+              mythis.route = 'new';
+              //mythis.$['import-dialog'].open();
           }, false);
           chooser.click();
       },
 
-      startimport: function(e){
+      resetimport: function(){
+        this.importing = false;
+      },
+
+      importproject: function(e, data){
+          var proj = data.projdata;
           var loading = this.$.loading;
           var mythis = this;
           var chooser = this.$.import;
-          var proj = e.model.proj;
-          this.$['import-dialog'].close();
-          console.log("selected project",proj);
-          mythis.set('options.body', "Importing.  Please wait...");
-          mythis.set('options.loading', true);
-          loading.open();
-          for(var i=0; i < chooser.files.length; i ++) {
-              var fileExt = chooser.files[i].name.split('.').pop().toLowerCase();
-              if(fileExt === "zip" || fileExt === "txt" || fileExt === "usfm"){
-                  App.importer.importUSFMFile(chooser.files[0],proj,this.currentuser).then(function(){
-                      mythis.set('options.title', "Import Complete");
-                      mythis.set('options.body', "Your file has been imported successfully.  Thanks.");
-                      mythis.set('options.loading', false);
-                      setTimeout(function() {
-                          mythis.updatelist();
-                      }, 250);
-                  }).catch(function(e){
-                      console.log('Import Error: ', e);
-                      mythis.set('options.title', "Import Error");
-                      mythis.set('options.body', "Your file was not imported. It may not be in the correct format or it has already been imported.");
-                      mythis.set('options.loading', false);
-                  });
+          var runImport = function(){
+              console.log('trying to import a project', e, data);
+              mythis.$['import-dialog'].close();
+              console.log("selected project",proj);
+              mythis.set('options.body', "Importing.  Please wait...");
+              mythis.set('options.loading', true);
+              loading.open();
+              for(var i=0; i < chooser.files.length; i ++) {
+                  var fileExt = chooser.files[i].name.split('.').pop().toLowerCase();
+                  if(fileExt === "zip" || fileExt === "txt" || fileExt === "usfm"){
+                      App.importer.importUSFMFile(chooser.files[0],proj,mythis.currentuser).then(function(){
+                          mythis.set('options.title', "Import Complete");
+                          mythis.set('options.body', "Your file has been imported successfully.  Thanks.");
+                          mythis.set('options.loading', false);
+                          setTimeout(function() {
+                              mythis.updatelist();
+                          }, 250);
+                      }).catch(function(e){
+                          console.log('Import Error: ', e);
+                          mythis.set('options.title', "Import Error");
+                          mythis.set('options.body', "Your file was not imported. It may not be in the correct format or it has already been imported.");
+                          mythis.set('options.loading', false);
+                      });
+                  }
               }
           }
+          App.projectsManager.saveTargetTranslation([], proj, this.currentuser)
+              .then(runImport)
+              .then(function() {
+              mythis.fire('iron-signal', {name: 'updatelist'});
+              mythis.fire('iron-signal', {name: 'loadproject', data: {projdata: proj, type: "new"}});
+          });
       },
 
       openfeedback: function () {

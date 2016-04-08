@@ -4,10 +4,9 @@ var _ = require('lodash'),
     path = require('path'),
     archiver = require('archiver'),
     fs = require('fs'),
-    utils = require('../js/lib/utils'),
-    git = require('../js/git').GitManager();
+    utils = require('../js/lib/utils');
 
-function ExportManager(configurator) {
+function ExportManager(configurator, git) {
 
     var targetDir = configurator.getValue('targetTranslationsDir'),
         mkdirp = utils.fs.mkdirs,

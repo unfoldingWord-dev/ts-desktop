@@ -4,9 +4,11 @@ var _ = require('lodash'),
     path = require('path'),
     AdmZip = require('adm-zip'),
     utils = require('../js/lib/utils'),
-    migrator = require('../js/migrator');
+    Migrator = require('../js/migrator').MigrateManager;
 
 function ImportManager(configurator) {
+
+    var migrator = new Migrator(configurator);
 
     return {
 

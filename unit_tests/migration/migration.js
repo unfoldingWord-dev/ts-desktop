@@ -5,7 +5,8 @@
     let assert = require('assert');
     let fs = require('fs');
     let rimraf = require('rimraf');
-    let migrator = require('../../src/js/migrator');
+    let Migrator = require('../../src/js/migrator').MigrateManager;
+    let migrator = new Migrator();
 
     let tempDir = 'unit_tests/migration/temp/';
     let dataDir = 'unit_tests/migration/data/';

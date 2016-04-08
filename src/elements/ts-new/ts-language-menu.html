@@ -140,7 +140,7 @@
       ],
 
       searchfilter: function (query, languagelist) {
-          let search = App.util.startsWithBase.bind(null, query);
+          let search = App.utils.startsWithBase.bind(null, query);
 
           var bycode = languagelist.filter(function (lang) {
               return search(lang.id);

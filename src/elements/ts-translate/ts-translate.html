@@ -1241,7 +1241,7 @@
                     App.printManager.targetTranslationToPdf(translation, projectmeta, filePath, options)
                         .then(function () {
                             mythis.set('options.title', "PDF Created");
-                            mythis.set('options.body', "Your project has been successfully saved to a PDF.  Thanks.");
+                            mythis.set('options.body', "Your project has been successfully saved to a PDF.");
                             mythis.set('options.loading', false);
                         })
                         .catch(function (err) {

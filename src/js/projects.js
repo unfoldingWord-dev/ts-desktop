@@ -3,12 +3,14 @@
 var _ = require('lodash'),
     path = require('path'),
     utils = require('../js/lib/utils'),
-    git = require('../js/git')(),
-    migrator = require('../js/migrator');
+    fs = require('fs'),
+    git = require('../js/git').GitManager(),
+    Migrator = require('../js/migrator').MigrateManager;
 
 function ProjectsManager(dataManager, configurator, reporter) {
 
     var targetDir = configurator.getValue('targetTranslationsDir'),
+        migrator = new Migrator(configurator),
         write = utils.fs.outputFile,
         read = utils.fs.readFile,
         mkdirp = utils.fs.mkdirs,

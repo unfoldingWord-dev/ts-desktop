@@ -5,7 +5,7 @@ var _ = require('lodash'),
     archiver = require('archiver'),
     fs = require('fs'),
     utils = require('../js/lib/utils'),
-    git = require('../js/git')();
+    git = require('../js/git').GitManager();
 
 function ExportManager(configurator) {
 

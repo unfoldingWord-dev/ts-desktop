@@ -85,7 +85,7 @@
                  *      Before:    [arg1, null, undefined, arg2, undefined, undefined]
                  *      After:     [arg1, null, undefined, arg2]
                  */
-                while (--i > 0 && typeof arguments[i] !== 'undefined') {};
+                while (--i > 0 && typeof arguments[i] !== 'undefined') {}
                 while (i > 0) { args.unshift(arguments[i--]); }
 
                 return new Promise(function (resolve, reject) {

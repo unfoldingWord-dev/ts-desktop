@@ -241,7 +241,7 @@
                 App.exportManager.exportTranslation(translation, projectmeta, filePath, mediaServer)
                     .then(function () {
                         mythis.set('options.title', "Project Exported");
-                        mythis.set('options.body', "Your project has been successfully exported to a file.  Thanks.");
+                        mythis.set('options.body', "Your project has been successfully exported to a file.");
                         mythis.set('options.loading', false);
                     })
                     .catch(function (err) {
@@ -270,7 +270,7 @@
 
             return App.gitManager.stage(user, paths.projectDir)
                 .then(function () {
-                    return App.util.getDeviceId();
+                    return App.utils.getDeviceId();
                 })
                 .then(function (deviceId) {
                     var getreg = App.keyManager.getRegistrationInfo.bind(App.keyManager, deviceId),
@@ -293,7 +293,7 @@
                 })
                 .then(function () {
                     mythis.set('options.title', "Project Published");
-                    mythis.set('options.body', "Your project has been successfully published to the server.  Thanks.");
+                    mythis.set('options.body', "Your project has been successfully published to the server.");
                     mythis.set('options.loading', false);
                 })
                 .catch(function (err) {

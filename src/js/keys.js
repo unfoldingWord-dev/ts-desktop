@@ -1,11 +1,13 @@
 'use strict';
 
-var net = require('net'),
-    path = require('path'),
+var path = require('path'),
     utils = require('../js/lib/utils'),
+
+
     _ = utils._,
-    logr = utils.logr,
     fs = utils.fs,
+
+
     keypair = require('keypair'),
     forge = require('node-forge');
 
@@ -43,7 +45,7 @@ function KeyManager(dataPath) {
                 private: privateSsh
             };
         })
-        .then(logr('Keys created!'))
+        .then(utils.logr('Keys created!'))
         .then(function (keys) {
             var writePublicKey = fs.writeFile(paths.publicKeyPath, keys.public),
                 writePrivateKey = fs.writeFile(paths.privateKeyPath, keys.private).then(function () {
@@ -86,7 +88,7 @@ function KeyManager(dataPath) {
         },
 
         destroyKeys: function () {
-            return utils.rm(paths.sshPath);
+            return utils.fs.remove(paths.sshPath);
         }
     };
 }

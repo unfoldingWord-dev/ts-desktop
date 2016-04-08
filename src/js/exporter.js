@@ -67,16 +67,16 @@ function ExportManager(configurator) {
                 let paths = utils.makeProjectPaths(targetDir, meta);
                 let sourceDir = paths.projectDir,
                     projectFolder = path.basename(sourceDir),
-                    targetDir = path.join(backupDir, projectFolder),
+                    mytargetDir = path.join(backupDir, projectFolder),
                     doBackup = _this.backupTranslation.bind(_this, meta);
 
-                return mkdirp(targetDir)
+                return mkdirp(mytargetDir)
                     .then(function () {
                         return git.getHash(sourceDir);
                     })
                     .then(function(hash) {
                         let fileName = hash + '.backup.tstudio';
-                        return path.join(targetDir, fileName);
+                        return path.join(mytargetDir, fileName);
                     })
                     .then(doBackup)
                     .then(removeOtherFiles);

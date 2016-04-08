@@ -260,7 +260,8 @@
             var loading = this.$.loading;
             var mythis = this;
             var projectmeta = this.currentproject.projectmeta;
-            var paths = App.projectsManager.getPaths(projectmeta);
+            var target = App.configurator.getValue('targetTranslationsDir');
+            var paths = App.utils.makeProjectPaths(target, projectmeta);
             var repo = projectmeta.unique_id;
             var user = this.currentuser;
 

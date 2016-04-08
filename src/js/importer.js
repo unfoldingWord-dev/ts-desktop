@@ -30,7 +30,7 @@ function ImportManager(configurator) {
                         return utils.makeProjectPaths(extractPath, targetPath);
                     });
                 })
-                .then(migrator.migrateAll)
+                .then(migrator.migrateAll.bind(migrator))
                 .then(function (results) {
                     if (!results.length) {
                         throw new Error ("Could not restore this project");

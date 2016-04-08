@@ -221,7 +221,7 @@ function ProjectsManager(dataManager, configurator, reporter) {
 
             return this.loadProjectsList()
                 .then(map(paths))
-                .then(migrator.migrateAll)
+                .then(migrator.migrateAll.bind(migrator))
         },
 
         loadFinishedFramesList: function (meta) {
@@ -304,7 +304,7 @@ function ProjectsManager(dataManager, configurator, reporter) {
             };
 
             var filterDirs = function (dirs) {
-                return Promise.all(_.map(dirs, isVisibleDir)).then(compact());
+                return Promise.all(_.map(dirs, isVisibleDir)).then(utils.lodash.compact());
             };
 
 

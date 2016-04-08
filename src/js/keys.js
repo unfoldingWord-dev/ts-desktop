@@ -1,5 +1,3 @@
-// uploader module
-
 'use strict';
 
 var net = require('net'),
@@ -11,9 +9,7 @@ var net = require('net'),
     keypair = require('keypair'),
     forge = require('node-forge');
 
-// TODO: this module has diverged from it's original intent and how the name is misleading.
-// All this module is doing is registering with the authentication server
-function Uploader(dataPath) {
+function KeyManager(dataPath) {
 
     var paths = {
         sshPath: path.resolve(path.join(dataPath, 'ssh')),
@@ -89,13 +85,10 @@ function Uploader(dataPath) {
             });
         },
 
-        /**
-         * Deletes the ssh keys. They will be regenerated/registered next time we publish
-         */
         destroyKeys: function () {
             return utils.rm(paths.sshPath);
         }
     };
 }
 
-exports.Uploader = Uploader;
+module.exports.KeyManager = KeyManager;

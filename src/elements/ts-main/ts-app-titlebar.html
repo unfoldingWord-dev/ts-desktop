@@ -121,7 +121,7 @@
         logout: function () {
             this.fire('iron-signal', {name: 'updateuser', data: {}});
             this.fire('iron-signal', {name: 'reset'});
-            App.uploader.destroyKeys();
+            App.keyManager.destroyKeys();
         },
 
         minimizeWindow: function() {

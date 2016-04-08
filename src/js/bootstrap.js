@@ -35,14 +35,17 @@ process.stdout.write = console.log.bind(console);
     setMsg('Loading Git...');
     let Git = require('../js/git');
 
-    setMsg('Loading Uploader...');
-    let Uploader = require('../js/uploader').Uploader;
+    setMsg('Loading Key Manager...');
+    let KeyManager = require('../js/keys').KeyManager;
 
     setMsg('Loading DB...');
     let Db = require('../js/lib/db').Db;
 
     setMsg('Loading Projects Manager...');
     let ProjectsManager = require('../js/projects').ProjectsManager;
+
+    setMsg('Loading Migrate Manager...');
+    let MigrateManager = require('../js/migrator').MigrateManager;
 
     setMsg('Loading Data Manager...');
     let DataManager = require('../js/database').DataManager;
@@ -149,7 +152,9 @@ process.stdout.write = console.log.bind(console);
             require('remote').getCurrentWindow().toggleDevTools();
         },
 
-        uploader: new Uploader(DATA_PATH),
+        keyManager: (function () {
+            return new KeyManager(DATA_PATH);
+        })(),
 
         utils: utils,
 
@@ -169,6 +174,10 @@ process.stdout.write = console.log.bind(console);
 
         importManager: (function () {
             return new ImportManager(configurator);
+        })(),
+
+        migrateManager: (function () {
+            return new MigrateManager(configurator);
         })(),
 
         exportManager: (function () {

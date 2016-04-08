@@ -273,8 +273,8 @@
                     return App.util.getDeviceId();
                 })
                 .then(function (deviceId) {
-                    var getreg = App.uploader.getRegistrationInfo.bind(App.uploader, deviceId),
-                        genreg = App.uploader.generateRegistrationInfo.bind(App.uploader, deviceId),
+                    var getreg = App.keyManager.getRegistrationInfo.bind(App.keyManager, deviceId),
+                        genreg = App.keyManager.generateRegistrationInfo.bind(App.keyManager, deviceId),
                         rereg = function () {
                             return App.git.unregister(user).then(genreg);
                         };

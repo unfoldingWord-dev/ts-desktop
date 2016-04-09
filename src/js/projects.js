@@ -371,7 +371,9 @@ function ProjectsManager(query, configurator, srcDir) {
                 archive.directory(paths.projectDir, name + "/");
                 archive.append(toJSON(manifest), {name: 'manifest.json'});
                 archive.finalize();
-                resolve(filePath);
+                output.on('finish', function(){
+                    resolve(filePath);
+                });
             });
         },
 

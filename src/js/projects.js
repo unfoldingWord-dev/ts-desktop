@@ -84,7 +84,6 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
         saveTargetTranslation: function (translation, meta, user) {
             var paths = utils.makeProjectPaths(targetDir, meta);
             var projectClass = meta.project_type_class;
-
             var sources = meta.source_translations.map(function (source) {
                     return {
                         language_id: source.language_id,
@@ -193,7 +192,6 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
 
         loadTargetTranslationsList: function () {
             var paths = utils.makeProjectPaths.bind(utils, targetDir);
-
             return this.loadProjectsList()
                 .then(map(paths))
                 .then(map('manifest'))
@@ -215,19 +213,9 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
 
         migrateTargetTranslationsList: function () {
             var paths = utils.makeProjectPaths.bind(utils, targetDir);
-
             return this.loadProjectsList()
                 .then(map(paths))
                 .then(migrator.migrateAll.bind(migrator))
-        },
-
-        loadFinishedFramesList: function (meta) {
-            var paths = utils.makeProjectPaths(targetDir, meta);
-
-            return read(paths.manifest).then(function (manifest) {
-                var finishedFrames = fromJSON(manifest).finished_chunks;
-                return _.indexBy(finishedFrames);
-            });
         },
 
         loadTargetTranslation: function (meta) {
@@ -236,7 +224,6 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             var parseChunkName = function (f) {
                 var p = path.parse(f),
                     ch = p.dir.split(path.sep).slice(-1);
-
                 return ch + '-' + p.name;
             };
 
@@ -245,30 +232,13 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                     var parsed = {
                         name: parseChunkName(f)
                     };
-
                     if (meta.project_type_class === "standard") {
                         parsed['transcontent'] = c.toString();
                     } else {
                         parsed['helpscontent'] = JSON.parse(c);
                     }
-
                     return parsed;
                 });
-            };
-
-            var markFinished = function (chunks) {
-                return function (finished) {
-                    return _.mapValues(chunks, function (c, name) {
-                        var mapped = {
-                            completed: !!finished[name]
-                        },
-                        key = meta.project_type_class === "standard" ? 'transcontent' : 'helpscontent';
-
-                        mapped[key] = c[key];
-
-                        return mapped;
-                    });
-                };
             };
 
             var makeFullPath = function (parent) {
@@ -295,7 +265,6 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 return isDir(f).then(function (isFolder) {
                     var name = path.parse(f).name,
                         isHidden = /^\..*/.test(name);
-
                     return (isFolder && !isHidden) ? f : false;
                 });
             };
@@ -303,8 +272,6 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             var filterDirs = function (dirs) {
                 return Promise.all(_.map(dirs, isVisibleDir)).then(utils.lodash.compact());
             };
-
-
 
             return readdir(paths.projectDir)
                 .then(map(makeFullPath(paths.projectDir)))
@@ -314,10 +281,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 .then(flatten())
                 .then(map(readChunk))
                 .then(Promise.all.bind(Promise))
-                .then(utils.lodash.indexBy('name'))
-                .then(function (chunks) {
-                    return this.loadFinishedFramesList(meta).then(markFinished(chunks));
-                }.bind(this));
+                .then(utils.lodash.indexBy('name'));
         },
 
         deleteTargetTranslation: function (meta) {

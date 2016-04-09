@@ -889,7 +889,7 @@
             }
 
             if (maindata) {
-                completed = maindata.completed;
+                completed = projectmeta.finished_chunks.indexOf(complexid) >= 0;
                 if (typeclass === "standard") {
                     transcontent = this.convertVerseMarkers(maindata.transcontent).text;
                     transcontent = this.migrateMarkers(transcontent);

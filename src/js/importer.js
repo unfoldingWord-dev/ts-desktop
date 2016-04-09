@@ -154,7 +154,8 @@ function Importer(configurator, pm) {
 
                             for(var ci = 0; ci<chunk.verses.length; ci++){
                                 if(typeof parsedData[chunk.chapter] !== 'undefined' && typeof parsedData[chunk.chapter].verses[chunk.verses[ci]] !== 'undefined'){
-                                    transcontent += '\\v' + parsedData[chunk.chapter].verses[chunk.verses[ci]].id + ' ' + parsedData[chunk.chapter].verses[chunk.verses[ci]].contents;
+                                    //transcontent += '\\v' + parsedData[chunk.chapter].verses[chunk.verses[ci]].id + ' ' + parsedData[chunk.chapter].verses[chunk.verses[ci]].contents;
+                                    transcontent += ' ' + parsedData[chunk.chapter].verses[chunk.verses[ci]].contents;
                                 }
                             }
                             chunkFileNames[i].meta = {
@@ -162,23 +163,9 @@ function Importer(configurator, pm) {
                                 frameid: chunkFileNames[i].filename,
                                 helpscontent: []
                             };
-                            var existing = curProj[chunkFileNames[i].chapter + '-' + chunkFileNames[i].filename];
-                            if(transcontent === ''){
-                                if(existing){
-                                    chunkFileNames[i].completed = existing.completed;
-                                    chunkFileNames[i].transcontent = existing.transcontent;
-                                } else {
-                                    chunkFileNames[i].transcontent = null;
-                                }
-                            } else {
-                                if(existing && existing.completed){
-                                    chunkFileNames[i].completed = existing.completed;
-                                    chunkFileNames[i].transcontent = existing.transcontent;
-                                } else {
-                                    chunkFileNames[i].completed = true;
-                                    chunkFileNames[i].transcontent = transcontent;
-                                }
-                            }
+
+                            chunkFileNames[i].completed = false;
+                            chunkFileNames[i].transcontent = transcontent;
                         }
 
 

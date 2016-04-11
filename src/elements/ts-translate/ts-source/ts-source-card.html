@@ -52,11 +52,11 @@
 
         <paper-material elevation="1">
             <div id="tabs">
-                <ts-source-tab readmode projectdata="[[chunk.data]]"></ts-source-tab>
+                <ts-source-tab readmode projectmeta="[[chunk.projectmeta]]"></ts-source-tab>
             </div>
             <div id="heading">
                 <div>
-                    <span>[[chunk.chapterref]]</span>
+                    <span>[[chunk.chaptermeta.chapterref]]</span>
                 </div>
             </div>
             <div id="content">
@@ -91,22 +91,7 @@
 
         rendertext: function () {
             if(this.chunk && this.chunk.srccontent) {
-                var textarray = this.chunk.srccontent.split(" ");
-                var numstr1 = "\<sup\>";
-                var numstr2 = "\<\/sup\>";
-                var returnstr = "";
-                var verse = 0;
-
-                for (var i = 0; i < textarray.length; i++) {
-                    if (textarray[i] === "\\v") {
-                        verse = textarray[i+1];
-                        returnstr += numstr1 + verse + numstr2;
-                        i++;
-                    } else {
-                        returnstr += textarray[i] + " ";
-                    }
-                }
-                this.$.textholder.innerHTML = returnstr;
+                this.$.textholder.innerHTML = this.chunk.srccontent;
             }
         },
 

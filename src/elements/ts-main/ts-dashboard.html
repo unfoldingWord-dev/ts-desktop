@@ -45,10 +45,6 @@
           margin: auto;
       }
 
-      .popup paper-button:hover {
-          color: var(--accent-color);
-      }
-
       #feedback {
           display: flex;
           flex-direction: column;
@@ -74,6 +70,10 @@
           display: flex;
           justify-content: flex-end;
           padding: 0 20px;
+      }
+
+      #feedbackbuttons paper-button:hover {
+          color: var(--accent-color);
       }
 
       input {
@@ -107,6 +107,10 @@
           display: flex;
           justify-content: flex-end;
           padding: 0 30px;
+      }
+
+      #importbuttons paper-button:hover {
+          color: var(--accent-color);
       }
 
       .option {
@@ -204,17 +208,17 @@
           </div>
           <div id="importbody">
               <div class="option">
-                  <paper-button raised class="fill" on-tap="sendcreate">Select</paper-button>
+                  <paper-button raised class="fill" on-tap="importbackup">Select</paper-button>
                   <span class="optiontitle">Import from Tstudio file</span>
                   <p>Will merge with the existing project, if one exists</p>
               </div>
               <div class="option">
-                  <paper-button raised class="fill" on-tap="sendcreate">Select</paper-button>
+                  <paper-button raised class="fill" on-tap="importusfm">Select</paper-button>
                   <span class="optiontitle">Import from USFM file</span>
                   <p>Must have either .usfm or .txt extension</p>
               </div>
               <div class="option">
-                  <paper-button raised class="fill" on-tap="sendcreate">Select</paper-button>
+                  <paper-button raised class="fill" on-tap="importserver">Select</paper-button>
                   <span class="optiontitle">Import from Door43</span>
                   <p>Will have option to merge with or overwrite existing file</p>
               </div>
@@ -313,6 +317,49 @@
           this.$.importoptions.open();
       },
 
+      importbackup: function() {
+          var mythis = this;
+          this.$.importoptions.close();
+          var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
+          var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}], properties: ['openFile']}});
+          if (!filePath) {
+              return;
+          }
+
+          mythis.set('options.body', "Importing.  Please wait...");
+          mythis.set('options.loading', true);
+          this.$.loading.open();
+
+          setTimeout(function() {
+              App.importManager.importFromBackup(filePath[0])
+                  .then(function() {
+                      mythis.set('options.title', "Import Complete");
+                      mythis.set('options.body', "Your project has been successfully imported.");
+                      mythis.set('options.loading', false);
+                      setTimeout(function() {
+                          mythis.updatelist();
+                      }, 250);
+                  })
+                  .catch(function(err) {
+                      var errmessage = "We're sorry.  An error occurred while trying to import your project";
+                      if(err !== null) {
+                          errmessage = err;
+                      }
+                      mythis.set('options.title', "Import Failed");
+                      mythis.set('options.body', errmessage);
+                      mythis.set('options.loading', false);
+                  });
+          }, 500);
+      },
+
+      importusfm: function () {
+
+      },
+
+      importserver: function () {
+
+      },
+
       openbackup: function (event, data) {
           var mythis = this;
           var defaultPath = App.configurator.getUserPath('datalocation', 'backups', data.projectmeta.unique_id);
@@ -357,7 +404,7 @@
           this.$.loading.open();
 
           setTimeout(function() {
-              App.importManager.restoreTargetTranslation(filePath[0])
+              App.importManager.restoreFromBackup(filePath[0])
                   .then(function() {
                       mythis.set('options.title', "Restore Complete");
                       mythis.set('options.body', "Your project has been successfully restored.");

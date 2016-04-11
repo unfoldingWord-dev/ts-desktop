@@ -83,6 +83,48 @@
           color: var(--secondary-text-color);
       }
 
+      #importoptions {
+          display: flex;
+          flex-direction: column;
+          width: 500px;
+          height: 500px;
+      }
+
+      #importheader {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+      }
+
+      #importbody {
+          display: flex;
+          flex-direction: column;
+          border-top: 1px solid var(--border-color);
+          padding: 0;
+      }
+
+      #importbuttons {
+          display: flex;
+          justify-content: flex-end;
+          padding: 0 30px;
+      }
+
+      .option {
+          border-bottom: 1px solid var(--border-color);
+          padding: 15px 30px 0;
+      }
+
+      .optiontitle {
+          font-size: 130%;
+          font-weight: bold;
+      }
+
+      .fill {
+          background: var(--accent-color);
+          color: var(--reverse-text-color);
+          text-transform: uppercase;
+      }
+
       #loading {
           width: 320px;
           height: 220px;
@@ -156,6 +198,32 @@
           </div>
       </paper-dialog>
 
+      <paper-dialog id="importoptions" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <div id="importheader">
+              <h2>Import Options</h2>
+          </div>
+          <div id="importbody">
+              <div class="option">
+                  <paper-button raised class="fill" on-tap="sendcreate">Select</paper-button>
+                  <span class="optiontitle">Import from Tstudio file</span>
+                  <p>Will merge with the existing project, if one exists</p>
+              </div>
+              <div class="option">
+                  <paper-button raised class="fill" on-tap="sendcreate">Select</paper-button>
+                  <span class="optiontitle">Import from USFM file</span>
+                  <p>Must have either .usfm or .txt extension</p>
+              </div>
+              <div class="option">
+                  <paper-button raised class="fill" on-tap="sendcreate">Select</paper-button>
+                  <span class="optiontitle">Import from Door43</span>
+                  <p>Will have option to merge with or overwrite existing file</p>
+              </div>
+          </div>
+          <div id="importbuttons">
+              <paper-button dialog-dismiss>Cancel</paper-button>
+          </div>
+      </paper-dialog>
+
       <paper-dialog id="loading" class="popup" modal="true" exit-animation="scale-down-animation">
           <template is="dom-if" if="{{options.loading}}">
               <p>{{options.body}}</p>
@@ -177,6 +245,7 @@
       <iron-signals on-iron-signal-updatelist="updatelist"></iron-signals>
       <iron-signals on-iron-signal-openfeedback="openfeedback"></iron-signals>
       <iron-signals on-iron-signal-openrestore="openrestore"></iron-signals>
+      <iron-signals on-iron-signal-openimport="openimport"></iron-signals>
       <iron-signals on-iron-signal-openbackup="openbackup"></iron-signals>
       <iron-signals on-iron-signal-updateuser="updateuser"></iron-signals>
 
@@ -238,6 +307,10 @@
           } else {
               this.set('route', 'login');
           }
+      },
+
+      openimport: function () {
+          this.$.importoptions.open();
       },
 
       openbackup: function (event, data) {

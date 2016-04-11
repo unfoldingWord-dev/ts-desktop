@@ -187,6 +187,7 @@
                 "target_language": language,
                 "translators": [],
                 "source_translations": [],
+                "finished_chunks": [],
                 "parent_draft": {}
             };
             var newprojectmeta = App.projectsManager.updateManifestToMeta(newprojectmanifest);
@@ -213,7 +214,7 @@
             this.animationConfig.exit.name = 'slide-left-animation';
             App.projectsManager.saveTargetTranslation([], newprojectmeta, this.currentuser).then(function() {
                 mythis.fire('iron-signal', {name: 'updatelist'});
-                mythis.fire('iron-signal', {name: 'loadproject', data: {projdata: newprojectmeta, type: "new"}});
+                mythis.fire('iron-signal', {name: 'loadproject', data: {projectmeta: newprojectmeta, type: "new"}});
                 mythis.selected = 0;
             });
         },

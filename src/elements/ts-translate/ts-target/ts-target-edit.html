@@ -79,7 +79,7 @@
         <paper-material elevation="1">
             <div id="heading">
                 <div>
-                    <span>[[chunk.meta.chunkref]]</span><span>[[chunk.meta.refaddon]]</span>
+                    <span>[[chunk.chunkmeta.chunkref]]</span><span>[[chunk.chunkmeta.refaddon]]</span>
                 </div>
                 <iron-icon icon="done" on-tap="review"></iron-icon>
             </div>
@@ -118,7 +118,7 @@
         rendertext: function () {
             if(this.chunk && this.chunk.srccontent) {
                 var completed = this.chunk.completed;
-                var typeclass = this.chunk.data.project_type_class;
+                var typeclass = this.chunk.projectmeta.project_type_class;
                 var contentbox = this.$.content;
                 var textbox = this.$.textbox;
                 var textholder = this.$.textholder;
@@ -165,7 +165,7 @@
         },
 
         review: function () {
-            var id = this.chunk.meta.chapterid + "-" + this.chunk.meta.frameid;
+            var id = this.chunk.chunkmeta.chapterid + "-" + this.chunk.chunkmeta.frameid;
             this.set('chunk.state.review', true);
             this.fire('setheight');
             this.fire('iron-signal', {name: 'updatestate', data: {id: id, mode: "review", value: true}});

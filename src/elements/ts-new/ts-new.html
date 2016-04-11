@@ -71,6 +71,11 @@
             color: var(--accent-color);
         }
 
+        #confirmimport {
+            width: 400px;
+            height: 200px;
+        }
+
     </style>
 
     <template>
@@ -88,6 +93,17 @@
             <ts-book-menu selected="{{selected}}" category="[[category]]" project="{{project}}" typedata="{{typedata}}" on-create="createproject"></ts-book-menu>
             <ts-type-menu selected="{{selected}}" language="[[language]]" category="[[category]]" project="[[project]]" typedata="{{typedata}}" projectlist="[[projectlist]]" on-create="createproject"></ts-type-menu>
         </neon-animated-pages>
+
+        <paper-dialog id="confirmimport" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <h2>Overwrite?</h2>
+            <div>
+                <p>This target translation already exists. Overwrite?</p>
+            </div>
+            <div id="confirmbuttons">
+                <paper-button dialog-dismiss>No</paper-button>
+                <paper-button on-tap="startimport">Confirm</paper-button>
+            </div>
+        </paper-dialog>
 
         <paper-dialog id="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <h2>[[options.title]]</h2>
@@ -151,6 +167,11 @@
                 type: Object,
                 value: {}
             },
+            importdata: {
+                type: Object,
+                value: {},
+                notify: true
+            },
             animationConfig: {
                 value: function () {
                     return {
@@ -211,12 +232,25 @@
                 return;
             }
 
-            this.animationConfig.exit.name = 'slide-left-animation';
-            App.projectsManager.saveTargetTranslation([], newprojectmeta, this.currentuser).then(function() {
-                mythis.fire('iron-signal', {name: 'updatelist'});
-                mythis.fire('iron-signal', {name: 'loadproject', data: {projectmeta: newprojectmeta, type: "new"}});
-                mythis.selected = 0;
-            });
+            if (this.importdata.importing) {
+                this.importdata.projectmeta = newprojectmeta;
+                this.startimport();
+            } else {
+                this.animationConfig.exit.name = 'slide-left-animation';
+                App.projectsManager.saveTargetTranslation([], newprojectmeta, this.currentuser).then(function() {
+                    mythis.fire('iron-signal', {name: 'updatelist'});
+                    mythis.fire('iron-signal', {name: 'loadproject', data: {projectmeta: newprojectmeta, type: "new"}});
+                    mythis.selected = 0;
+                });
+            }
+
+        },
+
+        startimport: function () {
+            this.$.confirmimport.close();
+            this.route = "home";
+            this.fire('iron-signal', {name: 'finishusfm'});
+            this.selected = 0;
         },
 
         back: function () {

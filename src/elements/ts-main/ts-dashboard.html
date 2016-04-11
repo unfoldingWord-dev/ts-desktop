@@ -180,7 +180,7 @@
       <ts-app-titlebar currentuser="[[currentuser]]"></ts-app-titlebar>
       <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
           <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]"></ts-home>
-          <ts-new data-route="new" route="{{route}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]"></ts-new>
+          <ts-new data-route="new" route="{{route}}" importdata="{{importdata}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]"></ts-new>
           <ts-translate data-route="translate" route="{{route}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]"></ts-translate>
           <ts-publish data-route="publish" route="{{route}}" currentproject="{{currentproject}}" currentuser="[[currentuser]]"></ts-publish>
           <ts-settings data-route="settings" route="{{route}}"></ts-settings>
@@ -213,7 +213,7 @@
                   <p>Will merge with the existing project, if one exists</p>
               </div>
               <div class="option">
-                  <paper-button raised class="fill" on-tap="importusfm">Select</paper-button>
+                  <paper-button raised class="fill" on-tap="startusfm">Select</paper-button>
                   <span class="optiontitle">Import from USFM file</span>
                   <p>Must have either .usfm or .txt extension</p>
               </div>
@@ -252,6 +252,7 @@
       <iron-signals on-iron-signal-openimport="openimport"></iron-signals>
       <iron-signals on-iron-signal-openbackup="openbackup"></iron-signals>
       <iron-signals on-iron-signal-updateuser="updateuser"></iron-signals>
+      <iron-signals on-iron-signal-finishusfm="finishusfm"></iron-signals>
 
   </template>
 
@@ -281,6 +282,10 @@
               value: ""
           },
           currentuser: {
+              type: Object,
+              value: {}
+          },
+          importdata: {
               type: Object,
               value: {}
           },
@@ -352,7 +357,117 @@
           }, 500);
       },
 
-      importusfm: function () {
+      startusfm: function () {
+          var mythis = this;
+          this.$.importoptions.close();
+          var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
+          var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}], properties: ['openFile']}});
+          if (!filePath) {
+              return;
+          }
+
+          this.set('importdata', {importing: true, filename: filePath});
+          this.set('route', 'new');
+
+
+
+      },
+
+      finishusfm: function () {
+          console.log("fired finish");
+          console.log(this.importdata.filename);
+          console.log(this.importdata.projectmeta);
+
+
+
+          mythis.set('options.body', "Importing.  Please wait...");
+          mythis.set('options.loading', true);
+          loading.open();
+          var runImport = function(){
+              console.log('trying to import a project', e, data);
+              console.log("selected project",proj);
+              var importing = App.importer.importUSFMFile(chooser.files[0],proj,mythis.currentuser);
+              for(var i=1; i < chooser.files.length; i ++) {
+                  importing = importing.then(function(){
+                      return App.importer.importUSFMFile(chooser.files[0],proj,mythis.currentuser);
+                  });
+              }
+              return importing;
+          };
+          var date = new Date(),
+              year = date.getFullYear(),
+              month = ("0" + (date.getMonth() + 1)).slice(-2),
+              day = ("0" + date.getDate()).slice(-2),
+              hour = ("0" + date.getHours()).slice(-2),
+              minutes = ("0" + date.getMinutes()).slice(-2),
+              seconds = ("0" + date.getSeconds()).slice(-2),
+              timeString = year + '-' + month + '-' + day + '_' + hour + '.' + minutes + '.' + seconds,
+              defaultPath = App.configurator.getUserPath('datalocation', 'backups', proj.unique_id),
+              filePath = defaultPath + '.' + timeString + '.tstudio';
+          var backupTargetTranslation = function(){
+              return App.projectsManager.backupTranslation(proj, filePath);
+          };
+          var startImport = function(){
+              return App.projectsManager.saveTargetTranslation([], proj, mythis.currentuser)
+                  .then(runImport)
+                  .then(function() {
+                      mythis.fire('iron-signal', {name: 'updatelist'});
+                      mythis.fire('iron-signal', {name: 'loadproject', data: {projdata: proj, type: "new"}});
+                  });
+          };
+          var importPromise;
+          if(overwriting){
+              importPromise = backupTargetTranslation().then(startImport);
+          } else {
+              importPromise = startImport();
+          }
+          importPromise.then(function(){
+              mythis.set('options.title', "Import Complete");
+              mythis.set('options.body', "Your file has been imported successfully.  Thanks.");
+              mythis.set('options.loading', false);
+              setTimeout(function() {
+                  mythis.updatelist();
+              }, 250);
+          }).catch(function(e){
+              console.log('Import Error: ', e);
+              App.projectsManager.restoreTargetTranslation(filePath).then(function(){
+                  mythis.set('options.title', "Import Error");
+                  mythis.set('options.body', "Your file was not imported. It may not be in the correct format or it has already been imported.");
+                  mythis.set('options.loading', false);
+                  mythis.route = 'home';
+              });
+          });
+
+/*
+
+
+
+
+
+          mythis.set('options.body', "Importing.  Please wait...");
+          mythis.set('options.loading', true);
+          this.$.loading.open();
+
+          setTimeout(function() {
+              App.importManager.importFromBackup(filePath[0])
+                  .then(function() {
+                      mythis.set('options.title', "Import Complete");
+                      mythis.set('options.body', "Your project has been successfully imported.");
+                      mythis.set('options.loading', false);
+                      setTimeout(function() {
+                          mythis.updatelist();
+                      }, 250);
+                  })
+                  .catch(function(err) {
+                      var errmessage = "We're sorry.  An error occurred while trying to import your project";
+                      if(err !== null) {
+                          errmessage = err;
+                      }
+                      mythis.set('options.title', "Import Failed");
+                      mythis.set('options.body', errmessage);
+                      mythis.set('options.loading', false);
+                  });
+          }, 500);*/
 
       },
 

@@ -77,8 +77,8 @@ function ExportManager(configurator, git) {
                         let fileName = hash + '.backup.tstudio';
                         return path.join(mytargetDir, fileName);
                     })
-                    .then(doBackup)
-                    .then(removeOtherFiles);
+                    .then(doBackup);
+                    //.then(removeOtherFiles);
             });
 
             return Promise.all(promises);

@@ -355,6 +355,11 @@
                 type: Object,
                 value: {loading: false, title: "", body: ""}
             },
+            busy: {
+                type: Boolean,
+                value: false,
+                notify: true
+            },
             animationConfig: {
                 value: function () {
                     return {
@@ -497,6 +502,14 @@
 
         loadproject: function (event, data) {
             var mythis = this;
+            if (this.busy) {
+                console.log("busy");
+                setTimeout(function() {
+                    mythis.loadproject(event, data);
+                }, 500);
+                return;
+            }
+            this.set('busy', true);
             var type = data.type;
             var projectmeta = data.projectmeta;
             var list = this.projectlist;
@@ -510,6 +523,7 @@
                 }
                 mythis.$.loading.close();
                 setTimeout(function() {
+                    mythis.set('busy', false);
                     mythis.setmodestate();
                     mythis.checksources();
                     if (type === "publish") {
@@ -604,6 +618,14 @@
 
         updatesources: function (event, data) {
             var mythis = this;
+            if (this.busy) {
+                console.log("busy");
+                setTimeout(function() {
+                    mythis.updatesources(event, data);
+                }, 500);
+                return;
+            }
+            this.set('busy', true);
             mythis.set('currentproject.projectmeta.source_translations', data.sources);
             mythis.set('currentproject.projectmeta.currentsource', data.selected);
             var projectmeta = mythis.currentproject.projectmeta;
@@ -623,6 +645,15 @@
         },
 
         updatetranslation: function () {
+            var mythis = this;
+            if (this.busy) {
+                console.log("busy");
+                setTimeout(function() {
+                    mythis.updatetranslation();
+                }, 500);
+                return;
+            }
+            this.set('busy', true);
             this.addcontributor();
             this.savecompletion();
             this.savetofile();

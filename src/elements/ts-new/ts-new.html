@@ -234,6 +234,7 @@
 
             if (this.importdata.importing) {
                 this.importdata.projectmeta = newprojectmeta;
+                this.importdata.overwrite = false;
                 this.startimport();
             } else {
                 this.animationConfig.exit.name = 'slide-left-animation';

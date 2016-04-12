@@ -184,6 +184,7 @@ function ImportManager(configurator, migrator) {
         },
 
         importSingleUSFMFile: function (usfmFile, projdata, user) {
+            console.log("fired backend");
             let self = this;
             return pm.loadTargetTranslation(projdata).then(function(curProj){
 

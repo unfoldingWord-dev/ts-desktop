@@ -142,9 +142,13 @@ function Printer() {
                             }
                         });
                         doc.pipe(fs.createWriteStream(filePath));
-
+                        fs.writeFile("log1.txt", JSON.stringify(project, null, 4));
                         // default meta
-                        doc.info.Title = project.title.transcontent || meta.project.name;
+                        if(project.title.transcontent !== ""){
+                        doc.info.Title = project.title.transcontent;}
+                        else{ doc.info.Title = meta.project.name;}
+
+                       // fs.writeFile("log.txt", JSON.stringify(meta, null, 4));
                         //doc.info.Author = 'Joel Lonbeck'; // todo: translators
                         //doc.info.Subject = 'an unrestricted, visual mini-Bible in any language'; // todo: project sub-title
                         doc.info.Keywords = meta.target_language.name;
@@ -205,6 +209,7 @@ function Printer() {
                                             doc.addPage();
                                         }
                                        doc.image(imgPath, {width:doc.page.width - 72*2});
+                                       doc.moveDown();//add extra line break after images as per github issue527
                                     }
                                     doc.moveDown()
                                         .fontSize(10)
@@ -270,11 +275,12 @@ function Printer() {
                         //set the title
                         doc.info.Title = translation[0].transcontent || meta.project.name;
                         doc.fontSize(25)
-                            .text(translation[0].transcontent, 72, doc.page.height / 2, {align: 'center'})
-                            .addPage();
+                            .text(translation[0].transcontent, 72, doc.page.height / 2, {align: 'center'});
 
                              // book body
                         _.forEach(project.chapters, function(chapter) {
+
+                            doc.addPage();//start each chapter on new page
 
                             //list chapters (remove leading zeros in the numbers)
                             var chapterNum = chapter.id.replace(/\b0+/, '');
@@ -290,12 +296,12 @@ function Printer() {
 
                             _.forEach(chapter.frames, function(frame) {
                                 if(options.includeIncompleteFrames === true || frame.completed === true) {
-                                    var content = frame.transcontent.split(/[\\||\/][v]([0-9]+)/g);
+                                    var content = frame.transcontent.split(/[\\]*[\\||\/][v][ ]([0-9]+)/g);
 
                                     _.forEach(content, function(info){
                                         let output = info;
                                        //superscript for verses not supported by pdfkit: https://github.com/devongovett/pdfkit/issues/15
-                                       output = output.replace(/[\\][\\c][0-9]+ /g, '');
+                                       output = output.replace(/[\\][\\c][ ][0-9]+ /g, '');
                                         doc.fontSize(10)
                                             .text(output + ' ',  { continued: true});
                                     });
@@ -303,7 +309,6 @@ function Printer() {
                                 doc.moveDown()
                                     .text("");
                             });
-                            doc.addPage();
                         });
 
                         // number pages

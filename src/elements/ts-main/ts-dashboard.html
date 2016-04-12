@@ -181,7 +181,7 @@
       <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
           <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]"></ts-home>
           <ts-new data-route="new" route="{{route}}" importdata="{{importdata}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]"></ts-new>
-          <ts-translate data-route="translate" route="{{route}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]"></ts-translate>
+          <ts-translate data-route="translate" route="{{route}}" busy="{{busy}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]"></ts-translate>
           <ts-publish data-route="publish" route="{{route}}" currentproject="{{currentproject}}" currentuser="[[currentuser]]"></ts-publish>
           <ts-settings data-route="settings" route="{{route}}"></ts-settings>
           <ts-login data-route="login" currentuser="[[currentuser]]"></ts-login>
@@ -292,6 +292,10 @@
           options: {
               type: Object,
               value: {loading: false, title: "", body: ""}
+          },
+          busy: {
+              type: Boolean,
+              value: false
           }
       },
 
@@ -556,7 +560,10 @@
               mythis.set('projectlist', _.compact(list));
 
               App.ipc.send('loading-status', 'Checking Auto Backups...');
-              App.exportManager.backupProjects(mythis.projectlist);
+              App.exportManager.backupProjects(mythis.projectlist)
+                  .then(function () {
+                      mythis.set('busy', false);
+                  });
 
               setTimeout(function() {
                 App.ipc.send('loading-done');

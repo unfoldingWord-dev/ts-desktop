@@ -159,7 +159,7 @@ function Importer(configurator, pm) {
                                     transcontent += ' ' + parsedData[chunk.chapter].verses[chunk.verses[ci]].contents;
                                 }
                             }
-                            chunkFileNames[i].meta = {
+                            chunkFileNames[i].chunkmeta = {
                                 chapterid: chunkFileNames[i].chapter,
                                 frameid: chunkFileNames[i].filename,
                                 helpscontent: []
@@ -173,7 +173,7 @@ function Importer(configurator, pm) {
                         //Pull in the title
                         if(typeof parsedData['00'] !== 'undefined'){
                             chunkFileNames.push({
-                                meta: {
+                                chunkmeta: {
                                     chapterid: '00',
                                     frameid: 'title',
                                     helpscontent: []

@@ -515,7 +515,7 @@
               filePath = defaultPath + '.' + timeString + '.tstudio';
 
           var backupTargetTranslation = function(){
-              return App.projectsManager.backupTranslation(proj, filePath);
+              return App.exportManager.backupTranslation(proj, filePath);
           };
 
           var startImport = function(){
@@ -523,7 +523,7 @@
                   .then(runImport)
                   .then(function() {
                       mythis.fire('iron-signal', {name: 'updatelist'});
-                      mythis.fire('iron-signal', {name: 'loadproject', data: {projdata: proj, type: "new"}});
+                      mythis.fire('iron-signal', {name: 'loadproject', data: {projectmeta: proj, type: "new"}});
                   });
           };
 
@@ -542,7 +542,7 @@
               }, 250);
           }).catch(function(e){
               console.log('Import Error: ', e);
-              App.projectsManager.restoreTargetTranslation(filePath).then(function(){
+              App.importManager.restoreTargetTranslation(filePath).then(function(){
                   mythis.set('options.title', "Import Error");
                   mythis.set('options.body', "Your file was not imported. It may not be in the correct format or it has already been imported.");
                   mythis.set('options.loading', false);

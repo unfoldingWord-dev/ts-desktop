@@ -36,7 +36,9 @@ function ExportManager(configurator, git) {
                 archive.directory(paths.projectDir, name + "/");
                 archive.append(toJSON(manifest), {name: 'manifest.json'});
                 archive.finalize();
-                resolve(filePath);
+                output.on('close',function(){
+                    resolve(filePath);
+                });
             });
         },
 

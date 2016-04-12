@@ -3,42 +3,25 @@
 var _ = require('lodash'),
     fs = require('fs'),
     path = require('path'),
-    mkdirP = require('mkdirp'),
+    utils = require('../js/lib/utils'),
     AdmZip = require('adm-zip'),
     https = require('https'),
-    download = require('../js/lib/util').download,
-    _ = require('lodash'),
     PDFDocument = require('pdfkit');
 
+function PrintManager(configurator) {
 
-function Printer() {
-
-    /**
-     * Returns the value of the first property found in the object.
-     * If the object has no properties null is returned
-     * @param obj
-     * @returns {}
-     */
-    function getFirstPropValue(obj) {
-        let values = _.values(obj);
-        return values.length ? values[0] : null;
-    }
+    var download = utils.download;
 
     return {
 
-        isTranslation: function (meta) {
-            return !meta.type.id || meta.type.id === 'text';
-        },
-
         getImages: function(meta){
             return new Promise(function(resolve, reject){
-                let App = window.App,
-                    imageRoot = path.join(App.configurator.getValue('rootdir'), 'images'),
+                let imageRoot = path.join(configurator.getValue('rootdir'), 'images'),
                     imagePath = path.join(imageRoot, meta.resource.id);
 
                 //check to see if we need to create the images directory;
                 if(!fs.existsSync(imagePath)){
-                    mkdirP.sync(imagePath);
+                    utils.fs.mkdirs(imagePath);
                 }
 
                 //if the zip file isn't downloaded yet, go get it.
@@ -46,7 +29,7 @@ function Printer() {
                 if(!fs.existsSync(dest)) {
                     //let out = fs.createWriteStream(dest);
                     // TRICKY: right now we have to hard code the urls until the api is updated
-                    let url = App.configurator.getValue("mediaServer") + '/obs/jpg/1/en/obs-images-360px.zip';
+                    let url = configurator.getValue("mediaServer") + '/obs/jpg/1/en/obs-images-360px.zip';
                     console.log('downloading images from', url);
                     download(url, dest, true).then(function() {
                         let zip = new AdmZip(dest);
@@ -77,31 +60,21 @@ function Printer() {
             });
         },
 
-        /**
-         * Generates a pdf of the target translation
-         * @param translation an array of frames
-         * @param meta the target translation manifest and other info
-         * @param filePath the path where the export will be saved
-         * @param options {includeIncompleteFrames: boolean, includeImages: boolean, doubleSpace: boolean}
-         * @returns {Promise.<boolean>}
-         */
         targetTranslationToPdf: function (translation, meta, filePath, options) {
 
-            let isTranslation = this.isTranslation(meta),
-                App = window.App,
-                imageRoot = path.join(App.configurator.getValue('rootdir'), "images"),
+            let imageRoot = path.join(configurator.getValue('rootdir'), "images"),
                 imagePath = path.join(imageRoot, meta.resource.id);
 
             return new Promise(function(resolve, reject) {
-                if(isTranslation) {
+                if(meta.project_type_class === "standard") {
                     // normalize input
                     let chapters = _.mapValues(_.groupBy(translation, function(obj) {
                         //console.debug('map chapter values', obj);
-                        return obj.meta.chapterid;
+                        return obj.chunkmeta.chapterid;
                     }), function(chapter, key) {
                         let frames = _.mapKeys(chapter, function(obj) {
                             //console.debug('map chapter keys', obj);
-                            return obj.meta.frameid;
+                            return obj.chunkmeta.frameid;
                         });
 
                         let chapterObj = {
@@ -116,7 +89,7 @@ function Printer() {
                             return o.transcontent !== '';
                         }), function(f) {
                             //console.debug('sort frames',f);
-                            return f.meta.frame;
+                            return f.chunkmeta.frame;
                         });
                         return chapterObj;
                     });
@@ -184,7 +157,7 @@ function Printer() {
                             // chapter title
                             doc.addPage();
                             doc.fontSize(20)
-                                .text(chapter.title.transcontent || chapter.title.meta.title, 72, doc.page.height / 2, {align: 'center'});
+                                .text(chapter.title.transcontent || chapter.title.chunkmeta.title, 72, doc.page.height / 2, {align: 'center'});
                             chapter.page = doc.bufferedPageRange().count;
 
                             // frames
@@ -198,7 +171,7 @@ function Printer() {
                                         //console.debug(meta);
                                         //console.debug(frame);
                                         // TRICKY: right now all images are en
-                                        var imgPath = path.join(imagePath, meta.resource.id + "-en-" + frame.meta.chapterid + "-" + frame.meta.frameid + ".jpg");
+                                        var imgPath = path.join(imagePath, meta.resource.id + "-en-" + frame.chunkmeta.chapterid + "-" + frame.chunkmeta.frameid + ".jpg");
                                         //check the position of the text on the page.
                                         // 792 (total ht of page) - 50 ( lower margin) - 263.25 (height of pic) = 478.75 (max amount of space used before image)
                                         if(doc.y > 478.75){
@@ -246,7 +219,7 @@ function Printer() {
                             }
                             doc.switchToPage(currTocPage);
                             doc.fontSize(10)
-                                .text(chapter.title.transcontent || chapter.title.meta.title)
+                                .text(chapter.title.transcontent || chapter.title.chunkmeta.title)
                                 .moveUp()
                                 .text(chapter.page + '', {align: 'right'})
                                 .moveDown();
@@ -328,4 +301,4 @@ function Printer() {
     };
 }
 
-module.exports.Printer = Printer;
+module.exports.PrintManager = PrintManager;

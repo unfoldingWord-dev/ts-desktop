@@ -115,20 +115,19 @@ function PrintManager(configurator) {
                             }
                         });
                         doc.pipe(fs.createWriteStream(filePath));
-                        fs.writeFile("log1.txt", JSON.stringify(project, null, 4));
                         // default meta
                         if(project.title.transcontent !== ""){
                         doc.info.Title = project.title.transcontent;}
-                        else{ doc.info.Title = meta.project.name;}
+                        else{ doc.info.Title = project.title.projectmeta.project.name;}
 
-                       // fs.writeFile("log.txt", JSON.stringify(meta, null, 4));
                         //doc.info.Author = 'Joel Lonbeck'; // todo: translators
                         //doc.info.Subject = 'an unrestricted, visual mini-Bible in any language'; // todo: project sub-title
                         doc.info.Keywords = meta.target_language.name;
 
                         // book title
                         doc.fontSize(25)
-                            .text(project.title.transcontent, 72, doc.page.height / 2, {align: 'center'});
+                            .font('src/assets/NotoSans-Regular.ttf')
+                            .text(doc.info.Title, 72, doc.page.height / 2, {align: 'center'});
 
                         // TOC placeholders
                         doc.addPage();
@@ -175,6 +174,7 @@ function PrintManager(configurator) {
                                         //console.debug(meta);
                                         //console.debug(frame);
                                         // TRICKY: right now all images are en
+                                        doc.moveDown();
                                         var imgPath = path.join(imagePath, meta.resource.id + "-en-" + frame.chunkmeta.chapterid + "-" + frame.chunkmeta.frameid + ".jpg");
                                         //check the position of the text on the page.
                                         // 792 (total ht of page) - 50 ( lower margin) - 263.25 (height of pic) = 478.75 (max amount of space used before image)
@@ -203,6 +203,7 @@ function PrintManager(configurator) {
                         for(let i = range.start; i < range.start + range.count; i ++) {
                             doc.switchToPage(i);
                             doc.fontSize(10)
+                                .font('Helvetica')
                                 .text(i + 1, 72, doc.page.height - 50 - 12, {align: 'center'});
                         }
 
@@ -248,7 +249,8 @@ function PrintManager(configurator) {
                         //set the title
                         doc.info.Title = translation[0].transcontent || meta.project.name;
                         doc.fontSize(25)
-                            .text(translation[0].transcontent, 72, doc.page.height / 2, {align: 'center'});
+                            .font('src/assets/NotoSans-Regular.ttf')
+                            .text(doc.info.Title, 72, doc.page.height / 2, {align: 'center'});
 
                              // book body
                         _.forEach(project.chapters, function(chapter) {
@@ -289,6 +291,7 @@ function PrintManager(configurator) {
                         for (let i = range.start; i < range.start + range.count; i ++) {
                             doc.switchToPage(i);
                             doc.fontSize(10)
+                                .font('Helvetica')
                                 .text(i + 1, 72, doc.page.height - 50 - 12, {align: 'center'});
                         }
 

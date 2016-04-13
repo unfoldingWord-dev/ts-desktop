@@ -5,6 +5,7 @@ var _ = require('lodash'),
     AdmZip = require('adm-zip'),
     request = require('request'),
     fs = require('fs'),
+    readline = require('readline'),
     utils = require('../js/lib/utils');
 
 function ImportManager(configurator, migrator) {
@@ -101,6 +102,29 @@ function ImportManager(configurator, migrator) {
                 .then(function () {
                     return utils.fs.remove(tmpDir);
                 });
+        },
+
+        retrieveUSFMProjectID: function (filepath) {
+            var id = "";
+
+            return new Promise(function (resolve, reject) {
+
+                var lineReader = readline.createInterface({
+                    input: fs.createReadStream(filepath)
+                });
+
+                lineReader.on('line', function (line) {
+                    if (line && line.trim().split(" ")[0] === "\\id") {
+                        id = line.trim().split(" ")[1];
+                        lineReader.close();
+                    }
+                });
+
+                lineReader.on('close', function(){
+                    resolve(id);
+                });
+            });
+
         },
 
         importFromUSFM: function (filepath, projectmeta) {
@@ -241,17 +265,11 @@ function UsfmParser () {
         }
     };
 
-    //not used
-    var project = {
-        encoding: "usx",
-        chapters: []
-    };
-
     var getMarker = function (line) {
         var beginMarker = line.split(" ")[0];
-        for (var type in markerTypes) {
-            if (markerTypes[type].regEx.test(beginMarker)) {
-                return markerTypes[type];
+        for (var t = 0; t < markerTypes.length; t++) {
+            if (markerTypes[t].regEx.test(beginMarker)) {
+                return markerTypes[t];
             }
         }
         return false;
@@ -265,7 +283,7 @@ function UsfmParser () {
 
             return new Promise(function (resolve, reject) {
 
-                var lineReader = require('readline').createInterface({
+                var lineReader = readline.createInterface({
                     input: fs.createReadStream(mythis.file)
                 });
 
@@ -321,7 +339,7 @@ function UsfmParser () {
         buildChapters: function(){
             mythis.chapters = {};
             var chap;
-            for (var m in mythis.markers) {
+            for (var m = 0; m < mythis.markers.length; m++) {
                 var marker = mythis.markers[m];
                 if (marker.type === "chapter") {
                     chap = String("00" + marker.options).slice(-2);

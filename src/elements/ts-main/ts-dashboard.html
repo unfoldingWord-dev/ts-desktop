@@ -368,76 +368,57 @@
           if (!filePath) {
               return;
           }
-          this.set('importdata', {importing: true, filename: filePath});
+          this.set('importdata', {importing: true, filepath: filePath});
           this.set('route', 'new');
       },
 
       finishusfm: function () {
           var mythis = this;
           var user = this.currentuser;
-          var filename = this.importdata.filename;
+          var filepath = this.importdata.filepath;
           var projectmeta = this.importdata.projectmeta;
           var overwrite = this.importdata.overwrite;
-
-          mythis.set('options.body', "Importing.  Please wait...");
-          mythis.set('options.loading', true);
-          mythis.$.loading.open();
-          //settimeout after this
-
-          var runImport = function(){
-              return App.importManager.importSingleUSFMFile(filename, projectmeta, user);
-          };
-
-          var date = new Date(),
-              year = date.getFullYear(),
-              month = ("0" + (date.getMonth() + 1)).slice(-2),
-              day = ("0" + date.getDate()).slice(-2),
-              hour = ("0" + date.getHours()).slice(-2),
-              minutes = ("0" + date.getMinutes()).slice(-2),
-              seconds = ("0" + date.getSeconds()).slice(-2),
-              timeString = year + '-' + month + '-' + day + '_' + hour + '.' + minutes + '.' + seconds,
-              defaultPath = App.configurator.getUserPath('datalocation', 'backups', projectmeta.unique_id),
-              backupPath = defaultPath + '.' + timeString + '.tstudio';
+          var timeString = App.utils.getTimeStamp();
+          var backupName = projectmeta.unique_id + '.' + timeString + '.tstudio';
+          var backupPath = App.configurator.getUserPath('datalocation', 'backups', backupName);
 
           var backupTargetTranslation = function(){
               return App.exportManager.backupTranslation(projectmeta, backupPath);
           };
+          var checkOverwrite = overwrite ? backupTargetTranslation() : Promise.resolve(true);
 
-          var startImport = function(){
-              console.log("startImport");
-              return App.projectsManager.saveTargetTranslation([], projectmeta, user)
-                  .then(runImport)
-                  .then(function() {
-                      mythis.fire('iron-signal', {name: 'updatelist'});
-                      mythis.fire('iron-signal', {name: 'loadproject', data: {projdata: projectmeta, type: "new"}});
+          mythis.set('options.body', "Importing.  Please wait...");
+          mythis.set('options.loading', true);
+          mythis.$.loading.open();
+
+          setTimeout(function() {
+              return checkOverwrite
+                  .then(function () {
+                      return App.importManager.importFromUSFM(filepath, projectmeta);
+                  })
+                  .then(function (chunks) {
+                      return App.projectsManager.saveTargetTranslation(chunks, projectmeta, user);
+                  })
+                  .then(function(){
+                      mythis.set('options.title', "Import Complete");
+                      mythis.set('options.body', "Your file has been successfully imported.");
+                      mythis.set('options.loading', false);
+                      setTimeout(function() {
+                          mythis.updatelist();
+                      }, 250);
+                  }).catch(function(err){
+                      var errmessage = "We're sorry.  An error occurred while trying to import your project";
+                      if(err !== null) {
+                          errmessage = err;
+                      }
+                      mythis.set('options.title', "Import Error");
+                      mythis.set('options.body', "Your file was not imported. It may not be in the correct format or it has already been imported.");
+                      mythis.set('options.loading', false);
+                      if (overwrite) {
+                          return App.importManager.restoreFromBackup(backupPath);
+                      }
                   });
-          };
-
-          var importPromise;
-          if(overwrite){
-              importPromise = backupTargetTranslation().then(startImport);
-          } else {
-              importPromise = startImport();
-          }
-
-          importPromise.then(function(){
-              mythis.set('options.title', "Import Complete");
-              mythis.set('options.body', "Your file has been imported successfully.");
-              mythis.set('options.loading', false);
-              setTimeout(function() {
-                  mythis.updatelist();
-              }, 250);
-          }).catch(function(err){
-              console.log('Import Error: ', err);
-              App.importManager.restoreFromBackup(backupPath).then(function(){
-                  mythis.set('options.title', "Import Error");
-                  mythis.set('options.body', "Your file was not imported. It may not be in the correct format or it has already been imported.");
-                  mythis.set('options.loading', false);
-                  mythis.route = 'home';
-              });
-          });
-
-
+          }, 500);
       },
 
       importserver: function () {
@@ -548,27 +529,29 @@
 
       updatelist: function () {
           var mythis = this;
-          App.projectsManager.migrateTargetTranslationsList()
+          var autobackupdir = App.configurator.getUserPath('datalocation', 'automatic_backups');
+          return App.projectsManager.migrateTargetTranslationsList()
               .then(function () {
                   return App.projectsManager.loadTargetTranslationsList()
               })
               .then(function(list) {
-              App.ipc.send('loading-status', 'Updating Manifest Files...');
-              for (var i = 0; i < list.length; i++) {
-                  list[i] = App.projectsManager.updateManifestToMeta(list[i]);
-              }
-              mythis.set('projectlist', _.compact(list));
-
-              App.ipc.send('loading-status', 'Checking Auto Backups...');
-              App.exportManager.backupProjects(mythis.projectlist)
-                  .then(function () {
-                      mythis.set('busy', false);
-                  });
-
-              setTimeout(function() {
-                App.ipc.send('loading-done');
-              }, 100);
-          });
+                  App.ipc.send('loading-status', 'Updating Manifest Files...');
+                  for (var i = 0; i < list.length; i++) {
+                      list[i] = App.projectsManager.updateManifestToMeta(list[i]);
+                  }
+                  return _.compact(list);
+              })
+              .then(function (list) {
+                  mythis.set('projectlist', list);
+                  App.ipc.send('loading-status', 'Creating Auto Backups...');
+                  return App.exportManager.backupAllTranslations(list, autobackupdir)
+              })
+              .then(function () {
+                  mythis.set('busy', false);
+                  setTimeout(function() {
+                      App.ipc.send('loading-done');
+                  }, 100);
+              });
       },
 
       ready: function() {

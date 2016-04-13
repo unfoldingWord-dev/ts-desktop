@@ -3,6 +3,8 @@
 var _ = require('lodash'),
     path = require('path'),
     AdmZip = require('adm-zip'),
+    request = require('request'),
+    fs = require('fs'),
     utils = require('../js/lib/utils');
 
 function ImportManager(configurator, migrator) {
@@ -102,7 +104,6 @@ function ImportManager(configurator, migrator) {
         },
 
         importFromUSFM: function (filepath, projectmeta) {
-            console.log("fired backend");
             var mythis = this;
 
             return mythis.getVerseChunkFileNames(projectmeta).then(function(chunkFileNames){
@@ -148,7 +149,7 @@ function ImportManager(configurator, migrator) {
                             completed: true
                         });
                     }
-
+                    console.log("completed", chunkFileNames);
                     return chunkFileNames;
                 });
             });

@@ -295,7 +295,7 @@
           },
           busy: {
               type: Boolean,
-              value: false
+              value: true
           }
       },
 
@@ -368,7 +368,7 @@
           if (!filePath) {
               return;
           }
-          this.set('importdata', {importing: true, filepath: filePath});
+          this.set('importdata', {importing: true, filepath: filePath[0]});
           this.set('route', 'new');
       },
 
@@ -397,6 +397,7 @@
                       return App.importManager.importFromUSFM(filepath, projectmeta);
                   })
                   .then(function (chunks) {
+                      console.log("after import, before save");
                       return App.projectsManager.saveTargetTranslation(chunks, projectmeta, user);
                   })
                   .then(function(){
@@ -411,8 +412,8 @@
                       if(err !== null) {
                           errmessage = err;
                       }
-                      mythis.set('options.title', "Import Error");
-                      mythis.set('options.body', "Your file was not imported. It may not be in the correct format or it has already been imported.");
+                      mythis.set('options.title', "Import Failed");
+                      mythis.set('options.body', errmessage);
                       mythis.set('options.loading', false);
                       if (overwrite) {
                           return App.importManager.restoreFromBackup(backupPath);

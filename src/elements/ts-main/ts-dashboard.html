@@ -403,6 +403,7 @@
                       mythis.set('options.title', "Import Complete");
                       mythis.set('options.body', "Your file has been successfully imported.");
                       mythis.set('options.loading', false);
+                      mythis.set('importdata', {importing: false});
                       setTimeout(function() {
                           mythis.updatelist();
                       }, 250);
@@ -414,6 +415,7 @@
                       mythis.set('options.title', "Import Failed");
                       mythis.set('options.body', errmessage);
                       mythis.set('options.loading', false);
+                      mythis.set('importdata', {importing: false});
                       if (overwrite) {
                           return App.importManager.restoreFromBackup(backupPath);
                       }

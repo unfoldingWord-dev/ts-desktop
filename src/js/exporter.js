@@ -8,10 +8,7 @@ var _ = require('lodash'),
 
 function ExportManager(configurator, git) {
 
-    var targetDir = configurator.getValue('targetTranslationsDir'),
-        mkdirp = utils.fs.mkdirs,
-        rm = utils.fs.remove,
-        toJSON = _.partialRight(JSON.stringify, null, '\t');
+    var targetDir = configurator.getValue('targetTranslationsDir');
 
     return {
 
@@ -19,8 +16,7 @@ function ExportManager(configurator, git) {
             var paths = utils.makeProjectPaths(targetDir, meta);
             var name = meta.unique_id;
 
-            return new Promise(function(resolve, reject) {
-                // need to fix
+            return git.getHash(paths.projectDir).then(function (hash) {
                 var output = fs.createWriteStream(filePath),
                     archive = archiver.create('zip'),
                     manifest = {
@@ -30,57 +26,22 @@ function ExportManager(configurator, git) {
                         },
                         package_version: 2,
                         timestamp: new Date().getTime(),
-                        target_translations: [{path: name, id: name, commit_hash: '', direction: "ltr"}]
+                        target_translations: [{path: name, id: name, commit_hash: hash, direction: meta.target_language.direction}]
                     };
                 archive.pipe(output);
                 archive.directory(paths.projectDir, name + "/");
-                archive.append(toJSON(manifest), {name: 'manifest.json'});
+                archive.append(JSON.stringify(manifest, null, '\t'), {name: 'manifest.json'});
                 archive.finalize();
-                resolve(filePath);
+                return filePath;
             });
         },
 
-        backupProjects: function(list) {
-            let _this = this,
-                backupDir = configurator.getUserPath('datalocation', 'automatic_backups');
-
-            /*
-             * NOTE: We are removing *after* we backup so that a backup is already there.
-             *          Example scenario: App attempts to auto backup, deletes all the
-             *          generated auto backups, tries to backup, then crashes. In this
-             *          instance, the user is left without backups. So, instead, we
-             *          clear out any old files only after we are certain that there
-             *          is a new backup.
-             */
-
-            let removeOtherFiles = function(backupName) {
-                let paths = path.parse(backupName),
-                    dir = paths.dir,
-                    hash = paths.base.split('.')[0];
-
-                // N.B. Double check that we're in the backups folder before doing any remove/delete
-                return dir.startsWith(backupDir) ? rm(dir + '/!(' + hash + ')*') : false;
-            };
-
-            let promises = _.map(list, function(meta) {
-                let paths = utils.makeProjectPaths(targetDir, meta);
-                let sourceDir = paths.projectDir,
-                    projectFolder = path.basename(sourceDir),
-                    mytargetDir = path.join(backupDir, projectFolder),
-                    doBackup = _this.backupTranslation.bind(_this, meta);
-
-                return mkdirp(mytargetDir)
-                    .then(function () {
-                        return git.getHash(sourceDir);
-                    })
-                    .then(function(hash) {
-                        let fileName = hash + '.backup.tstudio';
-                        return path.join(mytargetDir, fileName);
-                    })
-                    .then(doBackup);
-                    //.then(removeOtherFiles);
+        backupAllTranslations: function (list, dirPath) {
+            var mythis = this;
+            var promises = _.map(list, function(projectmeta) {
+                var filepath = path.join(dirPath, projectmeta.unique_id + ".tstudio");
+                return mythis.backupTranslation(projectmeta, filepath);
             });
-
             return Promise.all(promises);
         },
 
@@ -177,8 +138,12 @@ function ExportManager(configurator, git) {
                             }
                         }
 
-                        fs.writeFile(filePath, new Buffer(chapterContent));
-                        resolve(true);
+                        fs.writeFile(filePath, new Buffer(chapterContent), function (err) {
+                            if (err) {
+                                reject(err);
+                            }
+                            resolve(true);
+                        });
                     } else {
                         reject("We do not support exporting this project format yet");
                     }

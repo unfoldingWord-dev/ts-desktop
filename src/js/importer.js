@@ -10,7 +10,7 @@ function ImportManager(configurator, migrator) {
     return {
 
         restoreFromBackup: function(filePath) {
-            let zip = new AdmZip(filePath),
+            var zip = new AdmZip(filePath),
                 tmpDir = configurator.getValue('tempDir'),
                 targetDir = configurator.getValue('targetTranslationsDir'),
                 basename = path.basename(filePath, '.tstudio'),
@@ -41,7 +41,7 @@ function ImportManager(configurator, migrator) {
                 })
                 .then(function (targetPaths) {
                     return _.map(targetPaths, function(p) {
-                        let tmpPath = path.join(extractPath, p),
+                        var tmpPath = path.join(extractPath, p),
                             targetPath = path.join(targetDir, p);
 
                         return utils.fs.move(tmpPath, targetPath, {clobber: true});
@@ -56,7 +56,7 @@ function ImportManager(configurator, migrator) {
         },
 
         importFromBackup: function(filePath) {
-            let zip = new AdmZip(filePath),
+            var zip = new AdmZip(filePath),
                 tmpDir = configurator.getValue('tempDir'),
                 targetDir = configurator.getValue('targetTranslationsDir'),
                 basename = path.basename(filePath, '.tstudio'),
@@ -87,7 +87,7 @@ function ImportManager(configurator, migrator) {
                 })
                 .then(function (targetPaths) {
                     return _.map(targetPaths, function(p) {
-                        let tmpPath = path.join(extractPath, p),
+                        var tmpPath = path.join(extractPath, p),
                             targetPath = path.join(targetDir, p);
 
                         return utils.fs.move(tmpPath, targetPath, {clobber: true});
@@ -101,49 +101,63 @@ function ImportManager(configurator, migrator) {
                 });
         },
 
-        importUSFMFile: function (file, translation, user) {
+        importFromUSFM: function (filepath, projectmeta) {
+            console.log("fired backend");
+            var mythis = this;
 
-            var self = this;
-            let fileExt = file.name.split('.').pop().toLowerCase();
+            return mythis.getVerseChunkFileNames(projectmeta).then(function(chunkFileNames){
+                var parser = new UsfmParser();
+                return parser.load(filepath).then(function(){
+                    var parsedData = parser.parse();
 
-            if (fileExt === "zip") {
-                return self.getTxtFilesFromZip(file).then(function (files) {
+                    //if there was no data in the file, it's most likely the wrong format.
+                    if(JSON.stringify(parsedData) === JSON.stringify({})){
+                        throw new Error('This is not a valid USFM file.');
+                    }
 
-                    let txtFile = files[0];
-                    var promise = self.importSingleUSFMFile(txtFile, translation, user);
-                    for (var i = 1; i < files.length; i++) {
-                        txtFile = files[i];
-                        promise = promise.then(function(){
-                            return self.importSingleUSFMFile(txtFile, translation, user);
+                    for(var i = 0; i < chunkFileNames.length; i++){
+                        var chunk = chunkFileNames[i];
+                        var transcontent = '';
+
+                        for(var ci = 0; ci < chunk.verses.length; ci++){
+                            if(typeof parsedData[chunk.chapter] !== 'undefined' && typeof parsedData[chunk.chapter].verses[chunk.verses[ci]] !== 'undefined'){
+                                //transcontent += '\\v' + parsedData[chunk.chapter].verses[chunk.verses[ci]].id + ' ' + parsedData[chunk.chapter].verses[chunk.verses[ci]].contents;
+                                transcontent += ' ' + parsedData[chunk.chapter].verses[chunk.verses[ci]].contents;
+                            }
+                        }
+                        chunkFileNames[i].meta = {
+                            chapterid: chunkFileNames[i].chapter,
+                            frameid: chunkFileNames[i].filename,
+                            helpscontent: []
+                        };
+
+                        chunkFileNames[i].completed = false;
+                        chunkFileNames[i].transcontent = transcontent;
+                    }
+
+
+                    //Pull in the title
+                    if(typeof parsedData['00'] !== 'undefined'){
+                        chunkFileNames.push({
+                            meta: {
+                                chapterid: '00',
+                                frameid: 'title',
+                                helpscontent: []
+                            },
+                            transcontent: parsedData['00'].contents,
+                            completed: true
                         });
                     }
-                    return promise;
+
+                    return chunkFileNames;
                 });
-            } else {
-
-                return self.importSingleUSFMFile(file.path, translation, user);
-            }
-        },
-
-        getTxtFilesFromZip: function (zipFile) {
-            var tempDir = path.join(configurator.getValue('tempDir'), "usfm-import");
-
-            return new Promise(function (resolve, reject) {
-                let zip = new AdmZip(zipFile.path);
-                zip.extractAllTo(tempDir, true);
-                var files = fs.readdirSync(tempDir),
-                    output = [];
-                files.forEach(function (file) {
-                    output.push(path.join(tempDir, file));
-                });
-
-                resolve(output);
             });
+
         },
 
-        getVerseChunkFileNames: function(projdata){
+        getVerseChunkFileNames: function(projectmeta){
             return new Promise(function(resolve, reject){
-                var book = projdata.project.id;
+                var book = projectmeta.project.id;
                 var chunkDescUrl = "https://api.unfoldingword.org/bible/txt/1/" + book + "/chunks.json";
                 var chunks = [];
                 request(chunkDescUrl,function(err, resp, body){
@@ -152,19 +166,21 @@ function ImportManager(configurator, migrator) {
                         for(var i = 0; i<chunkDesc.length; i++){
                             var chunk = chunkDesc[i],
                                 verses = [],
+                                v,
                                 nextChunkChapter = typeof chunkDesc[i + 1] !== 'undefined' ? chunkDesc[i + 1].chp : false;
 
                             //if the next chunk exists and it's the same chapter as the current chunk...
                             if (nextChunkChapter === chunk.chp) {
                                 var lastVs = chunkDesc[i + 1].firstvs - 1;
-                                for (var v = parseInt(chunk.firstvs); v <= lastVs; v++) {
+                                for (v = parseInt(chunk.firstvs); v <= lastVs; v++) {
                                     verses.push(v);
                                 }
 
                                 //if it doesn't exist or it's not the same chapter as the current chunk, add 100 verses so we make sure to get everything being imported.
                             } else {
-                                var v = parseInt(chunk.firstvs), max = v + 100;
-                                for(v; v<max; v++){
+                                v = parseInt(chunk.firstvs);
+                                var max = v + 100;
+                                for(v; v < max; v++){
                                     verses.push(v);
                                 }
                             }
@@ -181,62 +197,6 @@ function ImportManager(configurator, migrator) {
                     }
                 });
             });
-        },
-
-        importSingleUSFMFile: function (usfmFile, projdata, user) {
-            console.log("fired backend");
-            let self = this;
-            return pm.loadTargetTranslation(projdata).then(function(curProj){
-
-                return self.getVerseChunkFileNames(projdata).then(function(chunkFileNames){
-                    var parser = new UsfmParser();
-                    return parser.load(usfmFile).then(function(){
-                        var parsedData = parser.parse();
-
-                        //if there was no data in the file, it's most likely the wrong format.
-                        if(JSON.stringify(parsedData) === JSON.stringify({})){
-                            throw new Error('This is not a valid USFM file.');
-                        }
-
-                        for(var i = 0; i<chunkFileNames.length; i++){
-                            var chunk = chunkFileNames[i];
-                            var transcontent = '';
-
-                            for(var ci = 0; ci<chunk.verses.length; ci++){
-                                if(typeof parsedData[chunk.chapter] !== 'undefined' && typeof parsedData[chunk.chapter].verses[chunk.verses[ci]] !== 'undefined'){
-                                    //transcontent += '\\v' + parsedData[chunk.chapter].verses[chunk.verses[ci]].id + ' ' + parsedData[chunk.chapter].verses[chunk.verses[ci]].contents;
-                                    transcontent += ' ' + parsedData[chunk.chapter].verses[chunk.verses[ci]].contents;
-                                }
-                            }
-                            chunkFileNames[i].meta = {
-                                chapterid: chunkFileNames[i].chapter,
-                                frameid: chunkFileNames[i].filename,
-                                helpscontent: []
-                            };
-
-                            chunkFileNames[i].completed = false;
-                            chunkFileNames[i].transcontent = transcontent;
-                        }
-
-
-                        //Pull in the title
-                        if(typeof parsedData['00'] !== 'undefined'){
-                            chunkFileNames.push({
-                                meta: {
-                                    chapterid: '00',
-                                    frameid: 'title',
-                                    helpscontent: []
-                                },
-                                transcontent: parsedData['00'].contents,
-                                completed: true
-                            });
-                        }
-
-                        return pm.saveTargetTranslation(chunkFileNames, projdata, user);
-                    });
-                });
-            });
-
         }
 
     };
@@ -304,27 +264,27 @@ function UsfmParser (file) {
         return false;
     };
 
-    var self = this;
+    var mythis = this;
 
     return {
         load: function (file) {
-            self.file = file;
+            mythis.file = file;
 
             return new Promise(function(resolve, reject){
 
                 var lineReader = require('readline').createInterface({
-                    input: fs.createReadStream(self.file)
+                    input: fs.createReadStream(mythis.file)
                 });
 
                 lineReader.on('line', function (line) {
                     if(typeof line !== "undefined"){
-                        self.contents.push(line);
+                        mythis.contents.push(line);
                     }
 
                 });
 
                 lineReader.on('close', function(){
-                    resolve(self);
+                    resolve(mythis);
                 });
             });
         },
@@ -333,28 +293,28 @@ function UsfmParser (file) {
             return this.buildChapters();
         },
         getMarkers: function () {
-            self.markers = [];
-            self.markerCount = 0;
+            mythis.markers = [];
+            mythis.markerCount = 0;
             var currentMarker = null;
-            for (var i = 0; i < self.contents.length; i++) {
-                var line = self.contents[i];
+            for (var i = 0; i < mythis.contents.length; i++) {
+                var line = mythis.contents[i];
                 var lineArray = line.split(" ");
                 for(var c=0; c<lineArray.length; c++){
                     var section = lineArray[c];
                     var marker = getMarker(section);
 
                     if (marker) {
-                        self.markers[self.markerCount] = {
+                        mythis.markers[mythis.markerCount] = {
                             type: marker.type,
                             line: line,
                             contents: ""
                         };
                         if(marker.hasOptions){
-                            self.markers[self.markerCount].options = lineArray[c + 1];
+                            mythis.markers[mythis.markerCount].options = lineArray[c + 1];
                             c++;
                         }
-                        currentMarker = self.markers[self.markerCount];
-                        self.markerCount++;
+                        currentMarker = mythis.markers[mythis.markerCount];
+                        mythis.markerCount++;
                     } else {
                         if(currentMarker){
                             currentMarker.contents += section + " ";
@@ -364,25 +324,25 @@ function UsfmParser (file) {
             }
         },
         buildChapters: function(){
-            self.chapters = {};
+            mythis.chapters = {};
             var chap;
-            for(var m in self.markers){
-                var marker = self.markers[m];
+            for(var m in mythis.markers){
+                var marker = mythis.markers[m];
                 if(marker.type === "chapter"){
                     chap = String("00" + marker.options).slice(-2);
                     var chapter =
-                        self.chapters[chap] = {
+                        mythis.chapters[chap] = {
                             id: chap,
                             verses: {}
                         };
-                    //self.chapters.push(chapter);
+                    //mythis.chapters.push(chapter);
                 } else if(marker.type === "verse"){
-                    self.chapters[chap].verses[marker.options] = {
+                    mythis.chapters[chap].verses[marker.options] = {
                         id: marker.options,
                         contents: marker.contents
                     }
                 } else if(marker.type === "heading"){
-                    self.chapters['00'] = {
+                    mythis.chapters['00'] = {
                         id: '00',
                         verses: {},
                         contents: marker.contents
@@ -390,8 +350,8 @@ function UsfmParser (file) {
                 }
 
             }
-            //console.log("chapters",self.chapters);
-            return self.chapters;
+            //console.log("chapters",mythis.chapters);
+            return mythis.chapters;
         }
     }
 }

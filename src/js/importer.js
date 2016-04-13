@@ -106,65 +106,58 @@ function ImportManager(configurator, migrator) {
         importFromUSFM: function (filepath, projectmeta) {
             var mythis = this;
 
-            return mythis.getVerseChunkFileNames(projectmeta).then(function(chunkFileNames){
+            return mythis.getVerses(projectmeta).then(function (chunkFileNames) {
                 var parser = new UsfmParser();
-                return parser.load(filepath).then(function(){
+                return parser.load(filepath).then(function () {
                     var parsedData = parser.parse();
 
-                    //if there was no data in the file, it's most likely the wrong format.
-                    if(JSON.stringify(parsedData) === JSON.stringify({})){
+                    if (JSON.stringify(parsedData) === JSON.stringify({})) {
                         throw new Error('This is not a valid USFM file.');
                     }
 
-                    for(var i = 0; i < chunkFileNames.length; i++){
+                    for (var i = 0; i < chunkFileNames.length; i++) {
                         var chunk = chunkFileNames[i];
                         var transcontent = '';
 
-                        for(var ci = 0; ci < chunk.verses.length; ci++){
-                            if(typeof parsedData[chunk.chapter] !== 'undefined' && typeof parsedData[chunk.chapter].verses[chunk.verses[ci]] !== 'undefined'){
+                        for (var ci = 0; ci < chunk.verses.length; ci++) {
+                            if (typeof parsedData[chunk.chapter] !== 'undefined' && typeof parsedData[chunk.chapter].verses[chunk.verses[ci]] !== 'undefined') {
                                 //transcontent += '\\v' + parsedData[chunk.chapter].verses[chunk.verses[ci]].id + ' ' + parsedData[chunk.chapter].verses[chunk.verses[ci]].contents;
                                 transcontent += ' ' + parsedData[chunk.chapter].verses[chunk.verses[ci]].contents;
                             }
                         }
-                        chunkFileNames[i].meta = {
+                        chunkFileNames[i].chunkmeta = {
                             chapterid: chunkFileNames[i].chapter,
-                            frameid: chunkFileNames[i].filename,
-                            helpscontent: []
+                            frameid: chunkFileNames[i].filename
                         };
 
                         chunkFileNames[i].completed = false;
-                        chunkFileNames[i].transcontent = transcontent;
+                        chunkFileNames[i].transcontent = transcontent.trim();
                     }
 
-
-                    //Pull in the title
-                    if(typeof parsedData['00'] !== 'undefined'){
+                    if (typeof parsedData['00'] !== 'undefined') {
                         chunkFileNames.push({
-                            meta: {
+                            chunkmeta: {
                                 chapterid: '00',
-                                frameid: 'title',
-                                helpscontent: []
+                                frameid: 'title'
                             },
-                            transcontent: parsedData['00'].contents,
-                            completed: true
+                            transcontent: parsedData['00'].contents.trim(),
+                            completed: false
                         });
                     }
-                    console.log("completed", chunkFileNames);
                     return chunkFileNames;
                 });
             });
-
         },
 
-        getVerseChunkFileNames: function(projectmeta){
-            return new Promise(function(resolve, reject){
+        getVerses: function (projectmeta) {
+            return new Promise(function (resolve, reject) {
                 var book = projectmeta.project.id;
                 var chunkDescUrl = "https://api.unfoldingword.org/bible/txt/1/" + book + "/chunks.json";
                 var chunks = [];
-                request(chunkDescUrl,function(err, resp, body){
-                    if(!err){
+                request(chunkDescUrl, function (err, resp, body) {
+                    if (!err) {
                         var chunkDesc = JSON.parse(body);
-                        for(var i = 0; i<chunkDesc.length; i++){
+                        for (var i = 0; i < chunkDesc.length; i++) {
                             var chunk = chunkDesc[i],
                                 verses = [],
                                 v,
@@ -181,7 +174,7 @@ function ImportManager(configurator, migrator) {
                             } else {
                                 v = parseInt(chunk.firstvs);
                                 var max = v + 100;
-                                for(v; v < max; v++){
+                                for (v; v < max; v++) {
                                     verses.push(v);
                                 }
                             }
@@ -199,11 +192,10 @@ function ImportManager(configurator, migrator) {
                 });
             });
         }
-
     };
 }
 
-function UsfmParser (file) {
+function UsfmParser () {
     this.contents = [];
 
     var markerTypes = {
@@ -249,6 +241,7 @@ function UsfmParser (file) {
         }
     };
 
+    //not used
     var project = {
         encoding: "usx",
         chapters: []
@@ -260,7 +253,6 @@ function UsfmParser (file) {
             if (markerTypes[type].regEx.test(beginMarker)) {
                 return markerTypes[type];
             }
-
         }
         return false;
     };
@@ -271,7 +263,7 @@ function UsfmParser (file) {
         load: function (file) {
             mythis.file = file;
 
-            return new Promise(function(resolve, reject){
+            return new Promise(function (resolve, reject) {
 
                 var lineReader = require('readline').createInterface({
                     input: fs.createReadStream(mythis.file)
@@ -281,7 +273,6 @@ function UsfmParser (file) {
                     if(typeof line !== "undefined"){
                         mythis.contents.push(line);
                     }
-
                 });
 
                 lineReader.on('close', function(){
@@ -289,10 +280,12 @@ function UsfmParser (file) {
                 });
             });
         },
+
         parse: function(){
             this.getMarkers();
             return this.buildChapters();
         },
+
         getMarkers: function () {
             mythis.markers = [];
             mythis.markerCount = 0;
@@ -300,7 +293,7 @@ function UsfmParser (file) {
             for (var i = 0; i < mythis.contents.length; i++) {
                 var line = mythis.contents[i];
                 var lineArray = line.split(" ");
-                for(var c=0; c<lineArray.length; c++){
+                for (var c=0; c < lineArray.length; c++) {
                     var section = lineArray[c];
                     var marker = getMarker(section);
 
@@ -310,26 +303,27 @@ function UsfmParser (file) {
                             line: line,
                             contents: ""
                         };
-                        if(marker.hasOptions){
+                        if (marker.hasOptions) {
                             mythis.markers[mythis.markerCount].options = lineArray[c + 1];
                             c++;
                         }
                         currentMarker = mythis.markers[mythis.markerCount];
                         mythis.markerCount++;
                     } else {
-                        if(currentMarker){
+                        if (currentMarker) {
                             currentMarker.contents += section + " ";
                         }
                     }
                 }
             }
         },
+
         buildChapters: function(){
             mythis.chapters = {};
             var chap;
-            for(var m in mythis.markers){
+            for (var m in mythis.markers) {
                 var marker = mythis.markers[m];
-                if(marker.type === "chapter"){
+                if (marker.type === "chapter") {
                     chap = String("00" + marker.options).slice(-2);
                     var chapter =
                         mythis.chapters[chap] = {
@@ -337,21 +331,19 @@ function UsfmParser (file) {
                             verses: {}
                         };
                     //mythis.chapters.push(chapter);
-                } else if(marker.type === "verse"){
+                } else if (marker.type === "verse") {
                     mythis.chapters[chap].verses[marker.options] = {
                         id: marker.options,
                         contents: marker.contents
                     }
-                } else if(marker.type === "heading"){
+                } else if (marker.type === "heading") {
                     mythis.chapters['00'] = {
                         id: '00',
                         verses: {},
                         contents: marker.contents
                     };
                 }
-
             }
-            //console.log("chapters",mythis.chapters);
             return mythis.chapters;
         }
     }

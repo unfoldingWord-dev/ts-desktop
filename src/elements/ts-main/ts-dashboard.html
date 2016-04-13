@@ -397,7 +397,6 @@
                       return App.importManager.importFromUSFM(filepath, projectmeta);
                   })
                   .then(function (chunks) {
-                      console.log("after import, before save");
                       return App.projectsManager.saveTargetTranslation(chunks, projectmeta, user);
                   })
                   .then(function(){

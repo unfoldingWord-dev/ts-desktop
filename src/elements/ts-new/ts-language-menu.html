@@ -124,6 +124,11 @@
               type: Object,
               value: {},
               notify: true
+          },
+          importdata: {
+              type: Object,
+              value: {},
+              notify: true
           }
       },
 
@@ -150,8 +155,20 @@
       store: function (e) {
           this.set('newdata.language', e.model.language);
           this.set('newdata.query', "");
-          this.fire('iron-signal', {name: 'createprojects'});
-          this.set('selected', 1);
+
+          if (this.importdata.importing && this.importdata.project.slug) {
+              this.set('newdata.project', this.importdata.project);
+              if (App.configurator.getUserSetting('glmode')) {
+                  this.fire('iron-signal', {name: 'createtypes'});
+                  this.set('selected', 3);
+              } else {
+                  this.set('newdata.typedata', {type: {id: "text", name: "Text"}, resource: {id: "reg", name: "Regular"}, format: "usfm", allowed: true});
+                  this.fire('create');
+              }
+          } else {
+              this.fire('iron-signal', {name: 'createprojects'});
+              this.set('selected', 1);
+          }
       },
 
       ready: function () {

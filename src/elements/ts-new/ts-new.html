@@ -88,10 +88,10 @@
         </div>
 
         <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
-            <ts-language-menu id="languages" selected="{{selected}}" newdata="{{newdata}}" on-create="createproject"></ts-language-menu>
-            <ts-project-menu selected="{{selected}}" newdata="{{newdata}}" on-create="createproject"></ts-project-menu>
+            <ts-language-menu id="languages" selected="{{selected}}" newdata="{{newdata}}" importdata="{{importdata}}" on-create="createproject"></ts-language-menu>
+            <ts-project-menu selected="{{selected}}" newdata="{{newdata}}" importdata="{{importdata}}" on-create="createproject"></ts-project-menu>
             <ts-book-menu selected="{{selected}}" newdata="{{newdata}}" on-create="createproject"></ts-book-menu>
-            <ts-type-menu selected="{{selected}}" newdata="{{newdata}}" projectlist="[[projectlist]]" on-create="createproject"></ts-type-menu>
+            <ts-type-menu selected="{{selected}}" newdata="{{newdata}}" importdata="{{importdata}}" projectlist="[[projectlist]]" on-create="createproject"></ts-type-menu>
         </neon-animated-pages>
 
         <paper-dialog id="confirmimport" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -182,9 +182,9 @@
 
         createproject: function () {
             var mythis = this;
-            var project = this.project;
-            var language = this.language;
-            var typedata = this.typedata;
+            var project = this.newdata.project;
+            var language = this.newdata.language;
+            var typedata = this.newdata.typedata;
             var projectarray = this.projectlist;
             var popup = this.$.popup;
             var newprojectmanifest = {
@@ -206,11 +206,20 @@
                 return;
             }
 
+            if (this.importdata.importing) {
+                this.importdata.projectmeta = newprojectmeta;
+            }
+
             for (var i = 0; i < projectarray.length; i++) {
                 if (projectarray[i].unique_id === newprojectmeta.unique_id) {
-                    this.set('options', {title: "Duplicate Found", body: "This project already exists"});
-                    popup.open();
-                    return;
+                    if (this.importdata.importing) {
+                        this.importdata.overwrite = true;
+                        this.$.confirmimport.open();
+                    } else {
+                        this.set('options', {title: "Duplicate Found", body: "This project already exists"});
+                        popup.open();
+                        return;
+                    }
                 }
             }
 
@@ -221,8 +230,7 @@
             }
 
             if (this.importdata.importing) {
-                this.importdata.projectmeta = newprojectmeta;
-                this.importdata.overwrite = true;
+                this.importdata.overwrite = false;
                 this.startimport();
             } else {
                 this.animationConfig.exit.name = 'slide-left-animation';

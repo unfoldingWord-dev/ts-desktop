@@ -171,7 +171,7 @@
                 this.$.popup.open();
             } else {
                 this.push('currentproject.projectmeta.translators', name);
-                this.fire('iron-signal', {name: 'savetofile'});
+                this.fire('iron-signal', {name: 'savemanifest'});
                 this.set('newinfo', {});
             }
         },

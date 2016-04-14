@@ -81,6 +81,66 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             return meta;
         },
 
+        saveTargetChunk: function (chunk, meta) {
+            var paths = utils.makeProjectPaths(targetDir, meta);
+            var projectClass = meta.project_type_class;
+
+            var makeChapterDir = function (chunk) {
+                return mkdirp(path.join(paths.projectDir, chunk.chunkmeta.chapterid));
+            };
+
+            var updateChunk = function (chunk) {
+                var file = path.join(paths.projectDir, chunk.chunkmeta.chapterid, chunk.chunkmeta.frameid + '.txt');
+                var hasContent = false;
+                if (projectClass === "standard") {
+                    hasContent = !!chunk.transcontent;
+                }
+                if (projectClass === "helps") {
+                    hasContent = !!chunk.helpscontent.length;
+                }
+                if (projectClass === "extant" && (!!chunk.helpscontent[0].title || !!chunk.helpscontent[0].body)) {
+                    hasContent = true;
+                }
+                return hasContent ? write(file, projectClass === "standard" ? chunk.transcontent : toJSON(chunk.helpscontent)) : rm(file);
+            };
+
+            return makeChapterDir(chunk)
+                .then(updateChunk(chunk));
+        },
+
+        saveTargetManifest: function (meta) {
+            var paths = utils.makeProjectPaths(targetDir, meta);
+
+            var sources = meta.source_translations.map(function (source) {
+                return {
+                    language_id: source.language_id,
+                    resource_id: source.resource_id,
+                    checking_level: source.checking_level,
+                    date_modified: source.date_modified,
+                    version: source.version
+                };
+            });
+
+            var manifest = {
+                package_version: meta.package_version,
+                format: meta.format,
+                generator: {
+                    name: 'ts-desktop',
+                    build: ''
+                },
+                target_language: meta.target_language,
+                project: meta.project,
+                type: meta.type,
+                resource: meta.resource,
+                source_translations: sources,
+                parent_draft: meta.parent_draft,
+                translators: meta.translators,
+                finished_chunks: meta.finished_chunks
+            };
+
+            return write(paths.manifest, toJSON(manifest));
+        },
+
         saveTargetTranslation: function (translation, meta, user) {
             var paths = utils.makeProjectPaths(targetDir, meta);
             var projectClass = meta.project_type_class;

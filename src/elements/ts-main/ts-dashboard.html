@@ -295,7 +295,7 @@
           },
           busy: {
               type: Boolean,
-              value: true
+              value: false
           }
       },
 
@@ -531,6 +531,13 @@
 
       updatelist: function () {
           var mythis = this;
+          if (mythis.busy) {
+              setTimeout(function() {
+                  mythis.updatelist();
+              }, 500);
+              return;
+          }
+          mythis.set('busy', true);
           var autobackupdir = App.configurator.getUserPath('datalocation', 'automatic_backups');
           return App.projectsManager.migrateTargetTranslationsList()
               .then(function () {

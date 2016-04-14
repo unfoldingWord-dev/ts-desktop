@@ -85,10 +85,10 @@
 
       <div id="header">
           <div>
-              <span class="click" on-tap="togroup">[[category.name]]</span>
+              <span class="click" on-tap="togroup">[[newdata.category.name]]</span>
               <iron-icon icon="chevron-right"></iron-icon>
               <template is="dom-if" if="{{!obs}}">
-                  <span class="click" on-tap="tobook">[[project.name]]</span>
+                  <span class="click" on-tap="tobook">[[newdata.project.name]]</span>
                   <iron-icon icon="chevron-right"></iron-icon>
               </template>
               <em>Choose a type</em>
@@ -96,7 +96,7 @@
       </div>
 
       <div id="contain">
-          <iron-list items="[[typelist]]" as="typedata">
+          <iron-list items="[[newdata.typelist]]" as="typedata">
               <template>
                   <div class$="[[checkclass(typedata.allowed)]]" on-tap="store">
                       <div>
@@ -124,17 +124,10 @@
               value: 0,
               notify: true
           },
-          language: {
+          newdata: {
               type: Object,
-              value: {}
-          },
-          category: {
-              type: Object,
-              value: {}
-          },
-          project: {
-              type: Object,
-              value: {}
+              value: {},
+              notify: true
           },
           projectlist: {
               type: Array,
@@ -143,15 +136,6 @@
           obs: {
               type: Boolean,
               value: false
-          },
-          typedata: {
-              type: Object,
-              value: {},
-              notify: true
-          },
-          typelist: {
-              type: Array,
-              value: []
           }
       },
 
@@ -160,13 +144,13 @@
       ],
 
       observers: [
-          'checkobs(category.name)'
+          'checkobs(newdata.category.name)'
       ],
 
       createtypes: function () {
-          var project = this.project.slug;
+          var project = this.newdata.project.slug;
           var typearray = [];
-          var language = this.language;
+          var language = this.newdata.language;
           var projectarray = this.projectlist;
           var standardexists = false;
 
@@ -196,8 +180,7 @@
                   }
               }
           }
-
-          this.set('typelist', typearray);
+          this.set('newdata.typelist', typearray);
       },
 
       checkclass: function (allowed) {
@@ -209,16 +192,16 @@
       },
 
       store: function(e) {
-          this.typedata = e.model.typedata;
+          this.set('newdata.typedata', e.model.typedata);
           this.fire('create');
       },
 
       togroup: function () {
-          this.selected = 1;
+          this.set('selected', 1);
       },
 
       tobook: function () {
-          this.selected = 2;
+          this.set('selected', 2);
       },
 
     ready: function() {

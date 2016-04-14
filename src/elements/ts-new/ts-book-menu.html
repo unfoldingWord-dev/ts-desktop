@@ -75,14 +75,14 @@
 
       <div id="header">
           <div>
-              <span class="click" on-tap="togroup">[[category.name]]</span>
+              <span class="click" on-tap="togroup">[[newdata.category.name]]</span>
               <iron-icon icon="chevron-right"></iron-icon>
               <em>Choose a book</em>
           </div>
       </div>
 
       <div id="contain">
-          <iron-list items="[[category.data]]" as="project">
+          <iron-list items="[[newdata.category.data]]" as="project">
               <template>
                   <div class="row" on-tap="store">
                       <div>
@@ -108,16 +108,7 @@
               value: 0,
               notify: true
           },
-          category: {
-              type: Object,
-              value: {}
-          },
-          project: {
-              type: Object,
-              value: {},
-              notify: true
-          },
-          typedata: {
+          newdata: {
               type: Object,
               value: {},
               notify: true
@@ -129,18 +120,18 @@
       ],
 
       store: function(e) {
-          this.project = e.model.project;
+          this.set('newdata.project', e.model.project);
           if (App.configurator.getUserSetting('glmode')) {
               this.fire('iron-signal', {name: 'createtypes'});
-              this.selected = this.selected + 1;
+              this.set('selected', 3);
           } else {
-              this.typedata = {type: {id: "text", name: "Text"}, resource: {id: "reg", name: "Regular"}, format: "usfm", allowed: true};
+              this.set('newdata.typedata', {type: {id: "text", name: "Text"}, resource: {id: "reg", name: "Regular"}, format: "usfm", allowed: true});
               this.fire('create');
           }
       },
 
       togroup: function () {
-          this.selected = 1;
+          this.set('selected', 1);
       },
 
     ready: function() {

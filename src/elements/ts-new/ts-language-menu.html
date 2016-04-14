@@ -85,17 +85,17 @@
 
       <div id="header">
           <div>
-              <input is="iron-input" bind-value="{{query}}" placeholder="Choose target language">
+              <input is="iron-input" bind-value="{{newdata.query}}" placeholder="Choose target language">
               <paper-icon-button class="right" icon="search" title="Search Languages"></paper-icon-button>
           </div>
       </div>
       <div id="contain">
-          <iron-list id="list" items="{{searchfilter(query,languagelist)}}" as="lang">
+          <iron-list id="list" items="{{searchfilter(newdata.query,newdata.languagelist)}}" as="language">
               <template>
                   <div class="row" on-tap="store">
                       <div>
-                          <span>[[lang.name]]</span>
-                          <span class="right">[[lang.id]]</span>
+                          <span>[[language.name]]</span>
+                          <span class="right">[[language.id]]</span>
                       </div>
                   </div>
               </template>
@@ -120,18 +120,10 @@
               value: 0,
               notify: true
           },
-          language: {
+          newdata: {
               type: Object,
               value: {},
               notify: true
-          },
-          query: {
-              type: String,
-              value: ""
-          },
-          languagelist: {
-              type: Array,
-              value: []
           }
       },
 
@@ -142,11 +134,11 @@
       searchfilter: function (query, languagelist) {
           let search = App.utils.startsWithBase.bind(null, query);
 
-          var bycode = languagelist.filter(function (lang) {
-              return search(lang.id);
+          var bycode = languagelist.filter(function (language) {
+              return search(language.id);
           });
-          var byname = languagelist.filter(function (lang) {
-              return search(lang.name);
+          var byname = languagelist.filter(function (language) {
+              return search(language.name);
           });
           var combined = bycode.concat(byname);
 
@@ -156,14 +148,14 @@
       },
 
       store: function (e) {
-          this.language = e.model.lang;
-          this.query = "";
+          this.set('newdata.language', e.model.language);
+          this.set('newdata.query', "");
           this.fire('iron-signal', {name: 'createprojects'});
-          this.selected = this.selected + 1;
+          this.set('selected', 1);
       },
 
       ready: function () {
-          this.languagelist = App.dataManager.getTargetLanguages();
+          this.set('newdata.languagelist', App.dataManager.getTargetLanguages());
       }
   });
 

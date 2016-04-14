@@ -1,7 +1,7 @@
 language: node_js
 cache:
   directories:
-  - $HOME/build/unfoldingWord-dev/ts-desktop/node_modules
+  - "$HOME/build/unfoldingWord-dev/ts-desktop/node_modules"
 sudo: false
 node_js:
 - '5.1'
@@ -9,6 +9,6 @@ before_script:
 - npm install
 - npm install gulp -g
 script: gulp
-#before_install:
-#- openssl aes-256-cbc -K $encrypted_09d7304f2fad_key -iv $encrypted_09d7304f2fad_iv
-#  -in config.json.enc -out unit_tests/git/config.json -d
+before_install:
+- if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then openssl aes-256-cbc -K $encrypted_54b2df9dba46_key -iv $encrypted_54b2df9dba46_iv -in config.json.enc -out unit_tests/git/config.json -d; fi
+

@@ -115,16 +115,19 @@ function PrintManager(configurator) {
                             }
                         });
                         doc.pipe(fs.createWriteStream(filePath));
-
                         // default meta
-                        doc.info.Title = project.title.transcontent || meta.project.name;
+                        if(project.title.transcontent !== ""){
+                        doc.info.Title = project.title.transcontent;}
+                        else{ doc.info.Title = project.title.projectmeta.project.name;}
+
                         //doc.info.Author = 'Joel Lonbeck'; // todo: translators
                         //doc.info.Subject = 'an unrestricted, visual mini-Bible in any language'; // todo: project sub-title
                         doc.info.Keywords = meta.target_language.name;
 
                         // book title
                         doc.fontSize(25)
-                            .text(project.title.transcontent, 72, doc.page.height / 2, {align: 'center'});
+                            .font('src/assets/NotoSans-Regular.ttf')
+                            .text(doc.info.Title, 72, doc.page.height / 2, {align: 'center'});
 
                         // TOC placeholders
                         doc.addPage();
@@ -171,6 +174,7 @@ function PrintManager(configurator) {
                                         //console.debug(meta);
                                         //console.debug(frame);
                                         // TRICKY: right now all images are en
+                                        doc.moveDown();
                                         var imgPath = path.join(imagePath, meta.resource.id + "-en-" + frame.chunkmeta.chapterid + "-" + frame.chunkmeta.frameid + ".jpg");
                                         //check the position of the text on the page.
                                         // 792 (total ht of page) - 50 ( lower margin) - 263.25 (height of pic) = 478.75 (max amount of space used before image)
@@ -178,6 +182,7 @@ function PrintManager(configurator) {
                                             doc.addPage();
                                         }
                                        doc.image(imgPath, {width:doc.page.width - 72*2});
+                                       doc.moveDown();//add extra line break after images as per github issue527
                                     }
                                     doc.moveDown()
                                         .fontSize(10)
@@ -198,6 +203,7 @@ function PrintManager(configurator) {
                         for(let i = range.start; i < range.start + range.count; i ++) {
                             doc.switchToPage(i);
                             doc.fontSize(10)
+                                .font('Helvetica')
                                 .text(i + 1, 72, doc.page.height - 50 - 12, {align: 'center'});
                         }
 
@@ -208,6 +214,7 @@ function PrintManager(configurator) {
                         doc.fontSize(25)
                             .lineGap(0)
                             .text('Table of Contents', 72, 72)
+                            .font('src/assets/NotoSans-Regular.ttf')
                             .moveDown();
                         _.forEach(project.chapters, function(chapter) {
                             if(tocPages[chapter.id] !== undefined && tocPages[chapter.id] !== currTocPage) {
@@ -243,11 +250,13 @@ function PrintManager(configurator) {
                         //set the title
                         doc.info.Title = translation[0].transcontent || meta.project.name;
                         doc.fontSize(25)
-                            .text(translation[0].transcontent, 72, doc.page.height / 2, {align: 'center'})
-                            .addPage();
+                            .font('src/assets/NotoSans-Regular.ttf')
+                            .text(doc.info.Title, 72, doc.page.height / 2, {align: 'center'});
 
                              // book body
                         _.forEach(project.chapters, function(chapter) {
+
+                            doc.addPage();//start each chapter on new page
 
                             //list chapters (remove leading zeros in the numbers)
                             var chapterNum = chapter.id.replace(/\b0+/, '');
@@ -263,12 +272,12 @@ function PrintManager(configurator) {
 
                             _.forEach(chapter.frames, function(frame) {
                                 if(options.includeIncompleteFrames === true || frame.completed === true) {
-                                    var content = frame.transcontent.split(/[\\||\/][v]([0-9]+)/g);
+                                    var content = frame.transcontent.split(/[\\]*[\\||\/][v][ ]([0-9]+)/g);
 
                                     _.forEach(content, function(info){
                                         let output = info;
                                        //superscript for verses not supported by pdfkit: https://github.com/devongovett/pdfkit/issues/15
-                                       output = output.replace(/[\\][\\c][0-9]+ /g, '');
+                                       output = output.replace(/[\\][\\c][ ][0-9]+ /g, '');
                                         doc.fontSize(10)
                                             .text(output + ' ',  { continued: true});
                                     });
@@ -276,7 +285,6 @@ function PrintManager(configurator) {
                                 doc.moveDown()
                                     .text("");
                             });
-                            doc.addPage();
                         });
 
                         // number pages
@@ -284,6 +292,7 @@ function PrintManager(configurator) {
                         for (let i = range.start; i < range.start + range.count; i ++) {
                             doc.switchToPage(i);
                             doc.fontSize(10)
+                                .font('Helvetica')
                                 .text(i + 1, 72, doc.page.height - 50 - 12, {align: 'center'});
                         }
 

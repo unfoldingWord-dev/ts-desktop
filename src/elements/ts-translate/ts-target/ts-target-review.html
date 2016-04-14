@@ -230,7 +230,7 @@
                 this.set('chunk.transcontent', returnstr);
                 this.set('chunk.completed', true);
                 this.$.toggle.checked = true;
-                this.fire('iron-signal', {name: 'updatetranslation'});
+                this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk, completion: true}});
             }
         },
 
@@ -275,7 +275,7 @@
 
                 this.set('chunk.transcontent', returnstr);
                 this.set('chunk.completed', false);
-                this.fire('iron-signal', {name: 'updatetranslation'});
+                this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk, completion: true}});
             }
         },
 

@@ -161,7 +161,7 @@
         },
 
         change: function () {
-            this.fire('iron-signal', {name: 'updatetranslation'});
+            this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk, completion: false}});
         },
 
         review: function () {

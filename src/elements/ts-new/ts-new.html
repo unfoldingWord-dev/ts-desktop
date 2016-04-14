@@ -241,10 +241,11 @@
                 App.projectsManager.saveTargetTranslation([], newprojectmeta, this.currentuser).then(function() {
                     mythis.fire('iron-signal', {name: 'updatelist'});
                     mythis.fire('iron-signal', {name: 'loadproject', data: {projectmeta: newprojectmeta, type: "new"}});
-                    mythis.selected = 0;
+                    setTimeout(function() {
+                        mythis.selected = 0;
+                    }, 15000);
                 });
             }
-
         },
 
         startimport: function () {

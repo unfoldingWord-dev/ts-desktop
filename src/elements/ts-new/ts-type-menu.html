@@ -144,6 +144,10 @@
               type: Boolean,
               value: false
           },
+          importing: {
+              type: Boolean,
+              value: false
+          },
           typedata: {
               type: Object,
               value: {},
@@ -195,6 +199,13 @@
                       typearray[i].allowed = false;
                   }
               }
+          }
+
+          //if we're importing, we should only show usfm projects.
+          if(this.importing){
+              typearray = _.filter(typearray, function(type){
+                  return type.format === 'usfm';
+              });
           }
 
           this.set('typelist', typearray);

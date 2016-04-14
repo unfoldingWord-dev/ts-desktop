@@ -68,6 +68,9 @@ process.stdout.write = console.log.bind(console);
     setMsg('Loading Utils...');
     let utils = require('../js/lib/utils');
 
+    setMsg('Loading Importer...');
+    let Importer = require('../js/importer').Importer;
+
     setMsg('Initializing...');
 
     // TODO: refactor this so we can just pass an object to the constructor
@@ -118,6 +121,10 @@ process.stdout.write = console.log.bind(console);
 
     let migrateManager = (function () {
         return new MigrateManager(configurator);
+    })();
+
+    let pm = (function () {
+        return new ProjectsManager(dataManager, configurator, reporter, gitManager, migrateManager);
     })();
 
     // TODO: where should these be?
@@ -181,9 +188,9 @@ process.stdout.write = console.log.bind(console);
             return new PrintManager(configurator);
         })(),
 
-        projectsManager: (function () {
-            return new ProjectsManager(dataManager, configurator, reporter, gitManager, migrateManager);
-        })(),
+        projectsManager: pm,
+
+        importer: new Importer(configurator, pm),
 
         userManager: (function () {
             return new UserManager({

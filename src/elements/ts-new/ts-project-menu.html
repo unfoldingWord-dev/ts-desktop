@@ -137,7 +137,15 @@
           categorylist: {
               type: Array,
               value: []
-          }
+          },
+          importing: {
+              type: Boolean,
+              value: false
+          },
+      },
+
+      visible: function(category){
+          return (category.name === "Old Testament" || category.name === "New Testament" || !this.importing);
       },
 
       behaviors: [
@@ -180,6 +188,7 @@
           var projects = App.dataManager.getProjects();
           var tempobject = {};
           var temparray = [];
+          var self = this;
           _.forEach(_.groupBy(projects, 'category'), function (data, category) {
               if (category === 'null') {
                   tempobject = {"name": "Open Bible Stories", "data": data};
@@ -188,9 +197,11 @@
               } else if (category === 'Bible: NT') {
                   tempobject = {"name": "New Testament", "data": data};
               }
-              temparray.push(tempobject);
+              if(tempobject.name !== "Open Bible Stories" || !self.importing){
+                  temparray.push(tempobject);
+              }
           });
-          if (App.configurator.getUserSetting('glmode')) {
+          if (App.configurator.getUserSetting('glmode') && !this.importing) {
               temparray.push({"name": "translationWords", "data": [{name: "translationWords", slug: "bible"}]});
               var volumes = App.dataManager.getVolumes();
               for (var i = 0; i < volumes.length; i++) {

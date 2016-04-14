@@ -129,6 +129,11 @@
               value: {},
               notify: true
           },
+          importdata: {
+              type: Object,
+              value: {},
+              notify: true
+          },
           projectlist: {
               type: Array,
               value: []
@@ -148,35 +153,36 @@
       ],
 
       createtypes: function () {
-          var project = this.newdata.project.slug;
+          var projectid = this.newdata.project.slug;
           var typearray = [];
           var language = this.newdata.language;
           var projectarray = this.projectlist;
           var standardexists = false;
 
           for (var i = 0; i < projectarray.length; i++) {
-              if (projectarray[i].project.id === project && projectarray[i].target_language.id === language.id && projectarray[i].type.id === "text") {
+              if (projectarray[i].project.id === projectid && projectarray[i].target_language.id === language.id && projectarray[i].type.id === "text") {
                   standardexists = true;
               }
           }
 
-          if (project === "obs") {
+          if (projectid === "obs") {
               typearray.push({type: {id: "text", name: "Text"}, resource: {id: "obs", name: "Open Bible Stories"}, format: "markdown", allowed: true});
           } else {
               typearray.push({type: {id: "text", name: "Text"}, resource: {id: "ulb", name: "Unlocked Literal Bible"}, format: "usfm", allowed: true});
               typearray.push({type: {id: "text", name: "Text"}, resource: {id: "udb", name: "Unlocked Dynamic Bible"}, format: "usfm", allowed: true});
           }
-          typearray.push({type: {id: "tn", name: "Notes"}, resource: {id: "", name: ""}, format: "markdown", allowed: standardexists});
-          typearray.push({type: {id: "tq", name: "Questions"}, resource: {id: "", name: ""}, format: "markdown", allowed: standardexists});
-
-          for (i = 0; i < typearray.length; i++) {
-              var unique_id = language.id + "_" + project + "_" + typearray[i].type.id;
-              if (typearray[i].resource.id !== "") {
-                  unique_id += "_" + typearray[i].resource.id;
-              }
-              for (var k = 0; k < projectarray.length; k++) {
-                  if (projectarray[k].unique_id === unique_id) {
-                      typearray[i].allowed = false;
+          if (!this.importdata.importing) {
+              typearray.push({type: {id: "tn", name: "Notes"}, resource: {id: "", name: ""}, format: "markdown", allowed: standardexists});
+              typearray.push({type: {id: "tq", name: "Questions"}, resource: {id: "", name: ""}, format: "markdown", allowed: standardexists});
+              for (i = 0; i < typearray.length; i++) {
+                  var unique_id = language.id + "_" + projectid + "_" + typearray[i].type.id;
+                  if (typearray[i].resource.id !== "") {
+                      unique_id += "_" + typearray[i].resource.id;
+                  }
+                  for (var k = 0; k < projectarray.length; k++) {
+                      if (projectarray[k].unique_id === unique_id) {
+                          typearray[i].allowed = false;
+                      }
                   }
               }
           }

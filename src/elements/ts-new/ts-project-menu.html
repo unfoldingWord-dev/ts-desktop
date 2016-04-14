@@ -123,6 +123,11 @@
               type: Object,
               value: {},
               notify: true
+          },
+          importdata: {
+              type: Object,
+              value: {},
+              notify: true
           }
       },
 
@@ -164,20 +169,19 @@
       },
 
       createprojects: function () {
+          var mythis = this;
           var projects = App.dataManager.getProjects();
-          var tempobject = {};
           var temparray = [];
           _.forEach(_.groupBy(projects, 'category'), function (data, category) {
-              if (category === 'null') {
-                  tempobject = {"name": "Open Bible Stories", "data": data};
+              if (category === 'null' && !mythis.importdata.importing) {
+                  temparray.push({"name": "Open Bible Stories", "data": data});
               } else if (category === 'Bible: OT') {
-                  tempobject = {"name": "Old Testament", "data": data};
+                  temparray.push({"name": "Old Testament", "data": data});
               } else if (category === 'Bible: NT') {
-                  tempobject = {"name": "New Testament", "data": data};
+                  temparray.push({"name": "New Testament", "data": data});
               }
-              temparray.push(tempobject);
           });
-          if (App.configurator.getUserSetting('glmode')) {
+          if (App.configurator.getUserSetting('glmode') && !mythis.importdata.importing) {
               temparray.push({"name": "translationWords", "data": [{name: "translationWords", slug: "bible"}]});
               var volumes = App.dataManager.getVolumes();
               for (var i = 0; i < volumes.length; i++) {

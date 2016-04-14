@@ -676,12 +676,18 @@
         },
 
         updatesources: function (event, data) {
-            this.set('currentproject.projectmeta.source_translations', data.sources);
-            this.set('currentproject.projectmeta.currentsource', data.selected);
-            this.savemanifest();
-            this.savesource();
-            this.getlocation();
-            this.reloaddata(data.full);
+            var mythis = this;
+            mythis.set('options.loading', true);
+            mythis.set('options.body', "Loading source. Please wait...");
+            mythis.$.loading.open();
+            setTimeout(function() {
+                mythis.set('currentproject.projectmeta.source_translations', data.sources);
+                mythis.set('currentproject.projectmeta.currentsource', data.selected);
+                mythis.savemanifest();
+                mythis.savesource();
+                mythis.getlocation();
+                mythis.reloaddata(data.full);
+            }, 250);
         },
 
         reloaddata: function (full) {
@@ -698,6 +704,7 @@
                 mythis.set('currentproject.rawdata.main', translation);
                 mythis.createchunks();
                 mythis.createchapters();
+                mythis.$.loading.close();
                 mythis.forceResize();
                 mythis.setlocation();
                 mythis.set('busy', false);

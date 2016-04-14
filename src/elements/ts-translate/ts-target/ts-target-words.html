@@ -175,7 +175,7 @@
         },
 
         change: function () {
-            this.fire('iron-signal', {name: 'updatetranslation'});
+            this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk, completion: false}});
         },
 
         checktitle: function (type) {
@@ -221,7 +221,7 @@
             if (this.chunk.index === index && this.chunk.projectmeta.project_type_class === "extant") {
                 this.set('chunk.completed', true);
                 this.$.toggle.checked = true;
-                this.fire('iron-signal', {name: 'updatetranslation'});
+                this.fire('iron-signal', {name: 'updatecompletion'});
                 this.fire('setheight');
             }
         },
@@ -258,7 +258,7 @@
                 }
             } else {
                 this.set('chunk.completed', false);
-                this.fire('iron-signal', {name: 'updatetranslation'});
+                this.fire('iron-signal', {name: 'updatecompletion'});
                 this.fire('setheight');
             }
         },

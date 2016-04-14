@@ -108,23 +108,19 @@ function ImportManager(configurator, migrator) {
             var id = "";
 
             return new Promise(function (resolve, reject) {
-
                 var lineReader = readline.createInterface({
                     input: fs.createReadStream(filepath)
                 });
-
                 lineReader.on('line', function (line) {
                     if (line && line.trim().split(" ")[0] === "\\id") {
-                        id = line.trim().split(" ")[1];
+                        id = line.trim().split(" ")[1].toLowerCase();
                         lineReader.close();
                     }
                 });
-
                 lineReader.on('close', function(){
                     resolve(id);
                 });
             });
-
         },
 
         importFromUSFM: function (filepath, projectmeta) {

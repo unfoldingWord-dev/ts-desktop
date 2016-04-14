@@ -362,14 +362,20 @@
       },
 
       startusfm: function () {
+          var mythis = this;
           this.$.importoptions.close();
           var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
           var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, filters: [{name: 'USFM Files', extensions: ['txt', 'usfm']}], properties: ['openFile']}});
           if (!filePath) {
               return;
           }
-          this.set('importdata', {importing: true, filepath: filePath[0]});
-          this.set('route', 'new');
+
+          App.importManager.retrieveUSFMProjectID(filePath[0])
+              .then(function (id) {
+                  var name = App.dataManager.getProjectName(id)[0].name;
+                  mythis.set('importdata', {importing: true, filepath: filePath[0], project: {slug: id, name: name}});
+                  mythis.set('route', 'new');
+              });
       },
 
       finishusfm: function () {

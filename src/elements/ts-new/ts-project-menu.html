@@ -88,7 +88,7 @@
       </div>
 
       <div id="contain">
-          <iron-list items="[[categorylist]]" as="category">
+          <iron-list items="[[newdata.categorylist]]" as="category">
               <template>
                   <div class="row" on-tap="store">
                       <div>
@@ -119,24 +119,10 @@
               value: 0,
               notify: true
           },
-          category: {
+          newdata: {
               type: Object,
               value: {},
               notify: true
-          },
-          project: {
-              type: Object,
-              value: {},
-              notify: true
-          },
-          typedata: {
-              type: Object,
-              value: {},
-              notify: true
-          },
-          categorylist: {
-              type: Array,
-              value: []
           }
       },
 
@@ -152,27 +138,28 @@
           return name === "Open Bible Stories" || name.substring(0, 11) === "translation" ? '' : 'chevron-right';
       },
 
-      store: function(e) {
-          this.category = e.model.category;
-          if (this.category.name === "Open Bible Stories") {
-              this.project = this.category.data[0];
+      store: function (e) {
+          var category = e.model.category;
+          this.set('newdata.category', category);
+          if (category.name === "Open Bible Stories") {
+              this.set('newdata.project', category.data[0]);
               if (App.configurator.getUserSetting('glmode')) {
                   this.fire('iron-signal', {name: 'createtypes'});
-                  this.selected = this.selected + 2;
+                  this.set('selected', 3);
               } else {
-                  this.typedata = {type: {id: "text", name: "Text"}, resource: {id: "obs", name: "Open Bible Stories"}, format: "markdown", allowed: true};
+                  this.set('newdata.typedata', {type: {id: "text", name: "Text"}, resource: {id: "obs", name: "Open Bible Stories"}, format: "markdown", allowed: true});
                   this.fire('create');
               }
-          } else if (this.category.name === "translationWords") {
-              this.project = this.category.data[0];
-              this.typedata = {type: {id: "tw", name: "Words"}, resource: {id: "", name: ""}, format: "markdown", allowed: true};
+          } else if (category.name === "translationWords") {
+              this.set('newdata.project', category.data[0]);
+              this.set('newdata.typedata', {type: {id: "tw", name: "Words"}, resource: {id: "", name: ""}, format: "markdown", allowed: true});
               this.fire('create');
-          } else if (this.category.name.substring(0, 18) === "translationAcademy") {
-              this.project = this.category.data[0];
-              this.typedata = {type: {id: "ta", name: "Academy"}, resource: {id: "", name: ""}, format: "markdown", allowed: true};
+          } else if (category.name.substring(0, 18) === "translationAcademy") {
+              this.set('newdata.project', category.data[0]);
+              this.set('newdata.typedata', {type: {id: "ta", name: "Academy"}, resource: {id: "", name: ""}, format: "markdown", allowed: true});
               this.fire('create');
           } else {
-              this.selected = this.selected + 1;
+              this.set('selected', 2);
           }
       },
 
@@ -198,7 +185,7 @@
                   temparray.push({"name": name, "data": [{name: name, slug: volumes[i].slug}]});
               }
           }
-          this.categorylist = temparray;
+          this.set('newdata.categorylist', temparray);
       },
 
       ready: function () {

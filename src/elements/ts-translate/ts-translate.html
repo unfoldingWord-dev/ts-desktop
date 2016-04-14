@@ -651,13 +651,13 @@
             mythis.set('currentproject.projectmeta', projectmeta);
             mythis.set('currentproject.statedata', {});
             mythis.set('currentproject.rawdata', {});
+            mythis.retrievesource();
             this.route = "translate";
             setTimeout(function() {
                 mythis.set('options.loading', true);
                 mythis.set('options.body', "Loading project. Please wait...");
                 mythis.$.loading.open();
                 setTimeout(function() {
-                    mythis.retrievesource();
                     App.projectsManager.loadTargetTranslation(projectmeta).then(function (translation) {
                         mythis.set('currentproject.rawdata.main', translation);
                         loaddata2();

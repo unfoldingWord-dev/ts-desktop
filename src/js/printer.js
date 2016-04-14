@@ -214,6 +214,7 @@ function PrintManager(configurator) {
                         doc.fontSize(25)
                             .lineGap(0)
                             .text('Table of Contents', 72, 72)
+                            .font('src/assets/NotoSans-Regular.ttf')
                             .moveDown();
                         _.forEach(project.chapters, function(chapter) {
                             if(tocPages[chapter.id] !== undefined && tocPages[chapter.id] !== currTocPage) {

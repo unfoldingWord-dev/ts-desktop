@@ -111,6 +111,11 @@
             currentuser: {
                 type: Object,
                 value: {}
+            },
+            busy: {
+                type: Boolean,
+                value: false,
+                notify: true
             }
         },
 
@@ -133,7 +138,14 @@
         },
 
         closeWindow: function() {
-            this.fire('iron-signal', {name: 'savestate'});
+            var mythis = this;
+            if (mythis.busy) {
+                setTimeout(function() {
+                    mythis.closeWindow();
+                }, 500);
+                return;
+            }
+            mythis.fire('iron-signal', {name: 'savestate'});
             App.close();
         },
 

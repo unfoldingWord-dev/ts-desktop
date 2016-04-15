@@ -85,12 +85,12 @@
 
       <div id="header">
           <div>
-              <input is="iron-input" bind-value="{{newdata.query}}" placeholder="Choose target language">
+              <input is="iron-input" bind-value="{{query}}" placeholder="Choose target language">
               <paper-icon-button class="right" icon="search" title="Search Languages"></paper-icon-button>
           </div>
       </div>
       <div id="contain">
-          <iron-list id="list" items="{{searchfilter(newdata.query,newdata.languagelist)}}" as="language">
+          <iron-list id="list" items="{{searchfilter(query,languagelist)}}" as="language">
               <template>
                   <div class="row" on-tap="store">
                       <div>
@@ -129,6 +129,14 @@
               type: Object,
               value: {},
               notify: true
+          },
+          languagelist: {
+              type: Array,
+              value: []
+          },
+          query: {
+              type: String,
+              value: ""
           }
       },
 
@@ -154,7 +162,7 @@
 
       store: function (e) {
           this.set('newdata.language', e.model.language);
-          this.set('newdata.query', "");
+          this.set('query', "");
 
           if (this.importdata.importing && this.importdata.project.slug) {
               this.set('newdata.project', this.importdata.project);
@@ -172,7 +180,7 @@
       },
 
       ready: function () {
-          this.set('newdata.languagelist', App.dataManager.getTargetLanguages());
+          this.set('languagelist', App.dataManager.getTargetLanguages());
       }
   });
 

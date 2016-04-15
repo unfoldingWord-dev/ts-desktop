@@ -11,38 +11,40 @@ var _ = require('lodash'),
 function PrintManager(configurator) {
 
     var download = utils.download;
+    var srcDir = path.resolve(path.join(__dirname, '..'));
+    var notoFontPath = path.join(srcDir, 'assets', 'NotoSans-Regular.ttf');
 
     return {
 
-        getImages: function(meta){
-            return new Promise(function(resolve, reject){
-                let imageRoot = path.join(configurator.getValue('rootdir'), 'images'),
+        getImages: function (meta) {
+            return new Promise(function (resolve, reject) {
+                var imageRoot = path.join(configurator.getValue('rootdir'), 'images'),
                     imagePath = path.join(imageRoot, meta.resource.id);
 
                 //check to see if we need to create the images directory;
-                if(!fs.existsSync(imagePath)){
+                if (!fs.existsSync(imagePath)) {
                     utils.fs.mkdirs(imagePath);
                 }
 
                 //if the zip file isn't downloaded yet, go get it.
-                let dest = path.join(imagePath, 'images.zip');
-                if(!fs.existsSync(dest)) {
+                var dest = path.join(imagePath, 'images.zip');
+                if (!fs.existsSync(dest)) {
                     //let out = fs.createWriteStream(dest);
                     // TRICKY: right now we have to hard code the urls until the api is updated
-                    let url = configurator.getValue("mediaServer") + '/obs/jpg/1/en/obs-images-360px.zip';
+                    var url = configurator.getValue("mediaServer") + '/obs/jpg/1/en/obs-images-360px.zip';
                     console.log('downloading images from', url);
-                    download(url, dest, true).then(function() {
-                        let zip = new AdmZip(dest);
+                    download(url, dest, true).then(function () {
+                        var zip = new AdmZip(dest);
                         zip.extractAllTo(imagePath, true);
 
-                        let directories = fs.readdirSync(imagePath).filter(function(file) {
+                        var directories = fs.readdirSync(imagePath).filter(function (file) {
                             return fs.statSync(path.join(imagePath, file)).isDirectory();
                         });
-                        directories.forEach(function(dir){
-                            let dirPath = path.join(imagePath,dir),
+                        directories.forEach(function (dir) {
+                            var dirPath = path.join(imagePath,dir),
                                 files = fs.readdirSync(dirPath);
-                            files.forEach(function(file){
-                                let filePath = path.join(imagePath,dir,file),
+                            files.forEach(function (file) {
+                                var filePath = path.join(imagePath,dir,file),
                                     newPath = path.join(imagePath,file);
                                 fs.renameSync(filePath, newPath);
                             });
@@ -51,7 +53,7 @@ function PrintManager(configurator) {
                             fs.rmdir(dirPath);
                         });
                         resolve();
-                    }).catch(function(err) {
+                    }).catch(function (err) {
                         reject(err);
                     });
                 } else {
@@ -62,22 +64,22 @@ function PrintManager(configurator) {
 
         targetTranslationToPdf: function (translation, meta, filePath, options) {
 
-            let imageRoot = path.join(configurator.getValue('rootdir'), "images"),
+            var imageRoot = path.join(configurator.getValue('rootdir'), "images"),
                 imagePath = path.join(imageRoot, meta.resource.id);
 
-            return new Promise(function(resolve, reject) {
-                if(meta.project_type_class === "standard") {
+            return new Promise(function (resolve, reject) {
+                if (meta.project_type_class === "standard") {
                     // normalize input
-                    let chapters = _.mapValues(_.groupBy(translation, function(obj) {
+                    var chapters = _.mapValues(_.groupBy(translation, function (obj) {
                         //console.debug('map chapter values', obj);
                         return obj.chunkmeta.chapterid;
-                    }), function(chapter, key) {
-                        let frames = _.mapKeys(chapter, function(obj) {
+                    }), function (chapter, key) {
+                        var frames = _.mapKeys(chapter, function (obj) {
                             //console.debug('map chapter keys', obj);
                             return obj.chunkmeta.frameid;
                         });
 
-                        let chapterObj = {
+                        var chapterObj = {
                             id: key,
                             title: frames.title || key,
                             reference: frames.reference === undefined ? null : frames.reference,
@@ -85,27 +87,27 @@ function PrintManager(configurator) {
                         };
                         delete frames.reference;
                         delete frames.title;
-                        chapterObj.frames = _.sortBy(_.filter(frames, function(o) {
+                        chapterObj.frames = _.sortBy(_.filter(frames, function (o) {
                             return o.transcontent !== '';
-                        }), function(f) {
+                        }), function (f) {
                             //console.debug('sort frames',f);
                             return f.chunkmeta.frame;
                         });
                         return chapterObj;
                     });
-                    let project = {
+                    var project = {
                         format: meta.format,
                         title: chapters['00'].title
                     };
                     delete chapters['00'];
-                    project.chapters = _.sortBy(_.filter(chapters, function(o) {
+                    project.chapters = _.sortBy(_.filter(chapters, function (o) {
                         return o.frames.length > 0;
                     }), 'id');
                     chapters = null;
 
-                    if(project.format === 'markdown') {
+                    if (project.format === 'markdown') {
 
-                        let doc = new PDFDocument({
+                        var doc = new PDFDocument({
                             bufferPages: true,
                             margins:{
                                 top: 72,
@@ -116,9 +118,11 @@ function PrintManager(configurator) {
                         });
                         doc.pipe(fs.createWriteStream(filePath));
                         // default meta
-                        if(project.title.transcontent !== ""){
-                        doc.info.Title = project.title.transcontent;}
-                        else{ doc.info.Title = project.title.projectmeta.project.name;}
+                        if (project.title.transcontent !== "") {
+                            doc.info.Title = project.title.transcontent;
+                        } else {
+                            doc.info.Title = project.title.projectmeta.project.name;
+                        }
 
                         //doc.info.Author = 'Joel Lonbeck'; // todo: translators
                         //doc.info.Subject = 'an unrestricted, visual mini-Bible in any language'; // todo: project sub-title
@@ -126,24 +130,24 @@ function PrintManager(configurator) {
 
                         // book title
                         doc.fontSize(25)
-                            .font('src/assets/NotoSans-Regular.ttf')
+                            .font(notoFontPath)
                             .text(doc.info.Title, 72, doc.page.height / 2, {align: 'center'});
 
                         // TOC placeholders
                         doc.addPage();
-                        let lastTOCPage = doc.bufferedPageRange().count;
-                        let tocPages = {
+                        var lastTOCPage = doc.bufferedPageRange().count;
+                        var tocPages = {
                             start: lastTOCPage - 1
                         };
                         doc.fontSize(25)
                             .text(' ', 72, 72)
                             .moveDown();
-                        _.forEach(project.chapters, function(chapter) {
+                        _.forEach(project.chapters, function (chapter) {
                             doc.fontSize(10)
                                 .text(' ')
                                 .moveDown();
-                            let currPage = doc.bufferedPageRange().count;
-                            if(lastTOCPage !== currPage) {
+                            var currPage = doc.bufferedPageRange().count;
+                            if (lastTOCPage !== currPage) {
                                 // record toc page split
                                 tocPages[chapter.id] = currPage - 1;
                                 lastTOCPage = currPage;
@@ -156,7 +160,7 @@ function PrintManager(configurator) {
                         });
 
                         // book body
-                        _.forEach(project.chapters, function(chapter) {
+                        _.forEach(project.chapters, function (chapter) {
                             // chapter title
                             doc.addPage();
                             doc.fontSize(20)
@@ -164,12 +168,12 @@ function PrintManager(configurator) {
                             chapter.page = doc.bufferedPageRange().count;
 
                             // frames
-                            if(options.doubleSpace === true){
+                            if (options.doubleSpace === true) {
                                 doc.lineGap(20);
                             }
                             doc.addPage();
-                            _.forEach(chapter.frames, function(frame) {
-                                if(options.includeIncompleteFrames === true || frame.completed === true) {
+                            _.forEach(chapter.frames, function (frame) {
+                                if (options.includeIncompleteFrames === true || frame.completed === true) {
                                     if (options.includeImages === true) {
                                         //console.debug(meta);
                                         //console.debug(frame);
@@ -178,7 +182,7 @@ function PrintManager(configurator) {
                                         var imgPath = path.join(imagePath, meta.resource.id + "-en-" + frame.chunkmeta.chapterid + "-" + frame.chunkmeta.frameid + ".jpg");
                                         //check the position of the text on the page.
                                         // 792 (total ht of page) - 50 ( lower margin) - 263.25 (height of pic) = 478.75 (max amount of space used before image)
-                                        if(doc.y > 478.75){
+                                        if (doc.y > 478.75) {
                                             doc.addPage();
                                         }
                                        doc.image(imgPath, {width:doc.page.width - 72*2});
@@ -191,7 +195,7 @@ function PrintManager(configurator) {
                             });
 
                             // chapter reference
-                            if(chapter.reference !== null) {
+                            if (chapter.reference !== null) {
                                 doc.moveDown()
                                     .fontSize(10)
                                     .text(chapter.reference.transcontent);
@@ -199,8 +203,8 @@ function PrintManager(configurator) {
                         });
 
                         // number pages
-                        let range = doc.bufferedPageRange();
-                        for(let i = range.start; i < range.start + range.count; i ++) {
+                        var range = doc.bufferedPageRange();
+                        for (var i = range.start; i < range.start + range.count; i ++) {
                             doc.switchToPage(i);
                             doc.fontSize(10)
                                 .font('Helvetica')
@@ -208,16 +212,16 @@ function PrintManager(configurator) {
                         }
 
                         // write TOC
-                        let currTocPage = tocPages.start;
+                        var currTocPage = tocPages.start;
                         doc.switchToPage(currTocPage);
                         // TODO: display correct title of TOC based on the project
                         doc.fontSize(25)
                             .lineGap(0)
                             .text('Table of Contents', 72, 72)
-                            .font('src/assets/NotoSans-Regular.ttf')
+                            .font(notoFontPath)
                             .moveDown();
-                        _.forEach(project.chapters, function(chapter) {
-                            if(tocPages[chapter.id] !== undefined && tocPages[chapter.id] !== currTocPage) {
+                        _.forEach(project.chapters, function (chapter) {
+                            if (tocPages[chapter.id] !== undefined && tocPages[chapter.id] !== currTocPage) {
                                 currTocPage = tocPages[chapter.id];
                                 doc.switchToPage(currTocPage);
                                 doc.fontSize(10)
@@ -236,7 +240,7 @@ function PrintManager(configurator) {
                         resolve(true);
                     } else if (project.format === 'usfm') {
 
-                         let doc = new PDFDocument({
+                         var doc = new PDFDocument({
                             bufferPages: true,
                             margins:{
                                 top: 72,
@@ -250,11 +254,11 @@ function PrintManager(configurator) {
                         //set the title
                         doc.info.Title = translation[0].transcontent || meta.project.name;
                         doc.fontSize(25)
-                            .font('src/assets/NotoSans-Regular.ttf')
+                            .font(notoFontPath)
                             .text(doc.info.Title, 72, doc.page.height / 2, {align: 'center'});
 
                              // book body
-                        _.forEach(project.chapters, function(chapter) {
+                        _.forEach(project.chapters, function (chapter) {
 
                             doc.addPage();//start each chapter on new page
 
@@ -266,15 +270,15 @@ function PrintManager(configurator) {
                             chapter.page = doc.bufferedPageRange().count;
 
                             // frames
-                            if(options.doubleSpace === true){
+                            if (options.doubleSpace === true) {
                                 doc.lineGap(20);
                             }
 
-                            _.forEach(chapter.frames, function(frame) {
-                                if(options.includeIncompleteFrames === true || frame.completed === true) {
+                            _.forEach(chapter.frames, function (frame) {
+                                if (options.includeIncompleteFrames === true || frame.completed === true) {
                                     var content = frame.transcontent.split(/[\\]*[\\||\/][v][ ]([0-9]+)/g);
 
-                                    _.forEach(content, function(info){
+                                    _.forEach(content, function (info) {
                                         let output = info;
                                        //superscript for verses not supported by pdfkit: https://github.com/devongovett/pdfkit/issues/15
                                        output = output.replace(/[\\][\\c][ ][0-9]+ /g, '');
@@ -288,8 +292,8 @@ function PrintManager(configurator) {
                         });
 
                         // number pages
-                        let range = doc.bufferedPageRange();
-                        for (let i = range.start; i < range.start + range.count; i ++) {
+                        var range = doc.bufferedPageRange();
+                        for (var i = range.start; i < range.start + range.count; i ++) {
                             doc.switchToPage(i);
                             doc.fontSize(10)
                                 .font('Helvetica')

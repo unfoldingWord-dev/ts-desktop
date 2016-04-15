@@ -269,7 +269,7 @@
             this.set('options.loading', true);
             loading.open();
 
-            return App.gitManager.stage(user, paths.projectDir)
+            return App.gitManager.commitAll(user, paths.projectDir)
                 .then(function () {
                     return App.utils.getDeviceId();
                 })

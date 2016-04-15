@@ -215,6 +215,7 @@
                     if (this.importdata.importing) {
                         this.importdata.overwrite = true;
                         this.$.confirmimport.open();
+                        return;
                     } else {
                         this.set('options', {title: "Duplicate Found", body: "This project already exists"});
                         popup.open();

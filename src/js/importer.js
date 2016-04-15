@@ -159,7 +159,7 @@ function ImportManager(configurator, migrator, dataManager) {
                     }
                 }
 
-                if (parsedData['00']) {
+                if (parsedData['00'].contents) {
                     chunks.unshift({
                         chunkmeta: {
                             chapterid: '00',
@@ -169,7 +169,6 @@ function ImportManager(configurator, migrator, dataManager) {
                         completed: false
                     });
                 }
-                console.log(chunks);
                 return chunks;
             });
         }

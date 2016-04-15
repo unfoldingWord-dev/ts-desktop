@@ -372,7 +372,10 @@
 
           App.importManager.retrieveUSFMProjectID(filePath[0])
               .then(function (id) {
-                  var name = App.dataManager.getProjectName(id)[0].name;
+                  var name = "";
+                  if (id) {
+                      name = App.dataManager.getProjectName(id)[0].name;
+                  }
                   mythis.set('importdata', {importing: true, filepath: filePath[0], project: {slug: id, name: name}});
                   mythis.set('route', 'new');
               });
@@ -409,7 +412,6 @@
                       mythis.set('options.title', "Import Complete");
                       mythis.set('options.body', "Your file has been successfully imported.");
                       mythis.set('options.loading', false);
-                      mythis.set('importdata', {importing: false});
                       setTimeout(function() {
                           mythis.updatelist();
                       }, 250);
@@ -421,7 +423,6 @@
                       mythis.set('options.title', "Import Failed");
                       mythis.set('options.body', errmessage);
                       mythis.set('options.loading', false);
-                      mythis.set('importdata', {importing: false});
                       if (overwrite) {
                           return App.importManager.restoreFromBackup(backupPath);
                       }

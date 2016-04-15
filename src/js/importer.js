@@ -8,7 +8,7 @@ var _ = require('lodash'),
     readline = require('readline'),
     utils = require('../js/lib/utils');
 
-function ImportManager(configurator, migrator) {
+function ImportManager(configurator, migrator, dataManager) {
 
     return {
 
@@ -124,92 +124,53 @@ function ImportManager(configurator, migrator) {
         },
 
         importFromUSFM: function (filepath, projectmeta) {
-            var mythis = this;
+            var parser = new UsfmParser();
 
-            return mythis.getVerses(projectmeta).then(function (chunkFileNames) {
-                var parser = new UsfmParser();
-                return parser.load(filepath).then(function () {
-                    var parsedData = parser.parse();
+            return parser.load(filepath).then(function () {
+                var parsedData = parser.parse();
 
-                    if (JSON.stringify(parsedData) === JSON.stringify({})) {
-                        throw new Error('This is not a valid USFM file.');
-                    }
+                if (JSON.stringify(parsedData) === JSON.stringify({})) {
+                    throw new Error('This is not a valid USFM file.');
+                }
+                var chunks = [];
+                var markers = dataManager.getChunkMarkers(projectmeta.project.id);
 
-                    for (var i = 0; i < chunkFileNames.length; i++) {
-                        var chunk = chunkFileNames[i];
-                        var transcontent = '';
+                for (var i = 0; i < markers.length; i++) {
+                    var frameid = markers[i].first_verse_slug;
+                    var first = parseInt(frameid);
+                    var chapter = markers[i].chapter_slug;
+                    var isLastChunkOfChapter = !markers[i+1] || markers[i+1].chapter_slug !== chapter;
+                    var last = isLastChunkOfChapter ? Number.MAX_VALUE : parseInt(markers[i+1].first_verse_slug) - 1;
 
-                        for (var ci = 0; ci < chunk.verses.length; ci++) {
-                            if (typeof parsedData[chunk.chapter] !== 'undefined' && typeof parsedData[chunk.chapter].verses[chunk.verses[ci]] !== 'undefined') {
-                                //transcontent += '\\v' + parsedData[chunk.chapter].verses[chunk.verses[ci]].id + ' ' + parsedData[chunk.chapter].verses[chunk.verses[ci]].contents;
-                                transcontent += ' ' + parsedData[chunk.chapter].verses[chunk.verses[ci]].contents;
-                            }
-                        }
-                        chunkFileNames[i].chunkmeta = {
-                            chapterid: chunkFileNames[i].chapter,
-                            frameid: chunkFileNames[i].filename
-                        };
+                    if (parsedData[chapter]) {
+                        var transcontent = _.chain(parsedData[chapter].verses).filter(function (verse) {
+                            var id = parseInt(verse.id);
+                            return id <= last && id >= first;
+                        }).map("contents").value().join("");
 
-                        chunkFileNames[i].completed = false;
-                        chunkFileNames[i].transcontent = transcontent.trim();
-                    }
-
-                    if (typeof parsedData['00'] !== 'undefined') {
-                        chunkFileNames.push({
+                        chunks.push({
                             chunkmeta: {
-                                chapterid: '00',
-                                frameid: 'title'
+                                chapterid: chapter,
+                                frameid: frameid
                             },
-                            transcontent: parsedData['00'].contents.trim(),
+                            transcontent: transcontent.trim(),
                             completed: false
                         });
                     }
-                    return chunkFileNames;
-                });
-            });
-        },
+                }
 
-        getVerses: function (projectmeta) {
-            return new Promise(function (resolve, reject) {
-                var book = projectmeta.project.id;
-                var chunkDescUrl = "https://api.unfoldingword.org/bible/txt/1/" + book + "/chunks.json";
-                var chunks = [];
-                request(chunkDescUrl, function (err, resp, body) {
-                    if (!err) {
-                        var chunkDesc = JSON.parse(body);
-                        for (var i = 0; i < chunkDesc.length; i++) {
-                            var chunk = chunkDesc[i],
-                                verses = [],
-                                v,
-                                nextChunkChapter = typeof chunkDesc[i + 1] !== 'undefined' ? chunkDesc[i + 1].chp : false;
-
-                            //if the next chunk exists and it's the same chapter as the current chunk...
-                            if (nextChunkChapter === chunk.chp) {
-                                var lastVs = chunkDesc[i + 1].firstvs - 1;
-                                for (v = parseInt(chunk.firstvs); v <= lastVs; v++) {
-                                    verses.push(v);
-                                }
-
-                                //if it doesn't exist or it's not the same chapter as the current chunk, add 100 verses so we make sure to get everything being imported.
-                            } else {
-                                v = parseInt(chunk.firstvs);
-                                var max = v + 100;
-                                for (v; v < max; v++) {
-                                    verses.push(v);
-                                }
-                            }
-                            var chk = {
-                                filename: chunk.firstvs,
-                                chapter: chunk.chp,
-                                verses: verses
-                            };
-                            chunks.push(chk);
-                        }
-                        resolve(chunks);
-                    } else {
-                        reject(err);
-                    }
-                });
+                if (parsedData['00']) {
+                    chunks.unshift({
+                        chunkmeta: {
+                            chapterid: '00',
+                            frameid: 'title'
+                        },
+                        transcontent: parsedData['00'].contents.trim(),
+                        completed: false
+                    });
+                }
+                console.log(chunks);
+                return chunks;
             });
         }
     };
@@ -263,9 +224,9 @@ function UsfmParser () {
 
     var getMarker = function (line) {
         var beginMarker = line.split(" ")[0];
-        for (var t = 0; t < markerTypes.length; t++) {
-            if (markerTypes[t].regEx.test(beginMarker)) {
-                return markerTypes[t];
+        for (var type in markerTypes) {
+            if (markerTypes[type].regEx.test(beginMarker)) {
+                return markerTypes[type];
             }
         }
         return false;
@@ -284,12 +245,12 @@ function UsfmParser () {
                 });
 
                 lineReader.on('line', function (line) {
-                    if(typeof line !== "undefined"){
+                    if (line) {
                         mythis.contents.push(line);
                     }
                 });
 
-                lineReader.on('close', function(){
+                lineReader.on('close', function() {
                     resolve(mythis);
                 });
             });
@@ -307,7 +268,7 @@ function UsfmParser () {
             for (var i = 0; i < mythis.contents.length; i++) {
                 var line = mythis.contents[i];
                 var lineArray = line.split(" ");
-                for (var c=0; c < lineArray.length; c++) {
+                for (var c = 0; c < lineArray.length; c++) {
                     var section = lineArray[c];
                     var marker = getMarker(section);
 
@@ -335,7 +296,7 @@ function UsfmParser () {
         buildChapters: function(){
             mythis.chapters = {};
             var chap;
-            for (var m = 0; m < mythis.markers.length; m++) {
+            for (var m in mythis.markers) {
                 var marker = mythis.markers[m];
                 if (marker.type === "chapter") {
                     chap = String("00" + marker.options).slice(-2);

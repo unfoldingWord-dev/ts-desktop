@@ -409,7 +409,7 @@
                 mythis.set('busy', true);
                 App.gitManager.init(paths.projectDir)
                     .then(function () {
-                        return App.gitManager.stage(mythis.currentuser, paths.projectDir);
+                        return App.gitManager.commitAll(mythis.currentuser, paths.projectDir);
                     }).then(function () {
                         mythis.gittimer = setTimeout(timer1, 120000);
                         mythis.set('busy', false);

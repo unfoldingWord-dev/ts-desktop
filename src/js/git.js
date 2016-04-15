@@ -86,25 +86,33 @@ function GitManager() {
             var mergedManifest = {};
 
             return Promise.all([utils.fs.readFile(mergeToManifest), utils.fs.readFile(mergeFromManifest)])
-                .then(function (mergeToManifestData, mergeFromManifestData) {
-                    var mergeToManifestJson = JSON.parse(mergeToManifestData);
-                    var mergeFromManifestJson = JSON.parse(mergeFromManifestData);
+                .then(function (manifestDataArray) {
+                    console.log("start manifest merge");
+                    //console.log(mergeToManifestData);
+                    var mergeToManifestJson = JSON.parse(manifestDataArray[0].toString());
+                    var mergeFromManifestJson = JSON.parse(manifestDataArray[1]);
                     mergedManifest = mergeToManifestJson;
                     mergedManifest.translators = _.union(mergeToManifestJson.translators, mergeFromManifestJson.translators);
                     mergedManifest.finished_chunks = _.union(mergeToManifestJson.finished_chunks, mergeFromManifestJson.finished_chunks);
-                    mergedManifest.source_translations = _.union(mergeToManifestJson.source_translations, mergeFromManifestJson.source_translations);
+                    //mergedManifest.source_translations = _.union(mergeToManifestJson.source_translations, mergeFromManifestJson.source_translations);
+                    console.log(mergedManifest);
                 })
                 .then(function () {
+                    console.log("start open repo");
                     return NodeGit.Repository.open(mergeToPath);
                 })
                 .then(function (repo) {
+                    console.log('start create remote');
                     var remote = NodeGit.Remote.createAnonymous(repo, mergeFromPath);
                     return {target: repo, remote: remote};
                 })
                 .then(function (repos) {
-                    return NodeGit.Branch.create(repos.target, "new", repos.remote, true).then(utils.ret(repos));
+                    console.log("start create branch");
+                    return repos.target.createBranch("new", repos.remote, true, repos.target.defaultSignature(), "good").then(utils.ret(repos));
+                    //return NodeGit.Branch.create(repos.target, "new", repos.remote, true).then(utils.ret(repos));
                 })
                 .then(function (repos) {
+                    console.log("start merge");
                     //NodeGit.Merge.merge(repos.target, repos.remote);
                     return repos.target.mergeBranches('master', 'new');
                 });

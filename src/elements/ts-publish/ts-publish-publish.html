@@ -76,7 +76,7 @@
         }
 
         #loading {
-            width: 320px;
+            width: 450px;
             height: 220px;
             color: var(--primary-text-color);
             display: flex;
@@ -118,6 +118,12 @@
         #imagebox {
             display: flex;
             justify-content: center;
+        }
+
+        .url {
+            color: var(--accent-color);
+            font-size: 90%;
+            cursor: pointer;
         }
 
         .hide {
@@ -163,6 +169,7 @@
                 <h2>{{options.title}}</h2>
                 <div id="text">
                     <p>{{options.body}}</p>
+                    <p class="url">{{options.link}}</p>
                 </div>
                 <div id="buttonbox">
                     <paper-button dialog-confirm on-tap="gohome">Return Home</paper-button>
@@ -264,6 +271,7 @@
             var paths = App.utils.makeProjectPaths(target, projectmeta);
             var repo = projectmeta.unique_id;
             var user = this.currentuser;
+            var shell = require('electron').shell;
 
             this.set('options.body', "Uploading Project.  Please wait...");
             this.set('options.loading', true);
@@ -290,18 +298,24 @@
                     return App.userManager.createRepo(user, repo);
                 })
                 .then(function (repo) {
-                    return App.gitManager.push(user, paths.projectDir, repo);
+                    return App.gitManager.push(user, paths.projectDir, repo).then(App.utils.ret(repo.html_url));
                 })
-                .then(function () {
+                .then(function (url) {
                     mythis.set('options.title', "Project Published");
-                    mythis.set('options.body', "Your project has been successfully published to the server.");
+                    mythis.set('options.body', "Your project has been uploaded to:");
+                    mythis.set('options.link', url);
                     mythis.set('options.loading', false);
+                    var link = loading.getElementsByClassName("url");
+                    link[0].addEventListener('click', function (event) {
+                        event.preventDefault();
+                        shell.openExternal(url);
+                    });
                 })
                 .catch(function (err) {
                     var errmessage = "We're sorry.  An error occurred while trying to upload your project.";
                     var logmessage = "";
                     if(err.status === 401) {
-                        errmessage = "Cannot publish with a local login.  Please login with a Door43 account.";
+                        errmessage = "Cannot publish without connecting to a Door43 account.";
                     }
                     if (err.status) {
                         logmessage = "Error: " + err.status + " " + err.data;

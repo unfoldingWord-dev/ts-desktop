@@ -214,7 +214,8 @@
         },
 
         back: function () {
-            this.selected === 0 ? this.route = "translate" : this.selected = this.selected - 1;
+            this.set('selected', 0);
+            this.set('route', "translate");
         },
 
         ready: function() {

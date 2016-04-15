@@ -177,7 +177,7 @@
 
   <template>
 
-      <ts-app-titlebar currentuser="[[currentuser]]"></ts-app-titlebar>
+      <ts-app-titlebar currentuser="[[currentuser]]" busy="{{busy}}"></ts-app-titlebar>
       <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
           <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]"></ts-home>
           <ts-new data-route="new" route="{{route}}" importdata="{{importdata}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]"></ts-new>

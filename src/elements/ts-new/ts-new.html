@@ -83,7 +83,12 @@
         <div id="header">
             <div id="title">
                 <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
-                <span>New Project</span>
+                <template is="dom-if" if="{{!importdata.importing}}">
+                    <span>New Project</span>
+                </template>
+                <template is="dom-if" if="{{importdata.importing}}">
+                    <span>Import Project</span>
+                </template>
             </div>
         </div>
 
@@ -239,7 +244,7 @@
                     mythis.fire('iron-signal', {name: 'updatelist'});
                     mythis.fire('iron-signal', {name: 'loadproject', data: {projectmeta: newprojectmeta, type: "new"}});
                     setTimeout(function() {
-                        mythis.selected = 0;
+                        mythis.set('selected', 0);
                     }, 15000);
                 });
             }
@@ -247,14 +252,17 @@
 
         startimport: function () {
             this.$.confirmimport.close();
-            this.route = "home";
+            this.set('route', "home");
             this.fire('iron-signal', {name: 'finishusfm'});
-            this.selected = 0;
+            this.set('selected', 0);
+            this.set('importdata', {importing: false});
         },
 
         back: function () {
             this.animationConfig.exit.name = 'slide-right-animation';
-            this.selected === 0 ? this.route = "home" : this.selected = this.selected - 1;
+            this.set('selected', 0);
+            this.set('importdata', {importing: false});
+            this.set('route', "home");
         },
 
         ready: function() {

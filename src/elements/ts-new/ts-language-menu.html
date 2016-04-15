@@ -85,8 +85,8 @@
 
       <div id="header">
           <div>
-              <input is="iron-input" bind-value="{{query}}" placeholder="Choose target language">
-              <paper-icon-button class="right" icon="search" title="Search Languages"></paper-icon-button>
+              <input is="iron-input" id="input" bind-value="{{query}}" placeholder="Choose target language">
+              <paper-icon-button class="right" icon="search" on-tap="focussearch"></paper-icon-button>
           </div>
       </div>
       <div id="contain">
@@ -144,6 +144,10 @@
           Polymer.IronResizableBehavior
       ],
 
+      focussearch: function () {
+          this.$.input.focus();
+      },
+
       searchfilter: function (query, languagelist) {
           let search = App.utils.startsWithBase.bind(null, query);
 
@@ -162,7 +166,6 @@
 
       store: function (e) {
           this.set('newdata.language', e.model.language);
-          this.set('query', "");
 
           if (this.importdata.importing && this.importdata.project.slug) {
               this.set('newdata.project', this.importdata.project);
@@ -177,6 +180,8 @@
               this.fire('iron-signal', {name: 'createprojects'});
               this.set('selected', 1);
           }
+          this.set('query', "");
+          this.$.list.scrollTop = 0;
       },
 
       ready: function () {

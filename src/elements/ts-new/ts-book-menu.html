@@ -82,7 +82,7 @@
       </div>
 
       <div id="contain">
-          <iron-list items="[[newdata.category.data]]" as="project">
+          <iron-list id="list" items="[[newdata.category.data]]" as="project">
               <template>
                   <div class="row" on-tap="store">
                       <div>
@@ -128,6 +128,7 @@
               this.set('newdata.typedata', {type: {id: "text", name: "Text"}, resource: {id: "reg", name: "Regular"}, format: "usfm", allowed: true});
               this.fire('create');
           }
+          this.$.list.scrollTop = 0;
       },
 
       togroup: function () {

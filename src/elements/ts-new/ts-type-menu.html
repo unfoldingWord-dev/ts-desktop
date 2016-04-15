@@ -85,11 +85,13 @@
 
       <div id="header">
           <div>
-              <span class="click" on-tap="togroup">[[newdata.category.name]]</span>
-              <iron-icon icon="chevron-right"></iron-icon>
-              <template is="dom-if" if="{{!obs}}">
-                  <span class="click" on-tap="tobook">[[newdata.project.name]]</span>
+              <template is="dom-if" if="{{!importdata.importing}}">
+                  <span class="click" on-tap="togroup">[[newdata.category.name]]</span>
                   <iron-icon icon="chevron-right"></iron-icon>
+                  <template is="dom-if" if="{{!obs}}">
+                      <span class="click" on-tap="tobook">[[newdata.project.name]]</span>
+                      <iron-icon icon="chevron-right"></iron-icon>
+                  </template>
               </template>
               <em>Choose a type</em>
           </div>

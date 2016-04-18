@@ -357,8 +357,8 @@
                 value: {loading: false, title: "", body: ""}
             },
             busy: {
-                type: Boolean,
-                value: true,
+                type: Object,
+                value: {signal: false, message: "Idle"},
                 notify: false
             },
             gittimer: {
@@ -402,30 +402,30 @@
             clearTimeout(mythis.backuptimer);
 
             mythis.gittimer = setTimeout(function timer1 () {
-                if (mythis.busy) {
+                if (mythis.busy.signal) {
                     mythis.gittimer = setTimeout(timer1, 5000);
                     return;
                 }
-                mythis.set('busy', true);
+                mythis.set('busy', {signal: true, message: "Committing changes to git..."});
                 App.gitManager.init(paths.projectDir)
                     .then(function () {
                         return App.gitManager.commitAll(mythis.currentuser, paths.projectDir);
                     }).then(function () {
                         mythis.gittimer = setTimeout(timer1, 120000);
-                        mythis.set('busy', false);
+                        mythis.set('busy', {signal: false, message: "Idle"});
                     })
                 }, 100);
 
             mythis.backuptimer = setTimeout(function timer2 () {
-                if (mythis.busy) {
+                if (mythis.busy.signal) {
                     mythis.backuptimer = setTimeout(timer2, 5000);
                     return;
                 }
-                mythis.set('busy', true);
+                mythis.set('busy', {signal: true, message: "Backing up project..."});
                 App.exportManager.backupTranslation(projectmeta, filePath)
                     .then(function () {
                         mythis.backuptimer = setTimeout(timer2, 600000);
-                        mythis.set('busy', false);
+                        mythis.set('busy', {signal: false, message: "Idle"});
                     })
                 }, 100);
         },
@@ -562,13 +562,13 @@
 
         loadproject: function (event, data) {
             var mythis = this;
-            if (mythis.busy) {
+            if (mythis.busy.signal) {
                 setTimeout(function() {
                     mythis.loadproject(event, data);
                 }, 500);
                 return;
             }
-            mythis.set('busy', true);
+            mythis.set('busy', {signal: true, message: "Loading project..."});
             var type = data.type;
             var projectmeta = data.projectmeta;
             var list = this.projectlist;
@@ -582,7 +582,7 @@
                 }
                 mythis.$.loading.close();
                 setTimeout(function() {
-                    mythis.set('busy', false);
+                    mythis.set('busy', {signal: false, message: "Idle"});
                     mythis.setmodestate();
                     mythis.checksources();
                     if (type === "publish") {
@@ -693,13 +693,13 @@
         reloaddata: function (full) {
             var mythis = this;
             var projectmeta = mythis.currentproject.projectmeta;
-            if (mythis.busy) {
+            if (mythis.busy.signal) {
                 setTimeout(function() {
                     mythis.reloaddata(full);
                 }, 500);
                 return;
             }
-            mythis.set('busy', true);
+            mythis.set('busy', {signal: true, message: "Loading source data..."});
             App.projectsManager.loadTargetTranslation(projectmeta).then(function (translation) {
                 mythis.set('currentproject.rawdata.main', translation);
                 mythis.createchunks();
@@ -707,7 +707,7 @@
                 mythis.$.loading.close();
                 mythis.forceResize();
                 mythis.setlocation();
-                mythis.set('busy', false);
+                mythis.set('busy', {signal: false, message: "Idle"});
                 if (full) {
                     mythis.checksources();
                 }
@@ -716,30 +716,30 @@
 
         saveproject: function () {
             var mythis = this;
-            if (mythis.busy) {
+            if (mythis.busy.signal) {
                 setTimeout(function() {
                     mythis.saveproject();
                 }, 500);
                 return;
             }
-            mythis.set('busy', true);
+            mythis.set('busy', {signal: true, message: "Saving project to file..."});
             App.projectsManager.saveTargetTranslation(this.currentproject.chunks, this.currentproject.projectmeta, this.currentuser).then(function() {
-                mythis.set('busy', false);
+                mythis.set('busy', {signal: false, message: "Idle"});
                 mythis.fire('iron-signal', {name: 'updatelist'});
             });
         },
 
         savechunk: function (event, data) {
             var mythis = this;
-            if (mythis.busy) {
+            if (mythis.busy.signal) {
                 setTimeout(function() {
                     mythis.savechunk(event, data);
                 }, 500);
                 return;
             }
-            mythis.set('busy', true);
+            mythis.set('busy', {signal: true, message: "Saving chunk to file..."});
             App.projectsManager.saveTargetChunk(data.chunk, this.currentproject.projectmeta).then(function() {
-                mythis.set('busy', false);
+                mythis.set('busy', {signal: false, message: "Idle"});
                 mythis.createchapters();
                 mythis.addcontributor();
                 if (data.completion) {
@@ -750,15 +750,15 @@
 
         savemanifest: function () {
             var mythis = this;
-            if (mythis.busy) {
+            if (mythis.busy.signal) {
                 setTimeout(function() {
                     mythis.savemanifest();
                 }, 500);
                 return;
             }
-            mythis.set('busy', true);
+            mythis.set('busy', {signal: true, message: "Saving manifest to file..."});
             App.projectsManager.saveTargetManifest(this.currentproject.projectmeta).then(function() {
-                mythis.set('busy', false);
+                mythis.set('busy', {signal: false, message: "Idle"});
             });
         },
 

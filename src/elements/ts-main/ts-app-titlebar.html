@@ -113,8 +113,8 @@
                 value: {}
             },
             busy: {
-                type: Boolean,
-                value: false,
+                type: Object,
+                value: {signal: false, message: "Idle"},
                 notify: true
             }
         },
@@ -139,7 +139,7 @@
 
         closeWindow: function() {
             var mythis = this;
-            if (mythis.busy) {
+            if (mythis.busy.signal) {
                 setTimeout(function() {
                     mythis.closeWindow();
                 }, 500);

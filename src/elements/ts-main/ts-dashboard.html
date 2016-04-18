@@ -36,6 +36,21 @@
           flex: auto;
       }
 
+      #statusbar {
+          width: 100%;
+          background: var(--primary-color-dark);
+          color: var(--reverse-text-color);
+          min-height: 30px;
+          padding: 0 20px;
+          font-size: 75%;
+          display: flex;
+          align-items: center;
+      }
+
+      #message {
+          padding-left: 10px;
+      }
+
       .popup {
           position: fixed;
           top: 0;
@@ -187,6 +202,9 @@
           <ts-profile data-route="profile" currentuser="[[currentuser]]"></ts-profile>
           <ts-terms data-route="terms"></ts-terms>
       </neon-animated-pages>
+      <div id="statusbar">
+          <span>Status: </span><span id="message">{{busy.message}}</span>
+      </div>
 
       <paper-dialog id="feedback" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
           <div id="feedbackheader">
@@ -294,8 +312,8 @@
               value: {loading: false, title: "", body: ""}
           },
           busy: {
-              type: Boolean,
-              value: false
+              type: Object,
+              value: {signal: false, message: "Idle"}
           }
       },
 
@@ -538,13 +556,13 @@
 
       updatelist: function () {
           var mythis = this;
-          if (mythis.busy) {
+          if (mythis.busy.signal) {
               setTimeout(function() {
                   mythis.updatelist();
               }, 500);
               return;
           }
-          mythis.set('busy', true);
+          mythis.set('busy', {signal: true, message: "Updating project list..."});
           var autobackupdir = App.configurator.getUserPath('datalocation', 'automatic_backups');
           return App.projectsManager.migrateTargetTranslationsList()
               .then(function () {
@@ -563,7 +581,7 @@
                   return App.exportManager.backupAllTranslations(list, autobackupdir)
               })
               .then(function () {
-                  mythis.set('busy', false);
+                  mythis.set('busy', {signal: false, message: "Idle"});
                   setTimeout(function() {
                       App.ipc.send('loading-done');
                   }, 100);

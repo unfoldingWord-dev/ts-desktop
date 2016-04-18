@@ -1,0 +1,263 @@
+
+<link rel="import" href="../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/iron-input/iron-input.html">
+<link rel="import" href="../../components/iron-icons/notification-icons.html">
+<link rel="import" href="../../components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../components/paper-progress/paper-progress.html">
+
+<dom-module id="ts-local-option">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #body {
+            overflow-y: auto;
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .optionbox {
+            display: flex;
+            flex-direction: column;
+            margin: 30px 0;
+            width: 600px;
+        }
+
+        .optionheader {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0 50px;
+            background-color: var(--card-background-color);
+        }
+
+        .optionheader p {
+            margin-top: 0;
+        }
+
+        .optionbody {
+            display: flex;
+            flex-direction: column;
+            border-top: 1px solid var(--border-color);
+            padding: 20px 50px;
+            background-color: var(--card-background-color);
+        }
+
+        .optionbuttons {
+            display: flex;
+            justify-content: flex-end;
+            padding: 20px;
+        }
+
+        input {
+            border: none;
+            font-size: 120%;
+            padding: 10px;
+            color: var(--secondary-text-color);
+        }
+
+        .fill {
+            background: var(--accent-color);
+            color: var(--reverse-text-color);
+            text-transform: uppercase;
+        }
+
+        .nofill {
+            color: var(--secondary-text-color);
+        }
+
+        .nofill:hover {
+            color: var(--accent-color);
+        }
+
+        .hide {
+            display: none;
+        }
+
+    </style>
+
+    <template>
+
+        <div id="body">
+            <div id="local" class="optionbox">
+                <div class="optionheader">
+                    <h2>Local Login</h2>
+                    <p>Required to use the app.</p>
+                    <p>Enter your full name or pseudonym.  This name will be added to the contributor list of all projects you work on.  This name will be visible to others.</p>
+                </div>
+                <div class="optionbody">
+                    <input is="iron-input" bind-value="{{newinfo.full_name}}" placeholder="Full Name or Pseudonym">
+                </div>
+                <div class="optionbuttons">
+                    <paper-button class="nofill" on-tap="openserver">Login with Door43 Account</paper-button>
+                    <paper-button raised class="fill" on-tap="adduser">Ok</paper-button>
+                </div>
+            </div>
+
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-local-option',
+
+        behaviors: [
+            Polymer.NeonAnimatableBehavior
+        ],
+
+        properties: {
+            newinfo: {
+                type: Object,
+                value: {}
+            },
+            currentuser: {
+                type: Object,
+                value: {}
+            },
+            options: {
+                type: Object,
+                value: {loading: false, title: "", body: ""}
+            },
+            animationConfig: {
+                value: function () {
+                    return {
+                        'entry': {
+                            name: 'slide-from-right-animation',
+                            node: this
+                        },
+                        'exit': {
+                            name: 'slide-right-animation',
+                            node: this
+                        }
+                    }
+                }
+            }
+        },
+
+        openserver: function () {
+            this.$.server.classList.remove('hide');
+            this.$.local.classList.add('hide');
+            this.newinfo = {};
+        },
+
+        opencreate: function () {
+            this.$.create.classList.remove('hide');
+            this.$.server.classList.add('hide');
+            this.newinfo = {};
+        },
+
+        reset: function () {
+            this.$.local.classList.remove('hide');
+            this.$.server.classList.add('hide');
+            this.$.create.classList.add('hide');
+            this.newinfo = {};
+            this.$.loading.close();
+        },
+
+        adduser: function () {
+            var user = this.newinfo;
+            user.type = "Local Login";
+            this.fire('iron-signal', {name: 'updateuser', data: user});
+            this.reset();
+        },
+
+        sendlogin: function () {
+            var mythis = this;
+            var user = this.newinfo;
+
+            if (!user.username || !user.password) {
+                mythis.set('options.title', "Incomplete Data");
+                mythis.set('options.body', "Please complete all fields");
+                mythis.set('options.loading', false);
+                mythis.$.loading.open();
+                return;
+            }
+
+            mythis.set('options.body', "Verifying Login.  Please wait...");
+            mythis.set('options.loading', true);
+            mythis.$.loading.open();
+
+            App.userManager.login(user).then(function (user) {
+                mythis.set('options.body', "Login Verified");
+                user.full_name = user.full_name === '' ? user.username : user.full_name;
+                user.type = "Door43 Login";
+                setTimeout(function() {
+                    mythis.fire('iron-signal', {name: 'updateuser', data: user});
+                    mythis.reset();
+                }, 500);
+            }).catch(function (err) {
+                var errmessage = "We're sorry.  An error occurred while trying to login";
+                if (err.status === 404) {
+                    errmessage = "Incorrect Username";
+                }
+                if (err.status === 401) {
+                    errmessage = "Incorrect Password";
+                }
+                mythis.set('options.title', "Login Failed");
+                mythis.set('options.body', errmessage);
+                mythis.set('options.loading', false);
+            });
+        },
+
+        sendcreate: function () {
+            var mythis = this;
+            var user = this.newinfo;
+
+            if (!user.username || !user.password || !user.full_name || !user.email) {
+                mythis.set('options.title', "Incomplete Data");
+                mythis.set('options.body', "Please complete all fields");
+                mythis.set('options.loading', false);
+                mythis.$.loading.open();
+                return;
+            }
+
+            if (user.password !== user.password2) {
+                mythis.set('options.title', "Password Invalid");
+                mythis.set('options.body', "Your password verification does not match");
+                mythis.set('options.loading', false);
+                mythis.$.loading.open();
+                return;
+            }
+
+            mythis.set('options.body', "Creating Account.  Please wait...");
+            mythis.set('options.loading', true);
+            mythis.$.loading.open();
+
+            App.userManager.createAccount(user).then(function (user) {
+                mythis.set('options.body', "Account Created");
+                user.full_name = user.full_name === '' ? user.username : user.full_name;
+                user.type = "Door43 Login";
+                setTimeout(function() {
+                    mythis.fire('iron-signal', {name: 'updateuser', data: user});
+                    mythis.reset();
+                }, 500);
+            }).catch(function (err) {
+                var errmessage = "We're sorry.  An error occurred while trying to create account";
+                if (err.status === 422) {
+                    errmessage = "Account already exists for this user";
+                }
+                mythis.set('options.title', "Account Creation Failed");
+                mythis.set('options.body', errmessage);
+                mythis.set('options.loading', false);
+            });
+        },
+
+        ready: function() {
+
+        }
+
+    });
+
+</script>

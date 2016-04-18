@@ -9,7 +9,7 @@
 <link rel="import" href="../../components/paper-progress/paper-progress.html">
 
 <link rel="import" href="./ts-app-titlebar.html">
-<link rel="import" href="./ts-login.html">
+<link rel="import" href="../ts-profile/ts-profile.html">
 <link rel="import" href="../ts-home/ts-home.html">
 <link rel="import" href="../ts-new/ts-new.html">
 <link rel="import" href="../ts-publish/ts-publish.html">
@@ -184,7 +184,7 @@
           <ts-translate data-route="translate" route="{{route}}" busy="{{busy}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]"></ts-translate>
           <ts-publish data-route="publish" route="{{route}}" currentproject="{{currentproject}}" currentuser="[[currentuser]]"></ts-publish>
           <ts-settings data-route="settings" route="{{route}}"></ts-settings>
-          <ts-login data-route="login" currentuser="[[currentuser]]"></ts-login>
+          <ts-profile data-route="profile" currentuser="[[currentuser]]"></ts-profile>
           <ts-terms data-route="terms"></ts-terms>
       </neon-animated-pages>
 
@@ -318,7 +318,7 @@
                   this.set('route', 'terms');
               }
           } else {
-              this.set('route', 'login');
+              this.set('route', 'profile');
           }
       },
 

@@ -20,6 +20,11 @@
             flex-direction: column;
         }
 
+        neon-animated-pages {
+            flex: auto;
+            display: flex;
+        }
+
         #header {
             background-color: var(--primary-color);
             min-height: 50px;
@@ -132,6 +137,10 @@
         ],
 
         properties: {
+            selected: {
+                type: Number,
+                value: 0
+            },
             newinfo: {
                 type: Object,
                 value: {}

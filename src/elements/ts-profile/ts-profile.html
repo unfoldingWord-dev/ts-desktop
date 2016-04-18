@@ -1,6 +1,7 @@
 
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
 <link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../components/iron-input/iron-input.html">
 <link rel="import" href="../../components/iron-icons/notification-icons.html">
 <link rel="import" href="../../components/paper-dialog/paper-dialog.html">
@@ -39,8 +40,10 @@
             min-height: 50px;
         }
 
-        #title {
-            margin-left: 60px;
+        #backbutton {
+            width: 60px;
+            display: flex;
+            justify-content: center;
         }
 
         #loading {
@@ -93,7 +96,10 @@
 
         <div id="header">
             <div id="heading">
-                <span id="title">User Profile</span>
+                <span id="backbutton">
+                    <paper-icon-button class$="[[backclass(selected)]]" icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
+                </span>
+                <span>User Profile</span>
             </div>
         </div>
 
@@ -145,10 +151,6 @@
                 type: Object,
                 value: {}
             },
-            currentuser: {
-                type: Object,
-                value: {}
-            },
             options: {
                 type: Object,
                 value: {loading: false, title: "", body: ""}
@@ -169,16 +171,12 @@
             }
         },
 
-        openserver: function () {
-            this.$.server.classList.remove('hide');
-            this.$.local.classList.add('hide');
-            this.newinfo = {};
+        backclass: function (selected) {
+            return selected === 0 ? "hide" : "";
         },
 
-        opencreate: function () {
-            this.$.create.classList.remove('hide');
-            this.$.server.classList.add('hide');
-            this.newinfo = {};
+        back: function () {
+            this.set('selected', 0);
         },
 
         reset: function () {
@@ -192,7 +190,6 @@
 
         sendlocal: function () {
             var user = this.newinfo;
-            user.type = "Local Login";
             this.reset();
             this.fire('iron-signal', {name: 'updateuser', data: user});
         },
@@ -216,7 +213,6 @@
             App.userManager.login(user).then(function (user) {
                 mythis.set('options.body', "Login Verified");
                 user.full_name = user.full_name === '' ? user.username : user.full_name;
-                user.type = "Door43 Login";
                 setTimeout(function() {
                     mythis.reset();
                     mythis.fire('iron-signal', {name: 'updateuser', data: user});
@@ -262,7 +258,6 @@
             App.userManager.createAccount(user).then(function (user) {
                 mythis.set('options.body', "Account Created");
                 user.full_name = user.full_name === '' ? user.username : user.full_name;
-                user.type = "Door43 Login";
                 setTimeout(function() {
                     mythis.reset();
                     mythis.fire('iron-signal', {name: 'updateuser', data: user});

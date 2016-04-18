@@ -38,8 +38,10 @@
             text-transform: uppercase;
         }
 
-        h3 {
-            padding: 0 30px;
+        #heading {
+            display: flex;
+            justify-content: center;
+            padding: 15px 30px;
         }
 
         .hide {
@@ -51,8 +53,8 @@
     <template>
 
         <div id="content">
-            <div>
-                <h3>Setup your User Profile with one of the options below.</h3>
+            <div id="heading">
+                <span class="optiontitle">Setup your User Profile with one of the options below.</span>
             </div>
             <div class="option">
                 <paper-button raised class="fill" on-tap="gotologin">Select</paper-button>
@@ -94,14 +96,17 @@
         },
 
         gotologin: function () {
+            this.set('newinfo', {});
             this.set('selected', 1);
         },
 
         gotocreate: function () {
+            this.set('newinfo', {});
             this.set('selected', 2);
         },
 
         gotolocal: function () {
+            this.set('newinfo', {});
             this.set('selected', 3);
         },
 

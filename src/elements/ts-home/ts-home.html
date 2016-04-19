@@ -160,7 +160,7 @@
             display: flex;
             flex-direction: column;
             width: 400px;
-            height: 350px;
+            height: 400px;
         }
 
         #info p {
@@ -168,17 +168,32 @@
             font-size: 110%;
         }
 
-        #info .offset {
-            transform: translateX(30px);
+        #infoheader {
+            flex: 0 0 30px;
+        }
+
+        #infodata {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #namebox {
+            flex: 0 0 100px;
+            padding-left: 30px;
+            border: 1px solid var(--border-color);
+            overflow-y: auto;
         }
 
         #infoicons {
             border-bottom: 1px solid var(--border-color);
             border-top: 1px solid var(--border-color);
+            flex: 0 0 60px;
             align-self: stretch;
             display: flex;
             justify-content: space-between;
-            padding: 10px 20px;
+            align-items: center;
+            padding: 0 20px;
         }
 
         #righticons {
@@ -188,8 +203,10 @@
         }
 
         #infobuttons {
+            flex: 0 0 20px;
             display: flex;
             justify-content: center;
+            align-items: center;
         }
 
         #delete {
@@ -269,16 +286,20 @@
         </div>
 
         <paper-dialog id="info" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <h2><span>[[currentinfo.project.name]]</span> — <span>[[currentinfo.target_language.name]]</span></h2>
-            <div>
+            <div id="infoheader">
+                <h2><span>[[currentinfo.project.name]]</span> — <span>[[currentinfo.target_language.name]]</span></h2>
+            </div>
+            <div id="infodata">
                 <p>{{locale.project}}: <strong><span>[[currentinfo.project.name]]</span> (<span>[[currentinfo.project.id]]</span>)</strong></p>
                 <p>{{locale.target_language}}: <strong><span>[[currentinfo.target_language.name]]</span> (<span>[[currentinfo.target_language.id]]</span>)</strong></p>
                 <p>{{locale.progress}}: <strong><span>[[currentinfo.completion]]</span>%</strong></p>
                 <p>{{locale.translators}}:</p>
                 <template is="dom-if" if="{{currentinfo.translators.length}}">
-                    <template is="dom-repeat" items="{{currentinfo.translators}}" as="user">
-                        <p class="offset"><strong>{{user}}</strong></p>
-                    </template>
+                    <div id="namebox">
+                        <template is="dom-repeat" items="{{currentinfo.translators}}" as="user">
+                            <p><strong>{{user}}</strong></p>
+                        </template>
+                    </div>
                 </template>
             </div>
             <div id="infoicons">

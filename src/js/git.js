@@ -85,84 +85,68 @@ function GitManager() {
             var mergeFromManifest = path.join(mergeFromPath, 'manifest.json');
             var mergedManifest = {};
 
+            function createBranch(repo, newBranchName, remoteName, remoteBranch) {
+                var remoteRefBase = 'refs/remotes/' + remoteName;
+                var remoteRefName = remoteRefBase + '/' + remoteBranch;
+                var remoteRefHead = remoteRefBase + '/' + 'HEAD';
+
+                return NodeGit.Reference.symbolicCreate(repo, remoteRefHead, remoteRefName, 1, 'Setting HEAD')
+                    .then(function () {
+                        return repo.getReference(remoteRefName);
+                    })
+                    .then(function (remoteRef) {
+                        // Create new branch based on the remote ref
+                        return repo.createBranch(newBranchName, remoteRef.target());
+                    })
+                    .then(function (branchRef) {
+                        // checkout branch to update working directory
+                        return repo.checkoutBranch(branchRef);
+                    });
+            }
+
             return Promise.all([utils.fs.readFile(mergeToManifest), utils.fs.readFile(mergeFromManifest)])
                 .then(function (manifestDataArray) {
-                    console.log("start manifest merge");
-                    //console.log(mergeToManifestData);
                     var mergeToManifestJson = JSON.parse(manifestDataArray[0].toString());
                     var mergeFromManifestJson = JSON.parse(manifestDataArray[1]);
                     mergedManifest = mergeToManifestJson;
                     mergedManifest.translators = _.union(mergeToManifestJson.translators, mergeFromManifestJson.translators);
                     mergedManifest.finished_chunks = _.union(mergeToManifestJson.finished_chunks, mergeFromManifestJson.finished_chunks);
-                    //mergedManifest.source_translations = _.union(mergeToManifestJson.source_translations, mergeFromManifestJson.source_translations);
-                    console.log(mergedManifest);
                 })
                 .then(function () {
                     console.log("start open repo");
-                    return NodeGit.Repository.open(mergeToPath);
+                    return NodeGit.Repository.open(mergeToPath).then(function (repo) {
+                        return {target: repo};
+                    });
                 })
-                .then(function (repo) {
+                .then(function (repos) {
+                    return NodeGit.Remote.delete(repos.target, "new").then(utils.ret(repos))
+                        .catch(utils.ret(repos));
+                })
+                .then(function (repos) {
+                    return repos.target.getBranch("superman").then(function (branch) {
+                        return NodeGit.Branch.delete(branch).then(utils.ret(repos));
+                    }).catch(utils.ret(repos));
+                })
+                .then(function (repos) {
                     console.log('start create remote');
-                    var remote = NodeGit.Remote.createAnonymous(repo, mergeFromPath);
-                    return {target: repo, remote: remote};
+                    NodeGit.Remote.create(repos.target, "new", mergeFromPath);
+                    return repos;
                 })
                 .then(function (repos) {
-                    console.log("start create branch");
-                    return repos.target.createBranch("new", repos.remote, true, repos.target.defaultSignature(), "good").then(utils.ret(repos));
-                    //return NodeGit.Branch.create(repos.target, "new", repos.remote, true).then(utils.ret(repos));
+                    var repo = repos.target;
+                    return repo.fetchAll().then(function () {
+                        return createBranch2(repo, 'superman', 'new', 'master').catch(utils.ret(true));
+                    }).then(function () {
+                        return repo.mergeBranches('master', 'new/master');
+                    }).then(function () {
+                        return repo.checkoutBranch('master');
+                    }).then(function () {
+                        console.log("final merge");
+                        return repo.mergeBranches('superman', 'master');
+                    })
                 })
-                .then(function (repos) {
-                    console.log("start merge");
-                    //NodeGit.Merge.merge(repos.target, repos.remote);
-                    return repos.target.mergeBranches('master', 'new');
-                });
+                .then(utils.logr("Finished merging"));
 
-
-//Joel's Android code is below for reference
-            /*
-
-            Manifest importedManifest = Manifest.generate(newDir);
-            Repo repo = getRepo();
-
-            // attach remote
-            repo.deleteRemote("new");
-            repo.setRemote("new", newDir.getAbsolutePath());
-            FetchCommand fetch = repo.getGit().fetch();
-            fetch.setRemote("new");
-            FetchResult fetchResult = fetch.call();
-
-            // create branch for new changes
-            DeleteBranchCommand deleteBranch = repo.getGit().branchDelete();
-            deleteBranch.setBranchNames("new");
-            deleteBranch.setForce(true);
-            deleteBranch.call();
-            CreateBranchCommand branch = repo.getGit().branchCreate();
-            branch.setName("new");
-            branch.setStartPoint("new/master");
-            branch.call();
-
-            // perform merge
-            MergeCommand merge = repo.getGit().merge();
-            merge.setFastForward(MergeCommand.FastForwardMode.NO_FF);
-            merge.include(repo.getGit().getRepository().getRef("new"));
-            MergeResult result = merge.call();
-
-            // merge manifests
-            manifest.join(importedManifest.getJSONArray(FIELD_TRANSLATORS), FIELD_TRANSLATORS);
-            manifest.join(importedManifest.getJSONArray(FIELD_FINISHED_CHUNKS), FIELD_FINISHED_CHUNKS);
-            manifest.join(importedManifest.getJSONObject(FIELD_SOURCE_TRANSLATIONS), FIELD_SOURCE_TRANSLATIONS);
-
-            // add missing parent draft status
-            if((!manifest.has(FIELD_PARENT_DRAFT) || !Manifest.valueExists(manifest.getJSONObject(FIELD_PARENT_DRAFT), "resource_id"))
-                && importedManifest.has(FIELD_PARENT_DRAFT)) {
-                manifest.put(FIELD_PARENT_DRAFT, importedManifest.getJSONObject(FIELD_PARENT_DRAFT));
-            }
-
-            if (result.getMergeStatus().equals(MergeResult.MergeStatus.CONFLICTING)) {
-                System.out.println(result.getConflicts().toString());
-                return false;
-            }
-            return true;*/
         },
 
         push: function (user, dir, repo) {

@@ -581,10 +581,10 @@
                   return App.exportManager.backupAllTranslations(list, autobackupdir)
               })
               .then(function () {
-                  mythis.set('busy', {signal: false, message: "Idle"});
                   setTimeout(function() {
+                      mythis.set('busy', {signal: false, message: "Idle"});
                       App.ipc.send('loading-done');
-                  }, 100);
+                  }, 1000);
               });
       },
 

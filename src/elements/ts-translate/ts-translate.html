@@ -359,7 +359,7 @@
             busy: {
                 type: Object,
                 value: {signal: false, message: "Idle"},
-                notify: false
+                notify: true
             },
             gittimer: {
                 type: Number
@@ -412,7 +412,9 @@
                         return App.gitManager.commitAll(mythis.currentuser, paths.projectDir);
                     }).then(function () {
                         mythis.gittimer = setTimeout(timer1, 120000);
-                        mythis.set('busy', {signal: false, message: "Idle"});
+                        setTimeout(function() {
+                            mythis.set('busy', {signal: false, message: "Idle"});
+                        }, 1000);
                     })
                 }, 100);
 
@@ -425,7 +427,9 @@
                 App.exportManager.backupTranslation(projectmeta, filePath)
                     .then(function () {
                         mythis.backuptimer = setTimeout(timer2, 600000);
-                        mythis.set('busy', {signal: false, message: "Idle"});
+                        setTimeout(function() {
+                            mythis.set('busy', {signal: false, message: "Idle"});
+                        }, 1000);
                     })
                 }, 100);
         },
@@ -582,7 +586,9 @@
                 }
                 mythis.$.loading.close();
                 setTimeout(function() {
-                    mythis.set('busy', {signal: false, message: "Idle"});
+                    setTimeout(function() {
+                        mythis.set('busy', {signal: false, message: "Idle"});
+                    }, 1000);
                     mythis.setmodestate();
                     mythis.checksources();
                     if (type === "publish") {
@@ -707,7 +713,9 @@
                 mythis.$.loading.close();
                 mythis.forceResize();
                 mythis.setlocation();
-                mythis.set('busy', {signal: false, message: "Idle"});
+                setTimeout(function() {
+                    mythis.set('busy', {signal: false, message: "Idle"});
+                }, 1000);
                 if (full) {
                     mythis.checksources();
                 }
@@ -724,7 +732,9 @@
             }
             mythis.set('busy', {signal: true, message: "Saving project to file..."});
             App.projectsManager.saveTargetTranslation(this.currentproject.chunks, this.currentproject.projectmeta, this.currentuser).then(function() {
-                mythis.set('busy', {signal: false, message: "Idle"});
+                setTimeout(function() {
+                    mythis.set('busy', {signal: false, message: "Idle"});
+                }, 1000);
                 mythis.fire('iron-signal', {name: 'updatelist'});
             });
         },
@@ -739,7 +749,9 @@
             }
             mythis.set('busy', {signal: true, message: "Saving chunk to file..."});
             App.projectsManager.saveTargetChunk(data.chunk, this.currentproject.projectmeta).then(function() {
-                mythis.set('busy', {signal: false, message: "Idle"});
+                setTimeout(function() {
+                    mythis.set('busy', {signal: false, message: "Idle"});
+                }, 1000);
                 mythis.createchapters();
                 mythis.addcontributor();
                 if (data.completion) {
@@ -758,7 +770,9 @@
             }
             mythis.set('busy', {signal: true, message: "Saving manifest to file..."});
             App.projectsManager.saveTargetManifest(this.currentproject.projectmeta).then(function() {
-                mythis.set('busy', {signal: false, message: "Idle"});
+                setTimeout(function() {
+                    mythis.set('busy', {signal: false, message: "Idle"});
+                }, 1000);
             });
         },
 

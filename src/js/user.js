@@ -6,8 +6,7 @@ var _ = require('lodash'),
 function UserManager(auth) {
 
     var api = new Gogs('https://git.door43.org/api/v1'),
-        tokenStub = {name: 'ts-desktop'},
-        keyStub = {title: 'ts-desktop'};
+        tokenStub = {name: 'ts-desktop'};
 
     return {
 
@@ -17,9 +16,6 @@ function UserManager(auth) {
 
         createAccount: function (user) {
             return api.createUser(user, auth, true)
-                .then(function (newUser) {
-                    return api.editUser(user, auth);
-                })
                 .then(function(updatedUser) {
                     return api.createToken(tokenStub, user)
                         .then(function(token) {
@@ -30,7 +26,7 @@ function UserManager(auth) {
         },
 
         login: function (userObj) {
-            return api.getUser(userObj, auth).then(function (user) {
+            return api.getUser(userObj).then(function (user) {
                 return api.listTokens(userObj)
                     .then(function (tokens) {
                         return _.find(tokens, tokenStub);
@@ -45,7 +41,8 @@ function UserManager(auth) {
             });
         },
 
-        register: function (user) {
+        register: function (user, deviceId) {
+            var keyStub = {title: 'ts-desktop ' + deviceId};
             return api.listPublicKeys(user).then(function (keys) {
                 return _.find(keys, keyStub);
             }).then(function (key) {
@@ -56,7 +53,8 @@ function UserManager(auth) {
             });
         },
 
-        unregister: function (user) {
+        unregister: function (user, deviceId) {
+            var keyStub = {title: 'ts-desktop ' + deviceId};
             return api.listPublicKeys(user).then(function (keys) {
                 return _.find(keys, keyStub);
             }).then(function (key) {

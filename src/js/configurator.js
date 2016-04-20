@@ -59,16 +59,15 @@
             let emptyStorageObj = {'value': value, 'meta': {'mutable': true, 'type': typeof value, 'default': ''}};
             let valueObj = storage[key] !== undefined ? JSON.parse(storage[key]) : emptyStorageObj;
 
-            if(_.get(valueObj, 'meta.mutable', true)) {
-                //update value
-                valueObj.value = value;
+            //update value
+            valueObj.value = value;
 
-                //update meta
-                valueObj.meta = _.merge(valueObj.meta, meta);
+            //update meta
+            valueObj.meta = _.merge(valueObj.meta, meta);
 
-                //update value in storage
-                storage[key] = JSON.stringify(valueObj);
-            }
+            //update value in storage
+            storage[key] = JSON.stringify(valueObj);
+
         };
 
         let unsetValue = function (key) {
@@ -77,22 +76,12 @@
             }
             key = key.toLowerCase();
 
-            //return if read-only
-            let mutable = getMetaValue(key, 'mutable');
-            if (mutable === false) {
-                return;
-            }
-
             //remove value from storage
             if (typeof storage.removeItem === 'function') {
                 storage.removeItem(key);
             } else {
                 storage[key] = undefined;
             }
-        };
-
-        let setReadOnlyValue = function (key, value) {
-            setValue(key, value, {'mutable': false});
         };
 
         let setDefaultValue = function (key, value) {
@@ -317,13 +306,7 @@
                 }
 
                 for (let i = 0; i < config.length; i++) {
-                    if (config[i].value !== undefined) {
-                        if (config[i].meta.mutable) {
-                            setDefaultValue(config[i].name, config[i].value);
-                        } else {
-                            setReadOnlyValue(config[i].name, config[i].value);
-                        }
-                    }
+                    setDefaultValue(config[i].name, config[i].value);
                 }
             },
 

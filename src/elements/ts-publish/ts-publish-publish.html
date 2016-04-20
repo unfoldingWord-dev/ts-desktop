@@ -304,6 +304,10 @@
                     var logmessage = "";
                     if(err.status === 401) {
                         errmessage = "Cannot publish with a local login.  Please login with a Door43 account.";
+                    } else if (err.data) {
+                        errmessage = err.data;
+                    } else {
+                        errmessage = err;
                     }
                     if (err.status) {
                         logmessage = "Error: " + err.status + " " + err.data;

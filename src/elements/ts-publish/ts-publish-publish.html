@@ -264,6 +264,7 @@
             var paths = App.utils.makeProjectPaths(target, projectmeta);
             var repo = projectmeta.unique_id;
             var user = this.currentuser;
+            var deviceId = "";
 
             this.set('options.body', "Uploading Project.  Please wait...");
             this.set('options.loading', true);
@@ -273,18 +274,19 @@
                 .then(function () {
                     return App.utils.getDeviceId();
                 })
-                .then(function (deviceId) {
+                .then(function (devId) {
+                    deviceId = devId;
                     var getreg = App.keyManager.getRegistrationInfo.bind(App.keyManager, deviceId),
                         genreg = App.keyManager.generateRegistrationInfo.bind(App.keyManager, deviceId),
                         rereg = function () {
-                            return App.userManager.unregister(user).then(genreg);
+                            return App.userManager.unregister(user, deviceId).then(genreg);
                         };
 
                     return getreg().catch(rereg);
                 })
                 .then(function (reg) {
                     user.reg = reg;
-                    return App.userManager.register(user);
+                    return App.userManager.register(user, deviceId);
                 })
                 .then(function () {
                     return App.userManager.createRepo(user, repo);

@@ -94,7 +94,7 @@ function GitManager() {
                     return NodeGit.Remote.createAnonymous(localrepo, remoteUrl);
                 })
                 .then(function(remote) {
-                    return remote.push(['+refs/heads/master:refs/heads/master'], {
+                    return remote.push(['refs/heads/master:refs/heads/master'], {
                         callbacks: {
                             certificateCheck: function () {
                                 // no certificate check, let it pass thru

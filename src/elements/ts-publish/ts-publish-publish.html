@@ -227,7 +227,7 @@
             if (projectmeta.format === 'markdown') {
                 filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'Zip Files', extensions: ['zip']}]}});
             } else {
-                filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'Text Files', extensions: ['txt']}]}});
+                filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'USFM Files', extensions: ['usfm']}]}});
             }
             if (!filePath) {
                 return;

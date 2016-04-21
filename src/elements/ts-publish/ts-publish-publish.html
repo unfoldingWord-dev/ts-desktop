@@ -318,6 +318,10 @@
                     var logmessage = "";
                     if(err.status === 401) {
                         errmessage = "Cannot publish without connecting to a Door43 account.";
+                    } else if (err.data) {
+                        errmessage = err.data;
+                    } else {
+                        errmessage = err;
                     }
                     if (err.status) {
                         logmessage = "Error: " + err.status + " " + err.data;

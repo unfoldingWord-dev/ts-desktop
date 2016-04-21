@@ -13,6 +13,9 @@ function ExportManager(configurator, git) {
     return {
 
         backupTranslation: function (meta, filePath) {
+            if(filePath.split('.').pop() !== 'tstudio') {
+                filePath += '.tstudio';
+            }
             var paths = utils.makeProjectPaths(targetDir, meta);
             var name = meta.unique_id;
 

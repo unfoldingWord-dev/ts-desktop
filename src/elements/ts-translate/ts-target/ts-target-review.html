@@ -126,7 +126,7 @@
         },
 
         observers: [
-            'rendertext(chunk.*)'
+            'rendertext(chunk.transcontent)'
         ],
 
         iconclass: function (complete) {
@@ -138,7 +138,7 @@
                 var verses = this.chunk.chunkmeta.verses;
                 var chap = this.chunk.chunkmeta.chapter;
                 var completed = this.chunk.completed;
-                var textholder = this.$.textholder;
+                var textholder = this.querySelector("#textholder");
                 var linearray = this.chunk.transcontent.split("\n");
                 var wordarray = [];
                 var vmstr1 = "\<ts-verse-marker id='c";
@@ -197,7 +197,7 @@
             var index = data.index;
 
             if (this.chunk.index === index && this.chunk.projectmeta.project_type_class === "standard") {
-                var textholder = this.$.textholder;
+                var textholder = this.querySelector("#textholder");
                 var paragraphs = textholder.children;
                 var type = "";
                 var text = "";
@@ -227,8 +227,8 @@
                     }
                 }
 
-                this.set('chunk.transcontent', returnstr);
                 this.set('chunk.completed', true);
+                this.set('chunk.transcontent', returnstr);
                 this.$.toggle.checked = true;
                 this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk, completion: true}});
             }
@@ -273,8 +273,8 @@
                     }
                 }
 
-                this.set('chunk.transcontent', returnstr);
                 this.set('chunk.completed', false);
+                this.set('chunk.transcontent', returnstr);
                 this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk, completion: true}});
             }
         },

@@ -10,7 +10,7 @@ function DataManager(query) {
     return {
 
         getTargetLanguages: function () {
-            var r = query("select slug 'id', name, direction from target_language order by slug");
+            var r = query("select slug 'id', name, direction from target_language order by lower(slug)");
             return zipper(r);
         },
 

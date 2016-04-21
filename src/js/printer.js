@@ -63,7 +63,9 @@ function PrintManager(configurator) {
         },
 
         targetTranslationToPdf: function (translation, meta, filePath, options) {
-
+            if(filePath.split('.').pop() !== 'pdf') {
+                filePath += '.pdf';
+            }
             var imageRoot = path.join(configurator.getValue('rootdir'), "images"),
                 imagePath = path.join(imageRoot, meta.resource.id);
 

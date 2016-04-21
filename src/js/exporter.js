@@ -49,12 +49,13 @@ function ExportManager(configurator, git) {
         },
 
         exportTranslation: function (translation, meta, filePath, mediaServer) {
-
             return new Promise(function(resolve, reject) {
                 if (meta.project_type_class === "standard") {
 
                     if (meta.format === 'markdown') {
-
+                        if(filePath.split('.').pop() !== 'zip') {
+                            filePath += '.zip';
+                        }
                         let chapterContent = '',
                             currentChapter = -1,
                             zip = archiver.create('zip'),
@@ -69,7 +70,7 @@ function ExportManager(configurator, git) {
                                     // TODO: we need to get the chapter reference and insert it here
                                     chapterContent += '////\n';
                                     //console.log('chapter ' + currentChapter, chapterContent);
-                                    zip.append(new Buffer(chapterContent), {name: currentChapter + '.txt'});
+                                    zip.append(new Buffer(chapterContent), {name: currentChapter + '.md'});
                                 }
                                 currentChapter = frame.chunkmeta.chapter;
                                 chapterContent = '';
@@ -102,11 +103,14 @@ function ExportManager(configurator, git) {
                         if(chapterContent !== '' && numFinishedFrames > 0) {
                             // TODO: we need to get the chapter reference and insert it here
                             chapterContent += '////\n';
-                            zip.append(new Buffer(chapterContent), {name: currentChapter + '.txt'});
+                            zip.append(new Buffer(chapterContent), {name: currentChapter + '.md'});
                         }
                         zip.finalize();
                         resolve(true);
                     } else if (meta.format === 'usfm') {
+                        if(filePath.split('.').pop() !== 'usfm') {
+                            filePath += '.usfm';
+                        }
                          let
                             currentChapter = 1,
                             numFinishedFrames = 0,

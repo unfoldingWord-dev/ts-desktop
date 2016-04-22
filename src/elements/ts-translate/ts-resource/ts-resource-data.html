@@ -40,8 +40,6 @@
             <div id="textholder"></div>
         </template>
 
-        <iron-signals on-iron-signal-renderresource="renderresource"></iron-signals>
-
 	</template>
 
 </dom-module>
@@ -61,23 +59,9 @@
 
         renderresource: function () {
             if(!this.resource.array && this.resource.data.length) {
-                var textarray = this.resource.data[0].split(" ");
-                var numstr1 = "\<sup\>";
-                var numstr2 = "\<\/sup\>";
-                var returnstr = "";
-                var verse = 0;
-
-                for (var i = 0; i < textarray.length; i++) {
-                    if (textarray[i].substring(0, 2) === "\\v") {
-                        verse = textarray[i].substring(2);
-                        returnstr += numstr1 + verse + numstr2;
-                    } else {
-                        returnstr += textarray[i] + " ";
-                    }
-                }
                 var textholder = this.querySelector("#textholder");
                 if (textholder) {
-                    textholder.innerHTML = returnstr;
+                    textholder.innerHTML = this.resource.data[0];
                     this.fire('setheight');
                 }
             }

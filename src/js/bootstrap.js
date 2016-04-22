@@ -20,11 +20,14 @@ process.stdout.write = console.log.bind(console);
 
     const DATA_PATH = ipcRenderer.sendSync('main-window', 'dataPath');
 
-    setMsg('Loading path...')
+    setMsg('Loading path...');
     let path = require('path');
 
     setMsg('Loading mkdirp...');
     let mkdirp = require('mkdirp');
+
+    setMsg('Loading DB...');
+    let Db = require('../js/lib/db').Db;
 
     setMsg('Loading Reporter...');
     let Reporter = require('../js/reporter').Reporter;
@@ -32,26 +35,38 @@ process.stdout.write = console.log.bind(console);
     setMsg('Loading Configurator...');
     let Configurator = require('../js/configurator').Configurator;
 
-    setMsg('Loading Git...');
-    let git = require('../js/git');
+    setMsg('Loading Git Manager...');
+    let GitManager = require('../js/git').GitManager;
 
-    setMsg('Loading Uploader...');
-    let Uploader = require('../js/uploader').Uploader;
-
-    setMsg('Loading DB...');
-    let Db = require('../js/lib/db').Db;
+    setMsg('Loading Key Manager...');
+    let KeyManager = require('../js/keys').KeyManager;
 
     setMsg('Loading Projects Manager...');
     let ProjectsManager = require('../js/projects').ProjectsManager;
+
+    setMsg('Loading Migrate Manager...');
+    let MigrateManager = require('../js/migrator').MigrateManager;
+
+    setMsg('Loading Data Manager...');
+    let DataManager = require('../js/database').DataManager;
+
+    setMsg('Loading User Manager...');
+    let UserManager = require('../js/user').UserManager;
+
+    setMsg('Loading Import Manager...');
+    let ImportManager = require('../js/importer').ImportManager;
+
+    setMsg('Loading Export Manager...');
+    let ExportManager = require('../js/exporter').ExportManager;
+
+    setMsg('Loading Print Manager...');
+    let PrintManager = require('../js/printer').PrintManager;
 
     setMsg('Loading Locale...');
     let i18n = require('../js/i18n').Locale(path.resolve(path.join(__dirname, '..', '..', 'i18n')));
 
     setMsg('Loading Utils...');
-    let util = require('../js/lib/util');
-
-    setMsg('Loading Printer...');
-    let printer = require('../js/printer').Printer();
+    let utils = require('../js/lib/utils');
 
     setMsg('Initializing...');
 
@@ -75,11 +90,35 @@ process.stdout.write = console.log.bind(console);
         c.setValue('targetTranslationsDir', path.join(DATA_PATH, 'targetTranslations'), {'mutable':false});
         c.setValue('tempDir', path.join(DATA_PATH, 'temp'), {'mutable':false});
         c.setValue('indexDir', path.join(DATA_PATH, 'index'), {'mutable':false});
-
         return c;
     })();
 
+    let reporter = new Reporter({
+        logPath: path.join(configurator.getValue('rootDir'), 'log.txt'),
+        oauthToken: configurator.getValue('github-oauth'),
+        repoOwner: configurator.getValue('repoOwner'),
+        repo: configurator.getValue('repo'),
+        maxLogFileKb: configurator.getValue('maxLogFileKb'),
+        appVersion: require('../../package.json').version
+    });
 
+    let dataManager = (function () {
+        // TODO: should we move the location of these files/folders outside of the src folder?
+        var srcDir = path.resolve(path.join(__dirname, '..')),
+            schemaPath = path.join(srcDir, 'config', 'schema.sql'),
+            dbPath = path.join(srcDir, 'index', 'index.sqlite'),
+            db = new Db(schemaPath, dbPath);
+
+        return new DataManager(db);
+    })();
+
+    let gitManager = (function () {
+        return new GitManager();
+    })();
+
+    let migrateManager = (function () {
+        return new MigrateManager(configurator);
+    })();
 
     // TODO: where should these be?
     mkdirp.sync(configurator.getValue('targetTranslationsDir'));
@@ -90,8 +129,6 @@ process.stdout.write = console.log.bind(console);
         appName: 'translationStudio',
 
         locale: i18n,
-
-        configurator: configurator,
 
         ipc: ipcRenderer,
 
@@ -120,32 +157,47 @@ process.stdout.write = console.log.bind(console);
             this.window.close();
         },
 
-        uploader: new Uploader(DATA_PATH),
+        showDevTools: function () {
+            require('remote').getCurrentWindow().toggleDevTools();
+        },
 
-        util: util,
+        utils: utils,
 
-        git: git,
+        configurator: configurator,
 
-        printer: printer,
+        reporter: reporter,
 
-        projectsManager: (function () {
-            // TODO: should we move the location of these files/folders outside of the src folder?
-            var srcDir = path.resolve(path.join(__dirname, '..')),
-                schemaPath = path.join(srcDir, 'config', 'schema.sql'),
-                dbPath = path.join(srcDir, 'index', 'index.sqlite'),
-                db = new Db(schemaPath, dbPath);
+        dataManager: dataManager,
 
-            return new ProjectsManager(db, configurator);
+        gitManager: gitManager,
+
+        migrateManager: migrateManager,
+
+        keyManager: (function () {
+            return new KeyManager(DATA_PATH);
         })(),
 
-        reporter: new Reporter({
-            logPath: path.join(configurator.getValue('rootDir'), 'log.txt'),
-            oauthToken: configurator.getValue("github-oauth"),
-            repoOwner: configurator.getValue('repoOwner'),
-            repo: configurator.getValue('repo'),
-            maxLogFileKb: configurator.getValue('maxLogFileKb'),
-            appVersion: require('../../package.json').version
-        })
+        printManager: (function () {
+            return new PrintManager(configurator);
+        })(),
+
+        projectsManager: (function () {
+            return new ProjectsManager(dataManager, configurator, reporter, gitManager, migrateManager);
+        })(),
+
+        userManager: (function () {
+            return new UserManager({
+                token: configurator.getValue('gogs-token')
+            });
+        })(),
+
+        importManager: (function () {
+            return new ImportManager(configurator, migrateManager);
+        })(),
+
+        exportManager: (function () {
+            return new ExportManager(configurator, gitManager);
+        })()
     };
 
     // hook up global exception handler

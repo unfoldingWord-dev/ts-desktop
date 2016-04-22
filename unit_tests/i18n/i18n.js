@@ -3,17 +3,17 @@
 ;(function () {
 
     let assert = require('assert');
-    let Configurator = require('../../app/js/configurator').Configurator;
+    let Configurator = require('../../src/js/configurator').Configurator;
     let config = new Configurator();
-    let defaults = require('../../app/config/defaults');
-    let Locale = require('../../app/js/i18n').Locale;
+    let defaults = require('../../src/config/defaults');
+    let Locale = require('../../src/js/i18n').Locale;
 
     config.setStorage({});
     config.loadConfig(defaults);
 
     describe('@i18n', function () {
         describe('@Defaults', function () {
-            let i18n = new Locale('./app/i18n','');
+            let i18n = new Locale('./i18n','');
 
             it('should return a code tag', function () {
                 assert.equal(i18n._('missing_key'), '[i18n: missing_key]');

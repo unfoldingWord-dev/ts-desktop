@@ -22,14 +22,15 @@
         #header {
             color: var(--secondary-text-color);
             font-size: 110%;
-            width: 100%;
             display: flex;
-            justify-content: center;
-            min-height: 60px;
+            flex-direction: column;
+            align-items: center;
+            flex: 0 0 60px;
         }
 
         #header > div {
             display: flex;
+            flex: auto;
             justify-content: space-between;
             align-items: center;
             padding: 0 20px;
@@ -39,9 +40,9 @@
             box-shadow: 0 -1px 2px 1px var(--primary-color-dark);
         }
 
-        iron-list {
+        #list {
             font-size: 110%;
-            max-height: 90vh;
+            max-height: calc(100vh - 145px);
             width: 450px;
             color: var(--primary-text-color);
             background: var(--card-background-color);
@@ -88,7 +89,6 @@
               <paper-icon-button class="right" icon="search" title="Search Languages"></paper-icon-button>
           </div>
       </div>
-
       <div id="contain">
           <iron-list id="list" items="{{searchfilter(query,languagelist)}}" as="lang">
               <template>
@@ -140,7 +140,7 @@
       ],
 
       searchfilter: function (query, languagelist) {
-          let search = App.util.startsWithBase.bind(null, query);
+          let search = App.utils.startsWithBase.bind(null, query);
 
           var bycode = languagelist.filter(function (lang) {
               return search(lang.id);
@@ -163,7 +163,7 @@
       },
 
       ready: function () {
-          this.languagelist = App.projectsManager.targetLanguages;
+          this.languagelist = App.dataManager.getTargetLanguages();
       }
   });
 

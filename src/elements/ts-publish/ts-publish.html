@@ -122,7 +122,7 @@
             <ts-publish-book selected="{{selected}}" currentproject="[[currentproject]]"></ts-publish-book>
             <ts-publish-profile selected="{{selected}}" currentproject="{{currentproject}}"></ts-publish-profile>
             <ts-publish-review selected="{{selected}}" currentproject="[[currentproject]]"></ts-publish-review>
-            <ts-publish-publish route="{{route}}" selected="{{selected}}" currentproject="[[currentproject]]"></ts-publish-publish>
+            <ts-publish-publish route="{{route}}" selected="{{selected}}" currentproject="[[currentproject]]" currentuser="[[currentuser]]"></ts-publish-publish>
         </neon-animated-pages>
 
     </template>
@@ -159,6 +159,10 @@
                 value: [],
                 computed: 'createlist(selected)'
             },
+            currentuser: {
+                type: Object,
+                value: {}
+            },
             animationConfig: {
                 value: function () {
                     return {
@@ -179,29 +183,29 @@
             var list = [];
             if (selected === 0) {
                 list = [
-                    {number: 1, name: "BOOK", level: "current"},
-                    {number: 2, name: "PROFILE", level: "future"},
+                    {number: 1, name: "PROJECT", level: "current"},
+                    {number: 2, name: "TRANSLATORS", level: "future"},
                     {number: 3, name: "REVIEW", level: "future"},
                     {number: 4, name: "PUBLISH", level: "future"}
                 ]
             } else if (selected === 1) {
                 list = [
-                    {number: 1, name: "BOOK", level: "past"},
-                    {number: 2, name: "PROFILE", level: "current"},
+                    {number: 1, name: "PROJECT", level: "past"},
+                    {number: 2, name: "TRANSLATORS", level: "current"},
                     {number: 3, name: "REVIEW", level: "future"},
                     {number: 4, name: "PUBLISH", level: "future"}
                 ]
             } else if (selected === 2) {
                 list = [
-                    {number: 1, name: "BOOK", level: "past"},
-                    {number: 2, name: "PROFILE", level: "past"},
+                    {number: 1, name: "PROJECT", level: "past"},
+                    {number: 2, name: "TRANSLATORS", level: "past"},
                     {number: 3, name: "REVIEW", level: "current"},
                     {number: 4, name: "PUBLISH", level: "future"}
                 ]
             } else if (selected === 3) {
                 list = [
-                    {number: 1, name: "BOOK", level: "past"},
-                    {number: 2, name: "PROFILE", level: "past"},
+                    {number: 1, name: "PROJECT", level: "past"},
+                    {number: 2, name: "TRANSLATORS", level: "past"},
                     {number: 3, name: "REVIEW", level: "past"},
                     {number: 4, name: "PUBLISH", level: "current"}
                 ]

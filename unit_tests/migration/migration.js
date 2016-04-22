@@ -5,7 +5,8 @@
     let assert = require('assert');
     let fs = require('fs');
     let rimraf = require('rimraf');
-    let targetTranslationMigrator = require('../../src/js/migration/targetTranslationMigrator');
+    let Migrator = require('../../src/js/migrator').MigrateManager;
+    let migrator = new Migrator();
 
     let tempDir = 'unit_tests/migration/temp/';
     let dataDir = 'unit_tests/migration/data/';
@@ -41,7 +42,7 @@
         });
 
         it('should migrate from v4', function() {
-            targetTranslationMigrator.migrate(tempDir + 'v4').then(function() {
+            migrator.migrate(tempDir + 'v4').then(function() {
                 assert(true, true);
             }).catch(function() {
                 // failed
@@ -50,7 +51,7 @@
         });
 
         it('should migrate from v3', function() {
-            targetTranslationMigrator.migrate(tempDir + 'v3').then(function() {
+            migrator.migrate(tempDir + 'v3').then(function() {
                 assert(true, true);
             }).catch(function() {
                 // failed
@@ -59,7 +60,7 @@
         });
 
         //it('should migrate from v2', function() {
-        //    targetTranslationMigrator.migrate(tempDir + 'v2');
+        //    migrator.migrate(tempDir + 'v2');
         //    assert(true, true);
         //});
     });

@@ -19,7 +19,10 @@ try {
     console.log('Please provide ./unit_tests/git/config.json to run git tests');
     return;
 }
-
+if(typeof Git !== 'function') {
+	console.log('Git could not be found. Tests will not be ran');
+	return;
+}
 let git = new Git({
     token: config.token
 });

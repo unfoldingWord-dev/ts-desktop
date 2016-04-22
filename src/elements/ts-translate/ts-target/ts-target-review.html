@@ -91,7 +91,7 @@
         <paper-material id="main" elevation="1">
             <div id="heading">
                 <div>
-                    <span>[[chunk.meta.chunkref]]</span><span>[[chunk.meta.refaddon]]</span>
+                    <span>[[chunk.chunkmeta.chunkref]]</span><span>[[chunk.chunkmeta.refaddon]]</span>
                 </div>
                 <iron-icon class$="[[iconclass(chunk.completed)]]" icon="create" on-tap="edit"></iron-icon>
             </div>
@@ -126,7 +126,7 @@
         },
 
         observers: [
-            'rendertext(chunk.*)'
+            'rendertext(chunk.transcontent)'
         ],
 
         iconclass: function (complete) {
@@ -135,10 +135,10 @@
 
         rendertext: function () {
             if(this.chunk && this.chunk.srccontent) {
-                var verses = this.chunk.meta.verses;
-                var chap = this.chunk.meta.chapter;
+                var verses = this.chunk.chunkmeta.verses;
+                var chap = this.chunk.chunkmeta.chapter;
                 var completed = this.chunk.completed;
-                var textholder = this.$.textholder;
+                var textholder = this.querySelector("#textholder");
                 var linearray = this.chunk.transcontent.split("\n");
                 var wordarray = [];
                 var vmstr1 = "\<ts-verse-marker id='c";
@@ -196,16 +196,16 @@
         completechunk: function (event, data) {
             var index = data.index;
 
-            if (this.chunk.index === index) {
-                var textholder = this.$.textholder;
+            if (this.chunk.index === index && this.chunk.projectmeta.project_type_class === "standard") {
+                var textholder = this.querySelector("#textholder");
                 var paragraphs = textholder.children;
                 var type = "";
                 var text = "";
                 var versenum = 0;
                 var returnstr = "";
 
-                if (this.chunk.meta.frame === 1 && this.chunk.data.project.id !== "obs") {
-                    returnstr += "\\c " + this.chunk.meta.chapter + " ";
+                if (this.chunk.chunkmeta.frame === 1 && this.chunk.projectmeta.project.id !== "obs") {
+                    returnstr += "\\c " + this.chunk.chunkmeta.chapter + " ";
                 }
 
                 for (var j = 0; j < paragraphs.length; j++) {
@@ -227,10 +227,10 @@
                     }
                 }
 
-                this.set('chunk.transcontent', returnstr);
                 this.set('chunk.completed', true);
+                this.set('chunk.transcontent', returnstr);
                 this.$.toggle.checked = true;
-                this.fire('iron-signal', {name: 'updatetranslation'});
+                this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk, completion: true}});
             }
         },
 
@@ -273,9 +273,9 @@
                     }
                 }
 
-                this.set('chunk.transcontent', returnstr);
                 this.set('chunk.completed', false);
-                this.fire('iron-signal', {name: 'updatetranslation'});
+                this.set('chunk.transcontent', returnstr);
+                this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk, completion: true}});
             }
         },
 
@@ -288,7 +288,7 @@
         },
 
         edit: function () {
-            var id = this.chunk.meta.chapterid + "-" + this.chunk.meta.frameid;
+            var id = this.chunk.chunkmeta.chapterid + "-" + this.chunk.chunkmeta.frameid;
             this.set('chunk.state.review', false);
             this.fire('setheight');
             this.fire('iron-signal', {name: 'updatestate', data: {id: id, mode: "review", value: false}});

@@ -109,10 +109,10 @@
     <template>
 
         <div id="contain">
-            <template is="dom-if" if="{{currentproject.data.translators.length}}">
+            <template is="dom-if" if="{{currentproject.projectmeta.translators.length}}">
                 <paper-material class="users" elevation="1">
                     <div id="usergroup">
-                        <template is="dom-repeat" items="{{currentproject.data.translators}}" as="user">
+                        <template is="dom-repeat" items="{{currentproject.projectmeta.translators}}" as="user">
                             <p>{{user}}</p>
                         </template>
                     </div>
@@ -170,15 +170,15 @@
             if (name === undefined || name === "") {
                 this.$.popup.open();
             } else {
-                this.push('currentproject.data.translators', name);
-                this.fire('iron-signal', {name: 'savetofile'});
+                this.push('currentproject.projectmeta.translators', name);
+                this.fire('iron-signal', {name: 'savemanifest'});
                 this.set('newinfo', {});
             }
         },
 
         next: function () {
             var name = this.newinfo.name;
-            var length = this.currentproject.data.translators.length;
+            var length = this.currentproject.projectmeta.translators.length;
             if ((name === undefined || name === "") && length) {
                 this.selected = this.selected + 1;
             } else if (name !== undefined && name !== "") {

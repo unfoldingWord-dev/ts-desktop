@@ -91,6 +91,7 @@ function GitManager() {
             var remoteMasterRef = 'refs/remotes/' + remoteName + '/master';
             var ourBranchName = 'master';
             var newBranchName = 'wonderwoman';
+            var cleanBranchName = 'lex';
 
 
             return Promise.all([utils.fs.readFile(mergeToManifest), utils.fs.readFile(mergeFromManifest)])
@@ -106,6 +107,9 @@ function GitManager() {
                     return NodeGit.Repository.open(mergeToPath);
                 })
                 .then(function (repo) {
+                    return repo.checkoutBranch(ourBranchName).then(utils.ret(repo));
+                })
+                .then(function (repo) {
                     console.log("Step 2");
                     return NodeGit.Remote.delete(repo, remoteName).then(utils.ret(repo))
                         .catch(utils.ret(repo));
@@ -113,6 +117,12 @@ function GitManager() {
                 .then(function (repo) {
                     console.log("Step 3");
                     return repo.getBranch(newBranchName).then(function (branch) {
+                        return NodeGit.Branch.delete(branch).then(utils.ret(repo));
+                    }).catch(utils.ret(repo));
+                })
+                .then(function (repo) {
+                    console.log("Step 3");
+                    return repo.getBranch(cleanBranchName).then(function (branch) {
                         return NodeGit.Branch.delete(branch).then(utils.ret(repo));
                     }).catch(utils.ret(repo));
                 })
@@ -131,13 +141,9 @@ function GitManager() {
                 })
                 .then(function (repo) {
                     console.log("Step 7");
-                    return repo.getReference(remoteMasterRef).then(function (ref) {
+                    return repo.getReference(remoteHeadRef).then(function (ref) {
                         return repo.createBranch(newBranchName, ref.target()).then(utils.ret(repo));
                     })
-                })
-                .then(function (repo) {
-                    console.log("Step 8");
-                    return repo.mergeBranches(newBranchName, remoteName + '/' + remoteBranch, null, NodeGit.Merge.PREFERENCE.NO_FASTFORWARD).then(utils.ret(repo));
                 })
                 .then(function (repo) {
                     console.log("Step 9");
@@ -166,7 +172,7 @@ function GitManager() {
                     if (data.index.hasConflicts()) {
                         data.index.conflictCleanup();
                     }
-                    data.index.write();
+                    //data.index.write();
                     return data.index.writeTreeTo(data.repo).then(function (oid) {
                         data.mergeCommit = oid;
                         return data;
@@ -174,9 +180,15 @@ function GitManager() {
                 })
                 .then(function (data) {
                     console.log("Step 13");
+                    return data.repo.getMasterCommit().then(function (commit) {
+                        return data.repo.createBranch(cleanBranchName, commit, true, data.repo.defaultSignature(), "Clean branch").then(utils.ret(data));
+                    });
+                })
+                .then(function (data) {
+                    console.log("Step 14");
                     var sig = data.repo.defaultSignature();
                     var parents = [data.ours, data.theirs];
-                    return data.repo.createCommit('refs/heads/' + ourBranchName, sig, sig, 'Merging...', data.mergeCommit, parents);
+                    return data.repo.createCommit('refs/heads/' + cleanBranchName, sig, sig, 'Merging to clean...', data.mergeCommit, parents);
                 })
                 .then(utils.logr("Finished merging"));
 

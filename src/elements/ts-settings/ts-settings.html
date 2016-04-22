@@ -240,7 +240,7 @@
                 return;
             }
             this.settings = App.configurator.setUserSetting('datalocation', newPath[0]);
-            App.projectsManager.migrateBackup(oldPath, newPath[0]);
+            App.projectsManager.moveBackups(oldPath, newPath[0]);
         },
 
         openSettingModal: function(event) {

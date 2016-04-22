@@ -211,24 +211,23 @@
         },
 
         gohome: function () {
-            this.fire('iron-signal', {name: 'setdefault'});
-            this.fire('iron-signal', {name: 'reset'});
             this.route = "home";
             this.selected = 0;
+            this.fire('iron-signal', {name: 'reset'});
         },
 
         export: function () {
             var mythis = this;
-            var meta = this.currentproject.data;
-            var translation = this.currentproject.translation;
+            var projectmeta = this.currentproject.projectmeta;
+            var translation = this.currentproject.chunks;
             var mediaServer = App.configurator.getUserSetting('mediaserver');
-            var name = meta.unique_id;
+            var name = projectmeta.unique_id;
             var filePath;
 
-            if (meta.format === 'markdown') {
+            if (projectmeta.format === 'markdown') {
                 filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'Zip Files', extensions: ['zip']}]}});
             } else {
-                filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'Text Files', extensions: ['txt']}]}});
+                filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'USFM Files', extensions: ['usfm']}]}});
             }
             if (!filePath) {
                 return;
@@ -239,10 +238,10 @@
             mythis.$.loading.open();
 
             setTimeout(function() {
-                App.projectsManager.exportTranslation(translation, meta, filePath, mediaServer)
+                App.exportManager.exportTranslation(translation, projectmeta, filePath, mediaServer)
                     .then(function () {
                         mythis.set('options.title', "Project Exported");
-                        mythis.set('options.body', "Your project has been successfully exported to a file.  Thanks.");
+                        mythis.set('options.body', "Your project has been successfully exported to a file.");
                         mythis.set('options.loading', false);
                     })
                     .catch(function (err) {
@@ -260,41 +259,44 @@
         upload: function() {
             var loading = this.$.loading;
             var mythis = this;
-            var meta = this.currentproject.data;
-            var paths = App.projectsManager.getPaths(meta);
-            var repo = meta.unique_id;
+            var projectmeta = this.currentproject.projectmeta;
+            var target = App.configurator.getValue('targetTranslationsDir');
+            var paths = App.utils.makeProjectPaths(target, projectmeta);
+            var repo = projectmeta.unique_id;
             var user = this.currentuser;
+            var deviceId = "";
 
             this.set('options.body', "Uploading Project.  Please wait...");
             this.set('options.loading', true);
             loading.open();
 
-            return App.git.stage(user, paths.projectDir)
+            return App.gitManager.stage(user, paths.projectDir)
                 .then(function () {
-                    return App.util.getDeviceId();
+                    return App.utils.getDeviceId();
                 })
-                .then(function (deviceId) {
-                    var getreg = App.uploader.getRegistrationInfo.bind(App.uploader, deviceId),
-                        genreg = App.uploader.generateRegistrationInfo.bind(App.uploader, deviceId),
+                .then(function (devId) {
+                    deviceId = devId;
+                    var getreg = App.keyManager.getRegistrationInfo.bind(App.keyManager, deviceId),
+                        genreg = App.keyManager.generateRegistrationInfo.bind(App.keyManager, deviceId),
                         rereg = function () {
-                            return App.git.unregister(user).then(genreg);
+                            return App.userManager.unregister(user, deviceId).then(genreg);
                         };
 
                     return getreg().catch(rereg);
                 })
                 .then(function (reg) {
                     user.reg = reg;
-                    return App.git.register(user);
+                    return App.userManager.register(user, deviceId);
                 })
                 .then(function () {
-                    return App.git.createRepo(user, repo);
+                    return App.userManager.createRepo(user, repo);
                 })
                 .then(function (repo) {
-                    return App.git.push(user, paths.projectDir, repo);
+                    return App.gitManager.push(user, paths.projectDir, repo);
                 })
                 .then(function () {
                     mythis.set('options.title', "Project Published");
-                    mythis.set('options.body', "Your project has been successfully published to the server.  Thanks.");
+                    mythis.set('options.body', "Your project has been successfully published to the server.");
                     mythis.set('options.loading', false);
                 })
                 .catch(function (err) {
@@ -302,6 +304,10 @@
                     var logmessage = "";
                     if(err.status === 401) {
                         errmessage = "Cannot publish with a local login.  Please login with a Door43 account.";
+                    } else if (err.data) {
+                        errmessage = err.data;
+                    } else {
+                        errmessage = err;
                     }
                     if (err.status) {
                         logmessage = "Error: " + err.status + " " + err.data;

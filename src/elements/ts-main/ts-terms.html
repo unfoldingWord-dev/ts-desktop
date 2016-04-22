@@ -100,7 +100,7 @@
                 <paper-button raised on-tap="openstatement">Statement of Faith</paper-button>
             </div>
             <div class="buttons">
-                <paper-button on-tap="close">No Thanks</paper-button>
+                <paper-button on-tap="logout">No Thanks</paper-button>
                 <paper-button on-tap="accept">I Agree</paper-button>
             </div>
         </div>
@@ -153,8 +153,9 @@
             this.fire('iron-signal', {name: 'updateuser', data: user});
         },
 
-        close: function () {
-            App.close();
+        logout: function () {
+            this.fire('iron-signal', {name: 'updateuser', data: {}});
+            App.keyManager.destroyKeys();
         },
 
         openlicense: function () {

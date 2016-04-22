@@ -21,7 +21,7 @@
             border-radius: 3px;
         }
 
-        #heading {
+        .heading {
             color: var(--secondary-text-color);
             display: flex;
             justify-content: space-between;
@@ -65,23 +65,25 @@
             margin-left: 16px;
         }
 
+        .hide {
+            display: none;
+        }
+
 	</style>
 
 	<template>
 
         <paper-material elevation="1">
-            <div id="heading">
-                <template is="dom-if" if="{{!chunk.meta.words}}">
-                    <ts-source-tab projectdata="[[chunk.data]]"></ts-source-tab>
-                    <div id="ref">
-                        <span>[[chunk.meta.chunkref]]</span>
-                    </div>
-                </template>
-                <template is="dom-if" if="{{chunk.meta.words}}">
-                    <div id="title">
-                        <h2>[[chunk.wordcontent]]</h2>
-                    </div>
-                </template>
+            <div class$="[[noextantclass(chunk.projectmeta.project_type_class)]]">
+                <ts-source-tab projectmeta="[[chunk.projectmeta]]"></ts-source-tab>
+                <div id="ref">
+                    <span>[[chunk.chunkmeta.chunkref]]</span>
+                </div>
+            </div>
+            <div class$="[[extantclass(chunk.projectmeta.project_type_class)]]">
+                <div id="title">
+                    <h2>[[chunk.wordcontent]]</h2>
+                </div>
             </div>
             <div id="content">
                 <div id="textholder"></div>
@@ -113,30 +115,21 @@
             'rendertext(chunk.*)'
         ],
 
+        noextantclass: function (typeclass) {
+            return typeclass !== "extant" ? 'heading' : 'hide';
+        },
+
+        extantclass: function (typeclass) {
+            return typeclass === "extant" ? 'heading' : 'hide';
+        },
+
         rendertext: function () {
             if(this.chunk && this.chunk.srccontent) {
-                var textarray = this.chunk.srccontent.split(" ");
-                var numstr1 = "\<sup\>";
-                var numstr2 = "\<\/sup\>";
-                var returnstr = "";
-                var verse = 0;
-
-                for (var i = 0; i < textarray.length; i++) {
-                    if (textarray[i].substring(0, 2) === "\\v") {
-                        verse = textarray[i].substring(2);
-                        returnstr += numstr1 + verse + numstr2;
-                    } else {
-                        returnstr += textarray[i] + " ";
-                    }
-                }
-                this.$.textholder.innerHTML = returnstr;
-
+                this.$.textholder.innerHTML = this.chunk.srccontent;
                 var links = this.$.textholder.getElementsByTagName('a');
-
                 for (var j = 0, len = links.length; j < len; ++j) {
                     links[j].addEventListener('click', function (event) {
                         event.preventDefault();
-                        console.log(this.href);
                     });
                 }
             }

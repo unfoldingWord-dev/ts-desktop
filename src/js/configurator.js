@@ -53,13 +53,7 @@
                 return;
             }
             key = key.toLowerCase();
-            value = typeof value === 'boolean' || typeof value === 'number' ? value : value.toString();
-
-            //return if read-only
-            let mutable = getMetaValue(key, 'mutable');
-            if (mutable !== undefined && mutable === false) {
-                return;
-            }
+            value = (typeof value === 'boolean' || typeof value === 'number' || typeof value === 'object') ? value : value.toString();
 
             //load value object or create new empty value object
             let emptyStorageObj = {'value': value, 'meta': {'mutable': true, 'type': typeof value, 'default': ''}};
@@ -73,6 +67,7 @@
 
             //update value in storage
             storage[key] = JSON.stringify(valueObj);
+
         };
 
         let unsetValue = function (key) {
@@ -81,22 +76,12 @@
             }
             key = key.toLowerCase();
 
-            //return if read-only
-            let mutable = getMetaValue(key, 'mutable');
-            if (mutable === false) {
-                return;
-            }
-
             //remove value from storage
             if (typeof storage.removeItem === 'function') {
                 storage.removeItem(key);
             } else {
                 storage[key] = undefined;
             }
-        };
-
-        let setReadOnlyValue = function (key, value) {
-            setValue(key, value, {'mutable': false});
         };
 
         let setDefaultValue = function (key, value) {
@@ -138,17 +123,15 @@
         /**
          */
         let fontSizeMap = {
+            'small': '50%',
             'normal': '100%',
-            'small': '90%',
-            'smaller': '80%',
-            'large': '110%',
-            'larger': '120%'
+            'large': '150%'
         };
 
 
-        // 
+        //
         // This is the returned object
-        // 
+        //
         let configurator = {
 
             /**
@@ -210,7 +193,7 @@
                 try {
                     var s = this.getUserSettingArr();
                     var list = _.find(s, {'list': [{'name': name}]}).list;
-                    return _.find(list, {'name': name}).value;     
+                    return _.find(list, {'name': name}).value;
                 } catch (e) { console.error(e); }
             },
 
@@ -243,7 +226,7 @@
             refreshUserSetting: function() {
                 var defaults = this._userSetting();
                 var current = [];
-                
+
                 try {
                     current = flattenUserSetting(JSON.parse(storage['user-setting']));
                 } catch (e) {
@@ -270,13 +253,13 @@
                 let body = window.document.querySelector('body');
                 let tsTranslate = window.document.querySelector('ts-translate');
                 let fontSizeVal = this.getUserSetting('fontsize').toLowerCase();
-                
+
                 tsTranslate.style.fontSize = fontSizeMap[fontSizeVal];
                 tsTranslate.style.fontFamily = this.getUserSetting('font');
             },
 
             /**
-             * 
+             *
              */
             applyPrefBehavior: function() {
                 // We may not need this as settings that affects behavior is most likely called
@@ -285,7 +268,7 @@
             },
 
             /**
-             * 
+             *
              */
             getAppVersion: function() {
                 try {
@@ -323,13 +306,7 @@
                 }
 
                 for (let i = 0; i < config.length; i++) {
-                    if (config[i].value !== undefined) {
-                        if (config[i].meta.mutable) {
-                            setDefaultValue(config[i].name, config[i].value);
-                        } else {
-                            setReadOnlyValue(config[i].name, config[i].value);
-                        }
-                    }
+                    setDefaultValue(config[i].name, config[i].value);
                 }
             },
 

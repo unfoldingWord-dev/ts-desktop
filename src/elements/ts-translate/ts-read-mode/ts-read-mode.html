@@ -61,7 +61,7 @@
     <template>
 
         <div id="contain">
-            <iron-list id="readlist" items="{{chapters.data}}" as="chunk" on-scroll="setheights">
+            <iron-list id="readlist" items="{{chapters}}" as="chunk" on-scroll="setheights">
                 <template>
                     <ts-read-card id="{{createid(index)}}" chunk="[[chunk]]" on-updateheight="updateheight"></ts-read-card>
                 </template>
@@ -84,8 +84,8 @@
 
         properties: {
             chapters: {
-                type: Object,
-                value: {}
+                type: Array,
+                value: []
             },
             modestatus: {
                 type: Object,
@@ -105,7 +105,7 @@
         },
 
         setheights: function () {
-            for (var i = 0; i < this.chapters.data.length; i++) {
+            for (var i = 0; i < this.chapters.length; i++) {
                 var card = document.getElementById(this.modename + i);
                 if (card !== null) {
                     card.setheight();
@@ -159,7 +159,7 @@
             var list = this.$.readlist;
             var index = list.firstVisibleIndex;
 
-            this.set('modestatus.chapter', this.chapters.data[index].chapter);
+            this.set('modestatus.chapter', this.chapters[index].chaptermeta.chapter);
             this.set('modestatus.index', -1);
         },
 

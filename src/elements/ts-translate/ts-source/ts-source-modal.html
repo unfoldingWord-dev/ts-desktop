@@ -115,7 +115,7 @@
                 <template is="dom-repeat" items="[[sources]]" as="source">
                     <div class="row" on-tap="removesource">
                         <div>
-                            <span>[[source.ln]]</span> - <span>[[source.name]]</span>
+                            <span>[[source.language_name]]</span> - <span>[[source.resource_name]]</span>
                         </div>
                         <paper-checkbox disabled checked></paper-checkbox>
                     </div>
@@ -125,7 +125,7 @@
                 <template is="dom-repeat" items="{{searchfilter(query, available)}}" as="source">
                     <div class="row" on-tap="addsource">
                         <div>
-                            <span>[[source.ln]]</span> - <span>[[source.name]]</span>
+                            <span>[[source.language_name]]</span> - <span>[[source.resource_name]]</span>
                         </div>
                         <paper-checkbox disabled></paper-checkbox>
                     </div>
@@ -182,9 +182,9 @@
 
         searchfilter: function(query, available) {
             if (query) {
-                var search = App.util.startsWithBase.bind(null, query);
+                var search = App.utils.startsWithBase.bind(null, query);
                 return available.filter(function(source) {
-                    return search(source.ln);
+                    return search(source.language_name);
                 });
             } else {
                 return available;
@@ -220,14 +220,16 @@
             var sources = this.sources;
             var selected = this.selectedSource;
             this.query = "";
-            this.fire('iron-signal', {name: 'updatesources', data: {sources: sources, selected: selected}});
+            this.fire('iron-signal', {name: 'updatesources', data: {sources: sources, selected: selected, full: true}});
             this.fire('close');
         },
 
         addsource: function(event) {
             var source = event.model.source;
-            this.push('sources', source);
-            this.selectedSource = this.sources.indexOf(source);
+            if (this.sources.length < 3) {
+                this.push('sources', source);
+                this.selectedSource = this.sources.indexOf(source);
+            }
         },
 
         removesource: function(event) {

@@ -99,9 +99,9 @@
 		<div class="tabs">
             <div class="readspace"></div>
             <div class="bigspace"></div>
-            <template is="dom-repeat" items="[[projectdata.sources]]" as="source">
+            <template is="dom-repeat" items="[[projectmeta.source_translations]]" as="source">
                 <div class="littlespace"></div>
-                <div class$="[[tabclass(projectdata.currentsource, index)]]" on-tap="choosesource"><span>{{source.ln}}</span><span class="upper">{{source.source}}</span></div>
+                <div class$="[[tabclass(projectmeta.currentsource, index)]]" on-tap="choosesource"><span>{{source.language_name}}</span><span class="upper">{{source.resource_id}}</span></div>
                 <div class="littlespace"></div>
             </template>
             <div class="fillspace"></div>
@@ -125,7 +125,7 @@
         ],
 
         properties: {
-            projectdata: {
+            projectmeta: {
                 type: Object,
                 value: {}
             }
@@ -141,7 +141,8 @@
 
         choosesource: function(e) {
             var selected = e.model.index;
-            this.fire('iron-signal', {name: 'updateselected', data: {selected: selected}});
+            var sources = this.projectmeta.source_translations;
+            this.fire('iron-signal', {name: 'updatesources', data: {sources: sources, selected: selected, full: false}});
         },
 
         ready: function() {

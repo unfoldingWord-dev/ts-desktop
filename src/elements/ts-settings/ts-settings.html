@@ -108,9 +108,6 @@
 
         </div>
 
-        <!-- TODO: Fix to work with electron -->
-        <input id="data-location-browser" name="data-location-browser" class="hide" type="file" nwdirectory directory on-change="_updateDataLocation"/>
-
     </template>
 
 </dom-module>
@@ -144,9 +141,6 @@
                     }
                 }
             },
-            backto: {
-                type: String
-            },
             settings: {
                 type: Array,
                 value: []
@@ -161,12 +155,13 @@
             this.settings = App.configurator.refreshUserSetting();
             this.settings = App.configurator.setUserSetting('appversion', App.configurator.getAppVersion());
             this.settings = App.configurator.setUserSetting('datapath', App.configurator.getValue('rootdir'));
-            // TODO: get working with electron. (Read only in the meantime.)
-            // this.$['backup-location-browser'].nwworkingdir = App.configurator.getUserSetting('backuplocation');
+            var untildify = require('untildify');
+            var location = App.configurator.getUserSetting('datalocation');
+            this.settings = App.configurator.setUserSetting('datalocation', untildify(location));
         },
 
         back: function() {
-            this.route = this.backto;
+            this.route = App.configurator.getValue("backto");
         },
 
         _isEnabled: function(bool) {
@@ -200,7 +195,9 @@
         },
 
         _runTapHandler: function(event) {
-            if (!event.target.dataEnabled) { return false; }           
+            if (!event.target.dataEnabled) {
+                return false;
+            }
             var name = event.model.setting.name;
             var value = event.model.setting.value;
             if (name === 'developertools') {
@@ -211,7 +208,7 @@
                 this.saveSettings();
             }
             else if (name === "datalocation") {
-                document.querySelector('#data-location-browser').click();
+                this._updateDataLocation();
             }
             else if (typeof value === 'boolean') {
                 var path = 'settings.' + event.target.dataGroup + '.list.' + event.target.dataList + '.value';
@@ -237,13 +234,13 @@
         },
 
         _updateDataLocation: function() {
-            var newPath = this.$['data-location-browser'].value;
-            if (newPath) {
-                var oldPath = App.configurator.getUserSetting('datalocation');
-                this.settings = App.configurator.setUserSetting('datalocation', newPath);
-                // TODO:
-                // App.projectsManager.migrateBackup(oldPath, newPath);
+            var oldPath = App.configurator.getUserSetting('datalocation');
+            var newPath = App.ipc.sendSync('open-file', {options: {defaultPath: oldPath, properties: ['openDirectory', 'createDirectory']}});
+            if (!newPath) {
+                return;
             }
+            this.settings = App.configurator.setUserSetting('datalocation', newPath[0]);
+            App.projectsManager.moveBackups(oldPath, newPath[0]);
         },
 
         openSettingModal: function(event) {

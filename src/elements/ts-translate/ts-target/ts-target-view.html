@@ -45,9 +45,9 @@
             border-radius: 3px;
         }
 
-        #content p {
+        #textholder p {
 			line-height: 2;
-            margin-top: 0;
+            margin: 0;
             color: var(--primary-text-color);
 		}
 
@@ -58,11 +58,11 @@
         <paper-material elevation="1">
             <div id="heading">
                 <div>
-                    <span>[[chunk.chapterref]]</span><span>[[chunk.refaddon]]</span>
+                    <span>[[chunk.chaptermeta.chapterref]]</span><span>[[chunk.chaptermeta.refaddon]]</span>
                 </div>
             </div>
             <div id="content" class="editmode">
-                <p id="textholder"></p>
+                <div id="textholder"></div>
             </div>
         </paper-material>
 
@@ -92,31 +92,34 @@
                 var completed = this.chunk.completed;
                 var contentbox = this.$.content;
                 var textholder = this.$.textholder;
-                var textarray = this.chunk.transcontent.split(" ");
+                var linearray = this.chunk.transcontent.split("\n");
                 var numstr1 = "\<sup\>";
                 var numstr2 = "\<\/sup\>";
+                var startp = "\<p class='style-scope ts-target-view'\>";
+                var endp = "\<\/p\>";
                 var returnstr = "";
-                var verse = 0;
-                var i = 0;
+
+                for (var j = 0; j < linearray.length; j++) {
+                    returnstr += startp;
+                    var wordarray = linearray[j].split(" ");
+                    for (var i = 0; i < wordarray.length; i++) {
+                        if (wordarray[i] === "\\v") {
+                            var verse = wordarray[i+1];
+                            returnstr += numstr1 + verse + numstr2;
+                            i++;
+                        } else if (wordarray[i] === "\\c") {
+                            i++;
+                        } else {
+                            returnstr += wordarray[i] + " ";
+                        }
+                    }
+                    returnstr += endp;
+                }
+                textholder.innerHTML = returnstr;
 
                 if (completed) {
-                    for (i = 0; i < textarray.length; i++) {
-                        if (textarray[i].substring(0, 2) === "\\v") {
-                            verse = textarray[i].substring(2);
-                            returnstr += numstr1 + verse + numstr2;
-                        } else if (textarray[i].substring(0, 2) !== "\\c") {
-                            returnstr += textarray[i] + " ";
-                        }
-                    }
-                    textholder.innerHTML = returnstr;
                     contentbox.classList.remove("editmode");
                 } else {
-                    for (i = 0; i < textarray.length; i++) {
-                        if (textarray[i].substring(0, 2) !== "\\v" && textarray[i].substring(0, 2) !== "\\c") {
-                            returnstr += textarray[i] + " ";
-                        }
-                    }
-                    textholder.innerHTML = returnstr;
                     contentbox.classList.add("editmode");
                 }
             }

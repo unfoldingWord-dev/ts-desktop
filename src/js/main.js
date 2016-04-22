@@ -85,10 +85,10 @@ function createWindow () {
 function createAcademyWindow () {
 
     academyWindow = new BrowserWindow({
-        width: 750,
+        width: 950,
         height: 660,
-        minWidth: 400,
-        minHeight: 400,
+        minWidth: 950,
+        minHeight: 580,
         useContentSize: true,
         center: true,
         title: app.getName(),
@@ -144,7 +144,7 @@ function createAppMenus() {
             submenu: [
                 {
                     label: "Toggle Developer Tools",
-                    accelerator: "Shift+CmdOrCtrl+I", 
+                    accelerator: "Shift+CmdOrCtrl+I",
                     click: function () {
                         var w = BrowserWindow.getFocusedWindow();
                         w && w.webContents.openDevTools();
@@ -184,7 +184,12 @@ ipcMain.on('openacademy', function (event, arg) {
 });
 
 ipcMain.on('save-as', function (event, arg) {
-    var input = dialog.showSaveDialog(mainWindow, {defaultPath: arg.name});
+    var input = dialog.showSaveDialog(mainWindow, arg.options);
+    event.returnValue = input || false;
+});
+
+ipcMain.on('open-file', function (event, arg) {
+    var input = dialog.showOpenDialog(mainWindow, arg.options);
     event.returnValue = input || false;
 });
 
@@ -205,7 +210,7 @@ app.on('ready', function () {
     createSplashScreen();
     setTimeout(function () {
         createWindow();
-    }, 500); 
+    }, 500);
 });
 
 app.on('window-all-closed', function () {

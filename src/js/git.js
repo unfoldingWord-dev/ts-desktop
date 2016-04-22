@@ -1,130 +1,132 @@
-// git interface module
-
 'use strict';
 
-let Git = require('nodegit'),
-    utils = require('../js/lib/util'),
-    wrap = utils.promisify,
-    logr = utils.logr,
-    fs = require('fs'),
-    readdir = wrap(fs, 'readdir');
+var NodeGit,
+    utils = require('../js/lib/utils'),
+    _ = require('lodash');
 
-
-
-let gitInterface = {
-
-    // Returns the last commit hash/id for the repo at dir
-    getHash: function (dir) {
-        return Git.Repository.open(dir).then(function (repo) {
-            return repo.getCurrentBranch();
-        }).then(function (ref) {
-            return ref.target().toString();
-        });
-    },
-
-    init: function (dir) {
-        return readdir(dir).then(function (files) {
-            var hasGitFolder = (files.indexOf('.git') >= 0);
-
-            return !hasGitFolder ? Git.Repository.init(dir, 0) : false;
-        }).then(logr('Git is initialized'));
-    },
-
-    stage: function (dir, username, email) {
-        username = username || 'tsDesktop';
-        email = email || 'you@example.com';
-
-        let repo, index, oid;
-
-        return Git.Repository.open(dir)
-            .then(function(repoResult) {
-                repo = repoResult;
-                return repo.openIndex();
-            })
-            .then(function(indexResult) {
-                index = indexResult;
-                return index.read(1);
-            })
-            .then(function() {
-                // Get all added files
-                return index.addAll();
-            })
-            .then(function() {
-                // Get all changed/deleted files
-                return index.updateAll();
-            })
-            .then(function() {
-                return index.write();
-            })
-            .then(function() {
-                return index.writeTree();
-            })
-            .then(function(oidResult) {
-                oid = oidResult;
-
-                return repo.getHeadCommit();
-            })
-            .then(function(head) {
-                let parents = head ? [head] : [];
-
-                let author = Git.Signature.now(username, email);
-                let committer = Git.Signature.now(username, email);
-
-                return repo.createCommit("HEAD", author, committer, (new Date()).toString(), oid, parents);
-            })
-            .then(function(commitId) {
-                return commitId;
-            })
-            .then(logr('Files are staged'));
-    },
-
-    push: function (dir, repo, reg, config) {
-        let r;
-
-        return Git.Repository.open(dir)
-            .then(function(repoResult) {
-                r = repoResult;
-                return r.openIndex();
-            }).then(function() {
-                let remoteUrl = `ssh://${config.host}:${config.port}/tS/${reg.deviceId}/${repo}`;
-                return Git.Remote.create(r, 'origin', remoteUrl);
-            }).then(function (remote) {
-                return remote ? remote : r.getRemote('origin');
-            }).then(function(remote) {
-                let opts = {
-                    callbacks: {
-                        certificateCheck: function () {
-                            // no certificate check
-                            return 1;
-                        },
-                        credentials: function (url, userName) {
-                            return Git.Cred.sshKeyNew(
-                                userName,
-                                reg.paths.publicKeyPath,
-                                reg.paths.privateKeyPath,
-                                ""
-                            );
-                        }
-                    }
-                };
-
-                return remote.push(["+refs/heads/master:refs/heads/master"], opts);
-            }).then(logr('Files are pushed'));
-    },
-
-    clone: function() {
-        console.log('not implimented');
-    },
-
-    pull: function() {
-        console.log('not implimented');
+try {
+    NodeGit = require('nodegit');
+} catch(e) {
+    if(process.env.NODE_ENV !== 'test') {
+        throw e;
     }
+}
 
-};
+function GitManager() {
 
-exports.getHash = gitInterface.getHash;
-exports.init = gitInterface.init;
-exports.clone = gitInterface.clone;
-exports.stage = gitInterface.stage;
-exports.pull = gitInterface.pull;
-exports.push = gitInterface.push;
+    var logr = utils.logr;
+
+    return {
+
+        getHash: function (dir) {
+            return NodeGit.Repository.open(dir).then(function (repo) {
+                return repo.getCurrentBranch();
+            }).then(function (ref) {
+                return ref.target().toString();
+            });
+        },
+
+        init: function (dir) {
+            return utils.fs.readdir(dir).then(function (files) {
+                var hasGitFolder = (files.indexOf('.git') >= 0);
+
+                return !hasGitFolder ? NodeGit.Repository.init(dir, 0) : false;
+            }).then(logr('Git is initialized'));
+        },
+
+        stage: function (user, dir) {
+            let author = NodeGit.Signature.now(user.username || 'tsDesktop', user.email || 'you@example.com'),
+                committer = author;
+
+            let repo, index, oid;
+
+            return NodeGit.Repository.open(dir)
+                .then(function(repoResult) {
+                    repo = repoResult;
+                    return repo.openIndex();
+                })
+                .then(function(indexResult) {
+                    index = indexResult;
+                    return index.read(1);
+                })
+                .then(function() {
+                    // Get all added files
+                    return index.addAll();
+                })
+                .then(function() {
+                    // Get all changed/deleted files
+                    return index.updateAll();
+                })
+                .then(function() {
+                    return index.write();
+                })
+                .then(function() {
+                    return index.writeTree();
+                })
+                .then(function(oidResult) {
+                    oid = oidResult;
+
+                    return repo.getHeadCommit();
+                })
+                .then(function(head) {
+                    let parents = head ? [head] : [];
+
+                    return repo.createCommit('HEAD', author, committer, (new Date()).toString(), oid, parents);
+                })
+                .then(function(commitId) {
+                    return commitId;
+                })
+                .then(logr('Files are staged'));
+        },
+
+        push: function (user, dir, repo) {
+            let localrepo,
+                isSSH = !!user.reg;
+
+            return NodeGit.Repository.open(dir)
+                .then(function(repoResult) {
+                    localrepo = repoResult;
+                    return localrepo.openIndex();
+                })
+                .then(function() {
+                    let remoteUrl = isSSH ? repo.ssh_url : repo.html_url;
+
+                    return NodeGit.Remote.createAnonymous(localrepo, remoteUrl);
+                })
+                .then(function(remote) {
+                    return remote.push(['refs/heads/master:refs/heads/master'], {
+                        callbacks: {
+                            certificateCheck: function () {
+                                // no certificate check, let it pass thru
+                                return true;
+                            },
+                            credentials: function (url, username) {
+                                if (isSSH) {
+                                    return NodeGit.Cred.sshKeyNew(
+                                        username,
+                                        user.reg.paths.publicKeyPath,
+                                        user.reg.paths.privateKeyPath,
+                                        ''
+                                    );
+                                }
+
+                                return NodeGit.Cred.userpassPlaintextNew(user.username, user.password);
+                            }
+                        }
+                    });
+                })
+                .then(logr('Files are pushed', repo));
+        },
+
+        clone: function() {
+            throw 'Not implemented';
+        },
+
+        pull: function() {
+            throw 'Not implemented';
+        }
+
+    };
+}
+
+module.exports.GitManager = GitManager;

@@ -10,9 +10,11 @@
 
         #contain {
             flex: auto;
+            display: flex;
         }
 
         #body {
+            flex: auto;
             max-height: calc(100vh - 70px);
             background: var(--card-background-color);
             padding: 15px 45px;
@@ -40,19 +42,28 @@
         },
 
         ready: function() {
-            var academy = App.projectsManager.getTa("%");
+            var academy = App.dataManager.getTa("%");
             var text = "";
+            var test1 = new RegExp(/<a class="wikilink1" href="\//g);
+            var replace1 = '<a class="wikilink1" href="#/';
+            var test2 = new RegExp(/src="\/assets/g);
+            var replace2 = 'src="assets';
+            var test3 = new RegExp(/src="assets/g);
+            var replace3 = 'style="max-width:700px;" src="assets';
+            var shell = require('electron').shell;
+
             for (var j = 0; j < academy.length; j++) {
-                text += academy[j].body;
+                text += academy[j].body.replace("<h2 ", "<h2 id='" + academy[j].reference + "' ");
             }
+            text = text.replace(test1, replace1);
+            text = text.replace(test2, replace2);
+            text = text.replace(test3, replace3);
             this.$.body.innerHTML = text;
-
-            var links = this.$.body.getElementsByTagName('a');
-
-            for (var i = 0, len = links.length; i < len; ++i) {
+            var links = this.$.body.getElementsByClassName('urlextern');
+            for (var i = 0; i < links.length; i++) {
                 links[i].addEventListener('click', function (event) {
                     event.preventDefault();
-                    console.log(this.href);
+                    shell.openExternal(this.href);
                 });
             }
         }

@@ -75,24 +75,6 @@
             padding: 0 1.5em;
         }
 
-        iron-list {
-            font-size: 110%;
-            max-height: 90vh;
-            width: 620px;
-            background: var(--card-background-color);
-            box-shadow: 0 2px 3px 2px var(--border-color);
-        }
-
-        .row {
-            display: flex;
-            border-bottom: 1px solid var(--border-color);
-            transition: background .3s, color .3s;
-            cursor: pointer;
-            min-height: 60px;
-            justify-content: flex-start;
-            align-items: center;
-        }
-
         #headings {
             flex: 0 0 50px;
             width: 620px;
@@ -101,9 +83,24 @@
         }
 
         #list {
-            flex: auto;
+            max-height: calc(100vh - 140px);
             display: flex;
             flex-direction: column;
+            font-size: 110%;
+            width: 620px;
+            box-shadow: 0 2px 3px 2px var(--border-color);
+            overflow-y: auto;
+        }
+
+        .row {
+            display: flex;
+            background: var(--card-background-color);
+            border-bottom: 1px solid var(--border-color);
+            transition: background .3s, color .3s;
+            cursor: pointer;
+            flex: 0 0 60px;
+            justify-content: flex-start;
+            align-items: center;
         }
 
         .row:hover {
@@ -219,11 +216,15 @@
             padding-left: 5px;
         }
 
+        .hide {
+            display: none;
+        }
+
     </style>
 
     <template>
 
-        <ts-home-sidebar route="{{route}}" selected="{{selected}}" backto="{{backto}}"></ts-home-sidebar>
+        <ts-home-sidebar route="{{route}}"></ts-home-sidebar>
 
         <div id="main">
             <div id="header">
@@ -249,22 +250,20 @@
                         <span>{{locale.progress}}</span>
                     </div>
                     <div id="list">
-                        <iron-list items="[[projectlist]]" as="proj">
-                            <template>
-                                <div class="row">
-                                    <div class="left" on-tap="openproject">
-                                        <span class="smallspan"><iron-icon class="smallicon" icon$="[[checkicon(proj.project.id)]]"></iron-icon></span>
-                                        <span class="bigspan">[[proj.project.name]]</span>
-                                        <span class="smallspan smalltext"><span>[[proj.type_name]]</span><span class="space">[[proj.resource_id]]</span></span>
-                                        <span class="smalltext bigspan">[[proj.target_language.name]]</span>
-                                        <span class="smallspan"><ts-completion-icon percent="[[proj.completion]]"></ts-completion-icon></span>
-                                    </div>
-                                    <div>
-                                        <span><paper-icon-button class="info" icon="info" on-tap="openinfo" title="details"></paper-icon-button></span>
-                                    </div>
+                        <template is="dom-repeat" items="[[projectlist]]" as="project">
+                            <div class="row">
+                                <div class="left" on-tap="openproject">
+                                    <span class="smallspan"><iron-icon class="smallicon" icon$="[[checkicon(project)]]"></iron-icon></span>
+                                    <span class="bigspan">[[project.project.name]]</span>
+                                    <span class="smallspan smalltext"><span>[[project.type.name]]</span><span class$="[[typeclass(project.resource.id)]]">[[project.resource.id]]</span></span>
+                                    <span class="smalltext bigspan">[[project.target_language.name]]</span>
+                                    <span class="smallspan"><ts-completion-icon percent="[[project.completion]]"></ts-completion-icon></span>
                                 </div>
-                            </template>
-                        </iron-list>
+                                <div>
+                                    <span><paper-icon-button class="info" icon="info" on-tap="openinfo" title="details"></paper-icon-button></span>
+                                </div>
+                            </div>
+                        </template>
                     </div>
                 </div>
             </template>
@@ -279,7 +278,7 @@
                 <p>{{locale.translators}}:</p>
                 <template is="dom-if" if="{{currentinfo.translators.length}}">
                     <template is="dom-repeat" items="{{currentinfo.translators}}" as="user">
-                        <p class="offset"><strong>{{user.name}}</strong></p>
+                        <p class="offset"><strong>{{user}}</strong></p>
                     </template>
                 </template>
             </div>
@@ -343,10 +342,6 @@
                 type: Object,
                 value: {}
             },
-            backto: {
-                type: String,
-                notify: true
-            },
             animationConfig: {
                 value: function () {
                     return {
@@ -363,35 +358,39 @@
             }
         },
 
-        checkicon: function (slug) {
-            return slug === "obs" || slug === "tw" || slug.substring(0, 3) === "vol" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
+        typeclass: function (id) {
+            return id === "ulb" || id === "udb" ? 'space' : 'hide';
+        },
+
+        checkicon: function (projectmeta) {
+            return projectmeta.project.id === "obs" || projectmeta.project_type_class === "extant" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
         },
 
         gopublish: function () {
-            var projectdata = this.currentinfo;
+            var projectmeta = this.currentinfo;
             this.closeinfo();
-            this.fire('iron-signal', {name: 'loadproject', data: {projdata: projectdata, type: "publish"}});
+            this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, type: "publish"}});
         },
 
         goprint: function () {
-            var projectdata = this.currentinfo;
+            var projectmeta = this.currentinfo;
             this.closeinfo();
-            this.fire('iron-signal', {name: 'loadproject', data: {projdata: projectdata, type: "print"}});
+            this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, type: "print"}});
         },
 
         gobackup: function () {
-            var meta = this.currentinfo;
+            var projectmeta = this.currentinfo;
             this.closeinfo();
-            this.fire('iron-signal', {name: 'openbackup', data: {meta: meta}});
+            this.fire('iron-signal', {name: 'openbackup', data: {projectmeta: projectmeta}});
         },
 
         openproject: function (e) {
-            var projectdata = e.model.proj;
-            this.fire('iron-signal', {name: 'loadproject', data: {projdata: projectdata, type: "home"}});
+            var projectmeta = e.model.project;
+            this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, type: "home"}});
         },
 
         openinfo: function (e) {
-            this.set('currentinfo', e.model.proj);
+            this.set('currentinfo', e.model.project);
             this.$.info.open();
         },
 
@@ -411,9 +410,9 @@
 
         deleteproject: function () {
             var mythis = this;
-            var projectdata = this.currentinfo;
-            var key = "uw-" + projectdata.fullname;
-            App.projectsManager.deleteTargetTranslation(projectdata).then(function() {
+            var projectmeta = this.currentinfo;
+            var key = projectmeta.unique_id;
+            App.projectsManager.deleteTargetTranslation(projectmeta).then(function() {
                 App.configurator.unsetValue(key + "-chapter");
                 App.configurator.unsetValue(key + "-index");
                 App.configurator.unsetValue(key + "-selected");

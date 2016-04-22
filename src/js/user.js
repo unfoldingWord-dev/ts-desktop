@@ -1,92 +1,80 @@
-// user module
+'use strict';
 
-;(function () {
-    'use strict';
+var _ = require('lodash'),
+    Gogs = require('gogs-client');
 
-    let mkdirp = require('mkdirp');
-    let jsonfile = require('jsonfile');
-    let path = require('path');
-    let md5 = require('md5');
-    let fs = require('fs');
+function UserManager(auth) {
 
-    function User (args) {
-        let profilesDirectory = args.profilesDirectory;
-        let username = args.username;
-        let password = args.password;
+    var api = new Gogs('https://git.door43.org/api/v1'),
+        tokenStub = {name: 'ts-desktop'};
 
-        if (username === '' || username === null) {
-            throw new Error('Must supply a valid username');
-        }
+    return {
 
-        let hash = md5(username);
-        let targetDirectory = 'translationStudio/profiles/' + hash + '/';
-        let targetFile = path.join(profilesDirectory, targetDirectory, 'profile.json');
-        let storage = {
-            'username': username,
-            'password': password,
-            'profile': profilesDirectory,
-            'email': '',
-            'name': '',
-            'phone': ''
-        };
+        deleteAccount: function (user) {
+            return api.deleteUser(user, auth);
+        },
 
-        function saveData () {
-            try {
-                jsonfile.writeFileSync(targetFile, storage);
-            } catch (e) {
-                throw new Error('Could not write to file');
-            }
-            return true;
-        }
-
-        jsonfile.readFile(targetFile, function (err, obj) {
-            if (err === null) {
-                storage = obj;
-            } else {
-                mkdirp(path.join(profilesDirectory, targetDirectory), function () {
-                    saveData();
+        createAccount: function (user) {
+            return api.createUser(user, auth, true)
+                .then(function(updatedUser) {
+                    return api.createToken(tokenStub, user)
+                        .then(function(token) {
+                            updatedUser.token = token.sha1;
+                            return updatedUser;
+                        });
                 });
-            }
-        });
+        },
 
+        login: function (userObj) {
+            return api.getUser(userObj).then(function (user) {
+                return api.listTokens(userObj)
+                    .then(function (tokens) {
+                        return _.find(tokens, tokenStub);
+                    })
+                    .then(function (token) {
+                        return token ? token : api.createToken(tokenStub, userObj);
+                    })
+                    .then(function (token) {
+                        user.token = token.sha1;
+                        return user;
+                    });
+            });
+        },
 
-        let user = {
-            setEmail: function (email) {
-                storage.email = email;
-            },
-            setName: function (name) {
-                storage.name = name;
-            },
-            setPhone: function (phone) {
-                storage.phone = phone;
-            },
-            getEmail: function () {
-                return storage.email;
-            },
-            getName: function () {
-                return storage.name;
-            },
-            getPhone: function () {
-                return storage.phone;
-            },
-            commit: function () {
-                return saveData();
-            },
-            destroy: function () {
-                let dir = path.join(profilesDirectory, targetDirectory);
-                if (fs.existsSync(targetFile)) {
-                    fs.unlinkSync(targetFile);
-                }
-                if (fs.existsSync(dir)) {
-                    fs.rmdirSync(dir);
-                }
-            },
-            getProfilePath: function () {
-                return targetFile;
-            }
-        };
-        return user;
-    }
+        register: function (user, deviceId) {
+            var keyStub = {title: 'ts-desktop ' + deviceId};
+            return api.listPublicKeys(user).then(function (keys) {
+                return _.find(keys, keyStub);
+            }).then(function (key) {
+                return key ? key : api.createPublicKey({
+                    title: keyStub.title,
+                    key: user.reg.keys.public
+                }, user);
+            });
+        },
 
-    exports.User = User;
-}());
+        unregister: function (user, deviceId) {
+            var keyStub = {title: 'ts-desktop ' + deviceId};
+            return api.listPublicKeys(user).then(function (keys) {
+                return _.find(keys, keyStub);
+            }).then(function (key) {
+                return key ? api.deletePublicKey(key, user) : false;
+            });
+        },
+
+        createRepo: function (user, reponame) {
+            return api.listRepos(user).then(function (repos) {
+                return _.find(repos, {full_name: user.username + '/' + reponame});
+            }).then(function (repo) {
+                return repo ? repo : api.createRepo({
+                    name: reponame,
+                    description: 'ts-desktop: ' + reponame,
+                    private: false
+                }, user);
+            });
+        }
+
+    };
+}
+
+module.exports.UserManager = UserManager;

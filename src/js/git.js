@@ -16,6 +16,7 @@ try {
 function GitManager() {
 
     var logr = utils.logr;
+    var toJSON = _.partialRight(JSON.stringify, null, '\t');
 
     return {
 
@@ -80,182 +81,96 @@ function GitManager() {
                 .then(logr('Files are staged'));
         },
 
-        merge: function (mergeToPath, mergeFromPath) {
-            var mergeToManifest = path.join(mergeToPath, 'manifest.json');
-            var mergeFromManifest = path.join(mergeFromPath, 'manifest.json');
+        merge: function (user, localPath, remotePath, favor) {
+            var mythis = this;
+            var localManifestPath = path.join(localPath, 'manifest.json');
+            var remoteManifestPath = path.join(remotePath, 'manifest.json');
             var mergedManifest = {};
+            var remoteName = 'tempremote';
+            var remoteHead = 'refs/remotes/' + remoteName + '/HEAD';
+            var remoteMaster = 'refs/remotes/' + remoteName + '/master';
+            var masterBranch = 'master';
+            var tempBranch = 'temp';
 
-            var remoteName = 'superman';
-            var remoteBranch = 'master';
-            var remoteHeadRef = 'refs/remotes/' + remoteName + '/HEAD';
-            var remoteMasterRef = 'refs/remotes/' + remoteName + '/master';
-            var ourBranchName = 'master';
-            var newBranchName = 'wonderwoman';
-            var cleanBranchName = 'lex';
-
-
-            return Promise.all([utils.fs.readFile(mergeToManifest), utils.fs.readFile(mergeFromManifest)])
-                .then(function (manifestDataArray) {
-                    var mergeToManifestJson = JSON.parse(manifestDataArray[0].toString());
-                    var mergeFromManifestJson = JSON.parse(manifestDataArray[1]);
-                    mergedManifest = mergeToManifestJson;
-                    mergedManifest.translators = _.union(mergeToManifestJson.translators, mergeFromManifestJson.translators);
-                    mergedManifest.finished_chunks = _.union(mergeToManifestJson.finished_chunks, mergeFromManifestJson.finished_chunks);
+            return Promise.all([utils.fs.readFile(localManifestPath), utils.fs.readFile(remoteManifestPath)])
+                .then(function (fileData) {
+                    var localManifest = JSON.parse(fileData[0]);
+                    var remoteManifest = JSON.parse(fileData[1]);
+                    mergedManifest = localManifest;
+                    mergedManifest.translators = _.union(localManifest.translators, remoteManifest.translators);
+                    mergedManifest.finished_chunks = _.union(localManifest.finished_chunks, remoteManifest.finished_chunks);
                 })
                 .then(function () {
-                    console.log("Step 1");
-                    return NodeGit.Repository.open(mergeToPath);
+                    return NodeGit.Repository.open(localPath);
                 })
                 .then(function (repo) {
-                    return repo.checkoutBranch(ourBranchName).then(utils.ret(repo));
+                    return repo.checkoutBranch(masterBranch).then(utils.ret(repo));
                 })
                 .then(function (repo) {
-                    console.log("Step 2");
                     return NodeGit.Remote.delete(repo, remoteName).then(utils.ret(repo))
                         .catch(utils.ret(repo));
                 })
                 .then(function (repo) {
-                    console.log("Step 3");
-                    return repo.getBranch(newBranchName).then(function (branch) {
+                    return repo.getBranch(tempBranch).then(function (branch) {
                         return NodeGit.Branch.delete(branch).then(utils.ret(repo));
                     }).catch(utils.ret(repo));
                 })
                 .then(function (repo) {
-                    console.log("Step 3");
-                    return repo.getBranch(cleanBranchName).then(function (branch) {
-                        return NodeGit.Branch.delete(branch).then(utils.ret(repo));
-                    }).catch(utils.ret(repo));
-                })
-                .then(function (repo) {
-                    console.log("Step 4");
-                    NodeGit.Remote.create(repo, remoteName, mergeFromPath);
+                    NodeGit.Remote.create(repo, remoteName, remotePath);
                     return repo;
                 })
                 .then(function (repo) {
-                    console.log("Step 5");
                     return repo.fetch(remoteName).then(utils.ret(repo));
                 })
                 .then(function (repo) {
-                    console.log("Step 6");
-                    return NodeGit.Reference.symbolicCreate(repo, remoteHeadRef, remoteMasterRef, 1, 'symbolic-ref').then(utils.ret(repo));
+                    return NodeGit.Reference.symbolicCreate(repo, remoteHead, remoteMaster, 1, 'symbolic-ref').then(utils.ret(repo));
                 })
                 .then(function (repo) {
-                    console.log("Step 7");
-                    return repo.getReference(remoteHeadRef).then(function (ref) {
-                        return repo.createBranch(newBranchName, ref.target()).then(utils.ret(repo));
+                    return repo.getReference(remoteHead).then(function (ref) {
+                        return repo.createBranch(tempBranch, ref.target()).then(utils.ret(repo));
                     })
                 })
                 .then(function (repo) {
-                    console.log("Step 9");
-                    return repo.getBranchCommit(ourBranchName).then(function (ours) {
-                        return {repo: repo, ours: ours};
+                    return repo.checkoutBranch(tempBranch).then(utils.ret(repo));
+                })
+                .then(function (repo) {
+                    return repo.getBranchCommit(masterBranch).then(function (master) {
+                        return {repo: repo, master: master};
                     });
                 })
                 .then(function (data) {
-                    console.log("Step 10");
-                    return data.repo.getBranchCommit(newBranchName).then(function (theirs) {
-                        data.theirs = theirs;
+                    return data.repo.getBranchCommit(tempBranch).then(function (temp) {
+                        data.temp = temp;
                         return data;
                     });
                 })
                 .then(function (data) {
-                    console.log("Step 11");
-                    return NodeGit.Merge.commits(data.repo, data.ours, data.theirs, {
-                        fileFavor: NodeGit.Merge.FILE_FAVOR.THEIRS
-                    }).then(function (index) {
+                    return NodeGit.Merge.commits(data.repo, data.master, data.temp, {fileFavor: favor}).then(function (index) {
                         data.index = index;
                         return data;
                     });
                 })
                 .then(function (data) {
-                    console.log("Step 12");
-                    if (data.index.hasConflicts()) {
-                        data.index.conflictCleanup();
-                    }
-                    //data.index.write();
-                    return data.index.writeTreeTo(data.repo).then(function (oid) {
-                        data.mergeCommit = oid;
+                    return data.index.writeTreeTo(data.repo).then(function (merge) {
+                        data.merge = merge;
                         return data;
                     });
                 })
                 .then(function (data) {
-                    console.log("Step 13");
-                    return data.repo.getMasterCommit().then(function (commit) {
-                        return data.repo.createBranch(cleanBranchName, commit, true, data.repo.defaultSignature(), "Clean branch").then(utils.ret(data));
-                    });
+                    var sig = data.repo.defaultSignature();
+                    var parents = [data.master, data.temp];
+                    return data.repo.createCommit('refs/heads/' + masterBranch, sig, sig, 'Merging...', data.merge, parents).then(utils.ret(data));
                 })
                 .then(function (data) {
-                    console.log("Step 14");
-                    var sig = data.repo.defaultSignature();
-                    var parents = [data.ours, data.theirs];
-                    return data.repo.createCommit('refs/heads/' + cleanBranchName, sig, sig, 'Merging to clean...', data.mergeCommit, parents);
-                })
-                .then(utils.logr("Finished merging"));
-
-
-/*
-            function createBranch(repo, newBranchName, remoteName, remoteBranch) {
-                var remoteRefBase = 'refs/remotes/' + remoteName;
-                var remoteRefName = remoteRefBase + '/' + remoteBranch;
-                var remoteRefHead = remoteRefBase + '/' + 'HEAD';
-
-                return NodeGit.Reference.symbolicCreate(repo, remoteRefHead, remoteRefName, 1, 'Setting HEAD')
-                    .then(function () {
-                        return repo.getReference(remoteRefName);
-                    })
-                    .then(function (remoteRef) {
-                        // Create new branch based on the remote ref
-                        return repo.createBranch(newBranchName, remoteRef.target());
-                    })
-                    .then(function (branchRef) {
-                        // checkout branch to update working directory
-                        return repo.checkoutBranch(branchRef);
-                    });
-            }
-
-            return Promise.all([utils.fs.readFile(mergeToManifest), utils.fs.readFile(mergeFromManifest)])
-                .then(function (manifestDataArray) {
-                    var mergeToManifestJson = JSON.parse(manifestDataArray[0].toString());
-                    var mergeFromManifestJson = JSON.parse(manifestDataArray[1]);
-                    mergedManifest = mergeToManifestJson;
-                    mergedManifest.translators = _.union(mergeToManifestJson.translators, mergeFromManifestJson.translators);
-                    mergedManifest.finished_chunks = _.union(mergeToManifestJson.finished_chunks, mergeFromManifestJson.finished_chunks);
+                    return data.repo.checkoutBranch(masterBranch);
                 })
                 .then(function () {
-                    console.log("start open repo");
-                    return NodeGit.Repository.open(mergeToPath).then(function (repo) {
-                        return {target: repo};
-                    });
+                    return utils.fs.outputFile(localManifestPath, toJSON(mergedManifest));
                 })
-                .then(function (repos) {
-                    return NodeGit.Remote.delete(repos.target, "new").then(utils.ret(repos))
-                        .catch(utils.ret(repos));
+                .then(function () {
+                    return mythis.commitAll(user, localPath);
                 })
-                .then(function (repos) {
-                    return repos.target.getBranch("superman").then(function (branch) {
-                        return NodeGit.Branch.delete(branch).then(utils.ret(repos));
-                    }).catch(utils.ret(repos));
-                })
-                .then(function (repos) {
-                    console.log('start create remote');
-                    NodeGit.Remote.create(repos.target, "new", mergeFromPath);
-                    return repos;
-                })
-                .then(function (repos) {
-                    var repo = repos.target;
-                    return repo.fetchAll().then(function () {
-                        return createBranch2(repo, 'superman', 'new', 'master').catch(utils.ret(true));
-                    }).then(function () {
-                        return repo.mergeBranches('master', 'new/master');
-                    }).then(function () {
-                        return repo.checkoutBranch('master');
-                    }).then(function () {
-                        console.log("final merge");
-                        return repo.mergeBranches('superman', 'master');
-                    })
-                })
-                .then(utils.logr("Finished merging"));*/
-
+                .then(utils.logr("Finished merging"));
         },
 
         push: function (user, dir, repo) {

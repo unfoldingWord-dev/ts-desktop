@@ -177,7 +177,7 @@
       },
 
       createprojects: function () {
-          var projects = App.projectsManager.getProjects();
+          var projects = App.dataManager.getProjects();
           var tempobject = {};
           var temparray = [];
           _.forEach(_.groupBy(projects, 'category'), function (data, category) {
@@ -192,7 +192,7 @@
           });
           if (App.configurator.getUserSetting('glmode')) {
               temparray.push({"name": "translationWords", "data": [{name: "translationWords", slug: "bible"}]});
-              var volumes = App.projectsManager.getVolumes();
+              var volumes = App.dataManager.getVolumes();
               for (var i = 0; i < volumes.length; i++) {
                   var name = "translationAcademy " + volumes[i].title;
                   temparray.push({"name": name, "data": [{name: name, slug: volumes[i].slug}]});

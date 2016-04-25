@@ -131,7 +131,7 @@
             var trans = this.$.transcard;
             var src = this.$.srccard;
             var mythis = this;
-            var id = this.chunk.meta.chapterid + "-" + this.chunk.meta.frameid;
+            var id = this.chunk.chunkmeta.chapterid + "-" + this.chunk.chunkmeta.frameid;
             var completed = this.chunk.completed;
             var index = this.chunk.index;
 
@@ -154,7 +154,7 @@
             var trans = this.$.transcard;
             var src = this.$.srccard;
             var mythis = this;
-            var id = this.chunk.meta.chapterid + "-" + this.chunk.meta.frameid;
+            var id = this.chunk.chunkmeta.chapterid + "-" + this.chunk.chunkmeta.frameid;
 
             if(!this.chunk.state.chunk) {
                 trans.classList.add("down");

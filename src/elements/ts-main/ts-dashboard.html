@@ -45,10 +45,6 @@
           margin: auto;
       }
 
-      .popup paper-button:hover {
-          color: var(--accent-color);
-      }
-
       #feedback {
           display: flex;
           flex-direction: column;
@@ -76,11 +72,61 @@
           padding: 0 20px;
       }
 
+      #feedbackbuttons paper-button:hover {
+          color: var(--accent-color);
+      }
+
       input {
           border: none;
           font-size: 120%;
           padding: 10px;
           color: var(--secondary-text-color);
+      }
+
+      #importoptions {
+          display: flex;
+          flex-direction: column;
+          width: 500px;
+          height: 500px;
+      }
+
+      #importheader {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+      }
+
+      #importbody {
+          display: flex;
+          flex-direction: column;
+          border-top: 1px solid var(--border-color);
+          padding: 0;
+      }
+
+      #importbuttons {
+          display: flex;
+          justify-content: flex-end;
+          padding: 0 30px;
+      }
+
+      #importbuttons paper-button:hover {
+          color: var(--accent-color);
+      }
+
+      .option {
+          border-bottom: 1px solid var(--border-color);
+          padding: 15px 30px 0;
+      }
+
+      .optiontitle {
+          font-size: 130%;
+          font-weight: bold;
+      }
+
+      .fill {
+          background: var(--accent-color);
+          color: var(--reverse-text-color);
+          text-transform: uppercase;
       }
 
       #loading {
@@ -134,8 +180,8 @@
       <ts-app-titlebar currentuser="[[currentuser]]"></ts-app-titlebar>
       <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
           <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]"></ts-home>
-          <ts-new data-route="new" route="{{route}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]"></ts-new>
-          <ts-translate data-route="translate" route="{{route}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]"></ts-translate>
+          <ts-new data-route="new" route="{{route}}" importdata="{{importdata}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]"></ts-new>
+          <ts-translate data-route="translate" route="{{route}}" busy="{{busy}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]"></ts-translate>
           <ts-publish data-route="publish" route="{{route}}" currentproject="{{currentproject}}" currentuser="[[currentuser]]"></ts-publish>
           <ts-settings data-route="settings" route="{{route}}"></ts-settings>
           <ts-login data-route="login" currentuser="[[currentuser]]"></ts-login>
@@ -153,6 +199,32 @@
           <div id="feedbackbuttons">
               <paper-button on-tap="closefeedback">Cancel</paper-button>
               <paper-button on-tap="sendfeedback">Confirm</paper-button>
+          </div>
+      </paper-dialog>
+
+      <paper-dialog id="importoptions" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <div id="importheader">
+              <h2>Import Options</h2>
+          </div>
+          <div id="importbody">
+              <div class="option">
+                  <paper-button raised class="fill" on-tap="importbackup">Select</paper-button>
+                  <span class="optiontitle">Import from Tstudio file</span>
+                  <p>Will merge with the existing project, if one exists</p>
+              </div>
+              <div class="option">
+                  <paper-button raised class="fill" on-tap="startusfm">Select</paper-button>
+                  <span class="optiontitle">Import from USFM file</span>
+                  <p>Must have either .usfm or .txt extension</p>
+              </div>
+              <div class="option">
+                  <paper-button raised class="fill" on-tap="importserver">Select</paper-button>
+                  <span class="optiontitle">Import from Door43</span>
+                  <p>Will have option to merge with or overwrite existing file</p>
+              </div>
+          </div>
+          <div id="importbuttons">
+              <paper-button dialog-dismiss>Cancel</paper-button>
           </div>
       </paper-dialog>
 
@@ -175,11 +247,12 @@
       </paper-dialog>
 
       <iron-signals on-iron-signal-updatelist="updatelist"></iron-signals>
-      <iron-signals on-iron-signal-setdefault="setdefault"></iron-signals>
       <iron-signals on-iron-signal-openfeedback="openfeedback"></iron-signals>
       <iron-signals on-iron-signal-openrestore="openrestore"></iron-signals>
+      <iron-signals on-iron-signal-openimport="openimport"></iron-signals>
       <iron-signals on-iron-signal-openbackup="openbackup"></iron-signals>
       <iron-signals on-iron-signal-updateuser="updateuser"></iron-signals>
+      <iron-signals on-iron-signal-finishusfm="finishusfm"></iron-signals>
 
   </template>
 
@@ -212,9 +285,17 @@
               type: Object,
               value: {}
           },
+          importdata: {
+              type: Object,
+              value: {importing: false}
+          },
           options: {
               type: Object,
               value: {loading: false, title: "", body: ""}
+          },
+          busy: {
+              type: Boolean,
+              value: false
           }
       },
 
@@ -241,9 +322,114 @@
           }
       },
 
+      openimport: function () {
+          this.$.importoptions.open();
+      },
+
+      importbackup: function() {
+          var mythis = this;
+          this.$.importoptions.close();
+          var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
+          var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}], properties: ['openFile']}});
+          if (!filePath) {
+              return;
+          }
+
+          mythis.set('options.body', "Importing.  Please wait...");
+          mythis.set('options.loading', true);
+          mythis.$.loading.open();
+
+          setTimeout(function() {
+              App.importManager.importFromBackup(filePath[0])
+                  .then(function() {
+                      mythis.set('options.title', "Import Complete");
+                      mythis.set('options.body', "Your project has been successfully imported.");
+                      mythis.set('options.loading', false);
+                      setTimeout(function() {
+                          mythis.updatelist();
+                      }, 250);
+                  })
+                  .catch(function(err) {
+                      var errmessage = "We're sorry.  An error occurred while trying to import your project";
+                      if(err !== null) {
+                          errmessage = err;
+                      }
+                      mythis.set('options.title', "Import Failed");
+                      mythis.set('options.body', errmessage);
+                      mythis.set('options.loading', false);
+                  });
+          }, 500);
+      },
+
+      startusfm: function () {
+          this.$.importoptions.close();
+          var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
+          var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, filters: [{name: 'USFM Files', extensions: ['txt', 'usfm']}], properties: ['openFile']}});
+          if (!filePath) {
+              return;
+          }
+          this.set('importdata', {importing: true, filepath: filePath[0]});
+          this.set('route', 'new');
+      },
+
+      finishusfm: function () {
+          var mythis = this;
+          var user = this.currentuser;
+          var filepath = this.importdata.filepath;
+          var projectmeta = this.importdata.projectmeta;
+          var overwrite = this.importdata.overwrite;
+          var timeString = App.utils.getTimeStamp();
+          var backupName = projectmeta.unique_id + '.' + timeString + '.tstudio';
+          var backupPath = App.configurator.getUserPath('datalocation', 'backups', backupName);
+
+          var backupTargetTranslation = function(){
+              return App.exportManager.backupTranslation(projectmeta, backupPath);
+          };
+          var checkOverwrite = overwrite ? backupTargetTranslation() : Promise.resolve(true);
+
+          mythis.set('options.body', "Importing.  Please wait...");
+          mythis.set('options.loading', true);
+          mythis.$.loading.open();
+
+          setTimeout(function() {
+              return checkOverwrite
+                  .then(function () {
+                      return App.importManager.importFromUSFM(filepath, projectmeta);
+                  })
+                  .then(function (chunks) {
+                      return App.projectsManager.saveTargetTranslation(chunks, projectmeta, user);
+                  })
+                  .then(function(){
+                      mythis.set('options.title', "Import Complete");
+                      mythis.set('options.body', "Your file has been successfully imported.");
+                      mythis.set('options.loading', false);
+                      mythis.set('importdata', {importing: false});
+                      setTimeout(function() {
+                          mythis.updatelist();
+                      }, 250);
+                  }).catch(function(err){
+                      var errmessage = "We're sorry.  An error occurred while trying to import your project";
+                      if(err !== null) {
+                          errmessage = err;
+                      }
+                      mythis.set('options.title', "Import Failed");
+                      mythis.set('options.body', errmessage);
+                      mythis.set('options.loading', false);
+                      mythis.set('importdata', {importing: false});
+                      if (overwrite) {
+                          return App.importManager.restoreFromBackup(backupPath);
+                      }
+                  });
+          }, 500);
+      },
+
+      importserver: function () {
+
+      },
+
       openbackup: function (event, data) {
           var mythis = this;
-          var defaultPath = App.configurator.getUserPath('datalocation', 'backups', data.meta.unique_id);
+          var defaultPath = App.configurator.getUserPath('datalocation', 'backups', data.projectmeta.unique_id);
           var filePath = App.ipc.sendSync('save-as', {options: {defaultPath: defaultPath, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}]}});
           if (!filePath) {
               return;
@@ -254,10 +440,10 @@
           mythis.$.loading.open();
 
           setTimeout(function() {
-              App.projectsManager.backupTranslation(data.meta, filePath)
+              App.exportManager.backupTranslation(data.projectmeta, filePath)
                   .then(function () {
                       mythis.set('options.title', "Backup Complete");
-                      mythis.set('options.body', "Your project has been successfully backed up.  Thanks.");
+                      mythis.set('options.body', "Your project has been successfully backed up.");
                       mythis.set('options.loading', false);
                   })
                   .catch(function (err) {
@@ -282,13 +468,13 @@
 
           mythis.set('options.body', "Restoring.  Please wait...");
           mythis.set('options.loading', true);
-          this.$.loading.open();
+          mythis.$.loading.open();
 
           setTimeout(function() {
-              App.projectsManager.restoreTargetTranslation(filePath[0])
+              App.importManager.restoreFromBackup(filePath[0])
                   .then(function() {
                       mythis.set('options.title', "Restore Complete");
-                      mythis.set('options.body', "Your project(s) has been successfully restored.  Thanks.");
+                      mythis.set('options.body', "Your project has been successfully restored.");
                       mythis.set('options.loading', false);
                       setTimeout(function() {
                           mythis.updatelist();
@@ -327,7 +513,7 @@
           if (App.reporter.canReportToGithub()) {
               App.reporter.reportBug(message, function (res) {
                   mythis.set('options.title', "Feedback Sent");
-                  mythis.set('options.body', "Your feedback has been successfully sent.  Thanks.");
+                  mythis.set('options.body', "Your feedback has been successfully sent.");
                   mythis.set('options.loading', false);
               });
           } else {
@@ -345,32 +531,39 @@
 
       updatelist: function () {
           var mythis = this;
-          App.projectsManager.migrateTargetTranslationsList()
+          if (mythis.busy) {
+              setTimeout(function() {
+                  mythis.updatelist();
+              }, 500);
+              return;
+          }
+          mythis.set('busy', true);
+          var autobackupdir = App.configurator.getUserPath('datalocation', 'automatic_backups');
+          return App.projectsManager.migrateTargetTranslationsList()
               .then(function () {
                   return App.projectsManager.loadTargetTranslationsList()
               })
               .then(function(list) {
-              App.ipc.send('loading-status', 'Updating Manifest Files...');
-              for (var i = 0; i < list.length; i++) {
-                  list[i] = App.projectsManager.updateManifestToMeta(list[i]);
-              }
-              mythis.set('projectlist', _.compact(list));
-
-              App.ipc.send('loading-status', 'Checking Auto Backups...');
-              App.projectsManager.backupProjects(mythis.projectlist);
-
-              setTimeout(function() {
-                App.ipc.send('loading-done');
-              }, 100);
-          });
-      },
-
-      setdefault: function () {
-          this.currentproject = {};
+                  App.ipc.send('loading-status', 'Updating Manifest Files...');
+                  for (var i = 0; i < list.length; i++) {
+                      list[i] = App.projectsManager.updateManifestToMeta(list[i]);
+                  }
+                  return _.compact(list);
+              })
+              .then(function (list) {
+                  mythis.set('projectlist', list);
+                  App.ipc.send('loading-status', 'Creating Auto Backups...');
+                  return App.exportManager.backupAllTranslations(list, autobackupdir)
+              })
+              .then(function () {
+                  mythis.set('busy', false);
+                  setTimeout(function() {
+                      App.ipc.send('loading-done');
+                  }, 100);
+              });
       },
 
       ready: function() {
-          this.setdefault();
           App.ipc.send('loading-status', 'Retrieving User Info...');
           this.retrieveuser();
           App.configurator.applyPrefAppearance();

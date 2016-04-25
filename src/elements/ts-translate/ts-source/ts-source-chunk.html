@@ -74,13 +74,13 @@
 	<template>
 
         <paper-material elevation="1">
-            <div class$="[[noextantclass(chunk.data.project_type_class)]]">
-                <ts-source-tab projectdata="[[chunk.data]]"></ts-source-tab>
+            <div class$="[[noextantclass(chunk.projectmeta.project_type_class)]]">
+                <ts-source-tab projectmeta="[[chunk.projectmeta]]"></ts-source-tab>
                 <div id="ref">
-                    <span>[[chunk.meta.chunkref]]</span>
+                    <span>[[chunk.chunkmeta.chunkref]]</span>
                 </div>
             </div>
-            <div class$="[[extantclass(chunk.data.project_type_class)]]">
+            <div class$="[[extantclass(chunk.projectmeta.project_type_class)]]">
                 <div id="title">
                     <h2>[[chunk.wordcontent]]</h2>
                 </div>
@@ -125,29 +125,11 @@
 
         rendertext: function () {
             if(this.chunk && this.chunk.srccontent) {
-                var textarray = this.chunk.srccontent.split(" ");
-                var numstr1 = "\<sup\>";
-                var numstr2 = "\<\/sup\>";
-                var returnstr = "";
-                var verse = 0;
-
-                for (var i = 0; i < textarray.length; i++) {
-                    if (textarray[i] === "\\v") {
-                        verse = textarray[i+1];
-                        returnstr += numstr1 + verse + numstr2;
-                        i++;
-                    } else {
-                        returnstr += textarray[i] + " ";
-                    }
-                }
-                this.$.textholder.innerHTML = returnstr;
-
+                this.$.textholder.innerHTML = this.chunk.srccontent;
                 var links = this.$.textholder.getElementsByTagName('a');
-
                 for (var j = 0, len = links.length; j < len; ++j) {
                     links[j].addEventListener('click', function (event) {
                         event.preventDefault();
-                        //console.log(this.href);
                     });
                 }
             }

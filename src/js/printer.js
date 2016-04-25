@@ -3,63 +3,48 @@
 var _ = require('lodash'),
     fs = require('fs'),
     path = require('path'),
-    mkdirP = require('mkdirp'),
+    utils = require('../js/lib/utils'),
     AdmZip = require('adm-zip'),
     https = require('https'),
-    download = require('../js/lib/util').download,
-    _ = require('lodash'),
     PDFDocument = require('pdfkit');
 
+function PrintManager(configurator) {
 
-function Printer() {
-
-    /**
-     * Returns the value of the first property found in the object.
-     * If the object has no properties null is returned
-     * @param obj
-     * @returns {}
-     */
-    function getFirstPropValue(obj) {
-        let values = _.values(obj);
-        return values.length ? values[0] : null;
-    }
+    var download = utils.download;
+    var srcDir = path.resolve(path.join(__dirname, '..'));
+    var notoFontPath = path.join(srcDir, 'assets', 'NotoSans-Regular.ttf');
 
     return {
 
-        isTranslation: function (meta) {
-            return !meta.type.id || meta.type.id === 'text';
-        },
-
-        getImages: function(meta){
-            return new Promise(function(resolve, reject){
-                let App = window.App,
-                    imageRoot = path.join(App.configurator.getValue('rootdir'), 'images'),
+        getImages: function (meta) {
+            return new Promise(function (resolve, reject) {
+                var imageRoot = path.join(configurator.getValue('rootdir'), 'images'),
                     imagePath = path.join(imageRoot, meta.resource.id);
 
                 //check to see if we need to create the images directory;
-                if(!fs.existsSync(imagePath)){
-                    mkdirP.sync(imagePath);
+                if (!fs.existsSync(imagePath)) {
+                    utils.fs.mkdirs(imagePath);
                 }
 
                 //if the zip file isn't downloaded yet, go get it.
-                let dest = path.join(imagePath, 'images.zip');
-                if(!fs.existsSync(dest)) {
+                var dest = path.join(imagePath, 'images.zip');
+                if (!fs.existsSync(dest)) {
                     //let out = fs.createWriteStream(dest);
                     // TRICKY: right now we have to hard code the urls until the api is updated
-                    let url = App.configurator.getValue("mediaServer") + '/obs/jpg/1/en/obs-images-360px.zip';
+                    var url = configurator.getValue("mediaServer") + '/obs/jpg/1/en/obs-images-360px.zip';
                     console.log('downloading images from', url);
-                    download(url, dest, true).then(function() {
-                        let zip = new AdmZip(dest);
+                    download(url, dest, true).then(function () {
+                        var zip = new AdmZip(dest);
                         zip.extractAllTo(imagePath, true);
 
-                        let directories = fs.readdirSync(imagePath).filter(function(file) {
+                        var directories = fs.readdirSync(imagePath).filter(function (file) {
                             return fs.statSync(path.join(imagePath, file)).isDirectory();
                         });
-                        directories.forEach(function(dir){
-                            let dirPath = path.join(imagePath,dir),
+                        directories.forEach(function (dir) {
+                            var dirPath = path.join(imagePath,dir),
                                 files = fs.readdirSync(dirPath);
-                            files.forEach(function(file){
-                                let filePath = path.join(imagePath,dir,file),
+                            files.forEach(function (file) {
+                                var filePath = path.join(imagePath,dir,file),
                                     newPath = path.join(imagePath,file);
                                 fs.renameSync(filePath, newPath);
                             });
@@ -68,7 +53,7 @@ function Printer() {
                             fs.rmdir(dirPath);
                         });
                         resolve();
-                    }).catch(function(err) {
+                    }).catch(function (err) {
                         reject(err);
                     });
                 } else {
@@ -77,34 +62,26 @@ function Printer() {
             });
         },
 
-        /**
-         * Generates a pdf of the target translation
-         * @param translation an array of frames
-         * @param meta the target translation manifest and other info
-         * @param filePath the path where the export will be saved
-         * @param options {includeIncompleteFrames: boolean, includeImages: boolean, doubleSpace: boolean}
-         * @returns {Promise.<boolean>}
-         */
         targetTranslationToPdf: function (translation, meta, filePath, options) {
-
-            let isTranslation = this.isTranslation(meta),
-                App = window.App,
-                imageRoot = path.join(App.configurator.getValue('rootdir'), "images"),
+            if(filePath.split('.').pop() !== 'pdf') {
+                filePath += '.pdf';
+            }
+            var imageRoot = path.join(configurator.getValue('rootdir'), "images"),
                 imagePath = path.join(imageRoot, meta.resource.id);
 
-            return new Promise(function(resolve, reject) {
-                if(isTranslation) {
+            return new Promise(function (resolve, reject) {
+                if (meta.project_type_class === "standard") {
                     // normalize input
-                    let chapters = _.mapValues(_.groupBy(translation, function(obj) {
+                    var chapters = _.mapValues(_.groupBy(translation, function (obj) {
                         //console.debug('map chapter values', obj);
-                        return obj.meta.chapterid;
-                    }), function(chapter, key) {
-                        let frames = _.mapKeys(chapter, function(obj) {
+                        return obj.chunkmeta.chapterid;
+                    }), function (chapter, key) {
+                        var frames = _.mapKeys(chapter, function (obj) {
                             //console.debug('map chapter keys', obj);
-                            return obj.meta.frameid;
+                            return obj.chunkmeta.frameid;
                         });
 
-                        let chapterObj = {
+                        var chapterObj = {
                             id: key,
                             title: frames.title || key,
                             reference: frames.reference === undefined ? null : frames.reference,
@@ -112,27 +89,27 @@ function Printer() {
                         };
                         delete frames.reference;
                         delete frames.title;
-                        chapterObj.frames = _.sortBy(_.filter(frames, function(o) {
+                        chapterObj.frames = _.sortBy(_.filter(frames, function (o) {
                             return o.transcontent !== '';
-                        }), function(f) {
+                        }), function (f) {
                             //console.debug('sort frames',f);
-                            return f.meta.frame;
+                            return f.chunkmeta.frame;
                         });
                         return chapterObj;
                     });
-                    let project = {
+                    var project = {
                         format: meta.format,
                         title: chapters['00'].title
                     };
                     delete chapters['00'];
-                    project.chapters = _.sortBy(_.filter(chapters, function(o) {
+                    project.chapters = _.sortBy(_.filter(chapters, function (o) {
                         return o.frames.length > 0;
                     }), 'id');
                     chapters = null;
 
-                    if(project.format === 'markdown') {
+                    if (project.format === 'markdown') {
 
-                        let doc = new PDFDocument({
+                        var doc = new PDFDocument({
                             bufferPages: true,
                             margins:{
                                 top: 72,
@@ -142,32 +119,37 @@ function Printer() {
                             }
                         });
                         doc.pipe(fs.createWriteStream(filePath));
-
                         // default meta
-                        doc.info.Title = project.title.transcontent || meta.project.name;
+                        if (project.title.transcontent !== "") {
+                            doc.info.Title = project.title.transcontent;
+                        } else {
+                            doc.info.Title = project.title.projectmeta.project.name;
+                        }
+
                         //doc.info.Author = 'Joel Lonbeck'; // todo: translators
                         //doc.info.Subject = 'an unrestricted, visual mini-Bible in any language'; // todo: project sub-title
                         doc.info.Keywords = meta.target_language.name;
 
                         // book title
                         doc.fontSize(25)
-                            .text(project.title.transcontent, 72, doc.page.height / 2, {align: 'center'});
+                            .font(notoFontPath)
+                            .text(doc.info.Title, 72, doc.page.height / 2, {align: 'center'});
 
                         // TOC placeholders
                         doc.addPage();
-                        let lastTOCPage = doc.bufferedPageRange().count;
-                        let tocPages = {
+                        var lastTOCPage = doc.bufferedPageRange().count;
+                        var tocPages = {
                             start: lastTOCPage - 1
                         };
                         doc.fontSize(25)
                             .text(' ', 72, 72)
                             .moveDown();
-                        _.forEach(project.chapters, function(chapter) {
+                        _.forEach(project.chapters, function (chapter) {
                             doc.fontSize(10)
                                 .text(' ')
                                 .moveDown();
-                            let currPage = doc.bufferedPageRange().count;
-                            if(lastTOCPage !== currPage) {
+                            var currPage = doc.bufferedPageRange().count;
+                            if (lastTOCPage !== currPage) {
                                 // record toc page split
                                 tocPages[chapter.id] = currPage - 1;
                                 lastTOCPage = currPage;
@@ -180,40 +162,43 @@ function Printer() {
                         });
 
                         // book body
-                        _.forEach(project.chapters, function(chapter) {
+                        _.forEach(project.chapters, function (chapter) {
                             // chapter title
                             doc.addPage();
                             doc.fontSize(20)
-                                .text(chapter.title.transcontent || chapter.title.meta.title, 72, doc.page.height / 2, {align: 'center'});
+                                .text(chapter.title.transcontent || chapter.title.chunkmeta.title, 72, doc.page.height / 2, {align: 'center'});
                             chapter.page = doc.bufferedPageRange().count;
 
                             // frames
-                            if(options.doubleSpace === true){
+                            if (options.doubleSpace === true) {
                                 doc.lineGap(20);
                             }
                             doc.addPage();
-                            _.forEach(chapter.frames, function(frame) {
-                                if(options.includeIncompleteFrames === true || frame.completed === true) {
+                            _.forEach(chapter.frames, function (frame) {
+                                if (options.includeIncompleteFrames === true || frame.completed === true) {
+                                    doc.moveDown();
                                     if (options.includeImages === true) {
                                         //console.debug(meta);
                                         //console.debug(frame);
                                         // TRICKY: right now all images are en
-                                        var imgPath = path.join(imagePath, meta.resource.id + "-en-" + frame.meta.chapterid + "-" + frame.meta.frameid + ".jpg");
+                                        var imgPath = path.join(imagePath, meta.resource.id + "-en-" + frame.chunkmeta.chapterid + "-" + frame.chunkmeta.frameid + ".jpg");
                                         //check the position of the text on the page.
                                         // 792 (total ht of page) - 50 ( lower margin) - 263.25 (height of pic) = 478.75 (max amount of space used before image)
-                                        if(doc.y > 478.75){
+                                        if (doc.y > 478.75) {
                                             doc.addPage();
                                         }
                                        doc.image(imgPath, {width:doc.page.width - 72*2});
                                     }
-                                    doc.moveDown()
-                                        .fontSize(10)
+                                    doc.fontSize(10)
                                         .text(frame.transcontent);
+                                    if (options.includeImages === true) {
+                                        doc.moveDown();//add extra line break after image and text as per github issue527
+                                    }
                                 }
                             });
 
                             // chapter reference
-                            if(chapter.reference !== null) {
+                            if (chapter.reference !== null) {
                                 doc.moveDown()
                                     .fontSize(10)
                                     .text(chapter.reference.transcontent);
@@ -221,23 +206,25 @@ function Printer() {
                         });
 
                         // number pages
-                        let range = doc.bufferedPageRange();
-                        for(let i = range.start; i < range.start + range.count; i ++) {
+                        var range = doc.bufferedPageRange();
+                        for (var i = range.start; i < range.start + range.count; i ++) {
                             doc.switchToPage(i);
                             doc.fontSize(10)
+                                .font('Helvetica')
                                 .text(i + 1, 72, doc.page.height - 50 - 12, {align: 'center'});
                         }
 
                         // write TOC
-                        let currTocPage = tocPages.start;
+                        var currTocPage = tocPages.start;
                         doc.switchToPage(currTocPage);
                         // TODO: display correct title of TOC based on the project
                         doc.fontSize(25)
                             .lineGap(0)
                             .text('Table of Contents', 72, 72)
+                            .font(notoFontPath)
                             .moveDown();
-                        _.forEach(project.chapters, function(chapter) {
-                            if(tocPages[chapter.id] !== undefined && tocPages[chapter.id] !== currTocPage) {
+                        _.forEach(project.chapters, function (chapter) {
+                            if (tocPages[chapter.id] !== undefined && tocPages[chapter.id] !== currTocPage) {
                                 currTocPage = tocPages[chapter.id];
                                 doc.switchToPage(currTocPage);
                                 doc.fontSize(10)
@@ -246,7 +233,7 @@ function Printer() {
                             }
                             doc.switchToPage(currTocPage);
                             doc.fontSize(10)
-                                .text(chapter.title.transcontent || chapter.title.meta.title)
+                                .text(chapter.title.transcontent || chapter.title.chunkmeta.title)
                                 .moveUp()
                                 .text(chapter.page + '', {align: 'right'})
                                 .moveDown();
@@ -256,7 +243,7 @@ function Printer() {
                         resolve(true);
                     } else if (project.format === 'usfm') {
 
-                         let doc = new PDFDocument({
+                         var doc = new PDFDocument({
                             bufferPages: true,
                             margins:{
                                 top: 72,
@@ -270,11 +257,13 @@ function Printer() {
                         //set the title
                         doc.info.Title = translation[0].transcontent || meta.project.name;
                         doc.fontSize(25)
-                            .text(translation[0].transcontent, 72, doc.page.height / 2, {align: 'center'})
-                            .addPage();
+                            .font(notoFontPath)
+                            .text(doc.info.Title, 72, doc.page.height / 2, {align: 'center'});
 
                              // book body
-                        _.forEach(project.chapters, function(chapter) {
+                        _.forEach(project.chapters, function (chapter) {
+
+                            doc.addPage();//start each chapter on new page
 
                             //list chapters (remove leading zeros in the numbers)
                             var chapterNum = chapter.id.replace(/\b0+/, '');
@@ -284,18 +273,18 @@ function Printer() {
                             chapter.page = doc.bufferedPageRange().count;
 
                             // frames
-                            if(options.doubleSpace === true){
+                            if (options.doubleSpace === true) {
                                 doc.lineGap(20);
                             }
 
-                            _.forEach(chapter.frames, function(frame) {
-                                if(options.includeIncompleteFrames === true || frame.completed === true) {
-                                    var content = frame.transcontent.split(/[\\||\/][v]([0-9]+)/g);
+                            _.forEach(chapter.frames, function (frame) {
+                                if (options.includeIncompleteFrames === true || frame.completed === true) {
+                                    var content = frame.transcontent.split(/[\\]*[\\||\/][v][ ]([0-9]+)/g);
 
-                                    _.forEach(content, function(info){
+                                    _.forEach(content, function (info) {
                                         let output = info;
                                        //superscript for verses not supported by pdfkit: https://github.com/devongovett/pdfkit/issues/15
-                                       output = output.replace(/[\\][\\c][0-9]+ /g, '');
+                                       output = output.replace(/[\\][\\c][ ][0-9]+ /g, '');
                                         doc.fontSize(10)
                                             .text(output + ' ',  { continued: true});
                                     });
@@ -303,14 +292,14 @@ function Printer() {
                                 doc.moveDown()
                                     .text("");
                             });
-                            doc.addPage();
                         });
 
                         // number pages
-                        let range = doc.bufferedPageRange();
-                        for (let i = range.start; i < range.start + range.count; i ++) {
+                        var range = doc.bufferedPageRange();
+                        for (var i = range.start; i < range.start + range.count; i ++) {
                             doc.switchToPage(i);
                             doc.fontSize(10)
+                                .font('Helvetica')
                                 .text(i + 1, 72, doc.page.height - 50 - 12, {align: 'center'});
                         }
 
@@ -328,4 +317,4 @@ function Printer() {
     };
 }
 
-module.exports.Printer = Printer;
+module.exports.PrintManager = PrintManager;

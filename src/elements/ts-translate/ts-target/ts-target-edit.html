@@ -108,7 +108,7 @@
 		},
 
         observers: [
-            'rendertext(chunk.*)'
+            'rendertext(chunk.transcontent)'
         ],
 
         focustextbox: function () {
@@ -121,7 +121,7 @@
                 var typeclass = this.chunk.projectmeta.project_type_class;
                 var contentbox = this.$.content;
                 var textbox = this.$.textbox;
-                var textholder = this.$.textholder;
+                var textholder = this.querySelector("#textholder");
                 var linearray = this.chunk.transcontent.split("\n");
                 var numstr1 = "\<sup\>";
                 var numstr2 = "\<\/sup\>";

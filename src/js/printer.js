@@ -63,7 +63,9 @@ function PrintManager(configurator) {
         },
 
         targetTranslationToPdf: function (translation, meta, filePath, options) {
-
+            if(filePath.split('.').pop() !== 'pdf') {
+                filePath += '.pdf';
+            }
             var imageRoot = path.join(configurator.getValue('rootdir'), "images"),
                 imagePath = path.join(imageRoot, meta.resource.id);
 
@@ -174,11 +176,11 @@ function PrintManager(configurator) {
                             doc.addPage();
                             _.forEach(chapter.frames, function (frame) {
                                 if (options.includeIncompleteFrames === true || frame.completed === true) {
+                                    doc.moveDown();
                                     if (options.includeImages === true) {
                                         //console.debug(meta);
                                         //console.debug(frame);
                                         // TRICKY: right now all images are en
-                                        doc.moveDown();
                                         var imgPath = path.join(imagePath, meta.resource.id + "-en-" + frame.chunkmeta.chapterid + "-" + frame.chunkmeta.frameid + ".jpg");
                                         //check the position of the text on the page.
                                         // 792 (total ht of page) - 50 ( lower margin) - 263.25 (height of pic) = 478.75 (max amount of space used before image)
@@ -186,11 +188,12 @@ function PrintManager(configurator) {
                                             doc.addPage();
                                         }
                                        doc.image(imgPath, {width:doc.page.width - 72*2});
-                                       doc.moveDown();//add extra line break after images as per github issue527
                                     }
-                                    doc.moveDown()
-                                        .fontSize(10)
+                                    doc.fontSize(10)
                                         .text(frame.transcontent);
+                                    if (options.includeImages === true) {
+                                        doc.moveDown();//add extra line break after image and text as per github issue527
+                                    }
                                 }
                             });
 

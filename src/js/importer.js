@@ -58,7 +58,7 @@ function ImportManager(configurator, migrator, dataManager) {
                 });
         },
 
-        importFromBackup: function(filePath) {
+        extractBackup: function(filePath) {
             var zip = new AdmZip(filePath),
                 tmpDir = configurator.getValue('tempDir'),
                 targetDir = configurator.getValue('targetTranslationsDir'),
@@ -93,15 +93,13 @@ function ImportManager(configurator, migrator, dataManager) {
                         var tmpPath = path.join(extractPath, p),
                             targetPath = path.join(targetDir, p);
 
-                        return utils.fs.move(tmpPath, targetPath, {clobber: true});
+                        return utils.fs.stat(targetPath).then(utils.ret(true)).catch(utils.ret(false))
+                            .then(function (exists) {
+                                return {tmpPath: tmpPath, targetPath: targetPath, targetExists: exists};
+                            });
                     });
                 })
-                .then(function (list) {
-                    return Promise.all(list);
-                })
-                .then(function () {
-                    return utils.fs.remove(tmpDir);
-                });
+                .then(Promise.all.bind(Promise));
         },
 
         retrieveUSFMProjectID: function (filepath) {

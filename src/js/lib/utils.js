@@ -33,6 +33,13 @@
             }).replace(/\s+/g, '');
         },
 
+        /**
+         * Pads date/time with a leading zero if it's a single digit
+         */
+        padZero: function(t) {
+            return ('0' + t.toString()).slice(-2);
+        },
+
         mapObject: function (obj, visit, filter) {
             var keys = Object.getOwnPropertyNames(obj);
 

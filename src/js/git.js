@@ -81,7 +81,9 @@ function GitManager() {
 
         push: function (user, dir, repo) {
             let localrepo,
-                isSSH = !!user.reg;
+                isSSH = !!user.reg,
+                tagName = '',
+                tagMessage = '';
 
             return NodeGit.Repository.open(dir)
                 .then(function(repoResult) {
@@ -89,12 +91,28 @@ function GitManager() {
                     return localrepo.openIndex();
                 })
                 .then(function() {
+                    return localrepo.getHeadCommit();
+                })
+                .then(function(commit) {
+                    let stamp = new Date(Date.now()),
+                        padZero = utils.padZero;
+                    tagName = 'R2P/'
+                              + stamp.getFullYear().toString() + '-'
+                              + padZero(stamp.getMonth()+1) + '-'
+                              + padZero(stamp.getDate()) + '/'
+                              + padZero(stamp.getHours()) + '.'
+                              + padZero(stamp.getMinutes()) + '.'
+                              + padZero(stamp.getSeconds());
+                    return localrepo.createTag(commit.id(), tagName, tagMessage);
+                })
+                .then(function() {
                     let remoteUrl = isSSH ? repo.ssh_url : repo.html_url;
 
                     return NodeGit.Remote.createAnonymous(localrepo, remoteUrl);
                 })
                 .then(function(remote) {
-                    return remote.push(['refs/heads/master:refs/heads/master'], {
+                    let tagRefSpecs = 'refs/tags/' + tagName + ':refs/tags/' + tagName;
+                    return remote.push(['refs/heads/master:refs/heads/master', tagRefSpecs], {
                         callbacks: {
                             certificateCheck: function () {
                                 // no certificate check, let it pass thru

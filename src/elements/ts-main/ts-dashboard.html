@@ -144,6 +144,60 @@
           text-transform: uppercase;
       }
 
+      #repo {
+          display: flex;
+          flex-direction: column;
+          width: 500px;
+          height: 500px;
+      }
+
+      #repoheader {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+      }
+
+      #repobody {
+          display: flex;
+          flex-direction: column;
+          height: 300px;
+          border-top: 1px solid var(--border-color);
+          padding: 0;
+      }
+
+      #repobuttons {
+          display: flex;
+          justify-content: flex-end;
+          padding: 0 30px;
+      }
+
+      #repobuttons paper-button:hover {
+          color: var(--accent-color);
+      }
+
+      #repoheader input {
+          border: none;
+          font-size: 110%;
+          font-style: italic;
+          font-family: sans-serif;
+          width: 75%;
+          padding: 0.25em 5px;
+          margin-left: -5px;
+      }
+
+      .row {
+          display: block;
+          margin: 0;
+          padding: 1em;
+          border-bottom: 1px solid var(--border-color);
+          transition: background .3s, color .3s;
+          cursor: pointer;
+      }
+
+      .row:hover {
+          background: var(--accent-color-light);
+      }
+
       #loading {
           width: 320px;
           height: 220px;
@@ -236,12 +290,33 @@
                   <p>Must have either .usfm or .txt extension</p>
               </div>
               <div class="option">
-                  <paper-button raised class="fill" on-tap="importserver">Select</paper-button>
+                  <paper-button raised class="fill" on-tap="openrepo">Select</paper-button>
                   <span class="optiontitle">Import from Door43</span>
-                  <p>Will have option to merge with or overwrite existing file</p>
+                  <p>Will merge with the existing project, if one exists</p>
               </div>
           </div>
           <div id="importbuttons">
+              <paper-button dialog-dismiss>Cancel</paper-button>
+          </div>
+      </paper-dialog>
+
+      <paper-dialog id="repo" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <div id="repoheader">
+              <h2>Choose a Project</h2>
+              <input is="iron-input" bind-value="{{query.user}}" placeholder="Filter by User">
+              <input is="iron-input" bind-value="{{query.proj}}" placeholder="Filter by Project">
+              <input is="iron-input" bind-value="{{query.lang}}" placeholder="Filter by Language">
+          </div>
+          <iron-list id="repobody" items="{{repolist}}" as="repo">
+              <template>
+                  <div class="row" on-tap="importrepo">
+                      <div>
+                          <span>[[repo.name]]</span>
+                      </div>
+                  </div>
+              </template>
+          </iron-list>
+          <div id="repobuttons">
               <paper-button dialog-dismiss>Cancel</paper-button>
           </div>
       </paper-dialog>
@@ -298,6 +373,14 @@
           feedback: {
               type: String,
               value: ""
+          },
+          query: {
+              type: Object,
+              value: {}
+          },
+          repolist: {
+              type: Array,
+              value: [{name: "cdwhitfield73/aaa_col_text_ulb"}, {name: "tjklemz/aag_mrk_text_ulb"}, {name: "cdwhitfield73/aa_obs_text_reg"}]
           },
           currentuser: {
               type: Object,
@@ -458,6 +541,11 @@
                       }
                   });
           }, 500);
+      },
+
+      openrepo: function () {
+          this.$.importoptions.close();
+          this.$.repo.open();
       },
 
       importserver: function () {

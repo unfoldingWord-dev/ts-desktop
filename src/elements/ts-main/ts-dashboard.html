@@ -155,14 +155,16 @@
           display: flex;
           flex-direction: column;
           align-items: center;
+          padding: 0 20px;
       }
 
       #repobody {
           display: flex;
           flex-direction: column;
-          height: 300px;
-          border-top: 1px solid var(--border-color);
+          height: 350px;
           padding: 0;
+          border-bottom: 1px solid var(--primary-text-color);
+          border-top: 1px solid var(--primary-text-color);
       }
 
       #repobuttons {
@@ -175,20 +177,26 @@
           color: var(--accent-color);
       }
 
-      #repoheader input {
-          border: none;
+      #filters {
+          display: flex;
+          justify-content: space-between;
+          width: 100%;
+          margin-top: 10px;
+      }
+
+      #filters input {
           font-size: 110%;
           font-style: italic;
           font-family: sans-serif;
-          width: 75%;
+          width: 130px;
           padding: 0.25em 5px;
-          margin-left: -5px;
+          border: 1px solid var(--border-color);
       }
 
       .row {
           display: block;
           margin: 0;
-          padding: 1em;
+          padding: 1em 50px;
           border-bottom: 1px solid var(--border-color);
           transition: background .3s, color .3s;
           cursor: pointer;
@@ -196,6 +204,10 @@
 
       .row:hover {
           background: var(--accent-color-light);
+      }
+
+      .right {
+          float: right;
       }
 
       #loading {
@@ -303,15 +315,18 @@
       <paper-dialog id="repo" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
           <div id="repoheader">
               <h2>Choose a Project</h2>
-              <input is="iron-input" bind-value="{{query.user}}" placeholder="Filter by User">
-              <input is="iron-input" bind-value="{{query.proj}}" placeholder="Filter by Project">
-              <input is="iron-input" bind-value="{{query.lang}}" placeholder="Filter by Language">
+              <div id="filters">
+                  <input is="iron-input" bind-value="{{query.user}}" placeholder="Filter by User">
+                  <input is="iron-input" bind-value="{{query.lang}}" placeholder="Filter by Language">
+                  <input is="iron-input" bind-value="{{query.proj}}" placeholder="Filter by Project">
+              </div>
           </div>
-          <iron-list id="repobody" items="{{repolist}}" as="repo">
+          <iron-list id="repobody" items="{{searchfilter(query.user,query.lang,query.proj,repolist)}}" as="repo">
               <template>
                   <div class="row" on-tap="importrepo">
                       <div>
-                          <span>[[repo.name]]</span>
+                          <span>[[repo.user]]</span>
+                          <span class="right">[[repo.reponame]]</span>
                       </div>
                   </div>
               </template>
@@ -376,11 +391,19 @@
           },
           query: {
               type: Object,
-              value: {}
+              value: {user: "", proj: "", lang: ""}
           },
           repolist: {
               type: Array,
-              value: [{name: "cdwhitfield73/aaa_col_text_ulb"}, {name: "tjklemz/aag_mrk_text_ulb"}, {name: "cdwhitfield73/aa_obs_text_reg"}]
+              value: [{repopath: "cdwhitfield73/aaa_col_text_ulb", user: "cdwhitfield73", reponame: "aaa_col_text_ulb", language: "aaa", project: "col"},
+                  {repopath: "tjklemz/aag_mrk_text_ulb", user: "tjklemz", reponame: "aag_mrk_text_ulb", language: "aag", project: "mrk"},
+                  {repopath: "cdwhitfield73/aa_obs_text_reg", user: "cdwhitfield73", reponame: "aa_obs_text_reg", language: "aa", project: "obs"},
+                  {repopath: "cdwhitfield73/baa_col_text_ulb", user: "cdwhitfield73", reponame: "baa_col_text_ulb", language: "baa", project: "col"},
+                  {repopath: "tjklemz/baa_obs_text_reg", user: "tjklemz", reponame: "baa_obs_text_reg", language: "baa", project: "obs"},
+                  {repopath: "cdwhitfield73/bba_mrk_text_ulb", user: "cdwhitfield73", reponame: "bba_mrk_text_ulb", language: "bba", project: "mrk"},
+                  {repopath: "cdwhitfield73/aac_jud_text_ulb", user: "cdwhitfield73", reponame: "aac_jud_text_ulb", language: "aac", project: "jud"},
+                  {repopath: "tjklemz/caa_col_text_reg", user: "tjklemz", reponame: "caa_col_text_reg", language: "caa", project: "col"}
+              ]
           },
           currentuser: {
               type: Object,
@@ -543,12 +566,32 @@
           }, 500);
       },
 
+      searchfilter: function (user, lang, proj, repolist) {
+          var usersearch = App.utils.startsWithBase.bind(null, user);
+          var langsearch = App.utils.startsWithBase.bind(null, lang);
+          var projsearch = App.utils.startsWithBase.bind(null, proj);
+
+          var byuser = repolist.filter(function (repo) {
+              return usersearch(repo.user);
+          });
+
+          var bylang = byuser.filter(function (repo) {
+              return langsearch(repo.language);
+          });
+
+          return bylang.filter(function (repo) {
+              return projsearch(repo.project);
+          });
+      },
+
       openrepo: function () {
           this.$.importoptions.close();
           this.$.repo.open();
       },
 
-      importserver: function () {
+      importrepo: function (e) {
+          var repopath = e.model.repo.repopath;
+          console.log(repopath);
 
       },
 

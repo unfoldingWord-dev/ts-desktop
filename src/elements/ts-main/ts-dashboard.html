@@ -484,14 +484,14 @@
       importrepo: function (event, data) {
           var mythis = this;
           var path = require('path');
-          var repopath = data.repo.full_name;
-          var reponame = repopath.split("/")[1];
+          var repo = data.repo.repo;
+          var project = data.repo.project;
           var server = App.configurator.getValue('dataserver');
-          var repourl = "https://" + server + "/" + repopath;
+          var repourl = "https://" + server + "/" + repo;
           var targetDir = App.configurator.getValue('targetTranslationsDir');
           var tmpDir = App.configurator.getValue('tempDir');
-          var targetPath = path.join(targetDir, reponame);
-          var tmpPath = path.join(tmpDir, reponame);
+          var targetPath = path.join(targetDir, project);
+          var tmpPath = path.join(tmpDir, project);
 
           mythis.$.repo.close();
           mythis.set('options.body', "Importing.  Please wait...");
@@ -504,6 +504,13 @@
                       return App.gitManager.clone(repourl, tmpDir)
                   })
                   .then(function () {
+                      var paths = App.utils.makeProjectPaths(tmpDir, project);
+                      return App.migrateManager.migrate(paths);
+                  })
+                  .then(function (data) {
+                      project = data.paths.projectDir.split(path.sep).pop();
+                      targetPath = path.join(targetDir, project);
+                      tmpPath = path.join(tmpDir, project);
                       return App.utils.fs.stat(targetPath).then(App.utils.ret(true)).catch(App.utils.ret(false));
                   })
                   .then(function (exists) {

@@ -75,8 +75,6 @@ function UserManager(auth) {
         },
 
         retrieveRepos: function (u, q) {
-            // { repopath, user, reponame, language, project }
-
             u = u === '*' ? '' : (u || '');
             q = q === '*' ? '_' : (q || '_');
 
@@ -106,6 +104,13 @@ function UserManager(auth) {
 
             return p.then(_.flatten).then(function (repos) {
                 return _.uniq(repos, 'id');
+            })
+            .then(function (repos) {
+                return _.map(repos, function (repo) {
+                    var user = repo.full_name.split("/")[0];
+                    var project = repo.full_name.split("/")[1];
+                    return {repo: repo.full_name, user: user, project: project};
+                })
             });
         }
 

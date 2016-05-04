@@ -395,7 +395,7 @@
           },
           repolist: {
               type: Array,
-              value: [{repopath: "cdwhitfield73/aaa_col_text_ulb", user: "cdwhitfield73", reponame: "aaa_col_text_ulb", language: "aaa", project: "col"},
+              value: [{repopath: "cdwhitfield73/aas_col_text_ulb", user: "cdwhitfield73", reponame: "aas_col_text_ulb", language: "aas", project: "col"},
                   {repopath: "tjklemz/aag_mrk_text_ulb", user: "tjklemz", reponame: "aag_mrk_text_ulb", language: "aag", project: "mrk"},
                   {repopath: "cdwhitfield73/aa_obs_text_reg", user: "cdwhitfield73", reponame: "aa_obs_text_reg", language: "aa", project: "obs"},
                   {repopath: "cdwhitfield73/baa_col_text_ulb", user: "cdwhitfield73", reponame: "baa_col_text_ulb", language: "baa", project: "col"},
@@ -591,6 +591,7 @@
 
       importrepo: function (e) {
           var mythis = this;
+          var path = require('path');
           var repopath = e.model.repo.repopath;
           var reponame = e.model.repo.reponame;
           var targetDir = App.configurator.getValue('targetTranslationsDir');
@@ -605,8 +606,10 @@
               return App.utils.fs.stat(targetPath).then(App.utils.ret(true)).catch(App.utils.ret(false))
                   .then(function (exists) {
                       if (exists) {
+                          console.log("exists true");
                           return App.gitManager.merge(mythis.currentuser, targetPath, repopath, 3);
                       } else {
+                          console.log("exists false");
                           //return App.utils.fs.move(item.tmpPath, item.targetPath, {clobber: true});
                       }
                   })

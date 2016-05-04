@@ -72,6 +72,30 @@ function UserManager(auth) {
                     private: false
                 }, user);
             });
+        },
+
+        retrieveRepos: function (u, q) {
+            // { repopath, user, reponame, language, project }
+
+            u = u === '*' ? '' : (u || '');
+            q = q === '*' ? '_' : (q || '_');
+
+            var limit = 20;
+
+            function searchUsers (visit) {
+                return api.searchUsers(u, limit).then(function (users) {
+                    return Promise.all(users.map(visit));
+                });
+            }
+
+            function searchRepos (user) {
+                var uid = (typeof user === 'object' ? user.id : user) || 0;
+                return api.searchRepos(q, uid, limit)
+            }
+
+            var p = u ? searchUsers(searchRepos) : searchRepos();
+
+            return p.then(_.flatten);
         }
 
     };

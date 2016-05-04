@@ -1,75 +1,100 @@
+
 <link rel="import" href="../../components/paper-spinner/paper-spinner.html">
 
 <dom-module id="ts-repo-search">
 
     <style>
-        * {
-            box-sizing: border-box;
-        }
 
         :host {
-            display: block;
-            min-height: 400px;
-            width: 66%;
-            margin: 2em auto;
+            display: flex;
+            flex-direction: column;
         }
 
-        .search {
+        #repoheader {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        #repobody {
+            display: flex;
+            flex-direction: column;
+            height: 350px;
+            padding: 0;
+            border-bottom: 1px solid var(--primary-text-color);
+            border-top: 1px solid var(--primary-text-color);
+        }
+
+        #repobuttons {
+            display: flex;
+            justify-content: flex-end;
+            padding: 0 30px;
+        }
+
+        #repobuttons paper-button:hover {
+            color: var(--accent-color);
+        }
+
+        #filters {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 1em;
-            position: relative;
+            width: 100%;
+            margin-top: 10px;
         }
 
-        input {
-            display: inline-block;
-            width: 49%;
-            border: 1px solid #333;
-            padding: 0.75em 0.5em;
+        #filters input {
             font-size: 110%;
+            font-style: italic;
+            font-family: sans-serif;
+            width: 130px;
+            padding: 0.25em 5px;
+            border: 1px solid var(--border-color);
         }
 
-        ul {
-            margin: 1em 0 0 0;
-            list-style-type: none;
-            padding: 0;
-            border-bottom: 1px solid #999;
-        }
-
-        li {
+        .row {
+            display: block;
             margin: 0;
-            padding: 0.75em;
-            background: white;
-            font-style: bold;
-            font-size: 90%;
-            border: 1px solid #999;
-            border-bottom: none;
+            padding: 1em 50px;
+            border-bottom: 1px solid var(--border-color);
+            transition: background .3s, color .3s;
             cursor: pointer;
         }
 
-        #spinner {
-            position: absolute;
-            right: -45px;
-            top: 9px;
+        .row:hover {
+            background: var(--accent-color-light);
         }
 
-
+        .right {
+            float: right;
+        }
 
     </style>
 
     <template>
-        <div>
-            <div class="search">
-                <input id="username" placeholder="Username" value="{{username::input}}">
-                <input id="project" placeholder="Project or Language" value="{{project::input}}">
+
+        <div id="repoheader">
+            <h2>Choose a Project</h2>
+            <div id="filters">
+                <input is="iron-input" bind-value="{{username}}" placeholder="Filter by User">
+                <input is="iron-input" bind-value="{{project}}" placeholder="Filter by Project Name">
                 <paper-spinner id="spinner"></paper-spinner>
             </div>
-            <ul>
-                <template is="dom-repeat" items="[[repos]]" as="repo">
-                    <li on-click="repoSelected"><span>{{repo.full_name}}</span></li>
-                </template>
-            </ul>
         </div>
+        <iron-list id="repobody" items="{{repos}}" as="repo">
+            <template>
+                <div class="row" on-tap="importrepo">
+                    <div>
+                        <span>[[repo.full_name]]</span>
+                        <span class="right">[[repo.reponame]]</span>
+                    </div>
+                </div>
+            </template>
+        </iron-list>
+        <div id="repobuttons">
+            <paper-button dialog-dismiss>Cancel</paper-button>
+        </div>
+
     </template>
 
 </dom-module>
@@ -109,8 +134,8 @@
             'searchRepos(username, project)'
         ],
 
-        repoSelected: function (event) {
-            var repo = event.model.repo; 
+        importrepo: function (event) {
+            var repo = event.model.repo;
             console.log(repo);
 
             this.repo = repo;
@@ -118,8 +143,6 @@
 
         searchRepos: function (username, project) {
             var mythis = this;
-
-            console.log('hello')
 
             window.clearTimeout(mythis.timer);
             mythis.$.spinner.active = false;
@@ -148,7 +171,7 @@
         attached: function () {
             window.clearTimeout(this.timer);
 
-            this.project = this.$.project.value = 'gen';
+            //this.project = this.$.project.value = 'gen';
         },
 
         detached: function () {

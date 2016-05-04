@@ -129,11 +129,13 @@
         },
 
         attached: function () {
-            window.cancelTimeout(this.timer);
+            window.clearTimeout(this.timer);
+
+            this.project = this.$.project.value = 'gen';
         },
 
         detached: function () {
-            window.cancelTimeout(this.timer);
+            window.clearTimeout(this.timer);
         }
 
     });

@@ -90,7 +90,7 @@ function UserManager(auth) {
 
             function searchRepos (user) {
                 var uid = (typeof user === 'object' ? user.id : user) || 0;
-                return api.searchRepos(q, uid, limit)
+                return api.searchRepos(q, uid, limit);
             }
 
             var p = u ? searchUsers(searchRepos) : searchRepos();

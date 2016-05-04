@@ -590,9 +590,44 @@
       },
 
       importrepo: function (e) {
+          var mythis = this;
           var repopath = e.model.repo.repopath;
-          console.log(repopath);
+          var reponame = e.model.repo.reponame;
+          var targetDir = App.configurator.getValue('targetTranslationsDir');
+          var targetPath = path.join(targetDir, reponame);
+          mythis.$.repo.close();
 
+          mythis.set('options.body', "Importing.  Please wait...");
+          mythis.set('options.loading', true);
+          mythis.$.loading.open();
+
+          setTimeout(function() {
+              return App.utils.fs.stat(targetPath).then(App.utils.ret(true)).catch(App.utils.ret(false))
+                  .then(function (exists) {
+                      if (exists) {
+                          return App.gitManager.merge(mythis.currentuser, targetPath, repopath, 3);
+                      } else {
+                          //return App.utils.fs.move(item.tmpPath, item.targetPath, {clobber: true});
+                      }
+                  })
+                  .then(function() {
+                      mythis.set('options.title', "Import Complete");
+                      mythis.set('options.body', "Your project has been successfully imported.");
+                      mythis.set('options.loading', false);
+                      setTimeout(function() {
+                          mythis.updatelist();
+                      }, 250);
+                  })
+                  .catch(function(err) {
+                      var errmessage = "We're sorry.  An error occurred while trying to import your project";
+                      if(err !== null) {
+                          errmessage = err;
+                      }
+                      mythis.set('options.title', "Import Failed");
+                      mythis.set('options.body', errmessage);
+                      mythis.set('options.loading', false);
+                  });
+          }, 500);
       },
 
       openbackup: function (event, data) {

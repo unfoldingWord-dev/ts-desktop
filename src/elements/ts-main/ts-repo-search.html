@@ -1,0 +1,160 @@
+<link rel="import" href="../../components/paper-spinner/paper-spinner.html">
+
+<dom-module id="ts-repo-search">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        :host {
+            display: block;
+            min-height: 400px;
+            width: 66%;
+            margin: 2em auto;
+        }
+
+        .search {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1em;
+            position: relative;
+        }
+
+        input {
+            display: inline-block;
+            width: 49%;
+            border: 1px solid #333;
+            padding: 0.75em 0.5em;
+            font-size: 110%;
+        }
+
+        ul {
+            margin: 1em 0 0 0;
+            list-style-type: none;
+            padding: 0;
+            border-bottom: 1px solid #999;
+        }
+
+        li {
+            margin: 0;
+            padding: 0.75em;
+            background: white;
+            font-style: bold;
+            font-size: 90%;
+            border: 1px solid #999;
+            border-bottom: none;
+            cursor: pointer;
+        }
+
+        #spinner {
+            position: absolute;
+            right: -45px;
+            top: 9px;
+        }
+
+
+
+    </style>
+
+    <template>
+        <div>
+            <div class="search">
+                <input id="username" placeholder="Username" value="{{username::input}}">
+                <input id="project" placeholder="Project or Language" value="{{project::input}}">
+                <paper-spinner id="spinner"></paper-spinner>
+            </div>
+            <ul>
+                <template is="dom-repeat" items="[[repos]]" as="repo">
+                    <li on-click="repoSelected"><span>{{repo.full_name}}</span></li>
+                </template>
+            </ul>
+        </div>
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-repo-search',
+
+        properties: {
+            repos: Array,
+            username: {
+                type: String,
+                value: ''
+            },
+            project: {
+                type: String,
+                value: ''
+            },
+            p: {
+                type: Object,
+                value: function () {
+                    return Promise.resolve([]);
+                }
+            },
+            timer: {
+                type: Number
+            },
+            repo: {
+                type: Object,
+                notify: true
+            }
+        },
+
+        observers: [
+            'searchRepos(username, project)'
+        ],
+
+        repoSelected: function (event) {
+            var repo = event.model.repo; 
+            console.log(repo);
+
+            this.repo = repo;
+        },
+
+        searchRepos: function (username, project) {
+            var mythis = this;
+
+            console.log('hello')
+
+            window.clearTimeout(mythis.timer);
+            mythis.$.spinner.active = false;
+
+            if (username || project) {
+                mythis.$.spinner.active = true;
+
+                mythis.timer = window.setTimeout(function () {
+                    mythis.p = mythis.p.then(function () {
+                        return App.userManager.retrieveRepos(username, project).then(function (repos) {
+                            mythis.$.spinner.active = false;
+                            console.log(repos);
+                            mythis.repos = repos;
+                        })
+                    });
+                }, 660);
+            } else {
+                mythis.repos = [];
+            }
+        },
+
+        ready: function () {
+            this.$.spinner.active = false;
+        },
+
+        attached: function () {
+            window.clearTimeout(this.timer);
+
+            this.project = this.$.project.value = 'gen';
+        },
+
+        detached: function () {
+            window.clearTimeout(this.timer);
+        }
+
+    });
+
+</script>

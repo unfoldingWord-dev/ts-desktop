@@ -96,8 +96,8 @@
             <template>
                 <div class="row" on-tap="selectrepo">
                     <div>
-                        <span>[[repo.full_name]]</span>
-                        <span class="right">[[repo.reponame]]</span>
+                        <span>[[repo.user]]</span>
+                        <span class="right">[[repo.project]]</span>
                     </div>
                 </div>
             </template>
@@ -177,8 +177,6 @@
 
         attached: function () {
             window.clearTimeout(this.timer);
-
-            //this.project = this.$.project.value = 'gen';
         },
 
         detached: function () {

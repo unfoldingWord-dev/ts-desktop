@@ -84,7 +84,16 @@ function UserManager(auth) {
 
             function searchUsers (visit) {
                 return api.searchUsers(u, limit).then(function (users) {
-                    return Promise.all(users.map(visit));
+                    var a = users.map(visit);
+
+                    a.push(visit(0).then(function (repos) {
+                        return repos.filter(function (repo) {
+                            var username = repo.full_name.split('/').shift();
+                            return username.includes(u);
+                        });
+                    }));
+
+                    return Promise.all(a);
                 });
             }
 
@@ -95,7 +104,9 @@ function UserManager(auth) {
 
             var p = u ? searchUsers(searchRepos) : searchRepos();
 
-            return p.then(_.flatten);
+            return p.then(_.flatten).then(function (repos) {
+                return _.uniq(repos, 'id');
+            });
         }
 
     };

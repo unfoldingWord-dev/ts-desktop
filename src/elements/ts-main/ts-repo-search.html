@@ -14,14 +14,14 @@
             flex-direction: column;
         }
 
-        #repoheader {
+        #header {
             display: flex;
             flex-direction: column;
             align-items: center;
             margin: 10px 30px;
         }
 
-        #repobody {
+        #body {
             height: 350px;
             display: flex;
             flex-direction: column;
@@ -30,13 +30,13 @@
             border-top: 1px solid var(--primary-text-color);
         }
 
-        #repobuttons {
+        #footer {
             display: flex;
             justify-content: flex-end;
             margin: 10px 30px;
         }
 
-        #repobuttons paper-button:hover {
+        #footer paper-button:hover {
             color: var(--accent-color);
         }
 
@@ -47,7 +47,7 @@
             margin-top: 10px;
         }
 
-        #filters input {
+        input {
             font-size: 110%;
             font-style: italic;
             font-family: sans-serif;
@@ -84,7 +84,7 @@
 
     <template>
 
-        <div id="repoheader">
+        <div id="header">
             <h2>Search for Projects</h2>
             <div id="filters">
                 <input is="iron-input" bind-value="{{username}}" placeholder="Username">
@@ -92,7 +92,7 @@
                 <input is="iron-input" bind-value="{{project}}" placeholder="Project Name">
             </div>
         </div>
-        <iron-list id="repobody" items="{{repos}}" as="repo">
+        <iron-list id="body" items="{{repos}}" as="repo">
             <template>
                 <div class="row" on-tap="selectrepo">
                     <div>
@@ -102,7 +102,7 @@
                 </div>
             </template>
         </iron-list>
-        <div id="repobuttons">
+        <div id="footer">
             <paper-button dialog-dismiss>Cancel</paper-button>
         </div>
 

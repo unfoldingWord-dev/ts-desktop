@@ -1,5 +1,9 @@
 
 <link rel="import" href="../../components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../../components/iron-signals/iron-signals.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/iron-input/iron-input.html">
+<link rel="import" href="../../components/iron-list/iron-list.html">
 
 <dom-module id="ts-repo-search">
 
@@ -14,13 +18,13 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 0 20px;
+            margin: 10px 30px;
         }
 
         #repobody {
+            height: 350px;
             display: flex;
             flex-direction: column;
-            height: 350px;
             padding: 0;
             border-bottom: 1px solid var(--primary-text-color);
             border-top: 1px solid var(--primary-text-color);
@@ -29,7 +33,7 @@
         #repobuttons {
             display: flex;
             justify-content: flex-end;
-            padding: 0 30px;
+            margin: 10px 30px;
         }
 
         #repobuttons paper-button:hover {
@@ -47,8 +51,8 @@
             font-size: 110%;
             font-style: italic;
             font-family: sans-serif;
-            width: 130px;
-            padding: 0.25em 5px;
+            width: 150px;
+            padding: 0.25em 10px;
             border: 1px solid var(--border-color);
         }
 
@@ -69,21 +73,28 @@
             float: right;
         }
 
+        paper-spinner {
+            --paper-spinner-layer-1-color: var(--accent-color);
+            --paper-spinner-layer-2-color: var(--primary-color);
+            --paper-spinner-layer-3-color: var(--accent-color);
+            --paper-spinner-layer-4-color: var(--primary-color);
+        }
+
     </style>
 
     <template>
 
         <div id="repoheader">
-            <h2>Choose a Project</h2>
+            <h2>Search for Projects</h2>
             <div id="filters">
-                <input is="iron-input" bind-value="{{username}}" placeholder="Filter by User">
-                <input is="iron-input" bind-value="{{project}}" placeholder="Filter by Project Name">
+                <input is="iron-input" bind-value="{{username}}" placeholder="Username">
                 <paper-spinner id="spinner"></paper-spinner>
+                <input is="iron-input" bind-value="{{project}}" placeholder="Project Name">
             </div>
         </div>
         <iron-list id="repobody" items="{{repos}}" as="repo">
             <template>
-                <div class="row" on-tap="importrepo">
+                <div class="row" on-tap="selectrepo">
                     <div>
                         <span>[[repo.full_name]]</span>
                         <span class="right">[[repo.reponame]]</span>
@@ -106,7 +117,10 @@
         is: 'ts-repo-search',
 
         properties: {
-            repos: Array,
+            repos: {
+                type: Array,
+                value: []
+            },
             username: {
                 type: String,
                 value: ''
@@ -123,10 +137,6 @@
             },
             timer: {
                 type: Number
-            },
-            repo: {
-                type: Object,
-                notify: true
             }
         },
 
@@ -134,11 +144,9 @@
             'searchRepos(username, project)'
         ],
 
-        importrepo: function (event) {
-            var repo = event.model.repo;
-            console.log(repo);
-
-            this.repo = repo;
+        selectrepo: function (e) {
+            var repo = e.model.repo;
+            this.fire('iron-signal', {name: 'importrepo', data: {repo: repo}});
         },
 
         searchRepos: function (username, project) {
@@ -154,13 +162,12 @@
                     mythis.p = mythis.p.then(function () {
                         return App.userManager.retrieveRepos(username, project).then(function (repos) {
                             mythis.$.spinner.active = false;
-                            console.log(repos);
-                            mythis.repos = repos;
+                            mythis.set('repos', repos);
                         })
                     });
                 }, 660);
             } else {
-                mythis.repos = [];
+                mythis.set('repos', []);
             }
         },
 

@@ -1,3 +1,5 @@
+<link rel="import" href="../../components/paper-spinner/paper-spinner.html">
+
 <dom-module id="ts-repo-search">
 
     <style>
@@ -15,7 +17,8 @@
         .search {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 2em;
+            margin-bottom: 1em;
+            position: relative;
         }
 
         input {
@@ -43,6 +46,15 @@
             border-bottom: none;
             cursor: pointer;
         }
+
+        #spinner {
+            position: absolute;
+            right: -45px;
+            top: 9px;
+        }
+
+
+
     </style>
 
     <template>
@@ -50,6 +62,7 @@
             <div class="search">
                 <input id="username" placeholder="Username" value="{{username::input}}">
                 <input id="project" placeholder="Project or Language" value="{{project::input}}">
+                <paper-spinner id="spinner"></paper-spinner>
             </div>
             <ul>
                 <template is="dom-repeat" items="[[repos]]" as="repo">
@@ -109,11 +122,15 @@
             console.log('hello')
 
             window.clearTimeout(mythis.timer);
+            mythis.$.spinner.active = false;
 
             if (username || project) {
+                mythis.$.spinner.active = true;
+
                 mythis.timer = window.setTimeout(function () {
                     mythis.p = mythis.p.then(function () {
                         return App.userManager.retrieveRepos(username, project).then(function (repos) {
+                            mythis.$.spinner.active = false;
                             console.log(repos);
                             mythis.repos = repos;
                         })
@@ -125,7 +142,7 @@
         },
 
         ready: function () {
-
+            this.$.spinner.active = false;
         },
 
         attached: function () {

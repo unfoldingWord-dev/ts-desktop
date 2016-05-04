@@ -150,6 +150,11 @@
           height: 500px;
       }
 
+      #repo * {
+          margin: 0;
+          padding: 0;
+      }
+
       #loading {
           width: 320px;
           height: 220px;
@@ -281,6 +286,7 @@
       <iron-signals on-iron-signal-openbackup="openbackup"></iron-signals>
       <iron-signals on-iron-signal-updateuser="updateuser"></iron-signals>
       <iron-signals on-iron-signal-finishusfm="finishusfm"></iron-signals>
+      <iron-signals on-iron-signal-importrepo="importrepo"></iron-signals>
 
   </template>
 
@@ -475,17 +481,17 @@
           this.$.repo.open();
       },
 
-      importrepo: function (e) {
+      importrepo: function (event, data) {
           var mythis = this;
           var path = require('path');
-          var repopath = e.model.repo.repopath;
-          var reponame = e.model.repo.reponame;
+          var repopath = data.repo.full_name;
+          //var reponame = e.model.repo.reponame;
           var server = App.configurator.getValue('dataserver');
           var repourl = "https://" + server + "/" + repopath;
           var targetDir = App.configurator.getValue('targetTranslationsDir');
           var targetPath = path.join(targetDir, reponame);
-          mythis.$.repo.close();
 
+          mythis.$.repo.close();
           mythis.set('options.body', "Importing.  Please wait...");
           mythis.set('options.loading', true);
           mythis.$.loading.open();

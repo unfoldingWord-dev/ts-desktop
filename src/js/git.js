@@ -1,6 +1,7 @@
 'use strict';
 
 var NodeGit,
+    path = require('path'),
     utils = require('../js/lib/utils'),
     path = require('path'),
     _ = require('lodash');
@@ -212,8 +213,21 @@ function GitManager() {
                 .then(logr('Files are pushed', repo));
         },
 
-        clone: function() {
-            throw 'Not implemented';
+        clone: function (repoUrl, localPath) {
+            var repoName = repoUrl.replace(/\.git/, '').split('/').pop();
+            var savePath = localPath.includes(repoName) ? localPath : path.join(localPath, repoName);
+
+            return NodeGit.Clone(repoUrl, savePath, {
+                checkoutBranch: 'master',
+
+                fetchOpts: {
+                    callbacks: {
+                        certificateCheck: function () {
+                            return 1;
+                        }
+                    }
+                }
+            });
         },
 
         pull: function() {

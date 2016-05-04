@@ -3,7 +3,6 @@
 var NodeGit,
     path = require('path'),
     utils = require('../js/lib/utils'),
-    path = require('path'),
     _ = require('lodash');
 
 try {

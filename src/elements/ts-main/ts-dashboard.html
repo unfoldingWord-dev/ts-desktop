@@ -485,11 +485,13 @@
           var mythis = this;
           var path = require('path');
           var repopath = data.repo.full_name;
-          //var reponame = e.model.repo.reponame;
+          var reponame = repopath.split("/")[1];
           var server = App.configurator.getValue('dataserver');
           var repourl = "https://" + server + "/" + repopath;
           var targetDir = App.configurator.getValue('targetTranslationsDir');
+          var tmpDir = App.configurator.getValue('tempDir');
           var targetPath = path.join(targetDir, reponame);
+          var tmpPath = path.join(tmpDir, reponame);
 
           mythis.$.repo.close();
           mythis.set('options.body', "Importing.  Please wait...");
@@ -497,15 +499,22 @@
           mythis.$.loading.open();
 
           setTimeout(function() {
-              return App.utils.fs.stat(targetPath).then(App.utils.ret(true)).catch(App.utils.ret(false))
+              return App.utils.fs.mkdirs(tmpPath)
+                  .then(function () {
+                      return App.gitManager.clone(repourl, tmpDir)
+                  })
+                  .then(function () {
+                      return App.utils.fs.stat(targetPath).then(App.utils.ret(true)).catch(App.utils.ret(false));
+                  })
                   .then(function (exists) {
                       if (exists) {
-                          console.log("exists true");
-                          return App.gitManager.merge(mythis.currentuser, targetPath, repourl, 3);
+                          return App.gitManager.merge(mythis.currentuser, targetPath, tmpPath, 3);
                       } else {
-                          console.log("exists false");
-                          //return App.utils.fs.move(item.tmpPath, item.targetPath, {clobber: true});
+                          return App.utils.fs.move(tmpPath, targetPath, {clobber: true});
                       }
+                  })
+                  .then(function () {
+                      return App.utils.fs.remove(App.configurator.getValue('tempDir'));
                   })
                   .then(function() {
                       mythis.set('options.title', "Import Complete");

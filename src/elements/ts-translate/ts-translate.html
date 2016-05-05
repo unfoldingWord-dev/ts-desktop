@@ -11,6 +11,7 @@
 <link rel="import" href="./ts-translate-sidebar.html">
 <link rel="import" href="./ts-nosource-mode.html">
 <link rel="import" href="./ts-source/ts-source-modal.html">
+<link rel="import" href="../ts-main/ts-loading.html">
 
 <dom-module id="ts-translate">
 
@@ -156,41 +157,11 @@
         #loading {
             width: 320px;
             height: 220px;
-            color: var(--primary-text-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 110%;
         }
 
-        #buttonbox {
-            display: flex;
-            justify-content: center;
-            color: var(--secondary-text-color);
-        }
-
-        #buttonbox paper-button:hover {
-            color: var(--accent-color);
-        }
-
-        paper-progress {
-            --paper-progress-active-color: var(--accent-color);
-            width: 250px;
-        }
-
-        #bar {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 40px;
-        }
-
-        #text {
-            text-align: center;
-        }
-
-        #loading h2 {
-            color: var(--accent-color);
+        #loading * {
+            margin: 0;
+            padding: 0;
         }
 
         .nodisplay {
@@ -277,21 +248,7 @@
         </paper-dialog>
 
         <paper-dialog id="loading" class="popup" modal="true" exit-animation="scale-down-animation">
-            <template is="dom-if" if="{{options.loading}}">
-                <p>{{options.body}}</p>
-                <div id="bar">
-                    <paper-progress indeterminate="true"></paper-progress>
-                </div>
-            </template>
-            <template is="dom-if" if="{{!options.loading}}">
-                <h2>{{options.title}}</h2>
-                <div id="text">
-                    <p>{{options.body}}</p>
-                </div>
-                <div id="buttonbox">
-                    <paper-button dialog-dismiss>Close</paper-button>
-                </div>
-            </template>
+            <ts-loading options="[[options]]"></ts-loading>
         </paper-dialog>
 
         <iron-signals on-iron-signal-frompublish="frompublish"></iron-signals>
@@ -660,8 +617,9 @@
             mythis.retrievesource();
             this.route = "translate";
             setTimeout(function() {
-                mythis.set('options.loading', true);
+                mythis.set('options.title', "");
                 mythis.set('options.body', "Loading project. Please wait...");
+                mythis.set('options.loading', true);
                 mythis.$.loading.open();
                 setTimeout(function() {
                     App.projectsManager.loadTargetTranslation(projectmeta).then(function (translation) {
@@ -683,8 +641,9 @@
 
         updatesources: function (event, data) {
             var mythis = this;
-            mythis.set('options.loading', true);
+            mythis.set('options.title', "");
             mythis.set('options.body', "Loading source. Please wait...");
+            mythis.set('options.loading', true);
             mythis.$.loading.open();
             setTimeout(function() {
                 mythis.set('currentproject.projectmeta.source_translations', data.sources);
@@ -1378,6 +1337,7 @@
                 return;
             }
             var generatePdf = function(){
+                mythis.set('options.title', "");
                 mythis.set('options.body', "Creating PDF. Please wait...");
                 setTimeout(function() {
                     App.printManager.targetTranslationToPdf(translation, projectmeta, filePath, options)
@@ -1403,6 +1363,7 @@
             mythis.$.loading.open();
 
             if (options.includeImages) {
+                mythis.set('options.title', "");
                 mythis.set('options.body', "Downloading Images. Please wait...");
                 App.printManager.getImages(projectmeta).then(function(){
                     generatePdf();

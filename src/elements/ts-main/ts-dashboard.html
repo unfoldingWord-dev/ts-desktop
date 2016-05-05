@@ -17,6 +17,7 @@
 <link rel="import" href="../ts-settings/ts-settings.html">
 <link rel="import" href="./ts-terms.html">
 <link rel="import" href="./ts-repo-search.html">
+<link rel="import" href="./ts-import-options.html">
 
 <dom-module id="ts-dashboard">
 
@@ -99,50 +100,14 @@
           color: var(--secondary-text-color);
       }
 
-      #importoptions {
-          display: flex;
-          flex-direction: column;
+      #import {
           width: 500px;
-          height: 500px;
+          height: 550px;
       }
 
-      #importheader {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-      }
-
-      #importbody {
-          display: flex;
-          flex-direction: column;
-          border-top: 1px solid var(--border-color);
+      #import * {
+          margin: 0;
           padding: 0;
-      }
-
-      #importbuttons {
-          display: flex;
-          justify-content: flex-end;
-          padding: 0 30px;
-      }
-
-      #importbuttons paper-button:hover {
-          color: var(--accent-color);
-      }
-
-      .option {
-          border-bottom: 1px solid var(--border-color);
-          padding: 15px 30px 0;
-      }
-
-      .optiontitle {
-          font-size: 130%;
-          font-weight: bold;
-      }
-
-      .fill {
-          background: var(--accent-color);
-          color: var(--reverse-text-color);
-          text-transform: uppercase;
       }
 
       #repo {
@@ -231,34 +196,12 @@
           </div>
       </paper-dialog>
 
-      <paper-dialog id="importoptions" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-          <div id="importheader">
-              <h2>Import Options</h2>
-          </div>
-          <div id="importbody">
-              <div class="option">
-                  <paper-button raised class="fill" on-tap="importbackup">Select</paper-button>
-                  <span class="optiontitle">Import from Tstudio file</span>
-                  <p>Will merge with the existing project, if one exists</p>
-              </div>
-              <div class="option">
-                  <paper-button raised class="fill" on-tap="startusfm">Select</paper-button>
-                  <span class="optiontitle">Import from USFM file</span>
-                  <p>Must have either .usfm or .txt extension</p>
-              </div>
-              <div class="option">
-                  <paper-button raised class="fill" on-tap="openrepo">Select</paper-button>
-                  <span class="optiontitle">Import from Door43</span>
-                  <p>Will merge with the existing project, if one exists</p>
-              </div>
-          </div>
-          <div id="importbuttons">
-              <paper-button dialog-dismiss>Cancel</paper-button>
-          </div>
+      <paper-dialog id="import" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <ts-import-options on-restore="restoreFromBackup" on-backup="importFromBackup" on-usfm="importFromUsfm" on-repo="openrepo"></ts-import-options>
       </paper-dialog>
 
       <paper-dialog id="repo" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-          <ts-repo-search></ts-repo-search>
+          <ts-repo-search on-cancel="cancelrepo"></ts-repo-search>
       </paper-dialog>
 
       <paper-dialog id="loading" class="popup" modal="true" exit-animation="scale-down-animation">
@@ -281,7 +224,6 @@
 
       <iron-signals on-iron-signal-updatelist="updatelist"></iron-signals>
       <iron-signals on-iron-signal-openfeedback="openfeedback"></iron-signals>
-      <iron-signals on-iron-signal-openrestore="openrestore"></iron-signals>
       <iron-signals on-iron-signal-openimport="openimport"></iron-signals>
       <iron-signals on-iron-signal-openbackup="openbackup"></iron-signals>
       <iron-signals on-iron-signal-updateuser="updateuser"></iron-signals>
@@ -357,18 +299,18 @@
       },
 
       openimport: function () {
-          this.$.importoptions.open();
+          this.$.import.open();
       },
 
-      importbackup: function() {
+      importFromBackup: function() {
           var mythis = this;
-          this.$.importoptions.close();
           var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
           var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}], properties: ['openFile']}});
           if (!filePath) {
               return;
           }
 
+          mythis.$.import.close();
           mythis.set('options.body', "Importing.  Please wait...");
           mythis.set('options.loading', true);
           mythis.$.loading.open();
@@ -407,14 +349,15 @@
           }, 500);
       },
 
-      startusfm: function () {
+      importFromUsfm: function () {
           var mythis = this;
-          this.$.importoptions.close();
           var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
           var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, filters: [{name: 'USFM Files', extensions: ['txt', 'usfm']}], properties: ['openFile']}});
           if (!filePath) {
               return;
           }
+
+          mythis.$.import.close();
 
           App.importManager.retrieveUSFMProjectID(filePath[0])
               .then(function (id) {
@@ -477,8 +420,13 @@
       },
 
       openrepo: function () {
-          this.$.importoptions.close();
+          this.$.import.close();
           this.$.repo.open();
+      },
+
+      cancelrepo: function () {
+          this.$.repo.close();
+          this.$.import.open();
       },
 
       importrepo: function (event, data) {
@@ -574,7 +522,7 @@
           }, 500);
       },
 
-      openrestore: function() {
+      restoreFromBackup: function() {
           var mythis = this;
           var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
           var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}], properties: ['openFile']}});
@@ -582,6 +530,7 @@
               return;
           }
 
+          mythis.$.import.close();
           mythis.set('options.body', "Restoring.  Please wait...");
           mythis.set('options.loading', true);
           mythis.$.loading.open();

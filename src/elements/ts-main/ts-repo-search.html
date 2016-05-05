@@ -33,7 +33,7 @@
         #footer {
             display: flex;
             justify-content: flex-end;
-            margin: 10px 30px;
+            margin: 10px 50px;
         }
 
         #footer paper-button:hover {
@@ -50,14 +50,14 @@
         input {
             font-size: 110%;
             font-style: italic;
-            font-family: sans-serif;
             width: 150px;
             padding: 0.25em 10px;
             border: 1px solid var(--border-color);
         }
 
         .row {
-            display: block;
+            display: flex;
+            justify-content: space-between;
             margin: 0;
             padding: 1em 50px;
             border-bottom: 1px solid var(--border-color);
@@ -67,10 +67,6 @@
 
         .row:hover {
             background: var(--accent-color-light);
-        }
-
-        .right {
-            float: right;
         }
 
         paper-spinner {
@@ -95,15 +91,13 @@
         <iron-list id="body" items="{{repos}}" as="repo">
             <template>
                 <div class="row" on-tap="selectrepo">
-                    <div>
-                        <span>[[repo.user]]</span>
-                        <span class="right">[[repo.project]]</span>
-                    </div>
+                    <span>[[repo.user]]</span>
+                    <span>[[repo.project]]</span>
                 </div>
             </template>
         </iron-list>
         <div id="footer">
-            <paper-button dialog-dismiss>Cancel</paper-button>
+            <paper-button on-tap="cancel">Cancel</paper-button>
         </div>
 
     </template>
@@ -143,6 +137,10 @@
         observers: [
             'searchRepos(username, project)'
         ],
+
+        cancel: function () {
+            this.fire('cancel');
+        },
 
         selectrepo: function (e) {
             var repo = e.model.repo;

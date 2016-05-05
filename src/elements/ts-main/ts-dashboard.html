@@ -315,7 +315,15 @@
                       mythis.set('options.body', errmessage);
                       mythis.set('options.loading', false);
                       if (overwrite) {
-                          return App.importManager.restoreFromBackup(backupPath);
+                          return App.importManager.extractBackup(backupPath)
+                              .then(function (list) {
+                                  return Promise.all(list.map(function (item) {
+                                      return App.utils.fs.move(item.tmpPath, item.targetPath, {clobber: true});
+                                  }))
+                              })
+                              .then(function () {
+                                  return App.utils.fs.remove(App.configurator.getValue('tempDir'));
+                              })
                       }
                   });
           }, 500);
@@ -441,7 +449,15 @@
           mythis.$.loading.open();
 
           setTimeout(function() {
-              App.importManager.restoreFromBackup(filePath[0])
+              App.importManager.extractBackup(filePath[0])
+                  .then(function (list) {
+                      return Promise.all(list.map(function (item) {
+                          return App.utils.fs.move(item.tmpPath, item.targetPath, {clobber: true});
+                      }))
+                  })
+                  .then(function () {
+                      return App.utils.fs.remove(App.configurator.getValue('tempDir'));
+                  })
                   .then(function() {
                       mythis.set('options.title', "Restore Complete");
                       mythis.set('options.body', "Your project has been successfully restored.");

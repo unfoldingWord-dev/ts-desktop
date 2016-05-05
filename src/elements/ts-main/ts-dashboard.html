@@ -2,10 +2,7 @@
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
 <link rel="import" href="../../components/iron-signals/iron-signals.html">
 <link rel="import" href="../../components/paper-button/paper-button.html">
-<link rel="import" href="../../components/iron-input/iron-input.html">
 <link rel="import" href="../../components/paper-dialog/paper-dialog.html">
-<link rel="import" href="../../components/iron-icons/iron-icons.html">
-<link rel="import" href="../../components/iron-icons/notification-icons.html">
 <link rel="import" href="../../components/paper-progress/paper-progress.html">
 
 <link rel="import" href="./ts-app-titlebar.html">
@@ -18,6 +15,7 @@
 <link rel="import" href="./ts-terms.html">
 <link rel="import" href="./ts-repo-search.html">
 <link rel="import" href="./ts-import-options.html">
+<link rel="import" href="./ts-feedback.html">
 
 <dom-module id="ts-dashboard">
 
@@ -63,41 +61,13 @@
       }
 
       #feedback {
-          display: flex;
-          flex-direction: column;
           width: 500px;
-          height: 300px;
+          height: 250px;
       }
 
-      #feedbackheader {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-      }
-
-      #feedbackbody {
-          display: flex;
-          flex-direction: column;
-          border-bottom: 1px solid var(--border-color);
-          border-top: 1px solid var(--border-color);
-          padding: 20px;
-      }
-
-      #feedbackbuttons {
-          display: flex;
-          justify-content: flex-end;
-          padding: 0 20px;
-      }
-
-      #feedbackbuttons paper-button:hover {
-          color: var(--accent-color);
-      }
-
-      input {
-          border: none;
-          font-size: 120%;
-          padding: 10px;
-          color: var(--secondary-text-color);
+      #feedback * {
+          margin: 0;
+          padding: 0;
       }
 
       #import {
@@ -183,17 +153,7 @@
       </div>
 
       <paper-dialog id="feedback" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-          <div id="feedbackheader">
-              <h2>Feedback</h2>
-              <p><iron-icon icon="notification:wifi"></iron-icon> This will use your internet connection</p>
-          </div>
-          <div id="feedbackbody">
-              <input is="iron-input" bind-value="{{feedback}}" placeholder="Describe the problem you are experiencing">
-          </div>
-          <div id="feedbackbuttons">
-              <paper-button on-tap="closefeedback">Cancel</paper-button>
-              <paper-button on-tap="sendfeedback">Confirm</paper-button>
-          </div>
+          <ts-feedback feedback="{{feedback}}" on-closefeedback="closefeedback" on-sendfeedback="sendfeedback"></ts-feedback>
       </paper-dialog>
 
       <paper-dialog id="import" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -558,7 +518,7 @@
       },
 
       openfeedback: function () {
-          this.feedback = "";
+          this.set('feedback', "");
           this.$.feedback.open();
       },
 

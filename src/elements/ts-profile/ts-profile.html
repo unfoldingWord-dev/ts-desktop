@@ -5,12 +5,12 @@
 <link rel="import" href="../../components/iron-input/iron-input.html">
 <link rel="import" href="../../components/iron-icons/notification-icons.html">
 <link rel="import" href="../../components/paper-dialog/paper-dialog.html">
-<link rel="import" href="../../components/paper-progress/paper-progress.html">
 
 <link rel="import" href="./ts-options-menu.html">
 <link rel="import" href="./ts-login-option.html">
 <link rel="import" href="./ts-create-option.html">
 <link rel="import" href="./ts-local-option.html">
+<link rel="import" href="../ts-main/ts-loading.html">
 
 <dom-module id="ts-profile">
 
@@ -49,41 +49,11 @@
         #loading {
             width: 320px;
             height: 220px;
-            color: var(--primary-text-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 110%;
         }
 
-        #buttonbox {
-            display: flex;
-            justify-content: center;
-            color: var(--secondary-text-color);
-        }
-
-        #buttonbox paper-button:hover {
-            color: var(--accent-color);
-        }
-
-        paper-progress {
-            --paper-progress-active-color: var(--accent-color);
-            width: 250px;
-        }
-
-        #bar {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 40px;
-        }
-
-        #text {
-            text-align: center;
-        }
-
-        #loading h2 {
-            color: var(--accent-color);
+        #loading * {
+            margin: 0;
+            padding: 0;
         }
 
         .hide {
@@ -111,21 +81,7 @@
         </neon-animated-pages>
 
         <paper-dialog id="loading" class="popup" modal="true" exit-animation="scale-down-animation">
-            <template is="dom-if" if="{{options.loading}}">
-                <p>{{options.body}}</p>
-                <div id="bar">
-                    <paper-progress indeterminate="true"></paper-progress>
-                </div>
-            </template>
-            <template is="dom-if" if="{{!options.loading}}">
-                <h2>{{options.title}}</h2>
-                <div id="text">
-                    <p>{{options.body}}</p>
-                </div>
-                <div id="buttonbox">
-                    <paper-button dialog-dismiss>Close</paper-button>
-                </div>
-            </template>
+            <ts-loading options="[[options]]"></ts-loading>
         </paper-dialog>
 
     </template>
@@ -206,11 +162,13 @@
                 return;
             }
 
+            mythis.set('options.title', "");
             mythis.set('options.body', "Verifying Login.  Please wait...");
             mythis.set('options.loading', true);
             mythis.$.loading.open();
 
             App.userManager.login(user).then(function (user) {
+                mythis.set('options.title', "");
                 mythis.set('options.body', "Login Verified");
                 user.full_name = user.full_name === '' ? user.username : user.full_name;
                 setTimeout(function() {
@@ -251,11 +209,13 @@
                 return;
             }
 
+            mythis.set('options.title', "");
             mythis.set('options.body', "Creating Account.  Please wait...");
             mythis.set('options.loading', true);
             mythis.$.loading.open();
 
             App.userManager.createAccount(user).then(function (user) {
+                mythis.set('options.title', "");
                 mythis.set('options.body', "Account Created");
                 user.full_name = user.full_name === '' ? user.username : user.full_name;
                 setTimeout(function() {

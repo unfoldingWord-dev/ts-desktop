@@ -144,7 +144,7 @@
 
         selectrepo: function (e) {
             var repo = e.model.repo;
-            this.fire('iron-signal', {name: 'importrepo', data: {repo: repo}});
+            this.fire('iron-signal', {name: 'importfromrepo', data: {repo: repo}});
         },
 
         searchRepos: function (username, project) {

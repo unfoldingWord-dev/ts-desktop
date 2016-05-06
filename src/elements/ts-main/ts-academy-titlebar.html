@@ -88,25 +88,44 @@
         is: 'ts-academy-titlebar',
 
         minimizeWindow: function() {
-            App.academyWindow.minimize();
+            this.academyWindow.minimize();
         },
 
         resizeWindow: function() {
-            App.academyWindow.isMaximized() ? App.academyWindow.unmaximize() : App.academyWindow.maximize();
+            this.academyWindow.isMaximized() ? this.academyWindow.unmaximize() : this.academyWindow.maximize();
         },
 
         closeWindow: function() {
-            App.academyWindow.close();
+            this.academyWindow.close();
         },
+
+        get academyWindow () {
+            return this._window('academy-window');
+        },
+
+        _window: function (windowName) {
+            var ipc = this.ipcRenderer,
+                send = ipc.sendSync.bind(ipc, windowName);
+
+            return {
+                close: send.bind(ipc, 'close'),
+                minimize: send.bind(ipc, 'minimize'),
+                maximize: send.bind(ipc, 'maximize'),
+                unmaximize: send.bind(ipc, 'unmaximize'),
+                isMaximized: send.bind(ipc, 'isMaximized')
+            };
+        },
+
+        ipcRenderer: require('electron').ipcRenderer,
 
         ready: function () {
             var resize = this.$.resizeicon;
 
-            App.ipc.on('maximize', function () {
+            this.ipcRenderer.on('maximize', function () {
                 resize.icon = 'titlebar:restore';
             });
 
-            App.ipc.on('unmaximize', function() {
+            this.ipcRenderer.on('unmaximize', function() {
                 resize.icon = 'titlebar:maximize';
             });
         }

@@ -344,7 +344,7 @@
           var path = require('path');
           var repo = data.repo.repo;
           var project = data.repo.project;
-          var server = App.configurator.getValue('dataserver');
+          var server = App.configurator.getUserSetting('dataserver');
           var repourl = "https://" + server + "/" + repo;
           var targetDir = App.configurator.getValue('targetTranslationsDir');
           var tmpDir = App.configurator.getValue('tempDir');

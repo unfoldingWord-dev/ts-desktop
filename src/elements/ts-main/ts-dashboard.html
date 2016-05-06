@@ -555,6 +555,10 @@
                   App.ipc.send('loading-status', 'Creating Auto Backups...');
                   return App.exportManager.backupAllTranslations(list, autobackupdir)
               })
+              .catch(function (err) {
+                  console.error(err);
+                  App.reporter.logError(err);
+              })
               .then(function () {
                   mythis.set('busy', false);
                   setTimeout(function() {

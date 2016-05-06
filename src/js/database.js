@@ -33,7 +33,17 @@ function DataManager(query) {
             ].join(' '));
             return zipper(r);
         },
-
+		
+		getChunkMarkers: function (id) {
+			var r = query([
+				"select cm.chapter_slug 'chapter_slug', cm.first_verse_slug 'first_verse_slug'",
+				"from chunk_marker as cm",
+				"left join project as p on p.id=cm.project_id",
+				"where p.slug='" + id + "'"
+			].join(' '));
+			return zipper(r);
+		},
+	
         getSources: function () {
             var r = query([
                     "select r.id, r.slug 'resource_id', r.name 'resource_name', l.name 'language_name', l.slug 'language_id', p.slug 'project_id', r.checking_level, r.version, r.modified_at 'date_modified' from resource r",

@@ -1,0 +1,96 @@
+
+<link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/iron-input/iron-input.html">
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../components/iron-icons/notification-icons.html">
+
+<dom-module id="ts-feedback">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 30px 10px;
+        }
+
+        #body {
+            display: flex;
+            flex-direction: column;
+            border-bottom: 1px solid var(--border-color);
+            border-top: 1px solid var(--border-color);
+            padding: 20px;
+        }
+
+        #footer {
+            display: flex;
+            justify-content: flex-end;
+            margin: 10px 50px;
+        }
+
+        #footer paper-button:hover {
+            color: var(--accent-color);
+        }
+
+        input {
+            border: none;
+            font-size: 120%;
+            padding: 10px;
+            color: var(--secondary-text-color);
+        }
+
+    </style>
+
+    <template>
+
+        <div id="header">
+            <h2>Feedback</h2>
+            <p><iron-icon icon="notification:wifi"></iron-icon> This will use your internet connection</p>
+        </div>
+        <div id="body">
+            <input is="iron-input" bind-value="{{feedback}}" placeholder="Describe the problem you are experiencing">
+        </div>
+        <div id="footer">
+            <paper-button on-tap="close">Cancel</paper-button>
+            <paper-button on-tap="send">Confirm</paper-button>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-feedback',
+
+        properties: {
+            feedback: {
+                type: String,
+                value: "",
+                notify: true
+            }
+        },
+
+        close: function () {
+            this.fire('close');
+        },
+
+        send: function () {
+            this.fire('send');
+        },
+
+        ready: function () {
+
+        }
+
+    });
+
+</script>

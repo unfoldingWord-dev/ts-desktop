@@ -79,11 +79,11 @@
             <paper-icon-button id="chunk" class$="[[checkclass(currentproject.projectmeta.project_type_class)]]" icon="flip-to-front" title="Chunk Mode" on-tap="chunk"></paper-icon-button>
             <paper-icon-button id="review" class$="[[checkclass(currentproject.projectmeta.project_type_class)]]" icon="assignment-turned-in" title="Review Mode" on-tap="review"></paper-icon-button>
         </div>
-        <paper-menu-button horizontal-offset="10" vertical-offset="10" vertical-align="bottom">
-            <paper-icon-button class="current dropdown-trigger" icon="more-vert" title="options"></paper-icon-button>
+        <paper-menu-button id="menu" horizontal-offset="10" vertical-offset="10" vertical-align="bottom">
+            <paper-icon-button class="current dropdown-trigger" icon="more-vert"></paper-icon-button>
             <paper-menu class="dropdown-content">
                 <paper-item on-tap="home"><iron-icon class="smallicon" icon="project:project"></iron-icon>Home</paper-item>
-                <paper-item on-tap="publish"><iron-icon class="smallicon" icon="cloud-done"></iron-icon>Publish</paper-item>
+                <paper-item on-tap="publish"><iron-icon class="smallicon" icon="cloud-done"></iron-icon>Upload</paper-item>
                 <paper-item on-tap="backup"><iron-icon class="smallicon" icon="file-upload"></iron-icon>Backup</paper-item>
                 <paper-item on-tap="print"><iron-icon class="smallicon" icon="print"></iron-icon>Print</paper-item>
                 <paper-item on-tap="academy"><iron-icon class="smallicon" icon="book"></iron-icon>translationAcademy</paper-item>
@@ -169,30 +169,37 @@
         },
 
         backup: function () {
+            this.$.menu.close();
             this.fire('gobackup');
         },
 
         publish: function () {
+            this.$.menu.close();
             this.fire('gopublish');
         },
 
         print: function () {
+            this.$.menu.close();
             this.fire('goprint');
         },
 
         academy: function () {
+            this.$.menu.close();
             App.ipc.send('openacademy');
         },
 
         home: function () {
+            this.$.menu.close();
             this.fire('gohome');
         },
 
         settings: function() {
+            this.$.menu.close();
             this.fire('gosettings');
         },
 
         feedback: function() {
+            this.$.menu.close();
             this.fire('iron-signal', {name: 'openfeedback'});
         },
 

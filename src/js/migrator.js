@@ -3,13 +3,14 @@
 var _ = require('lodash'),
     AdmZip = require('adm-zip'),
     path = require('path'),
-    utils = require('../js/lib/utils'),
-    jsonfile = require('jsonfile');
+    utils = require('../js/lib/utils');
 
 function MigrateManager(configurator) {
 
-    var readjson = utils.promisify(jsonfile, 'readFile'),
-        writejson = utils.promisify(jsonfile, 'writeFile');
+    var write = utils.fs.outputFile,
+        read = utils.fs.readFile,
+        toJSON = _.partialRight(JSON.stringify, null, '\t'),
+        fromJSON = JSON.parse.bind(JSON);
 
     return {
 
@@ -23,7 +24,8 @@ function MigrateManager(configurator) {
         migrate: function (paths) {
 
             var readManifest = function (paths) {
-                return readjson(paths.manifest).then(function (manifest) {
+                return read(paths.manifest).then(function (manifest) {
+                    manifest = fromJSON(manifest);
                     manifest.package_version = manifest.package_version || 2;
                     return {manifest: manifest, paths: paths};
                 })
@@ -328,7 +330,7 @@ function MigrateManager(configurator) {
                 manifest.generator.name = 'ts-desktop';
                 // TODO: update build number
 
-                return writejson(paths.manifest, manifest, {spaces: 2}).then(utils.ret({
+                return write(paths.manifest, toJSON(manifest)).then(utils.ret({
                     manifest: manifest,
                     paths: paths
                 }));

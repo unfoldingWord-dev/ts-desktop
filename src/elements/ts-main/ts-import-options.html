@@ -41,17 +41,20 @@
         .option {
             border-bottom: 1px solid var(--border-color);
             padding: 15px 30px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background .3s, color .3s;
+            cursor: pointer;
+        }
+
+        .option:hover {
+            background: var(--accent-color-light);
         }
 
         .optiontitle {
             font-size: 130%;
             font-weight: bold;
-        }
-
-        .fill {
-            background: var(--accent-color);
-            color: var(--reverse-text-color);
-            text-transform: uppercase;
         }
 
         .bold {
@@ -69,23 +72,19 @@
             <h2>Import Options</h2>
         </div>
         <div id="body">
-            <div class="option">
-                <paper-button raised class="fill" on-tap="restore">Select</paper-button>
+            <div class="option" on-tap="restore">
                 <span class="optiontitle">Restore from Tstudio file</span>
                 <p>Will <span class="bold">overwrite</span> the existing project, if one exists</p>
             </div>
-            <div class="option">
-                <paper-button raised class="fill" on-tap="backup">Select</paper-button>
+            <div class="option" on-tap="backup">
                 <span class="optiontitle">Import from Tstudio file</span>
                 <p>Will <span class="bold">merge</span> with the existing project, if one exists</p>
             </div>
-            <div class="option">
-                <paper-button raised class="fill" on-tap="usfm">Select</paper-button>
+            <div class="option" on-tap="usfm">
                 <span class="optiontitle">Import from USFM file</span>
                 <p>Must have either .usfm or .txt extension</p>
             </div>
-            <div class="option">
-                <paper-button raised class="fill" on-tap="repo">Select</paper-button>
+            <div class="option" on-tap="repo">
                 <span class="optiontitle">Import from Door43</span>
                 <p>Will <span class="bold">merge</span> with the existing project, if one exists</p>
             </div>

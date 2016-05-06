@@ -33,7 +33,7 @@ function DataManager(query) {
             ].join(' '));
             return zipper(r);
         },
-		
+
 		getChunkMarkers: function (id) {
 			var r = query([
 				"select cm.chapter_slug 'chapter_slug', cm.first_verse_slug 'first_verse_slug'",
@@ -43,7 +43,7 @@ function DataManager(query) {
 			].join(' '));
 			return zipper(r);
 		},
-	
+
         getSources: function () {
             var r = query([
                     "select r.id, r.slug 'resource_id', r.name 'resource_name', l.name 'language_name', l.slug 'language_id', p.slug 'project_id', r.checking_level, r.version, r.modified_at 'date_modified' from resource r",
@@ -112,11 +112,14 @@ function DataManager(query) {
             return zipper(r);
         },
 
-        getRelatedWords: function (wordid) {
+        getRelatedWords: function (wordid, source) {
+            var s = typeof source === 'object' ? source.id : source;
             var r = query([
                 "select w.id, w.term 'title', w.definition 'body', w.definition_title 'deftitle' from translation_word w",
+                "join resource__translation_word x on x.translation_word_id=w.id",
                 "join translation_word_related r on w.slug=r.slug",
-                "where r.translation_word_id='" + wordid + "'"
+                "where r.translation_word_id='" + wordid + "' and x.resource_id='" + s + "'",
+                "order by lower(w.term)"
             ].join(' '));
 
             return zipper(r);

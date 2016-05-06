@@ -11,6 +11,7 @@
 <link rel="import" href="./ts-translate-sidebar.html">
 <link rel="import" href="./ts-nosource-mode.html">
 <link rel="import" href="./ts-source/ts-source-modal.html">
+<link rel="import" href="../ts-main/ts-loading.html">
 
 <dom-module id="ts-translate">
 
@@ -156,41 +157,11 @@
         #loading {
             width: 320px;
             height: 220px;
-            color: var(--primary-text-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 110%;
         }
 
-        #buttonbox {
-            display: flex;
-            justify-content: center;
-            color: var(--secondary-text-color);
-        }
-
-        #buttonbox paper-button:hover {
-            color: var(--accent-color);
-        }
-
-        paper-progress {
-            --paper-progress-active-color: var(--accent-color);
-            width: 250px;
-        }
-
-        #bar {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 40px;
-        }
-
-        #text {
-            text-align: center;
-        }
-
-        #loading h2 {
-            color: var(--accent-color);
+        #loading * {
+            margin: 0;
+            padding: 0;
         }
 
         .nodisplay {
@@ -277,21 +248,7 @@
         </paper-dialog>
 
         <paper-dialog id="loading" class="popup" modal="true" exit-animation="scale-down-animation">
-            <template is="dom-if" if="{{options.loading}}">
-                <p>{{options.body}}</p>
-                <div id="bar">
-                    <paper-progress indeterminate="true"></paper-progress>
-                </div>
-            </template>
-            <template is="dom-if" if="{{!options.loading}}">
-                <h2>{{options.title}}</h2>
-                <div id="text">
-                    <p>{{options.body}}</p>
-                </div>
-                <div id="buttonbox">
-                    <paper-button dialog-dismiss>Close</paper-button>
-                </div>
-            </template>
+            <ts-loading options="[[options]]"></ts-loading>
         </paper-dialog>
 
         <iron-signals on-iron-signal-frompublish="frompublish"></iron-signals>
@@ -357,9 +314,9 @@
                 value: {loading: false, title: "", body: ""}
             },
             busy: {
-                type: Boolean,
-                value: true,
-                notify: false
+                type: Object,
+                value: {signal: false, message: "Idle"},
+                notify: true
             },
             gittimer: {
                 type: Number
@@ -402,30 +359,34 @@
             clearTimeout(mythis.backuptimer);
 
             mythis.gittimer = setTimeout(function timer1 () {
-                if (mythis.busy) {
+                if (mythis.busy.signal) {
                     mythis.gittimer = setTimeout(timer1, 5000);
                     return;
                 }
-                mythis.set('busy', true);
+                mythis.set('busy', {signal: true, message: "Committing changes to git..."});
                 App.gitManager.init(paths.projectDir)
                     .then(function () {
-                        return App.gitManager.stage(mythis.currentuser, paths.projectDir);
+                        return App.gitManager.commitAll(mythis.currentuser, paths.projectDir);
                     }).then(function () {
                         mythis.gittimer = setTimeout(timer1, 120000);
-                        mythis.set('busy', false);
+                        setTimeout(function() {
+                            mythis.set('busy', {signal: false, message: "Idle"});
+                        }, 1000);
                     })
                 }, 100);
 
             mythis.backuptimer = setTimeout(function timer2 () {
-                if (mythis.busy) {
+                if (mythis.busy.signal) {
                     mythis.backuptimer = setTimeout(timer2, 5000);
                     return;
                 }
-                mythis.set('busy', true);
+                mythis.set('busy', {signal: true, message: "Backing up project..."});
                 App.exportManager.backupTranslation(projectmeta, filePath)
                     .then(function () {
                         mythis.backuptimer = setTimeout(timer2, 600000);
-                        mythis.set('busy', false);
+                        setTimeout(function() {
+                            mythis.set('busy', {signal: false, message: "Idle"});
+                        }, 1000);
                     })
                 }, 100);
         },
@@ -562,13 +523,13 @@
 
         loadproject: function (event, data) {
             var mythis = this;
-            if (mythis.busy) {
+            if (mythis.busy.signal) {
                 setTimeout(function() {
                     mythis.loadproject(event, data);
                 }, 500);
                 return;
             }
-            mythis.set('busy', true);
+            mythis.set('busy', {signal: true, message: "Loading project..."});
             var type = data.type;
             var projectmeta = data.projectmeta;
             var list = this.projectlist;
@@ -582,7 +543,9 @@
                 }
                 mythis.$.loading.close();
                 setTimeout(function() {
-                    mythis.set('busy', false);
+                    setTimeout(function() {
+                        mythis.set('busy', {signal: false, message: "Idle"});
+                    }, 1000);
                     mythis.setmodestate();
                     mythis.checksources();
                     if (type === "publish") {
@@ -654,8 +617,9 @@
             mythis.retrievesource();
             this.route = "translate";
             setTimeout(function() {
-                mythis.set('options.loading', true);
+                mythis.set('options.title', "");
                 mythis.set('options.body', "Loading project. Please wait...");
+                mythis.set('options.loading', true);
                 mythis.$.loading.open();
                 setTimeout(function() {
                     App.projectsManager.loadTargetTranslation(projectmeta).then(function (translation) {
@@ -677,8 +641,9 @@
 
         updatesources: function (event, data) {
             var mythis = this;
-            mythis.set('options.loading', true);
+            mythis.set('options.title', "");
             mythis.set('options.body', "Loading source. Please wait...");
+            mythis.set('options.loading', true);
             mythis.$.loading.open();
             setTimeout(function() {
                 mythis.set('currentproject.projectmeta.source_translations', data.sources);
@@ -693,13 +658,13 @@
         reloaddata: function (full) {
             var mythis = this;
             var projectmeta = mythis.currentproject.projectmeta;
-            if (mythis.busy) {
+            if (mythis.busy.signal) {
                 setTimeout(function() {
                     mythis.reloaddata(full);
                 }, 500);
                 return;
             }
-            mythis.set('busy', true);
+            mythis.set('busy', {signal: true, message: "Loading source data..."});
             App.projectsManager.loadTargetTranslation(projectmeta).then(function (translation) {
                 mythis.set('currentproject.rawdata.main', translation);
                 mythis.createchunks();
@@ -707,7 +672,9 @@
                 mythis.$.loading.close();
                 mythis.forceResize();
                 mythis.setlocation();
-                mythis.set('busy', false);
+                setTimeout(function() {
+                    mythis.set('busy', {signal: false, message: "Idle"});
+                }, 1000);
                 if (full) {
                     mythis.checksources();
                 }
@@ -716,30 +683,34 @@
 
         saveproject: function () {
             var mythis = this;
-            if (mythis.busy) {
+            if (mythis.busy.signal) {
                 setTimeout(function() {
                     mythis.saveproject();
                 }, 500);
                 return;
             }
-            mythis.set('busy', true);
+            mythis.set('busy', {signal: true, message: "Saving project to file..."});
             App.projectsManager.saveTargetTranslation(this.currentproject.chunks, this.currentproject.projectmeta, this.currentuser).then(function() {
-                mythis.set('busy', false);
+                setTimeout(function() {
+                    mythis.set('busy', {signal: false, message: "Idle"});
+                }, 1000);
                 mythis.fire('iron-signal', {name: 'updatelist'});
             });
         },
 
         savechunk: function (event, data) {
             var mythis = this;
-            if (mythis.busy) {
+            if (mythis.busy.signal) {
                 setTimeout(function() {
                     mythis.savechunk(event, data);
                 }, 500);
                 return;
             }
-            mythis.set('busy', true);
+            mythis.set('busy', {signal: true, message: "Saving chunk to file..."});
             App.projectsManager.saveTargetChunk(data.chunk, this.currentproject.projectmeta).then(function() {
-                mythis.set('busy', false);
+                setTimeout(function() {
+                    mythis.set('busy', {signal: false, message: "Idle"});
+                }, 1000);
                 mythis.createchapters();
                 mythis.addcontributor();
                 if (data.completion) {
@@ -750,15 +721,17 @@
 
         savemanifest: function () {
             var mythis = this;
-            if (mythis.busy) {
+            if (mythis.busy.signal) {
                 setTimeout(function() {
                     mythis.savemanifest();
                 }, 500);
                 return;
             }
-            mythis.set('busy', true);
+            mythis.set('busy', {signal: true, message: "Saving manifest to file..."});
             App.projectsManager.saveTargetManifest(this.currentproject.projectmeta).then(function() {
-                mythis.set('busy', false);
+                setTimeout(function() {
+                    mythis.set('busy', {signal: false, message: "Idle"});
+                }, 1000);
             });
         },
 
@@ -1343,7 +1316,7 @@
 
         gobackup: function () {
             var projectmeta = this.currentproject.projectmeta;
-            this.fire('iron-signal', {name: 'openbackup', data: {projectmeta: projectmeta}});
+            this.fire('iron-signal', {name: 'createbackup', data: {projectmeta: projectmeta}});
         },
 
         gosettings: function () {
@@ -1364,6 +1337,7 @@
                 return;
             }
             var generatePdf = function(){
+                mythis.set('options.title', "");
                 mythis.set('options.body', "Creating PDF. Please wait...");
                 setTimeout(function() {
                     App.printManager.targetTranslationToPdf(translation, projectmeta, filePath, options)
@@ -1389,6 +1363,7 @@
             mythis.$.loading.open();
 
             if (options.includeImages) {
+                mythis.set('options.title', "");
                 mythis.set('options.body', "Downloading Images. Please wait...");
                 App.printManager.getImages(projectmeta).then(function(){
                     generatePdf();

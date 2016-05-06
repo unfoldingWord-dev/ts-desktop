@@ -192,7 +192,7 @@ process.stdout.write = console.log.bind(console);
         })(),
 
         importManager: (function () {
-            return new ImportManager(configurator, migrateManager);
+            return new ImportManager(configurator, migrateManager, dataManager);
         })(),
 
         exportManager: (function () {

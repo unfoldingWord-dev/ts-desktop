@@ -9,42 +9,32 @@
 
         :host {
             display: flex;
-            flex-direction: column;
+            justify-content: center;
         }
 
-        #contain {
-            flex: auto;
+        #main {
+            flex: 0 0 450px;
             display: flex;
             flex-direction: column;
-            align-items: center;
         }
 
         #header {
             color: var(--secondary-text-color);
             font-size: 110%;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            min-height: 60px;
-        }
-
-        #header > div {
+            flex: 0 0 60px;
             display: flex;
             justify-content: flex-start;
             align-items: center;
-            padding-left: 20px;
+            padding: 0 20px;
             border-bottom: 1px solid var(--border-color);
             background: var(--card-background-color);
-            width: 430px;
-            box-shadow: 0 -1px 2px 1px var(--primary-color-dark);
         }
 
-        iron-list {
+        #list {
             font-size: 110%;
-            max-height: calc(100vh - 145px);
-            width: 450px;
+            max-height: calc(100vh - 175px);
             color: var(--primary-text-color);
-            box-shadow: 0 2px 3px 2px var(--border-color);
+            background: var(--card-background-color);
         }
 
         .row {
@@ -83,20 +73,19 @@
 
   <template>
 
-      <div id="header">
-          <div>
-              <span class="click" on-tap="togroup">[[category.name]]</span>
-              <iron-icon icon="chevron-right"></iron-icon>
-              <template is="dom-if" if="{{!obs}}">
-                  <span class="click" on-tap="tobook">[[project.name]]</span>
+      <div id="main">
+          <div id="header">
+              <template is="dom-if" if="{{!importdata.importing}}">
+                  <span class="click" on-tap="togroup">[[newdata.category.name]]</span>
                   <iron-icon icon="chevron-right"></iron-icon>
+                  <template is="dom-if" if="{{!obs}}">
+                      <span class="click" on-tap="tobook">[[newdata.project.name]]</span>
+                      <iron-icon icon="chevron-right"></iron-icon>
+                  </template>
               </template>
               <em>Choose a type</em>
           </div>
-      </div>
-
-      <div id="contain">
-          <iron-list items="[[typelist]]" as="typedata">
+          <iron-list id="list" items="[[newdata.typelist]]" as="typedata">
               <template>
                   <div class$="[[checkclass(typedata.allowed)]]" on-tap="store">
                       <div>
@@ -124,17 +113,15 @@
               value: 0,
               notify: true
           },
-          language: {
+          newdata: {
               type: Object,
-              value: {}
+              value: {},
+              notify: true
           },
-          category: {
+          importdata: {
               type: Object,
-              value: {}
-          },
-          project: {
-              type: Object,
-              value: {}
+              value: {},
+              notify: true
           },
           projectlist: {
               type: Array,
@@ -143,15 +130,6 @@
           obs: {
               type: Boolean,
               value: false
-          },
-          typedata: {
-              type: Object,
-              value: {},
-              notify: true
-          },
-          typelist: {
-              type: Array,
-              value: []
           }
       },
 
@@ -160,44 +138,44 @@
       ],
 
       observers: [
-          'checkobs(category.name)'
+          'checkobs(newdata.category.name)'
       ],
 
       createtypes: function () {
-          var project = this.project.slug;
+          var projectid = this.newdata.project.slug;
           var typearray = [];
-          var language = this.language;
+          var language = this.newdata.language;
           var projectarray = this.projectlist;
           var standardexists = false;
 
           for (var i = 0; i < projectarray.length; i++) {
-              if (projectarray[i].project.id === project && projectarray[i].target_language.id === language.id && projectarray[i].type.id === "text") {
+              if (projectarray[i].project.id === projectid && projectarray[i].target_language.id === language.id && projectarray[i].type.id === "text") {
                   standardexists = true;
               }
           }
 
-          if (project === "obs") {
+          if (projectid === "obs") {
               typearray.push({type: {id: "text", name: "Text"}, resource: {id: "obs", name: "Open Bible Stories"}, format: "markdown", allowed: true});
           } else {
               typearray.push({type: {id: "text", name: "Text"}, resource: {id: "ulb", name: "Unlocked Literal Bible"}, format: "usfm", allowed: true});
               typearray.push({type: {id: "text", name: "Text"}, resource: {id: "udb", name: "Unlocked Dynamic Bible"}, format: "usfm", allowed: true});
           }
-          typearray.push({type: {id: "tn", name: "Notes"}, resource: {id: "", name: ""}, format: "markdown", allowed: standardexists});
-          typearray.push({type: {id: "tq", name: "Questions"}, resource: {id: "", name: ""}, format: "markdown", allowed: standardexists});
-
-          for (i = 0; i < typearray.length; i++) {
-              var unique_id = language.id + "_" + project + "_" + typearray[i].type.id;
-              if (typearray[i].resource.id !== "") {
-                  unique_id += "_" + typearray[i].resource.id;
-              }
-              for (var k = 0; k < projectarray.length; k++) {
-                  if (projectarray[k].unique_id === unique_id) {
-                      typearray[i].allowed = false;
+          if (!this.importdata.importing) {
+              typearray.push({type: {id: "tn", name: "Notes"}, resource: {id: "", name: ""}, format: "markdown", allowed: standardexists});
+              typearray.push({type: {id: "tq", name: "Questions"}, resource: {id: "", name: ""}, format: "markdown", allowed: standardexists});
+              for (i = 0; i < typearray.length; i++) {
+                  var unique_id = language.id + "_" + projectid + "_" + typearray[i].type.id;
+                  if (typearray[i].resource.id !== "") {
+                      unique_id += "_" + typearray[i].resource.id;
+                  }
+                  for (var k = 0; k < projectarray.length; k++) {
+                      if (projectarray[k].unique_id === unique_id) {
+                          typearray[i].allowed = false;
+                      }
                   }
               }
           }
-
-          this.set('typelist', typearray);
+          this.set('newdata.typelist', typearray);
       },
 
       checkclass: function (allowed) {
@@ -209,16 +187,16 @@
       },
 
       store: function(e) {
-          this.typedata = e.model.typedata;
+          this.set('newdata.typedata', e.model.typedata);
           this.fire('create');
       },
 
       togroup: function () {
-          this.selected = 1;
+          this.set('selected', 1);
       },
 
       tobook: function () {
-          this.selected = 2;
+          this.set('selected', 2);
       },
 
     ready: function() {

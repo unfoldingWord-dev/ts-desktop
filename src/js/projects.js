@@ -242,7 +242,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                     return git.init(paths.projectDir);
                 })
                 .then(function () {
-                    return git.stage(user, paths.projectDir);
+                    return git.commitAll(user, paths.projectDir);
                 });
         },
 

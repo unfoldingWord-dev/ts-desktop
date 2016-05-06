@@ -12,6 +12,20 @@ try {
     }
 }
 
+/**
+ *  Takes a date object and return a string with the format 'R2P/YYYY-MM-DD/HH.MM.SS'
+ */
+function createTagName(datetime) {
+    return 'R2P/' +
+        datetime.getFullYear().toString() + '-' +
+        utils.padZero(datetime.getMonth()+1) + '-' +
+        utils.padZero(datetime.getDate()) + '/' +
+        utils.padZero(datetime.getHours()) + '.' +
+        utils.padZero(datetime.getMinutes()) + '.' +
+        utils.padZero(datetime.getSeconds());
+}
+
+
 function GitManager() {
 
     var logr = utils.logr;
@@ -81,9 +95,7 @@ function GitManager() {
 
         push: function (user, dir, repo) {
             let localrepo,
-                isSSH = !!user.reg,
-                tagName = '',
-                tagMessage = '';
+                isSSH = !!user.reg;
 
             return NodeGit.Repository.open(dir)
                 .then(function(repoResult) {
@@ -94,25 +106,21 @@ function GitManager() {
                     return localrepo.getHeadCommit();
                 })
                 .then(function(commit) {
-                    let stamp = new Date(Date.now()),
-                        padZero = utils.padZero;
-                    tagName = 'R2P/'
-                              + stamp.getFullYear().toString() + '-'
-                              + padZero(stamp.getMonth()+1) + '-'
-                              + padZero(stamp.getDate()) + '/'
-                              + padZero(stamp.getHours()) + '.'
-                              + padZero(stamp.getMinutes()) + '.'
-                              + padZero(stamp.getSeconds());
+                    let tagName = createTagName(new Date()),
+                        tagMessage = '';
+
                     return localrepo.createTag(commit.id(), tagName, tagMessage);
                 })
-                .then(function() {
+                .then(function(tag) {
                     let remoteUrl = isSSH ? repo.ssh_url : repo.html_url;
-
-                    return NodeGit.Remote.createAnonymous(localrepo, remoteUrl);
+                    
+                    return NodeGit.Remote.createAnonymous(localrepo, remoteUrl).then(function(remote) {
+                        return {tag: tag, remote: remote};
+                    });
                 })
-                .then(function(remote) {
-                    let tagRefSpecs = 'refs/tags/' + tagName + ':refs/tags/' + tagName;
-                    return remote.push(['refs/heads/master:refs/heads/master', tagRefSpecs], {
+                .then(function(data) {
+                    let tagRefSpecs = 'refs/tags/' + data.tag.name() + ':refs/tags/' + data.tag.name();
+                    return data.remote.push(['refs/heads/master:refs/heads/master', tagRefSpecs], {
                         callbacks: {
                             certificateCheck: function () {
                                 // no certificate check, let it pass thru

@@ -180,7 +180,12 @@ ipcMain.on('academy-window', function (event, arg) {
 });
 
 ipcMain.on('openacademy', function (event, arg) {
-    createAcademyWindow();
+    if (academyWindow) {
+        academyWindow.show();
+        academyWindow.focus();
+    } else {
+        createAcademyWindow();
+    }
 });
 
 ipcMain.on('save-as', function (event, arg) {

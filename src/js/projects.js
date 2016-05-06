@@ -3,7 +3,8 @@
 var _ = require('lodash'),
     path = require('path'),
     utils = require('../js/lib/utils'),
-    fs = require('fs');
+    fs = require('fs'),
+    trash = require('trash');
 
 function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
 
@@ -11,7 +12,6 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
         write = utils.fs.outputFile,
         read = utils.fs.readFile,
         mkdirp = utils.fs.mkdirs,
-        rm = utils.fs.remove,
         readdir = utils.fs.readdir,
         map = utils.lodash.map,
         flatten = utils.lodash.flatten,
@@ -101,7 +101,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 if (projectClass === "extant" && (!!chunk.helpscontent[0].title || !!chunk.helpscontent[0].body)) {
                     hasContent = true;
                 }
-                return hasContent ? write(file, projectClass === "standard" ? chunk.transcontent : toJSON(chunk.helpscontent)) : rm(file);
+                return hasContent ? write(file, projectClass === "standard" ? chunk.transcontent : toJSON(chunk.helpscontent)) : trash([file]);
             };
 
             return makeChapterDir(chunk)
@@ -190,7 +190,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             var cleanChapterDir = function (data, chapter) {
                 var chapterpath = path.join(paths.projectDir, chapter);
                 return readdir(chapterpath).then(function (dir) {
-                    return !dir.length ? rm(chapterpath): true;
+                    return !dir.length ? trash([chapterpath]): true;
                 });
             };
 
@@ -215,7 +215,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 if (projectClass === "extant" && (!!chunk.helpscontent[0].title || !!chunk.helpscontent[0].body)) {
                     hasContent = true;
                 }
-                return hasContent ? write(file, projectClass === "standard" ? chunk.transcontent : toJSON(chunk.helpscontent)) : rm(file);
+                return hasContent ? write(file, projectClass === "standard" ? chunk.transcontent : toJSON(chunk.helpscontent)) : trash([file]);
             };
 
             var updateChunks = function (data) {
@@ -346,7 +346,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
 
         deleteTargetTranslation: function (meta) {
             var paths = utils.makeProjectPaths(targetDir, meta);
-            return rm(paths.projectDir);
+            return trash([paths.projectDir]);
         }
     };
 }

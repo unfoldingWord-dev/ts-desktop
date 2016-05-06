@@ -34,6 +34,7 @@
     "request": "^2.58.0",
     "rimraf": "^2.4.2",
     "sql.js": "^0.2.21",
+    "trash": "^3.4.1",
     "untildify": "^2.1.0"
   },
   "devDependencies": {

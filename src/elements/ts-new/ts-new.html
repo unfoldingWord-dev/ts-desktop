@@ -83,15 +83,20 @@
         <div id="header">
             <div id="title">
                 <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
-                <span>New Project</span>
+                <template is="dom-if" if="{{!importdata.importing}}">
+                    <span>New Project</span>
+                </template>
+                <template is="dom-if" if="{{importdata.importing}}">
+                    <span>Import Project</span>
+                </template>
             </div>
         </div>
 
         <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
-            <ts-language-menu id="languages" selected="{{selected}}" language="{{language}}"></ts-language-menu>
-            <ts-project-menu selected="{{selected}}" category="{{category}}" project="{{project}}" typedata="{{typedata}}" on-create="createproject"></ts-project-menu>
-            <ts-book-menu selected="{{selected}}" category="[[category]]" project="{{project}}" typedata="{{typedata}}" on-create="createproject"></ts-book-menu>
-            <ts-type-menu selected="{{selected}}" language="[[language]]" category="[[category]]" project="[[project]]" typedata="{{typedata}}" projectlist="[[projectlist]]" on-create="createproject"></ts-type-menu>
+            <ts-language-menu id="languages" selected="{{selected}}" newdata="{{newdata}}" importdata="{{importdata}}" on-create="createproject"></ts-language-menu>
+            <ts-project-menu selected="{{selected}}" newdata="{{newdata}}" importdata="{{importdata}}" on-create="createproject"></ts-project-menu>
+            <ts-book-menu selected="{{selected}}" newdata="{{newdata}}" on-create="createproject"></ts-book-menu>
+            <ts-type-menu selected="{{selected}}" newdata="{{newdata}}" importdata="{{importdata}}" projectlist="[[projectlist]]" on-create="createproject"></ts-type-menu>
         </neon-animated-pages>
 
         <paper-dialog id="confirmimport" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -139,19 +144,7 @@
                 value: '',
                 notify: true
             },
-            language: {
-                type: Object,
-                value: {}
-            },
-            category: {
-                type: Object,
-                value: {}
-            },
-            project: {
-                type: Object,
-                value: {}
-            },
-            typedata: {
+            newdata: {
                 type: Object,
                 value: {}
             },
@@ -194,9 +187,9 @@
 
         createproject: function () {
             var mythis = this;
-            var project = this.project;
-            var language = this.language;
-            var typedata = this.typedata;
+            var project = this.newdata.project;
+            var language = this.newdata.language;
+            var typedata = this.newdata.typedata;
             var projectarray = this.projectlist;
             var popup = this.$.popup;
             var newprojectmanifest = {
@@ -218,11 +211,21 @@
                 return;
             }
 
+            if (this.importdata.importing) {
+                this.importdata.projectmeta = newprojectmeta;
+            }
+
             for (var i = 0; i < projectarray.length; i++) {
                 if (projectarray[i].unique_id === newprojectmeta.unique_id) {
-                    this.set('options', {title: "Duplicate Found", body: "This project already exists"});
-                    popup.open();
-                    return;
+                    if (this.importdata.importing) {
+                        this.importdata.overwrite = true;
+                        this.$.confirmimport.open();
+                        return;
+                    } else {
+                        this.set('options', {title: "Duplicate Found", body: "This project already exists"});
+                        popup.open();
+                        return;
+                    }
                 }
             }
 
@@ -233,8 +236,7 @@
             }
 
             if (this.importdata.importing) {
-                this.importdata.projectmeta = newprojectmeta;
-                this.importdata.overwrite = true;
+                this.importdata.overwrite = false;
                 this.startimport();
             } else {
                 this.animationConfig.exit.name = 'slide-left-animation';
@@ -242,22 +244,25 @@
                     mythis.fire('iron-signal', {name: 'updatelist'});
                     mythis.fire('iron-signal', {name: 'loadproject', data: {projectmeta: newprojectmeta, type: "new"}});
                     setTimeout(function() {
-                        mythis.selected = 0;
-                    }, 15000);
+                        mythis.set('selected', 0);
+                    }, 5000);
                 });
             }
         },
 
         startimport: function () {
             this.$.confirmimport.close();
-            this.route = "home";
+            this.set('route', "home");
             this.fire('iron-signal', {name: 'finishusfm'});
-            this.selected = 0;
+            this.set('selected', 0);
+            this.set('importdata', {importing: false});
         },
 
         back: function () {
             this.animationConfig.exit.name = 'slide-right-animation';
-            this.selected === 0 ? this.route = "home" : this.selected = this.selected - 1;
+            this.set('selected', 0);
+            this.set('importdata', {importing: false});
+            this.set('route', "home");
         },
 
         ready: function() {

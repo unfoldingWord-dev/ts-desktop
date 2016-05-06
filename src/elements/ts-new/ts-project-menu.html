@@ -10,43 +10,32 @@
 
         :host {
             display: flex;
-            flex-direction: column;
+            justify-content: center;
         }
 
-        #contain {
-            flex: auto;
+        #main {
+            flex: 0 0 450px;
             display: flex;
             flex-direction: column;
-            align-items: center;
         }
 
         #header {
             color: var(--secondary-text-color);
             font-size: 110%;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            min-height: 60px;
-        }
-
-        #header > div {
+            flex: 0 0 60px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 20px;
             border-bottom: 1px solid var(--border-color);
             background: var(--card-background-color);
-            width: 410px;
-            box-shadow: 0 -1px 2px 1px var(--primary-color-dark);
         }
 
-        iron-list {
+        #list {
             font-size: 110%;
-            max-height: calc(100vh - 145px);
-            width: 450px;
+            max-height: calc(100vh - 175px);
             color: var(--primary-text-color);
             background: var(--card-background-color);
-            box-shadow: 0 2px 3px 2px var(--border-color);
         }
 
         .row {
@@ -80,15 +69,11 @@
 
   <template>
 
-      <div id="header">
-          <div>
+      <div id="main">
+          <div id="header">
               <em>Choose a project</em>
-              <paper-icon-button class="right" icon="autorenew"></paper-icon-button>
           </div>
-      </div>
-
-      <div id="contain">
-          <iron-list items="[[categorylist]]" as="category">
+          <iron-list id="list" items="[[newdata.categorylist]]" as="category">
               <template>
                   <div class="row" on-tap="store">
                       <div>
@@ -119,24 +104,15 @@
               value: 0,
               notify: true
           },
-          category: {
+          newdata: {
               type: Object,
               value: {},
               notify: true
           },
-          project: {
+          importdata: {
               type: Object,
               value: {},
               notify: true
-          },
-          typedata: {
-              type: Object,
-              value: {},
-              notify: true
-          },
-          categorylist: {
-              type: Array,
-              value: []
           }
       },
 
@@ -152,45 +128,45 @@
           return name === "Open Bible Stories" || name.substring(0, 11) === "translation" ? '' : 'chevron-right';
       },
 
-      store: function(e) {
-          this.category = e.model.category;
-          if (this.category.name === "Open Bible Stories") {
-              this.project = this.category.data[0];
+      store: function (e) {
+          var category = e.model.category;
+          this.set('newdata.category', category);
+          if (category.name === "Open Bible Stories") {
+              this.set('newdata.project', category.data[0]);
               if (App.configurator.getUserSetting('glmode')) {
                   this.fire('iron-signal', {name: 'createtypes'});
-                  this.selected = this.selected + 2;
+                  this.set('selected', 3);
               } else {
-                  this.typedata = {type: {id: "text", name: "Text"}, resource: {id: "obs", name: "Open Bible Stories"}, format: "markdown", allowed: true};
+                  this.set('newdata.typedata', {type: {id: "text", name: "Text"}, resource: {id: "obs", name: "Open Bible Stories"}, format: "markdown", allowed: true});
                   this.fire('create');
               }
-          } else if (this.category.name === "translationWords") {
-              this.project = this.category.data[0];
-              this.typedata = {type: {id: "tw", name: "Words"}, resource: {id: "", name: ""}, format: "markdown", allowed: true};
+          } else if (category.name === "translationWords") {
+              this.set('newdata.project', category.data[0]);
+              this.set('newdata.typedata', {type: {id: "tw", name: "Words"}, resource: {id: "", name: ""}, format: "markdown", allowed: true});
               this.fire('create');
-          } else if (this.category.name.substring(0, 18) === "translationAcademy") {
-              this.project = this.category.data[0];
-              this.typedata = {type: {id: "ta", name: "Academy"}, resource: {id: "", name: ""}, format: "markdown", allowed: true};
+          } else if (category.name.substring(0, 18) === "translationAcademy") {
+              this.set('newdata.project', category.data[0]);
+              this.set('newdata.typedata', {type: {id: "ta", name: "Academy"}, resource: {id: "", name: ""}, format: "markdown", allowed: true});
               this.fire('create');
           } else {
-              this.selected = this.selected + 1;
+              this.set('selected', 2);
           }
       },
 
       createprojects: function () {
+          var mythis = this;
           var projects = App.dataManager.getProjects();
-          var tempobject = {};
           var temparray = [];
           _.forEach(_.groupBy(projects, 'category'), function (data, category) {
-              if (category === 'null') {
-                  tempobject = {"name": "Open Bible Stories", "data": data};
+              if (category === 'null' && !mythis.importdata.importing) {
+                  temparray.push({"name": "Open Bible Stories", "data": data});
               } else if (category === 'Bible: OT') {
-                  tempobject = {"name": "Old Testament", "data": data};
+                  temparray.push({"name": "Old Testament", "data": data});
               } else if (category === 'Bible: NT') {
-                  tempobject = {"name": "New Testament", "data": data};
+                  temparray.push({"name": "New Testament", "data": data});
               }
-              temparray.push(tempobject);
           });
-          if (App.configurator.getUserSetting('glmode')) {
+          if (App.configurator.getUserSetting('glmode') && !mythis.importdata.importing) {
               temparray.push({"name": "translationWords", "data": [{name: "translationWords", slug: "bible"}]});
               var volumes = App.dataManager.getVolumes();
               for (var i = 0; i < volumes.length; i++) {
@@ -198,7 +174,7 @@
                   temparray.push({"name": name, "data": [{name: name, slug: volumes[i].slug}]});
               }
           }
-          this.categorylist = temparray;
+          this.set('newdata.categorylist', temparray);
       },
 
       ready: function () {

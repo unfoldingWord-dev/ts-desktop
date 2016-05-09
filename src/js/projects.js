@@ -91,6 +91,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
 
             var updateChunk = function (chunk) {
                 var file = path.join(paths.projectDir, chunk.chunkmeta.chapterid, chunk.chunkmeta.frameid + '.txt');
+                var standardcontent = chunk.transcontent;
                 var hasContent = false;
                 if (projectClass === "standard") {
                     hasContent = !!chunk.transcontent;
@@ -101,7 +102,10 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 if (projectClass === "extant" && (!!chunk.helpscontent[0].title || !!chunk.helpscontent[0].body)) {
                     hasContent = true;
                 }
-                return hasContent ? write(file, projectClass === "standard" ? chunk.transcontent : toJSON(chunk.helpscontent)) : trash([file]);
+                if (projectClass === "standard" && hasContent && chunk.chunkmeta.frame === 1 && chunk.projectmeta.project.id !== "obs") {
+                    standardcontent = "\\c " + chunk.chunkmeta.chapter + " " + standardcontent;
+                }
+                return hasContent ? write(file, projectClass === "standard" ? standardcontent : toJSON(chunk.helpscontent)) : trash([file]);
             };
 
             return makeChapterDir(chunk)
@@ -205,6 +209,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
 
             var updateChunk = function (chunk) {
                 var file = path.join(paths.projectDir, chunk.chunkmeta.chapterid, chunk.chunkmeta.frameid + '.txt');
+                var standardcontent = chunk.transcontent;
                 var hasContent = false;
                 if (projectClass === "standard") {
                     hasContent = !!chunk.transcontent;
@@ -215,7 +220,10 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 if (projectClass === "extant" && (!!chunk.helpscontent[0].title || !!chunk.helpscontent[0].body)) {
                     hasContent = true;
                 }
-                return hasContent ? write(file, projectClass === "standard" ? chunk.transcontent : toJSON(chunk.helpscontent)) : trash([file]);
+                if (projectClass === "standard" && hasContent && chunk.chunkmeta.frame === 1 && chunk.projectmeta.project.id !== "obs") {
+                    standardcontent = "\\c " + chunk.chunkmeta.chapter + " " + standardcontent;
+                }
+                return hasContent ? write(file, projectClass === "standard" ? standardcontent : toJSON(chunk.helpscontent)) : trash([file]);
             };
 
             var updateChunks = function (data) {

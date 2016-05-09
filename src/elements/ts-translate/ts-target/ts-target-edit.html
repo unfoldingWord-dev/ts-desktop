@@ -108,7 +108,7 @@
 		},
 
         observers: [
-            'rendertext(chunk.transcontent)'
+            'rendertext(chunk.transcontent, chunk.completed)'
         ],
 
         focustextbox: function () {
@@ -139,8 +139,6 @@
                                 verse = wordarray[i+1];
                                 returnstr += numstr1 + verse + numstr2;
                                 i++;
-                            } else if (wordarray[i] === "\\c") {
-                                i++;
                             } else {
                                 returnstr += wordarray[i] + " ";
                             }
@@ -161,7 +159,7 @@
         },
 
         change: function () {
-            this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk, completion: false}});
+            this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
         },
 
         review: function () {

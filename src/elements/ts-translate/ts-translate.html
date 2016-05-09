@@ -713,9 +713,6 @@
                 }, 1000);
                 mythis.createchapters();
                 mythis.addcontributor();
-                if (data.completion) {
-                    mythis.updatecompletion();
-                }
             });
         },
 
@@ -993,9 +990,7 @@
                 if (typeclass === "standard") {
                     transcontent = this.convertVerseMarkers(maindata.transcontent).text;
                     transcontent = this.migrateMarkers(transcontent);
-                    if (!completed) {
-                        transcontent = this.removeMarkers(transcontent);
-                    }
+                    transcontent = this.removeChapterMarkers(transcontent);
                 } else {
                     helpscontent = maindata.helpscontent;
                 }
@@ -1027,12 +1022,12 @@
             return text;
         },
 
-        removeMarkers: function (text) {
+        removeChapterMarkers: function (text) {
             var textarray = text.split(" ");
             var returnstr = "";
 
             for (var i = 0; i < textarray.length; i++) {
-                if (textarray[i] === "\\v" || textarray[i] === "\\c") {
+                if (textarray[i] === "\\c") {
                     i++;
                 } else {
                     returnstr += textarray[i] + " ";

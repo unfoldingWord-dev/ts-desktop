@@ -166,6 +166,16 @@ function UsfmParser () {
             hasOptions: false,
             type: "sectionHeading"
         },
+        quote: {
+            regEx: /\\q[0-9]*/,
+            hasOptions: false,
+            type: "quote"
+        },
+        break: {
+            regEx: /\\b/,
+            hasOptions: false,
+            type: "break"
+        },
         tableOfContents: {
             regEx: /\\toc[0-2]*/,
             hasOptions: false,
@@ -192,7 +202,7 @@ function UsfmParser () {
             return new Promise(function (resolve, reject) {
 
                 var lineReader = readline.createInterface({
-                    input: fs.createReadStream(mythis.file)
+                    input: fs.createReadStream(mythis.file, {encoding: "utf8"})
                 });
 
                 lineReader.on('line', function (line) {
@@ -234,6 +244,9 @@ function UsfmParser () {
                             c++;
                         }
                         currentMarker = mythis.markers[mythis.markerCount];
+                        if (marker.type === "verse") {
+                            currentMarker.contents = section + " " + currentMarker.options + " ";
+                        }
                         mythis.markerCount++;
                     } else {
                         if (currentMarker) {

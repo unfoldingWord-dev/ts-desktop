@@ -59,7 +59,7 @@ function Renderer() {
             return returnstr.trim();
         },
 
-        renderMarkersAsSuper: function (text) {
+        renderSourceWithVerses: function (text) {
             var textarray = text.split(" ");
             var numstr1 = "\<sup\>";
             var numstr2 = "\<\/sup\>";
@@ -74,6 +74,32 @@ function Renderer() {
                 } else {
                     returnstr += textarray[i] + " ";
                 }
+            }
+            return returnstr.trim();
+        },
+
+        renderTargetWithVerses: function (text, module) {
+            var linearray = text.split("\n");
+            var numstr1 = "\<sup\>";
+            var numstr2 = "\<\/sup\>";
+            var startp = "\<p class='style-scope " + module + "'\>";
+            var endp = "\<\/p\>";
+            var returnstr = "";
+
+            for (var j = 0; j < linearray.length; j++) {
+                returnstr += startp;
+                var wordarray = linearray[j].split(" ");
+                for (var i = 0; i < wordarray.length; i++) {
+                    if (wordarray[i] === "\\v") {
+                        var verse = wordarray[i+1];
+                        returnstr += numstr1 + verse + numstr2;
+                        i++;
+                    } else {
+                        returnstr += wordarray[i] + " ";
+                    }
+                }
+                returnstr = returnstr.trim();
+                returnstr += endp;
             }
             return returnstr;
         }

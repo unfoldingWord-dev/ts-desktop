@@ -60,7 +60,6 @@
         .bold {
             font-weight: bold;
             font-size: 110%;
-            text-transform: uppercase;
             text-decoration: underline;
         }
 
@@ -69,13 +68,9 @@
     <template>
 
         <div id="header">
-            <h2>Import Options</h2>
+            <h2>Import/Restore Options</h2>
         </div>
         <div id="body">
-            <div class="option" on-tap="restore">
-                <span class="optiontitle">Restore from Tstudio file</span>
-                <p>Will <span class="bold">overwrite</span> the existing project, if one exists</p>
-            </div>
             <div class="option" on-tap="backup">
                 <span class="optiontitle">Import from Tstudio file</span>
                 <p>Will <span class="bold">merge</span> with the existing project, if one exists</p>
@@ -87,6 +82,10 @@
             <div class="option" on-tap="repo">
                 <span class="optiontitle">Import from Door43</span>
                 <p>Will <span class="bold">merge</span> with the existing project, if one exists</p>
+            </div>
+            <div class="option" on-tap="restore">
+                <span class="optiontitle">Restore from Tstudio file</span>
+                <p>Will <span class="bold">overwrite</span> the existing project, if one exists</p>
             </div>
         </div>
         <div id="footer">

@@ -9,8 +9,6 @@
 
 <link rel="import" href="./ts-verse-marker.html">
 
-<script src="../../../js/dragging.js"></script>
-
 <dom-module id="ts-target-review">
 
 	<style>
@@ -99,7 +97,6 @@
                 <div id="textholder"></div>
             </div>
             <div id="togglebox">
-                <iron-icon class$="[[iconclass(chunk.completed)]]" icon="create" on-tap="savemarkers"></iron-icon>
                 <p>Mark chunk as done</p>
                 <paper-toggle-button id="toggle" on-change="checkdone"></paper-toggle-button>
             </div>
@@ -136,6 +133,7 @@
 
         rendertext: function () {
             if(this.chunk && this.chunk.srccontent) {
+                var mythis = this;
                 var verses = this.chunk.chunkmeta.verses;
                 var chap = this.chunk.chunkmeta.chapter;
                 var completed = this.chunk.completed;
@@ -144,9 +142,9 @@
                 var wordarray = [];
                 var vmstr1 = "\<ts-verse-marker id='c";
                 var vmstr2 = "v";
-                var vmstr3 = "' draggable='true' ondragstart='drag(event)' verse='";
+                var vmstr3 = "' draggable='true' class='markers' verse='";
                 var vmstr4 = "'\>\<\/ts-verse-marker\>";
-                var textstr1 = "\<span ondrop='drop(event)' ondragover='allowDrop(event)'\>";
+                var textstr1 = "\<span class='targets'\>";
                 var textstr2 = "\<\/span\> ";
                 var numstr1 = "\<sup\>";
                 var numstr2 = "\<\/sup\>";
@@ -202,7 +200,31 @@
                     }
                 }
                 textholder.innerHTML = returnstr;
-                this.$.toggle.checked = completed;
+                mythis.$.toggle.checked = completed;
+
+                var markers = this.querySelectorAll(".markers");
+                var targets = this.querySelectorAll(".targets");
+
+                for (i = 0; i < markers.length; i++) {
+                    markers[i].addEventListener("dragstart", function (event) {
+                        event.dataTransfer.setData("text", event.target.id);
+                    });
+                }
+
+                for (i = 0; i < targets.length; i++) {
+                    targets[i].addEventListener("dragover", function (event) {
+                        event.preventDefault();
+                    });
+                    targets[i].addEventListener("drop", function (event) {
+                        event.preventDefault();
+                        var dragid = event.dataTransfer.getData("text");
+                        var dragelement = document.getElementById(dragid);
+                        var targetelement = event.target;
+                        var parentelement = targetelement.parentNode;
+                        parentelement.insertBefore(dragelement, targetelement);
+                        mythis.savemarkers();
+                    });
+                }
             }
         },
 

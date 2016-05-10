@@ -122,31 +122,11 @@
                 var contentbox = this.$.content;
                 var textbox = this.$.textbox;
                 var textholder = this.querySelector("#textholder");
-                var linearray = this.chunk.transcontent.split("\n");
-                var numstr1 = "\<sup\>";
-                var numstr2 = "\<\/sup\>";
-                var startp = "\<p class='style-scope ts-target-edit'\>";
-                var endp = "\<\/p\>";
-                var returnstr = "";
-                var verse = 0;
+                var text = this.chunk.transcontent;
+                var module = "ts-target-edit";
 
                 if (completed || typeclass !== "standard") {
-                    for (var j = 0; j < linearray.length; j++) {
-                        returnstr += startp;
-                        var wordarray = linearray[j].split(" ");
-                        for (var i = 0; i < wordarray.length; i++) {
-                            if (wordarray[i] === "\\v") {
-                                verse = wordarray[i+1];
-                                returnstr += numstr1 + verse + numstr2;
-                                i++;
-                            } else {
-                                returnstr += wordarray[i] + " ";
-                            }
-                        }
-                        returnstr += endp;
-                    }
-
-                    textholder.innerHTML = returnstr;
+                    textholder.innerHTML = App.renderer.renderTargetWithVerses(text, module);
                     textholder.classList.remove("hide");
                     textbox.classList.add("hide");
                     contentbox.classList.remove("editmode");
@@ -160,35 +140,9 @@
 
         change: function () {
             var verses = this.chunk.chunkmeta.verses;
-            var linearray = this.chunk.transcontent.split("\n");
-            var wordarray = [];
-            var returnstr = "";
-            var versesused = [];
-            var verse = 0;
-            var i = 0;
-            var j = 0;
+            var text = this.chunk.transcontent;
 
-            for (j = 0; j < linearray.length; j++) {
-                wordarray = linearray[j].split(" ");
-                for (i = 0; i < wordarray.length; i++) {
-                    if (wordarray[i] === "\\v") {
-                        verse = parseInt(wordarray[i+1]);
-                        if (verses.indexOf(verse) >= 0 && versesused.indexOf(verse) === -1) {
-                            returnstr += "\\v " + verse + " ";
-                            versesused.push(verse);
-                        }
-                        i++;
-                    } else {
-                        returnstr += wordarray[i] + " ";
-                    }
-                }
-                returnstr = returnstr.trim();
-                if (j !== linearray.length-1) {
-                    returnstr += "\n";
-                }
-            }
-
-            this.set('chunk.transcontent', returnstr);
+            this.set('chunk.transcontent', App.renderer.validateVerseMarkers(text, verses));
             this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
         },
 

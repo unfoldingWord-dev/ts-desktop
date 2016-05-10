@@ -102,6 +102,33 @@ function Renderer() {
                 returnstr += endp;
             }
             return returnstr;
+        },
+
+        validateVerseMarkers: function (text, verses) {
+            var linearray = text.split("\n");
+            var returnstr = "";
+            var used = [];
+
+            for (var j = 0; j < linearray.length; j++) {
+                var wordarray = linearray[j].split(" ");
+                for (var i = 0; i < wordarray.length; i++) {
+                    if (wordarray[i] === "\\v") {
+                        var verse = parseInt(wordarray[i+1]);
+                        if (verses.indexOf(verse) >= 0 && used.indexOf(verse) === -1) {
+                            returnstr += "\\v " + verse + " ";
+                            used.push(verse);
+                        }
+                        i++;
+                    } else {
+                        returnstr += wordarray[i] + " ";
+                    }
+                }
+                returnstr = returnstr.trim();
+                if (j !== linearray.length-1) {
+                    returnstr += "\n";
+                }
+            }
+            return returnstr;
         }
 
 

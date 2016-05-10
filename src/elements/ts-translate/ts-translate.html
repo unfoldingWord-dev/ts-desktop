@@ -951,6 +951,7 @@
         getFrameData: function (chunkmeta, projectmeta) {
             var typeclass = projectmeta.project_type_class;
             var complexid = chunkmeta.chapterid + '-' + chunkmeta.frameid;
+            var verses = chunkmeta.verses;
             var maindata = this.currentproject.rawdata.main[complexid];
             var seconddata = this.currentproject.rawdata.second[complexid];
             var statedata = this.currentproject.statedata[complexid];
@@ -968,6 +969,7 @@
                     transcontent = App.renderer.convertVerseMarkers(maindata.transcontent).text;
                     transcontent = App.renderer.migrateMarkers(transcontent);
                     transcontent = App.renderer.removeChapterMarkers(transcontent);
+                    transcontent = App.renderer.validateVerseMarkers(transcontent, verses);
                 } else {
                     helpscontent = maindata.helpscontent;
                 }

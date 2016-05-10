@@ -62,6 +62,9 @@ process.stdout.write = console.log.bind(console);
     setMsg('Loading Print Manager...');
     let PrintManager = require('../js/printer').PrintManager;
 
+    setMsg('Loading Renderer...');
+    let Renderer = require('../js/render').Renderer;
+
     setMsg('Loading Locale...');
     let i18n = require('../js/i18n').Locale(path.resolve(path.join(__dirname, '..', '..', 'i18n')));
 
@@ -172,6 +175,10 @@ process.stdout.write = console.log.bind(console);
         gitManager: gitManager,
 
         migrateManager: migrateManager,
+
+        renderer: (function () {
+            return new Renderer();
+        })(),
 
         keyManager: (function () {
             return new KeyManager(DATA_PATH);

@@ -129,9 +129,74 @@ function Renderer() {
                 }
             }
             return returnstr;
+        },
+
+        markersToBalloons: function (chunk, module) {
+            var verses = chunk.chunkmeta.verses;
+            var chap = chunk.chunkmeta.chapter;
+            var linearray = chunk.transcontent.split("\n");
+            var vmstr1 = "\<ts-verse-marker id='c";
+            var vmstr2 = "v";
+            var vmstr3 = "' draggable='true' class='markers' verse='";
+            var vmstr4 = "'\>\<\/ts-verse-marker\>";
+            var textstr1 = "\<span class='targets'\>";
+            var textstr2 = "\<\/span\> ";
+            var startp = "\<p class='style-scope " + module + "'\>";
+            var endp = "\<\/p\>";
+            var returnstr = "";
+            var prestr = startp;
+            var used = [];
+
+            for (var j = 0; j < linearray.length; j++) {
+                if (j !== 0) {
+                    returnstr += startp;
+                }
+                var wordarray = linearray[j].split(" ");
+                for (var i = 0; i < wordarray.length; i++) {
+                    if (wordarray[i] === "\\v") {
+                        var verse = parseInt(wordarray[i+1]);
+                        if (verses.indexOf(verse) >= 0 && used.indexOf(verse) === -1) {
+                            returnstr += vmstr1 + chap + vmstr2 + verse + vmstr3 + verse + vmstr4;
+                            used.push(verse);
+                        }
+                        i++;
+                    } else {
+                        returnstr += textstr1 + wordarray[i] + textstr2;
+                    }
+                }
+                returnstr += endp;
+            }
+            for (i = 0; i < verses.length; i++) {
+                if (used.indexOf(verses[i]) === -1) {
+                    prestr += vmstr1 + chap + vmstr2 + verses[i] + vmstr3 + verses[i] + vmstr4;
+                }
+            }
+            return prestr + returnstr;
+        },
+
+        balloonsToMarkers: function (paragraphs) {
+            var returnstr = "";
+
+            for (var j = 0; j < paragraphs.length; j++) {
+                var children = paragraphs[j].children;
+                for (var i = 0; i < children.length; i++) {
+                    var type = children[i].nodeName;
+
+                    if (type === "TS-VERSE-MARKER") {
+                        var versenum = children[i].verse;
+                        returnstr += "\\v " + versenum + " ";
+                    } else {
+                        var text = children[i].textContent;
+                        returnstr += text + " ";
+                    }
+                }
+                returnstr = returnstr.trim();
+                if (j !== paragraphs.length-1) {
+                    returnstr += "\n";
+                }
+            }
+            return returnstr;
         }
-
-
 
     };
 }

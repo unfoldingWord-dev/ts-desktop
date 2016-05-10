@@ -132,130 +132,56 @@
         },
 
         rendertext: function () {
-            if(this.chunk && this.chunk.srccontent) {
+            if (this.chunk && this.chunk.srccontent) {
                 var mythis = this;
-                var verses = this.chunk.chunkmeta.verses;
-                var chap = this.chunk.chunkmeta.chapter;
                 var completed = this.chunk.completed;
-                var textholder = this.querySelector("#textholder");
-                var linearray = this.chunk.transcontent.split("\n");
-                var wordarray = [];
-                var vmstr1 = "\<ts-verse-marker id='c";
-                var vmstr2 = "v";
-                var vmstr3 = "' draggable='true' class='markers' verse='";
-                var vmstr4 = "'\>\<\/ts-verse-marker\>";
-                var textstr1 = "\<span class='targets'\>";
-                var textstr2 = "\<\/span\> ";
-                var numstr1 = "\<sup\>";
-                var numstr2 = "\<\/sup\>";
-                var startp = "\<p class='style-scope ts-target-review'\>";
-                var endp = "\<\/p\>";
+                var text = this.chunk.transcontent;
+                var module = "ts-target-review";
                 var returnstr = "";
-                var prestr = startp;
-                var versesused = [];
-                var verse = 0;
-                var i = 0;
-                var j = 0;
 
-                if(!completed) {
-                    for (j = 0; j < linearray.length; j++) {
-                        if (j !== 0) {
-                            returnstr += startp;
-                        }
-                        wordarray = linearray[j].split(" ");
-                        for (i = 0; i < wordarray.length; i++) {
-                            if (wordarray[i] === "\\v") {
-                                verse = parseInt(wordarray[i+1]);
-                                if (verses.indexOf(verse) >= 0 && versesused.indexOf(verse) === -1) {
-                                    returnstr += vmstr1 + chap + vmstr2 + verse + vmstr3 + verse + vmstr4;
-                                    versesused.push(verse);
-                                }
-                                i++;
-                            } else {
-                                returnstr += textstr1 + wordarray[i] + textstr2;
-                            }
-                        }
-                        returnstr += endp;
-                    }
-                    for (i = 0; i < verses.length; i++) {
-                        if (versesused.indexOf(verses[i]) === -1) {
-                            prestr += vmstr1 + chap + vmstr2 + verses[i] + vmstr3 + verses[i] + vmstr4;
-                        }
-                    }
-                    returnstr = prestr + returnstr;
+                if (completed) {
+                    returnstr = App.renderer.renderTargetWithVerses(text, module);
                 } else {
-                    for (j = 0; j < linearray.length; j++) {
-                        returnstr += startp;
-                        wordarray = linearray[j].split(" ");
-                        for (i = 0; i < wordarray.length; i++) {
-                            if (wordarray[i] === "\\v") {
-                                verse = wordarray[i+1];
-                                returnstr += numstr1 + verse + numstr2;
-                                i++;
-                            } else {
-                                returnstr += wordarray[i] + " ";
-                            }
-                        }
-                        returnstr += endp;
-                    }
+                    returnstr = App.renderer.markersToBalloons(mythis.chunk, module);
                 }
-                textholder.innerHTML = returnstr;
+                mythis.$.textholder.innerHTML = returnstr;
                 mythis.$.toggle.checked = completed;
+                mythis.addDragListeners();
+            }
+        },
 
-                var markers = this.querySelectorAll(".markers");
-                var targets = this.querySelectorAll(".targets");
+        addDragListeners: function () {
+            var mythis = this;
+            var markers = this.querySelectorAll(".markers");
+            var targets = this.querySelectorAll(".targets");
 
-                for (i = 0; i < markers.length; i++) {
-                    markers[i].addEventListener("dragstart", function (event) {
-                        event.dataTransfer.setData("text", event.target.id);
-                    });
-                }
+            for (var j = 0; j < markers.length; j++) {
+                markers[j].addEventListener("dragstart", function (event) {
+                    event.dataTransfer.setData("text", event.target.id);
+                });
+            }
 
-                for (i = 0; i < targets.length; i++) {
-                    targets[i].addEventListener("dragover", function (event) {
-                        event.preventDefault();
-                    });
-                    targets[i].addEventListener("drop", function (event) {
-                        event.preventDefault();
-                        var dragid = event.dataTransfer.getData("text");
-                        var dragelement = document.getElementById(dragid);
-                        var targetelement = event.target;
-                        var parentelement = targetelement.parentNode;
-                        parentelement.insertBefore(dragelement, targetelement);
-                        mythis.savemarkers();
-                    });
-                }
+            for (var i = 0; i < targets.length; i++) {
+                targets[i].addEventListener("dragover", function (event) {
+                    event.preventDefault();
+                });
+                targets[i].addEventListener("drop", function (event) {
+                    event.preventDefault();
+                    var dragid = event.dataTransfer.getData("text");
+                    var dragelement = document.getElementById(dragid);
+                    var targetelement = event.target;
+                    var parentelement = targetelement.parentNode;
+                    parentelement.insertBefore(dragelement, targetelement);
+                    mythis.savemarkers();
+                });
             }
         },
 
         savemarkers: function () {
             var textholder = this.querySelector("#textholder");
             var paragraphs = textholder.children;
-            var type = "";
-            var text = "";
-            var versenum = 0;
-            var returnstr = "";
 
-            for (var j = 0; j < paragraphs.length; j++) {
-                var children = paragraphs[j].children;
-                for (var i = 0; i < children.length; i++) {
-                    type = children[i].nodeName;
-
-                    if (type === "TS-VERSE-MARKER") {
-                        versenum = children[i].verse;
-                        returnstr += "\\v " + versenum + " ";
-                    } else {
-                        text = children[i].textContent;
-                        returnstr += text + " ";
-                    }
-                }
-                returnstr = returnstr.trim();
-                if (j !== paragraphs.length-1) {
-                    returnstr += "\n";
-                }
-            }
-
-            this.set('chunk.transcontent', returnstr);
+            this.set('chunk.transcontent', App.renderer.balloonsToMarkers(paragraphs));
             this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
         },
 

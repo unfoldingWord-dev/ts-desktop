@@ -1,5 +1,12 @@
 'use strict';
 
+/*
+ * Redirect all standard output to the console.
+ * NB: This is required for the sql.js library to work.
+ */
+process.stderr.write = console.error.bind(console);
+process.stdout.write = console.log.bind(console);
+
 let path = require('path'),
     fs = require('fs'),
     mkdirp = require('mkdirp'),
@@ -28,7 +35,7 @@ function Db (schemaPath, dbPath) {
         saveDB(sql);
     } else {
         let buffer = fs.readFileSync(dbFilePath);
-        
+
         sql = new SQL.Database(buffer);
     }
 

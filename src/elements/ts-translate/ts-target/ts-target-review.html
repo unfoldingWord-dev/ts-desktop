@@ -78,6 +78,12 @@
             cursor: pointer;
         }
 
+        .highlight {
+            font-weight: bold;
+            padding-left: 20px;
+            color: var(--accent-color);
+        }
+
         .hide {
             display: none;
         }
@@ -165,12 +171,21 @@
                 targets[i].addEventListener("dragover", function (event) {
                     event.preventDefault();
                 });
+                targets[i].addEventListener("dragenter", function (event) {
+                    var target = event.target;
+                    target.classList.add("highlight");
+                });
+                targets[i].addEventListener("dragleave", function (event) {
+                    var target = event.target;
+                    target.classList.remove("highlight");
+                });
                 targets[i].addEventListener("drop", function (event) {
                     event.preventDefault();
                     var dragid = event.dataTransfer.getData("text");
                     var dragelement = document.getElementById(dragid);
                     var targetelement = event.target;
                     var parentelement = targetelement.parentNode;
+                    targetelement.classList.remove("highlight");
                     parentelement.insertBefore(dragelement, targetelement);
                     mythis.savemarkers();
                 });

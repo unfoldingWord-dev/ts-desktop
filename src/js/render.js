@@ -139,7 +139,7 @@ function Renderer() {
             var vmstr2 = "v";
             var vmstr3 = "' draggable='true' class='markers' verse='";
             var vmstr4 = "'\>\<\/ts-verse-marker\>";
-            var textstr1 = "\<span class='targets'\>";
+            var textstr1 = "\<span class='targets style-scope " + module + "'\>";
             var textstr2 = "\<\/span\> ";
             var startp = "\<p class='style-scope " + module + "'\>";
             var endp = "\<\/p\>";

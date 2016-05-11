@@ -690,7 +690,7 @@
                 return;
             }
             mythis.set('busy', {signal: true, message: "Saving project to file..."});
-            App.projectsManager.saveTargetTranslation(this.currentproject.chunks, this.currentproject.projectmeta, this.currentuser).then(function() {
+            App.projectsManager.cleanAndCommitProject(this.currentproject.chunks, this.currentproject.projectmeta, this.currentuser).then(function() {
                 setTimeout(function() {
                     mythis.set('busy', {signal: false, message: "Idle"});
                 }, 1000);

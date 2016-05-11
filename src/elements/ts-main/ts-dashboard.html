@@ -15,6 +15,7 @@
 <link rel="import" href="./ts-import-options.html">
 <link rel="import" href="./ts-feedback.html">
 <link rel="import" href="./ts-loading.html">
+<link rel="import" href="./ts-backup-options.html">
 
 <dom-module id="ts-dashboard">
 
@@ -74,6 +75,11 @@
           height: 500px;
       }
 
+      #backup {
+          width: 450px;
+          height: 300px;
+      }
+
       #repo {
           width: 500px;
           height: 500px;
@@ -122,10 +128,14 @@
           <ts-loading options="[[options]]"></ts-loading>
       </paper-dialog>
 
+      <paper-dialog id="backup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <ts-backup-options on-filebackup="createFileBackup" on-repobackup="createRepoBackup"></ts-backup-options>
+      </paper-dialog>
+
       <iron-signals on-iron-signal-updatelist="updateList"></iron-signals>
       <iron-signals on-iron-signal-openfeedback="openFeedback"></iron-signals>
       <iron-signals on-iron-signal-openimport="openImport"></iron-signals>
-      <iron-signals on-iron-signal-createbackup="createBackup"></iron-signals>
+      <iron-signals on-iron-signal-openbackup="openBackup"></iron-signals>
       <iron-signals on-iron-signal-updateuser="updateUser"></iron-signals>
       <iron-signals on-iron-signal-finishusfm="finishUsfm"></iron-signals>
       <iron-signals on-iron-signal-importfromrepo="importFromRepo"></iron-signals>
@@ -164,6 +174,10 @@
           importdata: {
               type: Object,
               value: {importing: false}
+          },
+          backupdata: {
+              type: Object,
+              value: {}
           },
           options: {
               type: Object,
@@ -402,21 +416,36 @@
           }, 500);
       },
 
-      createBackup: function (event, data) {
+      openBackup: function (event, data) {
+          this.set('backupdata', data.projectmeta);
+          this.$.backup.open();
+      },
+
+      createRepoBackup: function () {
           var mythis = this;
-          var defaultPath = App.configurator.getUserPath('datalocation', 'backups', data.projectmeta.unique_id);
+          var meta = this.backupdata;
+
+          this.$.backup.close();
+          console.log("fire Repo Backup");
+      },
+
+      createFileBackup: function () {
+          var mythis = this;
+          var meta = this.backupdata;
+          var defaultPath = App.configurator.getUserPath('datalocation', 'backups', meta.unique_id);
           var filePath = App.ipc.sendSync('save-as', {options: {defaultPath: defaultPath, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}]}});
           if (!filePath) {
               return;
           }
 
+          mythis.$.backup.close();
           mythis.set('options.title', "");
           mythis.set('options.body', "Creating Backup.  Please wait...");
           mythis.set('options.loading', true);
           mythis.$.loading.open();
 
           setTimeout(function() {
-              App.exportManager.backupTranslation(data.projectmeta, filePath)
+              App.exportManager.backupTranslation(meta, filePath)
                   .then(function () {
                       mythis.set('options.title', "Backup Complete");
                       mythis.set('options.body', "Your project has been successfully backed up.");

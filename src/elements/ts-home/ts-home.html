@@ -401,7 +401,7 @@
         gobackup: function () {
             var projectmeta = this.currentinfo;
             this.closeinfo();
-            this.fire('iron-signal', {name: 'createbackup', data: {projectmeta: projectmeta}});
+            this.fire('iron-signal', {name: 'openbackup', data: {projectmeta: projectmeta}});
         },
 
         openproject: function (e) {

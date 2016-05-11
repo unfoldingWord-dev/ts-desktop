@@ -1239,7 +1239,7 @@
 
         gobackup: function () {
             var projectmeta = this.currentproject.projectmeta;
-            this.fire('iron-signal', {name: 'createbackup', data: {projectmeta: projectmeta}});
+            this.fire('iron-signal', {name: 'openbackup', data: {projectmeta: projectmeta}});
         },
 
         gosettings: function () {

@@ -81,31 +81,40 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             return meta;
         },
 
-        saveTargetChunk: function (chunk, meta) {
+        updateChunk: function (meta, chunk) {
             var paths = utils.makeProjectPaths(targetDir, meta);
             var projectClass = meta.project_type_class;
+            var file = path.join(paths.projectDir, chunk.chunkmeta.chapterid, chunk.chunkmeta.frameid + '.txt');
+            var standardcontent = chunk.transcontent;
+            var hasContent = false;
 
-            var makeChapterDir = function (chunk) {
-                return mkdirp(path.join(paths.projectDir, chunk.chunkmeta.chapterid));
-            };
+            if (projectClass === "standard") {
+                hasContent = !!chunk.transcontent;
+            }
+            if (projectClass === "helps") {
+                hasContent = !!chunk.helpscontent.length;
+            }
+            if (projectClass === "extant" && (!!chunk.helpscontent[0].title || !!chunk.helpscontent[0].body)) {
+                hasContent = true;
+            }
+            if (projectClass === "standard" && hasContent && chunk.chunkmeta.frame === 1 && chunk.projectmeta.project.id !== "obs") {
+                standardcontent = "\\c " + chunk.chunkmeta.chapter + " " + standardcontent;
+            }
+            return hasContent ? write(file, projectClass === "standard" ? standardcontent : toJSON(chunk.helpscontent)) : trash([file]);
+        },
 
-            var updateChunk = function (chunk) {
-                var file = path.join(paths.projectDir, chunk.chunkmeta.chapterid, chunk.chunkmeta.frameid + '.txt');
-                var hasContent = false;
-                if (projectClass === "standard") {
-                    hasContent = !!chunk.transcontent;
-                }
-                if (projectClass === "helps") {
-                    hasContent = !!chunk.helpscontent.length;
-                }
-                if (projectClass === "extant" && (!!chunk.helpscontent[0].title || !!chunk.helpscontent[0].body)) {
-                    hasContent = true;
-                }
-                return hasContent ? write(file, projectClass === "standard" ? chunk.transcontent : toJSON(chunk.helpscontent)) : trash([file]);
-            };
+        makeChapterDir: function (meta, chunk) {
+            var paths = utils.makeProjectPaths(targetDir, meta);
 
-            return makeChapterDir(chunk)
-                .then(updateChunk(chunk));
+            return mkdirp(path.join(paths.projectDir, chunk.chunkmeta.chapterid));
+        },
+
+        saveTargetChunk: function (chunk, meta) {
+            var mythis = this;
+            return mythis.makeChapterDir(meta, chunk)
+                .then(function () {
+                    return mythis.updateChunk(meta, chunk);
+                });
         },
 
         saveTargetManifest: function (meta) {
@@ -141,81 +150,16 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             return write(paths.manifest, toJSON(manifest));
         },
 
-        saveTargetTranslation: function (translation, meta, user) {
+        createTargetTranslation: function (translation, meta, user) {
+            var mythis = this;
             var paths = utils.makeProjectPaths(targetDir, meta);
-            var projectClass = meta.project_type_class;
-            var sources = meta.source_translations.map(function (source) {
-                    return {
-                        language_id: source.language_id,
-                        resource_id: source.resource_id,
-                        checking_level: source.checking_level,
-                        date_modified: source.date_modified,
-                        version: source.version
-                    };
-                });
-
-            var manifest = {
-                package_version: meta.package_version,
-                format: meta.format,
-                generator: {
-                    name: 'ts-desktop',
-                    build: ''
-                },
-                target_language: meta.target_language,
-                project: meta.project,
-                type: meta.type,
-                resource: meta.resource,
-                source_translations: sources,
-                parent_draft: meta.parent_draft,
-                translators: meta.translators,
-                finished_chunks: meta.finished_chunks
-            };
-
-            var writeFile = function (name, data) {
-                return function () {
-                    return write(name, toJSON(data));
-                };
-            };
-
-            var makeChapterDir = function (chunk) {
-                return mkdirp(path.join(paths.projectDir, chunk.chunkmeta.chapterid));
-            };
+            var makeChapterDir = mythis.makeChapterDir.bind(this, meta);
+            var updateChunk = mythis.updateChunk.bind(this, meta);
 
             var makeChapterDirs = function (data) {
                 return function () {
                     return Promise.all(_.map(data, makeChapterDir));
                 };
-            };
-
-            var cleanChapterDir = function (data, chapter) {
-                var chapterpath = path.join(paths.projectDir, chapter);
-                return readdir(chapterpath).then(function (dir) {
-                    return !dir.length ? trash([chapterpath]): true;
-                });
-            };
-
-            var cleanChapterDirs = function () {
-                return function () {
-                    var data = _.groupBy(translation, function (chunk) {
-                        return chunk.chunkmeta.chapterid;
-                    });
-                    return Promise.all(_.map(data, cleanChapterDir));
-                };
-            };
-
-            var updateChunk = function (chunk) {
-                var file = path.join(paths.projectDir, chunk.chunkmeta.chapterid, chunk.chunkmeta.frameid + '.txt');
-                var hasContent = false;
-                if (projectClass === "standard") {
-                    hasContent = !!chunk.transcontent;
-                }
-                if (projectClass === "helps") {
-                    hasContent = !!chunk.helpscontent.length;
-                }
-                if (projectClass === "extant" && (!!chunk.helpscontent[0].title || !!chunk.helpscontent[0].body)) {
-                    hasContent = true;
-                }
-                return hasContent ? write(file, projectClass === "standard" ? chunk.transcontent : toJSON(chunk.helpscontent)) : trash([file]);
             };
 
             var updateChunks = function (data) {
@@ -234,10 +178,34 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
 
             return mkdirp(paths.projectDir)
                 .then(setLicense())
-                .then(writeFile(paths.manifest, manifest))
+                .then(function () {
+                    return mythis.saveTargetManifest(meta);
+                })
                 .then(makeChapterDirs(translation))
                 .then(updateChunks(translation))
-                .then(cleanChapterDirs())
+                .then(function () {
+                    return mythis.cleanAndCommitProject(translation, meta, user);
+                });
+        },
+
+        cleanAndCommitProject: function (translation, meta, user) {
+            var paths = utils.makeProjectPaths(targetDir, meta);
+
+            var cleanChapterDir = function (data, chapter) {
+                var chapterpath = path.join(paths.projectDir, chapter);
+                return readdir(chapterpath).then(function (dir) {
+                    return !dir.length ? trash([chapterpath]): true;
+                }).catch(utils.ret(true));
+            };
+
+            var cleanChapterDirs = function () {
+                var data = _.groupBy(translation, function (chunk) {
+                    return chunk.chunkmeta.chapterid;
+                });
+                return Promise.all(_.map(data, cleanChapterDir));
+            };
+
+            return cleanChapterDirs()
                 .then(function () {
                     return git.init(paths.projectDir);
                 })

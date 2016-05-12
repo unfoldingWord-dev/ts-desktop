@@ -271,14 +271,14 @@
         movehelp: function (index, dir) {
             var removed = this.splice('chunk.helpscontent', index, 1)[0];
             this.splice('chunk.helpscontent', index + dir, 0, removed);
-            this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk, completion: false}});
+            this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
         },
 
         addhelp: function () {
             var newhelp = {title: "", body: ""};
             this.push('chunk.helpscontent', newhelp);
             this.fire('setheight');
-            this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk, completion: false}});
+            this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
         },
 
         deletehelp: function (event, data) {
@@ -288,7 +288,7 @@
             if (this.chunk.index === chunkindex) {
                 this.splice('chunk.helpscontent', noteindex, 1);
                 this.fire('setheight');
-                this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk, completion: false}});
+                this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
             }
         },
 
@@ -303,7 +303,7 @@
         },
 
         change: function () {
-            this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk, completion: false}});
+            this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
         },
 
         rendertext: function () {

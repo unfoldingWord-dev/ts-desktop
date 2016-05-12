@@ -175,7 +175,7 @@
         },
 
         change: function () {
-            this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk, completion: false}});
+            this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
         },
 
         checktitle: function (type) {

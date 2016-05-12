@@ -690,7 +690,7 @@
                 return;
             }
             mythis.set('busy', {signal: true, message: "Saving project to file..."});
-            App.projectsManager.saveTargetTranslation(this.currentproject.chunks, this.currentproject.projectmeta, this.currentuser).then(function() {
+            App.projectsManager.cleanAndCommitProject(this.currentproject.chunks, this.currentproject.projectmeta, this.currentuser).then(function() {
                 setTimeout(function() {
                     mythis.set('busy', {signal: false, message: "Idle"});
                 }, 1000);
@@ -713,9 +713,6 @@
                 }, 1000);
                 mythis.createchapters();
                 mythis.addcontributor();
-                if (data.completion) {
-                    mythis.updatecompletion();
-                }
             });
         },
 
@@ -764,10 +761,10 @@
 
             for (i = 0; i < frames.length; i++) {
                 var resources = this.getFrameResources(frames[i], currentsource);
-                var sourcedata = this.convertVerseMarkers(frames[i].chunk);
+                var sourcedata = App.renderer.convertVerseMarkers(frames[i].chunk);
                 var chunkmeta = this.createFrameMeta(frames[i], projectmeta, sourcedata.verses);
                 var chunk = this.getFrameData(chunkmeta, projectmeta);
-                chunk.srccontent = this.renderMarkersAsSuper(sourcedata.text);
+                chunk.srccontent = App.renderer.renderSourceWithVerses(sourcedata.text);
                 chunk.wordcontent = "";
                 chunk.resources = resources;
                 if (projectmeta.project_type_class === "standard" && chunkmeta.frameid === "01") {
@@ -898,35 +895,12 @@
             if (currentsource.resource_id === "ulb") {
                 var result = App.dataManager.getFrameUdb(currentsource, frame.chapter, frame.verse)[0];
                 if (result) {
-                    udbtext = this.convertVerseMarkers(result.chunk).text;
-                    udbtext = this.renderMarkersAsSuper(udbtext);
+                    udbtext = App.renderer.convertVerseMarkers(result.chunk).text;
+                    udbtext = App.renderer.renderSourceWithVerses(udbtext);
                     resources.push({title: "UDB", array: false, data: [udbtext]});
                 }
             }
             return resources;
-        },
-
-        convertVerseMarkers: function (text) {
-            var startstr = '<verse number="';
-            var endstr = '" style="v" />';
-            var expression = new RegExp(startstr);
-            var verses = [];
-
-            while (expression.test(text)) {
-                var versestr = text.substring(text.search(startstr) + 15, text.search(endstr));
-                if (versestr.indexOf("-") < 0) {
-                    verses.push(parseInt(versestr));
-                } else {
-                    var firstnum = parseInt(versestr.substring(0, versestr.search("-")));
-                    var lastnum = parseInt(versestr.substring(versestr.search("-") + 1));
-                    for (var j = firstnum; j <= lastnum; j++) {
-                        verses.push(j);
-                    }
-                }
-                text = text.replace(startstr, " \\v ");
-                text = text.replace(endstr, " ");
-            }
-            return {text: text, verses: verses};
         },
 
         createFrameMeta: function (frame, projectmeta, verses) {
@@ -977,6 +951,7 @@
         getFrameData: function (chunkmeta, projectmeta) {
             var typeclass = projectmeta.project_type_class;
             var complexid = chunkmeta.chapterid + '-' + chunkmeta.frameid;
+            var verses = chunkmeta.verses;
             var maindata = this.currentproject.rawdata.main[complexid];
             var seconddata = this.currentproject.rawdata.second[complexid];
             var statedata = this.currentproject.statedata[complexid];
@@ -991,11 +966,10 @@
             if (maindata) {
                 completed = projectmeta.finished_chunks.indexOf(complexid) >= 0;
                 if (typeclass === "standard") {
-                    transcontent = this.convertVerseMarkers(maindata.transcontent).text;
-                    transcontent = this.migrateMarkers(transcontent);
-                    if (!completed) {
-                        transcontent = this.removeMarkers(transcontent);
-                    }
+                    transcontent = App.renderer.convertVerseMarkers(maindata.transcontent).text;
+                    transcontent = App.renderer.migrateMarkers(transcontent);
+                    transcontent = App.renderer.removeChapterMarkers(transcontent);
+                    transcontent = App.renderer.validateVerseMarkers(transcontent, verses);
                 } else {
                     helpscontent = maindata.helpscontent;
                 }
@@ -1008,57 +982,6 @@
                 this.currentproject.statedata[complexid] = statedata;
             }
             return {projectmeta: _.cloneDeep(projectmeta), chunkmeta: chunkmeta, transcontent: transcontent, helpscontent: helpscontent, completed: completed, state: statedata};
-        },
-
-        migrateMarkers: function (text) {
-            var vtest1 = new RegExp(/\\v/g);
-            var vtest2 = new RegExp(/\/v/g);
-            var ctest = new RegExp(/\\c/g);
-            var stest = new RegExp(/  /g);
-            var vreplace = "\\v ";
-            var creplace = "\\c ";
-            var sreplace = " ";
-
-            text = text.replace(vtest1, vreplace);
-            text = text.replace(vtest2, vreplace);
-            text = text.replace(ctest, creplace);
-            text = text.replace(stest, sreplace);
-
-            return text;
-        },
-
-        removeMarkers: function (text) {
-            var textarray = text.split(" ");
-            var returnstr = "";
-
-            for (var i = 0; i < textarray.length; i++) {
-                if (textarray[i] === "\\v" || textarray[i] === "\\c") {
-                    i++;
-                } else {
-                    returnstr += textarray[i] + " ";
-                }
-            }
-
-            return returnstr.trim();
-        },
-
-        renderMarkersAsSuper: function (text) {
-            var textarray = text.split(" ");
-            var numstr1 = "\<sup\>";
-            var numstr2 = "\<\/sup\>";
-            var returnstr = "";
-            var verse = 0;
-
-            for (var i = 0; i < textarray.length; i++) {
-                if (textarray[i] === "\\v") {
-                    verse = textarray[i+1];
-                    returnstr += numstr1 + verse + numstr2;
-                    i++;
-                } else {
-                    returnstr += textarray[i] + " ";
-                }
-            }
-            return returnstr;
         },
 
         createProjectTitleFrame: function (chunkmeta, projectmeta, index) {

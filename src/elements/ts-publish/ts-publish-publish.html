@@ -271,7 +271,7 @@
                     return App.userManager.createRepo(user, repo);
                 })
                 .then(function (repo) {
-                    return App.gitManager.push(user, paths.projectDir, repo).then(App.utils.ret(repo.html_url));
+                    return App.gitManager.push(user, paths.projectDir, repo, {requestToPublish: true}).then(App.utils.ret(repo.html_url));
                 })
                 .then(function (url) {
                     mythis.set('options.title', "Project Uploaded");

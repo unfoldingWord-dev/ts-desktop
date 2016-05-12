@@ -69,14 +69,14 @@
         properties: {
             options: {
                 type: Object,
-                value: {loading: false, title: "", body: ""}
+                value: {}
             }
         },
 
         ready: function() {
             var mythis = this;
 
-            mythis.set('options.title', "");
+            mythis.set('options', {});
             mythis.set('options.body', "Loading translationAcademy...");
             mythis.set('options.loading', true);
             mythis.$.loading.open();

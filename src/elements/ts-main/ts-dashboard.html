@@ -90,6 +90,11 @@
           height: 220px;
       }
 
+      #wideloading {
+          width: 450px;
+          height: 220px;
+      }
+
       .hide {
           display: none;
       }
@@ -125,6 +130,10 @@
       </paper-dialog>
 
       <paper-dialog id="loading" class="popup" modal="true" exit-animation="scale-down-animation">
+          <ts-loading options="[[options]]"></ts-loading>
+      </paper-dialog>
+
+      <paper-dialog id="wideloading" class="popup" modal="true" exit-animation="scale-down-animation">
           <ts-loading options="[[options]]"></ts-loading>
       </paper-dialog>
 
@@ -181,7 +190,7 @@
           },
           options: {
               type: Object,
-              value: {loading: false, title: "", body: ""}
+              value: {}
           },
           busy: {
               type: Object,
@@ -225,7 +234,7 @@
           }
 
           mythis.$.import.close();
-          mythis.set('options.title', "");
+          mythis.set('options', {});
           mythis.set('options.body', "Importing.  Please wait...");
           mythis.set('options.loading', true);
           mythis.$.loading.open();
@@ -300,7 +309,7 @@
           };
           var checkOverwrite = overwrite ? backupTargetTranslation() : Promise.resolve(true);
 
-          mythis.set('options.title', "");
+          mythis.set('options', {});
           mythis.set('options.body', "Importing.  Please wait...");
           mythis.set('options.loading', true);
           mythis.$.loading.open();
@@ -366,7 +375,7 @@
           var tmpPath = path.join(tmpDir, project);
 
           mythis.$.repo.close();
-          mythis.set('options.title', "");
+          mythis.set('options', {});
           mythis.set('options.body', "Importing.  Please wait...");
           mythis.set('options.loading', true);
           mythis.$.loading.open();
@@ -423,10 +432,78 @@
 
       createRepoBackup: function () {
           var mythis = this;
-          var meta = this.backupdata;
+          var projectmeta = this.backupdata;
+          var loading = this.$.wideloading;
+          var target = App.configurator.getValue('targetTranslationsDir');
+          var paths = App.utils.makeProjectPaths(target, projectmeta);
+          var repo = projectmeta.unique_id;
+          var user = this.currentuser;
+          var shell = require('electron').shell;
+          var deviceId = "";
 
-          this.$.backup.close();
-          console.log("fire Repo Backup");
+          mythis.$.backup.close();
+          mythis.set('options', {});
+          mythis.set('options.body', "Uploading Project.  Please wait...");
+          mythis.set('options.loading', true);
+          loading.open();
+
+          return App.gitManager.commitAll(user, paths.projectDir)
+              .then(function () {
+                  return App.utils.getDeviceId();
+              })
+              .then(function (devId) {
+                  deviceId = devId;
+                  var getreg = App.keyManager.getRegistrationInfo.bind(App.keyManager, deviceId),
+                      genreg = App.keyManager.generateRegistrationInfo.bind(App.keyManager, deviceId),
+                      rereg = function () {
+                          return App.userManager.unregister(user, deviceId).then(genreg);
+                      };
+
+                  return getreg().catch(rereg);
+              })
+              .then(function (reg) {
+                  user.reg = reg;
+                  return App.userManager.register(user, deviceId);
+              })
+              .then(function () {
+                  return App.userManager.createRepo(user, repo);
+              })
+              .then(function (repo) {
+                  return App.gitManager.push(user, paths.projectDir, repo).then(App.utils.ret(repo.html_url));
+              })
+              .then(function (url) {
+                  mythis.set('options.title', "Backup Complete");
+                  mythis.set('options.body', "Your project has been backed up to:");
+                  mythis.set('options.link', url);
+                  mythis.set('options.showlink', true);
+                  mythis.set('options.loading', false);
+                  var link = loading.getElementsByClassName("url");
+                  link[0].addEventListener('click', function (event) {
+                      event.preventDefault();
+                      shell.openExternal(url);
+                  });
+              })
+              .catch(function (err) {
+                  var errmessage = "We're sorry.  An error occurred while trying to upload your project.";
+                  var logmessage = "";
+                  if(err.status === 401) {
+                      errmessage = "Cannot upload without connecting to a Door43 account.";
+                  } else if (err.data) {
+                      errmessage = err.data;
+                  } else {
+                      errmessage = err;
+                  }
+                  if (err.status) {
+                      logmessage = "Error: " + err.status + " " + err.data;
+                  } else {
+                      logmessage = err;
+                  }
+                  App.reporter.logError(logmessage);
+                  mythis.set('options.title', "Backup Failed");
+                  mythis.set('options.body', errmessage);
+                  mythis.set('options.loading', false);
+              });
+
       },
 
       createFileBackup: function () {
@@ -439,7 +516,7 @@
           }
 
           mythis.$.backup.close();
-          mythis.set('options.title', "");
+          mythis.set('options', {});
           mythis.set('options.body', "Creating Backup.  Please wait...");
           mythis.set('options.loading', true);
           mythis.$.loading.open();
@@ -472,7 +549,7 @@
           }
 
           mythis.$.import.close();
-          mythis.set('options.title', "");
+          mythis.set('options', {});
           mythis.set('options.body', "Restoring.  Please wait...");
           mythis.set('options.loading', true);
           mythis.$.loading.open();
@@ -520,7 +597,7 @@
           var message = this.feedback;
           var mythis = this;
 
-          mythis.set('options.title', "");
+          mythis.set('options', {});
           mythis.set('options.body', "Sending Feedback.  Please wait...");
           mythis.set('options.loading', true);
           mythis.$.feedback.close();

@@ -12,6 +12,20 @@ try {
     }
 }
 
+/**
+ *  Takes a date object and return a string with the format 'R2P/YYYY-MM-DD/HH.MM.SS'
+ */
+function createTagName(datetime) {
+    return 'R2P/' +
+        datetime.getFullYear().toString() + '-' +
+        utils.padZero(datetime.getMonth()+1) + '-' +
+        utils.padZero(datetime.getDate()) + '/' +
+        utils.padZero(datetime.getHours()) + '.' +
+        utils.padZero(datetime.getMinutes()) + '.' +
+        utils.padZero(datetime.getSeconds());
+}
+
+
 function GitManager() {
 
     var logr = utils.logr;
@@ -79,7 +93,9 @@ function GitManager() {
                 .then(logr('Files are staged'));
         },
 
-        push: function (user, dir, repo) {
+        push: function (user, dir, repo, opts) {
+            opts = opts || {};
+
             let localrepo,
                 isSSH = !!user.reg;
 
@@ -89,12 +105,27 @@ function GitManager() {
                     return localrepo.openIndex();
                 })
                 .then(function() {
-                    let remoteUrl = isSSH ? repo.ssh_url : repo.html_url;
-
-                    return NodeGit.Remote.createAnonymous(localrepo, remoteUrl);
+                    return localrepo.getHeadCommit();
                 })
-                .then(function(remote) {
-                    return remote.push(['refs/heads/master:refs/heads/master'], {
+                .then(function(commit) {
+                    let tagName = createTagName(new Date()),
+                        tagMessage = '';
+
+                    return opts.requestToPublish ? localrepo.createTag(commit.id(), tagName, tagMessage) : null;
+                })
+                .then(function(tag) {
+                    let remoteUrl = isSSH ? repo.ssh_url : repo.html_url;
+                    
+                    return NodeGit.Remote.createAnonymous(localrepo, remoteUrl).then(function(remote) {
+                        return {tag: tag, remote: remote};
+                    });
+                })
+                .then(function(data) {
+                    let refSpecs = ['refs/heads/master:refs/heads/master'],
+                        tagRefSpec = data.tag ? 'refs/tags/' + data.tag.name() + ':refs/tags/' + data.tag.name() : '';
+
+                    if (tagRefSpec) {refSpecs.push(tagRefSpec);}
+                    return data.remote.push(refSpecs, {
                         callbacks: {
                             certificateCheck: function () {
                                 // no certificate check, let it pass thru

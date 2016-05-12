@@ -297,7 +297,7 @@
                       return App.importManager.importFromUSFM(filepath, projectmeta);
                   })
                   .then(function (chunks) {
-                      return App.projectsManager.saveTargetTranslation(chunks, projectmeta, user);
+                      return App.projectsManager.createTargetTranslation(chunks, projectmeta, user);
                   })
                   .then(function(){
                       mythis.set('options.title', "Import Complete");

@@ -93,7 +93,9 @@ function GitManager() {
                 .then(logr('Files are staged'));
         },
 
-        push: function (user, dir, repo) {
+        push: function (user, dir, repo, opts) {
+            opts = opts || {};
+
             let localrepo,
                 isSSH = !!user.reg;
 
@@ -109,7 +111,7 @@ function GitManager() {
                     let tagName = createTagName(new Date()),
                         tagMessage = '';
 
-                    return localrepo.createTag(commit.id(), tagName, tagMessage);
+                    return opts.requestToPublish ? localrepo.createTag(commit.id(), tagName, tagMessage) : null;
                 })
                 .then(function(tag) {
                     let remoteUrl = isSSH ? repo.ssh_url : repo.html_url;
@@ -119,8 +121,11 @@ function GitManager() {
                     });
                 })
                 .then(function(data) {
-                    let tagRefSpecs = 'refs/tags/' + data.tag.name() + ':refs/tags/' + data.tag.name();
-                    return data.remote.push(['refs/heads/master:refs/heads/master', tagRefSpecs], {
+                    let refSpecs = ['refs/heads/master:refs/heads/master'],
+                        tagRefSpec = data.tag ? 'refs/tags/' + data.tag.name() + ':refs/tags/' + data.tag.name() : '';
+
+                    if (tagRefSpec) {refSpecs.push(tagRefSpec);}
+                    return data.remote.push(refSpecs, {
                         callbacks: {
                             certificateCheck: function () {
                                 // no certificate check, let it pass thru

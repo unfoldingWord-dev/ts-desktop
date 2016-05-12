@@ -13,52 +13,39 @@ function PrintManager(configurator) {
     var download = utils.download;
     var srcDir = path.resolve(path.join(__dirname, '..'));
     var notoFontPath = path.join(srcDir, 'assets', 'NotoSans-Regular.ttf');
+    var imageRoot = path.join(configurator.getValue('rootdir'), 'images');
+    var imagePath = path.join(imageRoot, 'obs');
+    var zipPath = path.join(imageRoot, 'obs-images.zip');
+    var url = configurator.getValue("mediaServer") + '/obs/jpg/1/en/obs-images-360px.zip';
 
     return {
 
-        getImages: function (meta) {
-            return new Promise(function (resolve, reject) {
-                var imageRoot = path.join(configurator.getValue('rootdir'), 'images'),
-                    imagePath = path.join(imageRoot, meta.resource.id);
+        downloadImages: function () {
+            return utils.fs.mkdirs(imagePath)
+                .then(function () {
+                    return utils.fs.stat(zipPath).then(utils.ret(true)).catch(utils.ret(false));
+                })
+                .then(function (fileExists) {
+                    return fileExists ? true : download(url, zipPath, true);
+                });
+        },
 
-                //check to see if we need to create the images directory;
-                if (!fs.existsSync(imagePath)) {
-                    utils.fs.mkdirs(imagePath);
-                }
+        extractImages: function () {
+            var zip = new AdmZip(zipPath);
+            zip.extractAllTo(imagePath, true);
 
-                //if the zip file isn't downloaded yet, go get it.
-                var dest = path.join(imagePath, 'images.zip');
-                if (!fs.existsSync(dest)) {
-                    //let out = fs.createWriteStream(dest);
-                    // TRICKY: right now we have to hard code the urls until the api is updated
-                    var url = configurator.getValue("mediaServer") + '/obs/jpg/1/en/obs-images-360px.zip';
-                    console.log('downloading images from', url);
-                    download(url, dest, true).then(function () {
-                        var zip = new AdmZip(dest);
-                        zip.extractAllTo(imagePath, true);
-
-                        var directories = fs.readdirSync(imagePath).filter(function (file) {
-                            return fs.statSync(path.join(imagePath, file)).isDirectory();
-                        });
-                        directories.forEach(function (dir) {
-                            var dirPath = path.join(imagePath,dir),
-                                files = fs.readdirSync(dirPath);
-                            files.forEach(function (file) {
-                                var filePath = path.join(imagePath,dir,file),
-                                    newPath = path.join(imagePath,file);
-                                fs.renameSync(filePath, newPath);
-                            });
-
-                            //remove the empty directory
-                            fs.rmdir(dirPath);
-                        });
-                        resolve();
-                    }).catch(function (err) {
-                        reject(err);
-                    });
-                } else {
-                    resolve();
-                }
+            var directories = fs.readdirSync(imagePath).filter(function (file) {
+                return fs.statSync(path.join(imagePath, file)).isDirectory();
+            });
+            directories.forEach(function (dir) {
+                var dirPath = path.join(imagePath, dir);
+                var files = fs.readdirSync(dirPath);
+                files.forEach(function (file) {
+                    var filePath = path.join(imagePath, dir, file);
+                    var newPath = path.join(imagePath, file);
+                    fs.renameSync(filePath, newPath);
+                });
+                fs.rmdirSync(dirPath);
             });
         },
 
@@ -66,8 +53,6 @@ function PrintManager(configurator) {
             if(filePath.split('.').pop() !== 'pdf') {
                 filePath += '.pdf';
             }
-            var imageRoot = path.join(configurator.getValue('rootdir'), "images"),
-                imagePath = path.join(imageRoot, meta.resource.id);
 
             return new Promise(function (resolve, reject) {
                 if (meta.project_type_class === "standard") {

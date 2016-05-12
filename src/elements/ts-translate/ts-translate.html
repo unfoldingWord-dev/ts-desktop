@@ -1287,7 +1287,9 @@
 
             if (options.includeImages) {
                 mythis.set('options.body', "Downloading Images. Please wait...");
-                App.printManager.getImages(projectmeta).then(function(){
+                App.printManager.downloadImages().then(function(){
+                    mythis.set('options.body', "Extracting Images. Please wait...");
+                    App.printManager.extractImages();
                     generatePdf();
                 }).catch(function(err){
                     var message = "We're sorry.  An error occurred while trying to download images for this project";

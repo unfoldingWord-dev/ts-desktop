@@ -210,6 +210,15 @@
             else if (name === "datalocation") {
                 this._updateDataLocation();
             }
+            else if (name === "license") {
+                this.fire('iron-signal', {name: 'openlicense'});
+            }
+            else if (name === "guidelines") {
+                this.fire('iron-signal', {name: 'openguidelines'});
+            }
+            else if (name === "statement") {
+                this.fire('iron-signal', {name: 'openstatement'});
+            }
             else if (typeof value === 'boolean') {
                 var path = 'settings.' + event.target.dataGroup + '.list.' + event.target.dataList + '.value';
                 this.set(path, !value);

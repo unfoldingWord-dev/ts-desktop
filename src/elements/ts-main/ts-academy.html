@@ -75,6 +75,12 @@
 
         ready: function() {
             var mythis = this;
+            /*
+             * Redirect all standard output to the console.
+             * NB: This is required for the sql.js library to work.
+             */
+            process.stderr.write = console.error.bind(console);
+            process.stdout.write = console.log.bind(console);
 
             mythis.set('options', {});
             mythis.set('options.body', "Loading translationAcademy...");

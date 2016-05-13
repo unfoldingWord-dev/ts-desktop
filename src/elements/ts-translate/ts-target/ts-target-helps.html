@@ -225,7 +225,7 @@
         },
 
         observers: [
-            'rendertext(chunk.*)'
+            'rendertext(chunk.completed)'
         ],
 
         iconclass: function (complete) {
@@ -307,7 +307,7 @@
         },
 
         rendertext: function () {
-            if(this.chunk && this.chunk.srccontent) {
+            if(this.chunk && this.chunk.srccontent && this.chunk.projectmeta.project_type_class === "helps") {
                 var completed = this.chunk.completed;
                 var content = this.$.content;
 

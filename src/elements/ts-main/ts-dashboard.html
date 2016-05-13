@@ -16,6 +16,9 @@
 <link rel="import" href="./ts-feedback.html">
 <link rel="import" href="./ts-loading.html">
 <link rel="import" href="./ts-backup-options.html">
+<link rel="import" href="./ts-license.html">
+<link rel="import" href="./ts-statement.html">
+<link rel="import" href="./ts-guidelines.html">
 
 <dom-module id="ts-dashboard">
 
@@ -63,6 +66,12 @@
       .popup * {
           margin: 0;
           padding: 0;
+      }
+
+      .legal {
+          width: 95%;
+          height: 95%;
+          overflow-y: auto;
       }
 
       #feedback {
@@ -141,6 +150,18 @@
           <ts-backup-options on-filebackup="createFileBackup" on-repobackup="createRepoBackup"></ts-backup-options>
       </paper-dialog>
 
+      <paper-dialog id="license" class="popup legal" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <ts-license></ts-license>
+      </paper-dialog>
+
+      <paper-dialog id="guidelines" class="popup legal" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <ts-guidelines></ts-guidelines>
+      </paper-dialog>
+
+      <paper-dialog id="statement" class="popup legal" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <ts-statement></ts-statement>
+      </paper-dialog>
+
       <iron-signals on-iron-signal-updatelist="updateList"></iron-signals>
       <iron-signals on-iron-signal-openfeedback="openFeedback"></iron-signals>
       <iron-signals on-iron-signal-openimport="openImport"></iron-signals>
@@ -148,6 +169,9 @@
       <iron-signals on-iron-signal-updateuser="updateUser"></iron-signals>
       <iron-signals on-iron-signal-finishusfm="finishUsfm"></iron-signals>
       <iron-signals on-iron-signal-importfromrepo="importFromRepo"></iron-signals>
+      <iron-signals on-iron-signal-openlicense="openLicense"></iron-signals>
+      <iron-signals on-iron-signal-openguidelines="openGuidelines"></iron-signals>
+      <iron-signals on-iron-signal-openstatement="openStatement"></iron-signals>
 
   </template>
 
@@ -196,6 +220,18 @@
               type: Object,
               value: {signal: false, message: "Idle"}
           }
+      },
+
+      openLicense: function () {
+          this.$.license.open();
+      },
+
+      openGuidelines: function () {
+          this.$.guidelines.open();
+      },
+
+      openStatement: function () {
+          this.$.statement.open();
       },
 
       updateUser: function (event, data) {

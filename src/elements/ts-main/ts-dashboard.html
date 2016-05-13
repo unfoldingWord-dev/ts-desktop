@@ -19,6 +19,7 @@
 <link rel="import" href="./ts-license.html">
 <link rel="import" href="./ts-statement.html">
 <link rel="import" href="./ts-guidelines.html">
+<link rel="import" href="./ts-attribution.html">
 
 <dom-module id="ts-dashboard">
 
@@ -162,6 +163,10 @@
           <ts-statement></ts-statement>
       </paper-dialog>
 
+      <paper-dialog id="attribution" class="popup legal" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <ts-attribution></ts-attribution>
+      </paper-dialog>
+
       <iron-signals on-iron-signal-updatelist="updateList"></iron-signals>
       <iron-signals on-iron-signal-openfeedback="openFeedback"></iron-signals>
       <iron-signals on-iron-signal-openimport="openImport"></iron-signals>
@@ -172,6 +177,7 @@
       <iron-signals on-iron-signal-openlicense="openLicense"></iron-signals>
       <iron-signals on-iron-signal-openguidelines="openGuidelines"></iron-signals>
       <iron-signals on-iron-signal-openstatement="openStatement"></iron-signals>
+      <iron-signals on-iron-signal-openattribution="openAttribution"></iron-signals>
 
   </template>
 
@@ -232,6 +238,10 @@
 
       openStatement: function () {
           this.$.statement.open();
+      },
+
+      openAttribution: function () {
+          this.$.attribution.open();
       },
 
       updateUser: function (event, data) {

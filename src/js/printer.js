@@ -49,7 +49,31 @@ function PrintManager(configurator) {
             });
         },
 
+        renderLicense: function (doc, filename) {
+            var filePath = path.join(srcDir, 'assets', filename);
+            var lines = fs.readFileSync(filePath).toString().split('\n');
+
+            doc.addPage();
+            doc.lineGap(0);
+            lines.forEach(function (line) {
+                var fontsize = 9;
+                var indent = 72;
+                if (line.startsWith("## ")) {
+                    fontsize = 14;
+                } else if (line.startsWith("### ")) {
+                    fontsize = 11;
+                } else if (line.startsWith("**")) {
+                    indent = 100;
+                }
+                doc.fontSize(fontsize);
+                doc.text(line.replace(/#+ /, "").replace(/\*\*/g, ""), indent);
+                doc.fontSize(5);
+                doc.moveDown();
+            });
+        },
+
         targetTranslationToPdf: function (translation, meta, filePath, options) {
+            var mythis = this;
             if(filePath.split('.').pop() !== 'pdf') {
                 filePath += '.pdf';
             }
@@ -119,6 +143,8 @@ function PrintManager(configurator) {
                         doc.fontSize(25)
                             .font(notoFontPath)
                             .text(doc.info.Title, 72, doc.page.height / 2, {align: 'center'});
+
+                        mythis.renderLicense(doc, "OBS_LICENSE.md");
 
                         // TOC placeholders
                         doc.addPage();
@@ -244,6 +270,8 @@ function PrintManager(configurator) {
                         doc.fontSize(25)
                             .font(notoFontPath)
                             .text(doc.info.Title, 72, doc.page.height / 2, {align: 'center'});
+
+                        mythis.renderLicense(doc, "LICENSE.md");
 
                              // book body
                         _.forEach(project.chapters, function (chapter) {

@@ -201,7 +201,7 @@
         },
 
         rendertext: function () {
-            if(this.chunk && this.chunk.srccontent) {
+            if(this.chunk && this.chunk.srccontent && this.chunk.projectmeta.project_type_class === "extant") {
                 var completed = this.chunk.completed;
                 var content = this.$.content;
                 var text = this.chunk.helpscontent[0].body;

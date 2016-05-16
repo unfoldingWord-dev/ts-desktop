@@ -47,6 +47,10 @@
             color: var(--primary-text-color);
         }
 
+        #textholder {
+            width: 100%;
+        }
+
     </style>
 
     <template>
@@ -93,6 +97,7 @@
         rendertext: function () {
             if(this.chunk && this.chunk.srccontent) {
                 this.$.textholder.innerHTML = this.chunk.srccontent;
+                this.$.textholder.style.direction = this.chunk.projectmeta.source_translations[this.chunk.projectmeta.currentsource].direction;
             }
         },
 

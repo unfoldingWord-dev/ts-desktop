@@ -46,7 +46,7 @@ function DataManager(query) {
 
         getSources: function () {
             var r = query([
-                    "select r.id, r.slug 'resource_id', r.name 'resource_name', l.name 'language_name', l.slug 'language_id', p.slug 'project_id', r.checking_level, r.version, r.modified_at 'date_modified' from resource r",
+                    "select r.id, r.slug 'resource_id', r.name 'resource_name', l.name 'language_name', l.direction, l.slug 'language_id', p.slug 'project_id', r.checking_level, r.version, r.modified_at 'date_modified' from resource r",
                     "join source_language l on l.id=r.source_language_id",
                     "join project p on p.id=l.project_id",
                     "order by r.name"
@@ -56,7 +56,7 @@ function DataManager(query) {
 
         getSourceDetails: function (project_id, language_id, resource_id) {
             var r = query([
-                "select r.id, r.name 'resource_name', l.name 'language_name', p.slug 'project_id' from resource r",
+                "select r.id, r.name 'resource_name', l.name 'language_name', l.direction, p.slug 'project_id' from resource r",
                 "join source_language l on l.id=r.source_language_id",
                 "join project p on p.id=l.project_id",
                 "where p.slug='" + project_id + "' and l.slug='" + language_id + "' and r.slug='" + resource_id + "'"

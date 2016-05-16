@@ -49,6 +49,10 @@
             display: flex;
 		}
 
+        #textholder {
+            width: 100%;
+        }
+
         #textholder p {
 			line-height: 2;
 			margin: 0;
@@ -157,6 +161,7 @@
                     returnstr = App.renderer.markersToBalloons(mythis.chunk, module);
                 }
                 mythis.$.textholder.innerHTML = returnstr;
+                mythis.$.textholder.style.direction = mythis.chunk.projectmeta.target_language.direction;
                 mythis.$.toggle.checked = completed;
                 mythis.addDragListeners();
             }

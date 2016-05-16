@@ -24,17 +24,12 @@
             left: 0;
         }
 
-        #note {
-            display: none;
-        }
-
 	</style>
 
 	<template>
 
         <div id="contain">
-            <iron-icon icon="description" title="{{text}}"></iron-icon>
-            <div id="note">{{text}}</div>
+            <iron-icon icon="description" on-tap="opennote"></iron-icon>
         </div>
 
 	</template>
@@ -53,6 +48,10 @@
                 value: ""
             }
 		},
+
+        opennote: function () {
+            this.fire('iron-signal', {name: 'opennote', data: {text: this.text}});
+        },
 
 		ready: function() {
 

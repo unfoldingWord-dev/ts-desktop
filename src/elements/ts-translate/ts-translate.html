@@ -764,7 +764,9 @@
                 var sourcedata = App.renderer.convertVerseMarkers(frames[i].chunk);
                 var chunkmeta = this.createFrameMeta(frames[i], projectmeta, sourcedata.verses);
                 var chunk = this.getFrameData(chunkmeta, projectmeta);
-                chunk.srccontent = App.renderer.renderSourceWithVerses(sourcedata.text);
+                var sourcecontent = App.renderer.convertNoteMarkers(sourcedata.text);
+                sourcecontent = App.renderer.removeUsxMarkers(sourcecontent);
+                chunk.srccontent = App.renderer.renderSourceWithVerses(sourcecontent);
                 chunk.wordcontent = "";
                 chunk.resources = resources;
                 if (projectmeta.project_type_class === "standard" && chunkmeta.frameid === "01") {

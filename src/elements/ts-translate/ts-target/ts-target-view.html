@@ -39,6 +39,10 @@
             display: flex;
 		}
 
+        #textholder {
+            width: 100%;
+        }
+
         #textholder p {
 			line-height: 2;
             margin: 0;
@@ -87,6 +91,7 @@
                 var module = "ts-target-view";
 
                 this.$.textholder.innerHTML = App.renderer.renderTargetWithVerses(text, module);
+                this.$.textholder.style.direction = this.chunk.projectmeta.target_language.direction;
             }
         },
 

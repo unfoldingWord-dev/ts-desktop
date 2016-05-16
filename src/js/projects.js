@@ -42,6 +42,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                     meta.source_translations[j].id = details.id;
                     meta.source_translations[j].language_name = details.language_name;
                     meta.source_translations[j].resource_name = details.resource_name;
+                    meta.source_translations[j].direction = details.direction;
                 }
 
                 if (manifest.source_translations.length) {

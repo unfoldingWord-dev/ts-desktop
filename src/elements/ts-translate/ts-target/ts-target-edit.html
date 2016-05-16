@@ -55,6 +55,10 @@
             width: 100%;
 		}
 
+        #textholder {
+            width: 100%;
+        }
+
         #textholder p {
             line-height: 2;
             margin: 0;
@@ -127,11 +131,13 @@
 
                 if (completed || typeclass !== "standard") {
                     textholder.innerHTML = App.renderer.renderTargetWithVerses(text, module);
+                    textholder.style.direction = this.chunk.projectmeta.target_language.direction;
                     textholder.classList.remove("hide");
                     textbox.classList.add("hide");
                     contentbox.classList.remove("editmode");
                 } else {
                     textholder.classList.add("hide");
+                    textbox.style.direction = this.chunk.projectmeta.target_language.direction;
                     textbox.classList.remove("hide");
                     contentbox.classList.add("editmode");
                 }

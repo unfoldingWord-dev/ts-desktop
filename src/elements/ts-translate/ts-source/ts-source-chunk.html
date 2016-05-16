@@ -38,6 +38,7 @@
         #textholder {
             line-height: 2;
             margin-top: 0;
+            width: 100%;
             color: var(--primary-text-color);
         }
 
@@ -127,6 +128,7 @@
         rendertext: function () {
             if(this.chunk && this.chunk.srccontent) {
                 this.$.textholder.innerHTML = this.chunk.srccontent;
+                this.$.textholder.style.direction = this.chunk.projectmeta.source_translations[this.chunk.projectmeta.currentsource].direction;
                 var links = this.$.textholder.getElementsByTagName('a');
                 for (var j = 0, len = links.length; j < len; ++j) {
                     links[j].addEventListener('click', function (event) {

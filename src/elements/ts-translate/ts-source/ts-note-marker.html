@@ -1,0 +1,63 @@
+
+<link rel="import" href="../../../components/iron-icons/iron-icons.html">
+
+<dom-module id="ts-note-marker">
+
+	<style>
+
+        :host {
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        #contain {
+            width: 24px;
+            height: 24px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+        }
+
+        iron-icon {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        #note {
+            display: none;
+        }
+
+	</style>
+
+	<template>
+
+        <div id="contain">
+            <iron-icon icon="description" title="{{text}}"></iron-icon>
+            <div id="note">{{text}}</div>
+        </div>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+		is: 'ts-note-marker',
+
+		properties: {
+            text: {
+                type: String,
+                value: ""
+            }
+		},
+
+		ready: function() {
+
+		}
+
+	});
+
+</script>

@@ -376,9 +376,9 @@
                           mythis.updateList();
                       }, 250);
                   }).catch(function(err){
-                      var errmessage = "We're sorry.  An error occurred while trying to import your project";
+                      var errmessage = "Error occurred importing project";
                       if(err !== null) {
-                          errmessage = err;
+                          errmessage += "\n(" + err + ")";
                       }
                       mythis.set('options.title', "Import Failed");
                       mythis.set('options.body', errmessage);

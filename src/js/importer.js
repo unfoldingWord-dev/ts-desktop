@@ -111,7 +111,7 @@ function ImportManager(configurator, migrator, dataManager) {
                     }
                 }
 
-                if (parsedData['00'].contents) {
+                if (parsedData['00'] && parsedData['00'].contents) {
                     chunks.unshift({
                         chunkmeta: {
                             chapterid: '00',

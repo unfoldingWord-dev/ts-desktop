@@ -1,11 +1,8 @@
 
-<link rel="import" href="../../components/paper-spinner/paper-spinner.html">
 <link rel="import" href="../../components/iron-signals/iron-signals.html">
 <link rel="import" href="../../components/paper-button/paper-button.html">
-<link rel="import" href="../../components/iron-input/iron-input.html">
-<link rel="import" href="../../components/iron-list/iron-list.html">
 
-<dom-module id="ts-import-options">
+<dom-module id="ts-backup-options">
 
     <style>
 
@@ -57,35 +54,21 @@
             font-weight: bold;
         }
 
-        .bold {
-            font-weight: bold;
-            font-size: 110%;
-            text-decoration: underline;
-        }
-
     </style>
 
     <template>
 
         <div id="header">
-            <h2>Import/Restore Options</h2>
+            <h2>Backup Options</h2>
         </div>
         <div id="body">
-            <div class="option" on-tap="backup">
-                <span class="optiontitle">Import from Tstudio file</span>
-                <p>Will <span class="bold">merge</span> with the existing project, if one exists</p>
+            <div class="option" on-tap="filebackup">
+                <span class="optiontitle">Backup to Tstudio file</span>
+                <p>Creates an archive file on your local file system</p>
             </div>
-            <div class="option" on-tap="usfm">
-                <span class="optiontitle">Import from USFM file</span>
-                <p>Must have either .usfm or .txt extension</p>
-            </div>
-            <div class="option" on-tap="repo">
-                <span class="optiontitle">Import from Door43</span>
-                <p>Will <span class="bold">merge</span> with the existing project, if one exists</p>
-            </div>
-            <div class="option" on-tap="restore">
-                <span class="optiontitle">Restore from Tstudio file</span>
-                <p>Will <span class="bold">overwrite</span> the existing project, if one exists</p>
+            <div class="option" on-tap="repobackup">
+                <span class="optiontitle">Backup to your Door43 account</span>
+                <p>Uploads project to a repository online</p>
             </div>
         </div>
         <div id="footer">
@@ -100,26 +83,18 @@
 
     Polymer({
 
-        is: 'ts-import-options',
+        is: 'ts-backup-options',
 
         properties: {
 
         },
 
-        restore: function () {
-            this.fire('restore');
+        filebackup: function () {
+            this.fire('filebackup');
         },
 
-        backup: function () {
-            this.fire('backup');
-        },
-
-        usfm: function () {
-            this.fire('usfm');
-        },
-
-        repo: function () {
-            this.fire('repo');
+        repobackup: function () {
+            this.fire('repobackup');
         },
 
         ready: function () {

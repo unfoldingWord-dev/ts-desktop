@@ -108,7 +108,7 @@
 		},
 
         observers: [
-            'rendertext(chunk.transcontent)'
+            'rendertext(chunk.transcontent, chunk.completed)'
         ],
 
         focustextbox: function () {
@@ -116,39 +116,17 @@
         },
 
         rendertext: function () {
-            if(this.chunk && this.chunk.srccontent) {
+            if(this.chunk && this.chunk.srccontent && this.chunk.projectmeta.project_type_class !== "extant") {
                 var completed = this.chunk.completed;
                 var typeclass = this.chunk.projectmeta.project_type_class;
                 var contentbox = this.$.content;
                 var textbox = this.$.textbox;
                 var textholder = this.querySelector("#textholder");
-                var linearray = this.chunk.transcontent.split("\n");
-                var numstr1 = "\<sup\>";
-                var numstr2 = "\<\/sup\>";
-                var startp = "\<p class='style-scope ts-target-edit'\>";
-                var endp = "\<\/p\>";
-                var returnstr = "";
-                var verse = 0;
+                var text = this.chunk.transcontent;
+                var module = "ts-target-edit";
 
                 if (completed || typeclass !== "standard") {
-                    for (var j = 0; j < linearray.length; j++) {
-                        returnstr += startp;
-                        var wordarray = linearray[j].split(" ");
-                        for (var i = 0; i < wordarray.length; i++) {
-                            if (wordarray[i] === "\\v") {
-                                verse = wordarray[i+1];
-                                returnstr += numstr1 + verse + numstr2;
-                                i++;
-                            } else if (wordarray[i] === "\\c") {
-                                i++;
-                            } else {
-                                returnstr += wordarray[i] + " ";
-                            }
-                        }
-                        returnstr += endp;
-                    }
-
-                    textholder.innerHTML = returnstr;
+                    textholder.innerHTML = App.renderer.renderTargetWithVerses(text, module);
                     textholder.classList.remove("hide");
                     textbox.classList.add("hide");
                     contentbox.classList.remove("editmode");
@@ -161,7 +139,11 @@
         },
 
         change: function () {
-            this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk, completion: false}});
+            var verses = this.chunk.chunkmeta.verses;
+            var text = this.chunk.transcontent;
+
+            this.set('chunk.transcontent', App.renderer.validateVerseMarkers(text, verses));
+            this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
         },
 
         review: function () {

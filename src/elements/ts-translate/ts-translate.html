@@ -130,6 +130,22 @@
             color: var(--accent-color);
         }
 
+        #note {
+            width: 350px;
+            height: 250px;
+        }
+
+        #notebuttons {
+            display: flex;
+            justify-content: flex-end;
+            padding: 0 50px;
+            color: var(--secondary-text-color);
+        }
+
+        #notebuttons paper-button:hover {
+            color: var(--accent-color);
+        }
+
         #printpopup {
             width: 450px;
             height: 280px;
@@ -243,6 +259,14 @@
             </div>
         </paper-dialog>
 
+        <paper-dialog id="note" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <h2>Note</h2>
+            <div id="notebody"></div>
+            <div id="notebuttons">
+                <paper-button dialog-dismiss>Dismiss</paper-button>
+            </div>
+        </paper-dialog>
+
         <paper-dialog id="sourcepopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <ts-source-modal id="modal" on-close="closesource"></ts-source-modal>
         </paper-dialog>
@@ -259,6 +283,7 @@
         <iron-signals on-iron-signal-opendelete="opendelete"></iron-signals>
         <iron-signals on-iron-signal-openedit="openedit"></iron-signals>
         <iron-signals on-iron-signal-opennodata="opennodata"></iron-signals>
+        <iron-signals on-iron-signal-opennote="opennote"></iron-signals>
         <iron-signals on-iron-signal-opensource="opensource"></iron-signals>
         <iron-signals on-iron-signal-savechunk="savechunk"></iron-signals>
         <iron-signals on-iron-signal-savemanifest="savemanifest"></iron-signals>
@@ -406,6 +431,12 @@
 
         opennodata: function () {
             this.$.nodatapopup.open();
+        },
+
+        opennote: function (event, data) {
+            var text = data.text;
+            this.$.note.open();
+            this.$.notebody.innerHTML = text;
         },
 
         openchecklist: function (event, data) {
@@ -764,7 +795,8 @@
                 var sourcedata = App.renderer.convertVerseMarkers(frames[i].chunk);
                 var chunkmeta = this.createFrameMeta(frames[i], projectmeta, sourcedata.verses);
                 var chunk = this.getFrameData(chunkmeta, projectmeta);
-                chunk.srccontent = App.renderer.renderSourceWithVerses(sourcedata.text);
+                var sourcecontent = App.renderer.convertNoteMarkers(sourcedata.text);
+                chunk.srccontent = App.renderer.renderSourceWithVerses(sourcecontent);
                 chunk.wordcontent = "";
                 chunk.resources = resources;
                 if (projectmeta.project_type_class === "standard" && chunkmeta.frameid === "01") {

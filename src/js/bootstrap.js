@@ -4,6 +4,12 @@
 */
 
 'use strict';
+/*
+ * Redirect all standard output to the console.
+ * NB: This is required for the sql.js library to work.
+ */
+process.stderr.write = console.error.bind(console);
+process.stdout.write = console.log.bind(console);
 
 (function () {
     let ipcRenderer = require('electron').ipcRenderer;

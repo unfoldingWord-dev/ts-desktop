@@ -144,7 +144,7 @@
         },
 
         rendertext: function () {
-            if (this.chunk && this.chunk.srccontent) {
+            if (this.chunk && this.chunk.srccontent && this.chunk.projectmeta.project_type_class === "standard") {
                 var mythis = this;
                 var completed = this.chunk.completed;
                 var text = this.chunk.transcontent;

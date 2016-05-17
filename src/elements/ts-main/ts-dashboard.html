@@ -15,6 +15,11 @@
 <link rel="import" href="./ts-import-options.html">
 <link rel="import" href="./ts-feedback.html">
 <link rel="import" href="./ts-loading.html">
+<link rel="import" href="./ts-backup-options.html">
+<link rel="import" href="./ts-license.html">
+<link rel="import" href="./ts-statement.html">
+<link rel="import" href="./ts-guidelines.html">
+<link rel="import" href="./ts-attribution.html">
 
 <dom-module id="ts-dashboard">
 
@@ -64,6 +69,12 @@
           padding: 0;
       }
 
+      .legal {
+          width: 95%;
+          height: 95%;
+          overflow-y: auto;
+      }
+
       #feedback {
           width: 500px;
           height: 250px;
@@ -74,6 +85,11 @@
           height: 500px;
       }
 
+      #backup {
+          width: 450px;
+          height: 300px;
+      }
+
       #repo {
           width: 500px;
           height: 500px;
@@ -81,6 +97,11 @@
 
       #loading {
           width: 320px;
+          height: 220px;
+      }
+
+      #wideloading {
+          width: 450px;
           height: 220px;
       }
 
@@ -122,13 +143,41 @@
           <ts-loading options="[[options]]"></ts-loading>
       </paper-dialog>
 
+      <paper-dialog id="wideloading" class="popup" modal="true" exit-animation="scale-down-animation">
+          <ts-loading options="[[options]]"></ts-loading>
+      </paper-dialog>
+
+      <paper-dialog id="backup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <ts-backup-options on-filebackup="createFileBackup" on-repobackup="createRepoBackup"></ts-backup-options>
+      </paper-dialog>
+
+      <paper-dialog id="license" class="popup legal" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <ts-license></ts-license>
+      </paper-dialog>
+
+      <paper-dialog id="guidelines" class="popup legal" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <ts-guidelines></ts-guidelines>
+      </paper-dialog>
+
+      <paper-dialog id="statement" class="popup legal" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <ts-statement></ts-statement>
+      </paper-dialog>
+
+      <paper-dialog id="attribution" class="popup legal" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <ts-attribution></ts-attribution>
+      </paper-dialog>
+
       <iron-signals on-iron-signal-updatelist="updateList"></iron-signals>
       <iron-signals on-iron-signal-openfeedback="openFeedback"></iron-signals>
       <iron-signals on-iron-signal-openimport="openImport"></iron-signals>
-      <iron-signals on-iron-signal-createbackup="createBackup"></iron-signals>
+      <iron-signals on-iron-signal-openbackup="openBackup"></iron-signals>
       <iron-signals on-iron-signal-updateuser="updateUser"></iron-signals>
       <iron-signals on-iron-signal-finishusfm="finishUsfm"></iron-signals>
       <iron-signals on-iron-signal-importfromrepo="importFromRepo"></iron-signals>
+      <iron-signals on-iron-signal-openlicense="openLicense"></iron-signals>
+      <iron-signals on-iron-signal-openguidelines="openGuidelines"></iron-signals>
+      <iron-signals on-iron-signal-openstatement="openStatement"></iron-signals>
+      <iron-signals on-iron-signal-openattribution="openAttribution"></iron-signals>
 
   </template>
 
@@ -165,14 +214,34 @@
               type: Object,
               value: {importing: false}
           },
+          backupdata: {
+              type: Object,
+              value: {}
+          },
           options: {
               type: Object,
-              value: {loading: false, title: "", body: ""}
+              value: {}
           },
           busy: {
               type: Object,
               value: {signal: false, message: "Idle"}
           }
+      },
+
+      openLicense: function () {
+          this.$.license.open();
+      },
+
+      openGuidelines: function () {
+          this.$.guidelines.open();
+      },
+
+      openStatement: function () {
+          this.$.statement.open();
+      },
+
+      openAttribution: function () {
+          this.$.attribution.open();
       },
 
       updateUser: function (event, data) {
@@ -211,7 +280,7 @@
           }
 
           mythis.$.import.close();
-          mythis.set('options.title', "");
+          mythis.set('options', {});
           mythis.set('options.body', "Importing.  Please wait...");
           mythis.set('options.loading', true);
           mythis.$.loading.open();
@@ -286,7 +355,7 @@
           };
           var checkOverwrite = overwrite ? backupTargetTranslation() : Promise.resolve(true);
 
-          mythis.set('options.title', "");
+          mythis.set('options', {});
           mythis.set('options.body', "Importing.  Please wait...");
           mythis.set('options.loading', true);
           mythis.$.loading.open();
@@ -352,7 +421,7 @@
           var tmpPath = path.join(tmpDir, project);
 
           mythis.$.repo.close();
-          mythis.set('options.title', "");
+          mythis.set('options', {});
           mythis.set('options.body', "Importing.  Please wait...");
           mythis.set('options.loading', true);
           mythis.$.loading.open();
@@ -402,21 +471,104 @@
           }, 500);
       },
 
-      createBackup: function (event, data) {
+      openBackup: function (event, data) {
+          this.set('backupdata', data.projectmeta);
+          this.$.backup.open();
+      },
+
+      createRepoBackup: function () {
           var mythis = this;
-          var defaultPath = App.configurator.getUserPath('datalocation', 'backups', data.projectmeta.unique_id);
+          var projectmeta = this.backupdata;
+          var loading = this.$.wideloading;
+          var target = App.configurator.getValue('targetTranslationsDir');
+          var paths = App.utils.makeProjectPaths(target, projectmeta);
+          var repo = projectmeta.unique_id;
+          var user = this.currentuser;
+          var shell = require('electron').shell;
+          var deviceId = "";
+
+          mythis.$.backup.close();
+          mythis.set('options', {});
+          mythis.set('options.body', "Uploading Project.  Please wait...");
+          mythis.set('options.loading', true);
+          loading.open();
+
+          return App.gitManager.commitAll(user, paths.projectDir)
+              .then(function () {
+                  return App.utils.getDeviceId();
+              })
+              .then(function (devId) {
+                  deviceId = devId;
+                  var getreg = App.keyManager.getRegistrationInfo.bind(App.keyManager, deviceId),
+                      genreg = App.keyManager.generateRegistrationInfo.bind(App.keyManager, deviceId),
+                      rereg = function () {
+                          return App.userManager.unregister(user, deviceId).then(genreg);
+                      };
+
+                  return getreg().catch(rereg);
+              })
+              .then(function (reg) {
+                  user.reg = reg;
+                  return App.userManager.register(user, deviceId);
+              })
+              .then(function () {
+                  return App.userManager.createRepo(user, repo);
+              })
+              .then(function (repo) {
+                  return App.gitManager.push(user, paths.projectDir, repo).then(App.utils.ret(repo.html_url));
+              })
+              .then(function (url) {
+                  mythis.set('options.title', "Backup Complete");
+                  mythis.set('options.body', "Your project has been backed up to:");
+                  mythis.set('options.link', url);
+                  mythis.set('options.showlink', true);
+                  mythis.set('options.loading', false);
+                  var link = loading.getElementsByClassName("url");
+                  link[0].addEventListener('click', function (event) {
+                      event.preventDefault();
+                      shell.openExternal(url);
+                  });
+              })
+              .catch(function (err) {
+                  var errmessage = "We're sorry.  An error occurred while trying to upload your project.";
+                  var logmessage = "";
+                  if(err.status === 401) {
+                      errmessage = "Cannot upload without connecting to a Door43 account.";
+                  } else if (err.data) {
+                      errmessage = err.data;
+                  } else {
+                      errmessage = err;
+                  }
+                  if (err.status) {
+                      logmessage = "Error: " + err.status + " " + err.data;
+                  } else {
+                      logmessage = err;
+                  }
+                  App.reporter.logError(logmessage);
+                  mythis.set('options.title', "Backup Failed");
+                  mythis.set('options.body', errmessage);
+                  mythis.set('options.loading', false);
+              });
+
+      },
+
+      createFileBackup: function () {
+          var mythis = this;
+          var meta = this.backupdata;
+          var defaultPath = App.configurator.getUserPath('datalocation', 'backups', meta.unique_id);
           var filePath = App.ipc.sendSync('save-as', {options: {defaultPath: defaultPath, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}]}});
           if (!filePath) {
               return;
           }
 
-          mythis.set('options.title', "");
+          mythis.$.backup.close();
+          mythis.set('options', {});
           mythis.set('options.body', "Creating Backup.  Please wait...");
           mythis.set('options.loading', true);
           mythis.$.loading.open();
 
           setTimeout(function() {
-              App.exportManager.backupTranslation(data.projectmeta, filePath)
+              App.exportManager.backupTranslation(meta, filePath)
                   .then(function () {
                       mythis.set('options.title', "Backup Complete");
                       mythis.set('options.body', "Your project has been successfully backed up.");
@@ -443,7 +595,7 @@
           }
 
           mythis.$.import.close();
-          mythis.set('options.title', "");
+          mythis.set('options', {});
           mythis.set('options.body', "Restoring.  Please wait...");
           mythis.set('options.loading', true);
           mythis.$.loading.open();
@@ -491,7 +643,7 @@
           var message = this.feedback;
           var mythis = this;
 
-          mythis.set('options.title', "");
+          mythis.set('options', {});
           mythis.set('options.body', "Sending Feedback.  Please wait...");
           mythis.set('options.loading', true);
           mythis.$.feedback.close();

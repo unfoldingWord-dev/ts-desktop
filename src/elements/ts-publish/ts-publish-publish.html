@@ -2,7 +2,8 @@
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
 <link rel="import" href="../../components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../components/paper-button/paper-button.html">
-<link rel="import" href="../../components/paper-progress/paper-progress.html">
+
+<link rel="import" href="../ts-main/ts-loading.html">
 
 <dom-module id="ts-publish-publish">
 
@@ -78,55 +79,24 @@
             margin: auto;
         }
 
+        .popup * {
+            margin: 0;
+            padding: 0;
+        }
+
         #loading {
+            width: 320px;
+            height: 220px;
+        }
+
+        #wideloading {
             width: 450px;
             height: 220px;
-            color: var(--primary-text-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 110%;
-        }
-
-        #buttonbox {
-            display: flex;
-            justify-content: center;
-            color: var(--secondary-text-color);
-        }
-
-        #buttonbox paper-button:hover {
-            color: var(--accent-color);
-        }
-
-        paper-progress {
-            --paper-progress-active-color: var(--accent-color);
-            width: 250px;
-        }
-
-        #bar {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 40px;
-        }
-
-        #text {
-            text-align: center;
-        }
-
-        #loading h2 {
-            color: var(--accent-color);
         }
 
         #imagebox {
             display: flex;
             justify-content: center;
-        }
-
-        .url {
-            color: var(--accent-color);
-            font-size: 90%;
-            cursor: pointer;
         }
 
         .hide {
@@ -169,23 +139,11 @@
         </div>
 
         <paper-dialog id="loading" class="popup" modal="true" exit-animation="scale-down-animation">
-            <template is="dom-if" if="{{options.loading}}">
-                <p>{{options.body}}</p>
-                <div id="bar">
-                    <paper-progress indeterminate="true"></paper-progress>
-                </div>
-            </template>
-            <template is="dom-if" if="{{!options.loading}}">
-                <h2>{{options.title}}</h2>
-                <div id="text">
-                    <p>{{options.body}}</p>
-                    <p class="url">{{options.link}}</p>
-                </div>
-                <div id="buttonbox">
-                    <paper-button dialog-confirm on-tap="gohome">Return Home</paper-button>
-                    <paper-button dialog-dismiss>Close</paper-button>
-                </div>
-            </template>
+            <ts-loading options="[[options]]" on-gohome="gohome"></ts-loading>
+        </paper-dialog>
+
+        <paper-dialog id="wideloading" class="popup" modal="true" exit-animation="scale-down-animation">
+            <ts-loading options="[[options]]" on-gohome="gohome"></ts-loading>
         </paper-dialog>
 
     </template>
@@ -219,7 +177,7 @@
             },
             options: {
                 type: Object,
-                value: {loading: false, title: "", body: ""}
+                value: {}
             }
         },
 
@@ -250,6 +208,7 @@
                 return;
             }
 
+            mythis.set('options', {});
             mythis.set('options.body', "Exporting Project.  Please wait...");
             mythis.set('options.loading', true);
             mythis.$.loading.open();
@@ -259,6 +218,7 @@
                     .then(function () {
                         mythis.set('options.title', "Project Exported");
                         mythis.set('options.body', "Your project has been successfully exported to a file.");
+                        mythis.set('options.showhome', true);
                         mythis.set('options.loading', false);
                     })
                     .catch(function (err) {
@@ -274,7 +234,7 @@
         },
 
         upload: function() {
-            var loading = this.$.loading;
+            var loading = this.$.wideloading;
             var mythis = this;
             var projectmeta = this.currentproject.projectmeta;
             var target = App.configurator.getValue('targetTranslationsDir');
@@ -284,8 +244,9 @@
             var shell = require('electron').shell;
             var deviceId = "";
 
-            this.set('options.body', "Uploading Project.  Please wait...");
-            this.set('options.loading', true);
+            mythis.set('options', {});
+            mythis.set('options.body', "Uploading Project.  Please wait...");
+            mythis.set('options.loading', true);
             loading.open();
 
             return App.gitManager.commitAll(user, paths.projectDir)
@@ -310,12 +271,14 @@
                     return App.userManager.createRepo(user, repo);
                 })
                 .then(function (repo) {
-                    return App.gitManager.push(user, paths.projectDir, repo).then(App.utils.ret(repo.html_url));
+                    return App.gitManager.push(user, paths.projectDir, repo, {requestToPublish: true}).then(App.utils.ret(repo.html_url));
                 })
                 .then(function (url) {
                     mythis.set('options.title', "Project Uploaded");
                     mythis.set('options.body', "Your project has been uploaded to:");
                     mythis.set('options.link', url);
+                    mythis.set('options.showlink', true);
+                    mythis.set('options.showhome', true);
                     mythis.set('options.loading', false);
                     var link = loading.getElementsByClassName("url");
                     link[0].addEventListener('click', function (event) {

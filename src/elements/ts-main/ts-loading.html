@@ -45,6 +45,16 @@
             width: 250px;
         }
 
+        .url {
+            color: var(--accent-color);
+            font-size: 90%;
+            cursor: pointer;
+        }
+
+        .hide {
+            display: none;
+        }
+
     </style>
 
     <template>
@@ -54,12 +64,14 @@
         </div>
         <div id="body">
             <p>{{options.body}}</p>
+            <p class$="[[linkclass(options.showlink)]]">{{options.link}}</p>
         </div>
         <div id="footer">
             <template is="dom-if" if="{{options.loading}}">
                 <paper-progress indeterminate="true"></paper-progress>
             </template>
             <template is="dom-if" if="{{!options.loading}}">
+                <paper-button class$="[[homeclass(options.showhome)]]" dialog-confirm on-tap="gohome">Return Home</paper-button>
                 <paper-button dialog-dismiss>Close</paper-button>
             </template>
         </div>
@@ -77,8 +89,20 @@
         properties: {
             options: {
                 type: Object,
-                value: {loading: false, title: "", body: ""}
+                value: {}
             }
+        },
+
+        linkclass: function (showlink) {
+            return showlink ? 'url' : 'hide';
+        },
+
+        homeclass: function (showhome) {
+            return showhome ? '' : 'hide';
+        },
+
+        gohome: function () {
+            this.fire('gohome');
         },
 
         ready: function () {

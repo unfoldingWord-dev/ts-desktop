@@ -1,0 +1,73 @@
+
+<link rel="import" href="../../components/paper-button/paper-button.html">
+
+<dom-module id="ts-attribution">
+
+    <style>
+
+        :host {
+        }
+
+        #content {
+            margin: 20px 35px;
+            color: var(--primary-text-color);
+        }
+
+        #buttons {
+            display: flex;
+            justify-content: center;
+            margin: 25px;
+            color: var(--secondary-text-color);
+        }
+
+        #buttons paper-button:hover {
+            color: var(--accent-color);
+        }
+
+    </style>
+
+    <template>
+
+        <div id="content">
+            <h2>unfoldingWord | Open Bible Stories</h2>
+            <h2>an unrestricted visual mini-Bible in any language</h2>
+            <p><a href="http://openbiblestories.com">http://openbiblestories.com</a></p>
+            <p>Open Bible Stories, v. 4</p>
+            <p>Created by Distant Shores Media (<a href="http://distantshores.org">http://distantshores.org</a>) and the Door43 world missions community (<a href="http://door43.org">http://door43.org</a>).</p>
+            <p>Use of trademarks: unfoldingWord is a trademark of Distant Shores Media and may not be included on any derivative works created from this content.
+                Unaltered content from <a href="http://unfoldingword.org">http://unfoldingword.org</a> must include the <strong>unfoldingWord</strong> logo when distributed to others.
+                But if you alter the content in any way, you must remove the <strong>unfoldingWord</strong> logo before distributing your work.</p>
+            <p>Attribution of artwork: All images used in these stories are © Sweet Publishing (<a href="https://sweetpublishing.com/">www.sweetpublishing.com</a>) and are made available
+                under a Creative Commons Attribution-Share Alike License (<a href="http://creativecommons.org/licenses/by-sa/3.0">http://creativecommons.org/licenses/by-sa/3.0</a>).</p>
+        </div>
+        <div id="buttons">
+            <paper-button dialog-dismiss>Close</paper-button>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+        is: 'ts-attribution',
+
+        properties: {
+
+        },
+
+        ready: function() {
+            var shell = require('electron').shell;
+            var links = this.$.content.getElementsByTagName('a');
+            for (var i = 0; i < links.length; i++) {
+                links[i].addEventListener('click', function (event) {
+                    event.preventDefault();
+                    shell.openExternal(this.href);
+                });
+            }
+        }
+
+    });
+
+</script>

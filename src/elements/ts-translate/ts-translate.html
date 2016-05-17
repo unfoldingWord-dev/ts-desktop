@@ -311,7 +311,7 @@
             },
             options: {
                 type: Object,
-                value: {loading: false, title: "", body: ""}
+                value: {}
             },
             busy: {
                 type: Object,
@@ -617,7 +617,7 @@
             mythis.retrievesource();
             this.route = "translate";
             setTimeout(function() {
-                mythis.set('options.title', "");
+                mythis.set('options', {});
                 mythis.set('options.body', "Loading project. Please wait...");
                 mythis.set('options.loading', true);
                 mythis.$.loading.open();
@@ -641,7 +641,7 @@
 
         updatesources: function (event, data) {
             var mythis = this;
-            mythis.set('options.title', "");
+            mythis.set('options', {});
             mythis.set('options.body', "Loading source. Please wait...");
             mythis.set('options.loading', true);
             mythis.$.loading.open();
@@ -1239,7 +1239,7 @@
 
         gobackup: function () {
             var projectmeta = this.currentproject.projectmeta;
-            this.fire('iron-signal', {name: 'createbackup', data: {projectmeta: projectmeta}});
+            this.fire('iron-signal', {name: 'openbackup', data: {projectmeta: projectmeta}});
         },
 
         gosettings: function () {
@@ -1260,7 +1260,6 @@
                 return;
             }
             var generatePdf = function(){
-                mythis.set('options.title', "");
                 mythis.set('options.body', "Creating PDF. Please wait...");
                 setTimeout(function() {
                     App.printManager.targetTranslationToPdf(translation, projectmeta, filePath, options)
@@ -1282,13 +1281,15 @@
             };
 
             mythis.$.printpopup.close();
+            mythis.set('options', {});
             mythis.set('options.loading', true);
             mythis.$.loading.open();
 
             if (options.includeImages) {
-                mythis.set('options.title', "");
                 mythis.set('options.body', "Downloading Images. Please wait...");
-                App.printManager.getImages(projectmeta).then(function(){
+                App.printManager.downloadImages().then(function(){
+                    mythis.set('options.body', "Extracting Images. Please wait...");
+                    App.printManager.extractImages();
                     generatePdf();
                 }).catch(function(err){
                     var message = "We're sorry.  An error occurred while trying to download images for this project";

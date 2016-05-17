@@ -1,27 +1,34 @@
+
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
 <link rel="import" href="../../components/paper-checkbox/paper-checkbox.html">
+
 <link rel="import" href="./ts-setting-modal.html">
 
 <dom-module id="ts-settings">
 
     <style>
+
         :host {
             display: flex;
             flex-direction: column;
         }
+
         neon-animated-pages {
             flex: none;
             display: flex;
             transform: translateY(-60px);
             height: calc(100% - 45px);
         }
+
         neon-animated-pages > * {
             flex: auto;
         }
+
         .header {
             background-color: var(--primary-color);
             min-height: 50px;
         }
+
         .heading {
             font-size: 125%;
             color: var(--reverse-text-color);
@@ -30,48 +37,60 @@
             align-items: center;
             min-height: 45px;
         }
+
         [icon="arrow-back"] {
             margin: 0 1em 0 .2em;
         }
+
         .body {
             padding: 0 4rem;
             overflow-y: auto;
             background-color: var(--card-background-color);
         }
+
         .setting-group-header {
             color: var(--primary-color);
             margin: 1.5rem 0 1rem;
             font-size: 105%;
         }
+
         .setting-group-item {
             padding: 1rem 0;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             cursor: pointer;
         }
+
         .setting-text {
             flex: 1 1 auto;
         }
+
         .main-text {
             color: var(--primary-text-color);
         }
+
         .help-text {
             color: var(--secondary-text-color);
             line-height: 1.6;
         }
+
         .setting-checkbox {
             flex: 0 0 48px;
         }
+
         .avoid-clicks {
             pointer-events: none;
         }
+
         paper-checkbox {
             --paper-checkbox-checked-color: var(--accent-color-dark);
             --paper-checkbox-unchecked-color: var(--accent-color-dark);
         }
+
         .hide {
             display: none;
         }
+
     </style>
 
     <template>
@@ -82,9 +101,7 @@
                 <span>Settings</span>
             </div>
         </div>
-
         <div class="body">
-
             <template is="dom-repeat" items="[[settings]]" index-as="group">
                 <div class="setting-group-header">{{_capitalize(item.group)}}</div>
                 <div class="setting-group-body">
@@ -105,7 +122,6 @@
                     </template>
                 </div>
             </template>
-
         </div>
 
     </template>
@@ -169,7 +185,9 @@
         },
 
         _isVisible: function(bool) {
-            if (bool === undefined) { bool = true; }
+            if (bool === undefined) {
+                bool = true;
+            }
             return bool;
         },
 
@@ -183,8 +201,7 @@
             var text;
             if (typeof setting.base.value === "number" && setting.base.helpText) {
                 text = setting.base.helpText.replace("<int>", setting.base.value);
-            }
-            else {
+            } else {
                 text = setting.base.helpText || setting.base.value || setting.base.nullText;
             }
             return text;
@@ -202,20 +219,24 @@
             var value = event.model.setting.value;
             if (name === 'developertools') {
                 App.showDevTools();
-            }
-            else if (name === "refreshsettings") {
+            } else if (name === "refreshsettings") {
                 this.settings = App.configurator.refreshUserSetting();
                 this.saveSettings();
-            }
-            else if (name === "datalocation") {
+            } else if (name === "datalocation") {
                 this._updateDataLocation();
-            }
-            else if (typeof value === 'boolean') {
+            } else if (name === "license") {
+                this.fire('iron-signal', {name: 'openlicense'});
+            } else if (name === "guidelines") {
+                this.fire('iron-signal', {name: 'openguidelines'});
+            } else if (name === "statement") {
+                this.fire('iron-signal', {name: 'openstatement'});
+            } else if (name === "attribution") {
+                this.fire('iron-signal', {name: 'openattribution'});
+            } else if (typeof value === 'boolean') {
                 var path = 'settings.' + event.target.dataGroup + '.list.' + event.target.dataList + '.value';
                 this.set(path, !value);
                 this.saveSettings();
-            }
-            else {
+            } else {
                 this.openSettingModal(event);
             }
         },
@@ -254,8 +275,7 @@
             if (event.model.setting.options) {
                 modal.options = event.model.setting.options;
                 modal.selected = event.model.setting.value;
-            }
-            else {
+            } else {
                 modal.text = event.model.setting.value;
             }
             this.appendChild(modal);

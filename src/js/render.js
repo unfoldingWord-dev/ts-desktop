@@ -27,6 +27,32 @@ function Renderer() {
             return {text: text, verses: verses};
         },
 
+        convertNoteMarkers: function (text) {
+            var startstr = '<note';
+            var endstr = '<\/note>';
+            var expression = new RegExp(startstr);
+
+            while (expression.test(text)) {
+                var notestr = this.removeUsxMarkers(text.substring(text.search(startstr), text.search(endstr)));
+                var marker = "\<ts-note-marker text='" + notestr + "'\>\<\/ts-note-marker\>";
+
+                text = text.replace(/<note[^]*note>/, marker);
+            }
+            return text;
+        },
+
+        removeUsxMarkers: function (text) {
+            var mtest = new RegExp(/<[^<>]*>/g);
+            var stest = new RegExp(/  /g);
+            var mreplace = " ";
+            var sreplace = " ";
+
+            text = text.replace(mtest, mreplace);
+            text = text.replace(stest, sreplace);
+
+            return text.trim();
+        },
+
         migrateMarkers: function (text) {
             var vtest1 = new RegExp(/\\v/g);
             var vtest2 = new RegExp(/\/v/g);

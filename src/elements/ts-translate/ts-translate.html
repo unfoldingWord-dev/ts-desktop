@@ -1008,6 +1008,8 @@
             }
             if (seconddata && typeclass === "helps") {
                 transcontent = seconddata.transcontent;
+                transcontent = App.renderer.migrateMarkers(transcontent);
+                transcontent = App.renderer.removeChapterMarkers(transcontent);
             }
             if (!statedata) {
                 statedata = {chunk: true, review: true, resource: 0};

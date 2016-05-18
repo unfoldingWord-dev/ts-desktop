@@ -94,6 +94,10 @@
             100% {transform: scale(1.3);}
         }
 
+        .rtl {
+            direction: rtl;
+        }
+
         .hide {
             display: none;
         }
@@ -110,7 +114,7 @@
                 <iron-icon class$="[[iconclass(chunk.completed)]]" icon="create" on-tap="edit"></iron-icon>
             </div>
             <div id="content">
-                <div id="textholder"></div>
+                <div id="textholder" class$="[[chunk.projectmeta.target_language.direction]]"></div>
             </div>
             <div id="togglebox">
                 <p>Mark chunk as done</p>
@@ -161,7 +165,6 @@
                     returnstr = App.renderer.markersToBalloons(mythis.chunk, module);
                 }
                 mythis.$.textholder.innerHTML = returnstr;
-                mythis.$.textholder.style.direction = mythis.chunk.projectmeta.target_language.direction;
                 mythis.$.toggle.checked = completed;
                 mythis.addDragListeners();
             }

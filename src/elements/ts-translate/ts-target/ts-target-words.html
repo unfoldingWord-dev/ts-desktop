@@ -116,6 +116,14 @@
             cursor: pointer;
         }
 
+        .rtl {
+            direction: rtl;
+        }
+
+        p.rtl {
+            width: 100%;
+        }
+
 	</style>
 
 	<template>
@@ -130,12 +138,12 @@
                 <template is="dom-repeat" items="{{chunk.helpscontent}}" as="help">
                     <paper-material class="contentbox" elevation="1">
                         <div class="contentheader">
-                            <p>{{help.title}}</p>
-                            <iron-autogrow-textarea bind-value="{{help.title}}" on-change="change" on-input="input" placeholder$="[[checktitle(chunk.projectmeta.type.id)]]"></iron-autogrow-textarea>
+                            <p class$="[[chunk.projectmeta.target_language.direction]]">{{help.title}}</p>
+                            <iron-autogrow-textarea class$="[[chunk.projectmeta.target_language.direction]]" bind-value="{{help.title}}" on-change="change" on-input="input" placeholder$="[[checktitle(chunk.projectmeta.type.id)]]"></iron-autogrow-textarea>
                         </div>
                         <div class="contentbody">
-                            <div id="textholder"></div>
-                            <iron-autogrow-textarea bind-value="{{help.body}}" on-change="change" on-input="input" placeholder$="[[checkbody(chunk.projectmeta.type.id)]]"></iron-autogrow-textarea>
+                            <div id="textholder" class$="[[chunk.projectmeta.target_language.direction]]"></div>
+                            <iron-autogrow-textarea class$="[[chunk.projectmeta.target_language.direction]]" bind-value="{{help.body}}" on-change="change" on-input="input" placeholder$="[[checkbody(chunk.projectmeta.type.id)]]"></iron-autogrow-textarea>
                         </div>
                     </paper-material>
                 </template>

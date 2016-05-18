@@ -333,10 +333,23 @@
               .then(function (id) {
                   var name = "";
                   if (id) {
-                      name = App.dataManager.getProjectName(id)[0].name;
+                      var data = App.dataManager.getProjectName(id);
+                      if (data.length) {
+                          name = data[0].name;
+                      } else {
+                          id = "";
+                      }
                   }
                   mythis.set('importdata', {importing: true, filepath: filePath[0], project: {slug: id, name: name}});
                   mythis.set('route', 'new');
+              }).catch(function(err){
+                  var errmessage = "Error occurred reading file";
+                  if(err !== null) {
+                      errmessage += "\n(" + err + ")";
+                  }
+                  mythis.set('options.title', "Import Failed");
+                  mythis.set('options.body', errmessage);
+                  mythis.set('options.loading', false);
               });
       },
 

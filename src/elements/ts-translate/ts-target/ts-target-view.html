@@ -49,6 +49,10 @@
             color: var(--primary-text-color);
 		}
 
+        .rtl {
+            direction: rtl;
+        }
+
 	</style>
 
 	<template>
@@ -60,7 +64,7 @@
                 </div>
             </div>
             <div id="content">
-                <div id="textholder"></div>
+                <div id="textholder" class$="[[chunk.projectmeta.target_language.direction]]"></div>
             </div>
         </paper-material>
 
@@ -91,7 +95,6 @@
                 var module = "ts-target-view";
 
                 this.$.textholder.innerHTML = App.renderer.renderTargetWithVerses(text, module);
-                this.$.textholder.style.direction = this.chunk.projectmeta.target_language.direction;
             }
         },
 

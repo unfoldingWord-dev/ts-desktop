@@ -120,6 +120,10 @@
               type: Array,
               value: []
           },
+          changedata: {
+              type: Object,
+              value: {}
+          },
           query: {
               type: String,
               value: ""
@@ -153,7 +157,9 @@
       store: function (e) {
           this.set('newdata.language', e.model.language);
 
-          if (this.importdata.importing && this.importdata.project.slug) {
+          if (this.changedata.changing) {
+              this.fire('iron-signal', {name: 'changelanguage', data: {meta: this.changedata.meta, language: this.newdata.language}});
+          } else if (this.importdata.importing && this.importdata.project.slug) {
               this.set('newdata.project', this.importdata.project);
               if (App.configurator.getUserSetting('glmode')) {
                   this.fire('iron-signal', {name: 'createtypes'});

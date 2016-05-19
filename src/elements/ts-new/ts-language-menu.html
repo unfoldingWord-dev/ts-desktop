@@ -154,11 +154,27 @@
           });
       },
 
+      change: function () {
+          var mythis = this;
+          var changedata = this.changedata;
+          var targetDir = App.configurator.getValue('targetTranslationsDir');
+          changedata.newmeta = _.cloneDeep(changedata.oldmeta);
+          changedata.newmeta.target_language = this.newdata.language;
+          changedata.newmeta.unique_id = App.projectsManager.makeUniqueId(changedata.newmeta);
+          changedata.oldpaths = App.utils.makeProjectPaths(targetDir, changedata.oldmeta);
+          changedata.newpaths = App.utils.makeProjectPaths(targetDir, changedata.newmeta);
+
+
+          mythis.fire('iron-signal', {name: 'changelanguage', data: changedata});
+          mythis.set('changedata.changing', false);
+          mythis.reset();
+      },
+
       store: function (e) {
           this.set('newdata.language', e.model.language);
 
           if (this.changedata.changing) {
-              this.fire('iron-signal', {name: 'changelanguage', data: {meta: this.changedata.meta, language: this.newdata.language}});
+              this.change();
           } else if (this.importdata.importing && this.importdata.project.slug) {
               this.set('newdata.project', this.importdata.project);
               if (App.configurator.getUserSetting('glmode')) {
@@ -168,10 +184,15 @@
                   this.set('newdata.typedata', {type: {id: "text", name: "Text"}, resource: {id: "reg", name: "Regular"}, format: "usfm", allowed: true});
                   this.fire('create');
               }
+              this.reset();
           } else {
               this.fire('iron-signal', {name: 'createprojects'});
               this.set('selected', 1);
+              this.reset();
           }
+      },
+
+      reset: function () {
           this.set('query', "");
           this.$.list.scrollTop = 0;
       },

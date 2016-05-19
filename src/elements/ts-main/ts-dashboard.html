@@ -178,6 +178,7 @@
       <iron-signals on-iron-signal-openguidelines="openGuidelines"></iron-signals>
       <iron-signals on-iron-signal-openstatement="openStatement"></iron-signals>
       <iron-signals on-iron-signal-openattribution="openAttribution"></iron-signals>
+      <iron-signals on-iron-signal-changelanguage="changeLanguage"></iron-signals>
 
   </template>
 
@@ -265,6 +266,14 @@
           } else {
               this.set('route', 'profile');
           }
+      },
+
+      changeLanguage: function (event, data) {
+          var meta = data.meta;
+          var language = data.language;
+          console.log("fired", meta, language);
+
+          this.set("route", "home");
       },
 
       openImport: function () {

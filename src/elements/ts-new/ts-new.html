@@ -4,6 +4,7 @@
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
 <link rel="import" href="../../components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/iron-signals/iron-signals.html">
 
 <link rel="import" href="./ts-language-menu.html">
 <link rel="import" href="./ts-project-menu.html">
@@ -93,7 +94,7 @@
         </div>
 
         <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
-            <ts-language-menu id="languages" selected="{{selected}}" newdata="{{newdata}}" importdata="{{importdata}}" on-create="createproject"></ts-language-menu>
+            <ts-language-menu id="languages" selected="{{selected}}" newdata="{{newdata}}" importdata="{{importdata}}" changedata="[[changedata]]" on-create="createproject"></ts-language-menu>
             <ts-project-menu selected="{{selected}}" newdata="{{newdata}}" importdata="{{importdata}}" on-create="createproject"></ts-project-menu>
             <ts-book-menu selected="{{selected}}" newdata="{{newdata}}" on-create="createproject"></ts-book-menu>
             <ts-type-menu selected="{{selected}}" newdata="{{newdata}}" importdata="{{importdata}}" projectlist="[[projectlist]]" on-create="createproject"></ts-type-menu>
@@ -119,6 +120,8 @@
                 <paper-button dialog-dismiss>Ok</paper-button>
             </div>
         </paper-dialog>
+
+        <iron-signals on-iron-signal-gotolanguage="gotolanguage"></iron-signals>
 
     </template>
 
@@ -165,6 +168,10 @@
                 value: {},
                 notify: true
             },
+            changedata: {
+                type: Object,
+                value: {}
+            },
             animationConfig: {
                 value: function () {
                     return {
@@ -183,6 +190,11 @@
 
         forceResize: function (event) {
             this.$.languages.notifyResize();
+        },
+
+        gotolanguage: function (event, data) {
+            this.set('changedata', {changing: true, meta: data.projectmeta});
+            this.set('route', "new");
         },
 
         createproject: function () {

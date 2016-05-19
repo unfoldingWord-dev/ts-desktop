@@ -216,11 +216,15 @@
 
         completechunk: function (event, data) {
             var index = data.index;
+            var mythis = this;
 
             if (this.chunk.index === index && this.chunk.projectmeta.project_type_class === "standard") {
-                this.set('chunk.completed', true);
-                this.$.toggle.checked = true;
-                this.fire('iron-signal', {name: 'updatecompletion'});
+                mythis.savemarkers();
+                mythis.set('chunk.completed', true);
+                mythis.$.toggle.checked = true;
+                setTimeout(function() {
+                    mythis.fire('iron-signal', {name: 'updatecompletion'});
+                }, 500);
             }
         },
 

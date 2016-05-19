@@ -210,21 +210,24 @@
 
         rendertext: function () {
             if(this.chunk && this.chunk.srccontent && this.chunk.projectmeta.project_type_class === "extant") {
-                var completed = this.chunk.completed;
-                var content = this.$.content;
-                var text = this.chunk.helpscontent[0].body;
-                var module = "ts-target-words";
+                var mythis = this;
+                setTimeout(function() {
+                    var completed = mythis.chunk.completed;
+                    var content = mythis.$.content;
+                    var text = mythis.chunk.helpscontent[0].body;
+                    var module = "ts-target-words";
 
-                if (completed) {
-                    content.classList.remove("editmode");
-                    content.classList.add("donemode");
-                    var textholder = this.querySelector("#textholder");
-                    textholder.innerHTML = App.renderer.renderTargetWithVerses(text, module);
-                } else {
-                    content.classList.add("editmode");
-                    content.classList.remove("donemode");
-                }
-                this.$.toggle.checked = completed;
+                    if (completed) {
+                        content.classList.remove("editmode");
+                        content.classList.add("donemode");
+                        var textholder = mythis.querySelector("#textholder");
+                        textholder.innerHTML = App.renderer.renderTargetWithVerses(text, module);
+                    } else {
+                        content.classList.add("editmode");
+                        content.classList.remove("donemode");
+                    }
+                    mythis.$.toggle.checked = completed;
+                }, 1000);
             }
         },
 

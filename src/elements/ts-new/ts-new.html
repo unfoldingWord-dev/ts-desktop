@@ -84,12 +84,7 @@
         <div id="header">
             <div id="title">
                 <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
-                <template is="dom-if" if="{{!importdata.importing}}">
-                    <span>New Project</span>
-                </template>
-                <template is="dom-if" if="{{importdata.importing}}">
-                    <span>Import Project</span>
-                </template>
+                <span>[[createtitle(route)]]</span>
             </div>
         </div>
 
@@ -192,8 +187,22 @@
             this.$.languages.notifyResize();
         },
 
+        createtitle: function (route) {
+            var title = "";
+            if (route === "new") {
+                if (this.importdata.importing) {
+                    title = "Import Project";
+                } else if (this.changedata.changing) {
+                    title = "Change Language";
+                } else {
+                    title = "New Project";
+                }
+            }
+            return title;
+        },
+
         gotolanguage: function (event, data) {
-            this.set('changedata', {changing: true, meta: data.projectmeta});
+            this.set('changedata', {changing: true, oldmeta: data.projectmeta});
             this.set('route', "new");
         },
 

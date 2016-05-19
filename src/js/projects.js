@@ -59,10 +59,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                     meta.project_type_class = "standard";
                 }
 
-                meta.unique_id = manifest.target_language.id + "_" + manifest.project.id + "_" + manifest.type.id;
-                if (manifest.resource.id !== "") {
-                    meta.unique_id += "_" + manifest.resource.id;
-                }
+                meta.unique_id = this.makeUniqueId(manifest);
 
                 var completion = configurator.getValue(meta.unique_id + "-completion");
                 if (completion !== undefined && completion !== "") {
@@ -80,6 +77,14 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 return null;
             }
             return meta;
+        },
+
+        makeUniqueId: function (manifest) {
+            var id = manifest.target_language.id + "_" + manifest.project.id + "_" + manifest.type.id;
+            if (manifest.resource.id !== "") {
+                id += "_" + manifest.resource.id;
+            }
+            return id;
         },
 
         updateChunk: function (meta, chunk) {

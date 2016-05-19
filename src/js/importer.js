@@ -166,16 +166,6 @@ function UsfmParser () {
             hasOptions: false,
             type: "sectionHeading"
         },
-        quote: {
-            regEx: /\\q[0-9]*/,
-            hasOptions: false,
-            type: "quote"
-        },
-        break: {
-            regEx: /\\b/,
-            hasOptions: false,
-            type: "break"
-        },
         tableOfContents: {
             regEx: /\\toc[0-2]*/,
             hasOptions: false,

@@ -156,16 +156,28 @@
 
       change: function () {
           var mythis = this;
-          var changedata = this.changedata;
           var targetDir = App.configurator.getValue('targetTranslationsDir');
-          changedata.newmeta = _.cloneDeep(changedata.oldmeta);
-          changedata.newmeta.target_language = this.newdata.language;
-          changedata.newmeta.unique_id = App.projectsManager.makeUniqueId(changedata.newmeta);
-          changedata.oldpaths = App.utils.makeProjectPaths(targetDir, changedata.oldmeta);
-          changedata.newpaths = App.utils.makeProjectPaths(targetDir, changedata.newmeta);
+          mythis.changedata.newmeta = _.cloneDeep(mythis.changedata.oldmeta);
+          mythis.changedata.newmeta.target_language = mythis.newdata.language;
+          mythis.changedata.newmeta.unique_id = App.projectsManager.makeUniqueId(mythis.changedata.newmeta);
+          mythis.changedata.oldpaths = App.utils.makeProjectPaths(targetDir, mythis.changedata.oldmeta);
+          mythis.changedata.newpaths = App.utils.makeProjectPaths(targetDir, mythis.changedata.newmeta);
 
+          return App.utils.fs.stat(mythis.changedata.newpaths.projectDir).then(App.utils.ret(true)).catch(App.utils.ret(false))
+              .then(function (exists) {
+                  mythis.changedata.exists = exists;
+                  if (exists) {
+                      mythis.fire('openconfirm');
+                  } else {
+                      mythis.firechange();
+                  }
+              });
+      },
 
-          mythis.fire('iron-signal', {name: 'changelanguage', data: changedata});
+      firechange: function () {
+          var mythis = this;
+
+          mythis.fire('iron-signal', {name: 'changelanguage', data: mythis.changedata});
           mythis.set('changedata.changing', false);
           mythis.reset();
       },

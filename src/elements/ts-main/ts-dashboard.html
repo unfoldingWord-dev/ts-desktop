@@ -278,11 +278,23 @@
           mythis.set('options.loading', true);
           mythis.$.loading.open();
 
-          return App.utils.fs.move(changedata.oldpaths.projectDir, changedata.newpaths.projectDir, {clobber: true})
-              .then(function () {
-                  return App.projectsManager.saveTargetManifest(changedata.newmeta);
-              })
+          var choice = function () {
+              if (changedata.exists) {
+                  return App.gitManager.merge(mythis.currentuser, changedata.newpaths.projectDir, changedata.oldpaths.projectDir, 3)
+                      .then(function () {
+                          return App.utils.fs.remove(changedata.oldpaths.projectDir);
+                      });
+              } else {
+                  return App.utils.fs.move(changedata.oldpaths.projectDir, changedata.newpaths.projectDir, {clobber: true})
+                      .then(function () {
+                          return App.projectsManager.saveTargetManifest(changedata.newmeta);
+                      });
+              }
+          };
+
+          return choice()
               .then(function() {
+                  App.projectsManager.unsetValues(changedata.oldmeta);
                   mythis.set('options.title', "Change Complete");
                   mythis.set('options.body', "Your project language has been changed.");
                   mythis.set('options.loading', false);

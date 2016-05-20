@@ -319,6 +319,16 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 .then(utils.lodash.indexBy('name'));
         },
 
+        unsetValues: function (meta) {
+            var key = meta.unique_id;
+
+            configurator.unsetValue(key + "-chapter");
+            configurator.unsetValue(key + "-index");
+            configurator.unsetValue(key + "-selected");
+            configurator.unsetValue(key + "-completion");
+            configurator.unsetValue(key + "-source");
+        },
+
         deleteTargetTranslation: function (meta) {
             var paths = utils.makeProjectPaths(targetDir, meta);
             return trash([paths.projectDir]);

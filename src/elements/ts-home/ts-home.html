@@ -448,13 +448,9 @@
         deleteproject: function () {
             var mythis = this;
             var projectmeta = this.currentinfo;
-            var key = projectmeta.unique_id;
+
             App.projectsManager.deleteTargetTranslation(projectmeta).then(function() {
-                App.configurator.unsetValue(key + "-chapter");
-                App.configurator.unsetValue(key + "-index");
-                App.configurator.unsetValue(key + "-selected");
-                App.configurator.unsetValue(key + "-completion");
-                App.configurator.unsetValue(key + "-source");
+                App.projectsManager.unsetValues(projectmeta);
                 mythis.fire('iron-signal', {name: 'updatelist'});
                 mythis.$.delete.close();
             });

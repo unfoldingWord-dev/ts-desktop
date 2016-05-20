@@ -13,6 +13,7 @@
 <link rel="import" href="./ts-new-project-button.html">
 <link rel="import" href="./ts-home-sidebar.html">
 <link rel="import" href="./ts-completion-icon.html">
+<link rel="import" href="./ts-resource-options.html">
 
 <dom-module id="ts-home">
 
@@ -148,6 +149,17 @@
             margin: auto;
         }
 
+        .buttons {
+            display: flex;
+            justify-content: flex-end;
+            padding: 0 50px;
+            color: var(--secondary-text-color);
+        }
+
+        .buttons paper-button:hover {
+            color: var(--accent-color);
+        }
+
         .popup paper-button:hover {
             color: var(--accent-color);
         }
@@ -228,6 +240,25 @@
             padding: 0 50px;
         }
 
+        #resource {
+            width: 300px;
+            height: 300px;
+        }
+
+        #resource * {
+            margin: 0;
+            padding: 0;
+        }
+
+        #confirmchange {
+            width: 450px;
+            height: 200px;
+        }
+
+        #confirmchange p {
+            font-size: 110%;
+        }
+
         .space {
             padding-left: 5px;
         }
@@ -298,7 +329,7 @@
             <div id="infodata">
                 <p>{{locale.project}}: <strong><span>[[currentinfo.project.name]]</span> (<span>[[currentinfo.project.id]]</span>)</strong></p>
                 <p>{{locale.target_language}}: <strong><span>[[currentinfo.target_language.name]]</span> (<span>[[currentinfo.target_language.id]]</span>)</strong><span class="link" on-tap="changelanguage">Change</span></p>
-                <p class$="[[idclass(currentinfo.resource.id)]]">Resource type: <strong><span>[[currentinfo.resource.id]]</span></strong><span class="link" on-tap="changeresource">Change</span></p>
+                <p class$="[[idclass(currentinfo.resource.id)]]">Resource type: <strong><span>[[currentinfo.resource.id]]</span></strong><span class="link" on-tap="openresource">Change</span></p>
                 <p>{{locale.progress}}: <strong><span>[[currentinfo.completion]]</span>%</strong></p>
                 <p>{{locale.translators}}:</p>
                 <template is="dom-if" if="{{currentinfo.translators.length}}">
@@ -335,6 +366,21 @@
             </div>
         </paper-dialog>
 
+        <paper-dialog id="confirmchange" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <h2>File already exists</h2>
+            <div>
+                <p>This project already exists.  If you continue with this change, the two projects will be merged together.</p>
+            </div>
+            <div class="buttons">
+                <paper-button on-tap="firechange">Continue</paper-button>
+                <paper-button on-tap="cancelconfirm">Cancel</paper-button>
+            </div>
+        </paper-dialog>
+
+        <paper-dialog id="resource" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <ts-resource-options currentinfo="[[currentinfo]]" changedata="{{changedata}}" on-confirm="openconfirm" on-change="firechange" on-cancel="cancelresource"></ts-resource-options>
+        </paper-dialog>
+
         <ts-new-project-button route="{{route}}"></ts-new-project-button>
 
     </template>
@@ -364,6 +410,10 @@
             projectlist: {
                 type: Array,
                 value: []
+            },
+            changedata: {
+                type: Object,
+                value: {}
             },
             locale: {
                 type: Object,
@@ -401,6 +451,32 @@
             var projectmeta = this.currentinfo;
             this.closeinfo();
             this.fire('iron-signal', {name: 'gotolanguage', data: {projectmeta: projectmeta}});
+        },
+
+        openresource: function () {
+            this.closeinfo();
+            this.$.resource.open();
+        },
+
+        cancelresource: function () {
+            this.$.resource.close();
+            this.$.info.open();
+        },
+
+        cancelconfirm: function () {
+            this.$.confirmchange.close();
+            this.$.resource.open();
+        },
+
+        openconfirm: function () {
+            this.$.resource.close();
+            this.$.confirmchange.open();
+        },
+
+        firechange: function () {
+            this.$.confirmchange.close();
+            this.fire('iron-signal', {name: 'changeproject', data: this.changedata});
+            this.$.resource.close();
         },
 
         gopublish: function () {

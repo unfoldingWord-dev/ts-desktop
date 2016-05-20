@@ -178,7 +178,7 @@
       <iron-signals on-iron-signal-openguidelines="openGuidelines"></iron-signals>
       <iron-signals on-iron-signal-openstatement="openStatement"></iron-signals>
       <iron-signals on-iron-signal-openattribution="openAttribution"></iron-signals>
-      <iron-signals on-iron-signal-changelanguage="changeLanguage"></iron-signals>
+      <iron-signals on-iron-signal-changeproject="changeProject"></iron-signals>
 
   </template>
 
@@ -268,13 +268,13 @@
           }
       },
 
-      changeLanguage: function (event, data) {
+      changeProject: function (event, data) {
           var mythis = this;
           var changedata = data;
 
           mythis.set("route", "home");
           mythis.set('options', {});
-          mythis.set('options.body', "Changing language.  Please wait...");
+          mythis.set('options.body', "Changing project.  Please wait...");
           mythis.set('options.loading', true);
           mythis.$.loading.open();
 
@@ -296,14 +296,14 @@
               .then(function() {
                   App.projectsManager.unsetValues(changedata.oldmeta);
                   mythis.set('options.title', "Change Complete");
-                  mythis.set('options.body', "Your project language has been changed.");
+                  mythis.set('options.body', "Your project has been changed.");
                   mythis.set('options.loading', false);
                   setTimeout(function() {
                       mythis.updateList();
                   }, 250);
               })
               .catch(function(err) {
-                  var errmessage = "An error occurred while trying to change the language";
+                  var errmessage = "An error occurred while trying to change the project";
                   if(err !== null) {
                       errmessage += "\n" + err;
                   }

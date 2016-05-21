@@ -250,12 +250,15 @@
              * Apply user preferences for app's look
              */
             applyPrefAppearance: function() {
-                let body = window.document.querySelector('body');
-                let tsTranslate = window.document.querySelector('ts-translate');
-                let fontSizeVal = this.getUserSetting('fontsize').toLowerCase();
+                var targets = window.document.querySelectorAll('.targetfont');
+                var fontSizeVal = this.getUserSetting('fontsize').toLowerCase();
+                var targetfont = this.getUserSetting('font');
 
-                tsTranslate.style.fontSize = fontSizeMap[fontSizeVal];
-                tsTranslate.style.fontFamily = this.getUserSetting('font');
+                for (var i = 0; i < targets.length; i++) {
+                    targets[i].style.fontSize = fontSizeMap[fontSizeVal];
+                    targets[i].style.fontFamily = targetfont;
+                }
+
             },
 
             /**

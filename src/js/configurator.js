@@ -249,15 +249,22 @@
             /**
              * Apply user preferences for app's look
              */
-            applyPrefAppearance: function() {
-                var targets = window.document.querySelectorAll('.targetfont');
-                var fontSizeVal = this.getUserSetting('fontsize').toLowerCase();
+            applyPrefAppearance: function(overwrite) {
                 var targetfont = this.getUserSetting('font');
+                var fontSizeVal = this.getUserSetting('fontsize').toLowerCase();
+                var fontSize = fontSizeMap[fontSizeVal];
+                var sheet = document.styleSheets[0];
+                var rules = sheet.cssRules;
 
-                for (var i = 0; i < targets.length; i++) {
-                    targets[i].style.fontSize = fontSizeMap[fontSizeVal];
-                    targets[i].style.fontFamily = targetfont;
+                for (var i = 0; i < rules.length; i++) {
+                    if (rules[i].selectorText.toLowerCase() === ".targetfont") {
+                        sheet.deleteRule(i);
+                        i--;
+                    }
                 }
+
+                sheet.insertRule(".targetfont {font-family: " + targetfont + "}", 0);
+                sheet.insertRule(".targetfont {font-size: " + fontSize + "}", 1);
 
             },
 

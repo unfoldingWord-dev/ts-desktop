@@ -10,6 +10,7 @@
         fse = require('fs-extra'),
         https = require('https'),
         http = require('http'),
+        fontkit = require('fontkit'),
         _ = require('lodash');
 
     var utils = {
@@ -367,6 +368,35 @@
                 license: path.join(projectDir, 'LICENSE.md')
             };
 
+        },
+
+        getSystemFonts: function () {
+            var fontDir = path.resolve({
+                win32:  '/Windows/fonts',
+                darwin: '/Library/Fonts',
+                linux:  '/usr/share/fonts/truetype'
+            }[process.platform]);
+
+            var fonts = fs.readdirSync(fontDir).map(function (name) {
+                return path.join(fontDir, name);
+            });
+
+            var list = fonts.map(function (font) {
+                var f = false;
+                try {
+                    f = fontkit.openSync(font);
+                } catch (e) {}
+                return f;
+            }).map(function (font) {
+                var name = false;
+                try {
+                    name = font.familyName;
+                } catch (e) {}
+                return name;
+            });
+            list.unshift('Noto Sans', 'Roboto');
+
+            return _.uniq(_.compact(list));
         },
 
         getTimeStamp: function () {

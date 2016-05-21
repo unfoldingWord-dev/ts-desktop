@@ -10,9 +10,9 @@
     },
     {
         "name": "font",
-        "mainText": "Font",
+        "mainText": "Target Translation Font",
         "value": "Roboto",
-        "options": ["Roboto", "Arial", "Times New Roman", "Calibri", "Tahoma"],
+        "options": [],
         "group": "general",
         "enabled": true,
         "visible": true

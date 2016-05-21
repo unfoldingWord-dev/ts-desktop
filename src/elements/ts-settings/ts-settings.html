@@ -275,6 +275,9 @@
             if (event.model.setting.options) {
                 modal.options = event.model.setting.options;
                 modal.selected = event.model.setting.value;
+                if (event.model.setting.name === "font") {
+                    modal.options = App.utils.getSystemFonts();
+                }
             } else {
                 modal.text = event.model.setting.value;
             }

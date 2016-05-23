@@ -214,7 +214,7 @@
             mythis.$.loading.open();
 
             setTimeout(function() {
-                App.exportManager.exportTranslation(translation, projectmeta, filePath, mediaServer)
+                return App.exportManager.exportTranslation(translation, projectmeta, filePath, mediaServer)
                     .then(function () {
                         mythis.set('options.title', "Project Exported");
                         mythis.set('options.body', "Your project has been successfully exported to a file.");
@@ -222,9 +222,9 @@
                         mythis.set('options.loading', false);
                     })
                     .catch(function (err) {
-                        var errmessage = "We're sorry.  An error occurred while trying to export your project";
+                        var errmessage = "An error occurred while trying to export your project";
                         if(err !== null) {
-                            errmessage = err;
+                            errmessage += "\n" + err;
                         }
                         mythis.set('options.title', "Export Failed");
                         mythis.set('options.body', errmessage);
@@ -287,7 +287,7 @@
                     });
                 })
                 .catch(function (err) {
-                    var errmessage = "We're sorry.  An error occurred while trying to upload your project.";
+                    var errmessage = "An error occurred while trying to upload your project.";
                     var logmessage = "";
                     if (err.status === 401) {
                         errmessage = "Cannot upload without connecting to a Door43 account.";

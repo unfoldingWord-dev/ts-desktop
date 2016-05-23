@@ -522,14 +522,10 @@
         },
 
         deleteproject: function () {
-            var mythis = this;
             var projectmeta = this.currentinfo;
 
-            App.projectsManager.deleteTargetTranslation(projectmeta).then(function() {
-                App.projectsManager.unsetValues(projectmeta);
-                mythis.fire('iron-signal', {name: 'updatelist'});
-                mythis.$.delete.close();
-            });
+            this.fire('iron-signal', {name: 'deleteproject', data: {projectmeta: projectmeta}});
+            this.$.delete.close();
         },
 
         start: function () {

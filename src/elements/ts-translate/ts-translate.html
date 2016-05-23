@@ -653,17 +653,17 @@
                 mythis.set('options.loading', true);
                 mythis.$.loading.open();
                 setTimeout(function() {
-                    App.projectsManager.loadTargetTranslation(projectmeta).then(function (translation) {
+                    return App.projectsManager.loadTargetTranslation(projectmeta).then(function (translation) {
                         mythis.set('currentproject.rawdata.main', translation);
                         loaddata2();
                     }).catch(function(err) {
                         App.reporter.logError(err);
-                        var message = "We're sorry.  An error occurred while trying to load this project";
+                        var errmessage = "An error occurred while trying to load this project";
                         if(err !== null) {
-                            message = err;
+                            errmessage += "\n" + err;
                         }
                         mythis.set('options.title', "Project Load Failed");
-                        mythis.set('options.body', message);
+                        mythis.set('options.body', errmessage);
                         mythis.set('options.loading', false);
                     });
                 }, 250);
@@ -1296,16 +1296,16 @@
             var generatePdf = function(){
                 mythis.set('options.body', "Creating PDF. Please wait...");
                 setTimeout(function() {
-                    App.printManager.targetTranslationToPdf(translation, projectmeta, filePath, options)
+                    return App.printManager.targetTranslationToPdf(translation, projectmeta, filePath, options)
                         .then(function () {
                             mythis.set('options.title', "PDF Created");
                             mythis.set('options.body', "Your project has been successfully saved to a PDF.");
                             mythis.set('options.loading', false);
                         })
                         .catch(function (err) {
-                            var errmessage = "We're sorry.  An error occurred while trying to save your project";
+                            var errmessage = "An error occurred saving your project";
                             if(err !== null) {
-                                errmessage = err;
+                                errmessage += "\n" + err;
                             }
                             mythis.set('options.title', "Print Failed");
                             mythis.set('options.body', errmessage);
@@ -1326,12 +1326,12 @@
                     App.printManager.extractImages();
                     generatePdf();
                 }).catch(function(err){
-                    var message = "We're sorry.  An error occurred while trying to download images for this project";
+                    var errmessage = "An error occurred while downloading images";
                     if(err !== null) {
-                        message = err;
+                        errmessage += "\n" + err;
                     }
                     mythis.set('options.title', "Download Failed");
-                    mythis.set('options.body', message);
+                    mythis.set('options.body', errmessage);
                     mythis.set('options.loading', false);
                 });
             } else {

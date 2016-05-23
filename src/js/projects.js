@@ -331,7 +331,15 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
 
         deleteTargetTranslation: function (meta) {
             var paths = utils.makeProjectPaths(targetDir, meta);
-            return trash([paths.projectDir]);
+
+            return utils.fs.stat(paths.projectDir).then(App.utils.ret(true)).catch(App.utils.ret(false))
+                .then(function (exists) {
+                    if (exists) {
+                        return trash([paths.projectDir]);
+                    } else {
+                        throw "Project file does not exist";
+                    }
+                });            
         }
     };
 }

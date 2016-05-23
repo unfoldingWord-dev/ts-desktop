@@ -179,6 +179,7 @@
       <iron-signals on-iron-signal-openstatement="openStatement"></iron-signals>
       <iron-signals on-iron-signal-openattribution="openAttribution"></iron-signals>
       <iron-signals on-iron-signal-changeproject="changeProject"></iron-signals>
+      <iron-signals on-iron-signal-deleteproject="deleteProject"></iron-signals>
 
   </template>
 
@@ -268,6 +269,38 @@
           }
       },
 
+      deleteProject: function (event, data) {
+          var mythis = this;
+          var projectmeta = data.projectmeta;
+
+          mythis.set('options', {});
+          mythis.set('options.body', "Deleting project.  Please wait...");
+          mythis.set('options.loading', true);
+          mythis.$.loading.open();
+
+          setTimeout(function() {
+              return App.projectsManager.deleteTargetTranslation(projectmeta)
+                  .then(function() {
+                      App.projectsManager.unsetValues(projectmeta);
+                      mythis.set('options.title', "Project Deleted");
+                      mythis.set('options.body', "Your project has been successfully deleted.");
+                      mythis.set('options.loading', false);
+                      setTimeout(function() {
+                          mythis.updateList();
+                      }, 250);
+                  })
+                  .catch(function(err) {
+                      var errmessage = "An error occurred while trying to delete your project";
+                      if(err !== null) {
+                          errmessage += "\n" + err;
+                      }
+                      mythis.set('options.title', "Delete Failed");
+                      mythis.set('options.body', errmessage);
+                      mythis.set('options.loading', false);
+                  });
+          }, 500);
+      },
+
       changeProject: function (event, data) {
           var mythis = this;
           var changedata = data;
@@ -292,26 +325,27 @@
               }
           };
 
-          return choice()
-              .then(function() {
-                  App.projectsManager.unsetValues(changedata.oldmeta);
-                  mythis.set('options.title', "Change Complete");
-                  mythis.set('options.body', "Your project has been changed.");
-                  mythis.set('options.loading', false);
-                  setTimeout(function() {
-                      mythis.updateList();
-                  }, 250);
-              })
-              .catch(function(err) {
-                  var errmessage = "An error occurred while trying to change the project";
-                  if(err !== null) {
-                      errmessage += "\n" + err;
-                  }
-                  mythis.set('options.title', "Change Failed");
-                  mythis.set('options.body', errmessage);
-                  mythis.set('options.loading', false);
-              });
-
+          setTimeout(function() {
+              return choice()
+                  .then(function() {
+                      App.projectsManager.unsetValues(changedata.oldmeta);
+                      mythis.set('options.title', "Change Complete");
+                      mythis.set('options.body', "Your project has been changed.");
+                      mythis.set('options.loading', false);
+                      setTimeout(function() {
+                          mythis.updateList();
+                      }, 250);
+                  })
+                  .catch(function(err) {
+                      var errmessage = "An error occurred while trying to change the project";
+                      if(err !== null) {
+                          errmessage += "\n" + err;
+                      }
+                      mythis.set('options.title', "Change Failed");
+                      mythis.set('options.body', errmessage);
+                      mythis.set('options.loading', false);
+                  });
+          }, 500);
       },
 
       openImport: function () {
@@ -333,7 +367,7 @@
           mythis.$.loading.open();
 
           setTimeout(function() {
-              App.importManager.extractBackup(filePath[0])
+              return App.importManager.extractBackup(filePath[0])
                   .then(function (list) {
                       return Promise.all(list.map(function (item) {
                           if (item.targetExists) {
@@ -355,9 +389,9 @@
                       }, 250);
                   })
                   .catch(function(err) {
-                      var errmessage = "We're sorry.  An error occurred while trying to import your project";
+                      var errmessage = "An error occurred while importing your project";
                       if(err !== null) {
-                          errmessage = err;
+                          errmessage += "\n" + err;
                       }
                       mythis.set('options.title', "Import Failed");
                       mythis.set('options.body', errmessage);
@@ -376,7 +410,7 @@
 
           mythis.$.import.close();
 
-          App.importManager.retrieveUSFMProjectID(filePath[0])
+          return App.importManager.retrieveUSFMProjectID(filePath[0])
               .then(function (id) {
                   var name = "";
                   if (id) {
@@ -520,9 +554,9 @@
                       }, 250);
                   })
                   .catch(function(err) {
-                      var errmessage = "We're sorry.  An error occurred while trying to import your project";
+                      var errmessage = "An error occurred while importing your project";
                       if(err !== null) {
-                          errmessage = err;
+                          errmessage += "\n" + err;
                       }
                       mythis.set('options.title', "Import Failed");
                       mythis.set('options.body', errmessage);
@@ -590,7 +624,7 @@
                   });
               })
               .catch(function (err) {
-                  var errmessage = "We're sorry.  An error occurred while trying to upload your project.";
+                  var errmessage = "An error occurred while uploading your project.";
                   var logmessage = "";
                   if (err.status === 401) {
                       errmessage = "Cannot upload without connecting to a Door43 account.";
@@ -631,16 +665,16 @@
           mythis.$.loading.open();
 
           setTimeout(function() {
-              App.exportManager.backupTranslation(meta, filePath)
+              return App.exportManager.backupTranslation(meta, filePath)
                   .then(function () {
                       mythis.set('options.title', "Backup Complete");
                       mythis.set('options.body', "Your project has been successfully backed up.");
                       mythis.set('options.loading', false);
                   })
                   .catch(function (err) {
-                      var errmessage = "We're sorry.  An error occurred while trying to backup your project";
+                      var errmessage = "An error occurred while trying to backup your project";
                       if(err !== null) {
-                          errmessage = err;
+                          errmessage += "\n" + err;
                       }
                       mythis.set('options.title', "Backup Failed");
                       mythis.set('options.body', errmessage);
@@ -664,7 +698,7 @@
           mythis.$.loading.open();
 
           setTimeout(function() {
-              App.importManager.extractBackup(filePath[0])
+              return App.importManager.extractBackup(filePath[0])
                   .then(function (list) {
                       return Promise.all(list.map(function (item) {
                           return App.utils.fs.move(item.tmpPath, item.targetPath, {clobber: true});
@@ -682,9 +716,9 @@
                       }, 250);
                   })
                   .catch(function(err) {
-                      var errmessage = "We're sorry.  An error occurred while trying to restore your project";
+                      var errmessage = "An error occurred while trying to restore your project";
                       if(err !== null) {
-                          errmessage = err;
+                          errmessage += "\n" + err;
                       }
                       mythis.set('options.title', "Restore Failed");
                       mythis.set('options.body', errmessage);

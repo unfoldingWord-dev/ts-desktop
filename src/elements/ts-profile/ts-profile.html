@@ -168,7 +168,7 @@
             mythis.set('options.loading', true);
             mythis.$.loading.open();
 
-            App.userManager.login(user).then(function (user) {
+            return App.userManager.login(user).then(function (user) {
                 mythis.set('options.body', "Login Verified");
                 user.full_name = user.full_name === '' ? user.username : user.full_name;
                 setTimeout(function() {
@@ -176,12 +176,12 @@
                     mythis.fire('iron-signal', {name: 'updateuser', data: user});
                 }, 500);
             }).catch(function (err) {
-                var errmessage = "We're sorry.  An error occurred while trying to login";
+                var errmessage = "An error occurred while trying to login";
                 if (err.status === 404) {
-                    errmessage = "Incorrect Username";
+                    errmessage += "\n" + "Incorrect Username";
                 }
                 if (err.status === 401) {
-                    errmessage = "Incorrect Password";
+                    errmessage += "\n" + "Incorrect Password";
                 }
                 mythis.set('options.title', "Login Failed");
                 mythis.set('options.body', errmessage);
@@ -216,7 +216,7 @@
             mythis.set('options.loading', true);
             mythis.$.loading.open();
 
-            App.userManager.createAccount(user).then(function (user) {
+            return App.userManager.createAccount(user).then(function (user) {
                 mythis.set('options.body', "Account Created");
                 user.full_name = user.full_name === '' ? user.username : user.full_name;
                 setTimeout(function() {
@@ -224,9 +224,9 @@
                     mythis.fire('iron-signal', {name: 'updateuser', data: user});
                 }, 500);
             }).catch(function (err) {
-                var errmessage = "We're sorry.  An error occurred while trying to create account";
+                var errmessage = "An error occurred while trying to create account";
                 if (err.status === 422) {
-                    errmessage = "Account already exists for this user";
+                    errmessage += "\n" + "Account already exists for this user";
                 }
                 mythis.set('options.title', "Account Creation Failed");
                 mythis.set('options.body', errmessage);

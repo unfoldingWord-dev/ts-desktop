@@ -187,7 +187,7 @@
                 </template>
                 <template is="dom-repeat" items="{{chunk.helpscontent}}" as="help">
                     <paper-material class="contentbox" elevation="1">
-                        <div class="leftbox">
+                        <div class="leftbox targetfont">
                             <div class="contentheader">
                                 <p class$="[[chunk.projectmeta.target_language.direction]]">{{help.title}}</p>
                                 <iron-autogrow-textarea class$="[[chunk.projectmeta.target_language.direction]]" bind-value="{{help.title}}" on-change="change" on-input="input" placeholder$="[[checktitle(chunk.projectmeta.type.id)]]"></iron-autogrow-textarea>

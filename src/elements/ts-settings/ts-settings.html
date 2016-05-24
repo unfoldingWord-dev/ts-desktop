@@ -264,22 +264,23 @@
             App.projectsManager.moveBackups(oldPath, newPath[0]);
         },
 
-        openSettingModal: function(event) {
+        openSettingModal: function (event) {
             var modal = document.createElement('ts-setting-modal');
             var path = 'settings.' + event.target.dataGroup + '.list.' + event.target.dataList + '.value';
+            var setting = event.model.setting;
             modal.id = "setting-modal";
             modal.style.display = 'block';
-            modal.heading = event.model.setting.mainText;
+            modal.heading = setting.mainText;
             // The following assignments will determine what kind of interface the modal
             // will have (Edit for text, select for selected.)
-            if (event.model.setting.options) {
-                modal.options = event.model.setting.options;
-                modal.selected = event.model.setting.value;
-                if (event.model.setting.name === "font") {
+            if (setting.options) {
+                modal.options = setting.options;
+                modal.selected = setting.value;
+                if (setting.name === "targetfont" || setting.name === "sourcefont") {
                     modal.options = App.utils.getSystemFonts();
                 }
             } else {
-                modal.text = event.model.setting.value;
+                modal.text = setting.value;
             }
             this.appendChild(modal);
             modal.fire('open');

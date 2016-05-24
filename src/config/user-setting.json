@@ -10,7 +10,25 @@
     },
     {
         "name": "font",
+        "mainText": "App Font",
+        "value": "Roboto",
+        "options": [],
+        "group": "general",
+        "enabled": true,
+        "visible": false
+    },
+    {
+        "name": "targetfont",
         "mainText": "Target Translation Font",
+        "value": "Roboto",
+        "options": [],
+        "group": "general",
+        "enabled": true,
+        "visible": true
+    },
+    {
+        "name": "sourcefont",
+        "mainText": "Source Translation Font",
         "value": "Roboto",
         "options": [],
         "group": "general",

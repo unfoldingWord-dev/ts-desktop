@@ -250,14 +250,15 @@
              * Apply user preferences for app's look
              */
             applyPrefAppearance: function(overwrite) {
-                var targetfont = this.getUserSetting('font');
+                var targetfont = this.getUserSetting('targetfont');
+                var sourcefont = this.getUserSetting('sourcefont');
                 var fontSizeVal = this.getUserSetting('fontsize').toLowerCase();
                 var fontSize = fontSizeMap[fontSizeVal];
                 var sheet = document.styleSheets[0];
                 var rules = sheet.cssRules;
 
                 for (var i = 0; i < rules.length; i++) {
-                    if (rules[i].selectorText.toLowerCase() === ".targetfont") {
+                    if (rules[i].selectorText.toLowerCase() === ".targetfont" || rules[i].selectorText.toLowerCase() === ".sourcefont") {
                         sheet.deleteRule(i);
                         i--;
                     }
@@ -265,6 +266,8 @@
 
                 sheet.insertRule(".targetfont {font-family: " + targetfont + "}", 0);
                 sheet.insertRule(".targetfont {font-size: " + fontSize + "}", 1);
+                sheet.insertRule(".sourcefont {font-family: " + sourcefont + "}", 2);
+                sheet.insertRule(".sourcefont {font-size: " + fontSize + "}", 3);
 
             },
 

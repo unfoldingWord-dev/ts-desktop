@@ -774,7 +774,6 @@
               return;
           }
           var autobackupdir = App.configurator.getUserPath('datalocation', 'automatic_backups');
-          mythis.set('options', {});
           mythis.set('busy', {signal: true, message: "Updating project list..."});
 
           return App.projectsManager.migrateTargetTranslationsList()
@@ -798,6 +797,7 @@
                   if(err !== null) {
                       errmessage = err;
                   }
+                  mythis.set('options', {});
                   mythis.set('options.title', "Error updating projects");
                   mythis.set('options.body', errmessage);
                   mythis.set('options.loading', false);

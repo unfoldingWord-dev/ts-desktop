@@ -292,7 +292,7 @@
                   .catch(function(err) {
                       var errmessage = "An error occurred while trying to delete your project";
                       if(err !== null) {
-                          errmessage += "\n" + err;
+                          errmessage = err;
                       }
                       mythis.set('options.title', "Delete Failed");
                       mythis.set('options.body', errmessage);
@@ -339,7 +339,7 @@
                   .catch(function(err) {
                       var errmessage = "An error occurred while trying to change the project";
                       if(err !== null) {
-                          errmessage += "\n" + err;
+                          errmessage = err;
                       }
                       mythis.set('options.title', "Change Failed");
                       mythis.set('options.body', errmessage);
@@ -391,7 +391,7 @@
                   .catch(function(err) {
                       var errmessage = "An error occurred while importing your project";
                       if(err !== null) {
-                          errmessage += "\n" + err;
+                          errmessage = err;
                       }
                       mythis.set('options.title', "Import Failed");
                       mythis.set('options.body', errmessage);
@@ -423,10 +423,10 @@
                   }
                   mythis.set('importdata', {importing: true, filepath: filePath[0], project: {slug: id, name: name}});
                   mythis.set('route', 'new');
-              }).catch(function(err){
-                  var errmessage = "Error occurred reading file";
+              }).catch(function (err) {
+                  var errmessage = "Error occurred reading file: ";
                   if(err !== null) {
-                      errmessage += "\n(" + err + ")";
+                      errmessage += err;
                   }
                   mythis.set('options.title', "Import Failed");
                   mythis.set('options.body', errmessage);
@@ -472,7 +472,7 @@
                   }).catch(function(err){
                       var errmessage = "Error occurred importing project";
                       if(err !== null) {
-                          errmessage += "\n(" + err + ")";
+                          errmessage = err;
                       }
                       mythis.set('options.title', "Import Failed");
                       mythis.set('options.body', errmessage);
@@ -556,7 +556,7 @@
                   .catch(function(err) {
                       var errmessage = "An error occurred while importing your project";
                       if(err !== null) {
-                          errmessage += "\n" + err;
+                          errmessage = err;
                       }
                       mythis.set('options.title', "Import Failed");
                       mythis.set('options.body', errmessage);
@@ -674,7 +674,7 @@
                   .catch(function (err) {
                       var errmessage = "An error occurred while trying to backup your project";
                       if(err !== null) {
-                          errmessage += "\n" + err;
+                          errmessage = err;
                       }
                       mythis.set('options.title', "Backup Failed");
                       mythis.set('options.body', errmessage);
@@ -718,7 +718,7 @@
                   .catch(function(err) {
                       var errmessage = "An error occurred while trying to restore your project";
                       if(err !== null) {
-                          errmessage += "\n" + err;
+                          errmessage = err;
                       }
                       mythis.set('options.title', "Restore Failed");
                       mythis.set('options.body', errmessage);

@@ -46,6 +46,9 @@ function ExportManager(configurator, git) {
                     archive.append(JSON.stringify(manifest, null, '\t'), {name: 'manifest.json'});
                     archive.finalize();
                     return filePath;
+                })
+                .catch(function (err) {
+                    throw "Error creating backup: " + err;
                 });
         },
 

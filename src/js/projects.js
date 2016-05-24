@@ -27,13 +27,13 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 })
                 .then(function () {
                     return utils.fs.stat(oldPath).then(App.utils.ret(true)).catch(App.utils.ret(false));
-                })            
+                })
                 .then(function (exists) {
                     if (exists) {
                         utils.fs.move(path.join(oldPath, 'automatic_backups'), path.join(newPath, 'automatic_backups'), {clobber: true});
-                        utils.fs.move(path.join(oldPath, 'backups'), path.join(newPath, 'backups'), {clobber: true});                        
+                        utils.fs.move(path.join(oldPath, 'backups'), path.join(newPath, 'backups'), {clobber: true});
                     }
-                });            
+                });
         },
 
         updateManifestToMeta: function (manifest) {
@@ -164,7 +164,11 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 finished_chunks: meta.finished_chunks
             };
 
-            return write(paths.manifest, toJSON(manifest));
+            return write(paths.manifest, toJSON(manifest))
+                .catch(function (err) {
+                    reporter.logError(err);
+                    throw "Unable to write to manifest file.";
+                });
         },
 
         createTargetTranslation: function (translation, meta, user) {
@@ -203,6 +207,9 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 .then(updateChunks(translation))
                 .then(function () {
                     return mythis.cleanAndCommitProject(translation, meta, user);
+                })
+                .catch(function (err) {
+                    throw "Error creating new project: " + err;
                 });
         },
 
@@ -350,7 +357,11 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                     } else {
                         throw "Project file does not exist";
                     }
-                });            
+                })
+                .catch(function (err) {
+                    reporter.logError(err);
+                    throw "Unable to delete file at this time.";
+                });
         }
     };
 }

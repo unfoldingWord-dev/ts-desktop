@@ -21,8 +21,19 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
     return {
 
         moveBackups: function(oldPath, newPath) {
-            utils.fs.move(path.join(oldPath, 'automatic_backups'), path.join(newPath, 'automatic_backups'), {clobber: true});
-            utils.fs.move(path.join(oldPath, 'backups'), path.join(newPath, 'backups'), {clobber: true});
+            return utils.fs.mkdirs(configurator.getUserPath('datalocation', 'automatic_backups'))
+                .then(function () {
+                    return utils.fs.mkdirs(configurator.getUserPath('datalocation', 'backups'));
+                })
+                .then(function () {
+                    return utils.fs.stat(oldPath).then(App.utils.ret(true)).catch(App.utils.ret(false));
+                })            
+                .then(function (exists) {
+                    if (exists) {
+                        utils.fs.move(path.join(oldPath, 'automatic_backups'), path.join(newPath, 'automatic_backups'), {clobber: true});
+                        utils.fs.move(path.join(oldPath, 'backups'), path.join(newPath, 'backups'), {clobber: true});                        
+                    }
+                });            
         },
 
         updateManifestToMeta: function (manifest) {

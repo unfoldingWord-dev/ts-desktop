@@ -122,11 +122,9 @@ process.stdout.write = console.log.bind(console);
         return new MigrateManager(configurator);
     })();
 
-    // TODO: where should these be?
+    // TODO: where should this be?
     mkdirp.sync(configurator.getValue('targetTranslationsDir'));
-    mkdirp.sync(configurator.getUserPath('datalocation', 'automatic_backups'));
-    mkdirp.sync(configurator.getUserPath('datalocation', 'backups'));
-
+    
     var App = {
         appName: 'translationStudio',
 

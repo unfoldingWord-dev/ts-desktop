@@ -773,8 +773,10 @@
               }, 500);
               return;
           }
-          mythis.set('busy', {signal: true, message: "Updating project list..."});
           var autobackupdir = App.configurator.getUserPath('datalocation', 'automatic_backups');
+          mythis.set('options', {});
+          mythis.set('busy', {signal: true, message: "Updating project list..."});
+
           return App.projectsManager.migrateTargetTranslationsList()
               .then(function () {
                   return App.projectsManager.loadTargetTranslationsList()
@@ -792,7 +794,14 @@
                   return App.exportManager.backupAllTranslations(list, autobackupdir)
               })
               .catch(function (err) {
-                  console.error(err);
+                  var errmessage = "An error occurred while updating projects";
+                  if(err !== null) {
+                      errmessage = err;
+                  }
+                  mythis.set('options.title', "Error updating projects");
+                  mythis.set('options.body', errmessage);
+                  mythis.set('options.loading', false);
+                  mythis.$.loading.open();
                   App.reporter.logError(err);
               })
               .then(function () {

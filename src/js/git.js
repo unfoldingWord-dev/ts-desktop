@@ -180,6 +180,9 @@ function GitManager() {
                 .then(function () {
                     return mythis.commitAll(user, localPath);
                 })
+                .catch(function (err) {
+                    throw "Error while merging projects: " + err;
+                })
                 .then(utils.logr("Finished merging"));
         },
 

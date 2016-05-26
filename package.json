@@ -47,7 +47,7 @@
     "yargs": "^3.17.1"
   },
   "engines": {
-    "electron": "0.36.8"
+    "electron": "0.36.9"
   },
   "scripts": {
     "start": "electron src/js/main.js"

@@ -40,14 +40,14 @@
   "devDependencies": {
     "bower": "^1.7.7",
     "electron-packager": "github:maxogden/electron-packager",
-    "electron-prebuilt": "^0.36.8",
+    "electron-prebuilt": "^0.36.9",
     "gulp": "^3.9.1",
     "gulp-mocha": "^2.2.0",
     "mocha": "^2.4.5",
     "yargs": "^3.17.1"
   },
   "engines": {
-    "electron": "0.36.8"
+    "electron": "0.36.9"
   },
   "scripts": {
     "start": "electron src/js/main.js"

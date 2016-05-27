@@ -206,14 +206,17 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 .then(makeChapterDirs(translation))
                 .then(updateChunks(translation))
                 .then(function () {
-                    return mythis.cleanAndCommitProject(translation, meta, user);
+                    return mythis.cleanProject(translation, meta);
+                })
+                .then(function () {
+                    return mythis.commitProject(meta, user);
                 })
                 .catch(function (err) {
                     throw "Error creating new project: " + err;
                 });
         },
 
-        cleanAndCommitProject: function (translation, meta, user) {
+        cleanProject: function (translation, meta) {
             var paths = utils.makeProjectPaths(targetDir, meta);
 
             var cleanChapterDir = function (data, chapter) {
@@ -230,13 +233,16 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 return Promise.all(_.map(data, cleanChapterDir));
             };
 
-            return cleanChapterDirs()
-                .then(function () {
-                    return git.init(paths.projectDir);
-                })
+            return cleanChapterDirs();                
+        },
+        
+        commitProject: function (meta, user) {
+            var paths = utils.makeProjectPaths(targetDir, meta);
+
+            return git.init(paths.projectDir)
                 .then(function () {
                     return git.commitAll(user, paths.projectDir);
-                });
+                });            
         },
 
         loadProjectsList: function () {

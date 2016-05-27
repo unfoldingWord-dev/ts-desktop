@@ -83,8 +83,12 @@
                 <span class="optiontitle">Import from Door43</span>
                 <p>Will <span class="bold">merge</span> with the existing project, if one exists</p>
             </div>
-            <div class="option" on-tap="restore">
+            <div class="option" on-tap="restorebackup">
                 <span class="optiontitle">Restore from Tstudio file</span>
+                <p>Will <span class="bold">overwrite</span> the existing project, if one exists</p>
+            </div>
+            <div class="option" on-tap="restorerepo">
+                <span class="optiontitle">Restore from Door43</span>
                 <p>Will <span class="bold">overwrite</span> the existing project, if one exists</p>
             </div>
         </div>
@@ -106,8 +110,12 @@
 
         },
 
-        restore: function () {
-            this.fire('restore');
+        restorebackup: function () {
+            this.fire('restorebackup');
+        },
+
+        restorerepo: function () {
+            this.fire('restorerepo');
         },
 
         backup: function () {

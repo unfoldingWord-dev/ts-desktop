@@ -485,8 +485,14 @@
       },
 
       openBackup: function (event, data) {
-          this.set('backupdata', data.projectmeta);
-          this.$.backup.open();
+          var mythis = this;
+          var meta = data.projectmeta;
+
+          return App.projectsManager.commitProject(meta, mythis.currentuser)
+              .then(function () {
+                  mythis.set('backupdata', meta);
+                  mythis.$.backup.open();
+              });
       },
 
       createRepoBackup: function () {

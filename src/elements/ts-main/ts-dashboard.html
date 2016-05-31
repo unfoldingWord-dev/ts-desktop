@@ -333,10 +333,23 @@
               .then(function (id) {
                   var name = "";
                   if (id) {
-                      name = App.dataManager.getProjectName(id)[0].name;
+                      var data = App.dataManager.getProjectName(id);
+                      if (data.length) {
+                          name = data[0].name;
+                      } else {
+                          id = "";
+                      }
                   }
                   mythis.set('importdata', {importing: true, filepath: filePath[0], project: {slug: id, name: name}});
                   mythis.set('route', 'new');
+              }).catch(function(err){
+                  var errmessage = "Error occurred reading file";
+                  if(err !== null) {
+                      errmessage += "\n(" + err + ")";
+                  }
+                  mythis.set('options.title', "Import Failed");
+                  mythis.set('options.body', errmessage);
+                  mythis.set('options.loading', false);
               });
       },
 
@@ -370,15 +383,15 @@
                   })
                   .then(function(){
                       mythis.set('options.title', "Import Complete");
-                      mythis.set('options.body', "Your file has been successfully imported.");
+                      mythis.set('options.body', "Your file has been imported. Please review it carefully.  If it was not formatted properly, text may not appear as desired.");
                       mythis.set('options.loading', false);
                       setTimeout(function() {
                           mythis.updateList();
                       }, 250);
                   }).catch(function(err){
-                      var errmessage = "We're sorry.  An error occurred while trying to import your project";
+                      var errmessage = "Error occurred importing project";
                       if(err !== null) {
-                          errmessage = err;
+                          errmessage += "\n(" + err + ")";
                       }
                       mythis.set('options.title', "Import Failed");
                       mythis.set('options.body', errmessage);
@@ -472,8 +485,14 @@
       },
 
       openBackup: function (event, data) {
-          this.set('backupdata', data.projectmeta);
-          this.$.backup.open();
+          var mythis = this;
+          var meta = data.projectmeta;
+
+          return App.projectsManager.commitProject(meta, mythis.currentuser)
+              .then(function () {
+                  mythis.set('backupdata', meta);
+                  mythis.$.backup.open();
+              });
       },
 
       createRepoBackup: function () {
@@ -532,12 +551,15 @@
               .catch(function (err) {
                   var errmessage = "We're sorry.  An error occurred while trying to upload your project.";
                   var logmessage = "";
-                  if(err.status === 401) {
+                  if (err.status === 401) {
                       errmessage = "Cannot upload without connecting to a Door43 account.";
                   } else if (err.data) {
                       errmessage = err.data;
                   } else {
                       errmessage = err;
+                  }
+                  if (errmessage == "Error: Cannot push because a reference that you are trying to update on the remote contains commits that are not present locally.") {
+                      errmessage = "Cannot upload this project because a project already exists that has no shared history";
                   }
                   if (err.status) {
                       logmessage = "Error: " + err.status + " " + err.data;

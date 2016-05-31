@@ -111,7 +111,7 @@ function ImportManager(configurator, migrator, dataManager) {
                     }
                 }
 
-                if (parsedData['00'].contents) {
+                if (parsedData['00'] && parsedData['00'].contents) {
                     chunks.unshift({
                         chunkmeta: {
                             chapterid: '00',
@@ -165,16 +165,6 @@ function UsfmParser () {
             regEx: /\\s[0-9]*/,
             hasOptions: false,
             type: "sectionHeading"
-        },
-        quote: {
-            regEx: /\\q[0-9]*/,
-            hasOptions: false,
-            type: "quote"
-        },
-        break: {
-            regEx: /\\b/,
-            hasOptions: false,
-            type: "break"
         },
         tableOfContents: {
             regEx: /\\toc[0-2]*/,

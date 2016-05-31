@@ -106,7 +106,7 @@
         <div id="header">
             <div id="title">
                 <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
-                <span>Publish Project</span>
+                <span>Upload Project</span>
             </div>
             <div id="steps">
                 <template is="dom-repeat" items="[[stepslist]]" as="step">
@@ -186,35 +186,36 @@
                     {number: 1, name: "PROJECT", level: "current"},
                     {number: 2, name: "TRANSLATORS", level: "future"},
                     {number: 3, name: "REVIEW", level: "future"},
-                    {number: 4, name: "PUBLISH", level: "future"}
+                    {number: 4, name: "UPLOAD", level: "future"}
                 ]
             } else if (selected === 1) {
                 list = [
                     {number: 1, name: "PROJECT", level: "past"},
                     {number: 2, name: "TRANSLATORS", level: "current"},
                     {number: 3, name: "REVIEW", level: "future"},
-                    {number: 4, name: "PUBLISH", level: "future"}
+                    {number: 4, name: "UPLOAD", level: "future"}
                 ]
             } else if (selected === 2) {
                 list = [
                     {number: 1, name: "PROJECT", level: "past"},
                     {number: 2, name: "TRANSLATORS", level: "past"},
                     {number: 3, name: "REVIEW", level: "current"},
-                    {number: 4, name: "PUBLISH", level: "future"}
+                    {number: 4, name: "UPLOAD", level: "future"}
                 ]
             } else if (selected === 3) {
                 list = [
                     {number: 1, name: "PROJECT", level: "past"},
                     {number: 2, name: "TRANSLATORS", level: "past"},
                     {number: 3, name: "REVIEW", level: "past"},
-                    {number: 4, name: "PUBLISH", level: "current"}
+                    {number: 4, name: "UPLOAD", level: "current"}
                 ]
             }
             return list;
         },
 
         back: function () {
-            this.selected === 0 ? this.route = "translate" : this.selected = this.selected - 1;
+            this.set('selected', 0);
+            this.set('route', "translate");
         },
 
         ready: function() {

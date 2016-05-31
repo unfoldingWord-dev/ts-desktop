@@ -28,7 +28,7 @@ function Db (schemaPath, dbPath) {
         saveDB(sql);
     } else {
         let buffer = fs.readFileSync(dbFilePath);
-        
+
         sql = new SQL.Database(buffer);
     }
 

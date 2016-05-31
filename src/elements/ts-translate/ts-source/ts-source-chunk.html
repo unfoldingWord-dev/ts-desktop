@@ -3,6 +3,7 @@
 <link rel="import" href="../../../components/iron-signals/iron-signals.html">
 
 <link rel="import" href="./ts-source-tab.html">
+<link rel="import" href="./ts-note-marker.html">
 
 <dom-module id="ts-source-chunk">
 
@@ -112,7 +113,7 @@
 		},
 
         observers: [
-            'rendertext(chunk.*)'
+            'rendertext(chunk.srccontent)'
         ],
 
         noextantclass: function (typeclass) {

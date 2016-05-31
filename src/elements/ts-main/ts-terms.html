@@ -1,11 +1,6 @@
 
-<link rel="import" href="../../components/neon-animation/neon-animation.html">
-<link rel="import" href="../../components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../components/paper-button/paper-button.html">
-
-<link rel="import" href="./ts-license.html">
-<link rel="import" href="./ts-statement.html">
-<link rel="import" href="./ts-guidelines.html">
+<link rel="import" href="../../components/iron-signals/iron-signals.html">
 
 <dom-module id="ts-terms">
 
@@ -69,18 +64,6 @@
             margin-top: 15px;
         }
 
-        .popup {
-            position: fixed;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            margin: auto;
-            width: 95%;
-            height: 95%;
-            overflow-y: auto;
-        }
-
     </style>
 
     <template>
@@ -104,18 +87,6 @@
                 <paper-button on-tap="accept">I Agree</paper-button>
             </div>
         </div>
-
-        <paper-dialog id="license" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <ts-license></ts-license>
-        </paper-dialog>
-
-        <paper-dialog id="guidelines" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <ts-guidelines></ts-guidelines>
-        </paper-dialog>
-
-        <paper-dialog id="statement" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <ts-statement></ts-statement>
-        </paper-dialog>
 
     </template>
 
@@ -159,15 +130,15 @@
         },
 
         openlicense: function () {
-            this.$.license.open();
+            this.fire('iron-signal', {name: 'openlicense'});
         },
 
         openguidelines: function () {
-            this.$.guidelines.open();
+            this.fire('iron-signal', {name: 'openguidelines'});
         },
 
         openstatement: function () {
-            this.$.statement.open();
+            this.fire('iron-signal', {name: 'openstatement'});
         },
 
         ready: function() {

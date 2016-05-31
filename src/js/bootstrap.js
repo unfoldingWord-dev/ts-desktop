@@ -4,7 +4,6 @@
 */
 
 'use strict';
-
 /*
  * Redirect all standard output to the console.
  * NB: This is required for the sql.js library to work.
@@ -61,6 +60,9 @@ process.stdout.write = console.log.bind(console);
 
     setMsg('Loading Print Manager...');
     let PrintManager = require('../js/printer').PrintManager;
+
+    setMsg('Loading Renderer...');
+    let Renderer = require('../js/render').Renderer;
 
     setMsg('Loading Locale...');
     let i18n = require('../js/i18n').Locale(path.resolve(path.join(__dirname, '..', '..', 'i18n')));
@@ -173,6 +175,10 @@ process.stdout.write = console.log.bind(console);
 
         migrateManager: migrateManager,
 
+        renderer: (function () {
+            return new Renderer();
+        })(),
+
         keyManager: (function () {
             return new KeyManager(DATA_PATH);
         })(),
@@ -192,7 +198,7 @@ process.stdout.write = console.log.bind(console);
         })(),
 
         importManager: (function () {
-            return new ImportManager(configurator, migrateManager);
+            return new ImportManager(configurator, migrateManager, dataManager);
         })(),
 
         exportManager: (function () {

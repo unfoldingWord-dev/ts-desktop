@@ -88,7 +88,7 @@
                     <div class="bigspace"></div>
                 </template>
             </div>
-            <div id="content">
+            <div id="content" class="sourcefont">
                 <template is="dom-repeat" items="{{chunk.resources}}" as="resource">
                     <ts-resource-data class$="[[pageclass(chunk.state.resource, index)]]" resource="[[resource]]" on-setheight="setheight"></ts-resource-data>
                 </template>

@@ -721,12 +721,16 @@
                 return;
             }
             mythis.set('busy', {signal: true, message: "Saving project to file..."});
-            App.projectsManager.cleanAndCommitProject(this.currentproject.chunks, this.currentproject.projectmeta, this.currentuser).then(function() {
-                setTimeout(function() {
-                    mythis.set('busy', {signal: false, message: "Idle"});
-                }, 1000);
-                mythis.fire('iron-signal', {name: 'updatelist'});
-            });
+            return App.projectsManager.cleanProject(mythis.currentproject.chunks, mythis.currentproject.projectmeta)
+                .then(function() {
+                    return App.projectsManager.commitProject(mythis.currentproject.projectmeta, mythis.currentuser);
+                })
+                .then(function() {
+                    setTimeout(function() {
+                        mythis.set('busy', {signal: false, message: "Idle"});
+                    }, 1000);
+                    mythis.fire('iron-signal', {name: 'updatelist'});
+                });
         },
 
         savechunk: function (event, data) {
@@ -738,13 +742,14 @@
                 return;
             }
             mythis.set('busy', {signal: true, message: "Saving chunk to file..."});
-            App.projectsManager.saveTargetChunk(data.chunk, this.currentproject.projectmeta).then(function() {
-                setTimeout(function() {
-                    mythis.set('busy', {signal: false, message: "Idle"});
-                }, 1000);
-                mythis.createchapters();
-                mythis.addcontributor();
-            });
+            return App.projectsManager.saveTargetChunk(data.chunk, this.currentproject.projectmeta)
+                .then(function() {
+                    setTimeout(function() {
+                        mythis.set('busy', {signal: false, message: "Idle"});
+                    }, 1000);
+                    mythis.createchapters();
+                    mythis.addcontributor();
+                });
         },
 
         savemanifest: function () {
@@ -756,11 +761,12 @@
                 return;
             }
             mythis.set('busy', {signal: true, message: "Saving manifest to file..."});
-            App.projectsManager.saveTargetManifest(this.currentproject.projectmeta).then(function() {
-                setTimeout(function() {
-                    mythis.set('busy', {signal: false, message: "Idle"});
-                }, 1000);
-            });
+            return App.projectsManager.saveTargetManifest(this.currentproject.projectmeta)
+                .then(function() {
+                    setTimeout(function() {
+                        mythis.set('busy', {signal: false, message: "Idle"});
+                    }, 1000);
+                });
         },
 
         addcontributor: function () {
@@ -867,9 +873,11 @@
             var frames;
             var volume = "vol1";
             var chunkarray = [];
+            var sources = App.dataManager.getSources();
+            var filtered = _.filter(sources, {'language_id': "en", 'resource_id': "ulb", 'checking_level': 3});
 
             if (type === "tw") {
-                frames = App.dataManager.getAllWords(172);
+                frames = App.dataManager.getAllWords(filtered[0]);
             } else if (type === "ta") {
                 if (projectmeta.project.id !== "ta") {
                     volume = projectmeta.project.id;
@@ -1271,6 +1279,7 @@
 
         gobackup: function () {
             var projectmeta = this.currentproject.projectmeta;
+            this.saveproject();
             this.fire('iron-signal', {name: 'openbackup', data: {projectmeta: projectmeta}});
         },
 

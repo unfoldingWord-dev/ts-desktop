@@ -250,9 +250,9 @@
              * Apply user preferences for app's look
              */
             applyPrefAppearance: function(overwrite) {
-                var targetfont = this.getUserSetting('targetfont');
-                var sourcefont = this.getUserSetting('sourcefont');
-                var fontSizeVal = this.getUserSetting('fontsize').toLowerCase();
+                var targetfont = this.getUserSetting('targetfont').name;
+                var sourcefont = this.getUserSetting('sourcefont').name;
+                var fontSizeVal = this.getUserSetting('fontsize').name.toLowerCase();
                 var fontSize = fontSizeMap[fontSizeVal];
                 var sheet = document.styleSheets[0];
                 var rules = sheet.cssRules;

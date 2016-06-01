@@ -167,7 +167,7 @@
             }
         },
 
-        ready: function() {
+        ready: function () {
             this.settings = App.configurator.refreshUserSetting();
             this.settings = App.configurator.setUserSetting('appversion', App.configurator.getAppVersion());
             this.settings = App.configurator.setUserSetting('datapath', App.configurator.getValue('rootdir'));
@@ -176,42 +176,42 @@
             this.settings = App.configurator.setUserSetting('datalocation', untildify(location));
         },
 
-        back: function() {
+        back: function () {
             this.route = App.configurator.getValue("backto");
         },
 
-        _isEnabled: function(bool) {
+        _isEnabled: function (bool) {
             return bool ? true : false;
         },
 
-        _isVisible: function(bool) {
+        _isVisible: function (bool) {
             if (bool === undefined) {
                 bool = true;
             }
             return bool;
         },
 
-        _capitalize: function(text) {
-            return text.charAt(0).toUpperCase() + text.slice(1).replace(/( [a-z])/g, function(match) {
+        _capitalize: function (text) {
+            return text.charAt(0).toUpperCase() + text.slice(1).replace(/( [a-z])/g, function (match) {
                 return match.toUpperCase();
             });
         },
 
-        _computeHelpText: function(setting) {
+        _computeHelpText: function (setting) {
             var text;
             if (typeof setting.base.value === "number" && setting.base.helpText) {
                 text = setting.base.helpText.replace("<int>", setting.base.value);
             } else {
-                text = setting.base.helpText || setting.base.value || setting.base.nullText;
+                text = setting.base.helpText || setting.base.value.name || setting.base.value || setting.base.nullText;
             }
             return text;
         },
 
-        _isBoolean: function(value) {
+        _isBoolean: function (value) {
             return typeof value === 'boolean';
         },
 
-        _runTapHandler: function(event) {
+        _runTapHandler: function (event) {
             if (!event.target.dataEnabled) {
                 return false;
             }
@@ -241,7 +241,7 @@
             }
         },
 
-        _onSettingConfirm: function(path, name) {
+        _onSettingConfirm: function (path, name) {
             var value = document.querySelector('ts-setting-modal').selected || document.querySelector('ts-setting-modal').text;
             this.set(path, value);
             this.closeSettingModal();
@@ -250,11 +250,11 @@
             App.configurator.applyPrefBehavior();
         },
 
-        _onSettingCancel: function() {
+        _onSettingCancel: function () {
             this.closeSettingModal();
         },
 
-        _updateDataLocation: function() {
+        _updateDataLocation: function () {
             var oldPath = App.configurator.getUserSetting('datalocation');
             var newPath = App.ipc.sendSync('open-file', {options: {defaultPath: oldPath, properties: ['openDirectory', 'createDirectory']}});
             if (!newPath) {
@@ -289,12 +289,12 @@
             return modal;
         },
 
-        closeSettingModal: function() {
+        closeSettingModal: function () {
             var modal = document.querySelector('ts-setting-modal');
             this.removeChild(modal);
         },
 
-        saveSettings: function() {
+        saveSettings: function () {
             App.configurator.saveUserSettingArr(this.settings);
         }
 

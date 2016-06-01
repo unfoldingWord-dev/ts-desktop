@@ -10,17 +10,8 @@ var _ = require('lodash'),
 
 function PrintManager(configurator) {
 
-    var download = utils.download;
-    var fontDir = path.resolve({
-        win32:  '/Windows/fonts',
-        darwin: '/Library/Fonts',
-        linux:  '/usr/share/fonts/truetype'
-    }[process.platform]);
-    var srcDir = path.resolve(path.join(__dirname, '..'));
-    var targetfont = path.join(srcDir, 'assets', 'NotoSans-Regular.ttf');
-    //var targetfont = configurator.getUserSetting('font');
-    //var targetfont = fontDir + "/";
-    var defaultfont = 'Helvetica';
+    var download = utils.download;    
+    var srcDir = path.resolve(path.join(__dirname, '..'));    
     var imageRoot = path.join(configurator.getValue('rootdir'), 'images');
     var imagePath = path.join(imageRoot, 'obs');
     var zipPath = path.join(imageRoot, 'obs-images.zip');
@@ -84,6 +75,11 @@ function PrintManager(configurator) {
             var mythis = this;
             if(filePath.split('.').pop() !== 'pdf') {
                 filePath += '.pdf';
+            }
+            var defaultfont = path.join(srcDir, 'assets', 'NotoSans-Regular.ttf');
+            var targetfont = configurator.getUserSetting('targetfont').path;
+            if (targetfont === "default") {
+                targetfont = defaultfont;
             }
 
             return new Promise(function (resolve, reject) {

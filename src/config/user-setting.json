@@ -20,7 +20,7 @@
     {
         "name": "targetfont",
         "mainText": "Target Translation Font",
-        "value": "Roboto",
+        "value": {"path": "default", "name": "Roboto"},
         "options": [],
         "group": "general",
         "enabled": true,
@@ -29,7 +29,7 @@
     {
         "name": "sourcefont",
         "mainText": "Source Translation Font",
-        "value": "Roboto",
+        "value": {"path": "default", "name": "Roboto"},
         "options": [],
         "group": "general",
         "enabled": true,
@@ -38,8 +38,8 @@
     {
         "name": "fontsize",
         "mainText": "Font Size",
-        "value": "Normal",
-        "options": ["Small", "Normal", "Large"],
+        "value": {"name": "Normal"},
+        "options": [{"name": "Small"}, {"name": "Normal"}, {"name": "Large"}],
         "group": "general",
         "enabled": true,
         "visible": true

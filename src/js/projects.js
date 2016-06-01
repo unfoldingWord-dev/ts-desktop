@@ -366,7 +366,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 })
                 .catch(function (err) {
                     reporter.logError(err);
-                    throw "Unable to delete file at this time.";
+                    throw "Unable to delete file at this time. You may need to restart the app first.";
                 });
         }
     };

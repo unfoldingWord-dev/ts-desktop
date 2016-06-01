@@ -88,7 +88,7 @@
             	<template is="dom-if" if="{{selected}}">
 	            	<paper-radio-group selected="[[selected]]">
 		                <template is="dom-repeat" items="[[options]]" as="option">
-	                        <paper-radio-button name$="[[option]]" data-value$="{{option}}" class="row" on-tap="selectOption" checked$="{{_checkSelected(selected,option)}}">[[option]]</paper-radio-button>
+	                        <paper-radio-button name$="[[option]]" data-value$="{{option}}" class="row" on-tap="selectOption" checked$="{{_checkSelected(selected,option)}}">[[option.name]]</paper-radio-button>
 		                </template>
 	                </paper-radio-group>
                 </template>
@@ -128,37 +128,37 @@
             	type: Array
             },
             selected: {
-            	type: String
+            	type: Object
             },
             text: {
             	type: String
             }
         },
 
-        ready: function() {
-        	this.async(function() {
+        ready: function () {
+        	this.async(function () {
 				if (!this.options) {
 					document.querySelector('paper-input').$.input.focus();
 				}
         	}, 30);
         },
 
-        onOpen: function() {
+        onOpen: function () {
         },
 
-        _checkSelected: function(selected,option) {
-        	return option === selected;
+        _checkSelected: function (selected, option) {
+        	return option.name === selected.name;
         },
 
-        selectOption: function(event) {
+        selectOption: function (event) {
         	this.selected = event.model.option;
         },
 
-        cancel: function() {
+        cancel: function () {
             this.fire('setting-cancel');
         },
 
-        confirm: function() {
+        confirm: function () {
             this.fire('setting-confirm');
         }
     });

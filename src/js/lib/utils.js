@@ -377,26 +377,54 @@
                 linux:  '/usr/share/fonts/truetype'
             }[process.platform]);
 
-            var fonts = fs.readdirSync(fontDir).map(function (name) {
+            var fontpaths = fs.readdirSync(fontDir).map(function (name) {
                 return path.join(fontDir, name);
             });
 
-            var list = fonts.map(function (font) {
-                var f = false;
+            var list = fontpaths.map(function (fontpath) {
+                var font = false;
                 try {
-                    f = fontkit.openSync(font);
+                    font = fontkit.openSync(fontpath);
                 } catch (e) {}
-                return f;
-            }).map(function (font) {
+                if (font) {
+                    return {path: fontpath, font: font};
+                } else {
+                    return false;
+                }
+            }).map(function (fontobject) {
                 var name = false;
                 try {
-                    name = font.familyName;
+                    name = fontobject.font.familyName;
                 } catch (e) {}
-                return name;
+                if (name) {
+                    return {path: fontobject.path, name: name};
+                } else {
+                    return false;
+                }
             });
-            list.unshift('Noto Sans', 'Roboto');
+            
+            list = _.compact(list);
+            
+            list = list.sort(function (a, b) {
+                if (a.name.toLowerCase() > b.name.toLowerCase()) {
+                    return 1;
+                } else if (a.name.toLowerCase() < b.name.toLowerCase()) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            });
 
-            return _.uniq(_.compact(list));
+            for (var i = 0; i < list.length - 1; i++) {
+                if (list[i].name === list[i+1].name) {
+                    list.splice(i, 1);
+                    i--;
+                }
+            }
+
+            list.unshift({path: "default", name: 'Noto Sans'}, {path: "default", name: 'Roboto'});
+
+            return list;
         },
 
         getTimeStamp: function () {

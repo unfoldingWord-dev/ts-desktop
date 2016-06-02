@@ -549,14 +549,17 @@
                   })
                   .then(function (exists) {
                       console.log(exists, restore);
-                      if (exists && !restore) {
-                          return App.gitManager.merge(mythis.currentuser, targetPath, tmpPath, 3);
+                      if (exists) {
+                          if (restore) {
+                              console.log('trying to move and clobber');
+                              return App.utils.fs.move(tmpPath, targetPath, {clobber: true});
+                          } else {
+                              console.log("trying to merge");
+                              return App.gitManager.merge(mythis.currentuser, targetPath, tmpPath, 3);
+                          }
                       } else {
                           console.log('trying to move');
-                          return App.utils.fs.remove(targetPath)
-                              .then(function () {
-                                  return App.utils.fs.move(tmpPath, targetPath, {clobber: true});
-                              });
+                          return App.utils.fs.move(tmpPath, targetPath, {clobber: true});
                       }
                   })
                   .then(function () {

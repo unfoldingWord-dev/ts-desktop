@@ -396,6 +396,7 @@
                       mythis.set('options.title', "Import Failed");
                       mythis.set('options.body', errmessage);
                       mythis.set('options.loading', false);
+                      return App.utils.fs.remove(App.configurator.getValue('tempDir'));
                   });
           }, 500);
       },
@@ -487,6 +488,9 @@
                               .then(function () {
                                   return App.utils.fs.remove(App.configurator.getValue('tempDir'));
                               })
+                              .catch(function () {
+                                  return App.utils.fs.remove(App.configurator.getValue('tempDir'));
+                              });
                       }
                   });
           }, 500);
@@ -582,6 +586,7 @@
                       mythis.set('options.title', "Import Failed");
                       mythis.set('options.body', errmessage);
                       mythis.set('options.loading', false);
+                      return App.utils.fs.remove(App.configurator.getValue('tempDir'));
                   });
           }, 500);
       },
@@ -750,6 +755,7 @@
                       mythis.set('options.title', "Restore Failed");
                       mythis.set('options.body', errmessage);
                       mythis.set('options.loading', false);
+                      return App.utils.fs.remove(App.configurator.getValue('tempDir'));
                   });
           }, 500);
       },

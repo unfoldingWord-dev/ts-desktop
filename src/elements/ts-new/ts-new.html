@@ -318,16 +318,24 @@
                 mythis.startimport();
             } else {
                 mythis.animationConfig.exit.name = 'slide-left-animation';
-                App.projectsManager.createTargetTranslation([], newprojectmeta, this.currentuser).then(function() {
-                    setTimeout(function() {
-                        mythis.set('busy', {signal: false, message: "Idle"});
-                    }, 1000);
-                    mythis.fire('iron-signal', {name: 'updatelist'});
-                    mythis.fire('iron-signal', {name: 'loadproject', data: {projectmeta: newprojectmeta, type: "new"}});
-                    setTimeout(function() {
-                        mythis.set('selected', 0);
-                    }, 5000);
-                });
+                App.projectsManager.createTargetTranslation([], newprojectmeta, this.currentuser)
+                    .then(function() {
+                        setTimeout(function() {
+                            mythis.set('busy', {signal: false, message: "Idle"});
+                        }, 1000);
+                        mythis.fire('iron-signal', {name: 'updatelist'});
+                        mythis.fire('iron-signal', {name: 'loadproject', data: {projectmeta: newprojectmeta, type: "new"}});
+                        setTimeout(function() {
+                            mythis.set('selected', 0);
+                        }, 5000);
+                    })
+                    .catch(function (err) {
+                        mythis.set('options', {title: "Error", body: err});
+                        popup.open();
+                        setTimeout(function() {
+                            mythis.set('busy', {signal: false, message: "Idle"});
+                        }, 1000);
+                    });
             }
         },
 

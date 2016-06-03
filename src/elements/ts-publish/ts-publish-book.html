@@ -85,6 +85,7 @@
             var projectmeta = this.currentproject.projectmeta;
             var name = projectmeta.project.name;
             var typeclass = projectmeta.project_type_class;
+            var direction = projectmeta.target_language.direction;
 
             var transdata = translation.map(function(chunk, index){
                 var start;
@@ -99,7 +100,7 @@
                     start = chunk.chunkmeta.frame;
                     end = chunk.chunkmeta.frame;
                 }
-                return {transcontent: chunk.transcontent, helpscontent: chunk.helpscontent, completed: chunk.completed, chunkmeta: chunk.chunkmeta, index: index, start: start, end: end, combined: false, typeclass: typeclass};
+                return {transcontent: chunk.transcontent, helpscontent: chunk.helpscontent, completed: chunk.completed, chunkmeta: chunk.chunkmeta, index: index, start: start, end: end, combined: false, typeclass: typeclass, direction: direction};
             });
 
             for (var i = 0; i < transdata.length; i++) {

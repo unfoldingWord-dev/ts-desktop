@@ -13,6 +13,7 @@
 <link rel="import" href="./ts-new-project-button.html">
 <link rel="import" href="./ts-home-sidebar.html">
 <link rel="import" href="./ts-completion-icon.html">
+<link rel="import" href="./ts-resource-options.html">
 
 <dom-module id="ts-home">
 
@@ -83,12 +84,11 @@
         }
 
         #list {
-            max-height: calc(100vh - 140px);
+            max-height: calc(100vh - 200px);
             display: flex;
             flex-direction: column;
             font-size: 110%;
             width: 620px;
-            box-shadow: 0 2px 3px 2px var(--border-color);
             overflow-y: auto;
         }
 
@@ -149,6 +149,17 @@
             margin: auto;
         }
 
+        .buttons {
+            display: flex;
+            justify-content: flex-end;
+            padding: 0 50px;
+            color: var(--secondary-text-color);
+        }
+
+        .buttons paper-button:hover {
+            color: var(--accent-color);
+        }
+
         .popup paper-button:hover {
             color: var(--accent-color);
         }
@@ -161,7 +172,7 @@
             display: flex;
             flex-direction: column;
             width: 400px;
-            height: 350px;
+            height: 420px;
         }
 
         #info p {
@@ -169,17 +180,32 @@
             font-size: 110%;
         }
 
-        #info .offset {
-            transform: translateX(30px);
+        #infoheader {
+            flex: 0 0 30px;
+        }
+
+        #infodata {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #namebox {
+            flex: 0 0 100px;
+            padding-left: 30px;
+            border: 1px solid var(--border-color);
+            overflow-y: auto;
         }
 
         #infoicons {
             border-bottom: 1px solid var(--border-color);
             border-top: 1px solid var(--border-color);
+            flex: 0 0 60px;
             align-self: stretch;
             display: flex;
             justify-content: space-between;
-            padding: 10px 20px;
+            align-items: center;
+            padding: 0 20px;
         }
 
         #righticons {
@@ -189,8 +215,10 @@
         }
 
         #infobuttons {
+            flex: 0 0 20px;
             display: flex;
             justify-content: center;
+            align-items: center;
         }
 
         #delete {
@@ -212,8 +240,33 @@
             padding: 0 50px;
         }
 
+        #resource {
+            width: 300px;
+            height: 300px;
+        }
+
+        #resource * {
+            margin: 0;
+            padding: 0;
+        }
+
+        #confirmchange {
+            width: 450px;
+            height: 200px;
+        }
+
+        #confirmchange p {
+            font-size: 110%;
+        }
+
         .space {
             padding-left: 5px;
+        }
+
+        .link {
+            cursor: pointer;
+            color: var(--accent-color);
+            padding-left: 20px;
         }
 
         .hide {
@@ -270,16 +323,21 @@
         </div>
 
         <paper-dialog id="info" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <h2><span>[[currentinfo.project.name]]</span> — <span>[[currentinfo.target_language.name]]</span></h2>
-            <div>
+            <div id="infoheader">
+                <h2><span>[[currentinfo.project.name]]</span> — <span>[[currentinfo.target_language.name]]</span></h2>
+            </div>
+            <div id="infodata">
                 <p>{{locale.project}}: <strong><span>[[currentinfo.project.name]]</span> (<span>[[currentinfo.project.id]]</span>)</strong></p>
-                <p>{{locale.target_language}}: <strong><span>[[currentinfo.target_language.name]]</span> (<span>[[currentinfo.target_language.id]]</span>)</strong></p>
+                <p>{{locale.target_language}}: <strong><span>[[currentinfo.target_language.name]]</span> (<span>[[currentinfo.target_language.id]]</span>)</strong><span class="link" on-tap="changelanguage">Change</span></p>
+                <p class$="[[idclass(currentinfo.resource.id)]]">Resource type: <strong><span>[[currentinfo.resource.id]]</span></strong><span class="link" on-tap="openresource">Change</span></p>
                 <p>{{locale.progress}}: <strong><span>[[currentinfo.completion]]</span>%</strong></p>
                 <p>{{locale.translators}}:</p>
                 <template is="dom-if" if="{{currentinfo.translators.length}}">
-                    <template is="dom-repeat" items="{{currentinfo.translators}}" as="user">
-                        <p class="offset"><strong>{{user}}</strong></p>
-                    </template>
+                    <div id="namebox">
+                        <template is="dom-repeat" items="{{currentinfo.translators}}" as="user">
+                            <p><strong>{{user}}</strong></p>
+                        </template>
+                    </div>
                 </template>
             </div>
             <div id="infoicons">
@@ -288,7 +346,7 @@
                 </div>
                 <div id="righticons">
                     <paper-icon-button on-tap="goprint" class="smallicon" icon="print" title="print"></paper-icon-button>
-                    <paper-icon-button on-tap="gopublish" class="smallicon" icon="cloud-done" title="publish"></paper-icon-button>
+                    <paper-icon-button on-tap="gopublish" class="smallicon" icon="cloud-done" title="upload"></paper-icon-button>
                     <paper-icon-button on-tap="gobackup" class="smallicon" icon="file-upload" title="backup"></paper-icon-button>
                 </div>
             </div>
@@ -306,6 +364,21 @@
                 <paper-button on-tap="closedelete">{{locale.no}}</paper-button>
                 <paper-button on-tap="deleteproject">{{locale.confirm}}</paper-button>
             </div>
+        </paper-dialog>
+
+        <paper-dialog id="confirmchange" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <h2>File already exists</h2>
+            <div>
+                <p>This project already exists.  If you continue with this change, the two projects will be merged together.</p>
+            </div>
+            <div class="buttons">
+                <paper-button on-tap="firechange">Continue</paper-button>
+                <paper-button on-tap="cancelconfirm">Cancel</paper-button>
+            </div>
+        </paper-dialog>
+
+        <paper-dialog id="resource" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <ts-resource-options currentinfo="[[currentinfo]]" changedata="{{changedata}}" on-confirm="openconfirm" on-change="firechange" on-cancel="cancelresource"></ts-resource-options>
         </paper-dialog>
 
         <ts-new-project-button route="{{route}}"></ts-new-project-button>
@@ -338,6 +411,10 @@
                 type: Array,
                 value: []
             },
+            changedata: {
+                type: Object,
+                value: {}
+            },
             locale: {
                 type: Object,
                 value: {}
@@ -362,8 +439,44 @@
             return id === "ulb" || id === "udb" ? 'space' : 'hide';
         },
 
+        idclass: function (id) {
+            return id === "" || id === "obs" ? 'hide' : '';
+        },
+
         checkicon: function (projectmeta) {
             return projectmeta.project.id === "obs" || projectmeta.project_type_class === "extant" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
+        },
+
+        changelanguage: function () {
+            var projectmeta = this.currentinfo;
+            this.closeinfo();
+            this.fire('iron-signal', {name: 'gotolanguage', data: {projectmeta: projectmeta}});
+        },
+
+        openresource: function () {
+            this.closeinfo();
+            this.$.resource.open();
+        },
+
+        cancelresource: function () {
+            this.$.resource.close();
+            this.$.info.open();
+        },
+
+        cancelconfirm: function () {
+            this.$.confirmchange.close();
+            this.$.resource.open();
+        },
+
+        openconfirm: function () {
+            this.$.resource.close();
+            this.$.confirmchange.open();
+        },
+
+        firechange: function () {
+            this.$.confirmchange.close();
+            this.fire('iron-signal', {name: 'changeproject', data: this.changedata});
+            this.$.resource.close();
         },
 
         gopublish: function () {
@@ -409,18 +522,10 @@
         },
 
         deleteproject: function () {
-            var mythis = this;
             var projectmeta = this.currentinfo;
-            var key = projectmeta.unique_id;
-            App.projectsManager.deleteTargetTranslation(projectmeta).then(function() {
-                App.configurator.unsetValue(key + "-chapter");
-                App.configurator.unsetValue(key + "-index");
-                App.configurator.unsetValue(key + "-selected");
-                App.configurator.unsetValue(key + "-completion");
-                App.configurator.unsetValue(key + "-source");
-                mythis.fire('iron-signal', {name: 'updatelist'});
-                mythis.$.delete.close();
-            });
+
+            this.fire('iron-signal', {name: 'deleteproject', data: {projectmeta: projectmeta}});
+            this.$.delete.close();
         },
 
         start: function () {

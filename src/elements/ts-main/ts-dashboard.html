@@ -321,6 +321,9 @@
                   return App.utils.fs.move(changedata.oldpaths.projectDir, changedata.newpaths.projectDir, {clobber: true})
                       .then(function () {
                           return App.projectsManager.saveTargetManifest(changedata.newmeta);
+                      })
+                      .then(function () {
+                          return App.projectsManager.commitProject(changedata.newmeta, mythis.currentuser);
                       });
               }
           };

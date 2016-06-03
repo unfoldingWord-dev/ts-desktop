@@ -37,7 +37,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
         },
 
         updateManifestToMeta: function (manifest) {
-            var meta = manifest;
+            var meta = _.cloneDeep(manifest);
             try {
                 if (manifest.project.name === "") {
                     meta.project.name = dataManager.getProjectName(manifest.project.id)[0].name;
@@ -72,13 +72,21 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
 
                 meta.unique_id = this.makeUniqueId(manifest);
 
+                if (!manifest.finished_chunks) {
+                    meta.finished_chunks = [];
+                }
+
                 var completion = configurator.getValue(meta.unique_id + "-completion");
                 if (completion !== undefined && completion !== "") {
                     meta.completion = completion;
                 } else {
-                    if (manifest.source_translations.length) {
+                    if (manifest.source_translations.length && manifest.finished_chunks) {
                         var frames = dataManager.getSourceFrames(manifest.source_translations[0]);
-                        meta.completion = Math.round((meta.finished_chunks.length / frames.length) * 100);
+                        if (frames.length) {
+                            meta.completion = Math.round((meta.finished_chunks.length / frames.length) * 100);
+                        } else {
+                            meta.completion = 0;
+                        }
                     } else {
                         meta.completion = 0;
                     }
@@ -233,16 +241,16 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 return Promise.all(_.map(data, cleanChapterDir));
             };
 
-            return cleanChapterDirs();                
+            return cleanChapterDirs();
         },
-        
+
         commitProject: function (meta, user) {
             var paths = utils.makeProjectPaths(targetDir, meta);
 
             return git.init(paths.projectDir)
                 .then(function () {
                     return git.commitAll(user, paths.projectDir);
-                });            
+                });
         },
 
         loadProjectsList: function () {

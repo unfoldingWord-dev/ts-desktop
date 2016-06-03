@@ -190,6 +190,11 @@
                 type: Object,
                 value: {}
             },
+            busy: {
+                type: Object,
+                value: {signal: false, message: "Idle"},
+                notify: true
+            },
             animationConfig: {
                 value: function () {
                     return {
@@ -240,6 +245,10 @@
 
         createproject: function () {
             var mythis = this;
+            if (mythis.busy.signal) {
+                return;
+            }
+            mythis.set('busy', {signal: true, message: "Creating project..."});
             var project = this.newdata.project;
             var language = this.newdata.language;
             var typedata = this.newdata.typedata;
@@ -258,42 +267,61 @@
                 "parent_draft": {}
             };
             var newprojectmeta = App.projectsManager.updateManifestToMeta(newprojectmanifest);
-            if(newprojectmeta === null) {
-                this.set('options', {title: "Unknown Error", body: "The project information is corrupt"});
+
+            if (newprojectmeta === null) {
+                mythis.set('options', {title: "Unknown Error", body: "The project information is corrupt"});
                 popup.open();
+                setTimeout(function() {
+                    mythis.set('busy', {signal: false, message: "Idle"});
+                }, 1000);
                 return;
             }
 
-            if (this.importdata.importing) {
-                this.importdata.projectmeta = newprojectmeta;
+            if (mythis.importdata.importing) {
+                mythis.importdata.projectmeta = newprojectmeta;
             }
 
             for (var i = 0; i < projectarray.length; i++) {
                 if (projectarray[i].unique_id === newprojectmeta.unique_id) {
-                    if (this.importdata.importing) {
-                        this.importdata.overwrite = true;
-                        this.$.confirmimport.open();
+                    if (mythis.importdata.importing) {
+                        mythis.importdata.overwrite = true;
+                        mythis.$.confirmimport.open();
+                        setTimeout(function() {
+                            mythis.set('busy', {signal: false, message: "Idle"});
+                        }, 1000);
                         return;
                     } else {
-                        this.set('options', {title: "Duplicate Found", body: "This project already exists"});
+                        mythis.set('options', {title: "Duplicate Found", body: "This project already exists"});
                         popup.open();
+                        setTimeout(function() {
+                            mythis.set('busy', {signal: false, message: "Idle"});
+                        }, 1000);
                         return;
                     }
                 }
             }
 
             if (!typedata.allowed) {
-                this.set('options', {title: "No Translation", body: "Cannot start this project until a standard translation project exists"});
+                mythis.set('options', {title: "No Translation", body: "Cannot start this project until a standard translation project exists"});
                 popup.open();
+                setTimeout(function() {
+                    mythis.set('busy', {signal: false, message: "Idle"});
+                }, 1000);
                 return;
             }
 
-            if (this.importdata.importing) {
-                this.importdata.overwrite = false;
-                this.startimport();
+            if (mythis.importdata.importing) {
+                mythis.importdata.overwrite = false;
+                setTimeout(function() {
+                    mythis.set('busy', {signal: false, message: "Idle"});
+                }, 1000);
+                mythis.startimport();
             } else {
-                this.animationConfig.exit.name = 'slide-left-animation';
+                mythis.animationConfig.exit.name = 'slide-left-animation';
                 App.projectsManager.createTargetTranslation([], newprojectmeta, this.currentuser).then(function() {
+                    setTimeout(function() {
+                        mythis.set('busy', {signal: false, message: "Idle"});
+                    }, 1000);
                     mythis.fire('iron-signal', {name: 'updatelist'});
                     mythis.fire('iron-signal', {name: 'loadproject', data: {projectmeta: newprojectmeta, type: "new"}});
                     setTimeout(function() {

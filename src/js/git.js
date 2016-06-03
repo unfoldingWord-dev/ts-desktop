@@ -126,16 +126,20 @@ function GitManager() {
                     }).catch(utils.ret(repo));
                 })
                 .then(function (repo) {
+                    console.log("step create");
                     NodeGit.Remote.create(repo, remoteName, remotePath);
                     return repo;
                 })
                 .then(function (repo) {
+                    console.log("step fetch");
                     return repo.fetch(remoteName).then(utils.ret(repo));
                 })
                 .then(function (repo) {
+                    console.log("step symbolic");
                     return NodeGit.Reference.symbolicCreate(repo, remoteHead, remoteMaster, 1, 'symbolic-ref').then(utils.ret(repo));
                 })
                 .then(function (repo) {
+                    console.log("step getRef");
                     return repo.getReference(remoteHead).then(function (ref) {
                         return repo.createBranch(tempBranch, ref.target()).then(utils.ret(repo));
                     })
@@ -155,12 +159,14 @@ function GitManager() {
                     });
                 })
                 .then(function (data) {
+                    console.log("step Merge");
                     return NodeGit.Merge.commits(data.repo, data.master, data.temp, {fileFavor: favor}).then(function (index) {
                         data.index = index;
                         return data;
                     });
                 })
                 .then(function (data) {
+                    console.log("step write to");
                     return data.index.writeTreeTo(data.repo).then(function (merge) {
                         data.merge = merge;
                         return data;

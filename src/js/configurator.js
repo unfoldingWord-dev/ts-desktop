@@ -249,10 +249,10 @@
             /**
              * Apply user preferences for app's look
              */
-            applyPrefAppearance: function(overwrite) {
+            applyPrefAppearance: function() {
                 var targetfont = this.getUserSetting('targetfont').name;
                 var sourcefont = this.getUserSetting('sourcefont').name;
-                var fontSizeVal = this.getUserSetting('fontsize').name.toLowerCase();
+                var fontSizeVal = this.getUserSetting('targetsize').name.toLowerCase();
                 var fontSize = fontSizeMap[fontSizeVal];
                 var sheet = document.styleSheets[0];
                 var rules = sheet.cssRules;

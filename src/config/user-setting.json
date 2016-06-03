@@ -9,9 +9,9 @@
         "visible": true
     },
     {
-        "name": "font",
+        "name": "appfont",
         "mainText": "App Font",
-        "value": "Roboto",
+        "value": {"path": "default", "name": "Roboto"},
         "options": [],
         "group": "general",
         "enabled": true,
@@ -36,7 +36,7 @@
         "visible": true
     },
     {
-        "name": "fontsize",
+        "name": "targetsize",
         "mainText": "Font Size",
         "value": {"name": "Normal"},
         "options": [{"name": "Small"}, {"name": "Normal"}, {"name": "Large"}],

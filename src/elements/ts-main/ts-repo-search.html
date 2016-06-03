@@ -1,0 +1,190 @@
+
+<link rel="import" href="../../components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../../components/iron-signals/iron-signals.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/iron-input/iron-input.html">
+<link rel="import" href="../../components/iron-list/iron-list.html">
+
+<dom-module id="ts-repo-search">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 10px 30px;
+        }
+
+        #body {
+            height: 350px;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            border-bottom: 1px solid var(--primary-text-color);
+            border-top: 1px solid var(--primary-text-color);
+        }
+
+        #footer {
+            display: flex;
+            justify-content: flex-end;
+            margin: 10px 50px;
+        }
+
+        #footer paper-button:hover {
+            color: var(--accent-color);
+        }
+
+        #filters {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        input {
+            font-size: 110%;
+            font-style: italic;
+            width: 150px;
+            padding: 0.25em 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            margin: 0;
+            padding: 1em 50px;
+            border-bottom: 1px solid var(--border-color);
+            transition: background .3s, color .3s;
+            cursor: pointer;
+        }
+
+        .row:hover {
+            background: var(--accent-color-light);
+        }
+
+        paper-spinner {
+            --paper-spinner-layer-1-color: var(--accent-color);
+            --paper-spinner-layer-2-color: var(--primary-color);
+            --paper-spinner-layer-3-color: var(--accent-color);
+            --paper-spinner-layer-4-color: var(--primary-color);
+        }
+
+    </style>
+
+    <template>
+
+        <div id="header">
+            <h2>Search for Projects</h2>
+            <div id="filters">
+                <input is="iron-input" bind-value="{{username}}" placeholder="Username" disabled="{{restore}}">
+                <paper-spinner id="spinner"></paper-spinner>
+                <input is="iron-input" bind-value="{{project}}" placeholder="Project Name">
+            </div>
+        </div>
+        <iron-list id="body" items="{{repos}}" as="repo">
+            <template>
+                <div class="row" on-tap="selectrepo">
+                    <span>[[repo.user]]</span>
+                    <span>[[repo.project]]</span>
+                </div>
+            </template>
+        </iron-list>
+        <div id="footer">
+            <paper-button on-tap="cancel">Cancel</paper-button>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-repo-search',
+
+        properties: {
+            repos: {
+                type: Array,
+                value: []
+            },
+            username: {
+                type: String,
+                value: ''
+            },
+            project: {
+                type: String,
+                value: ''
+            },
+            restore: {
+                type: Boolean,
+                value: false
+            },
+            p: {
+                type: Object,
+                value: function () {
+                    return Promise.resolve([]);
+                }
+            },
+            timer: {
+                type: Number
+            }
+        },
+
+        observers: [
+            'searchRepos(username, project)'
+        ],
+
+        cancel: function () {
+            this.fire('cancel');
+        },
+
+        selectrepo: function (e) {
+            var repo = e.model.repo;
+            this.fire('iron-signal', {name: 'importfromrepo', data: {repo: repo, restore: this.restore}});
+        },
+
+        searchRepos: function (username, project) {
+            var mythis = this;
+
+            window.clearTimeout(mythis.timer);
+            mythis.$.spinner.active = false;
+
+            if (username || project) {
+                mythis.$.spinner.active = true;
+
+                mythis.timer = window.setTimeout(function () {
+                    mythis.p = mythis.p.then(function () {
+                        return App.userManager.retrieveRepos(username, project).then(function (repos) {
+                            mythis.$.spinner.active = false;
+                            mythis.set('repos', repos);
+                        })
+                    });
+                }, 660);
+            } else {
+                mythis.set('repos', []);
+            }
+        },
+
+        ready: function () {
+            this.$.spinner.active = false;
+        },
+
+        attached: function () {
+            window.clearTimeout(this.timer);
+        },
+
+        detached: function () {
+            window.clearTimeout(this.timer);
+        }
+
+    });
+
+</script>

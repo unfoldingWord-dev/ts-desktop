@@ -19,24 +19,37 @@ function ExportManager(configurator, git) {
             var paths = utils.makeProjectPaths(targetDir, meta);
             var name = meta.unique_id;
 
-            return git.getHash(paths.projectDir).then(function (hash) {
-                var output = fs.createWriteStream(filePath),
-                    archive = archiver.create('zip'),
-                    manifest = {
-                        generator: {
-                            name: 'ts-desktop',
-                            build: ''
-                        },
-                        package_version: 2,
-                        timestamp: new Date().getTime(),
-                        target_translations: [{path: name, id: name, commit_hash: hash, direction: meta.target_language.direction}]
-                    };
-                archive.pipe(output);
-                archive.directory(paths.projectDir, name + "/");
-                archive.append(JSON.stringify(manifest, null, '\t'), {name: 'manifest.json'});
-                archive.finalize();
-                return filePath;
-            });
+            return utils.fs.mkdirs(configurator.getUserPath('datalocation', 'automatic_backups'))
+                .then(function () {
+                    return utils.fs.mkdirs(configurator.getUserPath('datalocation', 'backups'));
+                })
+                .catch(function () {
+                    throw "Backup location not found. Attach external drive or change backup location in settings.";
+                })
+                .then(function () {
+                    return git.getHash(paths.projectDir);
+                })
+                .then(function (hash) {
+                    var output = fs.createWriteStream(filePath);
+                    var archive = archiver.create('zip');
+                    var manifest = {
+                            generator: {
+                                name: 'ts-desktop',
+                                build: ''
+                            },
+                            package_version: 2,
+                            timestamp: new Date().getTime(),
+                            target_translations: [{path: name, id: name, commit_hash: hash, direction: meta.target_language.direction}]
+                        };
+                    archive.pipe(output);
+                    archive.directory(paths.projectDir, name + "/");
+                    archive.append(JSON.stringify(manifest, null, '\t'), {name: 'manifest.json'});
+                    archive.finalize();
+                    return filePath;
+                })
+                .catch(function (err) {
+                    throw "Error creating backup: " + err;
+                });
         },
 
         backupAllTranslations: function (list, dirPath) {
@@ -111,46 +124,48 @@ function ExportManager(configurator, git) {
                         if(filePath.split('.').pop() !== 'usfm') {
                             filePath += '.usfm';
                         }
-                         let
-                            currentChapter = 1,
-                            numFinishedFrames = 0,
-                            chapterContent = '';
-                        for(let frame of translation) {
-                            // build chapter header
-                            if(chapterContent === '') {
-                                //add in USFM header elements
-                                chapterContent += '\n\\\id ' + meta.project.id.toUpperCase() + ' ' + meta.source_translations[0].resource_name + '\n';
 
-                                chapterContent += '\\\ide ' + meta.format + '\n';
+                        var content = "";
+                        var currentChapter = 0;
 
-                                chapterContent += '\\\h ' + meta.project.name.toUpperCase() + '\n';
+                        content += "\\id " + meta.project.id + " " + meta.resource.name + "\n";
+                        content += "\\ide " + meta.format + "\n";
+                        content += "\\h " + meta.project.name + "\n";
+                        content += "\\toc1 " + meta.project.name + "\n";
+                        content += "\\toc2 " + meta.project.name + "\n";
+                        content += "\\toc3 " + meta.project.id + "\n";
+                        content += "\\mt " + meta.project.name + "\n";
 
-                                chapterContent += '\\' + 'toc1 ' + meta.project.name + '\n';
-
-                                chapterContent += '\\' + 'toc2 ' + meta.project.name + '\n';
-
-                                chapterContent += '\\' + 'toc3 ' + meta.project.id + '\n';
-
-                                chapterContent += '\\\mt1 ' + meta.project.name.toUpperCase() + '\n';
-
-                                chapterContent += '\\\c ' + frame.chunkmeta.chapter + '\n';
+                        translation.forEach(function (chunk) {
+                            if (chunk.chunkmeta.chapter > 0) {
+                                if (chunk.chunkmeta.chapter !== currentChapter) {
+                                    content += "\\c " + chunk.chunkmeta.chapter + "\n";
+                                    currentChapter = chunk.chunkmeta.chapter;
+                                }
+                                if (chunk.transcontent) {
+                                    var text = chunk.transcontent;
+                                    var start = 0;
+                                    var keepsearching = true;
+                                    while (keepsearching) {
+                                        var end = text.indexOf("\\v", start + 2);
+                                        if (end === -1) {
+                                            keepsearching = false;
+                                            content += text.substring(start) + "\n";
+                                        } else {
+                                            content += text.substring(start, end) + "\n";
+                                            start = end;
+                                        }
+                                    }
+                                }
                             }
-                            if(currentChapter !== frame.chunkmeta.chapter){
-                                chapterContent += '\\\c ' + frame.chunkmeta.chapter + '\n';
-                                currentChapter = frame.chunkmeta.chapter;
-                            }
-                            // add frame
-                            if(frame.transcontent !== ''){
-                            chapterContent += frame.transcontent + '\n';
-                            }
-                        }
-
-                        fs.writeFile(filePath, new Buffer(chapterContent), function (err) {
-                            if (err) {
-                                reject(err);
-                            }
-                            resolve(true);
                         });
+
+                        utils.fs.outputFile(filePath, content).then(function () {
+                            resolve(true);
+                        }).catch(function (err) {
+                            reject(err);
+                        });
+
                     } else {
                         reject("We do not support exporting this project format yet");
                     }

@@ -9,43 +9,32 @@
 
         :host {
             display: flex;
-            flex-direction: column;
+            justify-content: center;
         }
 
-        #contain {
-            flex: auto;
+        #main {
+            flex: 0 0 450px;
             display: flex;
             flex-direction: column;
-            align-items: center;
         }
 
         #header {
             color: var(--secondary-text-color);
             font-size: 110%;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            min-height: 60px;
-        }
-
-        #header > div {
+            flex: 0 0 60px;
             display: flex;
             justify-content: flex-start;
             align-items: center;
-            padding-left: 20px;
+            padding: 0 20px;
             border-bottom: 1px solid var(--border-color);
             background: var(--card-background-color);
-            width: 430px;
-            box-shadow: 0 -1px 2px 1px var(--primary-color-dark);
         }
 
-        iron-list {
+        #list {
             font-size: 110%;
-            max-height: calc(100vh - 145px);
-            width: 450px;
+            max-height: calc(100vh - 175px);
             color: var(--primary-text-color);
             background: var(--card-background-color);
-            box-shadow: 0 2px 3px 2px var(--border-color);
         }
 
         .row {
@@ -73,16 +62,13 @@
 
   <template>
 
-      <div id="header">
-          <div>
-              <span class="click" on-tap="togroup">[[category.name]]</span>
+      <div id="main">
+          <div id="header">
+              <span class="click" on-tap="togroup">[[newdata.category.name]]</span>
               <iron-icon icon="chevron-right"></iron-icon>
               <em>Choose a book</em>
           </div>
-      </div>
-
-      <div id="contain">
-          <iron-list items="[[category.data]]" as="project">
+          <iron-list id="list" items="[[newdata.category.data]]" as="project">
               <template>
                   <div class="row" on-tap="store">
                       <div>
@@ -108,16 +94,7 @@
               value: 0,
               notify: true
           },
-          category: {
-              type: Object,
-              value: {}
-          },
-          project: {
-              type: Object,
-              value: {},
-              notify: true
-          },
-          typedata: {
+          newdata: {
               type: Object,
               value: {},
               notify: true
@@ -129,23 +106,25 @@
       ],
 
       store: function(e) {
-          this.project = e.model.project;
+          this.set('newdata.project', e.model.project);
           if (App.configurator.getUserSetting('glmode')) {
               this.fire('iron-signal', {name: 'createtypes'});
-              this.selected = this.selected + 1;
+              this.set('selected', 3);
           } else {
-              this.typedata = {type: {id: "text", name: "Text"}, resource: {id: "reg", name: "Regular"}, format: "usfm", allowed: true};
+              this.set('newdata.typedata', {type: {id: "text", name: "Text"}, resource: {id: "reg", name: "Regular"}, format: "usfm", allowed: true});
               this.fire('create');
           }
+          this.$.list.scrollTop = 0;
       },
 
       togroup: function () {
-          this.selected = 1;
+          this.set('selected', 1);
       },
 
-    ready: function() {
+      ready: function() {
 
-    }
+      }
+
   });
 
 </script>

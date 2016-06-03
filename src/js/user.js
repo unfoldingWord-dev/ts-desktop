@@ -72,6 +72,46 @@ function UserManager(auth) {
                     private: false
                 }, user);
             });
+        },
+
+        retrieveRepos: function (u, q) {
+            u = u === '*' ? '' : (u || '');
+            q = q === '*' ? '_' : (q || '_');
+
+            var limit = 20;
+
+            function searchUsers (visit) {
+                return api.searchUsers(u, limit).then(function (users) {
+                    var a = users.map(visit);
+
+                    a.push(visit(0).then(function (repos) {
+                        return repos.filter(function (repo) {
+                            var username = repo.full_name.split('/').shift();
+                            return username.includes(u);
+                        });
+                    }));
+
+                    return Promise.all(a);
+                });
+            }
+
+            function searchRepos (user) {
+                var uid = (typeof user === 'object' ? user.id : user) || 0;
+                return api.searchRepos(q, uid, limit);
+            }
+
+            var p = u ? searchUsers(searchRepos) : searchRepos();
+
+            return p.then(_.flatten).then(function (repos) {
+                return _.uniq(repos, 'id');
+            })
+            .then(function (repos) {
+                return _.map(repos, function (repo) {
+                    var user = repo.full_name.split("/")[0];
+                    var project = repo.full_name.split("/")[1];
+                    return {repo: repo.full_name, user: user, project: project};
+                })
+            });
         }
 
     };

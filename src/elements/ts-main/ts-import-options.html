@@ -1,0 +1,139 @@
+
+<link rel="import" href="../../components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../../components/iron-signals/iron-signals.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/iron-input/iron-input.html">
+<link rel="import" href="../../components/iron-list/iron-list.html">
+
+<dom-module id="ts-import-options">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px;
+        }
+
+        #body {
+            display: flex;
+            flex-direction: column;
+            border-top: 1px solid var(--border-color);
+            padding: 0;
+        }
+
+        #footer {
+            display: flex;
+            justify-content: flex-end;
+            padding: 10px 50px;
+        }
+
+        #footer paper-button:hover {
+            color: var(--accent-color);
+        }
+
+        .option {
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 30px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background .3s, color .3s;
+            cursor: pointer;
+        }
+
+        .option:hover {
+            background: var(--accent-color-light);
+        }
+
+        .optiontitle {
+            font-size: 130%;
+            font-weight: bold;
+        }
+
+        .bold {
+            font-weight: bold;
+            font-size: 110%;
+            text-decoration: underline;
+        }
+
+    </style>
+
+    <template>
+
+        <div id="header">
+            <h2>Import/Restore Options</h2>
+        </div>
+        <div id="body">
+            <div class="option" on-tap="backup">
+                <span class="optiontitle">Import from Tstudio file</span>
+                <p>Will <span class="bold">merge</span> with the existing project, if one exists</p>
+            </div>
+            <div class="option" on-tap="usfm">
+                <span class="optiontitle">Import from USFM file</span>
+                <p>Must have either .usfm or .txt extension</p>
+            </div>
+            <div class="option" on-tap="repo">
+                <span class="optiontitle">Import from Door43</span>
+                <p>Will <span class="bold">merge</span> with the existing project, if one exists</p>
+            </div>
+            <div class="option" on-tap="restorebackup">
+                <span class="optiontitle">Restore from Tstudio file</span>
+                <p>Will <span class="bold">overwrite</span> the existing project, if one exists</p>
+            </div>
+            <div class="option" on-tap="restorerepo">
+                <span class="optiontitle">Restore from Door43</span>
+                <p>Will <span class="bold">overwrite</span> the existing project, if one exists</p>
+            </div>
+        </div>
+        <div id="footer">
+            <paper-button dialog-dismiss>Cancel</paper-button>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-import-options',
+
+        properties: {
+
+        },
+
+        restorebackup: function () {
+            this.fire('restorebackup');
+        },
+
+        restorerepo: function () {
+            this.fire('restorerepo');
+        },
+
+        backup: function () {
+            this.fire('backup');
+        },
+
+        usfm: function () {
+            this.fire('usfm');
+        },
+
+        repo: function () {
+            this.fire('repo');
+        },
+
+        ready: function () {
+
+        }
+
+    });
+
+</script>

@@ -119,7 +119,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             if (projectClass === "helps") {
                 hasContent = !!chunk.helpscontent.length;
             }
-            if (projectClass === "extant" && (!!chunk.helpscontent[0].title || !!chunk.helpscontent[0].body)) {
+            if (projectClass === "extant" && chunk.helpscontent[0] && (!!chunk.helpscontent[0].title || !!chunk.helpscontent[0].body)) {
                 hasContent = true;
             }
             if (projectClass === "standard" && hasContent && chunk.chunkmeta.frame === 1 && chunk.projectmeta.project.id !== "obs") {

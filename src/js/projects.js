@@ -139,6 +139,10 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             return mythis.makeChapterDir(meta, chunk)
                 .then(function () {
                     return mythis.updateChunk(meta, chunk);
+                })
+                .catch(function (err) {
+                    reporter.logError(err);
+                    throw "Unable to write to chunk file.";
                 });
         },
 

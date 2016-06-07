@@ -119,7 +119,7 @@ process.stdout.write = console.log.bind(console);
     })();
 
     let migrateManager = (function () {
-        return new MigrateManager(configurator);
+        return new MigrateManager(configurator, gitManager);
     })();
 
     // TODO: where should this be?

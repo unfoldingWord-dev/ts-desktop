@@ -115,10 +115,12 @@ function GitManager() {
             var localManifestPath = path.join(localPath, 'manifest.json');
             var remoteManifestPath = path.join(remotePath, 'manifest.json');
             var mergedManifest = {};
-            var hasConflicts = false;
+            var conflictlist = [];
+            var conflicts = [];
 
             // NOTE: should switch to using a fetch/merge instead of pull, so we don't depend on Perl
             var pull = cmd().cd(localPath).and.do(`git pull ${remotePath} master`);
+            var diff = cmd().cd(localPath).and.do('git diff --name-only --diff-filter=U');
 
             return Promise.all([utils.fs.readFile(localManifestPath), utils.fs.readFile(remoteManifestPath)])
                 .then(function (fileData) {
@@ -130,15 +132,33 @@ function GitManager() {
                 })
                 .then(function () {
                     return pull.run()
-                        .catch(function (err) {                            
-                            if (err.stdout.includes('fix conflicts')) {                                
-                                hasConflicts = true;
-                                return true;
-                            }                            
+                        .catch(function (err) {
+                            if (err.stdout.includes('fix conflicts')) {
+                                return diff.run()
+                                    .then(function (list) {
+                                        conflictlist =  list.stdout.split("\n");
+                                    });
+                            }
                             throw err;
                         })
                 })
                 .then(function () {                    
+                    if (conflictlist.length) {
+                        conflictlist.forEach(function (item) {
+                            if (item.includes('.txt')) {
+                                var splitindex = item.indexOf('/');
+                                var dotindex = item.indexOf('.');
+                                var chunk = item.substring(0, splitindex) + "-" + item.substring(splitindex + 1, dotindex);                                
+                                conflicts.push(chunk);
+                                var index = mergedManifest.finished_chunks.indexOf(chunk);
+                                if (index >= 0) {
+                                    mergedManifest.finished_chunks.splice(index, 1);
+                                }
+                            }
+                        });                        
+                    }                    
+                })
+                .then(function () {
                     return utils.fs.outputFile(localManifestPath, toJSON(mergedManifest));
                 })
                 .then(function () {
@@ -149,7 +169,7 @@ function GitManager() {
                 })
                 .then(utils.logr("Finished merging"))
                 .then(function () {
-                    return hasConflicts;
+                    return conflicts;
                 });
 
         },

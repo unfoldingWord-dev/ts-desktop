@@ -303,6 +303,7 @@
 
       changeProject: function (event, data) {
           var mythis = this;
+          var hasConflicts = false;
           var changedata = data;
 
           mythis.set("route", "home");
@@ -313,7 +314,10 @@
 
           var choice = function () {
               if (changedata.exists) {
-                  return App.gitManager.merge(mythis.currentuser, changedata.newpaths.projectDir, changedata.oldpaths.projectDir, 3)
+                  return App.gitManager.merge(mythis.currentuser, changedata.newpaths.projectDir, changedata.oldpaths.projectDir)
+                      .then(function (conflicts) {
+                          hasConflicts = conflicts;
+                      })
                       .then(function () {
                           return App.utils.fs.remove(changedata.oldpaths.projectDir);
                       });
@@ -332,8 +336,12 @@
               return choice()
                   .then(function() {
                       App.projectsManager.unsetValues(changedata.oldmeta);
+                      var message = "Your project has been changed. ";
+                      if (hasConflicts) {
+                          message += "There are conflicts that need your attention.";
+                      }
                       mythis.set('options.title', "Change Complete");
-                      mythis.set('options.body', "Your project has been changed.");
+                      mythis.set('options.body', message);
                       mythis.set('options.loading', false);
                       setTimeout(function() {
                           mythis.updateList();
@@ -357,6 +365,7 @@
 
       importFromBackup: function() {
           var mythis = this;
+          var hasConflicts = false;
           var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
           var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}], properties: ['openFile']}});
           if (!filePath) {
@@ -374,7 +383,10 @@
                   .then(function (list) {
                       return Promise.all(list.map(function (item) {
                           if (item.targetExists) {
-                              return App.gitManager.merge(mythis.currentuser, item.targetPath, item.tmpPath, 3);
+                              return App.gitManager.merge(mythis.currentuser, item.targetPath, item.tmpPath)
+                                  .then(function (conflicts) {
+                                      hasConflicts = conflicts;
+                                  });
                           } else {
                               return App.utils.fs.move(item.tmpPath, item.targetPath, {clobber: true});
                           }
@@ -384,8 +396,12 @@
                       return App.utils.fs.remove(App.configurator.getValue('tempDir'));
                   })
                   .then(function() {
+                      var message = "Your project has been successfully imported. ";
+                      if (hasConflicts) {
+                          message += "There are conflicts that need your attention.";
+                      }
                       mythis.set('options.title', "Import Complete");
-                      mythis.set('options.body', "Your project has been successfully imported.");
+                      mythis.set('options.body', message);
                       mythis.set('options.loading', false);
                       setTimeout(function() {
                           mythis.updateList();
@@ -522,6 +538,7 @@
 
       importFromRepo: function (event, data) {
           var mythis = this;
+          var hasConflicts = false;
           var path = require('path');
           var repo = data.repo.repo;
           var project = data.repo.project;
@@ -555,27 +572,29 @@
                       return App.utils.fs.stat(targetPath).then(App.utils.ret(true)).catch(App.utils.ret(false));
                   })
                   .then(function (exists) {
-                      console.log(exists, restore);
                       if (exists) {
                           if (restore) {
-                              console.log('trying to move and clobber');
                               return App.utils.fs.move(tmpPath, targetPath, {clobber: true});
                           } else {
-                              console.log("trying to merge");
-                              return App.gitManager.merge(mythis.currentuser, targetPath, tmpPath, 3);
+                              return App.gitManager.merge(mythis.currentuser, targetPath, tmpPath)
+                                  .then(function (conflicts) {
+                                      hasConflicts = conflicts;
+                                  });
                           }
                       } else {
-                          console.log('trying to move');
                           return App.utils.fs.move(tmpPath, targetPath, {clobber: true});
                       }
                   })
                   .then(function () {
-                      console.log('trying to delete temp');
                       return App.utils.fs.remove(App.configurator.getValue('tempDir'));
                   })
                   .then(function() {
+                      var message = "Your project has been successfully imported. ";
+                      if (hasConflicts) {
+                          message += "There are conflicts that need your attention.";
+                      }
                       mythis.set('options.title', "Import Complete");
-                      mythis.set('options.body', "Your project has been successfully imported.");
+                      mythis.set('options.body', message);
                       mythis.set('options.loading', false);
                       setTimeout(function() {
                           mythis.updateList();

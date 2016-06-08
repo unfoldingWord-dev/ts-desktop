@@ -1,15 +1,24 @@
-// git module
-
 'use strict';
 
 var path = require('path'),
     fs = require('fs'),
     exec = require('child_process').exec,
-    utils = require('../js/lib/util'),
-    log = utils.log,
-    logr = utils.logr;
+    utils = require('../js/lib/utils');
 
-function Git() {
+function createTagName(datetime) {
+    return 'R2P/' +
+        datetime.getFullYear().toString() + '-' +
+        utils.padZero(datetime.getMonth()+1) + '-' +
+        utils.padZero(datetime.getDate()) + '/' +
+        utils.padZero(datetime.getHours()) + '.' +
+        utils.padZero(datetime.getMinutes()) + '.' +
+        utils.padZero(datetime.getSeconds());
+}
+
+function GitManager() {
+
+    var logr = utils.logr;
+    var toJSON = _.partialRight(JSON.stringify, null, '\t');
 
     function cmd(s) {
         var str = s || '';
@@ -85,20 +94,31 @@ function Git() {
             var username = user.username || 'tsDesktop';
             var email = user.email || 'you@example.com';
             var stage = cmd().cd(dir)
-                    .and.do('git config user.name "${username}"')
-                    .and.do('git config user.email "${email}"')
+                    .and.do(`git config user.name "${username}"`)
+                    .and.do(`git config user.email "${email}"`)
+                    .and.do('git config core.autocrlf input')
                     .and.do('git add --all')
                     .and.do(`git commit -am "${msg}"`);
 
-            return stage.run().then(logr('Files are committed'));
+            return stage.run()
+                .catch(function (err) {
+                    if (!err.stdout.includes('nothing to commit')) {
+                        throw err;
+                    }
+                    return true;
+                })
+                .then(logr('Files are committed'));
         },
 
         merge: function (user, localPath, remotePath) {
+            var mythis = this;
             var localManifestPath = path.join(localPath, 'manifest.json');
             var remoteManifestPath = path.join(remotePath, 'manifest.json');
+            var mergedManifest = {};
+            var hasConflicts = false;
 
             // NOTE: should switch to using a fetch/merge instead of pull, so we don't depend on Perl
-            var pull = cmd().cd(localPath).and.do('git pull ${remotePath} master');
+            var pull = cmd().cd(localPath).and.do(`git pull ${remotePath} master`);
 
             return Promise.all([utils.fs.readFile(localManifestPath), utils.fs.readFile(remoteManifestPath)])
                 .then(function (fileData) {
@@ -108,8 +128,30 @@ function Git() {
                     mergedManifest.translators = _.union(localManifest.translators, remoteManifest.translators);
                     mergedManifest.finished_chunks = _.union(localManifest.finished_chunks, remoteManifest.finished_chunks);
                 })
+                .then(function () {
+                    return pull.run()
+                        .catch(function (err) {                            
+                            if (err.stdout.includes('fix conflicts')) {                                
+                                hasConflicts = true;
+                                return true;
+                            }                            
+                            throw err;
+                        })
+                })
+                .then(function () {                    
+                    return utils.fs.outputFile(localManifestPath, toJSON(mergedManifest));
+                })
+                .then(function () {
+                    return mythis.commitAll(user, localPath);
+                })
+                .catch(function (err) {
+                    throw "Error while merging projects: " + err.stdout;
+                })
+                .then(utils.logr("Finished merging"))
+                .then(function () {
+                    return hasConflicts;
+                });
 
-            return pull.run().then(logr('Merged repo'));
         },
 
         push: function (user, dir, repo, opts) {
@@ -128,11 +170,18 @@ function Git() {
         clone: function (repoUrl, localPath) {
             var repoName = repoUrl.replace(/\.git/, '').split('/').pop();
             var savePath = localPath.includes(repoName) ? localPath : path.join(localPath, repoName);
-            var clone = cmd().do('git clone ${repoUrl} ${localPath}');
+            var clone = cmd().do(`git clone ${repoUrl} ${savePath}`);
 
-            return clone.run().then(logr('Project cloned'));
+            return clone.run()
+                .catch(function (err) {
+                    if (err.error) {
+                        throw err;
+                    }
+                    return err;
+                })
+                .then(logr('Project cloned'));
         }
     };
 }
 
-module.exports.Git = Git;
+module.exports.GitManager = GitManager;

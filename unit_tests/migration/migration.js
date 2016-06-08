@@ -6,7 +6,21 @@
     let fs = require('fs');
     let rimraf = require('rimraf');
     let Migrator = require('../../src/js/migrator').MigrateManager;
-    let migrator = new Migrator();
+    let migrator = new Migrator({
+        getValue: function () {
+            return {};
+        },
+        setValue: function () {
+
+        },
+        unsetValue: function () {
+
+        }
+    }, {
+        commitAll: function () {
+            return Promise.resolve();
+        }
+    });
 
     let tempDir = 'unit_tests/migration/temp/';
     let dataDir = 'unit_tests/migration/data/';

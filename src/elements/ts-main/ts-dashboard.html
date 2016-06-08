@@ -303,7 +303,7 @@
 
       changeProject: function (event, data) {
           var mythis = this;
-          var hasConflicts = false;
+          var conflicts = [];
           var changedata = data;
 
           mythis.set("route", "home");
@@ -315,8 +315,8 @@
           var choice = function () {
               if (changedata.exists) {
                   return App.gitManager.merge(mythis.currentuser, changedata.newpaths.projectDir, changedata.oldpaths.projectDir)
-                      .then(function (conflicts) {
-                          hasConflicts = conflicts;
+                      .then(function (list) {
+                          conflicts = list;
                       })
                       .then(function () {
                           return App.utils.fs.remove(changedata.oldpaths.projectDir);
@@ -337,8 +337,11 @@
                   .then(function() {
                       App.projectsManager.unsetValues(changedata.oldmeta);
                       var message = "Your project has been changed. ";
-                      if (hasConflicts) {
-                          message += "There are conflicts that need your attention.";
+                      if (conflicts.length) {
+                          message += "The following chunks contain conflicts that need your attention: ";
+                          conflicts.forEach(function (item) {
+                              message += item + ", ";
+                          });
                       }
                       mythis.set('options.title', "Change Complete");
                       mythis.set('options.body', message);
@@ -365,7 +368,7 @@
 
       importFromBackup: function() {
           var mythis = this;
-          var hasConflicts = false;
+          var conflicts = [];
           var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
           var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}], properties: ['openFile']}});
           if (!filePath) {
@@ -384,8 +387,8 @@
                       return Promise.all(list.map(function (item) {
                           if (item.targetExists) {
                               return App.gitManager.merge(mythis.currentuser, item.targetPath, item.tmpPath)
-                                  .then(function (conflicts) {
-                                      hasConflicts = conflicts;
+                                  .then(function (list) {
+                                      conflicts = list;
                                   });
                           } else {
                               return App.utils.fs.move(item.tmpPath, item.targetPath, {clobber: true});
@@ -397,8 +400,11 @@
                   })
                   .then(function() {
                       var message = "Your project has been successfully imported. ";
-                      if (hasConflicts) {
-                          message += "There are conflicts that need your attention.";
+                      if (conflicts.length) {
+                          message += "The following chunks contain conflicts that need your attention: ";
+                          conflicts.forEach(function (item) {
+                              message += item + ", ";
+                          });
                       }
                       mythis.set('options.title', "Import Complete");
                       mythis.set('options.body', message);
@@ -538,7 +544,7 @@
 
       importFromRepo: function (event, data) {
           var mythis = this;
-          var hasConflicts = false;
+          var conflicts = [];
           var path = require('path');
           var repo = data.repo.repo;
           var project = data.repo.project;
@@ -577,8 +583,8 @@
                               return App.utils.fs.move(tmpPath, targetPath, {clobber: true});
                           } else {
                               return App.gitManager.merge(mythis.currentuser, targetPath, tmpPath)
-                                  .then(function (conflicts) {
-                                      hasConflicts = conflicts;
+                                  .then(function (list) {
+                                      conflicts = list;
                                   });
                           }
                       } else {
@@ -590,8 +596,11 @@
                   })
                   .then(function() {
                       var message = "Your project has been successfully imported. ";
-                      if (hasConflicts) {
-                          message += "There are conflicts that need your attention.";
+                      if (conflicts.length) {
+                          message += "The following chunks contain conflicts that need your attention: ";
+                          conflicts.forEach(function (item) {
+                              message += item + ", ";
+                          });
                       }
                       mythis.set('options.title', "Import Complete");
                       mythis.set('options.body', message);

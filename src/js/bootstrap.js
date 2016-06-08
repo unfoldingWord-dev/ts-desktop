@@ -35,7 +35,7 @@ process.stdout.write = console.log.bind(console);
     let Configurator = require('../js/configurator').Configurator;
 
     setMsg('Loading Git Manager...');
-    let GitManager = require('../js/git').GitManager;
+    let GitManager = require('../js/gitnative').GitManager;
 
     setMsg('Loading Key Manager...');
     let KeyManager = require('../js/keys').KeyManager;

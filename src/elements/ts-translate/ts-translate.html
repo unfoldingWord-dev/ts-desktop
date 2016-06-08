@@ -739,8 +739,8 @@
                 .then(function() {
                     setTimeout(function() {
                         mythis.set('busy', {signal: false, message: "Idle"});
+                        mythis.fire('iron-signal', {name: 'updatelist'});
                     }, 1000);
-                    mythis.fire('iron-signal', {name: 'updatelist'});
                 })
                 .catch(function() {
                     setTimeout(function() {

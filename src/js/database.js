@@ -1,6 +1,8 @@
 'use strict';
 
 var _ = require('lodash');
+var request = require('request');
+var utils = require('../js/lib/utils');
 
 function zipper (r) {
     return r.length ? _.map(r[0].values, _.zipObject.bind(_, r[0].columns)) : [];
@@ -8,6 +10,46 @@ function zipper (r) {
 
 function DataManager(query) {
     return {
+
+        getUpdatedLanguageList: function () {
+
+            var req = utils.promisify(request);
+            var currentlist = this.getTargetLanguages();            
+
+            return req('http://td.unfoldingword.org/exports/langnames.json')
+                .then(function (response) {
+                    return JSON.parse(response.body);
+                })
+                .then(function (newlist) {
+                    var missing = [];
+                    for (var i = 0; i < newlist.length; i++) {
+                        var found = false;
+                        for (var j = 0; j < currentlist.length; j++) {
+                            if (newlist[i].lc === currentlist[j].id) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            missing.push(newlist[i]);
+                        }
+                    }
+                    return missing;
+                })
+                .then(function (missing) {
+                    console.log(missing);
+                    for (var k = 0; k < missing.length; k++) {
+                        var lc = missing[k].lc;
+                        var ln = missing[k].ln;
+                        var ld = missing[k].ld;
+                        var lr = missing[k].lr;
+                        
+                        query("insert into target_language (slug, name, direction, region) values ('" + lc + "', '" + ln + "', '" + ld + "', '" + lr + "')");
+                    }
+                    console.log("done");
+                });
+
+        },
 
         getTargetLanguages: function () {
             var r = query("select slug 'id', name, direction from target_language order by lower(slug)");

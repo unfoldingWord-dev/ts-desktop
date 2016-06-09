@@ -32,7 +32,7 @@ function Db (schemaPath, dbPath) {
         sql = new SQL.Database(buffer);
     }
 
-    return sql.exec.bind(sql);
+    return {query: sql.exec.bind(sql), save: saveDB.bind(null, sql)};
 }
 
 module.exports.Db = Db;

@@ -8,47 +8,37 @@ function zipper (r) {
     return r.length ? _.map(r[0].values, _.zipObject.bind(_, r[0].columns)) : [];
 }
 
-function DataManager(query) {
+function DataManager(db) {
+    var query = db.query;
+    var save = db.save;
+    
     return {
 
-        getUpdatedLanguageList: function () {
-
+        updateLanguageList: function () {
             var req = utils.promisify(request);
-            var currentlist = this.getTargetLanguages();            
-
+            
             return req('http://td.unfoldingword.org/exports/langnames.json')
                 .then(function (response) {
                     return JSON.parse(response.body);
                 })
                 .then(function (newlist) {
-                    var missing = [];
+                    query("delete from target_language");
+                    
                     for (var i = 0; i < newlist.length; i++) {
-                        var found = false;
-                        for (var j = 0; j < currentlist.length; j++) {
-                            if (newlist[i].lc === currentlist[j].id) {
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (!found) {
-                            missing.push(newlist[i]);
-                        }
-                    }
-                    return missing;
+                        var lc = newlist[i].lc;
+                        var ln = newlist[i].ln;
+                        var ld = newlist[i].ld;
+                        var lr = newlist[i].lr;
+                        query('insert into target_language (slug, name, direction, region) values ("' + lc + '", "' + ln + '", "' + ld + '", "' + lr + '")');
+                    }                    
                 })
-                .then(function (missing) {
-                    console.log(missing);
-                    for (var k = 0; k < missing.length; k++) {
-                        var lc = missing[k].lc;
-                        var ln = missing[k].ln;
-                        var ld = missing[k].ld;
-                        var lr = missing[k].lr;
-                        
-                        query("insert into target_language (slug, name, direction, region) values ('" + lc + "', '" + ln + "', '" + ld + "', '" + lr + "')");
-                    }
-                    console.log("done");
+                .then(function () {                    
+                    save();                    
+                })
+                .catch(function (err) {
+                    console.log(err);
+                    throw "Could not update language list";
                 });
-
         },
 
         getTargetLanguages: function () {

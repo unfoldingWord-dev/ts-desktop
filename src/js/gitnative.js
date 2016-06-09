@@ -142,21 +142,21 @@ function GitManager() {
                             throw err;
                         })
                 })
-                .then(function () {                    
+                .then(function () {
                     if (conflictlist.length) {
                         conflictlist.forEach(function (item) {
                             if (item.includes('.txt')) {
                                 var splitindex = item.indexOf('/');
                                 var dotindex = item.indexOf('.');
-                                var chunk = item.substring(0, splitindex) + "-" + item.substring(splitindex + 1, dotindex);                                
+                                var chunk = item.substring(0, splitindex) + "-" + item.substring(splitindex + 1, dotindex);
                                 conflicts.push(chunk);
                                 var index = mergedManifest.finished_chunks.indexOf(chunk);
                                 if (index >= 0) {
                                     mergedManifest.finished_chunks.splice(index, 1);
                                 }
                             }
-                        });                        
-                    }                    
+                        });
+                    }
                 })
                 .then(function () {
                     return utils.fs.outputFile(localManifestPath, toJSON(mergedManifest));
@@ -175,16 +175,22 @@ function GitManager() {
         },
 
         push: function (user, dir, repo, opts) {
-            // TODO: check opts.requestToPublish and create the appropriate publish tag if needed
+            opts = opts || {};
 
             var ssh = `ssh -i "${user.reg.paths.privateKeyPath}" -o "StrictHostKeyChecking no"`;
             var pushUrl = user.reg ? repo.ssh_url : repo.html_url;
-            var gitSshPush = `git push -u ${pushUrl} master`;
+            var gitSshPush = `git push -u ${pushUrl} master --follow-tags`;
             var push = cmd().cd(dir).and.set('GIT_SSH_COMMAND', ssh).do(gitSshPush);
+            var tagName = createTagName(new Date());
+            var tag = opts.requestToPublish ? cmd().cd(dir).and.do(`git tag -a ${tagName} -m 'Request to Publish'`).run() : Promise.resolve();
 
             console.log('Starting push to server...\n' + push);
 
-            return push.run().then(logr('Files are pushed'));
+            return tag
+                .then(function () {
+                    return push.run();
+                })
+                .then(logr('Files are pushed'));
         },
 
         clone: function (repoUrl, localPath) {

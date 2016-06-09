@@ -209,9 +209,14 @@
           this.$.list.scrollTop = 0;
       },
 
+      updateList: function () {
+          this.set('languagelist', App.dataManager.getTargetLanguages());
+      },
+
       ready: function () {
           this.set('languagelist', App.dataManager.getTargetLanguages());
       }
+
   });
 
 })(window);

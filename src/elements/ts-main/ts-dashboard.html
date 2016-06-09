@@ -180,6 +180,7 @@
       <iron-signals on-iron-signal-openattribution="openAttribution"></iron-signals>
       <iron-signals on-iron-signal-changeproject="changeProject"></iron-signals>
       <iron-signals on-iron-signal-deleteproject="deleteProject"></iron-signals>
+      <iron-signals on-iron-signal-updatelanguages="updateLanguages"></iron-signals>
 
   </template>
 
@@ -267,6 +268,33 @@
           } else {
               this.set('route', 'profile');
           }
+      },
+
+      updateLanguages: function () {
+          var mythis = this;
+
+          mythis.set('options', {});
+          mythis.set('options.body', "Updating Languages. This may take several minutes. Please wait...");
+          mythis.set('options.loading', true);
+          mythis.$.loading.open();
+
+          setTimeout(function() {
+              return App.dataManager.updateLanguageList()
+                  .then(function() {
+                      mythis.set('options.title', "Update Complete");
+                      mythis.set('options.body', "The language list has been updated");
+                      mythis.set('options.loading', false);
+                  })
+                  .catch(function(err) {
+                      var errmessage = "An error occurred while updating";
+                      if(err !== null) {
+                          errmessage = err;
+                      }
+                      mythis.set('options.title', "Update Failed");
+                      mythis.set('options.body', errmessage);
+                      mythis.set('options.loading', false);
+                  });
+          }, 500);
       },
 
       deleteProject: function (event, data) {

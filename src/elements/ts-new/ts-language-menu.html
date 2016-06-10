@@ -120,6 +120,10 @@
               type: Array,
               value: []
           },
+          changedata: {
+              type: Object,
+              value: {}
+          },
           query: {
               type: String,
               value: ""
@@ -150,10 +154,40 @@
           });
       },
 
+      change: function () {
+          var mythis = this;
+          var targetDir = App.configurator.getValue('targetTranslationsDir');
+          mythis.changedata.newmeta = _.cloneDeep(mythis.changedata.oldmeta);
+          mythis.changedata.newmeta.target_language = mythis.newdata.language;
+          mythis.changedata.newmeta.unique_id = App.projectsManager.makeUniqueId(mythis.changedata.newmeta);
+          mythis.changedata.oldpaths = App.utils.makeProjectPaths(targetDir, mythis.changedata.oldmeta);
+          mythis.changedata.newpaths = App.utils.makeProjectPaths(targetDir, mythis.changedata.newmeta);
+
+          return App.utils.fs.stat(mythis.changedata.newpaths.projectDir).then(App.utils.ret(true)).catch(App.utils.ret(false))
+              .then(function (exists) {
+                  mythis.changedata.exists = exists;
+                  if (exists) {
+                      mythis.fire('openconfirm');
+                  } else {
+                      mythis.firechange();
+                  }
+              });
+      },
+
+      firechange: function () {
+          var mythis = this;
+
+          mythis.fire('iron-signal', {name: 'changeproject', data: mythis.changedata});
+          mythis.set('changedata.changing', false);
+          mythis.reset();
+      },
+
       store: function (e) {
           this.set('newdata.language', e.model.language);
 
-          if (this.importdata.importing && this.importdata.project.slug) {
+          if (this.changedata.changing) {
+              this.change();
+          } else if (this.importdata.importing && this.importdata.project.slug) {
               this.set('newdata.project', this.importdata.project);
               if (App.configurator.getUserSetting('glmode')) {
                   this.fire('iron-signal', {name: 'createtypes'});
@@ -162,17 +196,27 @@
                   this.set('newdata.typedata', {type: {id: "text", name: "Text"}, resource: {id: "reg", name: "Regular"}, format: "usfm", allowed: true});
                   this.fire('create');
               }
+              this.reset();
           } else {
               this.fire('iron-signal', {name: 'createprojects'});
               this.set('selected', 1);
+              this.reset();
           }
+      },
+
+      reset: function () {
           this.set('query', "");
           this.$.list.scrollTop = 0;
+      },
+
+      updateList: function () {
+          this.set('languagelist', App.dataManager.getTargetLanguages());
       },
 
       ready: function () {
           this.set('languagelist', App.dataManager.getTargetLanguages());
       }
+
   });
 
 })(window);

@@ -54,7 +54,6 @@
 
         .row {
             display: flex;
-            justify-content: space-between;
             margin: 0;
             padding: 1em;
             border-bottom: 1px solid var(--border-color);
@@ -63,6 +62,14 @@
         .row:hover {
             background: var(--accent-color-light);
             cursor: pointer;
+        }
+
+        .left {
+            justify-content: space-between;
+        }
+
+        .right {
+            justify-content: flex-end;
         }
 
         .row-header {
@@ -94,6 +101,7 @@
         paper-checkbox {
             --paper-checkbox-checked-color: var(--accent-color-dark);
             --paper-checkbox-unchecked-color: var(--accent-color-dark);
+            padding-left: 15px;
         }
 
         paper-checkbox[disabled]::shadow #checkbox.paper-checkbox {
@@ -113,7 +121,7 @@
             <div class="body">
                 <div class="row-header">Selected</div>
                 <template is="dom-repeat" items="[[sources]]" as="source">
-                    <div class="row" on-tap="removesource">
+                    <div class$="[[rowclass(source.direction)]]" on-tap="removesource">
                         <div>
                             <span>[[source.language_name]]</span> - <span>[[source.resource_name]]</span>
                         </div>
@@ -123,7 +131,7 @@
 
                 <div class="row-header">Available</div>
                 <template is="dom-repeat" items="{{searchfilter(query, available)}}" as="source">
-                    <div class="row" on-tap="addsource">
+                    <div class$="[[rowclass(source.direction)]]" on-tap="addsource">
                         <div>
                             <span>[[source.language_name]]</span> - <span>[[source.resource_name]]</span>
                         </div>
@@ -179,6 +187,10 @@
         observers: [
             'updateavailable(allSources.*, sources.*)'
         ],
+
+        rowclass: function (direction) {
+            return direction === "ltr" ? 'row left' : 'row right';
+        },
 
         searchfilter: function(query, available) {
             if (query) {

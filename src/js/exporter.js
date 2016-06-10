@@ -19,24 +19,37 @@ function ExportManager(configurator, git) {
             var paths = utils.makeProjectPaths(targetDir, meta);
             var name = meta.unique_id;
 
-            return git.getHash(paths.projectDir).then(function (hash) {
-                var output = fs.createWriteStream(filePath),
-                    archive = archiver.create('zip'),
-                    manifest = {
-                        generator: {
-                            name: 'ts-desktop',
-                            build: ''
-                        },
-                        package_version: 2,
-                        timestamp: new Date().getTime(),
-                        target_translations: [{path: name, id: name, commit_hash: hash, direction: meta.target_language.direction}]
-                    };
-                archive.pipe(output);
-                archive.directory(paths.projectDir, name + "/");
-                archive.append(JSON.stringify(manifest, null, '\t'), {name: 'manifest.json'});
-                archive.finalize();
-                return filePath;
-            });
+            return utils.fs.mkdirs(configurator.getUserPath('datalocation', 'automatic_backups'))
+                .then(function () {
+                    return utils.fs.mkdirs(configurator.getUserPath('datalocation', 'backups'));
+                })
+                .catch(function () {
+                    throw "Backup location not found. Attach external drive or change backup location in settings.";
+                })
+                .then(function () {
+                    return git.getHash(paths.projectDir);
+                })
+                .then(function (hash) {
+                    var output = fs.createWriteStream(filePath);
+                    var archive = archiver.create('zip');
+                    var manifest = {
+                            generator: {
+                                name: 'ts-desktop',
+                                build: ''
+                            },
+                            package_version: 2,
+                            timestamp: new Date().getTime(),
+                            target_translations: [{path: name, id: name, commit_hash: hash, direction: meta.target_language.direction}]
+                        };
+                    archive.pipe(output);
+                    archive.directory(paths.projectDir, name + "/");
+                    archive.append(JSON.stringify(manifest, null, '\t'), {name: 'manifest.json'});
+                    archive.finalize();
+                    return filePath;
+                })
+                .catch(function (err) {
+                    throw "Error creating backup: " + err;
+                });
         },
 
         backupAllTranslations: function (list, dirPath) {

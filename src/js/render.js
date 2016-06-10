@@ -135,13 +135,17 @@ function Renderer() {
         },
 
         validateVerseMarkers: function (text, verses) {
-            var linearray = text.split("\n");
+            var linearray = text.trim().split("\n");
             var returnstr = "";
             var used = [];
 
             for (var j = 0; j < linearray.length; j++) {
                 if (linearray[j] === "") {
-                    returnstr += "\n";
+                    if (linearray.length === 1) {
+                        returnstr += "";
+                    } else {
+                        returnstr += "\n";
+                    }                    
                 } else {
                     var wordarray = linearray[j].split(" ");
                     for (var i = 0; i < wordarray.length; i++) {

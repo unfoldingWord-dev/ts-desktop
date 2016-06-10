@@ -39,11 +39,19 @@
             display: flex;
 		}
 
+        #textholder {
+            width: 100%;
+        }
+
         #textholder p {
 			line-height: 2;
             margin: 0;
             color: var(--primary-text-color);
 		}
+
+        .rtl {
+            direction: rtl;
+        }
 
 	</style>
 
@@ -55,8 +63,8 @@
                     <span>[[chunk.chaptermeta.chapterref]]</span><span>[[chunk.chaptermeta.refaddon]]</span>
                 </div>
             </div>
-            <div id="content">
-                <div id="textholder"></div>
+            <div id="content" class="targetfont">
+                <div id="textholder" class$="[[chunk.projectmeta.target_language.direction]]"></div>
             </div>
         </paper-material>
 

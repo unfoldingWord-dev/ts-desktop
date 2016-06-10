@@ -35,7 +35,7 @@ process.stdout.write = console.log.bind(console);
     let Configurator = require('../js/configurator').Configurator;
 
     setMsg('Loading Git Manager...');
-    let GitManager = require('../js/git').GitManager;
+    let GitManager = require('../js/gitnative').GitManager;
 
     setMsg('Loading Key Manager...');
     let KeyManager = require('../js/keys').KeyManager;
@@ -119,14 +119,12 @@ process.stdout.write = console.log.bind(console);
     })();
 
     let migrateManager = (function () {
-        return new MigrateManager(configurator);
+        return new MigrateManager(configurator, gitManager);
     })();
 
-    // TODO: where should these be?
+    // TODO: where should this be?
     mkdirp.sync(configurator.getValue('targetTranslationsDir'));
-    mkdirp.sync(configurator.getUserPath('datalocation', 'automatic_backups'));
-    mkdirp.sync(configurator.getUserPath('datalocation', 'backups'));
-
+    
     var App = {
         appName: 'translationStudio',
 

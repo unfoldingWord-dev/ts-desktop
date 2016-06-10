@@ -577,7 +577,7 @@
           var repo = data.repo.repo;
           var project = data.repo.project;
           var restore = data.restore;
-          var server = App.configurator.getUserSetting('dataserver');
+          var server = "git.door43.org";
           var repourl = "https://" + server + "/" + repo;
           var targetDir = App.configurator.getValue('targetTranslationsDir');
           var tmpDir = App.configurator.getValue('tempDir');

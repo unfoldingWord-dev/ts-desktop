@@ -215,9 +215,11 @@ function DataManager(db) {
             for (var i = 0; i < mysources.length; i++) {
                 var source = mysources[i].resource_id;
                 var frames = this.getSourceFrames(mysources[i]);
-                console.log("resource:", source, "chunks:", frames.length);
-                combined[source] = frames;
-                sources.push(source);
+                if (frames.length) {
+                    console.log("resource:", source, "chunks:", frames.length);
+                    combined[source] = frames;
+                    sources.push(source);
+                }
             }
             var match = true;
             var j = 0;

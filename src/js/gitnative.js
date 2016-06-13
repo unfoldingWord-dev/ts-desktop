@@ -75,6 +75,28 @@ function GitManager() {
     }
 
     return {
+        
+        verifyGit: function () {
+            var status = cmd().do('git --version');
+            var installed = false;
+            
+            return status.run()
+                .then(function (log) {
+                    var wordarray = log.stdout.split(" ");
+                    var versionarray = wordarray[2].split(".");                    
+                    if (versionarray[0] < 2 || (versionarray[0] == 2 && versionarray[1] < 3)) {
+                        installed = true;
+                        throw "error";
+                    }
+                })
+                .catch(function (err) {
+                    if (installed) {
+                        throw "Your git is out of date. Please update to the latest version."
+                    } else {
+                        throw "Git is not installed. It is required to run tStudio Desktop."
+                    }                    
+                });
+        },
 
         getHash: function (dir) {
             return cmd().cd(dir).and.do('git rev-parse HEAD').run();

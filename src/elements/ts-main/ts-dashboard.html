@@ -899,12 +899,26 @@
       },
 
       ready: function() {
-          App.ipc.send('loading-status', 'Retrieving User Info...');
-          this.retrieveUser();
-          App.configurator.applyPrefAppearance();
-          App.configurator.applyPrefBehavior();
-          App.ipc.send('loading-status', 'Loading Projects List...');
-          this.updateList();
+          var mythis = this;
+
+          App.gitManager.verifyGit()
+              .then(function () {
+                  App.ipc.send('loading-status', 'Retrieving User Info...');
+                  mythis.retrieveUser();
+                  App.configurator.applyPrefAppearance();
+                  App.configurator.applyPrefBehavior();
+                  App.ipc.send('loading-status', 'Loading Projects List...');
+                  mythis.updateList();
+              })
+              .catch(function (err) {
+                  mythis.set('options', {});
+                  mythis.set('options.title', "Cannot find needed software");
+                  mythis.set('options.body', err);
+                  mythis.set('options.loading', false);
+                  mythis.$.loading.open();
+                  App.ipc.send('loading-done');
+              })
+
       }
 
   });

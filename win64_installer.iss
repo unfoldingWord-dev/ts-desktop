@@ -3,7 +3,7 @@
 
 #define MyAppName "translationStudio"
 #define Version "9.0"
-#define Build "9"
+#define Build "11"
 #define MyAppPublisher "Unfolding Word"
 #define MyAppURL "https://unfoldingword.org"
 #define MyAppExeName "translationStudio.exe"
@@ -73,6 +73,6 @@ Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: 
 Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: quicklaunchicon
 
 [Run]
-Filename: "{app}\vendor\Git-2.8.4-64-bit.exe"; Parameters: "/SILENT /LOADINF=""{app}\vendor\win_git_installer.iss""";
+Filename: "{app}\vendor\Git-2.9.0-64-bit.exe"; Parameters: "/SILENT /LOADINF=""{app}\vendor\win_git_installer.iss""";
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: postinstall skipifsilent
 

@@ -82,7 +82,7 @@
 
       #import {
           width: 450px;
-          height: 500px;
+          height: 550px;
       }
 
       #backup {
@@ -116,7 +116,7 @@
       <ts-app-titlebar currentuser="[[currentuser]]" busy="{{busy}}"></ts-app-titlebar>
       <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
           <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]"></ts-home>
-          <ts-new data-route="new" route="{{route}}" importdata="{{importdata}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]"></ts-new>
+          <ts-new data-route="new" route="{{route}}" busy="{{busy}}" importdata="{{importdata}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]"></ts-new>
           <ts-translate data-route="translate" route="{{route}}" busy="{{busy}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]"></ts-translate>
           <ts-publish data-route="publish" route="{{route}}" currentproject="{{currentproject}}" currentuser="[[currentuser]]"></ts-publish>
           <ts-settings data-route="settings" route="{{route}}"></ts-settings>
@@ -132,11 +132,11 @@
       </paper-dialog>
 
       <paper-dialog id="import" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-          <ts-import-options on-restore="restoreFromBackup" on-backup="importFromBackup" on-usfm="importFromUsfm" on-repo="openRepo"></ts-import-options>
+          <ts-import-options on-restorebackup="restoreFromBackup" on-restorerepo="openRepoRestore" on-backup="importFromBackup" on-usfm="importFromUsfm" on-repo="openRepoImport"></ts-import-options>
       </paper-dialog>
 
       <paper-dialog id="repo" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-          <ts-repo-search on-cancel="cancelRepo"></ts-repo-search>
+          <ts-repo-search id="reposearch" on-cancel="cancelRepo"></ts-repo-search>
       </paper-dialog>
 
       <paper-dialog id="loading" class="popup" modal="true" exit-animation="scale-down-animation">
@@ -178,6 +178,9 @@
       <iron-signals on-iron-signal-openguidelines="openGuidelines"></iron-signals>
       <iron-signals on-iron-signal-openstatement="openStatement"></iron-signals>
       <iron-signals on-iron-signal-openattribution="openAttribution"></iron-signals>
+      <iron-signals on-iron-signal-changeproject="changeProject"></iron-signals>
+      <iron-signals on-iron-signal-deleteproject="deleteProject"></iron-signals>
+      <iron-signals on-iron-signal-updatelanguages="updateLanguages"></iron-signals>
 
   </template>
 
@@ -267,12 +270,133 @@
           }
       },
 
+      updateLanguages: function () {
+          var mythis = this;
+
+          mythis.set('options', {});
+          mythis.set('options.body', "Updating Languages. This may take several minutes. Please wait...");
+          mythis.set('options.loading', true);
+          mythis.$.loading.open();
+
+          setTimeout(function() {
+              return App.dataManager.updateLanguageList()
+                  .then(function() {
+                      mythis.set('options.title', "Update Complete");
+                      mythis.set('options.body', "The language list has been updated");
+                      mythis.set('options.loading', false);
+                  })
+                  .catch(function(err) {
+                      var errmessage = "An error occurred while updating";
+                      if(err !== null) {
+                          errmessage = err;
+                      }
+                      mythis.set('options.title', "Update Failed");
+                      mythis.set('options.body', errmessage);
+                      mythis.set('options.loading', false);
+                  });
+          }, 500);
+      },
+
+      deleteProject: function (event, data) {
+          var mythis = this;
+          var projectmeta = data.projectmeta;
+
+          mythis.set('options', {});
+          mythis.set('options.body', "Deleting project.  Please wait...");
+          mythis.set('options.loading', true);
+          mythis.$.loading.open();
+
+          setTimeout(function() {
+              return App.projectsManager.deleteTargetTranslation(projectmeta)
+                  .then(function() {
+                      App.projectsManager.unsetValues(projectmeta);
+                      mythis.set('options.title', "Project Deleted");
+                      mythis.set('options.body', "Your project has been successfully deleted.");
+                      mythis.set('options.loading', false);
+                      setTimeout(function() {
+                          mythis.updateList();
+                      }, 250);
+                  })
+                  .catch(function(err) {
+                      var errmessage = "An error occurred while trying to delete your project";
+                      if(err !== null) {
+                          errmessage = err;
+                      }
+                      mythis.set('options.title', "Delete Failed");
+                      mythis.set('options.body', errmessage);
+                      mythis.set('options.loading', false);
+                  });
+          }, 500);
+      },
+
+      changeProject: function (event, data) {
+          var mythis = this;
+          var conflicts = [];
+          var changedata = data;
+
+          mythis.set("route", "home");
+          mythis.set('options', {});
+          mythis.set('options.body', "Changing project.  Please wait...");
+          mythis.set('options.loading', true);
+          mythis.$.loading.open();
+
+          var choice = function () {
+              if (changedata.exists) {
+                  return App.gitManager.merge(mythis.currentuser, changedata.newpaths.projectDir, changedata.oldpaths.projectDir)
+                      .then(function (list) {
+                          conflicts = list;
+                      })
+                      .then(function () {
+                          return App.utils.fs.remove(changedata.oldpaths.projectDir);
+                      });
+              } else {
+                  return App.utils.fs.move(changedata.oldpaths.projectDir, changedata.newpaths.projectDir, {clobber: true})
+                      .then(function () {
+                          return App.projectsManager.saveTargetManifest(changedata.newmeta);
+                      })
+                      .then(function () {
+                          return App.projectsManager.commitProject(changedata.newmeta, mythis.currentuser);
+                      });
+              }
+          };
+
+          setTimeout(function() {
+              return choice()
+                  .then(function() {
+                      App.projectsManager.unsetValues(changedata.oldmeta);
+                      var message = "Your project has been changed. ";
+                      if (conflicts.length) {
+                          message += "The following chunks contain conflicts that need your attention: ";
+                          conflicts.forEach(function (item) {
+                              message += item + ", ";
+                          });
+                      }
+                      mythis.set('options.title', "Change Complete");
+                      mythis.set('options.body', message);
+                      mythis.set('options.loading', false);
+                      setTimeout(function() {
+                          mythis.updateList();
+                      }, 250);
+                  })
+                  .catch(function(err) {
+                      var errmessage = "An error occurred while trying to change the project";
+                      if(err !== null) {
+                          errmessage = err;
+                      }
+                      mythis.set('options.title', "Change Failed");
+                      mythis.set('options.body', errmessage);
+                      mythis.set('options.loading', false);
+                  });
+          }, 500);
+      },
+
       openImport: function () {
           this.$.import.open();
       },
 
       importFromBackup: function() {
           var mythis = this;
+          var conflicts = [];
           var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
           var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}], properties: ['openFile']}});
           if (!filePath) {
@@ -286,11 +410,14 @@
           mythis.$.loading.open();
 
           setTimeout(function() {
-              App.importManager.extractBackup(filePath[0])
+              return App.importManager.extractBackup(filePath[0])
                   .then(function (list) {
                       return Promise.all(list.map(function (item) {
                           if (item.targetExists) {
-                              return App.gitManager.merge(mythis.currentuser, item.targetPath, item.tmpPath, 3);
+                              return App.gitManager.merge(mythis.currentuser, item.targetPath, item.tmpPath)
+                                  .then(function (list) {
+                                      conflicts = list;
+                                  });
                           } else {
                               return App.utils.fs.move(item.tmpPath, item.targetPath, {clobber: true});
                           }
@@ -300,21 +427,29 @@
                       return App.utils.fs.remove(App.configurator.getValue('tempDir'));
                   })
                   .then(function() {
+                      var message = "Your project has been successfully imported. ";
+                      if (conflicts.length) {
+                          message += "The following chunks contain conflicts that need your attention: ";
+                          conflicts.forEach(function (item) {
+                              message += item + ", ";
+                          });
+                      }
                       mythis.set('options.title', "Import Complete");
-                      mythis.set('options.body', "Your project has been successfully imported.");
+                      mythis.set('options.body', message);
                       mythis.set('options.loading', false);
                       setTimeout(function() {
                           mythis.updateList();
                       }, 250);
                   })
                   .catch(function(err) {
-                      var errmessage = "We're sorry.  An error occurred while trying to import your project";
+                      var errmessage = "An error occurred while importing your project";
                       if(err !== null) {
                           errmessage = err;
                       }
                       mythis.set('options.title', "Import Failed");
                       mythis.set('options.body', errmessage);
                       mythis.set('options.loading', false);
+                      return App.utils.fs.remove(App.configurator.getValue('tempDir'));
                   });
           }, 500);
       },
@@ -329,14 +464,27 @@
 
           mythis.$.import.close();
 
-          App.importManager.retrieveUSFMProjectID(filePath[0])
+          return App.importManager.retrieveUSFMProjectID(filePath[0])
               .then(function (id) {
                   var name = "";
                   if (id) {
-                      name = App.dataManager.getProjectName(id)[0].name;
+                      var data = App.dataManager.getProjectName(id);
+                      if (data.length) {
+                          name = data[0].name;
+                      } else {
+                          id = "";
+                      }
                   }
                   mythis.set('importdata', {importing: true, filepath: filePath[0], project: {slug: id, name: name}});
                   mythis.set('route', 'new');
+              }).catch(function (err) {
+                  var errmessage = "Error occurred reading file: ";
+                  if(err !== null) {
+                      errmessage += err;
+                  }
+                  mythis.set('options.title', "Import Failed");
+                  mythis.set('options.body', errmessage);
+                  mythis.set('options.loading', false);
               });
       },
 
@@ -370,13 +518,13 @@
                   })
                   .then(function(){
                       mythis.set('options.title', "Import Complete");
-                      mythis.set('options.body', "Your file has been successfully imported.");
+                      mythis.set('options.body', "Your file has been imported. Please review it carefully.  If it was not formatted properly, text may not appear as desired.");
                       mythis.set('options.loading', false);
                       setTimeout(function() {
                           mythis.updateList();
                       }, 250);
                   }).catch(function(err){
-                      var errmessage = "We're sorry.  An error occurred while trying to import your project";
+                      var errmessage = "Error occurred importing project";
                       if(err !== null) {
                           errmessage = err;
                       }
@@ -393,13 +541,27 @@
                               .then(function () {
                                   return App.utils.fs.remove(App.configurator.getValue('tempDir'));
                               })
+                              .catch(function () {
+                                  return App.utils.fs.remove(App.configurator.getValue('tempDir'));
+                              });
                       }
                   });
           }, 500);
       },
 
-      openRepo: function () {
+      openRepoImport: function () {
           this.$.import.close();
+          this.$.reposearch.username = "";
+          this.$.reposearch.project = "";
+          this.$.reposearch.restore = false;
+          this.$.repo.open();
+      },
+
+      openRepoRestore: function () {
+          this.$.import.close();
+          this.$.reposearch.username = this.currentuser.username;
+          this.$.reposearch.project = "";
+          this.$.reposearch.restore = true;
           this.$.repo.open();
       },
 
@@ -410,10 +572,12 @@
 
       importFromRepo: function (event, data) {
           var mythis = this;
+          var conflicts = [];
           var path = require('path');
           var repo = data.repo.repo;
           var project = data.repo.project;
-          var server = App.configurator.getUserSetting('dataserver');
+          var restore = data.restore;
+          var server = "git.door43.org";
           var repourl = "https://" + server + "/" + repo;
           var targetDir = App.configurator.getValue('targetTranslationsDir');
           var tmpDir = App.configurator.getValue('tempDir');
@@ -443,7 +607,14 @@
                   })
                   .then(function (exists) {
                       if (exists) {
-                          return App.gitManager.merge(mythis.currentuser, targetPath, tmpPath, 3);
+                          if (restore) {
+                              return App.utils.fs.move(tmpPath, targetPath, {clobber: true});
+                          } else {
+                              return App.gitManager.merge(mythis.currentuser, targetPath, tmpPath)
+                                  .then(function (list) {
+                                      conflicts = list;
+                                  });
+                          }
                       } else {
                           return App.utils.fs.move(tmpPath, targetPath, {clobber: true});
                       }
@@ -452,21 +623,29 @@
                       return App.utils.fs.remove(App.configurator.getValue('tempDir'));
                   })
                   .then(function() {
+                      var message = "Your project has been successfully imported. ";
+                      if (conflicts.length) {
+                          message += "The following chunks contain conflicts that need your attention: ";
+                          conflicts.forEach(function (item) {
+                              message += item + ", ";
+                          });
+                      }
                       mythis.set('options.title', "Import Complete");
-                      mythis.set('options.body', "Your project has been successfully imported.");
+                      mythis.set('options.body', message);
                       mythis.set('options.loading', false);
                       setTimeout(function() {
                           mythis.updateList();
                       }, 250);
                   })
                   .catch(function(err) {
-                      var errmessage = "We're sorry.  An error occurred while trying to import your project";
+                      var errmessage = "An error occurred while importing your project";
                       if(err !== null) {
                           errmessage = err;
                       }
                       mythis.set('options.title', "Import Failed");
                       mythis.set('options.body', errmessage);
                       mythis.set('options.loading', false);
+                      return App.utils.fs.remove(App.configurator.getValue('tempDir'));
                   });
           }, 500);
       },
@@ -530,14 +709,17 @@
                   });
               })
               .catch(function (err) {
-                  var errmessage = "We're sorry.  An error occurred while trying to upload your project.";
+                  var errmessage = "An error occurred while uploading your project.";
                   var logmessage = "";
-                  if(err.status === 401) {
+                  if (err.status === 401) {
                       errmessage = "Cannot upload without connecting to a Door43 account.";
                   } else if (err.data) {
                       errmessage = err.data;
                   } else {
                       errmessage = err;
+                  }
+                  if (errmessage == "Error: Cannot push because a reference that you are trying to update on the remote contains commits that are not present locally.") {
+                      errmessage = "Cannot upload this project because a project already exists that has no shared history";
                   }
                   if (err.status) {
                       logmessage = "Error: " + err.status + " " + err.data;
@@ -568,14 +750,14 @@
           mythis.$.loading.open();
 
           setTimeout(function() {
-              App.exportManager.backupTranslation(meta, filePath)
+              return App.exportManager.backupTranslation(meta, filePath)
                   .then(function () {
                       mythis.set('options.title', "Backup Complete");
                       mythis.set('options.body', "Your project has been successfully backed up.");
                       mythis.set('options.loading', false);
                   })
                   .catch(function (err) {
-                      var errmessage = "We're sorry.  An error occurred while trying to backup your project";
+                      var errmessage = "An error occurred while trying to backup your project";
                       if(err !== null) {
                           errmessage = err;
                       }
@@ -601,7 +783,7 @@
           mythis.$.loading.open();
 
           setTimeout(function() {
-              App.importManager.extractBackup(filePath[0])
+              return App.importManager.extractBackup(filePath[0])
                   .then(function (list) {
                       return Promise.all(list.map(function (item) {
                           return App.utils.fs.move(item.tmpPath, item.targetPath, {clobber: true});
@@ -619,13 +801,14 @@
                       }, 250);
                   })
                   .catch(function(err) {
-                      var errmessage = "We're sorry.  An error occurred while trying to restore your project";
+                      var errmessage = "An error occurred while trying to restore your project";
                       if(err !== null) {
                           errmessage = err;
                       }
                       mythis.set('options.title', "Restore Failed");
                       mythis.set('options.body', errmessage);
                       mythis.set('options.loading', false);
+                      return App.utils.fs.remove(App.configurator.getValue('tempDir'));
                   });
           }, 500);
       },
@@ -676,8 +859,9 @@
               }, 500);
               return;
           }
-          mythis.set('busy', {signal: true, message: "Updating project list..."});
           var autobackupdir = App.configurator.getUserPath('datalocation', 'automatic_backups');
+          mythis.set('busy', {signal: true, message: "Updating project list..."});
+
           return App.projectsManager.migrateTargetTranslationsList()
               .then(function () {
                   return App.projectsManager.loadTargetTranslationsList()
@@ -695,7 +879,15 @@
                   return App.exportManager.backupAllTranslations(list, autobackupdir)
               })
               .catch(function (err) {
-                  console.error(err);
+                  var errmessage = "An error occurred while updating projects";
+                  if(err !== null) {
+                      errmessage = err;
+                  }
+                  mythis.set('options', {});
+                  mythis.set('options.title', "Error updating projects");
+                  mythis.set('options.body', errmessage);
+                  mythis.set('options.loading', false);
+                  mythis.$.loading.open();
                   App.reporter.logError(err);
               })
               .then(function () {

@@ -9,19 +9,37 @@
         "visible": true
     },
     {
-        "name": "font",
-        "mainText": "Font",
-        "value": "Roboto",
-        "options": ["Roboto", "Arial", "Times New Roman", "Calibri", "Tahoma"],
+        "name": "appfont",
+        "mainText": "App Font",
+        "value": {"path": "default", "name": "Roboto"},
+        "options": [],
+        "group": "general",
+        "enabled": true,
+        "visible": false
+    },
+    {
+        "name": "targetfont",
+        "mainText": "Target Translation Font",
+        "value": {"path": "default", "name": "Roboto"},
+        "options": [],
         "group": "general",
         "enabled": true,
         "visible": true
     },
     {
-        "name": "fontsize",
+        "name": "sourcefont",
+        "mainText": "Source Translation Font",
+        "value": {"path": "default", "name": "Roboto"},
+        "options": [],
+        "group": "general",
+        "enabled": true,
+        "visible": true
+    },
+    {
+        "name": "targetsize",
         "mainText": "Font Size",
-        "value": "Normal",
-        "options": ["Small", "Normal", "Large"],
+        "value": {"name": "Normal"},
+        "options": [{"name": "Small"}, {"name": "Normal"}, {"name": "Large"}],
         "group": "general",
         "enabled": true,
         "visible": true
@@ -95,7 +113,7 @@
         "mainText": "Media Server",
         "value": "https://api.unfoldingword.org/",
         "group": "upload",
-        "enabled": true,
+        "enabled": false,
         "visible": true
     },
     {

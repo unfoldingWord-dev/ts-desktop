@@ -11,29 +11,29 @@ function zipper (r) {
 function DataManager(db) {
     var query = db.query;
     var save = db.save;
-    
+
     return {
 
         updateLanguageList: function () {
             var req = utils.promisify(request);
-            
+
             return req('http://td.unfoldingword.org/exports/langnames.json')
                 .then(function (response) {
                     return JSON.parse(response.body);
                 })
                 .then(function (newlist) {
                     query("delete from target_language");
-                    
+
                     for (var i = 0; i < newlist.length; i++) {
                         var lc = newlist[i].lc;
                         var ln = newlist[i].ln;
                         var ld = newlist[i].ld;
                         var lr = newlist[i].lr;
                         query('insert into target_language (slug, name, direction, region) values ("' + lc + '", "' + ln + '", "' + ld + '", "' + lr + '")');
-                    }                    
+                    }
                 })
-                .then(function () {                    
-                    save();                    
+                .then(function () {
+                    save();
                 })
                 .catch(function (err) {
                     console.log(err);
@@ -219,7 +219,7 @@ function DataManager(db) {
                     console.log("resource:", source, "chunks:", frames.length);
                     combined[source] = frames;
                     sources.push(source);
-                }                
+                }
             }
             var match = true;
             var j = 0;

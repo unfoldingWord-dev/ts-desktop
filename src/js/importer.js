@@ -53,6 +53,9 @@ function ImportManager(configurator, migrator, dataManager) {
                             });
                     });
                 })
+                .catch(function (err) {
+                    throw "Error while extracting file: " + err;
+                })
                 .then(Promise.all.bind(Promise));
         },
 
@@ -78,51 +81,55 @@ function ImportManager(configurator, migrator, dataManager) {
         importFromUSFM: function (filepath, projectmeta) {
             var parser = new UsfmParser();
 
-            return parser.load(filepath).then(function () {
-                var parsedData = parser.parse();
-
-                if (JSON.stringify(parsedData) === JSON.stringify({})) {
-                    throw new Error('This is not a valid USFM file.');
-                }
-                var chunks = [];
-                var markers = dataManager.getChunkMarkers(projectmeta.project.id);
-
-                for (var i = 0; i < markers.length; i++) {
-                    var frameid = markers[i].first_verse_slug;
-                    var first = parseInt(frameid);
-                    var chapter = markers[i].chapter_slug;
-                    var isLastChunkOfChapter = !markers[i+1] || markers[i+1].chapter_slug !== chapter;
-                    var last = isLastChunkOfChapter ? Number.MAX_VALUE : parseInt(markers[i+1].first_verse_slug) - 1;
-
-                    if (parsedData[chapter]) {
-                        var transcontent = _.chain(parsedData[chapter].verses).filter(function (verse) {
-                            var id = parseInt(verse.id);
-                            return id <= last && id >= first;
-                        }).map("contents").value().join("");
-
-                        chunks.push({
+            return parser.load(filepath)
+                .then(function () {
+                    var parsedData = parser.parse();
+    
+                    if (JSON.stringify(parsedData) === JSON.stringify({})) {
+                        throw new Error('This is not a valid USFM file.');
+                    }
+                    var chunks = [];
+                    var markers = dataManager.getChunkMarkers(projectmeta.project.id);
+    
+                    for (var i = 0; i < markers.length; i++) {
+                        var frameid = markers[i].first_verse_slug;
+                        var first = parseInt(frameid);
+                        var chapter = markers[i].chapter_slug;
+                        var isLastChunkOfChapter = !markers[i+1] || markers[i+1].chapter_slug !== chapter;
+                        var last = isLastChunkOfChapter ? Number.MAX_VALUE : parseInt(markers[i+1].first_verse_slug) - 1;
+    
+                        if (parsedData[chapter]) {
+                            var transcontent = _.chain(parsedData[chapter].verses).filter(function (verse) {
+                                var id = parseInt(verse.id);
+                                return id <= last && id >= first;
+                            }).map("contents").value().join("");
+    
+                            chunks.push({
+                                chunkmeta: {
+                                    chapterid: chapter,
+                                    frameid: frameid
+                                },
+                                transcontent: transcontent.trim(),
+                                completed: false
+                            });
+                        }
+                    }
+    
+                    if (parsedData['00'] && parsedData['00'].contents) {
+                        chunks.unshift({
                             chunkmeta: {
-                                chapterid: chapter,
-                                frameid: frameid
+                                chapterid: '00',
+                                frameid: 'title'
                             },
-                            transcontent: transcontent.trim(),
+                            transcontent: parsedData['00'].contents.trim(),
                             completed: false
                         });
                     }
-                }
-
-                if (parsedData['00'].contents) {
-                    chunks.unshift({
-                        chunkmeta: {
-                            chapterid: '00',
-                            frameid: 'title'
-                        },
-                        transcontent: parsedData['00'].contents.trim(),
-                        completed: false
-                    });
-                }
-                return chunks;
-            });
+                    return chunks;
+                })
+                .catch(function (err) {
+                    throw "Error occurred parsing file: " + err;
+                });
         }
     };
 }
@@ -165,16 +172,6 @@ function UsfmParser () {
             regEx: /\\s[0-9]*/,
             hasOptions: false,
             type: "sectionHeading"
-        },
-        quote: {
-            regEx: /\\q[0-9]*/,
-            hasOptions: false,
-            type: "quote"
-        },
-        break: {
-            regEx: /\\b/,
-            hasOptions: false,
-            type: "break"
         },
         tableOfContents: {
             regEx: /\\toc[0-2]*/,

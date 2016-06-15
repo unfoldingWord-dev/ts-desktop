@@ -21,12 +21,23 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
     return {
 
         moveBackups: function(oldPath, newPath) {
-            utils.fs.move(path.join(oldPath, 'automatic_backups'), path.join(newPath, 'automatic_backups'), {clobber: true});
-            utils.fs.move(path.join(oldPath, 'backups'), path.join(newPath, 'backups'), {clobber: true});
+            return utils.fs.mkdirs(configurator.getUserPath('datalocation', 'automatic_backups'))
+                .then(function () {
+                    return utils.fs.mkdirs(configurator.getUserPath('datalocation', 'backups'));
+                })
+                .then(function () {
+                    return utils.fs.stat(oldPath).then(App.utils.ret(true)).catch(App.utils.ret(false));
+                })
+                .then(function (exists) {
+                    if (exists) {
+                        utils.fs.move(path.join(oldPath, 'automatic_backups'), path.join(newPath, 'automatic_backups'), {clobber: true});
+                        utils.fs.move(path.join(oldPath, 'backups'), path.join(newPath, 'backups'), {clobber: true});
+                    }
+                });
         },
 
         updateManifestToMeta: function (manifest) {
-            var meta = manifest;
+            var meta = _.cloneDeep(manifest);
             try {
                 if (manifest.project.name === "") {
                     meta.project.name = dataManager.getProjectName(manifest.project.id)[0].name;
@@ -42,6 +53,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                     meta.source_translations[j].id = details.id;
                     meta.source_translations[j].language_name = details.language_name;
                     meta.source_translations[j].resource_name = details.resource_name;
+                    meta.source_translations[j].direction = details.direction;
                 }
 
                 if (manifest.source_translations.length) {
@@ -58,18 +70,23 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                     meta.project_type_class = "standard";
                 }
 
-                meta.unique_id = manifest.target_language.id + "_" + manifest.project.id + "_" + manifest.type.id;
-                if (manifest.resource.id !== "") {
-                    meta.unique_id += "_" + manifest.resource.id;
+                meta.unique_id = this.makeUniqueId(manifest);
+
+                if (!manifest.finished_chunks) {
+                    meta.finished_chunks = [];
                 }
 
                 var completion = configurator.getValue(meta.unique_id + "-completion");
                 if (completion !== undefined && completion !== "") {
                     meta.completion = completion;
                 } else {
-                    if (manifest.source_translations.length) {
+                    if (manifest.source_translations.length && manifest.finished_chunks) {
                         var frames = dataManager.getSourceFrames(manifest.source_translations[0]);
-                        meta.completion = Math.round((meta.finished_chunks.length / frames.length) * 100);
+                        if (frames.length) {
+                            meta.completion = Math.round((meta.finished_chunks.length / frames.length) * 100);
+                        } else {
+                            meta.completion = 0;
+                        }
                     } else {
                         meta.completion = 0;
                     }
@@ -79,6 +96,14 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 return null;
             }
             return meta;
+        },
+
+        makeUniqueId: function (manifest) {
+            var id = manifest.target_language.id + "_" + manifest.project.id + "_" + manifest.type.id;
+            if (manifest.resource.id !== "") {
+                id += "_" + manifest.resource.id;
+            }
+            return id;
         },
 
         updateChunk: function (meta, chunk) {
@@ -94,7 +119,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             if (projectClass === "helps") {
                 hasContent = !!chunk.helpscontent.length;
             }
-            if (projectClass === "extant" && (!!chunk.helpscontent[0].title || !!chunk.helpscontent[0].body)) {
+            if (projectClass === "extant" && chunk.helpscontent[0] && (!!chunk.helpscontent[0].title || !!chunk.helpscontent[0].body)) {
                 hasContent = true;
             }
             if (projectClass === "standard" && hasContent && chunk.chunkmeta.frame === 1 && chunk.projectmeta.project.id !== "obs") {
@@ -114,6 +139,10 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             return mythis.makeChapterDir(meta, chunk)
                 .then(function () {
                     return mythis.updateChunk(meta, chunk);
+                })
+                .catch(function (err) {
+                    reporter.logError(err);
+                    throw "Unable to write to chunk file.";
                 });
         },
 
@@ -147,7 +176,11 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 finished_chunks: meta.finished_chunks
             };
 
-            return write(paths.manifest, toJSON(manifest));
+            return write(paths.manifest, toJSON(manifest))
+                .catch(function (err) {
+                    reporter.logError(err);
+                    throw "Unable to write to manifest file.";
+                });
         },
 
         createTargetTranslation: function (translation, meta, user) {
@@ -185,11 +218,17 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 .then(makeChapterDirs(translation))
                 .then(updateChunks(translation))
                 .then(function () {
-                    return mythis.cleanAndCommitProject(translation, meta, user);
+                    return mythis.cleanProject(translation, meta);
+                })
+                .then(function () {
+                    return mythis.commitProject(meta, user);
+                })
+                .catch(function (err) {
+                    throw "Error creating new project: " + err;
                 });
         },
 
-        cleanAndCommitProject: function (translation, meta, user) {
+        cleanProject: function (translation, meta) {
             var paths = utils.makeProjectPaths(targetDir, meta);
 
             var cleanChapterDir = function (data, chapter) {
@@ -206,10 +245,13 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 return Promise.all(_.map(data, cleanChapterDir));
             };
 
-            return cleanChapterDirs()
-                .then(function () {
-                    return git.init(paths.projectDir);
-                })
+            return cleanChapterDirs();
+        },
+
+        commitProject: function (meta, user) {
+            var paths = utils.makeProjectPaths(targetDir, meta);
+
+            return git.init(paths.projectDir)
                 .then(function () {
                     return git.commitAll(user, paths.projectDir);
                 });
@@ -313,9 +355,31 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 .then(utils.lodash.indexBy('name'));
         },
 
+        unsetValues: function (meta) {
+            var key = meta.unique_id;
+
+            configurator.unsetValue(key + "-chapter");
+            configurator.unsetValue(key + "-index");
+            configurator.unsetValue(key + "-selected");
+            configurator.unsetValue(key + "-completion");
+            configurator.unsetValue(key + "-source");
+        },
+
         deleteTargetTranslation: function (meta) {
             var paths = utils.makeProjectPaths(targetDir, meta);
-            return trash([paths.projectDir]);
+
+            return utils.fs.stat(paths.projectDir).then(App.utils.ret(true)).catch(App.utils.ret(false))
+                .then(function (exists) {
+                    if (exists) {
+                        return trash([paths.projectDir]);
+                    } else {
+                        throw "Project file does not exist";
+                    }
+                })
+                .catch(function (err) {
+                    reporter.logError(err);
+                    throw "Unable to delete file at this time. You may need to restart the app first.";
+                });
         }
     };
 }

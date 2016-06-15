@@ -653,19 +653,24 @@
                 mythis.set('options.loading', true);
                 mythis.$.loading.open();
                 setTimeout(function() {
-                    App.projectsManager.loadTargetTranslation(projectmeta).then(function (translation) {
-                        mythis.set('currentproject.rawdata.main', translation);
-                        loaddata2();
-                    }).catch(function(err) {
-                        App.reporter.logError(err);
-                        var message = "We're sorry.  An error occurred while trying to load this project";
-                        if(err !== null) {
-                            message = err;
-                        }
-                        mythis.set('options.title', "Project Load Failed");
-                        mythis.set('options.body', message);
-                        mythis.set('options.loading', false);
-                    });
+                    return App.projectsManager.loadTargetTranslation(projectmeta)
+                        .then(function (translation) {
+                            mythis.set('currentproject.rawdata.main', translation);
+                            loaddata2();
+                        })
+                        .catch(function(err) {
+                            App.reporter.logError(err);
+                            var errmessage = "An error occurred while trying to load this project";
+                            if(err !== null) {
+                                errmessage += "\n" + err;
+                            }
+                            mythis.set('options.title', "Project Load Failed");
+                            mythis.set('options.body', errmessage);
+                            mythis.set('options.loading', false);
+                            setTimeout(function() {
+                                mythis.set('busy', {signal: false, message: "Idle"});
+                            }, 1000);
+                        });
                 }, 250);
             }, 500);
         },
@@ -696,20 +701,26 @@
                 return;
             }
             mythis.set('busy', {signal: true, message: "Loading source data..."});
-            App.projectsManager.loadTargetTranslation(projectmeta).then(function (translation) {
-                mythis.set('currentproject.rawdata.main', translation);
-                mythis.createchunks();
-                mythis.createchapters();
-                mythis.$.loading.close();
-                mythis.forceResize();
-                mythis.setlocation();
-                setTimeout(function() {
-                    mythis.set('busy', {signal: false, message: "Idle"});
-                }, 1000);
-                if (full) {
-                    mythis.checksources();
-                }
-            });
+            App.projectsManager.loadTargetTranslation(projectmeta)
+                .then(function (translation) {
+                    mythis.set('currentproject.rawdata.main', translation);
+                    mythis.createchunks();
+                    mythis.createchapters();
+                    mythis.$.loading.close();
+                    mythis.forceResize();
+                    mythis.setlocation();
+                    setTimeout(function() {
+                        mythis.set('busy', {signal: false, message: "Idle"});
+                    }, 1000);
+                    if (full) {
+                        mythis.checksources();
+                    }
+                })
+                .catch(function() {
+                    setTimeout(function() {
+                        mythis.set('busy', {signal: false, message: "Idle"});
+                    }, 1000);
+                });
         },
 
         saveproject: function () {
@@ -721,12 +732,21 @@
                 return;
             }
             mythis.set('busy', {signal: true, message: "Saving project to file..."});
-            App.projectsManager.cleanAndCommitProject(this.currentproject.chunks, this.currentproject.projectmeta, this.currentuser).then(function() {
-                setTimeout(function() {
-                    mythis.set('busy', {signal: false, message: "Idle"});
-                }, 1000);
-                mythis.fire('iron-signal', {name: 'updatelist'});
-            });
+            return App.projectsManager.cleanProject(mythis.currentproject.chunks, mythis.currentproject.projectmeta)
+                .then(function() {
+                    return App.projectsManager.commitProject(mythis.currentproject.projectmeta, mythis.currentuser);
+                })
+                .then(function() {
+                    setTimeout(function() {
+                        mythis.set('busy', {signal: false, message: "Idle"});
+                        mythis.fire('iron-signal', {name: 'updatelist'});
+                    }, 1000);
+                })
+                .catch(function() {
+                    setTimeout(function() {
+                        mythis.set('busy', {signal: false, message: "Idle"});
+                    }, 1000);
+                });
         },
 
         savechunk: function (event, data) {
@@ -738,13 +758,19 @@
                 return;
             }
             mythis.set('busy', {signal: true, message: "Saving chunk to file..."});
-            App.projectsManager.saveTargetChunk(data.chunk, this.currentproject.projectmeta).then(function() {
-                setTimeout(function() {
-                    mythis.set('busy', {signal: false, message: "Idle"});
-                }, 1000);
-                mythis.createchapters();
-                mythis.addcontributor();
-            });
+            return App.projectsManager.saveTargetChunk(data.chunk, this.currentproject.projectmeta)
+                .then(function() {
+                    setTimeout(function() {
+                        mythis.set('busy', {signal: false, message: "Idle"});
+                    }, 1000);
+                    mythis.createchapters();
+                    mythis.addcontributor();
+                })
+                .catch(function() {
+                    setTimeout(function() {
+                        mythis.set('busy', {signal: false, message: "Idle"});
+                    }, 1000);
+                });
         },
 
         savemanifest: function () {
@@ -756,11 +782,17 @@
                 return;
             }
             mythis.set('busy', {signal: true, message: "Saving manifest to file..."});
-            App.projectsManager.saveTargetManifest(this.currentproject.projectmeta).then(function() {
-                setTimeout(function() {
-                    mythis.set('busy', {signal: false, message: "Idle"});
-                }, 1000);
-            });
+            return App.projectsManager.saveTargetManifest(this.currentproject.projectmeta)
+                .then(function() {
+                    setTimeout(function() {
+                        mythis.set('busy', {signal: false, message: "Idle"});
+                    }, 1000);
+                })
+                .catch(function() {
+                    setTimeout(function() {
+                        mythis.set('busy', {signal: false, message: "Idle"});
+                    }, 1000);
+                });
         },
 
         addcontributor: function () {
@@ -867,9 +899,11 @@
             var frames;
             var volume = "vol1";
             var chunkarray = [];
+            var sources = App.dataManager.getSources();
+            var filtered = _.filter(sources, {'language_id': "en", 'resource_id': "ulb", 'checking_level': 3});
 
             if (type === "tw") {
-                frames = App.dataManager.getAllWords(172);
+                frames = App.dataManager.getAllWords(filtered[0]);
             } else if (type === "ta") {
                 if (projectmeta.project.id !== "ta") {
                     volume = projectmeta.project.id;
@@ -1008,6 +1042,8 @@
             }
             if (seconddata && typeclass === "helps") {
                 transcontent = seconddata.transcontent;
+                transcontent = App.renderer.migrateMarkers(transcontent);
+                transcontent = App.renderer.removeChapterMarkers(transcontent);
             }
             if (!statedata) {
                 statedata = {chunk: true, review: true, resource: 0};
@@ -1271,6 +1307,7 @@
 
         gobackup: function () {
             var projectmeta = this.currentproject.projectmeta;
+            this.saveproject();
             this.fire('iron-signal', {name: 'openbackup', data: {projectmeta: projectmeta}});
         },
 
@@ -1294,16 +1331,16 @@
             var generatePdf = function(){
                 mythis.set('options.body', "Creating PDF. Please wait...");
                 setTimeout(function() {
-                    App.printManager.targetTranslationToPdf(translation, projectmeta, filePath, options)
+                    return App.printManager.targetTranslationToPdf(translation, projectmeta, filePath, options)
                         .then(function () {
                             mythis.set('options.title', "PDF Created");
                             mythis.set('options.body', "Your project has been successfully saved to a PDF.");
                             mythis.set('options.loading', false);
                         })
                         .catch(function (err) {
-                            var errmessage = "We're sorry.  An error occurred while trying to save your project";
+                            var errmessage = "An error occurred saving your project";
                             if(err !== null) {
-                                errmessage = err;
+                                errmessage += "\n" + err;
                             }
                             mythis.set('options.title', "Print Failed");
                             mythis.set('options.body', errmessage);
@@ -1324,12 +1361,12 @@
                     App.printManager.extractImages();
                     generatePdf();
                 }).catch(function(err){
-                    var message = "We're sorry.  An error occurred while trying to download images for this project";
+                    var errmessage = "An error occurred while downloading images";
                     if(err !== null) {
-                        message = err;
+                        errmessage += "\n" + err;
                     }
                     mythis.set('options.title', "Download Failed");
-                    mythis.set('options.body', message);
+                    mythis.set('options.body', errmessage);
                     mythis.set('options.loading', false);
                 });
             } else {

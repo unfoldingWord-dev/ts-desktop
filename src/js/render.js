@@ -114,44 +114,56 @@ function Renderer() {
 
             for (var j = 0; j < linearray.length; j++) {
                 returnstr += startp;
-                var wordarray = linearray[j].split(" ");
-                for (var i = 0; i < wordarray.length; i++) {
-                    if (wordarray[i] === "\\v") {
-                        var verse = wordarray[i+1];
-                        returnstr += numstr1 + verse + numstr2;
-                        i++;
-                    } else {
-                        returnstr += wordarray[i] + " ";
+                if (linearray[j] === "") {
+                    returnstr += "&nbsp";
+                } else {
+                    var wordarray = linearray[j].split(" ");
+                    for (var i = 0; i < wordarray.length; i++) {
+                        if (wordarray[i] === "\\v") {
+                            var verse = wordarray[i+1];
+                            returnstr += numstr1 + verse + numstr2;
+                            i++;
+                        } else {
+                            returnstr += wordarray[i] + " ";
+                        }
                     }
+                    returnstr = returnstr.trim();
                 }
-                returnstr = returnstr.trim();
                 returnstr += endp;
             }
             return returnstr;
         },
 
         validateVerseMarkers: function (text, verses) {
-            var linearray = text.split("\n");
+            var linearray = text.trim().split("\n");
             var returnstr = "";
             var used = [];
 
             for (var j = 0; j < linearray.length; j++) {
-                var wordarray = linearray[j].split(" ");
-                for (var i = 0; i < wordarray.length; i++) {
-                    if (wordarray[i] === "\\v") {
-                        var verse = parseInt(wordarray[i+1]);
-                        if (verses.indexOf(verse) >= 0 && used.indexOf(verse) === -1) {
-                            returnstr += "\\v " + verse + " ";
-                            used.push(verse);
-                        }
-                        i++;
+                if (linearray[j] === "") {
+                    if (linearray.length === 1) {
+                        returnstr += "";
                     } else {
-                        returnstr += wordarray[i] + " ";
+                        returnstr += "\n";
+                    }                    
+                } else {
+                    var wordarray = linearray[j].split(" ");
+                    for (var i = 0; i < wordarray.length; i++) {
+                        if (wordarray[i] === "\\v") {
+                            var verse = parseInt(wordarray[i+1]);
+                            if (verses.indexOf(verse) >= 0 && used.indexOf(verse) === -1) {
+                                returnstr += "\\v " + verse + " ";
+                                used.push(verse);
+                            }
+                            i++;
+                        } else {
+                            returnstr += wordarray[i] + " ";
+                        }
                     }
-                }
-                returnstr = returnstr.trim();
-                if (j !== linearray.length-1) {
-                    returnstr += "\n";
+                    returnstr = returnstr.trim();
+                    if (j !== linearray.length-1) {
+                        returnstr += "\n";
+                    }
                 }
             }
             return returnstr;
@@ -177,17 +189,21 @@ function Renderer() {
                 if (j !== 0) {
                     returnstr += startp;
                 }
-                var wordarray = linearray[j].split(" ");
-                for (var i = 0; i < wordarray.length; i++) {
-                    if (wordarray[i] === "\\v") {
-                        var verse = parseInt(wordarray[i+1]);
-                        if (verses.indexOf(verse) >= 0 && used.indexOf(verse) === -1) {
-                            returnstr += vmstr1 + chap + vmstr2 + verse + vmstr3 + verse + vmstr4;
-                            used.push(verse);
+                if (linearray[j] === "") {
+                    returnstr += "&nbsp";
+                } else {
+                    var wordarray = linearray[j].split(" ");
+                    for (var i = 0; i < wordarray.length; i++) {
+                        if (wordarray[i] === "\\v") {
+                            var verse = parseInt(wordarray[i+1]);
+                            if (verses.indexOf(verse) >= 0 && used.indexOf(verse) === -1) {
+                                returnstr += vmstr1 + chap + vmstr2 + verse + vmstr3 + verse + vmstr4;
+                                used.push(verse);
+                            }
+                            i++;
+                        } else {
+                            returnstr += textstr1 + wordarray[i] + textstr2;
                         }
-                        i++;
-                    } else {
-                        returnstr += textstr1 + wordarray[i] + textstr2;
                     }
                 }
                 returnstr += endp;
@@ -205,20 +221,24 @@ function Renderer() {
 
             for (var j = 0; j < paragraphs.length; j++) {
                 var children = paragraphs[j].children;
-                for (var i = 0; i < children.length; i++) {
-                    var type = children[i].nodeName;
-
-                    if (type === "TS-VERSE-MARKER") {
-                        var versenum = children[i].verse;
-                        returnstr += "\\v " + versenum + " ";
-                    } else {
-                        var text = children[i].textContent;
-                        returnstr += text + " ";
-                    }
-                }
-                returnstr = returnstr.trim();
-                if (j !== paragraphs.length-1) {
+                if (!children.length) {
                     returnstr += "\n";
+                } else {
+                    for (var i = 0; i < children.length; i++) {
+                        var type = children[i].nodeName;
+
+                        if (type === "TS-VERSE-MARKER") {
+                            var versenum = children[i].verse;
+                            returnstr += "\\v " + versenum + " ";
+                        } else {
+                            var text = children[i].textContent;
+                            returnstr += text + " ";
+                        }
+                    }
+                    returnstr = returnstr.trim();
+                    if (j !== paragraphs.length-1) {
+                        returnstr += "\n";
+                    }
                 }
             }
             return returnstr;

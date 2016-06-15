@@ -195,7 +195,7 @@
             var mythis = this;
             var projectmeta = this.currentproject.projectmeta;
             var translation = this.currentproject.chunks;
-            var mediaServer = App.configurator.getUserSetting('mediaserver');
+            var mediaServer = "https://api.unfoldingword.org/";
             var name = projectmeta.unique_id;
             var filePath;
 
@@ -214,7 +214,7 @@
             mythis.$.loading.open();
 
             setTimeout(function() {
-                App.exportManager.exportTranslation(translation, projectmeta, filePath, mediaServer)
+                return App.exportManager.exportTranslation(translation, projectmeta, filePath, mediaServer)
                     .then(function () {
                         mythis.set('options.title', "Project Exported");
                         mythis.set('options.body', "Your project has been successfully exported to a file.");
@@ -222,9 +222,9 @@
                         mythis.set('options.loading', false);
                     })
                     .catch(function (err) {
-                        var errmessage = "We're sorry.  An error occurred while trying to export your project";
+                        var errmessage = "An error occurred while trying to export your project";
                         if(err !== null) {
-                            errmessage = err;
+                            errmessage += "\n" + err;
                         }
                         mythis.set('options.title', "Export Failed");
                         mythis.set('options.body', errmessage);
@@ -287,14 +287,17 @@
                     });
                 })
                 .catch(function (err) {
-                    var errmessage = "We're sorry.  An error occurred while trying to upload your project.";
+                    var errmessage = "An error occurred while trying to upload your project.";
                     var logmessage = "";
-                    if(err.status === 401) {
+                    if (err.status === 401) {
                         errmessage = "Cannot upload without connecting to a Door43 account.";
                     } else if (err.data) {
                         errmessage = err.data;
                     } else {
                         errmessage = err;
+                    }
+                    if (errmessage == "Error: Cannot push because a reference that you are trying to update on the remote contains commits that are not present locally.") {
+                        errmessage = "Cannot upload this project because a project already exists that has no shared history";
                     }
                     if (err.status) {
                         logmessage = "Error: " + err.status + " " + err.data;

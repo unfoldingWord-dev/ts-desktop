@@ -116,6 +116,14 @@
             cursor: pointer;
         }
 
+        .rtl {
+            direction: rtl;
+        }
+
+        p.rtl {
+            width: 100%;
+        }
+
 	</style>
 
 	<template>
@@ -128,14 +136,14 @@
             </paper-material>
             <div id="content" class="editmode">
                 <template is="dom-repeat" items="{{chunk.helpscontent}}" as="help">
-                    <paper-material class="contentbox" elevation="1">
+                    <paper-material class="contentbox targetfont" elevation="1">
                         <div class="contentheader">
-                            <p>{{help.title}}</p>
-                            <iron-autogrow-textarea bind-value="{{help.title}}" on-change="change" on-input="input" placeholder$="[[checktitle(chunk.projectmeta.type.id)]]"></iron-autogrow-textarea>
+                            <p class$="[[chunk.projectmeta.target_language.direction]]">{{help.title}}</p>
+                            <iron-autogrow-textarea class$="[[chunk.projectmeta.target_language.direction]]" bind-value="{{help.title}}" on-change="change" on-input="input" placeholder$="[[checktitle(chunk.projectmeta.type.id)]]"></iron-autogrow-textarea>
                         </div>
                         <div class="contentbody">
-                            <div id="textholder"></div>
-                            <iron-autogrow-textarea bind-value="{{help.body}}" on-change="change" on-input="input" placeholder$="[[checkbody(chunk.projectmeta.type.id)]]"></iron-autogrow-textarea>
+                            <div id="textholder" class$="[[chunk.projectmeta.target_language.direction]]"></div>
+                            <iron-autogrow-textarea class$="[[chunk.projectmeta.target_language.direction]]" bind-value="{{help.body}}" on-change="change" on-input="input" placeholder$="[[checkbody(chunk.projectmeta.type.id)]]"></iron-autogrow-textarea>
                         </div>
                     </paper-material>
                 </template>
@@ -202,21 +210,24 @@
 
         rendertext: function () {
             if(this.chunk && this.chunk.srccontent && this.chunk.projectmeta.project_type_class === "extant") {
-                var completed = this.chunk.completed;
-                var content = this.$.content;
-                var text = this.chunk.helpscontent[0].body;
-                var module = "ts-target-words";
+                var mythis = this;
+                setTimeout(function() {
+                    var completed = mythis.chunk.completed;
+                    var content = mythis.$.content;
+                    var text = mythis.chunk.helpscontent[0].body;
+                    var module = "ts-target-words";
 
-                if (completed) {
-                    content.classList.remove("editmode");
-                    content.classList.add("donemode");
-                    var textholder = this.querySelector("#textholder");
-                    textholder.innerHTML = App.renderer.renderTargetWithVerses(text, module);
-                } else {
-                    content.classList.add("editmode");
-                    content.classList.remove("donemode");
-                }
-                this.$.toggle.checked = completed;
+                    if (completed) {
+                        content.classList.remove("editmode");
+                        content.classList.add("donemode");
+                        var textholder = mythis.querySelector("#textholder");
+                        textholder.innerHTML = App.renderer.renderTargetWithVerses(text, module);
+                    } else {
+                        content.classList.add("editmode");
+                        content.classList.remove("donemode");
+                    }
+                    mythis.$.toggle.checked = completed;
+                }, 1000);
             }
         },
 

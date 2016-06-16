@@ -396,7 +396,7 @@
                         mythis.gittimer = setTimeout(timer1, 120000);
                         setTimeout(function() {
                             mythis.set('busy', {signal: false, message: "Idle"});
-                        }, 1000);
+                        }, 500);
                     })
                 }, 100);
 
@@ -411,7 +411,7 @@
                         mythis.backuptimer = setTimeout(timer2, 600000);
                         setTimeout(function() {
                             mythis.set('busy', {signal: false, message: "Idle"});
-                        }, 1000);
+                        }, 500);
                     })
                 }, 100);
         },
@@ -576,7 +576,7 @@
                 setTimeout(function() {
                     setTimeout(function() {
                         mythis.set('busy', {signal: false, message: "Idle"});
-                    }, 1000);
+                    }, 500);
                     mythis.setmodestate();
                     mythis.checksources();
                     if (type === "publish") {
@@ -669,7 +669,7 @@
                             mythis.set('options.loading', false);
                             setTimeout(function() {
                                 mythis.set('busy', {signal: false, message: "Idle"});
-                            }, 1000);
+                            }, 500);
                         });
                 }, 250);
             }, 500);
@@ -711,7 +711,7 @@
                     mythis.setlocation();
                     setTimeout(function() {
                         mythis.set('busy', {signal: false, message: "Idle"});
-                    }, 1000);
+                    }, 500);
                     if (full) {
                         mythis.checksources();
                     }
@@ -719,7 +719,7 @@
                 .catch(function() {
                     setTimeout(function() {
                         mythis.set('busy', {signal: false, message: "Idle"});
-                    }, 1000);
+                    }, 500);
                 });
         },
 
@@ -740,12 +740,12 @@
                     setTimeout(function() {
                         mythis.set('busy', {signal: false, message: "Idle"});
                         mythis.fire('iron-signal', {name: 'updatelist'});
-                    }, 1000);
+                    }, 500);
                 })
                 .catch(function() {
                     setTimeout(function() {
                         mythis.set('busy', {signal: false, message: "Idle"});
-                    }, 1000);
+                    }, 500);
                 });
         },
 
@@ -762,14 +762,14 @@
                 .then(function() {
                     setTimeout(function() {
                         mythis.set('busy', {signal: false, message: "Idle"});
-                    }, 1000);
+                    }, 500);
                     mythis.createchapters();
                     mythis.addcontributor();
                 })
                 .catch(function() {
                     setTimeout(function() {
                         mythis.set('busy', {signal: false, message: "Idle"});
-                    }, 1000);
+                    }, 500);
                 });
         },
 
@@ -786,12 +786,12 @@
                 .then(function() {
                     setTimeout(function() {
                         mythis.set('busy', {signal: false, message: "Idle"});
-                    }, 1000);
+                    }, 500);
                 })
                 .catch(function() {
                     setTimeout(function() {
                         mythis.set('busy', {signal: false, message: "Idle"});
-                    }, 1000);
+                    }, 500);
                 });
         },
 

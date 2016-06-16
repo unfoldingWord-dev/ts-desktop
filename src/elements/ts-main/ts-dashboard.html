@@ -859,13 +859,9 @@
               }, 500);
               return;
           }
-          var autobackupdir = App.configurator.getUserPath('datalocation', 'automatic_backups');
           mythis.set('busy', {signal: true, message: "Updating project list..."});
 
-          return App.projectsManager.migrateTargetTranslationsList()
-              .then(function () {
-                  return App.projectsManager.loadTargetTranslationsList()
-              })
+          return App.projectsManager.loadTargetTranslationsList()
               .then(function(list) {
                   App.ipc.send('loading-status', 'Updating Manifest Files...');
                   for (var i = 0; i < list.length; i++) {
@@ -875,8 +871,6 @@
               })
               .then(function (list) {
                   mythis.set('projectlist', list);
-                  App.ipc.send('loading-status', 'Creating Auto Backups...');
-                  return App.exportManager.backupAllTranslations(list, autobackupdir)
               })
               .catch(function (err) {
                   var errmessage = "An error occurred while updating projects";
@@ -893,13 +887,13 @@
               .then(function () {
                   setTimeout(function() {
                       mythis.set('busy', {signal: false, message: "Idle"});
-                      App.ipc.send('loading-done');
-                  }, 1000);
+                  }, 500);
               });
       },
 
       ready: function() {
           var mythis = this;
+          var autobackupdir = App.configurator.getUserPath('datalocation', 'automatic_backups');
 
           App.gitManager.verifyGit()
               .then(function () {
@@ -907,15 +901,27 @@
                   mythis.retrieveUser();
                   App.configurator.applyPrefAppearance();
                   App.configurator.applyPrefBehavior();
+              })
+              .then(function () {
+                  App.ipc.send('loading-status', 'Migrating Projects List...');
+                  return App.projectsManager.migrateTargetTranslationsList();
+              })
+              .then(function () {
                   App.ipc.send('loading-status', 'Loading Projects List...');
-                  mythis.updateList();
+                  return mythis.updateList();
+              })
+              .then(function () {
+                  App.ipc.send('loading-status', 'Creating Auto Backups...');
+                  return App.exportManager.backupAllTranslations(mythis.projectlist, autobackupdir)
               })
               .catch(function (err) {
                   mythis.set('options', {});
-                  mythis.set('options.title', "Cannot find needed software");
+                  mythis.set('options.title', "Error on startup");
                   mythis.set('options.body', err);
                   mythis.set('options.loading', false);
                   mythis.$.loading.open();
+              })
+              .then(function () {
                   App.ipc.send('loading-done');
               })
 

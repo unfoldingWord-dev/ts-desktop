@@ -212,6 +212,7 @@
         },
 
         forceResize: function (event) {
+            this.set('selected', 0);
             this.$.languages.updateList();
             this.$.languages.notifyResize();
         },
@@ -274,7 +275,7 @@
                 popup.open();
                 setTimeout(function() {
                     mythis.set('busy', {signal: false, message: "Idle"});
-                }, 1000);
+                }, 500);
                 return;
             }
 
@@ -289,14 +290,14 @@
                         mythis.$.confirmimport.open();
                         setTimeout(function() {
                             mythis.set('busy', {signal: false, message: "Idle"});
-                        }, 1000);
+                        }, 500);
                         return;
                     } else {
                         mythis.set('options', {title: "Duplicate Found", body: "This project already exists"});
                         popup.open();
                         setTimeout(function() {
                             mythis.set('busy', {signal: false, message: "Idle"});
-                        }, 1000);
+                        }, 500);
                         return;
                     }
                 }
@@ -307,7 +308,7 @@
                 popup.open();
                 setTimeout(function() {
                     mythis.set('busy', {signal: false, message: "Idle"});
-                }, 1000);
+                }, 500);
                 return;
             }
 
@@ -315,7 +316,7 @@
                 mythis.importdata.overwrite = false;
                 setTimeout(function() {
                     mythis.set('busy', {signal: false, message: "Idle"});
-                }, 1000);
+                }, 500);
                 mythis.startimport();
             } else {
                 mythis.animationConfig.exit.name = 'slide-left-animation';
@@ -323,19 +324,16 @@
                     .then(function() {
                         setTimeout(function() {
                             mythis.set('busy', {signal: false, message: "Idle"});
-                        }, 1000);
+                        }, 500);
                         mythis.fire('iron-signal', {name: 'updatelist'});
                         mythis.fire('iron-signal', {name: 'loadproject', data: {projectmeta: newprojectmeta, type: "new"}});
-                        setTimeout(function() {
-                            mythis.set('selected', 0);
-                        }, 5000);
                     })
                     .catch(function (err) {
                         mythis.set('options', {title: "Error", body: err});
                         popup.open();
                         setTimeout(function() {
                             mythis.set('busy', {signal: false, message: "Idle"});
-                        }, 1000);
+                        }, 500);
                     });
             }
         },

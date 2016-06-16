@@ -210,8 +210,11 @@
             var textholder = this.querySelector("#textholder");
             var paragraphs = textholder.children;
 
-            this.set('chunk.transcontent', App.renderer.balloonsToMarkers(paragraphs));
-            this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
+            if (this.chunk.projectmeta.project.id !== "obs") {
+                this.set('chunk.transcontent', App.renderer.balloonsToMarkers(paragraphs));
+                this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
+            }
+
         },
 
         completechunk: function (event, data) {

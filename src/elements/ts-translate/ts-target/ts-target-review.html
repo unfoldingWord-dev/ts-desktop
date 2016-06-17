@@ -159,11 +159,16 @@
                 var module = "ts-target-review";
                 var returnstr = "";
 
-                if (completed) {
-                    returnstr = App.renderer.renderTargetWithVerses(text, module);
+                if (this.chunk.projectmeta.project.id !== "obs") {
+                    if (completed) {
+                        returnstr = App.renderer.renderTargetWithVerses(text, module);
+                    } else {
+                        returnstr = App.renderer.markersToBalloons(mythis.chunk, module);
+                    }
                 } else {
-                    returnstr = App.renderer.markersToBalloons(mythis.chunk, module);
+                    returnstr = text;
                 }
+
                 mythis.$.textholder.innerHTML = returnstr;
                 mythis.$.toggle.checked = completed;
                 mythis.addDragListeners();

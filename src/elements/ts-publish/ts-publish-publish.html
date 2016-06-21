@@ -293,6 +293,8 @@
                         errmessage = "Cannot upload without connecting to a Door43 account.";
                     } else if (err.data) {
                         errmessage = err.data;
+                    } else if (err.stderr) {
+                        errmessage = err.stderr;
                     } else {
                         errmessage = err;
                     }
@@ -301,6 +303,8 @@
                     }
                     if (err.status) {
                         logmessage = "Error: " + err.status + " " + err.data;
+                    } else if (err.stderr) {
+                        logmessage = err.stderr;
                     } else {
                         logmessage = err;
                     }

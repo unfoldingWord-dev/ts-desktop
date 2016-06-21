@@ -113,18 +113,18 @@
 
   <template>
 
-      <ts-app-titlebar currentuser="[[currentuser]]" busy="{{busy}}"></ts-app-titlebar>
+      <ts-app-titlebar currentuser="[[currentuser]]"></ts-app-titlebar>
       <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
           <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]"></ts-home>
-          <ts-new data-route="new" route="{{route}}" busy="{{busy}}" importdata="{{importdata}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]"></ts-new>
-          <ts-translate data-route="translate" route="{{route}}" busy="{{busy}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]"></ts-translate>
+          <ts-new data-route="new" route="{{route}}" importdata="{{importdata}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]"></ts-new>
+          <ts-translate data-route="translate" route="{{route}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]"></ts-translate>
           <ts-publish data-route="publish" route="{{route}}" currentproject="{{currentproject}}" currentuser="[[currentuser]]"></ts-publish>
           <ts-settings data-route="settings" route="{{route}}"></ts-settings>
           <ts-profile data-route="profile" currentuser="[[currentuser]]"></ts-profile>
           <ts-terms data-route="terms"></ts-terms>
       </neon-animated-pages>
       <div id="statusbar">
-          <span>Status: </span><span id="message">{{busy.message}}</span>
+          <span>Status: </span><span id="message">No Status</span>
       </div>
 
       <paper-dialog id="feedback" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -224,10 +224,6 @@
           options: {
               type: Object,
               value: {}
-          },
-          busy: {
-              type: Object,
-              value: {signal: false, message: "Idle"}
           }
       },
 
@@ -853,13 +849,6 @@
 
       updateList: function () {
           var mythis = this;
-          if (mythis.busy.signal) {
-              setTimeout(function() {
-                  mythis.updateList();
-              }, 500);
-              return;
-          }
-          mythis.set('busy', {signal: true, message: "Updating project list..."});
 
           return App.projectsManager.loadTargetTranslationsList()
               .then(function(list) {
@@ -883,11 +872,6 @@
                   mythis.set('options.loading', false);
                   mythis.$.loading.open();
                   App.reporter.logError(err);
-              })
-              .then(function () {
-                  setTimeout(function() {
-                      mythis.set('busy', {signal: false, message: "Idle"});
-                  }, 500);
               });
       },
 

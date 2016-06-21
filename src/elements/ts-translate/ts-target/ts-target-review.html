@@ -153,6 +153,7 @@
 
         rendertext: function () {
             if (this.chunk && this.chunk.srccontent && this.chunk.projectmeta.project_type_class === "standard") {
+                console.log("review render fired", this.chunk.index);
                 var mythis = this;
                 var completed = this.chunk.completed;
                 var text = this.chunk.transcontent;
@@ -212,6 +213,7 @@
             var paragraphs = textholder.children;
 
             if (this.chunk.projectmeta.project.id !== "obs") {
+                console.log("savemarkers fired");
                 this.set('chunk.transcontent', App.renderer.balloonsToMarkers(paragraphs));
                 this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
             }
@@ -223,7 +225,8 @@
             var mythis = this;
 
             if (this.chunk.index === index && this.chunk.projectmeta.project_type_class === "standard") {
-                mythis.savemarkers();
+                console.log("completion fired");
+                //mythis.savemarkers();
                 mythis.set('chunk.completed', true);
                 mythis.$.toggle.checked = true;
                 setTimeout(function() {

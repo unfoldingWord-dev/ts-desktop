@@ -392,7 +392,6 @@
 
             mythis.backuptimer = setTimeout(function timer2 () {
                 mythis.set('saveoptions.backup', true);
-                console.log("Added save backup");
                 mythis.backuptimer = setTimeout(timer2, 590000);
             }, 100);
         },
@@ -425,63 +424,71 @@
 
             var saveChunk = function (data) {
                 var chunk = allchunks[data];
-                console.log("saving chunk:", data);
-                return App.projectsManager.saveTargetChunk(chunk, projectmeta);
+                return App.projectsManager.saveTargetChunk(chunk, projectmeta)
+                    .catch(function (err) {
+                        App.reporter.logError(err);
+                    });
             };
 
-            console.log("fire saveAll", this.saveoptions);
+            mythis.set('message', "Checking for Changes...");
 
             return Promise.resolve(true)
                 .then(function () {
                     if (savechunks.length) {
-                        mythis.set('message', "Saving Changes to Chunks...");
                         changes = true;
                         mythis.addcontributor();
                         return Promise.all(_.map(savechunks, saveChunk))
                             .then(function () {
                                 mythis.set('saveoptions.chunks', []);
-                                console.log("cleaning");
-                                return App.projectsManager.cleanProject(allchunks, projectmeta);
+                                return App.projectsManager.cleanProject(allchunks, projectmeta)
+                                    .catch(function (err) {
+                                        App.reporter.logError(err);
+                                    });
                             });
                     }
                 })
                 .then(function () {
                     if (mythis.saveoptions.manifest) {
-                        mythis.set('message', "Saving Changes to Manifest...");
                         changes = true;
-                        console.log("saving manifest");
                         return App.projectsManager.saveTargetManifest(projectmeta)
                             .then(function () {
                                 mythis.set('saveoptions.manifest', false);
+                            })
+                            .catch(function (err) {
+                                App.reporter.logError(err);
                             });
                     }
                 })
                 .then(function () {
                     if (changes) {
-                        console.log("committing");
-                        return App.projectsManager.commitProject(projectmeta, mythis.currentuser);
+                        return App.projectsManager.commitProject(projectmeta, mythis.currentuser)
+                            .catch(function (err) {
+                                App.reporter.logError(err);
+                            });
                     }
                 })
                 .then(function () {
                     if (mythis.saveoptions.backup) {
-                        console.log("backing up");
-                        mythis.set('message', "Creating Backup...");
                         return App.exportManager.backupTranslation(projectmeta, filePath)
                             .then(function () {
                                 mythis.set('saveoptions.backup', false);
+                            })
+                            .catch(function (err) {
+                                App.reporter.logError(err);
                             });
                     }
                 })
                 .then(function () {
                     if (changes) {
-                        console.log("updating list");
-                        mythis.set('message', "Project Saved");
                         mythis.fire('iron-signal', {name: 'updatelist'});
-                        setTimeout(function() {
-                            mythis.set('message', "Idle");
-                        }, 500);
                     }
                 })
+                .then(function () {
+                    mythis.set('message', "Changes Saved");
+                    setTimeout(function() {
+                        mythis.set('message', "Idle");
+                    }, 1000);
+                });
 
         },
 
@@ -765,12 +772,10 @@
                 this.push('saveoptions.chunks', data.chunk.index);
             }
             this.createchapters();
-            console.log("added to save chunks", this.saveoptions.chunks);
         },
 
         savemanifest: function () {
             this.set('saveoptions.manifest', true);
-            console.log("added save manifest");
         },
 
         addcontributor: function () {

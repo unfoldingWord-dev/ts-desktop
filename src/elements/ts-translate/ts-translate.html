@@ -481,10 +481,12 @@
                 .then(function () {
                     if (changes) {
                         mythis.fire('iron-signal', {name: 'updatelist'});
+                        mythis.set('message', "Changes Saved");
+                    } else {
+                        mythis.set('message', "No Changes Found");
                     }
                 })
                 .then(function () {
-                    mythis.set('message', "Changes Saved");
                     setTimeout(function() {
                         mythis.set('message', "Idle");
                     }, 1000);

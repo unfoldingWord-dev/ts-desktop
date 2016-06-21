@@ -46,6 +46,16 @@
             cursor: pointer;
         }
 
+        .row.unavailable {
+            background: var(--border-color);
+            border-bottom: 1px solid var(--card-background-color);
+        }
+
+        .row.unavailable:hover {
+            background: var(--border-color);
+            border-bottom: 1px solid var(--card-background-color);
+        }
+
         .row:hover {
             background: var(--accent-color-light);
         }
@@ -78,7 +88,7 @@
           </div>
           <iron-list id="list" items="{{searchfilter(query,languagelist)}}" as="language">
               <template>
-                  <div class="row" on-tap="store">
+                  <div class$="[[checkclass(language.id)]]" on-tap="store">
                       <div>
                           <span>[[language.name]]</span>
                           <span class="right">[[language.id]]</span>
@@ -138,6 +148,10 @@
           this.$.input.focus();
       },
 
+      checkclass: function (id) {
+          return this.changedata.changing && this.changedata.oldmeta.target_language.id === id ? 'row unavailable' : 'row';
+      },
+
       searchfilter: function (query, languagelist) {
           let search = App.utils.startsWithBase.bind(null, query);
 
@@ -186,7 +200,9 @@
           this.set('newdata.language', e.model.language);
 
           if (this.changedata.changing) {
-              this.change();
+              if (this.newdata.language.id !== this.changedata.oldmeta.target_language.id) {
+                  this.change();
+              }
           } else if (this.importdata.importing && this.importdata.project.slug) {
               this.set('newdata.project', this.importdata.project);
               if (App.configurator.getUserSetting('glmode')) {

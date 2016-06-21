@@ -291,6 +291,7 @@
         <iron-signals on-iron-signal-savestate="savestate"></iron-signals>
         <iron-signals on-iron-signal-reset="reset"></iron-signals>
         <iron-signals on-iron-signal-saveclose="saveAndClose"></iron-signals>
+        <iron-signals on-iron-signal-saveall="saveAll"></iron-signals>
 
     </template>
 
@@ -348,6 +349,11 @@
             },
             backuptimer: {
                 type: Number
+            },
+            message: {
+                type: String,
+                value: "Idle",
+                notify: true
             },
             animationConfig: {
                 value: function () {
@@ -428,6 +434,7 @@
             return Promise.resolve(true)
                 .then(function () {
                     if (savechunks.length) {
+                        mythis.set('message', "Saving Changes to Chunks...");
                         changes = true;
                         mythis.addcontributor();
                         return Promise.all(_.map(savechunks, saveChunk))
@@ -440,6 +447,7 @@
                 })
                 .then(function () {
                     if (mythis.saveoptions.manifest) {
+                        mythis.set('message', "Saving Changes to Manifest...");
                         changes = true;
                         console.log("saving manifest");
                         return App.projectsManager.saveTargetManifest(projectmeta)
@@ -457,6 +465,7 @@
                 .then(function () {
                     if (mythis.saveoptions.backup) {
                         console.log("backing up");
+                        mythis.set('message', "Creating Backup...");
                         return App.exportManager.backupTranslation(projectmeta, filePath)
                             .then(function () {
                                 mythis.set('saveoptions.backup', false);
@@ -466,7 +475,11 @@
                 .then(function () {
                     if (changes) {
                         console.log("updating list");
+                        mythis.set('message', "Project Saved");
                         mythis.fire('iron-signal', {name: 'updatelist'});
+                        setTimeout(function() {
+                            mythis.set('message', "Idle");
+                        }, 500);
                     }
                 })
 

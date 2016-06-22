@@ -586,7 +586,11 @@
 
           mythis.$.repo.close();
           mythis.set('options', {});
-          mythis.set('options.body', "Importing.  Please wait...");
+          if (restore) {
+              mythis.set('options.body', "Restoring.  Please wait...");
+          } else {
+              mythis.set('options.body', "Importing.  Please wait...");
+          }
           mythis.set('options.loading', true);
           mythis.$.loading.open();
 
@@ -630,7 +634,11 @@
                               message += item + ", ";
                           });
                       }
-                      mythis.set('options.title', "Import Complete");
+                      if (restore) {
+                          mythis.set('options.title', "Restore Complete");
+                      } else {
+                          mythis.set('options.title', "Import Complete");
+                      }
                       mythis.set('options.body', message);
                       mythis.set('options.loading', false);
                       setTimeout(function() {
@@ -642,7 +650,11 @@
                       if(err !== null) {
                           errmessage = err;
                       }
-                      mythis.set('options.title', "Import Failed");
+                      if (restore) {
+                          mythis.set('options.title', "Restore Failed");
+                      } else {
+                          mythis.set('options.title', "Import Failed");
+                      }
                       mythis.set('options.body', errmessage);
                       mythis.set('options.loading', false);
                       return App.utils.fs.remove(App.configurator.getValue('tempDir'));

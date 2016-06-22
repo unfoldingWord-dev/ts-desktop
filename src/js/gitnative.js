@@ -141,7 +141,7 @@ function GitManager() {
             var conflicts = [];
 
             // NOTE: should switch to using a fetch/merge instead of pull, so we don't depend on Perl
-            var pull = cmd().cd(localPath).and.do(`git pull ${remotePath} master`);
+            var pull = cmd().cd(localPath).and.do(`git pull ${remotePath} master --allow-unrelated-histories`);
             var diff = cmd().cd(localPath).and.do('git diff --name-only --diff-filter=U');
 
             return Promise.all([utils.fs.readFile(localManifestPath), utils.fs.readFile(remoteManifestPath)])
@@ -187,7 +187,7 @@ function GitManager() {
                     return mythis.commitAll(user, localPath);
                 })
                 .catch(function (err) {
-                    throw "Error while merging projects: " + err.stdout;
+                    throw "Error while merging projects: " + err.stderr;
                 })
                 .then(utils.logr("Finished merging"))
                 .then(function () {

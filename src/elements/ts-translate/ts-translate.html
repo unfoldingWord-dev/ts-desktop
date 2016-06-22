@@ -371,14 +371,6 @@
             }
         },
 
-        observers: [
-            'checktimers(route)'
-        ],
-
-        checktimers: function (route) {
-            route === "translate" ? this.starttimers() : this.stoptimers();
-        },
-
         starttimers: function () {
             var mythis = this;
 
@@ -642,8 +634,11 @@
                 setTimeout(function() {
                     mythis.setmodestate();
                     mythis.checksources();
+                    mythis.starttimers();
                     if (type === "publish") {
-                        mythis.gopublish();
+                        setTimeout(function() {
+                            mythis.gopublish();
+                        }, 750);
                     }
                     if (type === "print") {
                         mythis.goprint();
@@ -1272,12 +1267,17 @@
             var mythis = this;
             var typeclass = mythis.currentproject.projectmeta.project_type_class;
             if(mythis.currentproject.projectmeta.source_translations.length || typeclass === "extant") {
+                mythis.set('options', {});
+                mythis.set('options.body', "Loading upload page. Please wait...");
+                mythis.set('options.loading', true);
+                mythis.$.loading.open();
                 mythis.savestate();
                 mythis.setleftanimation();
                 mythis.stoptimers();
                 return mythis.saveAll()
                     .then(function () {
                         mythis.fire('iron-signal', {name: 'updatepublish'});
+                        mythis.$.loading.close();
                         mythis.set('route', "publish");
                     });
             }
@@ -1305,6 +1305,7 @@
             return mythis.saveAll()
                 .then(function () {
                     mythis.fire('iron-signal', {name: 'openbackup', data: {projectmeta: projectmeta}});
+                    mythis.starttimers();
                 });
         },
 

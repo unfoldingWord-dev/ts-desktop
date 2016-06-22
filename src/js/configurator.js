@@ -283,10 +283,10 @@
             /**
              *
              */
-            getAppVersion: function() {
+            getAppData: function() {
                 try {
                     let p = require('../../package');
-                    return p.version;
+                    return {version: p.version, build: p.build};
                 } catch (e) { console.log(e); }
             },
 

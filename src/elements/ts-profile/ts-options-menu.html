@@ -1,0 +1,110 @@
+
+<dom-module id="ts-options-menu">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: auto;
+        }
+
+        #content {
+            display: flex;
+            flex-direction: column;
+            background-color: var(--card-background-color);
+            margin-top: 30px;
+        }
+
+        .option {
+            border-top: 1px solid var(--border-color);
+            padding: 15px 30px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background .3s, color .3s;
+            cursor: pointer;
+        }
+
+        .option:hover {
+            background: var(--accent-color-light);
+        }
+
+        .optiontitle {
+            font-size: 130%;
+            font-weight: bold;
+        }
+
+        #heading {
+            display: flex;
+            justify-content: center;
+            padding: 15px 30px;
+        }
+
+    </style>
+
+    <template>
+
+        <div id="content">
+            <div id="heading">
+                <span class="optiontitle">Setup your User Profile with one of the options below.</span>
+            </div>
+            <div class="option" on-tap="login">
+                <span class="optiontitle">Login to your Door43 Account</span>
+                <p>Use this option to be able to upload projects to your existing account</p>
+            </div>
+            <div class="option" on-tap="create">
+                <span class="optiontitle">Create a Door43 Account</span>
+                <p>Use this option if you do not have a Door43 account but want to upload</p>
+            </div>
+            <div class="option" on-tap="local">
+                <span class="optiontitle">Create Local User Profile</span>
+                <p>Use this option if you do not have a Door43 account and do not want to upload</p>
+            </div>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-options-menu',
+
+        behaviors: [
+            Polymer.NeonAnimatableBehavior
+        ],
+
+        properties: {
+            selected: {
+                type: Number,
+                value: 0,
+                notify: true
+            }
+        },
+
+        login: function () {
+            this.set('newinfo', {});
+            this.set('selected', 1);
+        },
+
+        create: function () {
+            this.set('newinfo', {});
+            this.set('selected', 2);
+        },
+
+        local: function () {
+            this.set('newinfo', {});
+            this.set('selected', 3);
+        },
+
+        ready: function() {
+
+        }
+
+    });
+
+</script>

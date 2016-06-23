@@ -66,18 +66,18 @@
     <img src="../../icons/icon-big.png">
     <div id="text">
         <p id="title">translationStudio</p>
-        <p id="version">Version <span id="versiontext"></span></p>
+        <p id="version"></p>
     </div>
     <div id="status"><span id="status-text">Loading...</span></div>
 
     <script>
     (function () {
-    	var ipcRenderer = require('electron').ipcRenderer,
-            versiontext = document.getElementById('versiontext'),
-    		statusText = document.getElementById('status-text');
-
+    	var ipcRenderer = require('electron').ipcRenderer;
+        var version = document.getElementById('version');
+        var statusText = document.getElementById('status-text');
         var p = require('../../package');
-        versiontext.innerHTML = p.version;
+
+        version.innerHTML = "Version " + p.version + " Build " + p.build;
 
     	ipcRenderer.on('loading-status', function (event, status) {
     		statusText.innerHTML = status;

@@ -3,6 +3,7 @@
 <link rel="import" href="../../../components/iron-signals/iron-signals.html">
 
 <link rel="import" href="./ts-source-tab.html">
+<link rel="import" href="./ts-note-marker.html">
 
 <dom-module id="ts-source-chunk">
 
@@ -37,6 +38,7 @@
         #textholder {
             line-height: 2;
             margin-top: 0;
+            width: 100%;
             color: var(--primary-text-color);
         }
 
@@ -85,7 +87,7 @@
                     <h2>[[chunk.wordcontent]]</h2>
                 </div>
             </div>
-            <div id="content">
+            <div id="content" class="sourcefont">
                 <div id="textholder"></div>
             </div>
         </paper-material>
@@ -112,7 +114,7 @@
 		},
 
         observers: [
-            'rendertext(chunk.*)'
+            'rendertext(chunk.srccontent)'
         ],
 
         noextantclass: function (typeclass) {
@@ -125,7 +127,12 @@
 
         rendertext: function () {
             if(this.chunk && this.chunk.srccontent) {
+                var direction = "ltr";
+                if (this.chunk.projectmeta.project_type_class !== "extant") {
+                    direction = this.chunk.projectmeta.source_translations[this.chunk.projectmeta.currentsource].direction;
+                }
                 this.$.textholder.innerHTML = this.chunk.srccontent;
+                this.$.textholder.style.direction = direction;
                 var links = this.$.textholder.getElementsByTagName('a');
                 for (var j = 0, len = links.length; j < len; ++j) {
                     links[j].addEventListener('click', function (event) {

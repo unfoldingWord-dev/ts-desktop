@@ -3,6 +3,7 @@
 <link rel="import" href="../../../components/iron-signals/iron-signals.html">
 
 <link rel="import" href="./ts-source-tab.html">
+<link rel="import" href="./ts-note-marker.html">
 
 <dom-module id="ts-source-card">
 
@@ -46,6 +47,10 @@
             color: var(--primary-text-color);
         }
 
+        #textholder {
+            width: 100%;
+        }
+
     </style>
 
     <template>
@@ -59,7 +64,7 @@
                     <span>[[chunk.chaptermeta.chapterref]]</span>
                 </div>
             </div>
-            <div id="content">
+            <div id="content" class="sourcefont">
                 <p id="textholder"></p>
             </div>
         </paper-material>
@@ -86,12 +91,13 @@
         },
 
         observers: [
-            'rendertext(chunk.*)'
+            'rendertext(chunk.srccontent)'
         ],
 
         rendertext: function () {
-            if(this.chunk && this.chunk.srccontent) {
+            if(this.chunk && this.chunk.srccontent && this.chunk.projectmeta.project_type_class === "standard") {
                 this.$.textholder.innerHTML = this.chunk.srccontent;
+                this.$.textholder.style.direction = this.chunk.projectmeta.source_translations[this.chunk.projectmeta.currentsource].direction;
             }
         },
 

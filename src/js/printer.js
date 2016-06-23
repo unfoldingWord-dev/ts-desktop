@@ -10,64 +10,78 @@ var _ = require('lodash'),
 
 function PrintManager(configurator) {
 
-    var download = utils.download;
-    var srcDir = path.resolve(path.join(__dirname, '..'));
-    var notoFontPath = path.join(srcDir, 'assets', 'NotoSans-Regular.ttf');
+    var download = utils.download;    
+    var srcDir = path.resolve(path.join(__dirname, '..'));    
+    var imageRoot = path.join(configurator.getValue('rootdir'), 'images');
+    var imagePath = path.join(imageRoot, 'obs');
+    var zipPath = path.join(imageRoot, 'obs-images.zip');
+    var server = "https://api.unfoldingword.org/";
+    var url = server + 'obs/jpg/1/en/obs-images-360px.zip';
 
     return {
 
-        getImages: function (meta) {
-            return new Promise(function (resolve, reject) {
-                var imageRoot = path.join(configurator.getValue('rootdir'), 'images'),
-                    imagePath = path.join(imageRoot, meta.resource.id);
+        downloadImages: function () {
+            return utils.fs.mkdirs(imagePath)
+                .then(function () {
+                    return utils.fs.stat(zipPath).then(utils.ret(true)).catch(utils.ret(false));
+                })
+                .then(function (fileExists) {
+                    return fileExists ? true : download(url, zipPath, true);
+                });
+        },
 
-                //check to see if we need to create the images directory;
-                if (!fs.existsSync(imagePath)) {
-                    utils.fs.mkdirs(imagePath);
+        extractImages: function () {
+            var zip = new AdmZip(zipPath);
+            zip.extractAllTo(imagePath, true);
+
+            var directories = fs.readdirSync(imagePath).filter(function (file) {
+                return fs.statSync(path.join(imagePath, file)).isDirectory();
+            });
+            directories.forEach(function (dir) {
+                var dirPath = path.join(imagePath, dir);
+                var files = fs.readdirSync(dirPath);
+                files.forEach(function (file) {
+                    var filePath = path.join(imagePath, dir, file);
+                    var newPath = path.join(imagePath, file);
+                    fs.renameSync(filePath, newPath);
+                });
+                fs.rmdirSync(dirPath);
+            });
+        },
+
+        renderLicense: function (doc, filename) {
+            var filePath = path.join(srcDir, 'assets', filename);
+            var lines = fs.readFileSync(filePath).toString().split('\n');
+
+            doc.addPage();
+            doc.lineGap(0);
+            lines.forEach(function (line) {
+                var fontsize = 9;
+                var indent = 72;
+                if (line.startsWith("## ")) {
+                    fontsize = 14;
+                } else if (line.startsWith("### ")) {
+                    fontsize = 11;
+                } else if (line.startsWith("**")) {
+                    indent = 100;
                 }
-
-                //if the zip file isn't downloaded yet, go get it.
-                var dest = path.join(imagePath, 'images.zip');
-                if (!fs.existsSync(dest)) {
-                    //let out = fs.createWriteStream(dest);
-                    // TRICKY: right now we have to hard code the urls until the api is updated
-                    var url = configurator.getValue("mediaServer") + '/obs/jpg/1/en/obs-images-360px.zip';
-                    console.log('downloading images from', url);
-                    download(url, dest, true).then(function () {
-                        var zip = new AdmZip(dest);
-                        zip.extractAllTo(imagePath, true);
-
-                        var directories = fs.readdirSync(imagePath).filter(function (file) {
-                            return fs.statSync(path.join(imagePath, file)).isDirectory();
-                        });
-                        directories.forEach(function (dir) {
-                            var dirPath = path.join(imagePath,dir),
-                                files = fs.readdirSync(dirPath);
-                            files.forEach(function (file) {
-                                var filePath = path.join(imagePath,dir,file),
-                                    newPath = path.join(imagePath,file);
-                                fs.renameSync(filePath, newPath);
-                            });
-
-                            //remove the empty directory
-                            fs.rmdir(dirPath);
-                        });
-                        resolve();
-                    }).catch(function (err) {
-                        reject(err);
-                    });
-                } else {
-                    resolve();
-                }
+                doc.fontSize(fontsize);
+                doc.text(line.replace(/#+ /, "").replace(/\*\*/g, ""), indent);
+                doc.fontSize(5);
+                doc.moveDown();
             });
         },
 
         targetTranslationToPdf: function (translation, meta, filePath, options) {
+            var mythis = this;
             if(filePath.split('.').pop() !== 'pdf') {
                 filePath += '.pdf';
             }
-            var imageRoot = path.join(configurator.getValue('rootdir'), "images"),
-                imagePath = path.join(imageRoot, meta.resource.id);
+            var defaultfont = path.join(srcDir, 'assets', 'NotoSans-Regular.ttf');
+            var targetfont = configurator.getUserSetting('targetfont').path;
+            if (targetfont === "default") {
+                targetfont = defaultfont;
+            }
 
             return new Promise(function (resolve, reject) {
                 if (meta.project_type_class === "standard") {
@@ -132,8 +146,10 @@ function PrintManager(configurator) {
 
                         // book title
                         doc.fontSize(25)
-                            .font(notoFontPath)
+                            .font(targetfont)
                             .text(doc.info.Title, 72, doc.page.height / 2, {align: 'center'});
+
+                        mythis.renderLicense(doc, "OBS_LICENSE.md");
 
                         // TOC placeholders
                         doc.addPage();
@@ -210,7 +226,7 @@ function PrintManager(configurator) {
                         for (var i = range.start; i < range.start + range.count; i ++) {
                             doc.switchToPage(i);
                             doc.fontSize(10)
-                                .font('Helvetica')
+                                .font(defaultfont)
                                 .text(i + 1, 72, doc.page.height - 50 - 12, {align: 'center'});
                         }
 
@@ -221,7 +237,7 @@ function PrintManager(configurator) {
                         doc.fontSize(25)
                             .lineGap(0)
                             .text('Table of Contents', 72, 72)
-                            .font(notoFontPath)
+                            .font(targetfont)
                             .moveDown();
                         _.forEach(project.chapters, function (chapter) {
                             if (tocPages[chapter.id] !== undefined && tocPages[chapter.id] !== currTocPage) {
@@ -257,8 +273,10 @@ function PrintManager(configurator) {
                         //set the title
                         doc.info.Title = translation[0].transcontent || meta.project.name;
                         doc.fontSize(25)
-                            .font(notoFontPath)
+                            .font(targetfont)
                             .text(doc.info.Title, 72, doc.page.height / 2, {align: 'center'});
+
+                        mythis.renderLicense(doc, "LICENSE.md");
 
                              // book body
                         _.forEach(project.chapters, function (chapter) {
@@ -299,7 +317,7 @@ function PrintManager(configurator) {
                         for (var i = range.start; i < range.start + range.count; i ++) {
                             doc.switchToPage(i);
                             doc.fontSize(10)
-                                .font('Helvetica')
+                                .font(defaultfont)
                                 .text(i + 1, 72, doc.page.height - 50 - 12, {align: 'center'});
                         }
 

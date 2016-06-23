@@ -2,7 +2,8 @@
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
 <link rel="import" href="../../components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../components/paper-button/paper-button.html">
-<link rel="import" href="../../components/paper-progress/paper-progress.html">
+
+<link rel="import" href="../ts-main/ts-loading.html">
 
 <dom-module id="ts-publish-publish">
 
@@ -25,32 +26,35 @@
         }
 
         #left {
-            margin: 15px;
+            margin: 15px 0 15px 15px;
             flex: 2 2;
             padding: 20px;
         }
 
         #right {
             flex: 1 1;
-            margin: 15px 15px 15px 0;
+            margin: 15px;
             display: flex;
             flex-direction: column;
-        }
-
-        #right > div {
-            display: flex;
-            justify-content: center;
-            flex-direction: column;
-            align-items: flex-start;
-            flex-grow: 1;
-        }
-
-        #right > div > * {
-            margin: 10px 20px;
         }
 
         #lower {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            flex-grow: 1;
+            padding: 20px;
             border-top: 1px solid var(--border-color);
+        }
+
+        #upper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            flex-grow: 1;
+            padding: 20px;
         }
 
         .link {
@@ -75,44 +79,19 @@
             margin: auto;
         }
 
+        .popup * {
+            margin: 0;
+            padding: 0;
+        }
+
         #loading {
             width: 320px;
             height: 220px;
-            color: var(--primary-text-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 110%;
         }
 
-        #buttonbox {
-            display: flex;
-            justify-content: center;
-            color: var(--secondary-text-color);
-        }
-
-        #buttonbox paper-button:hover {
-            color: var(--accent-color);
-        }
-
-        paper-progress {
-            --paper-progress-active-color: var(--accent-color);
-            width: 250px;
-        }
-
-        #bar {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 40px;
-        }
-
-        #text {
-            text-align: center;
-        }
-
-        #loading h2 {
-            color: var(--accent-color);
+        #wideloading {
+            width: 450px;
+            height: 220px;
         }
 
         #imagebox {
@@ -133,7 +112,14 @@
                 <div id="imagebox">
                     <img src="../ts-icons/uw-title-image.png" width="326" height="68">
                 </div>
-                <p>Publishing your work through unfoldingWord makes your content available:</p>
+                <p>By uploading your project to your Door43 account, it can be:</p>
+                <ul>
+                    <li>Downloaded by other translators</li>
+                    <li>Merged with other projects</li>
+                    <li>Used as an online backup</li>
+                    <li>Published to unfoldingWord by submitting a "Request to Publish"</li>
+                </ul>
+                <p>Publishing your work to unfoldingWord makes your content available:</p>
                 <ul>
                     <li>Online at unfoldingword.org in multiple formats</li>
                     <li>In the unfoldingWord Mobile App</li>
@@ -141,8 +127,8 @@
                 </ul>
             </div>
             <div id="right">
-                <div>
-                    <p>Publish your project directly to unfoldingWord</p>
+                <div id="upper">
+                    <p>Upload your project to your Door43 account</p>
                     <paper-button raised id="publish" on-tap="upload">Upload</paper-button>
                 </div>
                 <div id="lower">
@@ -153,22 +139,11 @@
         </div>
 
         <paper-dialog id="loading" class="popup" modal="true" exit-animation="scale-down-animation">
-            <template is="dom-if" if="{{options.loading}}">
-                <p>{{options.body}}</p>
-                <div id="bar">
-                    <paper-progress indeterminate="true"></paper-progress>
-                </div>
-            </template>
-            <template is="dom-if" if="{{!options.loading}}">
-                <h2>{{options.title}}</h2>
-                <div id="text">
-                    <p>{{options.body}}</p>
-                </div>
-                <div id="buttonbox">
-                    <paper-button dialog-confirm on-tap="gohome">Return Home</paper-button>
-                    <paper-button dialog-dismiss>Close</paper-button>
-                </div>
-            </template>
+            <ts-loading options="[[options]]" on-gohome="gohome"></ts-loading>
+        </paper-dialog>
+
+        <paper-dialog id="wideloading" class="popup" modal="true" exit-animation="scale-down-animation">
+            <ts-loading options="[[options]]" on-gohome="gohome"></ts-loading>
         </paper-dialog>
 
     </template>
@@ -202,7 +177,7 @@
             },
             options: {
                 type: Object,
-                value: {loading: false, title: "", body: ""}
+                value: {}
             }
         },
 
@@ -220,7 +195,7 @@
             var mythis = this;
             var projectmeta = this.currentproject.projectmeta;
             var translation = this.currentproject.chunks;
-            var mediaServer = App.configurator.getUserSetting('mediaserver');
+            var mediaServer = "https://api.unfoldingword.org/";
             var name = projectmeta.unique_id;
             var filePath;
 
@@ -233,21 +208,23 @@
                 return;
             }
 
+            mythis.set('options', {});
             mythis.set('options.body', "Exporting Project.  Please wait...");
             mythis.set('options.loading', true);
             mythis.$.loading.open();
 
             setTimeout(function() {
-                App.exportManager.exportTranslation(translation, projectmeta, filePath, mediaServer)
+                return App.exportManager.exportTranslation(translation, projectmeta, filePath, mediaServer)
                     .then(function () {
                         mythis.set('options.title', "Project Exported");
                         mythis.set('options.body', "Your project has been successfully exported to a file.");
+                        mythis.set('options.showhome', true);
                         mythis.set('options.loading', false);
                     })
                     .catch(function (err) {
-                        var errmessage = "We're sorry.  An error occurred while trying to export your project";
+                        var errmessage = "An error occurred while trying to export your project";
                         if(err !== null) {
-                            errmessage = err;
+                            errmessage += "\n" + err;
                         }
                         mythis.set('options.title', "Export Failed");
                         mythis.set('options.body', errmessage);
@@ -257,20 +234,22 @@
         },
 
         upload: function() {
-            var loading = this.$.loading;
+            var loading = this.$.wideloading;
             var mythis = this;
             var projectmeta = this.currentproject.projectmeta;
             var target = App.configurator.getValue('targetTranslationsDir');
             var paths = App.utils.makeProjectPaths(target, projectmeta);
             var repo = projectmeta.unique_id;
             var user = this.currentuser;
+            var shell = require('electron').shell;
             var deviceId = "";
 
-            this.set('options.body', "Uploading Project.  Please wait...");
-            this.set('options.loading', true);
+            mythis.set('options', {});
+            mythis.set('options.body', "Uploading Project.  Please wait...");
+            mythis.set('options.loading', true);
             loading.open();
 
-            return App.gitManager.stage(user, paths.projectDir)
+            return App.gitManager.commitAll(user, paths.projectDir)
                 .then(function () {
                     return App.utils.getDeviceId();
                 })
@@ -292,30 +271,45 @@
                     return App.userManager.createRepo(user, repo);
                 })
                 .then(function (repo) {
-                    return App.gitManager.push(user, paths.projectDir, repo);
+                    return App.gitManager.push(user, paths.projectDir, repo, {requestToPublish: true}).then(App.utils.ret(repo.html_url));
                 })
-                .then(function () {
-                    mythis.set('options.title', "Project Published");
-                    mythis.set('options.body', "Your project has been successfully published to the server.");
+                .then(function (url) {
+                    mythis.set('options.title', "Project Uploaded");
+                    mythis.set('options.body', "Your project has been uploaded to:");
+                    mythis.set('options.link', url);
+                    mythis.set('options.showlink', true);
+                    mythis.set('options.showhome', true);
                     mythis.set('options.loading', false);
+                    var link = loading.getElementsByClassName("url");
+                    link[0].addEventListener('click', function (event) {
+                        event.preventDefault();
+                        shell.openExternal(url);
+                    });
                 })
                 .catch(function (err) {
-                    var errmessage = "We're sorry.  An error occurred while trying to upload your project.";
+                    var errmessage = "An error occurred while trying to upload your project.";
                     var logmessage = "";
-                    if(err.status === 401) {
-                        errmessage = "Cannot publish with a local login.  Please login with a Door43 account.";
+                    if (err.status === 401) {
+                        errmessage = "Cannot upload without connecting to a Door43 account.";
                     } else if (err.data) {
                         errmessage = err.data;
+                    } else if (err.stderr) {
+                        errmessage = err.stderr;
                     } else {
                         errmessage = err;
                     }
+                    if (errmessage.includes("rejected because the remote contains work")) {
+                        errmessage = "Cannot upload this project because a project already exists that has no shared history";
+                    }
                     if (err.status) {
                         logmessage = "Error: " + err.status + " " + err.data;
+                    } else if (err.stderr) {
+                        logmessage = err.stderr;
                     } else {
                         logmessage = err;
                     }
                     App.reporter.logError(logmessage);
-                    mythis.set('options.title', "Publish Failed");
+                    mythis.set('options.title', "Upload Failed");
                     mythis.set('options.body', errmessage);
                     mythis.set('options.loading', false);
                 });

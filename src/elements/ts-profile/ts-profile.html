@@ -1,0 +1,243 @@
+
+<link rel="import" href="../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../components/iron-input/iron-input.html">
+<link rel="import" href="../../components/iron-icons/notification-icons.html">
+<link rel="import" href="../../components/paper-dialog/paper-dialog.html">
+
+<link rel="import" href="./ts-options-menu.html">
+<link rel="import" href="./ts-login-option.html">
+<link rel="import" href="./ts-create-option.html">
+<link rel="import" href="./ts-local-option.html">
+<link rel="import" href="../ts-main/ts-loading.html">
+
+<dom-module id="ts-profile">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
+
+        neon-animated-pages {
+            flex: auto;
+            display: flex;
+        }
+
+        #header {
+            background-color: var(--primary-color);
+            min-height: 50px;
+        }
+
+        #heading {
+            font-size: 125%;
+            color: var(--reverse-text-color);
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 50px;
+        }
+
+        #backbutton {
+            width: 60px;
+            display: flex;
+            justify-content: center;
+        }
+
+        #loading {
+            width: 320px;
+            height: 220px;
+        }
+
+        #loading * {
+            margin: 0;
+            padding: 0;
+        }
+
+        .hide {
+            display: none;
+        }
+
+    </style>
+
+    <template>
+
+        <div id="header">
+            <div id="heading">
+                <span id="backbutton">
+                    <paper-icon-button class$="[[backclass(selected)]]" icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
+                </span>
+                <span>User Profile</span>
+            </div>
+        </div>
+
+        <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
+            <ts-options-menu selected="{{selected}}"></ts-options-menu>
+            <ts-login-option selected="{{selected}}" newinfo="{{newinfo}}" on-login="sendlogin"></ts-login-option>
+            <ts-create-option selected="{{selected}}" newinfo="{{newinfo}}" on-create="sendcreate"></ts-create-option>
+            <ts-local-option selected="{{selected}}" newinfo="{{newinfo}}" on-local="sendlocal"></ts-local-option>
+        </neon-animated-pages>
+
+        <paper-dialog id="loading" class="popup" modal="true" exit-animation="scale-down-animation">
+            <ts-loading options="[[options]]"></ts-loading>
+        </paper-dialog>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-profile',
+
+        behaviors: [
+            Polymer.NeonAnimatableBehavior
+        ],
+
+        properties: {
+            selected: {
+                type: Number,
+                value: 0
+            },
+            newinfo: {
+                type: Object,
+                value: {}
+            },
+            options: {
+                type: Object,
+                value: {}
+            },
+            animationConfig: {
+                value: function () {
+                    return {
+                        'entry': {
+                            name: 'slide-from-right-animation',
+                            node: this
+                        },
+                        'exit': {
+                            name: 'slide-right-animation',
+                            node: this
+                        }
+                    }
+                }
+            }
+        },
+
+        backclass: function (selected) {
+            return selected === 0 ? "hide" : "";
+        },
+
+        back: function () {
+            this.set('selected', 0);
+        },
+
+        reset: function () {
+            var mythis = this;
+            this.$.loading.close();
+            this.set('newinfo', {});
+            setTimeout(function() {
+                mythis.set('selected', 0);
+            }, 1000);
+        },
+
+        sendlocal: function () {
+            var user = this.newinfo;
+            this.reset();
+            this.fire('iron-signal', {name: 'updateuser', data: user});
+        },
+
+        sendlogin: function () {
+            var mythis = this;
+            var user = this.newinfo;
+
+            if (!user.username || !user.password) {
+                mythis.set('options', {});
+                mythis.set('options.title', "Incomplete Data");
+                mythis.set('options.body', "Please complete all fields");
+                mythis.set('options.loading', false);
+                mythis.$.loading.open();
+                return;
+            }
+
+            mythis.set('options', {});
+            mythis.set('options.body', "Verifying Login.  Please wait...");
+            mythis.set('options.loading', true);
+            mythis.$.loading.open();
+
+            return App.userManager.login(user).then(function (user) {
+                mythis.set('options.body', "Login Verified");
+                user.full_name = user.full_name === '' ? user.username : user.full_name;
+                setTimeout(function() {
+                    mythis.reset();
+                    mythis.fire('iron-signal', {name: 'updateuser', data: user});
+                }, 500);
+            }).catch(function (err) {
+                var errmessage = "An error occurred while trying to login";
+                if (err.status === 404) {
+                    errmessage += "\n" + "Incorrect Username";
+                }
+                if (err.status === 401) {
+                    errmessage += "\n" + "Incorrect Password";
+                }
+                mythis.set('options.title', "Login Failed");
+                mythis.set('options.body', errmessage);
+                mythis.set('options.loading', false);
+            });
+        },
+
+        sendcreate: function () {
+            var mythis = this;
+            var user = this.newinfo;
+
+            if (!user.username || !user.password || !user.full_name || !user.email) {
+                mythis.set('options', {});
+                mythis.set('options.title', "Incomplete Data");
+                mythis.set('options.body', "Please complete all fields");
+                mythis.set('options.loading', false);
+                mythis.$.loading.open();
+                return;
+            }
+
+            if (user.password !== user.password2) {
+                mythis.set('options', {});
+                mythis.set('options.title', "Password Invalid");
+                mythis.set('options.body', "Your password verification does not match");
+                mythis.set('options.loading', false);
+                mythis.$.loading.open();
+                return;
+            }
+
+            mythis.set('options', {});
+            mythis.set('options.body', "Creating Account.  Please wait...");
+            mythis.set('options.loading', true);
+            mythis.$.loading.open();
+
+            return App.userManager.createAccount(user).then(function (user) {
+                mythis.set('options.body', "Account Created");
+                user.full_name = user.full_name === '' ? user.username : user.full_name;
+                setTimeout(function() {
+                    mythis.reset();
+                    mythis.fire('iron-signal', {name: 'updateuser', data: user});
+                }, 500);
+            }).catch(function (err) {
+                var errmessage = "An error occurred while trying to create account";
+                if (err.status === 422) {
+                    errmessage += "\n" + "Account already exists for this user";
+                }
+                mythis.set('options.title', "Account Creation Failed");
+                mythis.set('options.body', errmessage);
+                mythis.set('options.loading', false);
+            });
+        },
+
+        ready: function() {
+
+        }
+
+    });
+
+</script>

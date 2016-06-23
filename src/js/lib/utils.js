@@ -10,6 +10,7 @@
         fse = require('fs-extra'),
         https = require('https'),
         http = require('http'),
+        fontkit = require('fontkit'),
         _ = require('lodash');
 
     var utils = {
@@ -31,6 +32,13 @@
             return a.replace(/(?:^\w|[A-Z]|\b\w)/g, function(letter, index) {
                 return index === 0 ? letter.toLowerCase() : letter.toUpperCase();
             }).replace(/\s+/g, '');
+        },
+
+        /**
+         * Pads date/time with a leading zero if it's a single digit
+         */
+        padZero: function(t) {
+            return ('0' + t.toString()).slice(-2);
         },
 
         mapObject: function (obj, visit, filter) {
@@ -360,6 +368,63 @@
                 license: path.join(projectDir, 'LICENSE.md')
             };
 
+        },
+
+        getSystemFonts: function () {
+            var fontDir = path.resolve({
+                win32:  '/Windows/fonts',
+                darwin: '/Library/Fonts',
+                linux:  '/usr/share/fonts/truetype'
+            }[process.platform]);
+
+            var fontpaths = fs.readdirSync(fontDir).map(function (name) {
+                return path.join(fontDir, name);
+            });
+
+            var list = fontpaths.map(function (fontpath) {
+                var font = false;
+                try {
+                    font = fontkit.openSync(fontpath);
+                } catch (e) {}
+                if (font) {
+                    return {path: fontpath, font: font};
+                } else {
+                    return false;
+                }
+            }).map(function (fontobject) {
+                var name = false;
+                try {
+                    name = fontobject.font.familyName;
+                } catch (e) {}
+                if (name) {
+                    return {path: fontobject.path, name: name};
+                } else {
+                    return false;
+                }
+            });
+            
+            list = _.compact(list);
+            
+            list = list.sort(function (a, b) {
+                if (a.name.toLowerCase() > b.name.toLowerCase()) {
+                    return 1;
+                } else if (a.name.toLowerCase() < b.name.toLowerCase()) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            });
+
+            for (var i = 0; i < list.length - 1; i++) {
+                if (list[i].name === list[i+1].name) {
+                    list.splice(i, 1);
+                    i--;
+                }
+            }
+
+            list.unshift({path: "default", name: 'Noto Sans'}, {path: "default", name: 'Roboto'});
+
+            return list;
         },
 
         getTimeStamp: function () {

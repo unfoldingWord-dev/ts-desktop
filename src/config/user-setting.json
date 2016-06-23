@@ -9,20 +9,94 @@
         "visible": true
     },
     {
-        "name": "font",
-        "mainText": "Font",
-        "value": "Roboto",
-        "options": ["Roboto", "Arial", "Times New Roman", "Calibri", "Tahoma"],
+        "name": "appfont",
+        "mainText": "App Font",
+        "value": {"path": "default", "name": "Roboto"},
+        "options": [],
+        "group": "general",
+        "enabled": true,
+        "visible": false
+    },
+    {
+        "name": "targetfont",
+        "mainText": "Target Translation Font",
+        "value": {"path": "default", "name": "Roboto"},
+        "options": [],
         "group": "general",
         "enabled": true,
         "visible": true
     },
     {
-        "name": "fontsize",
-        "mainText": "Font Size",
-        "value": "Normal",
-        "options": ["Small", "Normal", "Large"],
+        "name": "sourcefont",
+        "mainText": "Source Translation Font",
+        "value": {"path": "default", "name": "Roboto"},
+        "options": [],
         "group": "general",
+        "enabled": true,
+        "visible": true
+    },
+    {
+        "name": "targetsize",
+        "mainText": "Font Size",
+        "value": {"name": "Normal"},
+        "options": [{"name": "Small"}, {"name": "Normal"}, {"name": "Large"}],
+        "group": "general",
+        "enabled": true,
+        "visible": true
+    },
+    {
+        "name": "datalocation",
+        "mainText": "Backup Location",
+        "value": "~/translationStudio",
+        "group": "general",
+        "enabled": true,
+        "visible": true
+    },
+    {
+        "name": "appversion",
+        "mainText": "App Version",
+        "value": "0.0.0",
+        "group": "about",
+        "enabled": false,
+        "visible": true
+    },
+    {
+        "name": "datapath",
+        "mainText": "Data Path",
+        "value": "/test/path",
+        "group": "about",
+        "enabled": false,
+        "visible": true
+    },
+    {
+        "name": "license",
+        "mainText": "License Agreement",
+        "value": "",
+        "group": "legal",
+        "enabled": true,
+        "visible": true
+    },
+    {
+        "name": "guidelines",
+        "mainText": "Translation Guidelines",
+        "value": "",
+        "group": "legal",
+        "enabled": true,
+        "visible": true
+    },
+    {
+        "name": "statement",
+        "mainText": "Statement of Faith",
+        "value": "",
+        "group": "legal",
+        "enabled": true,
+        "visible": true
+    },
+    {
+        "name": "attribution",
+        "mainText": "Attribution",
+        "value": "",
+        "group": "legal",
         "enabled": true,
         "visible": true
     },
@@ -39,15 +113,7 @@
         "mainText": "Media Server",
         "value": "https://api.unfoldingword.org/",
         "group": "upload",
-        "enabled": true,
-        "visible": true
-    },
-    {
-        "name": "datalocation",
-        "mainText": "Backup Location",
-        "value": "~/translationStudio",
-        "group": "advanced",
-        "enabled": true,
+        "enabled": false,
         "visible": true
     },
     {
@@ -73,22 +139,6 @@
         "helpText": "Update user options to the most current",
         "group": "advanced",
         "enabled": true,
-        "visible": true
-    },
-    {
-        "name": "appversion",
-        "mainText": "App Version",
-        "value": "0.0.0",
-        "group": "about",
-        "enabled": false,
-        "visible": true
-    },
-    {
-        "name": "datapath",
-        "mainText": "Data Path",
-        "value": "/test/path",
-        "group": "about",
-        "enabled": false,
         "visible": true
     }
 ]

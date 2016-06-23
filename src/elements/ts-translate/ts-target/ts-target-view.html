@@ -39,10 +39,8 @@
             display: flex;
 		}
 
-        #content.editmode {
-            background-size: 100% 32px;
-            background-image: -webkit-linear-gradient(var(--card-background-color) 27px, var(--border-color) 27px, var(--border-color) 28px, var(--card-background-color) 28px);
-            border-radius: 3px;
+        #textholder {
+            width: 100%;
         }
 
         #textholder p {
@@ -50,6 +48,10 @@
             margin: 0;
             color: var(--primary-text-color);
 		}
+
+        .rtl {
+            direction: rtl;
+        }
 
 	</style>
 
@@ -61,8 +63,8 @@
                     <span>[[chunk.chaptermeta.chapterref]]</span><span>[[chunk.chaptermeta.refaddon]]</span>
                 </div>
             </div>
-            <div id="content" class="editmode">
-                <div id="textholder"></div>
+            <div id="content" class="targetfont">
+                <div id="textholder" class$="[[chunk.projectmeta.target_language.direction]]"></div>
             </div>
         </paper-material>
 
@@ -84,44 +86,15 @@
 		},
 
         observers: [
-            'rendertext(chunk.*)'
+            'rendertext(chunk.transcontent)'
         ],
 
         rendertext: function () {
-            if(this.chunk && this.chunk.srccontent) {
-                var completed = this.chunk.completed;
-                var contentbox = this.$.content;
-                var textholder = this.querySelector("#textholder");
-                var linearray = this.chunk.transcontent.split("\n");
-                var numstr1 = "\<sup\>";
-                var numstr2 = "\<\/sup\>";
-                var startp = "\<p class='style-scope ts-target-view'\>";
-                var endp = "\<\/p\>";
-                var returnstr = "";
+            if(this.chunk && this.chunk.srccontent && this.chunk.projectmeta.project_type_class === "standard") {
+                var text = this.chunk.transcontent;
+                var module = "ts-target-view";
 
-                for (var j = 0; j < linearray.length; j++) {
-                    returnstr += startp;
-                    var wordarray = linearray[j].split(" ");
-                    for (var i = 0; i < wordarray.length; i++) {
-                        if (wordarray[i] === "\\v") {
-                            var verse = wordarray[i+1];
-                            returnstr += numstr1 + verse + numstr2;
-                            i++;
-                        } else if (wordarray[i] === "\\c") {
-                            i++;
-                        } else {
-                            returnstr += wordarray[i] + " ";
-                        }
-                    }
-                    returnstr += endp;
-                }
-                textholder.innerHTML = returnstr;
-
-                if (completed) {
-                    contentbox.classList.remove("editmode");
-                } else {
-                    contentbox.classList.add("editmode");
-                }
+                this.$.textholder.innerHTML = App.renderer.renderTargetWithVerses(text, module);
             }
         },
 

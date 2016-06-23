@@ -1,0 +1,53 @@
+
+<dom-module id="ts-text-holder">
+
+	<style>
+
+        :host {
+        }
+
+        p {
+            margin: 0;
+        }
+
+	</style>
+
+	<template>
+
+        <p id="textholder"></p>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+		is: 'ts-text-holder',
+
+		properties: {
+            text: {
+                type: String,
+                value: ""
+            }
+		},
+
+        observers: [
+            'rendertext(text)'
+        ],
+
+        rendertext: function (text) {
+            var textholder = this.querySelector("#textholder");
+            if (textholder) {
+                textholder.innerHTML = text;
+            }
+        },
+
+		ready: function() {
+
+		}
+
+	});
+
+</script>

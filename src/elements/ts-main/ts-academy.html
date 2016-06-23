@@ -1,4 +1,9 @@
 
+<link rel="import" href="../../components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../components/neon-animation/neon-animation.html">
+
+<link rel="import" href="./ts-loading.html">
+
 <dom-module id="ts-academy">
 
     <style>
@@ -21,6 +26,25 @@
             overflow-y: auto;
         }
 
+        .popup {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+        }
+
+        .popup * {
+            margin: 0;
+            padding: 0;
+        }
+
+        #loading {
+            width: 320px;
+            height: 220px;
+        }
+
     </style>
 
     <template>
@@ -28,6 +52,10 @@
         <div id="contain">
             <div id="body"></div>
         </div>
+
+        <paper-dialog id="loading" class="popup" modal="true" exit-animation="scale-down-animation">
+            <ts-loading options="[[options]]"></ts-loading>
+        </paper-dialog>
 
     </template>
 
@@ -39,33 +67,63 @@
         is: 'ts-academy',
 
         properties: {
+            options: {
+                type: Object,
+                value: {}
+            }
         },
 
         ready: function() {
-            var academy = App.dataManager.getTa("%");
-            var text = "";
-            var test1 = new RegExp(/<a class="wikilink1" href="\//g);
-            var replace1 = '<a class="wikilink1" href="#/';
-            var test2 = new RegExp(/src="\/assets/g);
-            var replace2 = 'src="assets';
-            var test3 = new RegExp(/src="assets/g);
-            var replace3 = 'style="max-width:700px;" src="assets';
-            var shell = require('electron').shell;
+            var mythis = this;
+            /*
+             * Redirect all standard output to the console.
+             * NB: This is required for the sql.js library to work.
+             */
+            process.stderr.write = console.error.bind(console);
+            process.stdout.write = console.log.bind(console);
 
-            for (var j = 0; j < academy.length; j++) {
-                text += academy[j].body.replace("<h2 ", "<h2 id='" + academy[j].reference + "' ");
-            }
-            text = text.replace(test1, replace1);
-            text = text.replace(test2, replace2);
-            text = text.replace(test3, replace3);
-            this.$.body.innerHTML = text;
-            var links = this.$.body.getElementsByClassName('urlextern');
-            for (var i = 0; i < links.length; i++) {
-                links[i].addEventListener('click', function (event) {
-                    event.preventDefault();
-                    shell.openExternal(this.href);
-                });
-            }
+            mythis.set('options', {});
+            mythis.set('options.body', "Loading translationAcademy...");
+            mythis.set('options.loading', true);
+            mythis.$.loading.open();
+
+            setTimeout(function() {
+                var path = require('path');
+                var Db = require('../js/lib/db').Db;
+                var DataManager = require('../js/database').DataManager;
+                var dataManager = (function () {
+                    var srcDir = path.resolve(path.join(__dirname, '..')),
+                        schemaPath = path.join(srcDir, 'config', 'schema.sql'),
+                        dbPath = path.join(srcDir, 'index', 'index.sqlite'),
+                        db = new Db(schemaPath, dbPath);
+
+                    return new DataManager(db);
+                })();
+                var academy = dataManager.getTa("%");
+                var text = "";
+                var test1 = new RegExp(/<a class="wikilink1" href="\//g);
+                var replace1 = '<a class="wikilink1" href="#/';
+                var test2 = new RegExp(/src="\/assets/g);
+                var replace2 = 'src="assets';
+                var test3 = new RegExp(/src="assets/g);
+                var replace3 = 'style="max-width:700px;" src="assets';
+                var shell = require('electron').shell;
+                for (var j = 0; j < academy.length; j++) {
+                    text += academy[j].body.replace("<h2 ", "<h2 id='" + academy[j].reference + "' ");
+                }
+                text = text.replace(test1, replace1);
+                text = text.replace(test2, replace2);
+                text = text.replace(test3, replace3);
+                mythis.$.body.innerHTML = text;
+                var links = mythis.$.body.getElementsByClassName('urlextern');
+                for (var i = 0; i < links.length; i++) {
+                    links[i].addEventListener('click', function (event) {
+                        event.preventDefault();
+                        shell.openExternal(this.href);
+                    });
+                }
+                mythis.$.loading.close();
+            }, 500);
         }
 
     });

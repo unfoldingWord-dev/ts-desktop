@@ -9,44 +9,32 @@
 
         :host {
             display: flex;
-            flex-direction: column;
+            justify-content: center;
         }
 
-        #contain {
-            flex: auto;
+        #main {
+            flex: 0 0 450px;
             display: flex;
             flex-direction: column;
-            align-items: center;
         }
 
         #header {
             color: var(--secondary-text-color);
             font-size: 110%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
             flex: 0 0 60px;
-        }
-
-        #header > div {
             display: flex;
-            flex: auto;
             justify-content: space-between;
             align-items: center;
             padding: 0 20px;
             border-bottom: 1px solid var(--border-color);
             background: var(--card-background-color);
-            width: 410px;
-            box-shadow: 0 -1px 2px 1px var(--primary-color-dark);
         }
 
         #list {
             font-size: 110%;
-            max-height: calc(100vh - 145px);
-            width: 450px;
+            max-height: calc(100vh - 175px);
             color: var(--primary-text-color);
             background: var(--card-background-color);
-            box-shadow: 0 2px 3px 2px var(--border-color);
         }
 
         .row {
@@ -56,6 +44,16 @@
             border-bottom: 1px solid var(--border-color);
             transition: background .3s, color .3s;
             cursor: pointer;
+        }
+
+        .row.unavailable {
+            background: var(--border-color);
+            border-bottom: 1px solid var(--card-background-color);
+        }
+
+        .row.unavailable:hover {
+            background: var(--border-color);
+            border-bottom: 1px solid var(--card-background-color);
         }
 
         .row:hover {
@@ -83,19 +81,17 @@
 
   <template>
 
-      <div id="header">
-          <div>
-              <input is="iron-input" bind-value="{{query}}" placeholder="Choose target language">
-              <paper-icon-button class="right" icon="search" title="Search Languages"></paper-icon-button>
+      <div id="main">
+          <div id="header">
+              <input is="iron-input" id="input" bind-value="{{query}}" placeholder="Choose target language">
+              <paper-icon-button class="right" icon="search" on-tap="focussearch"></paper-icon-button>
           </div>
-      </div>
-      <div id="contain">
-          <iron-list id="list" items="{{searchfilter(query,languagelist)}}" as="lang">
+          <iron-list id="list" items="{{searchfilter(query,languagelist)}}" as="language">
               <template>
-                  <div class="row" on-tap="store">
+                  <div class$="[[checkclass(language.id)]]" on-tap="store">
                       <div>
-                          <span>[[lang.name]]</span>
-                          <span class="right">[[lang.id]]</span>
+                          <span>[[language.name]]</span>
+                          <span class="right">[[language.id]]</span>
                       </div>
                   </div>
               </template>
@@ -120,18 +116,27 @@
               value: 0,
               notify: true
           },
-          language: {
+          newdata: {
               type: Object,
               value: {},
               notify: true
           },
-          query: {
-              type: String,
-              value: ""
+          importdata: {
+              type: Object,
+              value: {},
+              notify: true
           },
           languagelist: {
               type: Array,
               value: []
+          },
+          changedata: {
+              type: Object,
+              value: {}
+          },
+          query: {
+              type: String,
+              value: ""
           }
       },
 
@@ -139,14 +144,22 @@
           Polymer.IronResizableBehavior
       ],
 
+      focussearch: function () {
+          this.$.input.focus();
+      },
+
+      checkclass: function (id) {
+          return this.changedata.changing && this.changedata.oldmeta.target_language.id === id ? 'row unavailable' : 'row';
+      },
+
       searchfilter: function (query, languagelist) {
           let search = App.utils.startsWithBase.bind(null, query);
 
-          var bycode = languagelist.filter(function (lang) {
-              return search(lang.id);
+          var bycode = languagelist.filter(function (language) {
+              return search(language.id);
           });
-          var byname = languagelist.filter(function (lang) {
-              return search(lang.name);
+          var byname = languagelist.filter(function (language) {
+              return search(language.name);
           });
           var combined = bycode.concat(byname);
 
@@ -155,16 +168,71 @@
           });
       },
 
+      change: function () {
+          var mythis = this;
+          var targetDir = App.configurator.getValue('targetTranslationsDir');
+          mythis.changedata.newmeta = _.cloneDeep(mythis.changedata.oldmeta);
+          mythis.changedata.newmeta.target_language = mythis.newdata.language;
+          mythis.changedata.newmeta.unique_id = App.projectsManager.makeUniqueId(mythis.changedata.newmeta);
+          mythis.changedata.oldpaths = App.utils.makeProjectPaths(targetDir, mythis.changedata.oldmeta);
+          mythis.changedata.newpaths = App.utils.makeProjectPaths(targetDir, mythis.changedata.newmeta);
+
+          return App.utils.fs.stat(mythis.changedata.newpaths.projectDir).then(App.utils.ret(true)).catch(App.utils.ret(false))
+              .then(function (exists) {
+                  mythis.changedata.exists = exists;
+                  if (exists) {
+                      mythis.fire('openconfirm');
+                  } else {
+                      mythis.firechange();
+                  }
+              });
+      },
+
+      firechange: function () {
+          var mythis = this;
+
+          mythis.fire('iron-signal', {name: 'changeproject', data: mythis.changedata});
+          mythis.set('changedata.changing', false);
+          mythis.reset();
+      },
+
       store: function (e) {
-          this.language = e.model.lang;
-          this.query = "";
-          this.fire('iron-signal', {name: 'createprojects'});
-          this.selected = this.selected + 1;
+          this.set('newdata.language', e.model.language);
+
+          if (this.changedata.changing) {
+              if (this.newdata.language.id !== this.changedata.oldmeta.target_language.id) {
+                  this.change();
+              }
+          } else if (this.importdata.importing && this.importdata.project.slug) {
+              this.set('newdata.project', this.importdata.project);
+              if (App.configurator.getUserSetting('glmode')) {
+                  this.fire('iron-signal', {name: 'createtypes'});
+                  this.set('selected', 3);
+              } else {
+                  this.set('newdata.typedata', {type: {id: "text", name: "Text"}, resource: {id: "reg", name: "Regular"}, format: "usfm", allowed: true});
+                  this.fire('create');
+              }
+              this.reset();
+          } else {
+              this.fire('iron-signal', {name: 'createprojects'});
+              this.set('selected', 1);
+              this.reset();
+          }
+      },
+
+      reset: function () {
+          this.set('query', "");
+          this.$.list.scrollTop = 0;
+      },
+
+      updateList: function () {
+          this.set('languagelist', App.dataManager.getTargetLanguages());
       },
 
       ready: function () {
-          this.languagelist = App.dataManager.getTargetLanguages();
+          this.set('languagelist', App.dataManager.getTargetLanguages());
       }
+
   });
 
 })(window);

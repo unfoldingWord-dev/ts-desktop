@@ -10,13 +10,13 @@ var _ = require('lodash'),
 
 function PrintManager(configurator) {
 
-    var download = utils.download;
-    var srcDir = path.resolve(path.join(__dirname, '..'));
-    var notoFontPath = path.join(srcDir, 'assets', 'NotoSans-Regular.ttf');
+    var download = utils.download;    
+    var srcDir = path.resolve(path.join(__dirname, '..'));    
     var imageRoot = path.join(configurator.getValue('rootdir'), 'images');
     var imagePath = path.join(imageRoot, 'obs');
     var zipPath = path.join(imageRoot, 'obs-images.zip');
-    var url = configurator.getValue("mediaServer") + '/obs/jpg/1/en/obs-images-360px.zip';
+    var server = "https://api.unfoldingword.org/";
+    var url = server + 'obs/jpg/1/en/obs-images-360px.zip';
 
     return {
 
@@ -76,6 +76,11 @@ function PrintManager(configurator) {
             var mythis = this;
             if(filePath.split('.').pop() !== 'pdf') {
                 filePath += '.pdf';
+            }
+            var defaultfont = path.join(srcDir, 'assets', 'NotoSans-Regular.ttf');
+            var targetfont = configurator.getUserSetting('targetfont').path;
+            if (targetfont === "default") {
+                targetfont = defaultfont;
             }
 
             return new Promise(function (resolve, reject) {
@@ -141,7 +146,7 @@ function PrintManager(configurator) {
 
                         // book title
                         doc.fontSize(25)
-                            .font(notoFontPath)
+                            .font(targetfont)
                             .text(doc.info.Title, 72, doc.page.height / 2, {align: 'center'});
 
                         mythis.renderLicense(doc, "OBS_LICENSE.md");
@@ -221,7 +226,7 @@ function PrintManager(configurator) {
                         for (var i = range.start; i < range.start + range.count; i ++) {
                             doc.switchToPage(i);
                             doc.fontSize(10)
-                                .font('Helvetica')
+                                .font(defaultfont)
                                 .text(i + 1, 72, doc.page.height - 50 - 12, {align: 'center'});
                         }
 
@@ -232,7 +237,7 @@ function PrintManager(configurator) {
                         doc.fontSize(25)
                             .lineGap(0)
                             .text('Table of Contents', 72, 72)
-                            .font(notoFontPath)
+                            .font(targetfont)
                             .moveDown();
                         _.forEach(project.chapters, function (chapter) {
                             if (tocPages[chapter.id] !== undefined && tocPages[chapter.id] !== currTocPage) {
@@ -268,7 +273,7 @@ function PrintManager(configurator) {
                         //set the title
                         doc.info.Title = translation[0].transcontent || meta.project.name;
                         doc.fontSize(25)
-                            .font(notoFontPath)
+                            .font(targetfont)
                             .text(doc.info.Title, 72, doc.page.height / 2, {align: 'center'});
 
                         mythis.renderLicense(doc, "LICENSE.md");
@@ -312,7 +317,7 @@ function PrintManager(configurator) {
                         for (var i = range.start; i < range.start + range.count; i ++) {
                             doc.switchToPage(i);
                             doc.fontSize(10)
-                                .font('Helvetica')
+                                .font(defaultfont)
                                 .text(i + 1, 72, doc.page.height - 50 - 12, {align: 'center'});
                         }
 

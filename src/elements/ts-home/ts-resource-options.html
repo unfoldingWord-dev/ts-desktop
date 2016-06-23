@@ -1,0 +1,148 @@
+
+<link rel="import" href="../../components/paper-button/paper-button.html">
+
+<dom-module id="ts-resource-options">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px;
+        }
+
+        #body {
+            display: flex;
+            flex-direction: column;
+            border-top: 1px solid var(--border-color);
+            padding: 0;
+        }
+
+        #footer {
+            display: flex;
+            justify-content: flex-end;
+            padding: 10px 50px;
+        }
+
+        #footer paper-button:hover {
+            color: var(--accent-color);
+        }
+
+        .option {
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 30px;
+            display: flex;
+            transition: background .3s, color .3s;
+            cursor: pointer;
+        }
+
+        .option:hover {
+            background: var(--accent-color-light);
+        }
+
+        .option.unavailable {
+            background: var(--border-color);
+            border-bottom: 1px solid var(--card-background-color);
+        }
+
+        .option.unavailable:hover {
+            background: var(--border-color);
+            border-bottom: 1px solid var(--card-background-color);
+        }
+
+        .optiontitle {
+            font-size: 130%;
+            font-weight: bold;
+        }
+
+    </style>
+
+    <template>
+
+        <div id="header">
+            <h2>Resource Options</h2>
+        </div>
+        <div id="body">
+            <template is="dom-repeat" items="[[resourceoptions]]" as="resource">
+                <div class$="[[checkclass(resource.id, currentinfo.resource.id)]]" on-tap="select">
+                    <span class="optiontitle">[[resource.name]]</span>
+                </div>
+            </template>
+        </div>
+        <div id="footer">
+            <paper-button on-tap="cancel">Cancel</paper-button>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-resource-options',
+
+        properties: {
+            resourceoptions: {
+                type: Array,
+                value: [{id: "ulb", name: "Unlocked Literal Bible"}, {id: "udb", name: "Unlocked Dynamic Bible"}, {id: "reg", name: "Regular"}]
+            },
+            changedata: {
+                type: Object,
+                value: {},
+                notify: true
+            },
+            currentinfo: {
+                type: Object,
+                value: {}
+            }
+        },
+
+        checkclass: function (id1, id2) {
+            return this.currentinfo.resource && id1 === id2 ? 'option unavailable' : 'option';
+        },
+
+        select: function (e) {
+            var mythis = this;
+
+            if (e.model.resource.id === mythis.currentinfo.resource.id) {
+                return;
+            }
+
+            var targetDir = App.configurator.getValue('targetTranslationsDir');
+            mythis.changedata.oldmeta = mythis.currentinfo;
+            mythis.changedata.newmeta = _.cloneDeep(mythis.changedata.oldmeta);
+            mythis.changedata.newmeta.resource = e.model.resource;
+            mythis.changedata.newmeta.unique_id = App.projectsManager.makeUniqueId(mythis.changedata.newmeta);
+            mythis.changedata.oldpaths = App.utils.makeProjectPaths(targetDir, mythis.changedata.oldmeta);
+            mythis.changedata.newpaths = App.utils.makeProjectPaths(targetDir, mythis.changedata.newmeta);
+
+            return App.utils.fs.stat(mythis.changedata.newpaths.projectDir).then(App.utils.ret(true)).catch(App.utils.ret(false))
+                .then(function (exists) {
+                    mythis.changedata.exists = exists;
+                    if (exists) {
+                        mythis.fire('confirm');
+                    } else {
+                        mythis.fire('change');
+                    }
+                });
+        },
+
+        cancel: function () {
+            this.fire('cancel');
+        },
+
+        ready: function () {
+
+        }
+
+    });
+
+</script>

@@ -1,8 +1,10 @@
 
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
 <link rel="import" href="../../components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../../components/paper-dialog/paper-dialog.html">
 
 <link rel="import" href="./ts-setting-modal.html">
+<link rel="import" href="../ts-main/ts-loading.html">
 
 <dom-module id="ts-settings">
 
@@ -87,6 +89,25 @@
             --paper-checkbox-unchecked-color: var(--accent-color-dark);
         }
 
+        .popup {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+        }
+
+        .popup * {
+            margin: 0;
+            padding: 0;
+        }
+
+        #loading {
+            width: 320px;
+            height: 220px;
+        }
+
         .hide {
             display: none;
         }
@@ -124,6 +145,10 @@
             </template>
         </div>
 
+        <paper-dialog id="loading" class="popup" modal="true" exit-animation="scale-down-animation">
+            <ts-loading options="[[options]]"></ts-loading>
+        </paper-dialog>
+
     </template>
 
 </dom-module>
@@ -142,6 +167,10 @@
             route: {
                 type: String,
                 notify: true
+            },
+            options: {
+                type: Object,
+                value: {}
             },
             animationConfig: {
                 value: function () {
@@ -167,51 +196,53 @@
             }
         },
 
-        ready: function() {
+        ready: function () {
             this.settings = App.configurator.refreshUserSetting();
-            this.settings = App.configurator.setUserSetting('appversion', App.configurator.getAppVersion());
+            this.settings = App.configurator.setUserSetting('appversion', App.configurator.getAppData().version);
             this.settings = App.configurator.setUserSetting('datapath', App.configurator.getValue('rootdir'));
+            this.settings = App.configurator.setUserSetting('dataserver', "git.door43.org");
+            this.settings = App.configurator.setUserSetting('mediaserver', "https://api.unfoldingword.org/");
             var untildify = require('untildify');
             var location = App.configurator.getUserSetting('datalocation');
             this.settings = App.configurator.setUserSetting('datalocation', untildify(location));
         },
 
-        back: function() {
+        back: function () {
             this.route = App.configurator.getValue("backto");
         },
 
-        _isEnabled: function(bool) {
+        _isEnabled: function (bool) {
             return bool ? true : false;
         },
 
-        _isVisible: function(bool) {
+        _isVisible: function (bool) {
             if (bool === undefined) {
                 bool = true;
             }
             return bool;
         },
 
-        _capitalize: function(text) {
-            return text.charAt(0).toUpperCase() + text.slice(1).replace(/( [a-z])/g, function(match) {
+        _capitalize: function (text) {
+            return text.charAt(0).toUpperCase() + text.slice(1).replace(/( [a-z])/g, function (match) {
                 return match.toUpperCase();
             });
         },
 
-        _computeHelpText: function(setting) {
+        _computeHelpText: function (setting) {
             var text;
             if (typeof setting.base.value === "number" && setting.base.helpText) {
                 text = setting.base.helpText.replace("<int>", setting.base.value);
             } else {
-                text = setting.base.helpText || setting.base.value || setting.base.nullText;
+                text = setting.base.helpText || setting.base.value.name || setting.base.value || setting.base.nullText;
             }
             return text;
         },
 
-        _isBoolean: function(value) {
+        _isBoolean: function (value) {
             return typeof value === 'boolean';
         },
 
-        _runTapHandler: function(event) {
+        _runTapHandler: function (event) {
             if (!event.target.dataEnabled) {
                 return false;
             }
@@ -241,7 +272,7 @@
             }
         },
 
-        _onSettingConfirm: function(path, name) {
+        _onSettingConfirm: function (path, name) {
             var value = document.querySelector('ts-setting-modal').selected || document.querySelector('ts-setting-modal').text;
             this.set(path, value);
             this.closeSettingModal();
@@ -250,11 +281,11 @@
             App.configurator.applyPrefBehavior();
         },
 
-        _onSettingCancel: function() {
+        _onSettingCancel: function () {
             this.closeSettingModal();
         },
 
-        _updateDataLocation: function() {
+        _updateDataLocation: function () {
             var oldPath = App.configurator.getUserSetting('datalocation');
             var newPath = App.ipc.sendSync('open-file', {options: {defaultPath: oldPath, properties: ['openDirectory', 'createDirectory']}});
             if (!newPath) {
@@ -264,20 +295,39 @@
             App.projectsManager.moveBackups(oldPath, newPath[0]);
         },
 
-        openSettingModal: function(event) {
+        openSettingModal: function (event) {
+            var mythis = this;
             var modal = document.createElement('ts-setting-modal');
-            var path = 'settings.' + event.target.dataGroup + '.list.' + event.target.dataList + '.value';
+            var setting = event.model.setting;
             modal.id = "setting-modal";
             modal.style.display = 'block';
-            modal.heading = event.model.setting.mainText;
+            modal.heading = setting.mainText;
             // The following assignments will determine what kind of interface the modal
             // will have (Edit for text, select for selected.)
-            if (event.model.setting.options) {
-                modal.options = event.model.setting.options;
-                modal.selected = event.model.setting.value;
+            if (setting.options) {
+                modal.options = setting.options;
+                modal.selected = setting.value;
+                if (setting.name === "targetfont" || setting.name === "sourcefont") {
+                    mythis.set('options', {});
+                    mythis.set('options.body', "Updating Font List. Please wait...");
+                    mythis.set('options.loading', true);
+                    mythis.$.loading.open();
+                    setTimeout(function() {
+                        modal.options = App.utils.getSystemFonts();
+                        mythis.$.loading.close();
+                        mythis.openModal(modal, event);
+                    }, 500);
+                } else {
+                    mythis.openModal(modal, event);
+                }
             } else {
-                modal.text = event.model.setting.value;
+                modal.text = setting.value;
+                mythis.openModal(modal, event);
             }
+        },
+
+        openModal: function (modal, event) {
+            var path = 'settings.' + event.target.dataGroup + '.list.' + event.target.dataList + '.value';
             this.appendChild(modal);
             modal.fire('open');
             modal.addEventListener('setting-confirm', this._onSettingConfirm.bind(this, path, event.target.id));
@@ -285,12 +335,12 @@
             return modal;
         },
 
-        closeSettingModal: function() {
+        closeSettingModal: function () {
             var modal = document.querySelector('ts-setting-modal');
             this.removeChild(modal);
         },
 
-        saveSettings: function() {
+        saveSettings: function () {
             App.configurator.saveUserSettingArr(this.settings);
         }
 

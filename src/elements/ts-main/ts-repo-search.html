@@ -83,7 +83,7 @@
         <div id="header">
             <h2>Search for Projects</h2>
             <div id="filters">
-                <input is="iron-input" bind-value="{{username}}" placeholder="Username">
+                <input is="iron-input" bind-value="{{username}}" placeholder="Username" disabled="{{restore}}">
                 <paper-spinner id="spinner"></paper-spinner>
                 <input is="iron-input" bind-value="{{project}}" placeholder="Project Name">
             </div>
@@ -123,6 +123,10 @@
                 type: String,
                 value: ''
             },
+            restore: {
+                type: Boolean,
+                value: false
+            },
             p: {
                 type: Object,
                 value: function () {
@@ -144,7 +148,7 @@
 
         selectrepo: function (e) {
             var repo = e.model.repo;
-            this.fire('iron-signal', {name: 'importfromrepo', data: {repo: repo}});
+            this.fire('iron-signal', {name: 'importfromrepo', data: {repo: repo, restore: this.restore}});
         },
 
         searchRepos: function (username, project) {

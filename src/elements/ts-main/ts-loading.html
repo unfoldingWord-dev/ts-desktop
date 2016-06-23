@@ -22,7 +22,9 @@
 
         #body {
             color: var(--primary-text-color);
-            margin: 0 20px;
+            flex: 0 0 100px;
+            overflow-y: auto;
+            padding: 0 20px;
             text-align: center;
             font-size: 130%;
         }
@@ -65,11 +67,11 @@
         <div id="body">
             <p>{{options.body}}</p>
             <p class$="[[linkclass(options.showlink)]]">{{options.link}}</p>
-        </div>
-        <div id="footer">
             <template is="dom-if" if="{{options.loading}}">
                 <paper-progress indeterminate="true"></paper-progress>
             </template>
+        </div>
+        <div id="footer">
             <template is="dom-if" if="{{!options.loading}}">
                 <paper-button class$="[[homeclass(options.showhome)]]" dialog-confirm on-tap="gohome">Return Home</paper-button>
                 <paper-button dialog-dismiss>Close</paper-button>

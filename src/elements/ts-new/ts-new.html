@@ -10,6 +10,7 @@
 <link rel="import" href="./ts-project-menu.html">
 <link rel="import" href="./ts-book-menu.html">
 <link rel="import" href="./ts-type-menu.html">
+<link rel="import" href="../ts-main/ts-loading.html">
 
 <dom-module id="ts-new">
 
@@ -59,6 +60,11 @@
             margin: auto;
         }
 
+        .popup * {
+            margin: 0;
+            padding: 0;
+        }
+
         .popup p {
             font-size: 110%;
         }
@@ -74,7 +80,7 @@
             color: var(--accent-color);
         }
 
-        #error {
+        #loading {
             width: 320px;
             height: 220px;
         }
@@ -118,14 +124,8 @@
             </div>
         </paper-dialog>
 
-        <paper-dialog id="error" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <h2>[[options.title]]</h2>
-            <div>
-                <p>[[options.body]]</p>
-            </div>
-            <div class="buttons">
-                <paper-button dialog-dismiss>Ok</paper-button>
-            </div>
+        <paper-dialog id="loading" class="popup" modal="true" exit-animation="scale-down-animation">
+            <ts-loading options="[[options]]"></ts-loading>
         </paper-dialog>
 
         <paper-dialog id="confirmchange" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -171,7 +171,7 @@
             },
             options: {
                 type: Object,
-                value: {title: "", body: ""}
+                value: {}
             },
             projectlist: {
                 type: Array,
@@ -190,11 +190,6 @@
                 type: Object,
                 value: {}
             },
-            busy: {
-                type: Object,
-                value: {signal: false, message: "Idle"},
-                notify: true
-            },
             animationConfig: {
                 value: function () {
                     return {
@@ -212,6 +207,7 @@
         },
 
         forceResize: function (event) {
+            this.set('selected', 0);
             this.$.languages.updateList();
             this.$.languages.notifyResize();
         },
@@ -246,15 +242,16 @@
 
         createproject: function () {
             var mythis = this;
-            if (mythis.busy.signal) {
-                return;
-            }
-            mythis.set('busy', {signal: true, message: "Creating project..."});
             var project = this.newdata.project;
             var language = this.newdata.language;
             var typedata = this.newdata.typedata;
             var projectarray = this.projectlist;
-            var popup = this.$.error;
+
+            mythis.set('options', {});
+            mythis.set('options.body', "Creating project. Please wait...");
+            mythis.set('options.loading', true);
+            mythis.$.loading.open();
+
             var newprojectmanifest = {
                 "package_version": 6,
                 "project": {"id": project.slug, "name": project.name},
@@ -270,11 +267,9 @@
             var newprojectmeta = App.projectsManager.updateManifestToMeta(newprojectmanifest);
 
             if (newprojectmeta === null) {
-                mythis.set('options', {title: "Unknown Error", body: "The project information is corrupt"});
-                popup.open();
-                setTimeout(function() {
-                    mythis.set('busy', {signal: false, message: "Idle"});
-                }, 1000);
+                mythis.set('options.title', "Unknown Error");
+                mythis.set('options.body', "The project information is corrupt");
+                mythis.set('options.loading', false);
                 return;
             }
 
@@ -286,56 +281,41 @@
                 if (projectarray[i].unique_id === newprojectmeta.unique_id) {
                     if (mythis.importdata.importing) {
                         mythis.importdata.overwrite = true;
+                        mythis.$.loading.close();
                         mythis.$.confirmimport.open();
-                        setTimeout(function() {
-                            mythis.set('busy', {signal: false, message: "Idle"});
-                        }, 1000);
                         return;
                     } else {
-                        mythis.set('options', {title: "Duplicate Found", body: "This project already exists"});
-                        popup.open();
-                        setTimeout(function() {
-                            mythis.set('busy', {signal: false, message: "Idle"});
-                        }, 1000);
+                        mythis.set('options.title', "Duplicate Found");
+                        mythis.set('options.body', "This project already exists");
+                        mythis.set('options.loading', false);
                         return;
                     }
                 }
             }
 
             if (!typedata.allowed) {
-                mythis.set('options', {title: "No Translation", body: "Cannot start this project until a standard translation project exists"});
-                popup.open();
-                setTimeout(function() {
-                    mythis.set('busy', {signal: false, message: "Idle"});
-                }, 1000);
+                mythis.set('options.title', "No Translation");
+                mythis.set('options.body', "Cannot start this project until a standard translation project exists");
+                mythis.set('options.loading', false);
                 return;
             }
 
             if (mythis.importdata.importing) {
                 mythis.importdata.overwrite = false;
-                setTimeout(function() {
-                    mythis.set('busy', {signal: false, message: "Idle"});
-                }, 1000);
+                mythis.$.loading.close();
                 mythis.startimport();
             } else {
                 mythis.animationConfig.exit.name = 'slide-left-animation';
                 App.projectsManager.createTargetTranslation([], newprojectmeta, this.currentuser)
                     .then(function() {
-                        setTimeout(function() {
-                            mythis.set('busy', {signal: false, message: "Idle"});
-                        }, 1000);
+                        mythis.$.loading.close();
                         mythis.fire('iron-signal', {name: 'updatelist'});
                         mythis.fire('iron-signal', {name: 'loadproject', data: {projectmeta: newprojectmeta, type: "new"}});
-                        setTimeout(function() {
-                            mythis.set('selected', 0);
-                        }, 5000);
                     })
                     .catch(function (err) {
-                        mythis.set('options', {title: "Error", body: err});
-                        popup.open();
-                        setTimeout(function() {
-                            mythis.set('busy', {signal: false, message: "Idle"});
-                        }, 1000);
+                        mythis.set('options.title', "Error");
+                        mythis.set('options.body', err);
+                        mythis.set('options.loading', false);
                     });
             }
         },
@@ -352,6 +332,7 @@
             this.animationConfig.exit.name = 'slide-right-animation';
             this.set('selected', 0);
             this.set('importdata', {importing: false});
+            this.set('changedata', {});
             this.set('route', "home");
         },
 

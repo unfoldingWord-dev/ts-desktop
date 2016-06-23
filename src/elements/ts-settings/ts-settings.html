@@ -198,8 +198,10 @@
 
         ready: function () {
             this.settings = App.configurator.refreshUserSetting();
-            this.settings = App.configurator.setUserSetting('appversion', App.configurator.getAppVersion());
+            this.settings = App.configurator.setUserSetting('appversion', App.configurator.getAppData().version);
             this.settings = App.configurator.setUserSetting('datapath', App.configurator.getValue('rootdir'));
+            this.settings = App.configurator.setUserSetting('dataserver', "git.door43.org");
+            this.settings = App.configurator.setUserSetting('mediaserver', "https://api.unfoldingword.org/");
             var untildify = require('untildify');
             var location = App.configurator.getUserSetting('datalocation');
             this.settings = App.configurator.setUserSetting('datalocation', untildify(location));

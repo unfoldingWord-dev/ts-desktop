@@ -21,6 +21,7 @@ process.stdout.write = console.log.bind(console);
 
     setMsg('Loading path...');
     let path = require('path');
+    let fs = require('fs');
 
     setMsg('Loading mkdirp...');
     let mkdirp = require('mkdirp');
@@ -70,7 +71,7 @@ process.stdout.write = console.log.bind(console);
     setMsg('Loading Utils...');
     let utils = require('../js/lib/utils');
 
-    setMsg('Initializing...');
+    setMsg('Initializing configurator...');
 
     // TODO: refactor this so we can just pass an object to the constructor
     let configurator = (function () {
@@ -91,6 +92,7 @@ process.stdout.write = console.log.bind(console);
         c.setValue('rootDir', DATA_PATH, {'mutable':false});
         c.setValue('targetTranslationsDir', path.join(DATA_PATH, 'targetTranslations'), {'mutable':false});
         c.setValue('tempDir', path.join(DATA_PATH, 'temp'), {'mutable':false});
+        c.setValue('libraryDir', path.join(DATA_PATH, 'library'), {'mutable':false});
         c.setValue('indexDir', path.join(DATA_PATH, 'index'), {'mutable':false});
         return c;
     })();
@@ -105,14 +107,32 @@ process.stdout.write = console.log.bind(console);
     });
 
     let dataManager = (function () {
-        // TODO: should we move the location of these files/folders outside of the src folder?
-        var srcDir = path.resolve(path.join(__dirname, '..')),
-            schemaPath = path.join(srcDir, 'config', 'schema.sql'),
-            dbPath = path.join(srcDir, 'index', 'index.sqlite'),
-            db = new Db(schemaPath, dbPath);
+        var libraryDir = configurator.getValue('libraryDir');
+        var libraryPath = path.join(libraryDir, "index.sqlite");
+        var srcDir = path.resolve(path.join(__dirname, '..'));
+        var schemaPath = path.join(srcDir, 'config', 'schema.sql');
+        var srcDB = path.join(srcDir, 'index', 'index.sqlite');
+        var appData = configurator.getAppData();
+        var stat;
+
+        try {
+            stat = fs.statSync(libraryPath);
+        } catch(e) {}
+
+        if (!stat || configurator.getValue("libraryBuild") != appData.build) {
+            setMsg('Setting up index files...');            
+            mkdirp.sync(libraryDir);
+            var content = fs.readFileSync(srcDB);
+            fs.writeFileSync(libraryPath, content);
+            configurator.setValue("libraryBuild", appData.build);
+        }
+
+        var db = new Db(schemaPath, libraryPath);
 
         return new DataManager(db);
     })();
+
+    setMsg('Initializing modules...');
 
     let gitManager = (function () {
         return new GitManager();
@@ -124,7 +144,7 @@ process.stdout.write = console.log.bind(console);
 
     // TODO: where should this be?
     mkdirp.sync(configurator.getValue('targetTranslationsDir'));
-    
+
     var App = {
         appName: 'translationStudio',
 

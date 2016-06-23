@@ -584,13 +584,15 @@
           var targetPath = path.join(targetDir, project);
           var tmpPath = path.join(tmpDir, project);
 
+          var errmessage = restore ? "An error occurred while restoring your project" : "An error occurred while importing your project";
+          var message = restore ? "Your project has been successfully restored. " : "Your project has been successfully imported. ";
+          var loadmessage = restore ? "Restoring.  Please wait..." : "Importing.  Please wait...";
+          var title = restore ? "Restore Complete" : "Import Complete";
+          var errtitle = restore ? "Restore Failed" : "Import Failed";
+
           mythis.$.repo.close();
           mythis.set('options', {});
-          if (restore) {
-              mythis.set('options.body', "Restoring.  Please wait...");
-          } else {
-              mythis.set('options.body', "Importing.  Please wait...");
-          }
+          mythis.set('options.body', loadmessage);
           mythis.set('options.loading', true);
           mythis.$.loading.open();
 
@@ -627,18 +629,13 @@
                       return App.utils.fs.remove(App.configurator.getValue('tempDir'));
                   })
                   .then(function() {
-                      var message = "Your project has been successfully imported. ";
                       if (conflicts.length) {
                           message += "The following chunks contain conflicts that need your attention: ";
                           conflicts.forEach(function (item) {
                               message += item + ", ";
                           });
                       }
-                      if (restore) {
-                          mythis.set('options.title', "Restore Complete");
-                      } else {
-                          mythis.set('options.title', "Import Complete");
-                      }
+                      mythis.set('options.title', title);
                       mythis.set('options.body', message);
                       mythis.set('options.loading', false);
                       setTimeout(function() {
@@ -646,15 +643,10 @@
                       }, 250);
                   })
                   .catch(function(err) {
-                      var errmessage = "An error occurred while importing your project";
                       if(err !== null) {
                           errmessage = err;
                       }
-                      if (restore) {
-                          mythis.set('options.title', "Restore Failed");
-                      } else {
-                          mythis.set('options.title', "Import Failed");
-                      }
+                      mythis.set('options.title', errtitle);
                       mythis.set('options.body', errmessage);
                       mythis.set('options.loading', false);
                       return App.utils.fs.remove(App.configurator.getValue('tempDir'));

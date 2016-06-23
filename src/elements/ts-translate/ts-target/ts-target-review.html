@@ -140,15 +140,28 @@
                 type: Object,
                 value: {},
                 notify: true
+            },
+            rendertimer: {
+                type: Number
             }
         },
 
         observers: [
-            'rendertext(chunk.transcontent, chunk.completed)'
+            'starttimer(chunk.transcontent, chunk.completed)'
         ],
 
         iconclass: function (complete) {
             return complete ? 'hide' : '';
+        },
+
+        starttimer: function () {
+            var mythis = this;
+
+            clearTimeout(mythis.rendertimer);
+
+            mythis.rendertimer = setTimeout(function () {
+                mythis.rendertext();
+            }, 500);
         },
 
         rendertext: function () {
@@ -164,8 +177,10 @@
                 } else {
                     returnstr = App.renderer.markersToBalloons(mythis.chunk, module);
                 }
+
                 mythis.$.textholder.innerHTML = returnstr;
                 mythis.$.toggle.checked = completed;
+                mythis.fire('setheight');
                 mythis.addDragListeners();
             }
         },
@@ -210,8 +225,11 @@
             var textholder = this.querySelector("#textholder");
             var paragraphs = textholder.children;
 
-            this.set('chunk.transcontent', App.renderer.balloonsToMarkers(paragraphs));
-            this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
+            if (this.chunk.projectmeta.project.id !== "obs") {
+                this.set('chunk.transcontent', App.renderer.balloonsToMarkers(paragraphs));
+                this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
+            }
+
         },
 
         completechunk: function (event, data) {
@@ -219,7 +237,7 @@
             var mythis = this;
 
             if (this.chunk.index === index && this.chunk.projectmeta.project_type_class === "standard") {
-                mythis.savemarkers();
+                //mythis.savemarkers();
                 mythis.set('chunk.completed', true);
                 mythis.$.toggle.checked = true;
                 setTimeout(function() {

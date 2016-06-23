@@ -112,15 +112,28 @@
                 type: Object,
                 value: {},
                 notify: true
+            },
+            rendertimer: {
+                type: Number
             }
 		},
 
         observers: [
-            'rendertext(chunk.transcontent, chunk.completed)'
+            'starttimer(chunk.transcontent, chunk.completed)'
         ],
 
         focustextbox: function () {
             this.$.textbox.textarea.focus();
+        },
+
+        starttimer: function () {
+            var mythis = this;
+
+            clearTimeout(mythis.rendertimer);
+
+            mythis.rendertimer = setTimeout(function () {
+                mythis.rendertext();
+            }, 500);
         },
 
         rendertext: function () {

@@ -78,6 +78,11 @@
             font-size: 80%;
         }
 
+        .rtl {
+            direction: rtl;
+            width: 100%;
+        }
+
         .hide {
             display: none;
         }
@@ -107,9 +112,9 @@
                     </div>
                 </div>
                 <template is="dom-if" if="{{!chunk.completed}}">
-                    <div class="body">
-                        <p class$="[[standardclass(chunk.typeclass)]]">[[chunk.transcontent]]</p>
-                        <p class$="[[notstandardclass(chunk.typeclass)]]">[[chunk.helpscontent.0.title]]</p>
+                    <div class="body targetfont">
+                        <p class$="[[standardclass(chunk.typeclass, chunk.direction)]]">[[chunk.transcontent]]</p>
+                        <p class$="[[notstandardclass(chunk.typeclass, chunk.direction)]]">[[chunk.helpscontent.0.title]]</p>
                     </div>
                 </template>
             </paper-material>
@@ -139,12 +144,12 @@
             }
         },
 
-        standardclass: function (typeclass) {
-            return typeclass === "standard" ? '' : 'hide';
+        standardclass: function (typeclass, direction) {
+            return typeclass === "standard" ? direction : direction + ' hide';
         },
 
-        notstandardclass: function (typeclass) {
-            return typeclass === "standard" ? 'hide' : '';
+        notstandardclass: function (typeclass, direction) {
+            return typeclass === "standard" ? direction + ' hide' : direction;
         },
 
         gotochunk: function () {

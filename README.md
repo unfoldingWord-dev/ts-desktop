@@ -57,3 +57,9 @@ nodegit is installed correctly from `npm install`.
 
 **Linux**
 nodegit is installed correctly from `npm install`.
+
+
+##Windows Installer
+In order to create a native windows installer you must have [Inno Setup](http://www.jrsoftware.org/isinfo.php) installed then you can open and run `win64_installer.iss`. You may need to update the `Version` and `Build` values before generating your installer. Everything else should remain the same.
+
+> NOTE: Inno Setup has trouble running with long file paths therefore you'll need to remove `out\translationStudio-win32-x64\resources\app\node_modules\nodegit\node_modules` before executing the iss file.

@@ -4,11 +4,13 @@
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
 <link rel="import" href="../../components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/iron-signals/iron-signals.html">
 
 <link rel="import" href="./ts-language-menu.html">
 <link rel="import" href="./ts-project-menu.html">
 <link rel="import" href="./ts-book-menu.html">
 <link rel="import" href="./ts-type-menu.html">
+<link rel="import" href="../ts-main/ts-loading.html">
 
 <dom-module id="ts-new">
 
@@ -17,6 +19,7 @@
         :host {
             display: flex;
             flex-direction: column;
+            color: var(--primary-text-color);
         }
 
         neon-animated-pages {
@@ -48,31 +51,47 @@
             margin: 0 1em 0 .2em;
         }
 
-        #popup {
+        .popup {
             position: fixed;
             top: 0;
             bottom: 0;
             left: 0;
             right: 0;
             margin: auto;
-            width: 320px;
-            height: 220px;
-            text-align: center;
-            color: var(--primary-text-color);
         }
 
-        #popup .buttons {
+        .popup * {
+            margin: 0;
+            padding: 0;
+        }
+
+        .popup p {
+            font-size: 110%;
+        }
+
+        .buttons {
             display: flex;
-            justify-content: center;
+            justify-content: flex-end;
+            padding: 0 50px;
             color: var(--secondary-text-color);
         }
 
-        #popup .buttons paper-button:hover {
+        .buttons paper-button:hover {
             color: var(--accent-color);
+        }
+
+        #loading {
+            width: 320px;
+            height: 220px;
         }
 
         #confirmimport {
             width: 400px;
+            height: 200px;
+        }
+
+        #confirmchange {
+            width: 450px;
             height: 200px;
         }
 
@@ -83,17 +102,12 @@
         <div id="header">
             <div id="title">
                 <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
-                <template is="dom-if" if="{{!importdata.importing}}">
-                    <span>New Project</span>
-                </template>
-                <template is="dom-if" if="{{importdata.importing}}">
-                    <span>Import Project</span>
-                </template>
+                <span>[[createtitle(route)]]</span>
             </div>
         </div>
 
         <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
-            <ts-language-menu id="languages" selected="{{selected}}" newdata="{{newdata}}" importdata="{{importdata}}" on-create="createproject"></ts-language-menu>
+            <ts-language-menu id="languages" selected="{{selected}}" newdata="{{newdata}}" importdata="{{importdata}}" changedata="[[changedata]]" on-create="createproject" on-openconfirm="openconfirm"></ts-language-menu>
             <ts-project-menu selected="{{selected}}" newdata="{{newdata}}" importdata="{{importdata}}" on-create="createproject"></ts-project-menu>
             <ts-book-menu selected="{{selected}}" newdata="{{newdata}}" on-create="createproject"></ts-book-menu>
             <ts-type-menu selected="{{selected}}" newdata="{{newdata}}" importdata="{{importdata}}" projectlist="[[projectlist]]" on-create="createproject"></ts-type-menu>
@@ -104,21 +118,28 @@
             <div>
                 <p>This target translation already exists. Overwrite?</p>
             </div>
-            <div id="confirmbuttons">
+            <div class="buttons">
                 <paper-button dialog-dismiss>No</paper-button>
                 <paper-button on-tap="startimport">Confirm</paper-button>
             </div>
         </paper-dialog>
 
-        <paper-dialog id="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <h2>[[options.title]]</h2>
+        <paper-dialog id="loading" class="popup" modal="true" exit-animation="scale-down-animation">
+            <ts-loading options="[[options]]"></ts-loading>
+        </paper-dialog>
+
+        <paper-dialog id="confirmchange" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <h2>File already exists</h2>
             <div>
-                <p>[[options.body]]</p>
+                <p>This project already exists.  If you continue with this change, the two projects will be merged together.</p>
             </div>
             <div class="buttons">
-                <paper-button dialog-dismiss>Ok</paper-button>
+                <paper-button on-tap="firechange">Continue</paper-button>
+                <paper-button dialog-dismiss>Cancel</paper-button>
             </div>
         </paper-dialog>
+
+        <iron-signals on-iron-signal-gotolanguage="gotolanguage"></iron-signals>
 
     </template>
 
@@ -150,7 +171,7 @@
             },
             options: {
                 type: Object,
-                value: {title: "", body: ""}
+                value: {}
             },
             projectlist: {
                 type: Array,
@@ -164,6 +185,10 @@
                 type: Object,
                 value: {},
                 notify: true
+            },
+            changedata: {
+                type: Object,
+                value: {}
             },
             animationConfig: {
                 value: function () {
@@ -182,7 +207,37 @@
         },
 
         forceResize: function (event) {
+            this.set('selected', 0);
+            this.$.languages.updateList();
             this.$.languages.notifyResize();
+        },
+
+        openconfirm: function () {
+            this.$.confirmchange.open();
+        },
+
+        firechange: function () {
+            this.$.languages.firechange();
+            this.$.confirmchange.close();
+        },
+
+        createtitle: function (route) {
+            var title = "";
+            if (route === "new") {
+                if (this.importdata.importing) {
+                    title = "Import Project";
+                } else if (this.changedata.changing) {
+                    title = "Change Language";
+                } else {
+                    title = "New Project";
+                }
+            }
+            return title;
+        },
+
+        gotolanguage: function (event, data) {
+            this.set('changedata', {changing: true, oldmeta: data.projectmeta});
+            this.set('route', "new");
         },
 
         createproject: function () {
@@ -191,7 +246,12 @@
             var language = this.newdata.language;
             var typedata = this.newdata.typedata;
             var projectarray = this.projectlist;
-            var popup = this.$.popup;
+
+            mythis.set('options', {});
+            mythis.set('options.body', "Creating project. Please wait...");
+            mythis.set('options.loading', true);
+            mythis.$.loading.open();
+
             var newprojectmanifest = {
                 "package_version": 6,
                 "project": {"id": project.slug, "name": project.name},
@@ -205,48 +265,58 @@
                 "parent_draft": {}
             };
             var newprojectmeta = App.projectsManager.updateManifestToMeta(newprojectmanifest);
-            if(newprojectmeta === null) {
-                this.set('options', {title: "Unknown Error", body: "The project information is corrupt"});
-                popup.open();
+
+            if (newprojectmeta === null) {
+                mythis.set('options.title', "Unknown Error");
+                mythis.set('options.body', "The project information is corrupt");
+                mythis.set('options.loading', false);
                 return;
             }
 
-            if (this.importdata.importing) {
-                this.importdata.projectmeta = newprojectmeta;
+            if (mythis.importdata.importing) {
+                mythis.importdata.projectmeta = newprojectmeta;
             }
 
             for (var i = 0; i < projectarray.length; i++) {
                 if (projectarray[i].unique_id === newprojectmeta.unique_id) {
-                    if (this.importdata.importing) {
-                        this.importdata.overwrite = true;
-                        this.$.confirmimport.open();
+                    if (mythis.importdata.importing) {
+                        mythis.importdata.overwrite = true;
+                        mythis.$.loading.close();
+                        mythis.$.confirmimport.open();
                         return;
                     } else {
-                        this.set('options', {title: "Duplicate Found", body: "This project already exists"});
-                        popup.open();
+                        mythis.set('options.title', "Duplicate Found");
+                        mythis.set('options.body', "This project already exists");
+                        mythis.set('options.loading', false);
                         return;
                     }
                 }
             }
 
             if (!typedata.allowed) {
-                this.set('options', {title: "No Translation", body: "Cannot start this project until a standard translation project exists"});
-                popup.open();
+                mythis.set('options.title', "No Translation");
+                mythis.set('options.body', "Cannot start this project until a standard translation project exists");
+                mythis.set('options.loading', false);
                 return;
             }
 
-            if (this.importdata.importing) {
-                this.importdata.overwrite = false;
-                this.startimport();
+            if (mythis.importdata.importing) {
+                mythis.importdata.overwrite = false;
+                mythis.$.loading.close();
+                mythis.startimport();
             } else {
-                this.animationConfig.exit.name = 'slide-left-animation';
-                App.projectsManager.createTargetTranslation([], newprojectmeta, this.currentuser).then(function() {
-                    mythis.fire('iron-signal', {name: 'updatelist'});
-                    mythis.fire('iron-signal', {name: 'loadproject', data: {projectmeta: newprojectmeta, type: "new"}});
-                    setTimeout(function() {
-                        mythis.set('selected', 0);
-                    }, 5000);
-                });
+                mythis.animationConfig.exit.name = 'slide-left-animation';
+                App.projectsManager.createTargetTranslation([], newprojectmeta, this.currentuser)
+                    .then(function() {
+                        mythis.$.loading.close();
+                        mythis.fire('iron-signal', {name: 'updatelist'});
+                        mythis.fire('iron-signal', {name: 'loadproject', data: {projectmeta: newprojectmeta, type: "new"}});
+                    })
+                    .catch(function (err) {
+                        mythis.set('options.title', "Error");
+                        mythis.set('options.body', err);
+                        mythis.set('options.loading', false);
+                    });
             }
         },
 
@@ -262,6 +332,7 @@
             this.animationConfig.exit.name = 'slide-right-animation';
             this.set('selected', 0);
             this.set('importdata', {importing: false});
+            this.set('changedata', {});
             this.set('route', "home");
         },
 

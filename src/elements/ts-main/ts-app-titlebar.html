@@ -113,9 +113,8 @@
                 value: {}
             },
             busy: {
-                type: Object,
-                value: {signal: false, message: "Idle"},
-                notify: true
+                type: Boolean,
+                value: false
             }
         },
 
@@ -139,14 +138,11 @@
 
         closeWindow: function() {
             var mythis = this;
-            if (mythis.busy.signal) {
-                setTimeout(function() {
-                    mythis.closeWindow();
-                }, 500);
+            if (mythis.busy) {
                 return;
             }
-            mythis.fire('iron-signal', {name: 'savestate'});
-            App.close();
+            mythis.set('busy', true);
+            mythis.fire('iron-signal', {name: 'saveclose'});
         },
 
         ready: function () {

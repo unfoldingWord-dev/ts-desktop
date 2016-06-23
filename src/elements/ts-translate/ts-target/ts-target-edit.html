@@ -55,6 +55,10 @@
             width: 100%;
 		}
 
+        #textholder {
+            width: 100%;
+        }
+
         #textholder p {
             line-height: 2;
             margin: 0;
@@ -66,6 +70,10 @@
 
         :host([chunkmode]) iron-icon {
             display: none;
+        }
+
+        .rtl {
+            direction: rtl;
         }
 
         .hide {
@@ -83,9 +91,9 @@
                 </div>
                 <iron-icon icon="done" on-tap="review"></iron-icon>
             </div>
-            <div id="content" class="editmode">
-                <iron-autogrow-textarea id="textbox" on-change="change" bind-value="{{chunk.transcontent}}" on-input="input"></iron-autogrow-textarea>
-                <div id="textholder"></div>
+            <div id="content" class="editmode targetfont">
+                <iron-autogrow-textarea id="textbox" class$="[[chunk.projectmeta.target_language.direction]]" on-change="change" bind-value="{{chunk.transcontent}}" on-input="input"></iron-autogrow-textarea>
+                <div id="textholder" class$="[[chunk.projectmeta.target_language.direction]]"></div>
             </div>
         </paper-material>
 
@@ -104,15 +112,28 @@
                 type: Object,
                 value: {},
                 notify: true
+            },
+            rendertimer: {
+                type: Number
             }
 		},
 
         observers: [
-            'rendertext(chunk.transcontent, chunk.completed)'
+            'starttimer(chunk.transcontent, chunk.completed)'
         ],
 
         focustextbox: function () {
             this.$.textbox.textarea.focus();
+        },
+
+        starttimer: function () {
+            var mythis = this;
+
+            clearTimeout(mythis.rendertimer);
+
+            mythis.rendertimer = setTimeout(function () {
+                mythis.rendertext();
+            }, 500);
         },
 
         rendertext: function () {

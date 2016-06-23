@@ -5,7 +5,7 @@ var _ = require('lodash'),
     path = require('path'),
     utils = require('../js/lib/utils');
 
-function MigrateManager(configurator) {
+function MigrateManager(configurator, git) {
 
     var write = utils.fs.outputFile,
         read = utils.fs.readFile,
@@ -22,6 +22,7 @@ function MigrateManager(configurator) {
         },
 
         migrate: function (paths) {
+            var user = configurator.getValue("userdata");
 
             var readManifest = function (paths) {
                 return read(paths.manifest).then(function (manifest) {
@@ -328,6 +329,7 @@ function MigrateManager(configurator) {
                 let paths = project.paths;
 
                 manifest.generator.name = 'ts-desktop';
+                manifest.generator.build = "";
                 // TODO: update build number
 
                 return write(paths.manifest, toJSON(manifest)).then(utils.ret({
@@ -344,6 +346,9 @@ function MigrateManager(configurator) {
                 .then(migrateV6)
                 .then(checkVersion)
                 .then(saveManifest)
+                .then(function (project) {                    
+                    return git.commitAll(user, project.paths.projectDir).then(utils.ret(project));
+                })
 
         },
 

@@ -1271,15 +1271,17 @@
                 mythis.set('options.body', "Loading upload page. Please wait...");
                 mythis.set('options.loading', true);
                 mythis.$.loading.open();
-                mythis.savestate();
-                mythis.setleftanimation();
-                mythis.stoptimers();
-                return mythis.saveAll()
-                    .then(function () {
-                        mythis.fire('iron-signal', {name: 'updatepublish'});
-                        mythis.$.loading.close();
-                        mythis.set('route', "publish");
-                    });
+                setTimeout(function() {
+                    mythis.savestate();
+                    mythis.setleftanimation();
+                    mythis.stoptimers();
+                    return mythis.saveAll()
+                        .then(function () {
+                            mythis.fire('iron-signal', {name: 'updatepublish'});
+                            mythis.$.loading.close();
+                            mythis.set('route', "publish");
+                        });
+                }, 250);
             }
         },
 

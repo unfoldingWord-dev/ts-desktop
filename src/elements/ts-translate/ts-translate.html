@@ -11,6 +11,7 @@
 <link rel="import" href="./ts-translate-sidebar.html">
 <link rel="import" href="./ts-nosource-mode.html">
 <link rel="import" href="./ts-source/ts-source-modal.html">
+<link rel="import" href="../ts-main/ts-loading.html">
 
 <dom-module id="ts-translate">
 
@@ -129,6 +130,22 @@
             color: var(--accent-color);
         }
 
+        #note {
+            width: 350px;
+            height: 250px;
+        }
+
+        #notebuttons {
+            display: flex;
+            justify-content: flex-end;
+            padding: 0 50px;
+            color: var(--secondary-text-color);
+        }
+
+        #notebuttons paper-button:hover {
+            color: var(--accent-color);
+        }
+
         #printpopup {
             width: 450px;
             height: 280px;
@@ -156,41 +173,11 @@
         #loading {
             width: 320px;
             height: 220px;
-            color: var(--primary-text-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 110%;
         }
 
-        #buttonbox {
-            display: flex;
-            justify-content: center;
-            color: var(--secondary-text-color);
-        }
-
-        #buttonbox paper-button:hover {
-            color: var(--accent-color);
-        }
-
-        paper-progress {
-            --paper-progress-active-color: var(--accent-color);
-            width: 250px;
-        }
-
-        #bar {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 40px;
-        }
-
-        #text {
-            text-align: center;
-        }
-
-        #loading h2 {
-            color: var(--accent-color);
+        #loading * {
+            margin: 0;
+            padding: 0;
         }
 
         .nodisplay {
@@ -272,26 +259,20 @@
             </div>
         </paper-dialog>
 
+        <paper-dialog id="note" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <h2>Note</h2>
+            <div id="notebody"></div>
+            <div id="notebuttons">
+                <paper-button dialog-dismiss>Dismiss</paper-button>
+            </div>
+        </paper-dialog>
+
         <paper-dialog id="sourcepopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <ts-source-modal id="modal" on-close="closesource"></ts-source-modal>
         </paper-dialog>
 
         <paper-dialog id="loading" class="popup" modal="true" exit-animation="scale-down-animation">
-            <template is="dom-if" if="{{options.loading}}">
-                <p>{{options.body}}</p>
-                <div id="bar">
-                    <paper-progress indeterminate="true"></paper-progress>
-                </div>
-            </template>
-            <template is="dom-if" if="{{!options.loading}}">
-                <h2>{{options.title}}</h2>
-                <div id="text">
-                    <p>{{options.body}}</p>
-                </div>
-                <div id="buttonbox">
-                    <paper-button dialog-dismiss>Close</paper-button>
-                </div>
-            </template>
+            <ts-loading options="[[options]]"></ts-loading>
         </paper-dialog>
 
         <iron-signals on-iron-signal-frompublish="frompublish"></iron-signals>
@@ -302,12 +283,15 @@
         <iron-signals on-iron-signal-opendelete="opendelete"></iron-signals>
         <iron-signals on-iron-signal-openedit="openedit"></iron-signals>
         <iron-signals on-iron-signal-opennodata="opennodata"></iron-signals>
+        <iron-signals on-iron-signal-opennote="opennote"></iron-signals>
         <iron-signals on-iron-signal-opensource="opensource"></iron-signals>
         <iron-signals on-iron-signal-savechunk="savechunk"></iron-signals>
         <iron-signals on-iron-signal-savemanifest="savemanifest"></iron-signals>
         <iron-signals on-iron-signal-updatestate="updatestate"></iron-signals>
         <iron-signals on-iron-signal-savestate="savestate"></iron-signals>
         <iron-signals on-iron-signal-reset="reset"></iron-signals>
+        <iron-signals on-iron-signal-saveclose="saveAndClose"></iron-signals>
+        <iron-signals on-iron-signal-saveall="saveAll"></iron-signals>
 
     </template>
 
@@ -354,18 +338,22 @@
             },
             options: {
                 type: Object,
-                value: {loading: false, title: "", body: ""}
+                value: {}
             },
-            busy: {
-                type: Boolean,
-                value: true,
-                notify: false
+            saveoptions: {
+                type: Object,
+                value: {chunks: [], manifest: false, backup: false}
             },
-            gittimer: {
+            savetimer: {
                 type: Number
             },
             backuptimer: {
                 type: Number
+            },
+            message: {
+                type: String,
+                value: "Idle",
+                notify: true
             },
             animationConfig: {
                 value: function () {
@@ -383,56 +371,119 @@
             }
         },
 
-        observers: [
-            'checktimers(route)'
-        ],
-
-        checktimers: function (route) {
-            route === "translate" ? this.starttimers() : this.stoptimers();
-        },
-
         starttimers: function () {
             var mythis = this;
-            var projectmeta = mythis.currentproject.projectmeta;
-            var target = App.configurator.getValue('targetTranslationsDir');
-            var paths = App.utils.makeProjectPaths(target, projectmeta);
-            var filePath = App.configurator.getUserPath('datalocation', 'automatic_backups', projectmeta.unique_id + ".tstudio");
 
-            clearTimeout(mythis.gittimer);
+            clearTimeout(mythis.savetimer);
             clearTimeout(mythis.backuptimer);
 
-            mythis.gittimer = setTimeout(function timer1 () {
-                if (mythis.busy) {
-                    mythis.gittimer = setTimeout(timer1, 5000);
-                    return;
-                }
-                mythis.set('busy', true);
-                App.gitManager.init(paths.projectDir)
-                    .then(function () {
-                        return App.gitManager.stage(mythis.currentuser, paths.projectDir);
-                    }).then(function () {
-                        mythis.gittimer = setTimeout(timer1, 120000);
-                        mythis.set('busy', false);
-                    })
-                }, 100);
+            mythis.savetimer = setTimeout(function timer1 () {
+                mythis.saveAll();
+                mythis.savetimer = setTimeout(timer1, 120000);
+            }, 100);
 
             mythis.backuptimer = setTimeout(function timer2 () {
-                if (mythis.busy) {
-                    mythis.backuptimer = setTimeout(timer2, 5000);
-                    return;
-                }
-                mythis.set('busy', true);
-                App.exportManager.backupTranslation(projectmeta, filePath)
-                    .then(function () {
-                        mythis.backuptimer = setTimeout(timer2, 600000);
-                        mythis.set('busy', false);
-                    })
-                }, 100);
+                mythis.set('saveoptions.backup', true);
+                mythis.backuptimer = setTimeout(timer2, 590000);
+            }, 100);
         },
 
         stoptimers: function () {
-            clearTimeout(this.gittimer);
+            clearTimeout(this.savetimer);
             clearTimeout(this.backuptimer);
+        },
+
+        saveAndClose: function () {
+            if (this.route === "translate") {
+                this.savestate();
+                this.stoptimers();
+                return this.saveAll()
+                    .then(function () {
+                        App.close();
+                    });
+            } else {
+                App.close();
+            }
+        },
+
+        saveAll: function () {
+            var mythis = this;
+            var projectmeta = mythis.currentproject.projectmeta;
+            var allchunks = mythis.currentproject.chunks;
+            var filePath = App.configurator.getUserPath('datalocation', 'automatic_backups', projectmeta.unique_id + ".tstudio");
+            var changes = false;
+            var savechunks = mythis.saveoptions.chunks;
+
+            var saveChunk = function (data) {
+                var chunk = allchunks[data];
+                return App.projectsManager.saveTargetChunk(chunk, projectmeta)
+                    .catch(function (err) {
+                        App.reporter.logError(err);
+                    });
+            };
+
+            mythis.set('message', "Checking for Changes...");
+
+            return Promise.resolve(true)
+                .then(function () {
+                    if (savechunks.length) {
+                        changes = true;
+                        mythis.addcontributor();
+                        return Promise.all(_.map(savechunks, saveChunk))
+                            .then(function () {
+                                mythis.set('saveoptions.chunks', []);
+                                return App.projectsManager.cleanProject(allchunks, projectmeta)
+                                    .catch(function (err) {
+                                        App.reporter.logError(err);
+                                    });
+                            });
+                    }
+                })
+                .then(function () {
+                    if (mythis.saveoptions.manifest) {
+                        changes = true;
+                        return App.projectsManager.saveTargetManifest(projectmeta)
+                            .then(function () {
+                                mythis.set('saveoptions.manifest', false);
+                            })
+                            .catch(function (err) {
+                                App.reporter.logError(err);
+                            });
+                    }
+                })
+                .then(function () {
+                    if (changes) {
+                        return App.projectsManager.commitProject(projectmeta, mythis.currentuser)
+                            .catch(function (err) {
+                                App.reporter.logError(err);
+                            });
+                    }
+                })
+                .then(function () {
+                    if (mythis.saveoptions.backup) {
+                        return App.exportManager.backupTranslation(projectmeta, filePath)
+                            .then(function () {
+                                mythis.set('saveoptions.backup', false);
+                            })
+                            .catch(function (err) {
+                                App.reporter.logError(err);
+                            });
+                    }
+                })
+                .then(function () {
+                    if (changes) {
+                        mythis.fire('iron-signal', {name: 'updatelist'});
+                        mythis.set('message', "Changes Saved");
+                    } else {
+                        mythis.set('message', "No Changes Found");
+                    }
+                })
+                .then(function () {
+                    setTimeout(function() {
+                        mythis.set('message', "Idle");
+                    }, 1000);
+                });
+
         },
 
         versecheck: function (data) {
@@ -445,6 +496,12 @@
 
         opennodata: function () {
             this.$.nodatapopup.open();
+        },
+
+        opennote: function (event, data) {
+            var text = data.text;
+            this.$.note.open();
+            this.$.notebody.innerHTML = text;
         },
 
         openchecklist: function (event, data) {
@@ -562,13 +619,6 @@
 
         loadproject: function (event, data) {
             var mythis = this;
-            if (mythis.busy) {
-                setTimeout(function() {
-                    mythis.loadproject(event, data);
-                }, 500);
-                return;
-            }
-            mythis.set('busy', true);
             var type = data.type;
             var projectmeta = data.projectmeta;
             var list = this.projectlist;
@@ -582,11 +632,13 @@
                 }
                 mythis.$.loading.close();
                 setTimeout(function() {
-                    mythis.set('busy', false);
                     mythis.setmodestate();
                     mythis.checksources();
+                    mythis.starttimers();
                     if (type === "publish") {
-                        mythis.gopublish();
+                        setTimeout(function() {
+                            mythis.gopublish();
+                        }, 750);
                     }
                     if (type === "print") {
                         mythis.goprint();
@@ -654,31 +706,35 @@
             mythis.retrievesource();
             this.route = "translate";
             setTimeout(function() {
-                mythis.set('options.loading', true);
+                mythis.set('options', {});
                 mythis.set('options.body', "Loading project. Please wait...");
+                mythis.set('options.loading', true);
                 mythis.$.loading.open();
                 setTimeout(function() {
-                    App.projectsManager.loadTargetTranslation(projectmeta).then(function (translation) {
-                        mythis.set('currentproject.rawdata.main', translation);
-                        loaddata2();
-                    }).catch(function(err) {
-                        App.reporter.logError(err);
-                        var message = "We're sorry.  An error occurred while trying to load this project";
-                        if(err !== null) {
-                            message = err;
-                        }
-                        mythis.set('options.title', "Project Load Failed");
-                        mythis.set('options.body', message);
-                        mythis.set('options.loading', false);
-                    });
+                    return App.projectsManager.loadTargetTranslation(projectmeta)
+                        .then(function (translation) {
+                            mythis.set('currentproject.rawdata.main', translation);
+                            loaddata2();
+                        })
+                        .catch(function(err) {
+                            App.reporter.logError(err);
+                            var errmessage = "An error occurred while trying to load this project";
+                            if(err !== null) {
+                                errmessage += "\n" + err;
+                            }
+                            mythis.set('options.title', "Project Load Failed");
+                            mythis.set('options.body', errmessage);
+                            mythis.set('options.loading', false);
+                        });
                 }, 250);
             }, 500);
         },
 
         updatesources: function (event, data) {
             var mythis = this;
-            mythis.set('options.loading', true);
+            mythis.set('options', {});
             mythis.set('options.body', "Loading source. Please wait...");
+            mythis.set('options.loading', true);
             mythis.$.loading.open();
             setTimeout(function() {
                 mythis.set('currentproject.projectmeta.source_translations', data.sources);
@@ -693,73 +749,30 @@
         reloaddata: function (full) {
             var mythis = this;
             var projectmeta = mythis.currentproject.projectmeta;
-            if (mythis.busy) {
-                setTimeout(function() {
-                    mythis.reloaddata(full);
-                }, 500);
-                return;
-            }
-            mythis.set('busy', true);
-            App.projectsManager.loadTargetTranslation(projectmeta).then(function (translation) {
-                mythis.set('currentproject.rawdata.main', translation);
-                mythis.createchunks();
-                mythis.createchapters();
-                mythis.$.loading.close();
-                mythis.forceResize();
-                mythis.setlocation();
-                mythis.set('busy', false);
-                if (full) {
-                    mythis.checksources();
-                }
-            });
-        },
 
-        saveproject: function () {
-            var mythis = this;
-            if (mythis.busy) {
-                setTimeout(function() {
-                    mythis.saveproject();
-                }, 500);
-                return;
-            }
-            mythis.set('busy', true);
-            App.projectsManager.saveTargetTranslation(this.currentproject.chunks, this.currentproject.projectmeta, this.currentuser).then(function() {
-                mythis.set('busy', false);
-                mythis.fire('iron-signal', {name: 'updatelist'});
-            });
+            App.projectsManager.loadTargetTranslation(projectmeta)
+                .then(function (translation) {
+                    mythis.set('currentproject.rawdata.main', translation);
+                    mythis.createchunks();
+                    mythis.createchapters();
+                    mythis.$.loading.close();
+                    mythis.forceResize();
+                    mythis.setlocation();
+                    if (full) {
+                        mythis.checksources();
+                    }
+                });
         },
 
         savechunk: function (event, data) {
-            var mythis = this;
-            if (mythis.busy) {
-                setTimeout(function() {
-                    mythis.savechunk(event, data);
-                }, 500);
-                return;
+            if (this.saveoptions.chunks.indexOf(data.chunk.index) < 0) {
+                this.push('saveoptions.chunks', data.chunk.index);
             }
-            mythis.set('busy', true);
-            App.projectsManager.saveTargetChunk(data.chunk, this.currentproject.projectmeta).then(function() {
-                mythis.set('busy', false);
-                mythis.createchapters();
-                mythis.addcontributor();
-                if (data.completion) {
-                    mythis.updatecompletion();
-                }
-            });
+            this.createchapters();
         },
 
         savemanifest: function () {
-            var mythis = this;
-            if (mythis.busy) {
-                setTimeout(function() {
-                    mythis.savemanifest();
-                }, 500);
-                return;
-            }
-            mythis.set('busy', true);
-            App.projectsManager.saveTargetManifest(this.currentproject.projectmeta).then(function() {
-                mythis.set('busy', false);
-            });
+            this.set('saveoptions.manifest', true);
         },
 
         addcontributor: function () {
@@ -791,10 +804,11 @@
 
             for (i = 0; i < frames.length; i++) {
                 var resources = this.getFrameResources(frames[i], currentsource);
-                var sourcedata = this.convertVerseMarkers(frames[i].chunk);
+                var sourcedata = App.renderer.convertVerseMarkers(frames[i].chunk);
                 var chunkmeta = this.createFrameMeta(frames[i], projectmeta, sourcedata.verses);
                 var chunk = this.getFrameData(chunkmeta, projectmeta);
-                chunk.srccontent = this.renderMarkersAsSuper(sourcedata.text);
+                var sourcecontent = App.renderer.convertNoteMarkers(sourcedata.text);
+                chunk.srccontent = App.renderer.renderSourceWithVerses(sourcecontent);
                 chunk.wordcontent = "";
                 chunk.resources = resources;
                 if (projectmeta.project_type_class === "standard" && chunkmeta.frameid === "01") {
@@ -865,9 +879,11 @@
             var frames;
             var volume = "vol1";
             var chunkarray = [];
+            var sources = App.dataManager.getSources();
+            var filtered = _.filter(sources, {'language_id': "en", 'resource_id': "ulb", 'checking_level': 3});
 
             if (type === "tw") {
-                frames = App.dataManager.getAllWords(172);
+                frames = App.dataManager.getAllWords(filtered[0]);
             } else if (type === "ta") {
                 if (projectmeta.project.id !== "ta") {
                     volume = projectmeta.project.id;
@@ -925,35 +941,12 @@
             if (currentsource.resource_id === "ulb") {
                 var result = App.dataManager.getFrameUdb(currentsource, frame.chapter, frame.verse)[0];
                 if (result) {
-                    udbtext = this.convertVerseMarkers(result.chunk).text;
-                    udbtext = this.renderMarkersAsSuper(udbtext);
+                    udbtext = App.renderer.convertVerseMarkers(result.chunk).text;
+                    udbtext = App.renderer.renderSourceWithVerses(udbtext);
                     resources.push({title: "UDB", array: false, data: [udbtext]});
                 }
             }
             return resources;
-        },
-
-        convertVerseMarkers: function (text) {
-            var startstr = '<verse number="';
-            var endstr = '" style="v" />';
-            var expression = new RegExp(startstr);
-            var verses = [];
-
-            while (expression.test(text)) {
-                var versestr = text.substring(text.search(startstr) + 15, text.search(endstr));
-                if (versestr.indexOf("-") < 0) {
-                    verses.push(parseInt(versestr));
-                } else {
-                    var firstnum = parseInt(versestr.substring(0, versestr.search("-")));
-                    var lastnum = parseInt(versestr.substring(versestr.search("-") + 1));
-                    for (var j = firstnum; j <= lastnum; j++) {
-                        verses.push(j);
-                    }
-                }
-                text = text.replace(startstr, " \\v ");
-                text = text.replace(endstr, " ");
-            }
-            return {text: text, verses: verses};
         },
 
         createFrameMeta: function (frame, projectmeta, verses) {
@@ -1004,6 +997,7 @@
         getFrameData: function (chunkmeta, projectmeta) {
             var typeclass = projectmeta.project_type_class;
             var complexid = chunkmeta.chapterid + '-' + chunkmeta.frameid;
+            var verses = chunkmeta.verses;
             var maindata = this.currentproject.rawdata.main[complexid];
             var seconddata = this.currentproject.rawdata.second[complexid];
             var statedata = this.currentproject.statedata[complexid];
@@ -1018,74 +1012,24 @@
             if (maindata) {
                 completed = projectmeta.finished_chunks.indexOf(complexid) >= 0;
                 if (typeclass === "standard") {
-                    transcontent = this.convertVerseMarkers(maindata.transcontent).text;
-                    transcontent = this.migrateMarkers(transcontent);
-                    if (!completed) {
-                        transcontent = this.removeMarkers(transcontent);
-                    }
+                    transcontent = App.renderer.convertVerseMarkers(maindata.transcontent).text;
+                    transcontent = App.renderer.migrateMarkers(transcontent);
+                    transcontent = App.renderer.removeChapterMarkers(transcontent);
+                    transcontent = App.renderer.validateVerseMarkers(transcontent, verses);
                 } else {
                     helpscontent = maindata.helpscontent;
                 }
             }
             if (seconddata && typeclass === "helps") {
                 transcontent = seconddata.transcontent;
+                transcontent = App.renderer.migrateMarkers(transcontent);
+                transcontent = App.renderer.removeChapterMarkers(transcontent);
             }
             if (!statedata) {
                 statedata = {chunk: true, review: true, resource: 0};
                 this.currentproject.statedata[complexid] = statedata;
             }
             return {projectmeta: _.cloneDeep(projectmeta), chunkmeta: chunkmeta, transcontent: transcontent, helpscontent: helpscontent, completed: completed, state: statedata};
-        },
-
-        migrateMarkers: function (text) {
-            var vtest1 = new RegExp(/\\v/g);
-            var vtest2 = new RegExp(/\/v/g);
-            var ctest = new RegExp(/\\c/g);
-            var stest = new RegExp(/  /g);
-            var vreplace = "\\v ";
-            var creplace = "\\c ";
-            var sreplace = " ";
-
-            text = text.replace(vtest1, vreplace);
-            text = text.replace(vtest2, vreplace);
-            text = text.replace(ctest, creplace);
-            text = text.replace(stest, sreplace);
-
-            return text;
-        },
-
-        removeMarkers: function (text) {
-            var textarray = text.split(" ");
-            var returnstr = "";
-
-            for (var i = 0; i < textarray.length; i++) {
-                if (textarray[i] === "\\v" || textarray[i] === "\\c") {
-                    i++;
-                } else {
-                    returnstr += textarray[i] + " ";
-                }
-            }
-
-            return returnstr.trim();
-        },
-
-        renderMarkersAsSuper: function (text) {
-            var textarray = text.split(" ");
-            var numstr1 = "\<sup\>";
-            var numstr2 = "\<\/sup\>";
-            var returnstr = "";
-            var verse = 0;
-
-            for (var i = 0; i < textarray.length; i++) {
-                if (textarray[i] === "\\v") {
-                    verse = textarray[i+1];
-                    returnstr += numstr1 + verse + numstr2;
-                    i++;
-                } else {
-                    returnstr += textarray[i] + " ";
-                }
-            }
-            return returnstr;
         },
 
         createProjectTitleFrame: function (chunkmeta, projectmeta, index) {
@@ -1309,20 +1253,35 @@
         },
 
         gohome: function () {
-            this.savestate();
-            this.saveproject();
-            this.route = "home";
-            this.reset();
+            var mythis = this;
+            mythis.savestate();
+            mythis.stoptimers();
+            return mythis.saveAll()
+                .then(function () {
+                    mythis.set('route', "home");
+                    mythis.reset();
+                });
         },
 
         gopublish: function () {
-            var typeclass = this.currentproject.projectmeta.project_type_class;
-            if(this.currentproject.projectmeta.source_translations.length || typeclass === "extant") {
-                this.savestate();
-                this.setleftanimation();
-                this.saveproject();
-                this.fire('iron-signal', {name: 'updatepublish'});
-                this.route = "publish";
+            var mythis = this;
+            var typeclass = mythis.currentproject.projectmeta.project_type_class;
+            if(mythis.currentproject.projectmeta.source_translations.length || typeclass === "extant") {
+                mythis.set('options', {});
+                mythis.set('options.body', "Loading upload page. Please wait...");
+                mythis.set('options.loading', true);
+                mythis.$.loading.open();
+                setTimeout(function() {
+                    mythis.savestate();
+                    mythis.setleftanimation();
+                    mythis.stoptimers();
+                    return mythis.saveAll()
+                        .then(function () {
+                            mythis.fire('iron-signal', {name: 'updatepublish'});
+                            mythis.$.loading.close();
+                            mythis.set('route', "publish");
+                        });
+                }, 250);
             }
         },
 
@@ -1342,8 +1301,14 @@
         },
 
         gobackup: function () {
-            var projectmeta = this.currentproject.projectmeta;
-            this.fire('iron-signal', {name: 'openbackup', data: {projectmeta: projectmeta}});
+            var mythis = this;
+            var projectmeta = mythis.currentproject.projectmeta;
+            mythis.stoptimers();
+            return mythis.saveAll()
+                .then(function () {
+                    mythis.fire('iron-signal', {name: 'openbackup', data: {projectmeta: projectmeta}});
+                    mythis.starttimers();
+                });
         },
 
         gosettings: function () {
@@ -1366,16 +1331,16 @@
             var generatePdf = function(){
                 mythis.set('options.body', "Creating PDF. Please wait...");
                 setTimeout(function() {
-                    App.printManager.targetTranslationToPdf(translation, projectmeta, filePath, options)
+                    return App.printManager.targetTranslationToPdf(translation, projectmeta, filePath, options)
                         .then(function () {
                             mythis.set('options.title', "PDF Created");
                             mythis.set('options.body', "Your project has been successfully saved to a PDF.");
                             mythis.set('options.loading', false);
                         })
                         .catch(function (err) {
-                            var errmessage = "We're sorry.  An error occurred while trying to save your project";
+                            var errmessage = "An error occurred saving your project";
                             if(err !== null) {
-                                errmessage = err;
+                                errmessage += "\n" + err;
                             }
                             mythis.set('options.title', "Print Failed");
                             mythis.set('options.body', errmessage);
@@ -1385,20 +1350,23 @@
             };
 
             mythis.$.printpopup.close();
+            mythis.set('options', {});
             mythis.set('options.loading', true);
             mythis.$.loading.open();
 
             if (options.includeImages) {
                 mythis.set('options.body', "Downloading Images. Please wait...");
-                App.printManager.getImages(projectmeta).then(function(){
+                App.printManager.downloadImages().then(function(){
+                    mythis.set('options.body', "Extracting Images. Please wait...");
+                    App.printManager.extractImages();
                     generatePdf();
                 }).catch(function(err){
-                    var message = "We're sorry.  An error occurred while trying to download images for this project";
+                    var errmessage = "An error occurred while downloading images";
                     if(err !== null) {
-                        message = err;
+                        errmessage += "\n" + err;
                     }
                     mythis.set('options.title', "Download Failed");
-                    mythis.set('options.body', message);
+                    mythis.set('options.body', errmessage);
                     mythis.set('options.loading', false);
                 });
             } else {

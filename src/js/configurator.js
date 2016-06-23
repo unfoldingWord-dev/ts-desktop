@@ -250,12 +250,25 @@
              * Apply user preferences for app's look
              */
             applyPrefAppearance: function() {
-                let body = window.document.querySelector('body');
-                let tsTranslate = window.document.querySelector('ts-translate');
-                let fontSizeVal = this.getUserSetting('fontsize').toLowerCase();
+                var targetfont = this.getUserSetting('targetfont').name;
+                var sourcefont = this.getUserSetting('sourcefont').name;
+                var fontSizeVal = this.getUserSetting('targetsize').name.toLowerCase();
+                var fontSize = fontSizeMap[fontSizeVal];
+                var sheet = document.styleSheets[0];
+                var rules = sheet.cssRules;
 
-                tsTranslate.style.fontSize = fontSizeMap[fontSizeVal];
-                tsTranslate.style.fontFamily = this.getUserSetting('font');
+                for (var i = 0; i < rules.length; i++) {
+                    if (rules[i].selectorText.toLowerCase() === ".targetfont" || rules[i].selectorText.toLowerCase() === ".sourcefont") {
+                        sheet.deleteRule(i);
+                        i--;
+                    }
+                }
+
+                sheet.insertRule(".targetfont {font-family: " + targetfont + "}", 0);
+                sheet.insertRule(".targetfont {font-size: " + fontSize + "}", 1);
+                sheet.insertRule(".sourcefont {font-family: " + sourcefont + "}", 2);
+                sheet.insertRule(".sourcefont {font-size: " + fontSize + "}", 3);
+
             },
 
             /**
@@ -270,10 +283,10 @@
             /**
              *
              */
-            getAppVersion: function() {
+            getAppData: function() {
                 try {
                     let p = require('../../package');
-                    return p.version;
+                    return {version: p.version, build: p.build};
                 } catch (e) { console.log(e); }
             },
 

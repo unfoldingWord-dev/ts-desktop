@@ -1,13 +1,45 @@
 'use strict';
 
 var _ = require('lodash');
+var request = require('request');
+var utils = require('../js/lib/utils');
 
 function zipper (r) {
     return r.length ? _.map(r[0].values, _.zipObject.bind(_, r[0].columns)) : [];
 }
 
-function DataManager(query) {
+function DataManager(db) {
+    var query = db.query;
+    var save = db.save;
+
     return {
+
+        updateLanguageList: function () {
+            var req = utils.promisify(request);
+
+            return req('http://td.unfoldingword.org/exports/langnames.json')
+                .then(function (response) {
+                    return JSON.parse(response.body);
+                })
+                .then(function (newlist) {
+                    query("delete from target_language");
+
+                    for (var i = 0; i < newlist.length; i++) {
+                        var lc = newlist[i].lc;
+                        var ln = newlist[i].ln;
+                        var ld = newlist[i].ld;
+                        var lr = newlist[i].lr;
+                        query('insert into target_language (slug, name, direction, region) values ("' + lc + '", "' + ln + '", "' + ld + '", "' + lr + '")');
+                    }
+                })
+                .then(function () {
+                    save();
+                })
+                .catch(function (err) {
+                    console.log(err);
+                    throw "Could not update language list";
+                });
+        },
 
         getTargetLanguages: function () {
             var r = query("select slug 'id', name, direction from target_language order by lower(slug)");
@@ -34,9 +66,19 @@ function DataManager(query) {
             return zipper(r);
         },
 
+		getChunkMarkers: function (id) {
+			var r = query([
+				"select cm.chapter_slug 'chapter_slug', cm.first_verse_slug 'first_verse_slug'",
+				"from chunk_marker as cm",
+				"left join project as p on p.id=cm.project_id",
+				"where p.slug='" + id + "'"
+			].join(' '));
+			return zipper(r);
+		},
+
         getSources: function () {
             var r = query([
-                    "select r.id, r.slug 'resource_id', r.name 'resource_name', l.name 'language_name', l.slug 'language_id', p.slug 'project_id', r.checking_level, r.version, r.modified_at 'date_modified' from resource r",
+                    "select r.id, r.slug 'resource_id', r.name 'resource_name', l.name 'language_name', l.direction, l.slug 'language_id', p.slug 'project_id', r.checking_level, r.version, r.modified_at 'date_modified' from resource r",
                     "join source_language l on l.id=r.source_language_id",
                     "join project p on p.id=l.project_id",
                     "order by r.name"
@@ -46,7 +88,7 @@ function DataManager(query) {
 
         getSourceDetails: function (project_id, language_id, resource_id) {
             var r = query([
-                "select r.id, r.name 'resource_name', l.name 'language_name', p.slug 'project_id' from resource r",
+                "select r.id, r.name 'resource_name', l.name 'language_name', l.direction, p.slug 'project_id' from resource r",
                 "join source_language l on l.id=r.source_language_id",
                 "join project p on p.id=l.project_id",
                 "where p.slug='" + project_id + "' and l.slug='" + language_id + "' and r.slug='" + resource_id + "'"
@@ -102,11 +144,14 @@ function DataManager(query) {
             return zipper(r);
         },
 
-        getRelatedWords: function (wordid) {
+        getRelatedWords: function (wordid, source) {
+            var s = typeof source === 'object' ? source.id : source;
             var r = query([
                 "select w.id, w.term 'title', w.definition 'body', w.definition_title 'deftitle' from translation_word w",
+                "join resource__translation_word x on x.translation_word_id=w.id",
                 "join translation_word_related r on w.slug=r.slug",
-                "where r.translation_word_id='" + wordid + "'"
+                "where r.translation_word_id='" + wordid + "' and x.resource_id='" + s + "'",
+                "order by lower(w.term)"
             ].join(' '));
 
             return zipper(r);
@@ -170,9 +215,11 @@ function DataManager(query) {
             for (var i = 0; i < mysources.length; i++) {
                 var source = mysources[i].resource_id;
                 var frames = this.getSourceFrames(mysources[i]);
-                console.log("resource:", source, "chunks:", frames.length);
-                combined[source] = frames;
-                sources.push(source);
+                if (frames.length) {
+                    console.log("resource:", source, "chunks:", frames.length);
+                    combined[source] = frames;
+                    sources.push(source);
+                }
             }
             var match = true;
             var j = 0;

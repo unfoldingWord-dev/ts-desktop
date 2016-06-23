@@ -8,6 +8,7 @@
 <link rel="import" href="../../../components/iron-icons/iron-icons.html">
 
 <link rel="import" href="./ts-review-card.html">
+<link rel="import" href="./ts-text-holder.html">
 
 <dom-module id="ts-review-mode">
 
@@ -27,7 +28,7 @@
         }
 
         iron-list {
-            max-height: calc(100vh - 40px);
+            max-height: calc(100vh - 70px);
         }
 
         :host(.preview) {
@@ -67,7 +68,7 @@
             background: var(--card-background-color);
             color: var(--primary-text-color);
             width: 416px;
-            height: calc(100% - 40px);
+            height: calc(100% - 70px);
             display: flex;
             flex-direction: column;
         }
@@ -170,7 +171,7 @@
                 <div class="buttons">
                     <paper-button on-tap="closeresource"><iron-icon icon="clear"></iron-icon>Close</paper-button>
                 </div>
-                <div id="resourcecontent">
+                <div id="resourcecontent" class="sourcefont">
                     <div id="textholder"></div>
                     <template is="dom-if" if="{{related.length}}">
                         <h3>See Also:</h3>
@@ -183,7 +184,7 @@
                         <template is="dom-repeat" items="{{examples}}" as="example">
                             <div id="examples">
                                 <p class="link" on-tap="examplescroll"><span>{{chunks.0.projectmeta.project.name}}</span> <span>{{example.chapter}}</span>:<span>{{example.frame}}</span></p>
-                                <p>{{example.body}}</p>
+                                <ts-text-holder text="[[example.body]]"></ts-text-holder>
                             </div>
                         </template>
                     </template>
@@ -275,12 +276,11 @@
             }
             if (data.type === "Words") {
                 if (projectmeta.project.id === "obs") {
-                    this.set('related', App.dataManager.getRelatedWords(data.id));
                     this.set('examples', App.dataManager.getWordExamples(data.id));
                 } else {
-                    this.set('related', clear);
                     this.set('examples', clear);
                 }
+                this.set('related', App.dataManager.getRelatedWords(data.id, currentsource));
                 this.set('allwords', clear);
                 footer.classList.remove("hide");
                 content = "\<h2 class='style-scope ts-review-mode'\>" + data.title + "\<\/h2\>\<h3 class='style-scope ts-review-mode'\>" + data.deftitle + "\<\/h3\>" + data.body;

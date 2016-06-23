@@ -28,11 +28,11 @@ function Db (schemaPath, dbPath) {
         saveDB(sql);
     } else {
         let buffer = fs.readFileSync(dbFilePath);
-        
+
         sql = new SQL.Database(buffer);
     }
 
-    return sql.exec.bind(sql);
+    return {query: sql.exec.bind(sql), save: saveDB.bind(null, sql)};
 }
 
 module.exports.Db = Db;

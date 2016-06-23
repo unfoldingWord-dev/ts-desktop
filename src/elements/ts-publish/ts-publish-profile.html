@@ -131,7 +131,7 @@
         <paper-dialog id="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <h2>Invalid Data</h2>
             <div>
-                <p>You must enter a name and email address (phone is optional).</p>
+                <p>You must enter a name.</p>
             </div>
             <div class="buttons">
                 <paper-button dialog-dismiss>Close</paper-button>
@@ -172,6 +172,7 @@
             } else {
                 this.push('currentproject.projectmeta.translators', name);
                 this.fire('iron-signal', {name: 'savemanifest'});
+                this.fire('iron-signal', {name: 'saveall'});
                 this.set('newinfo', {});
             }
         },

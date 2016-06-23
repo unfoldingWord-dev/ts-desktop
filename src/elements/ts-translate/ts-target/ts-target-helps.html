@@ -155,6 +155,14 @@
             cursor: pointer;
         }
 
+        .rtl {
+            direction: rtl;
+        }
+
+        p.rtl {
+            width: 100%;
+        }
+
         .hide {
             display: none;
         }
@@ -179,14 +187,14 @@
                 </template>
                 <template is="dom-repeat" items="{{chunk.helpscontent}}" as="help">
                     <paper-material class="contentbox" elevation="1">
-                        <div class="leftbox">
+                        <div class="leftbox targetfont">
                             <div class="contentheader">
-                                <p>{{help.title}}</p>
-                                <iron-autogrow-textarea bind-value="{{help.title}}" on-change="change" on-input="input" placeholder$="[[checktitle(chunk.projectmeta.type.id)]]"></iron-autogrow-textarea>
+                                <p class$="[[chunk.projectmeta.target_language.direction]]">{{help.title}}</p>
+                                <iron-autogrow-textarea class$="[[chunk.projectmeta.target_language.direction]]" bind-value="{{help.title}}" on-change="change" on-input="input" placeholder$="[[checktitle(chunk.projectmeta.type.id)]]"></iron-autogrow-textarea>
                             </div>
                             <div class="contentbody">
-                                <p>{{help.body}}</p>
-                                <iron-autogrow-textarea bind-value="{{help.body}}" on-change="change" on-input="input" placeholder$="[[checkbody(chunk.projectmeta.type.id)]]"></iron-autogrow-textarea>
+                                <p class$="[[chunk.projectmeta.target_language.direction]]">{{help.body}}</p>
+                                <iron-autogrow-textarea class$="[[chunk.projectmeta.target_language.direction]]" bind-value="{{help.body}}" on-change="change" on-input="input" placeholder$="[[checkbody(chunk.projectmeta.type.id)]]"></iron-autogrow-textarea>
                             </div>
                         </div>
                         <div class="rightbox">
@@ -225,7 +233,7 @@
         },
 
         observers: [
-            'rendertext(chunk.*)'
+            'rendertext(chunk.completed)'
         ],
 
         iconclass: function (complete) {
@@ -271,14 +279,14 @@
         movehelp: function (index, dir) {
             var removed = this.splice('chunk.helpscontent', index, 1)[0];
             this.splice('chunk.helpscontent', index + dir, 0, removed);
-            this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk, completion: false}});
+            this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
         },
 
         addhelp: function () {
             var newhelp = {title: "", body: ""};
             this.push('chunk.helpscontent', newhelp);
             this.fire('setheight');
-            this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk, completion: false}});
+            this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
         },
 
         deletehelp: function (event, data) {
@@ -288,7 +296,7 @@
             if (this.chunk.index === chunkindex) {
                 this.splice('chunk.helpscontent', noteindex, 1);
                 this.fire('setheight');
-                this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk, completion: false}});
+                this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
             }
         },
 
@@ -303,11 +311,11 @@
         },
 
         change: function () {
-            this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk, completion: false}});
+            this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
         },
 
         rendertext: function () {
-            if(this.chunk && this.chunk.srccontent) {
+            if(this.chunk && this.chunk.srccontent && this.chunk.projectmeta.project_type_class === "helps") {
                 var completed = this.chunk.completed;
                 var content = this.$.content;
 

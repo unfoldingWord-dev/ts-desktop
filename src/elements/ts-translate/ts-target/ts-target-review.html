@@ -9,8 +9,6 @@
 
 <link rel="import" href="./ts-verse-marker.html">
 
-<script src="../../../js/dragging.js"></script>
-
 <dom-module id="ts-target-review">
 
 	<style>
@@ -51,6 +49,10 @@
             display: flex;
 		}
 
+        #textholder {
+            width: 100%;
+        }
+
         #textholder p {
 			line-height: 2;
 			margin: 0;
@@ -80,6 +82,22 @@
             cursor: pointer;
         }
 
+        .highlight {
+            font-weight: bold;
+            padding: 0 10px 0 30px;
+            color: var(--accent-color);
+            animation: scale 5s infinite;
+        }
+
+        @keyframes scale {
+            0% {transform: scale(1.3);}
+            100% {transform: scale(1.3);}
+        }
+
+        .rtl {
+            direction: rtl;
+        }
+
         .hide {
             display: none;
         }
@@ -95,8 +113,8 @@
                 </div>
                 <iron-icon class$="[[iconclass(chunk.completed)]]" icon="create" on-tap="edit"></iron-icon>
             </div>
-            <div id="content">
-                <div id="textholder"></div>
+            <div id="content" class="targetfont">
+                <div id="textholder" class$="[[chunk.projectmeta.target_language.direction]]"></div>
             </div>
             <div id="togglebox">
                 <p>Mark chunk as done</p>
@@ -122,125 +140,117 @@
                 type: Object,
                 value: {},
                 notify: true
+            },
+            rendertimer: {
+                type: Number
             }
         },
 
         observers: [
-            'rendertext(chunk.transcontent)'
+            'starttimer(chunk.transcontent, chunk.completed)'
         ],
 
         iconclass: function (complete) {
             return complete ? 'hide' : '';
         },
 
-        rendertext: function () {
-            if(this.chunk && this.chunk.srccontent) {
-                var verses = this.chunk.chunkmeta.verses;
-                var chap = this.chunk.chunkmeta.chapter;
-                var completed = this.chunk.completed;
-                var textholder = this.querySelector("#textholder");
-                var linearray = this.chunk.transcontent.split("\n");
-                var wordarray = [];
-                var vmstr1 = "\<ts-verse-marker id='c";
-                var vmstr2 = "v";
-                var vmstr3 = "' draggable='true' ondragstart='drag(event)' verse='";
-                var vmstr4 = "'\>\<\/ts-verse-marker\>";
-                var textstr1 = "\<span ondrop='drop(event)' ondragover='allowDrop(event)'\>";
-                var textstr2 = "\<\/span\> ";
-                var numstr1 = "\<sup\>";
-                var numstr2 = "\<\/sup\>";
-                var startp = "\<p class='style-scope ts-target-review'\>";
-                var endp = "\<\/p\>";
-                var returnstr = "";
-                var verse = 0;
-                var i = 0;
-                var j = 0;
+        starttimer: function () {
+            var mythis = this;
 
-                if(!completed) {
-                    for (j = 0; j < linearray.length; j++) {
-                        returnstr += startp;
-                        if (j === 0) {
-                            for (i = 0; i < verses.length; i++) {
-                                returnstr += vmstr1 + chap + vmstr2 + verses[i] + vmstr3 + verses[i] + vmstr4;
-                            }
-                        }
-                        wordarray = linearray[j].split(" ");
-                        for (i = 0; i < wordarray.length; i++) {
-                            returnstr += textstr1 + wordarray[i] + textstr2;
-                        }
-                        returnstr += endp;
-                    }
+            clearTimeout(mythis.rendertimer);
+
+            mythis.rendertimer = setTimeout(function () {
+                mythis.rendertext();
+            }, 500);
+        },
+
+        rendertext: function () {
+            if (this.chunk && this.chunk.srccontent && this.chunk.projectmeta.project_type_class === "standard") {
+                var mythis = this;
+                var completed = this.chunk.completed;
+                var text = this.chunk.transcontent;
+                var module = "ts-target-review";
+                var returnstr = "";
+
+                if (completed) {
+                    returnstr = App.renderer.renderTargetWithVerses(text, module);
                 } else {
-                    for (j = 0; j < linearray.length; j++) {
-                        returnstr += startp;
-                        wordarray = linearray[j].split(" ");
-                        for (i = 0; i < wordarray.length; i++) {
-                            if (wordarray[i] === "\\v") {
-                                verse = wordarray[i+1];
-                                returnstr += numstr1 + verse + numstr2;
-                                i++;
-                            } else if (wordarray[i] === "\\c") {
-                                i++;
-                            } else {
-                                returnstr += wordarray[i] + " ";
-                            }
-                        }
-                        returnstr += endp;
-                    }
+                    returnstr = App.renderer.markersToBalloons(mythis.chunk, module);
                 }
-                textholder.innerHTML = returnstr;
-                this.$.toggle.checked = completed;
+
+                mythis.$.textholder.innerHTML = returnstr;
+                mythis.$.toggle.checked = completed;
+                mythis.fire('setheight');
+                mythis.addDragListeners();
             }
+        },
+
+        addDragListeners: function () {
+            var mythis = this;
+            var markers = this.querySelectorAll(".markers");
+            var targets = this.querySelectorAll(".targets");
+
+            for (var j = 0; j < markers.length; j++) {
+                markers[j].addEventListener("dragstart", function (event) {
+                    event.dataTransfer.setData("text", event.target.id);
+                });
+            }
+
+            for (var i = 0; i < targets.length; i++) {
+                targets[i].addEventListener("dragover", function (event) {
+                    event.preventDefault();
+                });
+                targets[i].addEventListener("dragenter", function (event) {
+                    var target = event.target;
+                    target.classList.add("highlight");
+                });
+                targets[i].addEventListener("dragleave", function (event) {
+                    var target = event.target;
+                    target.classList.remove("highlight");
+                });
+                targets[i].addEventListener("drop", function (event) {
+                    event.preventDefault();
+                    var dragid = event.dataTransfer.getData("text");
+                    var dragelement = document.getElementById(dragid);
+                    var targetelement = event.target;
+                    var parentelement = targetelement.parentNode;
+                    targetelement.classList.remove("highlight");
+                    parentelement.insertBefore(dragelement, targetelement);
+                    mythis.savemarkers();
+                });
+            }
+        },
+
+        savemarkers: function () {
+            var textholder = this.querySelector("#textholder");
+            var paragraphs = textholder.children;
+
+            if (this.chunk.projectmeta.project.id !== "obs") {
+                this.set('chunk.transcontent', App.renderer.balloonsToMarkers(paragraphs));
+                this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
+            }
+
         },
 
         completechunk: function (event, data) {
             var index = data.index;
+            var mythis = this;
 
             if (this.chunk.index === index && this.chunk.projectmeta.project_type_class === "standard") {
-                var textholder = this.querySelector("#textholder");
-                var paragraphs = textholder.children;
-                var type = "";
-                var text = "";
-                var versenum = 0;
-                var returnstr = "";
-
-                if (this.chunk.chunkmeta.frame === 1 && this.chunk.projectmeta.project.id !== "obs") {
-                    returnstr += "\\c " + this.chunk.chunkmeta.chapter + " ";
-                }
-
-                for (var j = 0; j < paragraphs.length; j++) {
-                    var children = paragraphs[j].children;
-                    for (var i = 0; i < children.length; i++) {
-                        type = children[i].nodeName;
-
-                        if (type === "TS-VERSE-MARKER") {
-                            versenum = children[i].verse;
-                            returnstr += "\\v " + versenum + " ";
-                        } else {
-                            text = children[i].textContent;
-                            returnstr += text + " ";
-                        }
-                    }
-                    returnstr = returnstr.trim();
-                    if (j !== paragraphs.length-1) {
-                        returnstr += "\n";
-                    }
-                }
-
-                this.set('chunk.completed', true);
-                this.set('chunk.transcontent', returnstr);
-                this.$.toggle.checked = true;
-                this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk, completion: true}});
+                //mythis.savemarkers();
+                mythis.set('chunk.completed', true);
+                mythis.$.toggle.checked = true;
+                setTimeout(function() {
+                    mythis.fire('iron-signal', {name: 'updatecompletion'});
+                }, 500);
             }
         },
 
         checkdone: function () {
-            var linearray = this.chunk.transcontent.split("\n");
+            var mythis = this;
             var completed = this.chunk.completed;
             var index = this.chunk.index;
             var toggle = this.$.toggle;
-            var returnstr = "";
-            var mythis = this;
 
             if (toggle.pressed) {
                 setTimeout(function() {
@@ -252,30 +262,14 @@
             toggle.checked = false;
 
             if (!completed) {
-                if (this.chunk.transcontent === "") {
-                    this.fire('iron-signal', {name: 'opennodata'});
+                if (mythis.chunk.transcontent === "") {
+                    mythis.fire('iron-signal', {name: 'opennodata'});
                 } else {
-                    this.fire('iron-signal', {name: 'openchecklist', data: {index: index}});
+                    mythis.fire('iron-signal', {name: 'openchecklist', data: {index: index}});
                 }
             } else {
-                for (var j = 0; j < linearray.length; j++) {
-                    var wordarray = linearray[j].split(" ");
-                    for (var i = 0; i < wordarray.length; i++) {
-                        if (wordarray[i] === "\\v" || wordarray[i] === "\\c") {
-                            i++;
-                        } else {
-                            returnstr += wordarray[i] + " ";
-                        }
-                    }
-                    returnstr = returnstr.trim();
-                    if (j !== linearray.length-1) {
-                        returnstr += "\n";
-                    }
-                }
-
-                this.set('chunk.completed', false);
-                this.set('chunk.transcontent', returnstr);
-                this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk, completion: true}});
+                mythis.set('chunk.completed', false);
+                mythis.fire('iron-signal', {name: 'updatecompletion'});
             }
         },
 

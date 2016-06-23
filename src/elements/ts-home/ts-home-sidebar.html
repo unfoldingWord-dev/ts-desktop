@@ -58,15 +58,14 @@
     </style>
 
     <template>
-        <paper-menu-button horizontal-offset="10" vertical-offset="10" vertical-align="bottom">
-            <paper-icon-button class="dropdown-trigger" icon="more-vert" title="options"></paper-icon-button>
+        <paper-menu-button id="menu" horizontal-offset="10" vertical-offset="10" vertical-align="bottom">
+            <paper-icon-button class="dropdown-trigger" icon="more-vert"></paper-icon-button>
             <paper-menu class="dropdown-content">
-                <paper-item on-tap="logout"><iron-icon class="smallicon" icon="perm-identity"></iron-icon>Logout</paper-item>
-                <paper-item class="hide"><iron-icon class="smallicon" icon="maps:local-library"></iron-icon>Update</paper-item>
-                <paper-item class="hide" on-tap="import"><iron-icon class="smallicon" icon="file-download"></iron-icon>Import</paper-item>
-                <paper-item on-tap="restore"><iron-icon class="smallicon" icon="file-download"></iron-icon>Restore</paper-item>
+                <paper-item on-tap="update"><iron-icon class="smallicon" icon="maps:local-library"></iron-icon>Update Languages</paper-item>
+                <paper-item on-tap="import"><iron-icon class="smallicon" icon="file-download"></iron-icon>Import/Restore</paper-item>
                 <paper-item on-tap="academy"><iron-icon class="smallicon" icon="book"></iron-icon>translationAcademy</paper-item>
                 <paper-item on-tap="feedback"><iron-icon class="smallicon" icon="announcement"></iron-icon>Feedback</paper-item>
+                <paper-item on-tap="logout"><iron-icon class="smallicon" icon="perm-identity"></iron-icon>Logout</paper-item>
                 <paper-item on-tap="settings"><iron-icon class="smallicon" icon="settings"></iron-icon>Settings</paper-item>
             </paper-menu>
         </paper-menu-button>
@@ -89,28 +88,34 @@
         },
 
         settings: function () {
+            this.$.menu.close();
             App.configurator.setValue("backto", this.route);
             this.route = 'settings';
         },
 
         feedback: function() {
+            this.$.menu.close();
             this.fire('iron-signal', {name: 'openfeedback'});
         },
 
         logout: function () {
+            this.$.menu.close();
             this.fire('iron-signal', {name: 'updateuser', data: {}});
             App.keyManager.destroyKeys();
         },
 
-        restore: function() {
-            this.fire('iron-signal', {name: 'openrestore'});
-        },
-
         import: function() {
+            this.$.menu.close();
             this.fire('iron-signal', {name: 'openimport'});
         },
 
+        update: function() {
+            this.$.menu.close();
+            this.fire('iron-signal', {name: 'updatelanguages'});
+        },
+
         academy: function () {
+            this.$.menu.close();
             App.ipc.send('openacademy');
         },
 

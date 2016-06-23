@@ -83,7 +83,7 @@
 
         <header>
             <span class="title">translationStudio</span>
-            <span class$="[[loginclass(currentuser.full_name)]]"><span>{{currentuser.type}}</span>: <span>{{currentuser.full_name}}</span><span class="link" on-tap="logout">(Logout)</span></span>
+            <span class$="[[loginclass(currentuser.full_name)]]"><span>Current User: </span><span>{{currentuser.full_name}}</span><span class="link" on-tap="logout">(Logout)</span></span>
             <div class="window-buttons">
                 <button on-tap="minimizeWindow">
                     <iron-icon icon="titlebar:minimize" title="minimize"></iron-icon>
@@ -111,6 +111,10 @@
             currentuser: {
                 type: Object,
                 value: {}
+            },
+            busy: {
+                type: Boolean,
+                value: false
             }
         },
 
@@ -133,8 +137,12 @@
         },
 
         closeWindow: function() {
-            this.fire('iron-signal', {name: 'savestate'});
-            App.close();
+            var mythis = this;
+            if (mythis.busy) {
+                return;
+            }
+            mythis.set('busy', true);
+            mythis.fire('iron-signal', {name: 'saveclose'});
         },
 
         ready: function () {

@@ -1,8 +1,10 @@
 
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
 <link rel="import" href="../../components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../../components/paper-dialog/paper-dialog.html">
 
 <link rel="import" href="./ts-setting-modal.html">
+<link rel="import" href="../ts-main/ts-loading.html">
 
 <dom-module id="ts-settings">
 
@@ -87,6 +89,25 @@
             --paper-checkbox-unchecked-color: var(--accent-color-dark);
         }
 
+        .popup {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+        }
+
+        .popup * {
+            margin: 0;
+            padding: 0;
+        }
+
+        #loading {
+            width: 320px;
+            height: 220px;
+        }
+
         .hide {
             display: none;
         }
@@ -124,6 +145,10 @@
             </template>
         </div>
 
+        <paper-dialog id="loading" class="popup" modal="true" exit-animation="scale-down-animation">
+            <ts-loading options="[[options]]"></ts-loading>
+        </paper-dialog>
+
     </template>
 
 </dom-module>
@@ -142,6 +167,10 @@
             route: {
                 type: String,
                 notify: true
+            },
+            options: {
+                type: Object,
+                value: {}
             },
             animationConfig: {
                 value: function () {
@@ -169,8 +198,10 @@
 
         ready: function () {
             this.settings = App.configurator.refreshUserSetting();
-            this.settings = App.configurator.setUserSetting('appversion', App.configurator.getAppVersion());
+            this.settings = App.configurator.setUserSetting('appversion', App.configurator.getAppData().version);
             this.settings = App.configurator.setUserSetting('datapath', App.configurator.getValue('rootdir'));
+            this.settings = App.configurator.setUserSetting('dataserver', "git.door43.org");
+            this.settings = App.configurator.setUserSetting('mediaserver', "https://api.unfoldingword.org/");
             var untildify = require('untildify');
             var location = App.configurator.getUserSetting('datalocation');
             this.settings = App.configurator.setUserSetting('datalocation', untildify(location));
@@ -265,8 +296,8 @@
         },
 
         openSettingModal: function (event) {
+            var mythis = this;
             var modal = document.createElement('ts-setting-modal');
-            var path = 'settings.' + event.target.dataGroup + '.list.' + event.target.dataList + '.value';
             var setting = event.model.setting;
             modal.id = "setting-modal";
             modal.style.display = 'block';
@@ -277,11 +308,26 @@
                 modal.options = setting.options;
                 modal.selected = setting.value;
                 if (setting.name === "targetfont" || setting.name === "sourcefont") {
-                    modal.options = App.utils.getSystemFonts();
+                    mythis.set('options', {});
+                    mythis.set('options.body', "Updating Font List. Please wait...");
+                    mythis.set('options.loading', true);
+                    mythis.$.loading.open();
+                    setTimeout(function() {
+                        modal.options = App.utils.getSystemFonts();
+                        mythis.$.loading.close();
+                        mythis.openModal(modal, event);
+                    }, 500);
+                } else {
+                    mythis.openModal(modal, event);
                 }
             } else {
                 modal.text = setting.value;
+                mythis.openModal(modal, event);
             }
+        },
+
+        openModal: function (modal, event) {
+            var path = 'settings.' + event.target.dataGroup + '.list.' + event.target.dataList + '.value';
             this.appendChild(modal);
             modal.fire('open');
             modal.addEventListener('setting-confirm', this._onSettingConfirm.bind(this, path, event.target.id));

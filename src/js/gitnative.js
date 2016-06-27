@@ -76,6 +76,28 @@ function GitManager() {
 
     return {
 
+        verifyGit: function () {
+            var status = cmd().do('git --version');
+            var installed = false;
+
+            return status.run()
+                .then(function (log) {
+                    var wordarray = log.stdout.split(" ");
+                    var versionarray = wordarray[2].split(".");
+                    if (versionarray[0] < 2 || (versionarray[0] == 2 && versionarray[1] < 3)) {
+                        installed = true;
+                        throw "error";
+                    }
+                })
+                .catch(function (err) {
+                    if (installed) {
+                        throw "Your git is out of date. Please update to the latest version."
+                    } else {
+                        throw "Git is not installed. It is required to run tStudio Desktop."
+                    }
+                });
+        },
+
         getHash: function (dir) {
             return cmd().cd(dir).and.do('git rev-parse HEAD').run();
         },
@@ -119,7 +141,7 @@ function GitManager() {
             var conflicts = [];
 
             // NOTE: should switch to using a fetch/merge instead of pull, so we don't depend on Perl
-            var pull = cmd().cd(localPath).and.do(`git pull ${remotePath} master`);
+            var pull = cmd().cd(localPath).and.do(`git pull ${remotePath} master --allow-unrelated-histories`);
             var diff = cmd().cd(localPath).and.do('git diff --name-only --diff-filter=U');
 
             return Promise.all([utils.fs.readFile(localManifestPath), utils.fs.readFile(remoteManifestPath)])
@@ -165,7 +187,7 @@ function GitManager() {
                     return mythis.commitAll(user, localPath);
                 })
                 .catch(function (err) {
-                    throw "Error while merging projects: " + err.stdout;
+                    throw "Error while merging projects: " + err.stderr;
                 })
                 .then(utils.logr("Finished merging"))
                 .then(function () {
@@ -182,7 +204,7 @@ function GitManager() {
             var gitSshPush = `git push -u ${pushUrl} master --follow-tags`;
             var push = cmd().cd(dir).and.set('GIT_SSH_COMMAND', ssh).do(gitSshPush);
             var tagName = createTagName(new Date());
-            var tag = opts.requestToPublish ? cmd().cd(dir).and.do(`git tag -a ${tagName} -m 'Request to Publish'`).run() : Promise.resolve();
+            var tag = opts.requestToPublish ? cmd().cd(dir).and.do(`git tag -a ${tagName} -m "Request to Publish"`).run() : Promise.resolve();
 
             console.log('Starting push to server...\n' + push);
 

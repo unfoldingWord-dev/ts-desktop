@@ -4,6 +4,7 @@ src/components/
 dist/
 cache/
 tmp/
+vendor/
 build/
 out/
 .brackets.json

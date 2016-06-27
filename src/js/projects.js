@@ -148,6 +148,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
 
         saveTargetManifest: function (meta) {
             var paths = utils.makeProjectPaths(targetDir, meta);
+            var build = configurator.getAppData().build;
 
             var sources = meta.source_translations.map(function (source) {
                 return {
@@ -164,7 +165,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 format: meta.format,
                 generator: {
                     name: 'ts-desktop',
-                    build: ''
+                    build: build
                 },
                 target_language: meta.target_language,
                 project: meta.project,

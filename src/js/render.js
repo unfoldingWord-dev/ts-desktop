@@ -166,7 +166,18 @@ function Renderer() {
                     }
                 }
             }
-            return returnstr;
+
+            var addon = "";
+            
+            if (returnstr) {                
+                for (var k = 0; k < verses.length; k++) {
+                    if (used.indexOf(verses[k]) < 0) {
+                        addon += "\\v " + verses[k] + " ";
+                    }
+                }
+            }
+            
+            return addon + returnstr;
         },
 
         markersToBalloons: function (chunk, module) {

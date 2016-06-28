@@ -1,7 +1,7 @@
 'use strict';
 
 var electron = require('electron'),
-    Menu = require('menu'),
+    Menu = electron.Menu,
     dialog = electron.dialog,
     path = require('path'),
     app = electron.app,

@@ -39,16 +39,16 @@
     "untildify": "^2.1.0"
   },
   "devDependencies": {
-    "bower": "^1.7.7",
-    "electron-packager": "github:maxogden/electron-packager",
-    "electron-prebuilt": "^0.36.9",
+    "bower": "^1.7.9",
+    "electron-packager": "^7.1.0",
+    "electron-prebuilt": "^1.2.5",
     "gulp": "^3.9.1",
     "gulp-mocha": "^2.2.0",
-    "mocha": "^2.4.5",
+    "mocha": "^2.5.3",
     "yargs": "^3.17.1"
   },
   "engines": {
-    "electron": "0.36.9"
+    "electron": "1.2.5"
   },
   "scripts": {
     "start": "electron src/js/main.js"

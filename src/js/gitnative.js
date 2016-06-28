@@ -165,9 +165,9 @@ function GitManager() {
                     var pull = "";
 
                     if (version.major > 2 || (version.major == 2 && version.minor > 8)) {
-                        pull = cmd().cd(localPath).and.do(`git pull ${remotePath} master --allow-unrelated-histories`);
+                        pull = cmd().cd(localPath).and.do(`git pull "${remotePath}" master --allow-unrelated-histories`);
                     } else {
-                        pull = cmd().cd(localPath).and.do(`git pull ${remotePath} master`);
+                        pull = cmd().cd(localPath).and.do(`git pull "${remotePath}" master`);
                     }
                     
                     return pull.run()
@@ -235,7 +235,7 @@ function GitManager() {
         clone: function (repoUrl, localPath) {
             var repoName = repoUrl.replace(/\.git/, '').split('/').pop();
             var savePath = localPath.includes(repoName) ? localPath : path.join(localPath, repoName);
-            var clone = cmd().do(`git clone ${repoUrl} ${savePath}`);
+            var clone = cmd().do(`git clone ${repoUrl} "${savePath}"`);
 
             return clone.run()
                 .catch(function (err) {

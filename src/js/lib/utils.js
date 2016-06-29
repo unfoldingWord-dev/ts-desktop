@@ -451,8 +451,7 @@
     utils.fs.mover = function (src, dest) {
         return utils.fs.move(src, dest, {clobber: true})
             .then(function () {
-                console.log("chmod called");
-                return utils.fs.chmodr(dest, '755');
+                return utils.fs.chmodr(dest, 420);
             });
     };
 

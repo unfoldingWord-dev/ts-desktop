@@ -4,6 +4,7 @@
 <link rel="import" href="../../components/paper-button/paper-button.html">
 <link rel="import" href="../../components/paper-material/paper-material.html">
 <link rel="import" href="../../components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../components/paper-checkbox/paper-checkbox.html">
 
 <dom-module id="ts-publish-profile">
 
@@ -20,22 +21,33 @@
             align-items: center;
         }
 
-        #next {
-            background: var(--accent-color);
-            color: var(--reverse-text-color);
-            text-transform: uppercase;
+        #users {
+            display: flex;
+            flex-direction: column;
             margin-top: 20px;
+            padding: 20px 30px;
+            background: var(--card-background-color);
+            width: 450px;
+            min-height: 60px;
+            font-size: 120%;
+            color: var(--secondary-text-color);
         }
 
-        #add {
-            background: var(--card-background-color);
-            color: var(--accent-color);
-            text-transform: uppercase;
+        .user {
+            padding: 0 5px;
+        }
+
+        #new {
+            display: flex;
+            flex-direction: column;
             margin-top: 20px;
+            padding: 20px 30px;
+            background: var(--card-background-color);
+            width: 450px;
         }
 
         input {
-            width: 350px;
+            width: 400px;
             height: 30px;
             font-size: 120%;
             margin: 10px 0;
@@ -44,41 +56,46 @@
             color: var(--secondary-text-color);
         }
 
-        .input {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            margin-top: 20px;
-            background: var(--card-background-color);
-            width: 450px;
-            height: 60px;
-        }
-
-        .users {
+        #agree {
             display: flex;
             align-items: center;
-            margin-top: 20px;
-            background: var(--card-background-color);
-            width: 450px;
-            min-height: 60px;
-            font-size: 120%;
-            color: var(--secondary-text-color);
+            font-size: 90%;
+            margin-top: 5px;
         }
 
-        .users p {
-            margin: 5px 20px;
+        #check {
+            --paper-checkbox-checked-color: var(--accent-color-dark);
+            --paper-checkbox-unchecked-color: var(--accent-color-dark);
+            padding-right: 10px;
         }
 
-        #usergroup {
-            margin: 10px 0;
+        #links {
+            display: flex;
+            justify-content: space-between;
+            font-size: 90%;
+            margin-top: 10px;
         }
 
-        .right {
-            color: var(--border-color);
+        .link {
+            color: var(--accent-color);
+            cursor: pointer;
         }
 
         #buttons {
             display: flex;
+            margin-top: 20px;
+        }
+
+        #next {
+            background: var(--accent-color);
+            color: var(--reverse-text-color);
+            text-transform: uppercase;
+        }
+
+        #add {
+            background: var(--card-background-color);
+            color: var(--accent-color);
+            text-transform: uppercase;
         }
 
         #popup {
@@ -110,17 +127,25 @@
 
         <div id="contain">
             <template is="dom-if" if="{{currentproject.projectmeta.translators.length}}">
-                <paper-material class="users" elevation="1">
-                    <div id="usergroup">
-                        <template is="dom-repeat" items="{{currentproject.projectmeta.translators}}" as="user">
-                            <p>{{user}}</p>
-                        </template>
-                    </div>
+                <paper-material id="users" elevation="1">
+                    <template is="dom-repeat" items="{{currentproject.projectmeta.translators}}" as="user">
+                        <div class="user">{{user}}</div>
+                    </template>
                 </paper-material>
             </template>
-            <paper-material class="input" elevation="1">
-                <input is="iron-input" bind-value="{{newinfo.name}}" placeholder="Name or Pseudonym">
-                <iron-icon class="right" icon="info" title="Info"></iron-icon>
+            <paper-material id="new" elevation="1">
+                <div id="name">
+                    <input is="iron-input" bind-value="{{newinfo.name}}" placeholder="Name or Pseudonym">
+                </div>
+                <div id="agree">
+                    <paper-checkbox id="check"></paper-checkbox>
+                    <div>This person has agreed to the License Agreement, Statement of Faith, and Translation Guidelines</div>
+                </div>
+                <div id="links">
+                    <span class="link" on-tap="openlicense">License Agreement</span>
+                    <span class="link" on-tap="openstatement">Statement of Faith</span>
+                    <span class="link" on-tap="openguidelines">Translation Guidelines</span>
+                </div>
             </paper-material>
             <div id="buttons">
                 <paper-button raised id="add" on-tap="add">Add Contributor</paper-button>
@@ -188,6 +213,18 @@
             } else {
                 this.$.popup.open();
             }
+        },
+
+        openlicense: function () {
+            this.fire('iron-signal', {name: 'openlicense'});
+        },
+
+        openguidelines: function () {
+            this.fire('iron-signal', {name: 'openguidelines'});
+        },
+
+        openstatement: function () {
+            this.fire('iron-signal', {name: 'openstatement'});
         },
 
         ready: function() {

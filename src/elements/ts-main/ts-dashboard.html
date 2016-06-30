@@ -350,7 +350,7 @@
                           return App.utils.fs.remove(changedata.oldpaths.projectDir);
                       });
               } else {
-                  return App.utils.fs.move(changedata.oldpaths.projectDir, changedata.newpaths.projectDir, {clobber: true})
+                  return App.utils.fs.mover(changedata.oldpaths.projectDir, changedata.newpaths.projectDir)
                       .then(function () {
                           return App.projectsManager.saveTargetManifest(changedata.newmeta);
                       })
@@ -419,7 +419,7 @@
                                       conflicts = list;
                                   });
                           } else {
-                              return App.utils.fs.move(item.tmpPath, item.targetPath, {clobber: true});
+                              return App.utils.fs.mover(item.tmpPath, item.targetPath);
                           }
                       }))
                   })
@@ -535,7 +535,7 @@
                           return App.importManager.extractBackup(backupPath)
                               .then(function (list) {
                                   return Promise.all(list.map(function (item) {
-                                      return App.utils.fs.move(item.tmpPath, item.targetPath, {clobber: true});
+                                      return App.utils.fs.mover(item.tmpPath, item.targetPath);
                                   }))
                               })
                               .then(function () {
@@ -614,7 +614,7 @@
                   .then(function (exists) {
                       if (exists) {
                           if (restore) {
-                              return App.utils.fs.move(tmpPath, targetPath, {clobber: true});
+                              return App.utils.fs.mover(tmpPath, targetPath);
                           } else {
                               return App.gitManager.merge(mythis.currentuser, targetPath, tmpPath)
                                   .then(function (list) {
@@ -622,7 +622,7 @@
                                   });
                           }
                       } else {
-                          return App.utils.fs.move(tmpPath, targetPath, {clobber: true});
+                          return App.utils.fs.mover(tmpPath, targetPath);
                       }
                   })
                   .then(function () {
@@ -790,7 +790,7 @@
               return App.importManager.extractBackup(filePath[0])
                   .then(function (list) {
                       return Promise.all(list.map(function (item) {
-                          return App.utils.fs.move(item.tmpPath, item.targetPath, {clobber: true});
+                          return App.utils.fs.mover(item.tmpPath, item.targetPath);
                       }))
                   })
                   .then(function () {

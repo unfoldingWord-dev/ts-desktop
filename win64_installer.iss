@@ -2,8 +2,8 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "translationStudio"
-#define Version "9.0"
-#define Build "21"
+#define Version "9.1"
+#define Build "22"
 #define MyAppPublisher "Unfolding Word"
 #define MyAppURL "https://unfoldingword.org"
 #define MyAppExeName "translationStudio.exe"

@@ -92,7 +92,7 @@
                 <iron-icon icon="done" on-tap="review"></iron-icon>
             </div>
             <div id="content" class="editmode targetfont">
-                <iron-autogrow-textarea id="textbox" class$="[[chunk.projectmeta.target_language.direction]]" on-change="change" bind-value="{{chunk.transcontent}}" on-input="input"></iron-autogrow-textarea>
+                <iron-autogrow-textarea id="textbox" class$="[[chunk.projectmeta.target_language.direction]]" on-change="change" value="[[chunk.transcontent]]" on-input="input"></iron-autogrow-textarea>
                 <div id="textholder" class$="[[chunk.projectmeta.target_language.direction]]"></div>
             </div>
         </paper-material>
@@ -110,58 +110,47 @@
 		properties: {
             chunk: {
                 type: Object,
-                value: {},
+                value: function () { return {}; },
                 notify: true
-            },
-            rendertimer: {
-                type: Number
             }
 		},
 
         observers: [
-            'starttimer(chunk.transcontent, chunk.completed)'
+            'rendertext(chunk.transcontent, chunk.completed)'
         ],
 
         focustextbox: function () {
             this.$.textbox.textarea.focus();
         },
 
-        starttimer: function () {
-            var mythis = this;
-
-            clearTimeout(mythis.rendertimer);
-
-            mythis.rendertimer = setTimeout(function () {
-                mythis.rendertext();
-            }, 500);
-        },
-
         rendertext: function () {
-            if(this.chunk && this.chunk.srccontent && this.chunk.projectmeta.project_type_class !== "extant") {
-                var completed = this.chunk.completed;
-                var typeclass = this.chunk.projectmeta.project_type_class;
-                var contentbox = this.$.content;
-                var textbox = this.$.textbox;
-                var textholder = this.querySelector("#textholder");
-                var text = this.chunk.transcontent;
-                var module = "ts-target-edit";
+            setTimeout(function () {
+                if(this.chunk && this.chunk.srccontent && this.chunk.projectmeta.project_type_class !== "extant") {
+                    var completed = this.chunk.completed;
+                    var typeclass = this.chunk.projectmeta.project_type_class;
+                    var contentbox = this.$.content;
+                    var textbox = this.$.textbox;
+                    var textholder = this.$.textholder;
+                    var text = this.chunk.transcontent;
+                    var module = "ts-target-edit";
 
-                if (completed || typeclass !== "standard") {
-                    textholder.innerHTML = App.renderer.renderTargetWithVerses(text, module);
-                    textholder.classList.remove("hide");
-                    textbox.classList.add("hide");
-                    contentbox.classList.remove("editmode");
-                } else {
-                    textholder.classList.add("hide");
-                    textbox.classList.remove("hide");
-                    contentbox.classList.add("editmode");
+                    if (completed || typeclass !== "standard") {
+                        textholder.innerHTML = App.renderer.renderTargetWithVerses(text, module);
+                        textholder.classList.remove("hide");
+                        textbox.classList.add("hide");
+                        contentbox.classList.remove("editmode");
+                    } else {
+                        textholder.classList.add("hide");
+                        textbox.classList.remove("hide");
+                        contentbox.classList.add("editmode");
+                    }
                 }
-            }
+            }.bind(this), 1);
         },
 
-        change: function () {
+        change: function (event) {
             var verses = this.chunk.chunkmeta.verses;
-            var text = this.chunk.transcontent;
+            var text = event.target.value;
 
             this.set('chunk.transcontent', App.renderer.validateVerseMarkers(text, verses));
             this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});

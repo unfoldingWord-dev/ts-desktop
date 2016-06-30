@@ -30,8 +30,8 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 })
                 .then(function (exists) {
                     if (exists) {
-                        utils.fs.move(path.join(oldPath, 'automatic_backups'), path.join(newPath, 'automatic_backups'), {clobber: true});
-                        utils.fs.move(path.join(oldPath, 'backups'), path.join(newPath, 'backups'), {clobber: true});
+                        utils.fs.mover(path.join(oldPath, 'automatic_backups'), path.join(newPath, 'automatic_backups'));
+                        utils.fs.mover(path.join(oldPath, 'backups'), path.join(newPath, 'backups'));
                     }
                 });
         },

@@ -10,6 +10,7 @@
         fse = require('fs-extra'),
         https = require('https'),
         http = require('http'),
+        chmodr = require('chmodr'),
         fontkit = require('fontkit'),
         _ = require('lodash');
 
@@ -444,7 +445,15 @@
      * See note on 'promisify' function for example usage.
      */
     utils.fs = utils.promisifyAll(fse);
-    utils.lodash = utils.guardAll(_);
+    utils.lodash = utils.guardAll(_);    
+    utils.fs.chmodr = utils.promisify(chmodr);
+    
+    utils.fs.mover = function (src, dest) {
+        return utils.fs.move(src, dest, {clobber: true})
+            .then(function () {
+                return utils.fs.chmodr(dest, 420);
+            });
+    };
 
     module.exports = utils;
 }());

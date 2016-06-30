@@ -4,6 +4,10 @@
 <link rel="import" href="../../components/paper-button/paper-button.html">
 <link rel="import" href="../../components/paper-material/paper-material.html">
 <link rel="import" href="../../components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../../components/neon-animation/neon-animation.html">
+
+<link rel="import" href="../ts-main/ts-loading.html">
 
 <dom-module id="ts-publish-profile">
 
@@ -20,22 +24,32 @@
             align-items: center;
         }
 
-        #next {
-            background: var(--accent-color);
-            color: var(--reverse-text-color);
-            text-transform: uppercase;
+        #users {
+            display: flex;
+            flex-direction: column;
             margin-top: 20px;
+            padding: 20px 30px;
+            background: var(--card-background-color);
+            width: 450px;
+            font-size: 120%;
+            color: var(--secondary-text-color);
         }
 
-        #add {
-            background: var(--card-background-color);
-            color: var(--accent-color);
-            text-transform: uppercase;
+        .user {
+            padding: 0 5px;
+        }
+
+        #new {
+            display: flex;
+            flex-direction: column;
             margin-top: 20px;
+            padding: 20px 30px;
+            background: var(--card-background-color);
+            width: 450px;
         }
 
         input {
-            width: 350px;
+            width: 400px;
             height: 30px;
             font-size: 120%;
             margin: 10px 0;
@@ -44,64 +58,65 @@
             color: var(--secondary-text-color);
         }
 
-        .input {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            margin-top: 20px;
-            background: var(--card-background-color);
-            width: 450px;
-            height: 60px;
-        }
-
-        .users {
+        #agree {
             display: flex;
             align-items: center;
-            margin-top: 20px;
-            background: var(--card-background-color);
-            width: 450px;
-            min-height: 60px;
-            font-size: 120%;
-            color: var(--secondary-text-color);
+            font-size: 90%;
+            margin-top: 5px;
         }
 
-        .users p {
-            margin: 5px 20px;
+        #check {
+            --paper-checkbox-checked-color: var(--accent-color-dark);
+            --paper-checkbox-unchecked-color: var(--accent-color-dark);
+            padding-right: 10px;
         }
 
-        #usergroup {
-            margin: 10px 0;
+        #links {
+            display: flex;
+            justify-content: space-between;
+            font-size: 90%;
+            margin-top: 10px;
         }
 
-        .right {
-            color: var(--border-color);
+        .link {
+            color: var(--accent-color);
+            cursor: pointer;
         }
 
         #buttons {
             display: flex;
+            margin-top: 20px;
         }
 
-        #popup {
+        #next {
+            background: var(--accent-color);
+            color: var(--reverse-text-color);
+            text-transform: uppercase;
+        }
+
+        #add {
+            background: var(--card-background-color);
+            color: var(--accent-color);
+            text-transform: uppercase;
+        }
+
+        .popup {
             position: fixed;
             top: 0;
             bottom: 0;
             left: 0;
             right: 0;
             margin: auto;
+        }
+
+        #loading {
             width: 320px;
             height: 220px;
-            text-align: center;
-            color: var(--primary-text-color);
         }
 
-        #popup .buttons {
-            display: flex;
-            justify-content: center;
-            color: var(--secondary-text-color);
-        }
-
-        #popup .buttons paper-button:hover {
-            color: var(--accent-color);
+        #loading * {
+            margin: 0;
+            padding: 0;
         }
 
     </style>
@@ -110,32 +125,34 @@
 
         <div id="contain">
             <template is="dom-if" if="{{currentproject.projectmeta.translators.length}}">
-                <paper-material class="users" elevation="1">
-                    <div id="usergroup">
-                        <template is="dom-repeat" items="{{currentproject.projectmeta.translators}}" as="user">
-                            <p>{{user}}</p>
-                        </template>
-                    </div>
+                <paper-material id="users" elevation="1">
+                    <template is="dom-repeat" items="{{currentproject.projectmeta.translators}}" as="user">
+                        <div class="user">{{user}}</div>
+                    </template>
                 </paper-material>
             </template>
-            <paper-material class="input" elevation="1">
-                <input is="iron-input" bind-value="{{newinfo.name}}" placeholder="Name or Pseudonym">
-                <iron-icon class="right" icon="info" title="Info"></iron-icon>
+            <paper-material id="new" elevation="1">
+                <div>
+                    <input is="iron-input" bind-value="{{newinfo.name}}" placeholder="Name or Pseudonym">
+                </div>
+                <div id="agree">
+                    <paper-checkbox id="check"></paper-checkbox>
+                    <div>This person has agreed to the License Agreement, Statement of Faith, and Translation Guidelines</div>
+                </div>
+                <div id="links">
+                    <span class="link" on-tap="openlicense">License Agreement</span>
+                    <span class="link" on-tap="openstatement">Statement of Faith</span>
+                    <span class="link" on-tap="openguidelines">Translation Guidelines</span>
+                </div>
             </paper-material>
             <div id="buttons">
-                <paper-button raised id="add" on-tap="add">Add Contributor</paper-button>
+                <paper-button raised id="add" on-tap="addnew">Add Contributor</paper-button>
                 <paper-button raised id="next" on-tap="next">Next Step</paper-button>
             </div>
         </div>
 
-        <paper-dialog id="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <h2>Invalid Data</h2>
-            <div>
-                <p>You must enter a name.</p>
-            </div>
-            <div class="buttons">
-                <paper-button dialog-dismiss>Close</paper-button>
-            </div>
+        <paper-dialog id="loading" class="popup" modal="true" exit-animation="scale-down-animation">
+            <ts-loading options="[[options]]"></ts-loading>
         </paper-dialog>
 
     </template>
@@ -159,35 +176,69 @@
                 value: {},
                 notify: true
             },
+            options: {
+                type: Object,
+                value: {}
+            },
             newinfo: {
                 type: Object,
                 value: {}
             }
         },
 
-        add: function () {
-            var name = this.newinfo.name;
-            if (name === undefined || name === "") {
-                this.$.popup.open();
+        addnew: function () {
+            this.add(false);
+        },
+
+        add: function (flag) {
+            var mythis = this;
+            var name = mythis.newinfo.name;
+            var check = mythis.$.check.checked;
+
+            if (!name) {
+                mythis.set('options', {});
+                mythis.set('options.title', "Missing Info");
+                mythis.set('options.body', "Must enter a contributor name");
+                mythis.$.loading.open();
+            } else if (!check) {
+                mythis.set('options', {});
+                mythis.set('options.title', "No Agreement");
+                mythis.set('options.body', "Must agree to terms");
+                mythis.$.loading.open();
             } else {
-                this.push('currentproject.projectmeta.translators', name);
-                this.fire('iron-signal', {name: 'savemanifest'});
-                this.fire('iron-signal', {name: 'saveall'});
-                this.set('newinfo', {});
+                mythis.push('currentproject.projectmeta.translators', name);
+                mythis.fire('iron-signal', {name: 'savemanifest'});
+                mythis.fire('iron-signal', {name: 'saveall'});
+                mythis.set('newinfo', {});
+                mythis.$.check.checked = false;
+                if (flag) {
+                    mythis.set('selected', mythis.selected + 1);
+                }
             }
         },
 
         next: function () {
-            var name = this.newinfo.name;
-            var length = this.currentproject.projectmeta.translators.length;
-            if ((name === undefined || name === "") && length) {
-                this.selected = this.selected + 1;
-            } else if (name !== undefined && name !== "") {
-                this.add();
-                this.selected = this.selected + 1;
+            var mythis = this;
+            var name = mythis.newinfo.name;
+            var length = mythis.currentproject.projectmeta.translators.length;
+
+            if (!name && length) {
+                mythis.set('selected', mythis.selected + 1);
             } else {
-                this.$.popup.open();
+                mythis.add(true);
             }
+        },
+
+        openlicense: function () {
+            this.fire('iron-signal', {name: 'openlicense'});
+        },
+
+        openguidelines: function () {
+            this.fire('iron-signal', {name: 'openguidelines'});
+        },
+
+        openstatement: function () {
+            this.fire('iron-signal', {name: 'openstatement'});
         },
 
         ready: function() {

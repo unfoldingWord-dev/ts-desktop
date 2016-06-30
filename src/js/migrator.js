@@ -296,7 +296,7 @@ function MigrateManager(configurator, git) {
                             ]);
                         })
                         .then(function () {
-                            return utils.fs.move(oldpath, newpath, {clobber: true});
+                            return utils.fs.mover(oldpath, newpath);
                         })
                         .then(function () {
                             return {manifest: manifest, paths: paths};

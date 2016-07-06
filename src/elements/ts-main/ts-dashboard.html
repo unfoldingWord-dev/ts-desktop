@@ -679,13 +679,15 @@
                       errmessage = err;
                   }
 
-                  if (typeof errmessage === 'string' && errmessage.includes('Error: Cannot push because a reference that you are trying to update on the remote contains commits that are not present locally.')) {
+                  if (typeof errmessage === 'string' && errmessage.includes('a reference that you are trying to update on the remote contains commits that are not present locally')) {
                       errmessage = 'Cannot upload this project because a project already exists that has no shared history';
                   }
 
+                  if (errmessage !== err) {
+                    App.reporter.logError(err, 'Backup Failed');
+                  }
                   mythis.showErrorMessage('Backup Failed', errmessage, null);
               });
-
       },
 
       createFileBackup: function () {

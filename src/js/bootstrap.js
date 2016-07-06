@@ -175,7 +175,7 @@ process.stdout.write = console.log.bind(console);
         },
 
         showDevTools: function () {
-            require('remote').getCurrentWindow().toggleDevTools();
+            require('electron').remote.getCurrentWindow().toggleDevTools();
         },
 
         utils: utils,

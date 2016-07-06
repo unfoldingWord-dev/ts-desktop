@@ -139,6 +139,6 @@
         "helpText": "Update user options to the most current",
         "group": "advanced",
         "enabled": true,
-        "visible": true
+        "visible": false
     }
 ]

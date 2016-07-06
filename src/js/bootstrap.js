@@ -103,7 +103,8 @@ process.stdout.write = console.log.bind(console);
         repoOwner: configurator.getValue('repoOwner'),
         repo: configurator.getValue('repo'),
         maxLogFileKb: configurator.getValue('maxLogFileKb'),
-        appVersion: require('../../package.json').version
+        appVersion: require('../../package.json').version,
+        verbose: true
     });
 
     let dataManager = (function () {
@@ -134,13 +135,9 @@ process.stdout.write = console.log.bind(console);
 
     setMsg('Initializing modules...');
 
-    let gitManager = (function () {
-        return new GitManager();
-    })();
+    let gitManager = new GitManager();
 
-    let migrateManager = (function () {
-        return new MigrateManager(configurator, gitManager);
-    })();
+    let migrateManager = new MigrateManager(configurator, gitManager, reporter);
 
     // TODO: where should this be?
     mkdirp.sync(configurator.getValue('targetTranslationsDir'));

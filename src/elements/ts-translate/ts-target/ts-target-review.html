@@ -84,14 +84,7 @@
 
         .highlight {
             font-weight: bold;
-            padding: 0 10px 0 30px;
             color: var(--accent-color);
-            animation: scale 5s infinite;
-        }
-
-        @keyframes scale {
-            0% {transform: scale(1.3);}
-            100% {transform: scale(1.3);}
         }
 
         .rtl {
@@ -138,51 +131,40 @@
         properties: {
             chunk: {
                 type: Object,
-                value: {},
+                value: function () { return {}; },
                 notify: true
-            },
-            rendertimer: {
-                type: Number
             }
         },
 
         observers: [
-            'starttimer(chunk.transcontent, chunk.completed)'
+            'rendertext(chunk.transcontent, chunk.completed)'
         ],
 
         iconclass: function (complete) {
             return complete ? 'hide' : '';
         },
 
-        starttimer: function () {
-            var mythis = this;
-
-            clearTimeout(mythis.rendertimer);
-
-            mythis.rendertimer = setTimeout(function () {
-                mythis.rendertext();
-            }, 500);
-        },
-
         rendertext: function () {
-            if (this.chunk && this.chunk.srccontent && this.chunk.projectmeta.project_type_class === "standard") {
-                var mythis = this;
-                var completed = this.chunk.completed;
-                var text = this.chunk.transcontent;
-                var module = "ts-target-review";
-                var returnstr = "";
+            setTimeout(function () {
+                if (this.chunk && this.chunk.srccontent && this.chunk.projectmeta.project_type_class === "standard") {
+                    var mythis = this;
+                    var completed = this.chunk.completed;
+                    var text = this.chunk.transcontent;
+                    var module = "ts-target-review";
+                    var returnstr = "";
 
-                if (completed) {
-                    returnstr = App.renderer.renderTargetWithVerses(text, module);
-                } else {
-                    returnstr = App.renderer.markersToBalloons(mythis.chunk, module);
+                    if (completed) {
+                        returnstr = App.renderer.renderTargetWithVerses(text, module);
+                    } else {
+                        returnstr = App.renderer.markersToBalloons(mythis.chunk, module);
+                    }
+
+                    mythis.$.textholder.innerHTML = returnstr;
+                    mythis.$.toggle.checked = completed;
+                    mythis.fire('setheight');
+                    mythis.addDragListeners();
                 }
-
-                mythis.$.textholder.innerHTML = returnstr;
-                mythis.$.toggle.checked = completed;
-                mythis.fire('setheight');
-                mythis.addDragListeners();
-            }
+            }.bind(this), 1);
         },
 
         addDragListeners: function () {
@@ -237,7 +219,6 @@
             var mythis = this;
 
             if (this.chunk.index === index && this.chunk.projectmeta.project_type_class === "standard") {
-                //mythis.savemarkers();
                 mythis.set('chunk.completed', true);
                 mythis.$.toggle.checked = true;
                 setTimeout(function() {

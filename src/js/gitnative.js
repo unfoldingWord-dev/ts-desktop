@@ -76,15 +76,24 @@ function GitManager() {
 
     return {
 
-        verifyGit: function () {
+        getVersion: function () {
             var status = cmd().do('git --version');
-            var installed = false;
-
+            
             return status.run()
                 .then(function (log) {
                     var wordarray = log.stdout.split(" ");
                     var versionarray = wordarray[2].split(".");
-                    if (versionarray[0] < 2 || (versionarray[0] == 2 && versionarray[1] < 3)) {
+                    
+                    return {major: versionarray[0], minor: versionarray[1]};                    
+                })
+        },
+
+        verifyGit: function () {            
+            var installed = false;
+
+            return this.getVersion()
+                .then(function (version) {                    
+                    if (version.major < 2 || (version.major == 2 && version.minor < 3)) {
                         installed = true;
                         throw "error";
                     }
@@ -140,10 +149,6 @@ function GitManager() {
             var conflictlist = [];
             var conflicts = [];
 
-            // NOTE: should switch to using a fetch/merge instead of pull, so we don't depend on Perl
-            var pull = cmd().cd(localPath).and.do(`git pull ${remotePath} master --allow-unrelated-histories`);
-            var diff = cmd().cd(localPath).and.do('git diff --name-only --diff-filter=U');
-
             return Promise.all([utils.fs.readFile(localManifestPath), utils.fs.readFile(remoteManifestPath)])
                 .then(function (fileData) {
                     var localManifest = JSON.parse(fileData[0]);
@@ -153,6 +158,18 @@ function GitManager() {
                     mergedManifest.finished_chunks = _.union(localManifest.finished_chunks, remoteManifest.finished_chunks);
                 })
                 .then(function () {
+                    return mythis.getVersion();
+                })
+                .then(function (version) {
+                    var diff = cmd().cd(localPath).and.do('git diff --name-only --diff-filter=U');
+                    var pull = "";
+
+                    if (version.major > 2 || (version.major == 2 && version.minor > 8)) {
+                        pull = cmd().cd(localPath).and.do(`git pull "${remotePath}" master --allow-unrelated-histories`);
+                    } else {
+                        pull = cmd().cd(localPath).and.do(`git pull "${remotePath}" master`);
+                    }
+                    
                     return pull.run()
                         .catch(function (err) {
                             if (err.stdout.includes('fix conflicts')) {
@@ -218,7 +235,7 @@ function GitManager() {
         clone: function (repoUrl, localPath) {
             var repoName = repoUrl.replace(/\.git/, '').split('/').pop();
             var savePath = localPath.includes(repoName) ? localPath : path.join(localPath, repoName);
-            var clone = cmd().do(`git clone ${repoUrl} ${savePath}`);
+            var clone = cmd().do(`git clone ${repoUrl} "${savePath}"`);
 
             return clone.run()
                 .catch(function (err) {

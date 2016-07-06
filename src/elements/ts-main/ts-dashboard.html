@@ -285,7 +285,7 @@
       },
 
       showErrorMessage: function (title, defaultBody, err) {
-          App.reporter.logError(err, title);
+          App.reporter.logError(err, title, 1);
 
           var errmessage = App.utils.convertError(err, defaultBody);
 
@@ -768,8 +768,19 @@
 
           if (App.reporter.canReportToGithub()) {
               App.reporter.reportBug(message, function (res) {
-                  console.log(res);
-                  mythis.showMessage('Feedback Sent', 'Your feedback has been successfully sent.');
+                  var response;
+
+                  try {
+                    response = JSON.parse(res);
+                  } catch (e) {}
+
+                  if (response && response.url && response.repository_url) {
+                      App.reporter.logNotice(response.url, 'Feedback Sent');
+                      mythis.showMessage('Feedback Sent', 'Your feedback has been successfully sent.');
+                  } else {
+                      !response && App.reporter.logWarning(res, 'Feedback failed with invalid JSON response');
+                      mythis.showErrorMessage('Feedback Failed', 'Unable to post the feedback. Please try again.', response || null);
+                  }
               });
           } else {
               mythis.showErrorMessage('Feedback Failed', 'You are not set up with a token to send feedback.', null);

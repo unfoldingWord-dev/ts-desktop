@@ -45,17 +45,21 @@
             return addTitle(e, title);
         };
 
-        var log = function (level, err, title, done) {
-            if (arguments.length === 2 && typeof title === 'function') {
+        var log = function (level, err, title, stackModifier, done) {
+            if (arguments.length === 3 && typeof title === 'function') {
                 done = title;
                 title = '';
+            } else if (arguments.length === 4 && typeof stackModifier === 'function') {
+                done = stackModifier;
+                stackModifier = 0;
             }
 
             err = err || '';
+            stackModifier = stackModifier || 0;
 
             var msg = makeMessage(err, title);
 
-            this.toLogFile(level, msg, done);
+            this.toLogFile(level, msg, done, stackModifier);
         };
 
         _this.logWarning = log.bind(_this, 'W');
@@ -97,11 +101,11 @@
             return err.stack;
         };
 
-        _this.toLogFile = function (level, string, callback) {
+        _this.toLogFile = function (level, string, callback, stackModifier) {
             /* We make 3 calls before processing who called the original
              *  log command; therefore, the 4th call will be the original caller.
              */
-            let callNumber = 4;
+            let callNumber = 4 + stackModifier;
             let location = _this.stackTrace()
                                 .split('\n')[callNumber]
                                 .split(/(\\|\/)/)

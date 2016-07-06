@@ -281,6 +281,7 @@
           this.set('options.title', title);
           this.set('options.body', body);
           this.set('options.loading', false);
+          this.$.wideloading.close();
           this.$.loading.open();
       },
 
@@ -669,24 +670,17 @@
                   });
               })
               .catch(function (err) {
-                  var errmessage = 'An error occurred while uploading your project.';
+                  err = err || '';
 
-                  if (err && err.status == 401) {
-                      errmessage = 'Cannot upload without connecting to a Door43 account.';
-                  } else if (err && err.data) {
-                      errmessage = err.data;
-                  } else if (err) {
-                      errmessage = err;
+                  var errmessage = err.status == 401
+                      ? "Cannot upload without connecting to a Door43 account."
+                      : (err.data || err.stderr || "An error occurred while trying to upload your project.");
+
+                  if (typeof errmessage === 'string' && errmessage.includes("rejected because the remote contains work")) {
+                      errmessage = "Cannot upload this project because a project already exists that has no shared history";
                   }
 
-                  if (typeof errmessage === 'string' && errmessage.includes('a reference that you are trying to update on the remote contains commits that are not present locally')) {
-                      errmessage = 'Cannot upload this project because a project already exists that has no shared history';
-                  }
-
-                  if (errmessage !== err) {
-                    App.reporter.logError(err, 'Backup Failed');
-                  }
-                  mythis.showErrorMessage('Backup Failed', errmessage, null);
+                  mythis.showErrorMessage('Backup Failed', errmessage, err);
               });
       },
 

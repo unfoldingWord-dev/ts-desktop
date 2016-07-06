@@ -467,7 +467,10 @@
     utils.fs.chmodr = utils.promisify(chmodr);
     
     utils.fs.mover = function (src, dest) {
-        return utils.fs.move(src, dest, {clobber: true})
+        return utils.fs.remove(dest)
+            .then(function () {
+                return utils.fs.move(src, dest, {clobber: true});
+            })
             .then(function () {
                 return utils.fs.chmodr(dest, 420);
             });

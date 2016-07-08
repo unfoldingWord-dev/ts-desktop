@@ -5,7 +5,7 @@ var _ = require('lodash'),
     path = require('path'),
     utils = require('../js/lib/utils');
 
-function MigrateManager(configurator, git) {
+function MigrateManager(configurator, git, reporter) {
 
     var write = utils.fs.outputFile,
         read = utils.fs.readFile,
@@ -15,10 +15,22 @@ function MigrateManager(configurator, git) {
     return {
 
         migrateAll: function (list) {
-            return utils.chain(this.migrate, function(err) {
-                console.log(err);
+            var getProjectName = function (proj) {
+                return proj.projectDir.split(path.sep).pop();
+            };
+
+            return utils.chain(this.migrate, function(err, proj) {
+                var name = getProjectName(proj);
+                reporter.logWarning(err, 'Unable to migrate project ' + name);
+
                 return false;
-            })(list);
+            })(list).then(function (migrated) {
+                var names = migrated.map(function (manifest) {
+                    return getProjectName(manifest.paths);
+                });
+                reporter.logNotice(names, 'Migrated projects');
+                return migrated;
+            });
         },
 
         migrate: function (paths) {

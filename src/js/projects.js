@@ -80,8 +80,8 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 if (completion !== undefined && completion !== "") {
                     meta.completion = completion;
                 } else {
-                    if (manifest.source_translations.length && manifest.finished_chunks) {
-                        var frames = dataManager.getSourceFrames(manifest.source_translations[0]);
+                    if (meta.source_translations.length && meta.finished_chunks) {
+                        var frames = dataManager.getSourceFrames(meta.source_translations[0]);
                         if (frames.length) {
                             meta.completion = Math.round((meta.finished_chunks.length / frames.length) * 100);
                         } else {

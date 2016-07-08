@@ -22,14 +22,20 @@ function DataManager(db) {
                     return JSON.parse(response.body);
                 })
                 .then(function (newlist) {
-                    query("delete from target_language");
+                    var result = {};
+                    zipper(query('select slug from target_language')).forEach(function (item) {
+                        result [item.slug] = true;
+                    });
 
                     for (var i = 0; i < newlist.length; i++) {
                         var lc = newlist[i].lc;
                         var ln = newlist[i].ln;
                         var ld = newlist[i].ld;
                         var lr = newlist[i].lr;
-                        query('insert into target_language (slug, name, direction, region) values ("' + lc + '", "' + ln + '", "' + ld + '", "' + lr + '")');
+
+                        if (!result[lc]) {
+                            query('insert into target_language (slug, name, direction, region) values ("' + lc + '", "' + ln + '", "' + ld + '", "' + lr + '")');
+                        }
                     }
                 })
                 .then(function () {

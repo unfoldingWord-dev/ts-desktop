@@ -3,7 +3,7 @@
 
 #define MyAppName "translationStudio"
 #define Version "9.1"
-#define Build "22"
+#define Build "25"
 #define MyAppPublisher "Unfolding Word"
 #define MyAppURL "https://unfoldingword.org"
 #define MyAppExeName "translationStudio.exe"

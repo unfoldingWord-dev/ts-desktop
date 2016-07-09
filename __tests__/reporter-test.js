@@ -1,4 +1,5 @@
-jest.mock('../src/js/lib/utils');
+'use strict';
+
 jest.unmock('../src/js/reporter');
 
 var config = {

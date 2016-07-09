@@ -5,7 +5,7 @@
 let fs = require('fs');
 let os = require('os');
 let https = require('https');
-let utils = require('utils');
+let utils = require('./lib/utils');
 let path = require('path');
 let moment = require('moment');
 

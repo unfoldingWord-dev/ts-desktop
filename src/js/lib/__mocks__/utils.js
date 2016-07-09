@@ -1,6 +1,6 @@
 'use strict';
 
-var utils = jest.genMockFromModule('../utils');
+var utils = {}; //=jest.genMockFromModule('../utils');
 
 var __lastWritten = {};
 

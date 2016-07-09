@@ -1,3 +1,4 @@
+jest.mock('../src/js/lib/utils');
 jest.unmock('../src/js/reporter');
 
 var config = {
@@ -19,6 +20,7 @@ describe('Reporter', () => {
 				expect(utils.fs.__lastWritten.path).toEqual(config.logPath);
 				expect(message).toMatch(/bob/);
 				expect(message).toMatch(/Bob is a jerk/);
+				expect(message).toMatch(/\sW\//);
 			});
 		});
 	});

@@ -475,8 +475,8 @@
 
         firechange: function () {
             this.$.confirmchange.close();
-            this.fire('iron-signal', {name: 'changeproject', data: this.changedata});
             this.$.resource.close();
+            this.fire('iron-signal', {name: 'changeproject', data: this.changedata});
         },
 
         gopublish: function () {

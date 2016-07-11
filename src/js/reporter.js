@@ -8,6 +8,7 @@
     let https = require('https');
     let mkdirp = require('mkdirp');
     let path = require('path');
+    let moment = require('moment');
 
     function Reporter (args) {
 
@@ -18,39 +19,52 @@
         let repo = args.repo || '';
         let maxLogFileKb = args.maxLogFileKb || 200;
         let appVersion = args.appVersion || '0.0.0';
+        let verbose = args.verbose || false;
 
-        _this.logNotice = function (string, callback) {
-            if (!string) {
-                throw new Error('reporter.logNotice requires a message.');
-            }
-            _this.toLogFile('I', string, function () {
-                if (typeof callback === 'function') {
-                    callback();
-                }
-            });
+        var convertError = function (err) {
+            var indentLines = function (s) {
+                return s.split('\n').map(function (line) {
+                    return '\t' + line;
+                }).join('\n');
+            };
+
+            var shouldStringify = Array.isArray(err) || err.toString() === '[object Object]';
+            var converted = shouldStringify ? JSON.stringify(err, null, 2) : err.toString();
+
+            return indentLines(converted);
         };
 
-        _this.logWarning = function (string, callback) {
-            if (!string) {
-                throw new Error('reporter.logWarning requires a message.');
-            }
-            _this.toLogFile('W', string, function () {
-                if (typeof callback === 'function') {
-                    callback();
-                }
-            });
+        var addTitle = function (err, title) {
+            var shouldHaveNewLine = title || err.toString().split('\n').length > 1
+            var pre = (title || '') + (shouldHaveNewLine ? '\n' : '');
+            return pre + err;
         };
 
-        _this.logError = function (string, callback) {
-            if (!string) {
-                throw new Error('reporter.logError requires a message.');
-            }
-            this.toLogFile('E', string, function () {
-                if (typeof callback === 'function') {
-                    callback();
-                }
-            });
+        var makeMessage = function (err, title) {
+            var e = convertError(err);
+            return addTitle(e, title);
         };
+
+        var log = function (level, err, title, stackModifier, done) {
+            if (arguments.length === 3 && typeof title === 'function') {
+                done = title;
+                title = '';
+            } else if (arguments.length === 4 && typeof stackModifier === 'function') {
+                done = stackModifier;
+                stackModifier = 0;
+            }
+
+            err = err || '';
+            stackModifier = stackModifier || 0;
+
+            var msg = makeMessage(err, title);
+
+            this.toLogFile(level, msg, done, stackModifier);
+        };
+
+        _this.logWarning = log.bind(_this, 'W');
+        _this.logError = log.bind(_this, 'E');
+        _this.logNotice = log.bind(_this, 'I');
 
         _this.logClear = function (callback) {
             fs.writeFile(logPath, '', function(err){
@@ -87,40 +101,45 @@
             return err.stack;
         };
 
-        _this.toLogFile = function (level, string, callback) {
+        _this.toLogFile = function (level, string, callback, stackModifier) {
             /* We make 3 calls before processing who called the original
              *  log command; therefore, the 4th call will be the original caller.
-             * */
-            let location = _this.stackTrace().split('\n')[4];
-            try {
-                location = location.split(/(\\|\/)/);
-                location = location[location.length - 1];
-                location = location.substr(0, location.length - 1);
-            } catch (e) {
-                throw new Error(e.message);
-            }
-            let date = new Date();
-            date = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+             */
+            let callNumber = 4 + stackModifier;
+            let location = _this.stackTrace()
+                                .split('\n')[callNumber]
+                                .split(/(\\|\/)/)
+                                .pop()
+                                .slice(0,-1);
+
+            let date = moment().format('YYYY-MM-DD HH:m:s');
 
             let message = date + ' ' + level + '/' + location + ': ' + string + '\n';
 
             let dir = path.dirname(logPath);
 
-            console.log(message);
+            if (verbose) {
+                let levels = {
+                    'I': 'info',
+                    'W': 'warn',
+                    'E': 'error'
+                };
+                let type = levels[level];
+
+                console[type](message);
+            }
 
             mkdirp(dir, function (e) {
                 if (e) {
                     throw new Error(e);
-                } else {
-                    fs.appendFile(logPath, message, function (err) {
-                        if (err) {
-                            throw new Error(err.message);
-                        }
-                        if (typeof callback === 'function') {
-                            callback();
-                        }
-                    });
                 }
+
+                fs.appendFile(logPath, message, function (err) {
+                    if (err) {
+                        throw new Error(err.message);
+                    }
+                    callback && callback();
+                });
             });
 
             _this.truncateLogFile();
@@ -282,7 +301,7 @@
         };
 
         _this.canReportToGithub = function () {
-            return repo !== '' && repoOwner !== '' && oauthToken !== '';
+            return repo && repoOwner && oauthToken;
         };
 
         return _this;

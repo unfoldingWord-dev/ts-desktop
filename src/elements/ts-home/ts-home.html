@@ -524,8 +524,8 @@
         deleteproject: function () {
             var projectmeta = this.currentinfo;
 
-            this.fire('iron-signal', {name: 'deleteproject', data: {projectmeta: projectmeta}});
             this.$.delete.close();
+            this.fire('iron-signal', {name: 'deleteproject', data: {projectmeta: projectmeta}});
         },
 
         start: function () {

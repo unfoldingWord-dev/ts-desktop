@@ -38,8 +38,24 @@
         /**
          * Pads date/time with a leading zero if it's a single digit
          */
-        padZero: function(t) {
+        padZero: function (t) {
             return ('0' + t.toString()).slice(-2);
+        },
+
+        convertError: function (err, defaultMessage) {
+            if (!err) {
+                return defaultMessage;
+            }
+
+            var msg = defaultMessage;
+
+            if (typeof err === 'string') {
+                msg = err;
+            } else if (typeof err === 'object' && err.toString() !== '[object Object]') {
+                msg = err.toString();
+            }
+
+            return msg;
         },
 
         mapObject: function (obj, visit, filter) {
@@ -209,7 +225,9 @@
 
                 list.forEach(function (l) {
                     p = p.then(visit.bind(null, l))
-                         .catch(fail)
+                         .catch(function (err) {
+                            return fail(err, l);
+                         })
                          .then(function (result) {
                              results.push(result);
                          });
@@ -449,7 +467,10 @@
     utils.fs.chmodr = utils.promisify(chmodr);
     
     utils.fs.mover = function (src, dest) {
-        return utils.fs.move(src, dest, {clobber: true})
+        return utils.fs.remove(dest)
+            .then(function () {
+                return utils.fs.move(src, dest, {clobber: true});
+            })
             .then(function () {
                 return utils.fs.chmodr(dest, 420);
             });

@@ -270,29 +270,54 @@
           }
       },
 
+      showLoadingMessage: function (msg) {
+          this.set('options', {});
+          this.set('options.body', msg);
+          this.set('options.loading', true);
+          this.$.loading.open();
+      },
+
+      showMessage: function (title, body) {
+          this.set('options.title', title);
+          this.set('options.body', body);
+          this.set('options.loading', false);
+          this.$.wideloading.close();
+          this.$.loading.open();
+      },
+
+      showErrorMessage: function (title, defaultBody, err) {
+          App.reporter.logError(err, title, 1);
+
+          var errmessage = App.utils.convertError(err, defaultBody);
+
+          this.showMessage(title, errmessage);
+      },
+
+      showConflictsMessage: function (title, body, conflicts) {
+          var msg = body;
+
+          if (conflicts && conflicts.length) {
+              App.reporter.logNotice(conflicts, 'Chunk Conflicts');
+
+              msg += ' The following chunks contain conflicts that need your attention: ';
+              msg += conflicts.join(', ');
+          }
+
+          this.showMessage(title, msg);
+      },
+
       updateLanguages: function () {
           var mythis = this;
 
-          mythis.set('options', {});
-          mythis.set('options.body', "Updating Languages. This may take several minutes. Please wait...");
-          mythis.set('options.loading', true);
-          mythis.$.loading.open();
+          mythis.showLoadingMessage('Updating Languages. This may take several minutes. Please wait...');
 
-          setTimeout(function() {
+          setTimeout(function () {
               return App.dataManager.updateLanguageList()
-                  .then(function() {
-                      mythis.set('options.title', "Update Complete");
-                      mythis.set('options.body', "The language list has been updated");
-                      mythis.set('options.loading', false);
+                  .then(function () {
+                      mythis.showMessage('Update Complete', 'The language list has been updated');
                   })
-                  .catch(function(err) {
-                      var errmessage = "An error occurred while updating";
-                      if(err !== null) {
-                          errmessage = err;
-                      }
-                      mythis.set('options.title', "Update Failed");
-                      mythis.set('options.body', errmessage);
-                      mythis.set('options.loading', false);
+                  .catch(function (err) {
+                      mythis.showErrorMessage('Update Failed', 'An error occurred while updating', err);
                   });
           }, 500);
       },
@@ -301,30 +326,21 @@
           var mythis = this;
           var projectmeta = data.projectmeta;
 
-          mythis.set('options', {});
-          mythis.set('options.body', "Deleting project.  Please wait...");
-          mythis.set('options.loading', true);
-          mythis.$.loading.open();
+          mythis.showLoadingMessage('Deleting project.  Please wait...');
 
           setTimeout(function() {
               return App.projectsManager.deleteTargetTranslation(projectmeta)
                   .then(function() {
                       App.projectsManager.unsetValues(projectmeta);
-                      mythis.set('options.title', "Project Deleted");
-                      mythis.set('options.body', "Your project has been successfully deleted.");
-                      mythis.set('options.loading', false);
+
+                      mythis.showMessage('Project Deleted', 'Your project has been successfully deleted.');
+
                       setTimeout(function() {
                           mythis.updateList();
                       }, 250);
                   })
                   .catch(function(err) {
-                      var errmessage = "An error occurred while trying to delete your project";
-                      if(err !== null) {
-                          errmessage = err;
-                      }
-                      mythis.set('options.title', "Delete Failed");
-                      mythis.set('options.body', errmessage);
-                      mythis.set('options.loading', false);
+                      mythis.showErrorMessage('Delete Failed', 'An error occurred while trying to delete your project', err);
                   });
           }, 500);
       },
@@ -334,11 +350,8 @@
           var conflicts = [];
           var changedata = data;
 
-          mythis.set("route", "home");
-          mythis.set('options', {});
-          mythis.set('options.body', "Changing project.  Please wait...");
-          mythis.set('options.loading', true);
-          mythis.$.loading.open();
+          mythis.set('route', 'home');
+          mythis.showLoadingMessage('Changing project.  Please wait...');
 
           var choice = function () {
               if (changedata.exists) {
@@ -360,32 +373,19 @@
               }
           };
 
-          setTimeout(function() {
+          setTimeout(function () {
               return choice()
-                  .then(function() {
+                  .then(function () {
                       App.projectsManager.unsetValues(changedata.oldmeta);
-                      var message = "Your project has been changed. ";
-                      if (conflicts.length) {
-                          message += "The following chunks contain conflicts that need your attention: ";
-                          conflicts.forEach(function (item) {
-                              message += item + ", ";
-                          });
-                      }
-                      mythis.set('options.title', "Change Complete");
-                      mythis.set('options.body', message);
-                      mythis.set('options.loading', false);
-                      setTimeout(function() {
+
+                      mythis.showConflictsMessage('Change Complete', 'Your project has been changed.', conflicts);
+
+                      setTimeout(function () {
                           mythis.updateList();
                       }, 250);
                   })
                   .catch(function(err) {
-                      var errmessage = "An error occurred while trying to change the project";
-                      if(err !== null) {
-                          errmessage = err;
-                      }
-                      mythis.set('options.title', "Change Failed");
-                      mythis.set('options.body', errmessage);
-                      mythis.set('options.loading', false);
+                      mythis.showErrorMessage('Change Failed', 'An error occurred while trying to change the project', err);
                   });
           }, 500);
       },
@@ -404,10 +404,7 @@
           }
 
           mythis.$.import.close();
-          mythis.set('options', {});
-          mythis.set('options.body', "Importing.  Please wait...");
-          mythis.set('options.loading', true);
-          mythis.$.loading.open();
+          mythis.showLoadingMessage('Importing.  Please wait...');
 
           setTimeout(function() {
               return App.importManager.extractBackup(filePath[0])
@@ -427,28 +424,15 @@
                       return App.utils.fs.remove(App.configurator.getValue('tempDir'));
                   })
                   .then(function() {
-                      var message = "Your project has been successfully imported. ";
-                      if (conflicts.length) {
-                          message += "The following chunks contain conflicts that need your attention: ";
-                          conflicts.forEach(function (item) {
-                              message += item + ", ";
-                          });
-                      }
-                      mythis.set('options.title', "Import Complete");
-                      mythis.set('options.body', message);
-                      mythis.set('options.loading', false);
+                      mythis.showConflictsMessage('Import Complete', 'Your project has been successfully imported.', conflicts);
+
                       setTimeout(function() {
                           mythis.updateList();
                       }, 250);
                   })
                   .catch(function(err) {
-                      var errmessage = "An error occurred while importing your project";
-                      if(err !== null) {
-                          errmessage = err;
-                      }
-                      mythis.set('options.title', "Import Failed");
-                      mythis.set('options.body', errmessage);
-                      mythis.set('options.loading', false);
+                      mythis.showErrorMessage('Import Failed', 'An error occurred while importing your project', err);
+
                       return App.utils.fs.remove(App.configurator.getValue('tempDir'));
                   });
           }, 500);
@@ -478,13 +462,8 @@
                   mythis.set('importdata', {importing: true, filepath: filePath[0], project: {slug: id, name: name}});
                   mythis.set('route', 'new');
               }).catch(function (err) {
-                  var errmessage = "Error occurred reading file: ";
-                  if(err !== null) {
-                      errmessage += err;
-                  }
-                  mythis.set('options.title', "Import Failed");
-                  mythis.set('options.body', errmessage);
-                  mythis.set('options.loading', false);
+                  var filename = (filePath && filePath[0]) || '';
+                  mythis.showErrorMessage('Import Failed', 'Error occurred reading file: ' + filename, err);
               });
       },
 
@@ -503,10 +482,7 @@
           };
           var checkOverwrite = overwrite ? backupTargetTranslation() : Promise.resolve(true);
 
-          mythis.set('options', {});
-          mythis.set('options.body', "Importing.  Please wait...");
-          mythis.set('options.loading', true);
-          mythis.$.loading.open();
+          mythis.showLoadingMessage('Importing.  Please wait...');
 
           setTimeout(function() {
               return checkOverwrite
@@ -516,21 +492,15 @@
                   .then(function (chunks) {
                       return App.projectsManager.createTargetTranslation(chunks, projectmeta, user);
                   })
-                  .then(function(){
-                      mythis.set('options.title', "Import Complete");
-                      mythis.set('options.body', "Your file has been imported. Please review it carefully.  If it was not formatted properly, text may not appear as desired.");
-                      mythis.set('options.loading', false);
+                  .then(function () {
+                      mythis.showMessage('Import Complete', 'Your file has been imported. Please review it carefully.  If it was not formatted properly, text may not appear as desired.');
+
                       setTimeout(function() {
                           mythis.updateList();
                       }, 250);
-                  }).catch(function(err){
-                      var errmessage = "Error occurred importing project";
-                      if(err !== null) {
-                          errmessage = err;
-                      }
-                      mythis.set('options.title', "Import Failed");
-                      mythis.set('options.body', errmessage);
-                      mythis.set('options.loading', false);
+                  }).catch(function (err) {
+                      mythis.showErrorMessage('Import Failed', 'Error occurred importing project', err);
+
                       if (overwrite) {
                           return App.importManager.extractBackup(backupPath)
                               .then(function (list) {
@@ -591,10 +561,8 @@
           var errtitle = restore ? "Restore Failed" : "Import Failed";
 
           mythis.$.repo.close();
-          mythis.set('options', {});
-          mythis.set('options.body', loadmessage);
-          mythis.set('options.loading', true);
-          mythis.$.loading.open();
+
+          mythis.showLoadingMessage(loadmessage);
 
           setTimeout(function() {
               return App.utils.fs.mkdirs(tmpPath)
@@ -629,26 +597,15 @@
                       return App.utils.fs.remove(App.configurator.getValue('tempDir'));
                   })
                   .then(function() {
-                      if (conflicts.length) {
-                          message += "The following chunks contain conflicts that need your attention: ";
-                          conflicts.forEach(function (item) {
-                              message += item + ", ";
-                          });
-                      }
-                      mythis.set('options.title', title);
-                      mythis.set('options.body', message);
-                      mythis.set('options.loading', false);
+                      mythis.showConflictsMessage(title, message, conflicts);
+
                       setTimeout(function() {
                           mythis.updateList();
                       }, 250);
                   })
                   .catch(function(err) {
-                      if(err !== null) {
-                          errmessage = err;
-                      }
-                      mythis.set('options.title', errtitle);
-                      mythis.set('options.body', errmessage);
-                      mythis.set('options.loading', false);
+                      mythis.showErrorMessage(errtitle, errmessage, err && err.error ? err.error : err);
+
                       return App.utils.fs.remove(App.configurator.getValue('tempDir'));
                   });
           }, 500);
@@ -713,29 +670,18 @@
                   });
               })
               .catch(function (err) {
-                  var errmessage = "An error occurred while uploading your project.";
-                  var logmessage = "";
-                  if (err.status === 401) {
-                      errmessage = "Cannot upload without connecting to a Door43 account.";
-                  } else if (err.data) {
-                      errmessage = err.data;
-                  } else {
-                      errmessage = err;
-                  }
-                  if (errmessage == "Error: Cannot push because a reference that you are trying to update on the remote contains commits that are not present locally.") {
+                  err = err || '';
+
+                  var errmessage = err.status == 401
+                      ? "Cannot upload without connecting to a Door43 account."
+                      : (err.data || err.stderr || "An error occurred while trying to upload your project.");
+
+                  if (typeof errmessage === 'string' && errmessage.includes("rejected because the remote contains work")) {
                       errmessage = "Cannot upload this project because a project already exists that has no shared history";
                   }
-                  if (err.status) {
-                      logmessage = "Error: " + err.status + " " + err.data;
-                  } else {
-                      logmessage = err;
-                  }
-                  App.reporter.logError(logmessage);
-                  mythis.set('options.title', "Backup Failed");
-                  mythis.set('options.body', errmessage);
-                  mythis.set('options.loading', false);
-              });
 
+                  mythis.showErrorMessage('Backup Failed', errmessage, err);
+              });
       },
 
       createFileBackup: function () {
@@ -748,26 +694,15 @@
           }
 
           mythis.$.backup.close();
-          mythis.set('options', {});
-          mythis.set('options.body', "Creating Backup.  Please wait...");
-          mythis.set('options.loading', true);
-          mythis.$.loading.open();
+          mythis.showLoadingMessage('Creating Backup.  Please wait...');
 
           setTimeout(function() {
               return App.exportManager.backupTranslation(meta, filePath)
                   .then(function () {
-                      mythis.set('options.title', "Backup Complete");
-                      mythis.set('options.body', "Your project has been successfully backed up.");
-                      mythis.set('options.loading', false);
+                      mythis.showMessage('Backup Complete', 'Your project has been successfully backed up.');
                   })
                   .catch(function (err) {
-                      var errmessage = "An error occurred while trying to backup your project";
-                      if(err !== null) {
-                          errmessage = err;
-                      }
-                      mythis.set('options.title', "Backup Failed");
-                      mythis.set('options.body', errmessage);
-                      mythis.set('options.loading', false);
+                      mythis.showErrorMessage('Backup Failed', 'An error occurred while trying to backup your project', err);
                   });
           }, 500);
       },
@@ -781,10 +716,7 @@
           }
 
           mythis.$.import.close();
-          mythis.set('options', {});
-          mythis.set('options.body', "Restoring.  Please wait...");
-          mythis.set('options.loading', true);
-          mythis.$.loading.open();
+          mythis.showLoadingMessage('Restoring.  Please wait...');
 
           setTimeout(function() {
               return App.importManager.extractBackup(filePath[0])
@@ -797,28 +729,22 @@
                       return App.utils.fs.remove(App.configurator.getValue('tempDir'));
                   })
                   .then(function() {
-                      mythis.set('options.title', "Restore Complete");
-                      mythis.set('options.body', "Your project has been successfully restored.");
-                      mythis.set('options.loading', false);
+                      mythis.showMessage('Restore Complete', 'Your project has been successfully restored.');
+
                       setTimeout(function() {
                           mythis.updateList();
                       }, 250);
                   })
                   .catch(function(err) {
-                      var errmessage = "An error occurred while trying to restore your project";
-                      if(err !== null) {
-                          errmessage = err;
-                      }
-                      mythis.set('options.title', "Restore Failed");
-                      mythis.set('options.body', errmessage);
-                      mythis.set('options.loading', false);
+                      mythis.showErrorMessage('Restore Failed', 'An error occurred while trying to restore your project', err);
+
                       return App.utils.fs.remove(App.configurator.getValue('tempDir'));
                   });
           }, 500);
       },
 
       openFeedback: function () {
-          this.set('feedback', "");
+          this.set('feedback', '');
           this.$.feedback.open();
       },
 
@@ -838,14 +764,22 @@
 
           if (App.reporter.canReportToGithub()) {
               App.reporter.reportBug(message, function (res) {
-                  mythis.set('options.title', "Feedback Sent");
-                  mythis.set('options.body', "Your feedback has been successfully sent.");
-                  mythis.set('options.loading', false);
+                  var response;
+
+                  try {
+                    response = JSON.parse(res);
+                  } catch (e) {}
+
+                  if (response && response.url && response.repository_url) {
+                      App.reporter.logNotice(response.url, 'Feedback Sent');
+                      mythis.showMessage('Feedback Sent', 'Your feedback has been successfully sent.');
+                  } else {
+                      !response && App.reporter.logWarning(res, 'Feedback failed with invalid JSON response');
+                      mythis.showErrorMessage('Feedback Failed', 'Unable to post the feedback. Please try again.', response || null);
+                  }
               });
           } else {
-              mythis.set('options.title', "Feedback Failed");
-              mythis.set('options.body', "You are not set up with a token to send feedback.");
-              mythis.set('options.loading', false);
+              mythis.showErrorMessage('Feedback Failed', 'You are not set up with a token to send feedback.', null);
           }
       },
 
@@ -870,16 +804,7 @@
                   mythis.set('projectlist', list);
               })
               .catch(function (err) {
-                  var errmessage = "An error occurred while updating projects";
-                  if(err !== null) {
-                      errmessage = err;
-                  }
-                  mythis.set('options', {});
-                  mythis.set('options.title', "Error updating projects");
-                  mythis.set('options.body', errmessage);
-                  mythis.set('options.loading', false);
-                  mythis.$.loading.open();
-                  App.reporter.logError(err);
+                  mythis.showErrorMessage('Error updating projects', 'An error occurred while updating projects', err);
               });
       },
 
@@ -907,16 +832,14 @@
                   return App.exportManager.backupAllTranslations(mythis.projectlist, autobackupdir)
               })
               .catch(function (err) {
+                  App.reporter.logError(err.stack, 'Error on startup');
+
                   mythis.set('options', {});
-                  mythis.set('options.title', "Error on startup");
-                  mythis.set('options.body', err);
-                  mythis.set('options.loading', false);
-                  mythis.$.loading.open();
+                  mythis.showErrorMessage('Error on startup', 'Something broke.', err);
               })
               .then(function () {
                   App.ipc.send('loading-done');
-              })
-
+              });
       }
 
   });

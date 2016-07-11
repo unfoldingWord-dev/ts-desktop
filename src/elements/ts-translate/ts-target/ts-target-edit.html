@@ -151,8 +151,10 @@
         change: function (event) {
             var verses = this.chunk.chunkmeta.verses;
             var text = event.target.value;
+            var result = App.renderer.validateVerseMarkers(text, verses);
 
-            this.set('chunk.transcontent', App.renderer.validateVerseMarkers(text, verses));
+            this.set('chunk.transcontent', result);
+            this.$.textbox.value = result;
             this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
         },
 

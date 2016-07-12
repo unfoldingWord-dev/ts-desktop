@@ -34,31 +34,26 @@
             padding: 0 16px;
 		}
 
-        #content1 {
-			padding: 24px 16px;
+        .content {
             flex: auto;
-            display: flex;
-		}
-
-        #content2 {
-            padding: 24px 16px;
-            flex: auto;
-            display: flex;
-        }
-
-        #textholder {
-            width: 100%;
-        }
-
-        #textholder p {
-			line-height: 2;
-			margin: 0;
             color: var(--primary-text-color);
+            cursor: pointer;
+            padding: 16px;
 		}
 
-        #togglebox {
+        #top {
+            background: var(--accent-color-light);
+            margin: 8px 0 4px;
+        }
+
+        #bottom {
+            background: var(--primary-color-light);
+            margin: 4px 0 8px;
+        }
+
+        #footer {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             border-top: 1px solid var(--border-color);
             color: var(--secondary-text-color);
             font-size: 88%;
@@ -84,14 +79,14 @@
                     <span>[[chunk.chunkmeta.chunkref]]</span><span>[[chunk.chunkmeta.refaddon]]</span>
                 </div>
             </div>
-            <div id="content1" class="targetfont">
+            <div id="top" class="targetfont content" on-tap="savetop">
                 <div class$="[[chunk.projectmeta.target_language.direction]]">{{chunk.conflicts.content1}}</div>
             </div>
-            <div id="content2" class="targetfont">
+            <div id="bottom" class="targetfont content" on-tap="savebottom">
                 <div class$="[[chunk.projectmeta.target_language.direction]]">{{chunk.conflicts.content2}}</div>
             </div>
-            <div id="togglebox">
-                <p>Click on the version you wish to keep</p>
+            <div id="footer">
+                <p>Resolve Conflict - Click on the version to keep</p>
             </div>
         </paper-material>
 
@@ -111,6 +106,18 @@
                 value: function () { return {}; },
                 notify: true
             }
+        },
+
+        savetop: function () {
+            this.set('chunk.transcontent', this.chunk.conflicts.content1);
+            this.set('chunk.conflicts', {exists: false});
+            this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
+        },
+
+        savebottom: function () {
+            this.set('chunk.transcontent', this.chunk.conflicts.content2);
+            this.set('chunk.conflicts', {exists: false});
+            this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
         },
 
 		ready: function() {

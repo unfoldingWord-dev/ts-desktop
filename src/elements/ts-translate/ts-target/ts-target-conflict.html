@@ -1,0 +1,122 @@
+
+<link rel="import" href="../../../components/paper-material/paper-material.html">
+<link rel="import" href="../../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../../components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../../components/neon-animation/neon-animation.html">
+
+<dom-module id="ts-target-conflict">
+
+	<style>
+
+        :host {
+            flex: auto;
+            display: flex;
+        }
+
+        #main {
+            flex: auto;
+            display: flex;
+            background: var(--card-background-color);
+            flex-direction: column;
+            border-radius: 3px;
+        }
+
+		#heading {
+			color: var(--secondary-text-color);
+            border-bottom: 1px solid var(--note-card-pink);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex: 0 0 48px;
+            font-size: 88%;
+            font-weight: 300;
+            letter-spacing: 1px;
+            padding: 0 16px;
+		}
+
+        #content1 {
+			padding: 24px 16px;
+            flex: auto;
+            display: flex;
+		}
+
+        #content2 {
+            padding: 24px 16px;
+            flex: auto;
+            display: flex;
+        }
+
+        #textholder {
+            width: 100%;
+        }
+
+        #textholder p {
+			line-height: 2;
+			margin: 0;
+            color: var(--primary-text-color);
+		}
+
+        #togglebox {
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid var(--border-color);
+            color: var(--secondary-text-color);
+            font-size: 88%;
+            padding: 0 16px;
+            align-items: center;
+        }
+
+        .rtl {
+            direction: rtl;
+        }
+
+        .hide {
+            display: none;
+        }
+
+	</style>
+
+	<template>
+
+        <paper-material id="main" elevation="1">
+            <div id="heading">
+                <div>
+                    <span>[[chunk.chunkmeta.chunkref]]</span><span>[[chunk.chunkmeta.refaddon]]</span>
+                </div>
+            </div>
+            <div id="content1" class="targetfont">
+                <div class$="[[chunk.projectmeta.target_language.direction]]">{{chunk.conflicts.content1}}</div>
+            </div>
+            <div id="content2" class="targetfont">
+                <div class$="[[chunk.projectmeta.target_language.direction]]">{{chunk.conflicts.content2}}</div>
+            </div>
+            <div id="togglebox">
+                <p>Click on the version you wish to keep</p>
+            </div>
+        </paper-material>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+		is: 'ts-target-conflict',
+
+        properties: {
+            chunk: {
+                type: Object,
+                value: function () { return {}; },
+                notify: true
+            }
+        },
+
+		ready: function() {
+
+		}
+
+	});
+
+</script>

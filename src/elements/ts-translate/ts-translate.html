@@ -1004,6 +1004,7 @@
             var completed = false;
             var transcontent = "";
             var helpscontent = [];
+            var conflicts = {exists: false};
 
             if (typeclass === "extant") {
                 helpscontent = [{title: "", body: ""}];
@@ -1012,12 +1013,26 @@
             if (maindata) {
                 completed = projectmeta.finished_chunks.indexOf(complexid) >= 0;
                 if (typeclass === "standard") {
-                    transcontent = App.renderer.convertVerseMarkers(maindata.transcontent).text;
-                    transcontent = App.renderer.migrateMarkers(transcontent);
-                    transcontent = App.renderer.removeChapterMarkers(transcontent);
-                    transcontent = App.renderer.validateVerseMarkers(transcontent, verses);
+                    transcontent = maindata.transcontent;
+                    conflicts = this.checkForConflicts(transcontent);
+                    if (conflicts.exists) {
+                        conflicts.content1 = App.renderer.convertVerseMarkers(conflicts.content1).text;
+                        conflicts.content1 = App.renderer.migrateMarkers(conflicts.content1);
+                        conflicts.content1 = App.renderer.removeChapterMarkers(conflicts.content1);
+                        conflicts.content1 = App.renderer.validateVerseMarkers(conflicts.content1, verses);
+                        conflicts.content2 = App.renderer.convertVerseMarkers(conflicts.content2).text;
+                        conflicts.content2 = App.renderer.migrateMarkers(conflicts.content2);
+                        conflicts.content2 = App.renderer.removeChapterMarkers(conflicts.content2);
+                        conflicts.content2 = App.renderer.validateVerseMarkers(conflicts.content2, verses);
+                    } else {
+                        transcontent = App.renderer.convertVerseMarkers(transcontent).text;
+                        transcontent = App.renderer.migrateMarkers(transcontent);
+                        transcontent = App.renderer.removeChapterMarkers(transcontent);
+                        transcontent = App.renderer.validateVerseMarkers(transcontent, verses);
+                    }
                 } else {
                     helpscontent = maindata.helpscontent;
+                    conflicts = this.checkForConflicts(helpscontent);
                 }
             }
             if (seconddata && typeclass === "helps") {
@@ -1029,7 +1044,20 @@
                 statedata = {chunk: true, review: true, resource: 0};
                 this.currentproject.statedata[complexid] = statedata;
             }
-            return {projectmeta: _.cloneDeep(projectmeta), chunkmeta: chunkmeta, transcontent: transcontent, helpscontent: helpscontent, completed: completed, state: statedata};
+            return {projectmeta: _.cloneDeep(projectmeta), chunkmeta: chunkmeta, transcontent: transcontent, helpscontent: helpscontent, conflicts: conflicts, completed: completed, state: statedata};
+        },
+
+        checkForConflicts: function (content) {
+            if (content.includes("<<<<<<< HEAD")) {
+                var starts = content.indexOf("<<<<");
+                var endOf1 = content.indexOf("====");
+                var endOf2 = content.indexOf(">>>>");
+                var content1 = content.substring(starts + 13, endOf1 - 1);
+                var content2 = content.substring(endOf1 + 8, endOf2 - 1);
+            } else {
+                return {exists: false};
+            }
+            return {exists: true, content1: content1, content2: content2};
         },
 
         createProjectTitleFrame: function (chunkmeta, projectmeta, index) {

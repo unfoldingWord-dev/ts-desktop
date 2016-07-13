@@ -23,6 +23,8 @@ function Reporter (args) {
     let verbose = args.verbose || false;
 
     var convertError = function (err) {
+        if(!err) return '';
+
         var indentLines = function (s) {
             return s.split('\n').map(function (line) {
                 return '\t' + line;
@@ -36,7 +38,7 @@ function Reporter (args) {
     };
 
     var addTitle = function (err, title) {
-        var shouldHaveNewLine = title || err.toString().split('\n').length > 1
+        var shouldHaveNewLine = !!err;
         var pre = (title || '') + (shouldHaveNewLine ? '\n' : '');
         return pre + err;
     };
@@ -59,27 +61,24 @@ function Reporter (args) {
     _this.logError = log.bind(_this, 'E');
     _this.logNotice = log.bind(_this, 'I');
 
-    _this.clearLog = function (callback) {
+    _this.clearLog = function () {
         return utils.fs.writeFile(logPath, '');
     };
 
+    /**
+     * Sends a bug report to github
+     * @param string the bug report
+     * @param callback deprecated
+     */
     _this.reportBug = function (string, callback) {
         if (!string) {
-            throw new Error('reporter.reportBug requires a message.');
+            return Promise.reject('reporter.reportBug requires a message.')
         }
-        _this.formGithubIssue('bug report', string, null, function (res) {
-            if (typeof callback === 'function') {
-                callback(res);
-            }
-        });
+        return _this.formGithubIssue('bug report', string, null);
     };
 
     _this.reportCrash = function (string, crashFilePath, callback) {
-        _this.formGithubIssue('crash report', string, crashFilePath, function (res) {
-            if (typeof callback === 'function') {
-                callback(res);
-            }
-        });
+        return _this.formGithubIssue('crash report', string, crashFilePath);
     };
 
     _this.stackTrace = function () {
@@ -148,7 +147,7 @@ function Reporter (args) {
         });
     };
 
-    _this.formGithubIssue = function (type, string, filePath, callback) {
+    _this.formGithubIssue = function (type, string, filePath) {
         let issueObject = {};
         issueObject.user = repoOwner;
         issueObject.repo = repo;
@@ -187,36 +186,31 @@ function Reporter (args) {
         bodyBuilder.push('\nLog History\n======');
         bodyBuilder.push('```javascript');
 
-        _this.stringFromLogFile(null, function (results) {
-            if (filePath) {
-                _this.stringFromLogFile(filePath, function (crashFileResults) {
+        // TODO: this code is crazy. fix it!
+        return _this.stringFromLogFile(null)
+            .then(function (results) {
+                if (filePath) {
+                    return _this.stringFromLogFile(filePath)
+                        .then(function (crashFileResults) {
+                            bodyBuilder.push(results);
+                            bodyBuilder.push('```');
+                            bodyBuilder.push('\nCrash File\n======');
+                            bodyBuilder.push('```javascript');
+                            bodyBuilder.push(crashFileResults);
+                            bodyBuilder.push('```');
+                            issueObject.body = bodyBuilder.join('\n');
+                            return _this.sendIssueToGithub(issueObject);
+                        });
+                } else {
                     bodyBuilder.push(results);
                     bodyBuilder.push('```');
-                    bodyBuilder.push('\nCrash File\n======');
-                    bodyBuilder.push('```javascript');
-                    bodyBuilder.push(crashFileResults);
-                    bodyBuilder.push('```');
                     issueObject.body = bodyBuilder.join('\n');
-                    _this.sendIssueToGithub(issueObject, function (res) {
-                        if (typeof callback === 'function') {
-                            callback(res);
-                        }
-                    });
-                });
-            } else {
-                bodyBuilder.push(results);
-                bodyBuilder.push('```');
-                issueObject.body = bodyBuilder.join('\n');
-                _this.sendIssueToGithub(issueObject, function (res) {
-                    if (typeof callback === 'function') {
-                        callback(res);
-                    }
-                });
-            }
-        });
+                    return _this.sendIssueToGithub(issueObject);
+                }
+            });
     };
 
-    _this.sendIssueToGithub = function (issue, callback) {
+    _this.sendIssueToGithub = function (issue) {
         let params = {};
         params.title = issue.title;
         params.body = issue.body;
@@ -237,22 +231,20 @@ function Reporter (args) {
             }
         };
 
-        let postReq = https.request(postOptions, function (res) {
-            res.setEncoding('utf8');
-            let completeData = '';
-            res.on('data', function (partialData) {
-                completeData += partialData;
-            }).on('end', function () {
-                if (typeof callback === 'function') {
-                    callback(completeData);
-                }
-            });
-        }).on('error', function (err) {
-            throw new Error(err.message);
+        return new Promise(function(resolve, reject) {
+            let postReq = https.request(postOptions, function (res) {
+                res.setEncoding('utf8');
+                let completeData = '';
+                res.on('data', function (partialData) {
+                    completeData += partialData;
+                }).on('end', function () {
+                    resolve(completeData);
+                });
+            }).on('error', reject);
+            postReq.write(paramsJson);
+            postReq.end();
+            _this.clearLog();
         });
-        postReq.write(paramsJson);
-        postReq.end();
-        _this.clearLog();
     };
 
     _this.canReportToGithub = function () {

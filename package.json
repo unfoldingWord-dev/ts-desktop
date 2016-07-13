@@ -46,6 +46,7 @@
     "electron-prebuilt": "^1.2.5",
     "gulp": "^3.9.1",
     "gulp-mocha": "^2.2.0",
+    "jest": "^13.2.3",
     "mocha": "^2.5.3",
     "yargs": "^3.17.1"
   },
@@ -53,7 +54,8 @@
     "electron": "1.2.5"
   },
   "scripts": {
-    "start": "electron src/js/main.js"
+    "start": "electron src/js/main.js",
+    "test": "jest"
   },
   "main": "src/js/main.js",
   "license": "GPL-2.0"

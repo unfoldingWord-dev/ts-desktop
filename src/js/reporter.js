@@ -77,6 +77,12 @@ function Reporter (args) {
         return _this.formGithubIssue('bug report', string, null);
     };
 
+    /**
+     *
+     * @param string
+     * @param crashFilePath
+     * @param callback
+     */
     _this.reportCrash = function (string, crashFilePath, callback) {
         return _this.formGithubIssue('crash report', string, crashFilePath);
     };

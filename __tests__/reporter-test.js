@@ -324,6 +324,7 @@ describe('ReporterNetworkCalls', () => {
                 .then(function(response) {
                     expect(false).toBeFalsy();
                 }).catch(function(err) {
+                    expect(https.request.mock.calls.length).toEqual(0);
                     expect(true).toBeTruthy();
                 });
         });

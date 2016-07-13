@@ -59,15 +59,8 @@ function Reporter (args) {
     _this.logError = log.bind(_this, 'E');
     _this.logNotice = log.bind(_this, 'I');
 
-    _this.logClear = function (callback) {
-        fs.writeFile(logPath, '', function(err){
-            if (err) {
-                throw new Error(err.message);
-            }
-            if (typeof callback === 'function') {
-                callback();
-            }
-        });
+    _this.clearLog = function (callback) {
+        return utils.fs.writeFile(logPath, '');
     };
 
     _this.reportBug = function (string, callback) {
@@ -259,7 +252,7 @@ function Reporter (args) {
         });
         postReq.write(paramsJson);
         postReq.end();
-        _this.logClear();
+        _this.clearLog();
     };
 
     _this.canReportToGithub = function () {

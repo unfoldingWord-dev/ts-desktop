@@ -3,6 +3,7 @@
 <link rel="import" href="../../../components/iron-icons/iron-icons.html">
 <link rel="import" href="../../../components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../../components/iron-signals/iron-signals.html">
 
 <dom-module id="ts-target-conflict">
 
@@ -37,6 +38,7 @@
         .content {
             flex: auto;
             color: var(--primary-text-color);
+            line-height: 2;
             cursor: pointer;
             padding: 16px;
 		}
@@ -55,10 +57,15 @@
             display: flex;
             justify-content: center;
             border-top: 1px solid var(--border-color);
-            color: var(--secondary-text-color);
             font-size: 88%;
             padding: 0 16px;
             align-items: center;
+        }
+
+        #footer p {
+            background: var(--review-color);
+            color: var(--reverse-text-color);
+            padding: 5px 10px;
         }
 
         .rtl {
@@ -90,6 +97,8 @@
             </div>
         </paper-material>
 
+        <iron-signals on-iron-signal-saveconflict="saveconflict"></iron-signals>
+
 	</template>
 
 </dom-module>
@@ -109,15 +118,30 @@
         },
 
         savetop: function () {
-            this.set('chunk.transcontent', this.chunk.conflicts.content1);
-            this.set('chunk.conflicts', {exists: false});
-            this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
+            var index = this.chunk.index;
+            var choice = "top";
+            this.fire('iron-signal', {name: 'openconflict', data: {index: index, choice: choice}});
         },
 
         savebottom: function () {
-            this.set('chunk.transcontent', this.chunk.conflicts.content2);
-            this.set('chunk.conflicts', {exists: false});
-            this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
+            var index = this.chunk.index;
+            var choice = "bottom";
+            this.fire('iron-signal', {name: 'openconflict', data: {index: index, choice: choice}});
+        },
+
+        saveconflict: function (event, data) {
+            var index = data.index;
+            var choice = data.choice;
+
+            if (this.chunk.index === index && this.chunk.projectmeta.project_type_class === "standard") {
+                if (choice === "top") {
+                    this.set('chunk.transcontent', this.chunk.conflicts.content1);
+                } else {
+                    this.set('chunk.transcontent', this.chunk.conflicts.content2);
+                }
+                this.set('chunk.conflicts', {exists: false});
+                this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
+            }
         },
 
 		ready: function() {

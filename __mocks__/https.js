@@ -2,25 +2,37 @@
 
 var callbacks = {};
 var responseMessage = 'success';
-var shouldError = false;
+var statusCode = 200;
+var lastWritten = '';
+var lastOptions = {};
 
 var https = {
+    get __lastOptions () {
+        return lastOptions;
+    },
+
+    get __lastWritten () {
+       return lastWritten;
+    },
 
     set __setResponse (message) {
         responseMessage = message;
     },
 
-    set __setShouldError(error) {
-        shouldError = !!error;
+    set __setStatusCode(code) {
+        statusCode = code;
     },
 
     request: jest.fn(function(options, callback) {
+        lastOptions = options;
         return {
             on: function(type, callback) {
                 callbacks[type] = callback;
                 return this;
             },
-            write: function(data) {},
+            write: function(data) {
+                lastWritten = data;
+            },
             end: function() {
                 var resourceCallbacks = {};
                 callback({
@@ -31,14 +43,13 @@ var https = {
                         resourceCallbacks[type] = resCallback;
 
                         if(type === 'end') {
-                            if (shouldError) {
-                                callbacks['error']();
-                            } else {
-                                resourceCallbacks['data'](responseMessage);
-                                resourceCallbacks['end']();
-                            }
+                            resourceCallbacks['data'](responseMessage);
+                            resourceCallbacks['end']();
                         }
                         return this;
+                    },
+                    get statusCode () {
+                        return statusCode
                     }
                 });
             }

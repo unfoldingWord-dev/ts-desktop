@@ -211,11 +211,13 @@ function Reporter (args) {
     };
 
     _this.sendIssueToGithub = function (issue) {
+        if(!_this.canReportToGithub()) return Promise.reject({message:'Missing credentials'});
+
         let params = {};
         params.title = issue.title;
         params.body = issue.body;
         params.labels = issue.labels;
-        let paramsJson = JSON.stringify(params);
+        let payload = JSON.stringify(params);
 
         let urlPath = '/repos/' + issue.user + '/' + issue.repo + '/issues';
         let postOptions = {
@@ -226,7 +228,7 @@ function Reporter (args) {
             headers: {
                 'User-Agent': 'ts-desktop',
                 'Content-Type': 'application/json',
-                'Content-Length': paramsJson.length,
+                'Content-Length': payload.length,
                 'Authorization': 'token ' + oauthToken
             }
         };
@@ -238,17 +240,21 @@ function Reporter (args) {
                 res.on('data', function (partialData) {
                     completeData += partialData;
                 }).on('end', function () {
-                    resolve(completeData);
+                    if(res.statusCode >= 400) {
+                        reject(JSON.parse(completeData));
+                    } else {
+                        resolve(completeData);
+                    }
                 });
             }).on('error', reject);
-            postReq.write(paramsJson);
+            postReq.write(payload);
             postReq.end();
             _this.clearLog();
         });
     };
 
     _this.canReportToGithub = function () {
-        return repo && repoOwner && oauthToken;
+        return !!(repo && repoOwner && oauthToken);
     };
 
     return _this;

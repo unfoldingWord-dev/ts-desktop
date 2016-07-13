@@ -1,6 +1,5 @@
 'use strict';
 
-// jest.setMock('moment');
 jest.mock('https');
 jest.unmock('../src/js/reporter');
 
@@ -198,16 +197,16 @@ describe('Reporter', () => {
     describe('clearLog', () => {
         it('should clear the contents of the log', () => {
             var data = 'hello world';
-            expect(!utils.fs.__logData[config.logPath]);
+            expect(utils.fs.__logData[config.logPath]).toBeFalsy();
             utils.fs.writeFile(config.logPath, data);
             expect(utils.fs.__logData[config.logPath]).toEqual(data);
             return reporter.clearLog().then(function() {
-                expect(!utils.fs.__logData[config.logPath]);
+                expect(utils.fs.__logData[config.logPath]).toBeFalsy();
             }).then(function() {
                 // TRICKY: make sure multiple clears doesn't break things
                 return reporter.clearLog();
             }).then(function() {
-                expect(!utils.fs.__logData[config.logPath]);
+                expect(utils.fs.__logData[config.logPath]).toBeFalsy();
             });
         });
     });
@@ -221,7 +220,7 @@ describe('ReporterNetworkCalls', () => {
            utils = require('../src/js/lib/utils');
            var Reporter = require('../src/js/reporter').Reporter;
            reporter = new Reporter();
-           expect(!reporter.canReportToGithub());
+           expect(reporter.canReportToGithub()).toBeFalsy();
        });
 
         it('should not be able to report to github with no token', () => {
@@ -231,7 +230,7 @@ describe('ReporterNetworkCalls', () => {
                 repoOwner:'owner',
                 repo: 'repo'
             });
-            expect(!reporter.canReportToGithub());
+            expect(reporter.canReportToGithub()).toBeFalsy();
         });
 
         it('should not be able to report to github with no repo', () => {
@@ -239,30 +238,30 @@ describe('ReporterNetworkCalls', () => {
             var Reporter = require('../src/js/reporter').Reporter;
             reporter = new Reporter({
                 repoOwner:'owner',
-                token: 'token'
+                oauthToken: 'token'
             });
-            expect(!reporter.canReportToGithub());
+            expect(reporter.canReportToGithub()).toBeFalsy();
         });
 
         it('should not be able to report to github with no owner', () => {
             utils = require('../src/js/lib/utils');
             var Reporter = require('../src/js/reporter').Reporter;
             reporter = new Reporter({
-                repo:'repo',
-                token: 'token'
+                repoOwner:'repo',
+                oauthToken: 'token'
             });
-            expect(!reporter.canReportToGithub());
+            expect(reporter.canReportToGithub()).toBeFalsy();
         });
 
         it('should be able to report to github with config', () => {
             utils = require('../src/js/lib/utils');
             var Reporter = require('../src/js/reporter').Reporter;
             reporter = new Reporter({
-                owner: 'owner',
+                repoOwner: 'owner',
                 repo:'repo',
-                token: 'token'
+                oauthToken: 'token'
             });
-            expect(reporter.canReportToGithub());
+            expect(reporter.canReportToGithub()).toBeTruthy();
         });
     });
 
@@ -272,40 +271,61 @@ describe('ReporterNetworkCalls', () => {
             https = require('https');
             var Reporter = require('../src/js/reporter').Reporter;
             reporter = new Reporter({
-                owner: 'owner',
+                repoOwner: 'owner',
                 repo:'repo',
-                token: 'token'
+                oauthToken: 'token'
             });
 
-            https.__setResponse ='success';
+            var expectedResponse = 'bug report successfully submitted';
+            var bugTitle = 'my bug';
+            https.__setResponse = expectedResponse;
 
-            return reporter.reportBug("my bug!")
-            .then(function(response) {
-                console.log(response);
-                expect(response).toEqual('success');
-            });
+            return reporter.reportBug(bugTitle)
+                .then(function(response) {
+                    expect(response).toEqual(expectedResponse);
+                    expect(https.__lastOptions.method).toEqual('POST');
+                    expect(https.__lastOptions.port).not.toEqual(80);
+                    expect(https.__lastWritten).toMatch(new RegExp(bugTitle));
+                });
         });
 
         it('should receive an error while submitting the report', () => {
-            // success, auth failed, error
             var Reporter = require('../src/js/reporter').Reporter;
             reporter = new Reporter({
-                owner: 'owner',
+                repoOwner: 'owner',
                 repo:'repo',
-                token: 'token'
+                oauthToken: 'token'
             });
 
             // set response type
 
             https = require('https');
-            https.__setShouldError = false;
+            https.__setStatusCode = 400;
 
             return reporter.reportBug("my bug!")
-            .then(function(response) {
-                expect(false);
-            }).catch(function(err) {
-                expect(true);
+                .then(function(response) {
+                    expect(false).toBeFalsy();
+                }).catch(function(err) {
+                    expect(true).toBeTruthy();
+                });
+        });
+
+        it('should receive an error while submitting with incomplete credentials', () => {
+            var Reporter = require('../src/js/reporter').Reporter;
+            reporter = new Reporter({
+                repoOwner: 'owner',
+                repo:'repo'
             });
+
+            // set response type
+            https = require('https');
+
+            return reporter.reportBug("my bug!")
+                .then(function(response) {
+                    expect(false).toBeFalsy();
+                }).catch(function(err) {
+                    expect(true).toBeTruthy();
+                });
         });
     });
 });

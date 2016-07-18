@@ -20,6 +20,19 @@ function GitManager() {
     var logr = utils.logr;
     var toJSON = _.partialRight(JSON.stringify, null, '\t');
 
+    // NOTE: This could be configured or passed in.
+    const paths = ['/usr/local/bin'];
+
+    const pathStr = (function makePathString (paths) {
+        if (paths && paths.length) {
+            return process.platform === 'win32' ?
+                'set PATH=' + paths.join(';') + ';%PATH% & ' :
+                'PATH=' + paths.join(':') + ':$PATH ';
+        }
+
+        return '';
+    })(paths);
+
     function cmd(s) {
         var str = s || '';
 
@@ -50,8 +63,16 @@ function GitManager() {
                 return cmd(str + c);
             },
 
-            do: function (c) {
+            withPaths: function (paths) {
+                var c = process.platform === 'win32' ?
+                    'set PATH=' + paths.join(';') + ';%PATH% & ' :
+                    'PATH=' + paths.join(':') + ':$PATH ';
+
                 return cmd(str + c);
+            },
+
+            do: function (c) {
+                return cmd(str + pathStr + c);
             },
 
             run: function () {
@@ -75,6 +96,9 @@ function GitManager() {
     }
 
     return {
+        get _cmd () {
+            return cmd;
+        },
 
         getVersion: function () {
             var status = cmd().do('git --version');

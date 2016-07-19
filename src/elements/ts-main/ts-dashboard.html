@@ -818,7 +818,7 @@
 
           App.gitManager.verifyGit()
               .then(function (version) {
-                  App.reporter.logNotice(version, 'Git Version');
+                  App.reporter.logNotice('Git Version ' + version);
               })
               .then(function () {
                   App.ipc.send('loading-status', 'Retrieving User Info...');
@@ -839,10 +839,19 @@
                   return App.exportManager.backupAllTranslations(mythis.projectlist, autobackupdir)
               })
               .catch(function (err) {
-                  App.reporter.logError(err.stack, 'Error on startup');
+                  err && err.stack && App.reporter.logError(err.stack, 'Error on startup');
 
                   mythis.set('options', {});
-                  mythis.showErrorMessage('Error on startup', 'Something broke.', err);
+
+                  var msg = 'Something broke.';
+
+                  if (err && typeof err === 'string') {
+                      msg = err;
+                  } else if (err && err.toString() !== '[object Object]') {
+                      msg = err.toString();
+                  }
+
+                  mythis.showErrorMessage('Error on startup', msg, err);
               })
               .then(function () {
                   App.ipc.send('loading-done');

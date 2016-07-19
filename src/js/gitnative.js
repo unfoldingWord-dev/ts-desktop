@@ -27,6 +27,14 @@ function GitManager() {
 
     const cmd = cmdr(paths);
 
+    const minGitVersion = {
+        major: 2,
+        minor: 3,
+        toString: function () {
+            return this.major + '.' + this.minor;
+        }
+    };
+
     return {
         get _cmd () {
             return cmd;
@@ -57,15 +65,16 @@ function GitManager() {
 
             return this.getVersion()
                 .then(function (version) {
-                    if (version.major < 2 || (version.major == 2 && version.minor < 3)) {
+                    if (version.major < minGitVersion.major || (version.major == minGitVersion.major && version.minor < minGitVersion.minor)) {
                         installed = true;
-                        throw "error";
+                        throw version;
                     }
                     return version;
                 })
                 .catch(function (err) {
                     if (installed) {
-                        throw "Your git is out of date. Please update to the latest version."
+                        var msg = "Your version of Git is out of date. We detected "  + err + ", but the app needs at least version " + minGitVersion + " in order to run.";
+                        throw msg;
                     } else {
                         throw "Git is not installed. It is required to run tStudio Desktop."
                     }

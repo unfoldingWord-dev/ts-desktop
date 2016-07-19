@@ -4,23 +4,15 @@ node_js:
 - '6'
 os:
 - 'linux'
-- 'osx'
-matrix:
-  include:
-    - os: linux
-      env: LAZ_VER=1.4.4 LAZ_ENV=wine WINEARCH=win32 LAZ_OPT="--os=win32 --cpu=i386"
-    - os: linux
-      env: LAZ_VER=1.4.4 LAZ_ENV=wine WINEARCH=win64 LAZ_OPT="--os=win64 --cpu=x86_64"
-sudo: false
-before_install:
-#- apt-get update
-#- apt-get install wine
+sudo: true
 before_script:
 - npm install
 - npm install gulp -g
 script: npm test
 after_success:
 - gulp build
+- sudo apt-get install wine && wine wineboot
+
 #before_install:
 #- if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then openssl aes-256-cbc -K $encrypted_54b2df9dba46_key -iv $encrypted_54b2df9dba46_iv -in config.json.enc -out unit_tests/git/config.json -d; fi
 

@@ -10,20 +10,20 @@ before_install:
 - sudo add-apt-repository --yes ppa:arx/release
 - sudo apt-get update -d
 - sudo apt-get install -y -q innoextract wine python-software-properties
-- wget --no-check-certificate -O is.exe http://www.jrsoftware.org/download.php/is.exe
 - wine --version
 - innoextract --version
 - ./scripts/innosetup/innoinstall.sh
 - sudo cp scripts/innosetup/iscc /usr/local/bin/iscc
 - iscc /? 2> | grep "Inno Setup Preprocessor"
-
 before_script:
 - npm install
 - npm install gulp -g
 script: npm test
 after_success:
 - gulp build
-
+- iscc win64_installer.iss
+- iscc win32_installer.iss
+# TODO: upload
 #before_install:
 #- if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then openssl aes-256-cbc -K $encrypted_54b2df9dba46_key -iv $encrypted_54b2df9dba46_iv -in config.json.enc -out unit_tests/git/config.json -d; fi
 

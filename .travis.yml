@@ -24,6 +24,8 @@ before_script:
 script: npm test
 after_success:
 - gulp build
+- ./scripts/download_git.sh ./vendor 2.9.2 64
+- ./scripts/download_git.sh ./vendor 2.9.2 32
 - iscc win64_installer.iss
 - iscc win32_installer.iss
 # TODO: upload

@@ -8,7 +8,6 @@
 #define MyAppURL "https://unfoldingword.org"
 #define MyAppExeName "translationStudio.exe"
 #define MyLicenseFile "LICENSE"
-#define GitExecutable "Git-2.9.2-64-bit.exe"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
@@ -63,7 +62,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 0,6.1
 
 [Files]
-Source: "vendor\{#GitExecutable}"; DestDir: "{app}\vendor"; Flags: ignoreversion recursesubdirs deleteafterinstall
+Source: "vendor\git-64-bit.exe"; DestDir: "{app}\vendor"; Flags: ignoreversion recursesubdirs deleteafterinstall
 Source: "scripts\win64_git_installer.iss"; DestDir: "{app}\vendor"; Flags: ignoreversion recursesubdirs deleteafterinstall
 Source: "out\translationStudio-win32-x64\*.*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 
@@ -74,6 +73,6 @@ Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: 
 Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: quicklaunchicon
 
 [Run]
-Filename: "{app}\vendor\{#GitExecutable}"; Parameters: "/SILENT /LOADINF=""{app}\vendor\win64_git_installer.iss""";
+Filename: "{app}\vendor\git-64-bit.exe"; Parameters: "/SILENT /LOADINF=""{app}\vendor\win64_git_installer.iss""";
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: postinstall skipifsilent
 

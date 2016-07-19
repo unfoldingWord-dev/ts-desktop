@@ -10,8 +10,8 @@ var _ = require('lodash'),
 
 function PrintManager(configurator) {
 
-    var download = utils.download;    
-    var srcDir = path.resolve(path.join(__dirname, '..'));    
+    var download = utils.download;
+    var srcDir = path.resolve(path.join(__dirname, '..'));
     var imageRoot = path.join(configurator.getValue('rootdir'), 'images');
     var imagePath = path.join(imageRoot, 'obs');
     var zipPath = path.join(imageRoot, 'obs-images.zip');
@@ -78,6 +78,7 @@ function PrintManager(configurator) {
                 filePath += '.pdf';
             }
             var defaultfont = path.join(srcDir, 'assets', 'NotoSans-Regular.ttf');
+            var pagenumfont = ("Helvetica");
             var targetfont = configurator.getUserSetting('targetfont').path;
             if (targetfont === "default") {
                 targetfont = defaultfont;
@@ -226,7 +227,7 @@ function PrintManager(configurator) {
                         for (var i = range.start; i < range.start + range.count; i ++) {
                             doc.switchToPage(i);
                             doc.fontSize(10)
-                                .font(defaultfont)
+                                .font(pagenumfont)
                                 .text(i + 1, 72, doc.page.height - 50 - 12, {align: 'center'});
                         }
 
@@ -317,7 +318,7 @@ function PrintManager(configurator) {
                         for (var i = range.start; i < range.start + range.count; i ++) {
                             doc.switchToPage(i);
                             doc.fontSize(10)
-                                .font(defaultfont)
+                                .font(pagenumfont)
                                 .text(i + 1, 72, doc.page.height - 50 - 12, {align: 'center'});
                         }
 

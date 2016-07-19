@@ -69,14 +69,30 @@
             font-size: 110%;
         }
 
-        .buttons {
+        .popup .header {
+            flex: 0 0 60px;
+            color: var(--accent-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .popup .body {
+            color: var(--primary-text-color);
+            flex: 0 0 100px;
+            padding: 0 20px;
+            text-align: center;
+            font-size: 130%;
+        }
+
+        .popup .buttons {
             display: flex;
             justify-content: flex-end;
             padding: 0 50px;
             color: var(--secondary-text-color);
         }
 
-        .buttons paper-button:hover {
+        .popup .buttons paper-button:hover {
             color: var(--accent-color);
         }
 
@@ -88,11 +104,15 @@
         #confirmimport {
             width: 400px;
             height: 200px;
+            display: flex;
+            flex-direction: column;
         }
 
         #confirmchange {
             width: 450px;
             height: 200px;
+            display: flex;
+            flex-direction: column;
         }
 
     </style>
@@ -114,8 +134,10 @@
         </neon-animated-pages>
 
         <paper-dialog id="confirmimport" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <h2>Overwrite?</h2>
-            <div>
+            <div class="header">
+                <h2>Overwrite?</h2>
+            </div>
+            <div class="body">
                 <p>This target translation already exists. Overwrite?</p>
             </div>
             <div class="buttons">
@@ -129,8 +151,10 @@
         </paper-dialog>
 
         <paper-dialog id="confirmchange" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <h2>File already exists</h2>
-            <div>
+            <div class="header">
+                <h2>File already exists</h2>
+            </div>
+            <div class="body">
                 <p>This project already exists.  If you continue with this change, the two projects will be merged together.</p>
             </div>
             <div class="buttons">
@@ -217,8 +241,8 @@
         },
 
         firechange: function () {
-            this.$.languages.firechange();
             this.$.confirmchange.close();
+            this.$.languages.firechange();
         },
 
         createtitle: function (route) {

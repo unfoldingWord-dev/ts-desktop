@@ -177,15 +177,17 @@
                 }, 500);
             }).catch(function (err) {
                 var errmessage = "An error occurred while trying to login";
-                if (err.status === 404) {
-                    errmessage += "\n" + "Incorrect Username";
-                }
-                if (err.status === 401) {
-                    errmessage += "\n" + "Incorrect Password";
+                if (err.syscall === "getaddrinfo") {
+                    errmessage = "Unable to connect to server";
+                } else if (err.status === 404) {
+                    errmessage = "Incorrect Username";
+                } else if (err.status === 401) {
+                    errmessage = "Incorrect Password";
                 }
                 mythis.set('options.title', "Login Failed");
                 mythis.set('options.body', errmessage);
                 mythis.set('options.loading', false);
+                mythis.set('newinfo', {});
             });
         },
 
@@ -225,12 +227,15 @@
                 }, 500);
             }).catch(function (err) {
                 var errmessage = "An error occurred while trying to create account";
-                if (err.status === 422) {
-                    errmessage += "\n" + "Account already exists for this user";
+                if (err.syscall === "getaddrinfo") {
+                    errmessage = "Unable to connect to server";
+                } else if (err.status === 422) {
+                    errmessage = "Account already exists for this username or this email address";
                 }
                 mythis.set('options.title', "Account Creation Failed");
                 mythis.set('options.body', errmessage);
                 mythis.set('options.loading', false);
+                mythis.set('newinfo', {});
             });
         },
 

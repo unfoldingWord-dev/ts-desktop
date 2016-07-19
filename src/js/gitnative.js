@@ -1,10 +1,10 @@
 'use strict';
 
 var path = require('path'),
-    fs = require('fs'),
-    exec = require('child_process').exec,
-    utils = require('../js/lib/utils');
+    utils = require('../js/lib/utils'),
+    cmdr = require('../js/lib/cmdr');
 
+// NOTE: could use moment module for this
 function createTagName(datetime) {
     return 'R2P/' +
         datetime.getFullYear().toString() + '-' +
@@ -18,82 +18,14 @@ function createTagName(datetime) {
 function GitManager() {
 
     var logr = utils.logr;
-    var toJSON = _.partialRight(JSON.stringify, null, '\t');
+    var toJSON = function (obj) {
+        return JSON.stringify(obj, null, '\t');
+    };
 
     // NOTE: This could be configured or passed in.
     const paths = ['/usr/local/bin'];
 
-    const pathStr = (function makePathString (paths) {
-        if (paths && paths.length) {
-            return process.platform === 'win32' ?
-                'set PATH=' + paths.join(';') + ';%PATH% & ' :
-                'PATH=' + paths.join(':') + ':$PATH ';
-        }
-
-        return '';
-    })(paths);
-
-    function cmd(s) {
-        var str = s || '';
-
-        return {
-            cd: function (dir) {
-                return cmd(str + 'cd "' + dir + '"');
-            },
-
-            get and () {
-                return cmd(str + ' && ');
-            },
-
-            get then () {
-                var c = process.platform === 'win32' ? '& ' : '; ';
-
-                return cmd(str + c);
-            },
-
-            get or () {
-                return cmd(str + ' || ');
-            },
-
-            set: function (name, val) {
-                var c = process.platform === 'win32' ?
-                            `set ${name}=${val} & ` :
-                            `${name}='${val}' `;
-
-                return cmd(str + c);
-            },
-
-            withPaths: function (paths) {
-                var c = process.platform === 'win32' ?
-                    'set PATH=' + paths.join(';') + ';%PATH% & ' :
-                    'PATH=' + paths.join(':') + ':$PATH ';
-
-                return cmd(str + c);
-            },
-
-            do: function (c) {
-                return cmd(str + pathStr + c);
-            },
-
-            run: function () {
-                return new Promise(function (resolve, reject) {
-                    exec(str, function (err, stdout, stderr) {
-                        var ret = {
-                            stdout: stdout,
-                            stderr: stderr,
-                            error: err
-                        };
-
-                        (err && reject(ret)) || resolve(ret);
-                    });
-                });
-            },
-
-            toString: function () {
-                return str;
-            }
-        };
-    }
+    const cmd = cmdr(paths);
 
     return {
         get _cmd () {

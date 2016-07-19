@@ -4,16 +4,13 @@ node_js:
 - '6'
 os:
 - 'linux'
-- 'os'
 sudo: true
 before_install:
-- sudo apt-get update
-
 # Inno Setup (for Windows installer)
 - sudo add-apt-repository --yes ppa:arx/release
 - sudo apt-get update -d
 - sudo apt-get install -y -q innoextract wine python-software-properties
-- wget -O is.exe http://www.jrsoftware.org/download.php/is.exe
+- wget --no-check-certificate -O is.exe http://www.jrsoftware.org/download.php/is.exe
 - wine --version
 - innoextract --version
 - ./scripts/innosetup/innoinstall.sh

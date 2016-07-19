@@ -475,8 +475,8 @@
 
         firechange: function () {
             this.$.confirmchange.close();
-            this.fire('iron-signal', {name: 'changeproject', data: this.changedata});
             this.$.resource.close();
+            this.fire('iron-signal', {name: 'changeproject', data: this.changedata});
         },
 
         gopublish: function () {
@@ -524,8 +524,8 @@
         deleteproject: function () {
             var projectmeta = this.currentinfo;
 
-            this.fire('iron-signal', {name: 'deleteproject', data: {projectmeta: projectmeta}});
             this.$.delete.close();
+            this.fire('iron-signal', {name: 'deleteproject', data: {projectmeta: projectmeta}});
         },
 
         start: function () {

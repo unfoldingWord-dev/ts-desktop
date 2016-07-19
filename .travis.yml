@@ -7,14 +7,18 @@ os:
 - 'os'
 sudo: true
 before_install:
-- apt-get install wine && wine wineboot
-- add-apt-repository --yes ppa:arx/release
-- apt-get update -d
-- apt-get install -y -q innoextract
+- sudo apt-get update
+
+# Inno Setup (for Windows installer)
+- sudo add-apt-repository --yes ppa:arx/release
+- sudo apt-get update -d
+- sudo apt-get install -y -q innoextract wine python-software-properties
 - wget -O is.exe http://www.jrsoftware.org/download.php/is.exe
-- innoextract is.exe
-- mkdir -p ~/".wine/drive_c/inno"
-- cp -a app/* ~/".wine/drive_c/inno"
+- wine --version
+- innoextract --version
+- ./scripts/innosetup/innoinstall.sh
+- sudo cp scripts/innosetup/iscc /usr/local/bin/iscc
+- iscc /? 2> | grep "Inno Setup Preprocessor"
 
 before_script:
 - npm install

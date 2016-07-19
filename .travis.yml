@@ -5,6 +5,9 @@ node_js:
 os:
 - 'linux'
 sudo: true
+cache:
+  directories:
+    - node_modules
 before_install:
 # Inno Setup (for Windows installer)
 - sudo add-apt-repository --yes ppa:arx/release

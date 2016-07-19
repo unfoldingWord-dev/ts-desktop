@@ -288,9 +288,9 @@
       showErrorMessage: function (title, defaultBody, err) {
           App.reporter.logError(err, title, 1);
 
-          var errmessage = App.utils.convertError(err, defaultBody);
+          //var errmessage = App.utils.convertError(err, defaultBody);
 
-          this.showMessage(title, errmessage);
+          this.showMessage(title, defaultBody);
       },
 
       showConflictsMessage: function (title, body, conflicts) {
@@ -671,15 +671,19 @@
               })
               .catch(function (err) {
                   err = err || '';
+                  var errmessage = "";
 
-                  var errmessage = err.status == 401
-                      ? "Cannot upload without connecting to a Door43 account."
-                      : (err.data || err.stderr || "An error occurred while trying to upload your project.");
+                  if (err.syscall === "getaddrinfo") {
+                      errmessage = "Unable to connect to server";
+                  } else if (err.status === 401) {
+                      errmessage = "Cannot upload without connecting to a Door43 account.";
+                  } else {
+                      errmessage = err.data || err.stderr || "An error occurred while trying to upload your project.";
+                  }
 
                   if (typeof errmessage === 'string' && errmessage.includes("rejected because the remote contains work")) {
                       errmessage = "Cannot upload this project because a project already exists that has no shared history";
                   }
-
                   mythis.showErrorMessage('Backup Failed', errmessage, err);
               });
       },

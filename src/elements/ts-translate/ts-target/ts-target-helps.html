@@ -167,6 +167,10 @@
             display: none;
         }
 
+        #iconbox.hide {
+            display: none;
+        }
+
 	</style>
 
 	<template>
@@ -180,7 +184,7 @@
             </paper-material>
             <div id="content" class="editmode">
                 <template is="dom-if" if="{{!chunk.helpscontent.length}}">
-                    <div id="iconbox" on-tap="addhelp">
+                    <div id="iconbox" class$="[[iconclass(chunk.completed)]]" on-tap="addhelp">
                         <p>Click to add <span>[[chunk.projectmeta.type.name]]</span></p>
                         <iron-icon icon="add"></iron-icon>
                     </div>

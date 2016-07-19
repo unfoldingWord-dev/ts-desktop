@@ -817,6 +817,9 @@
           var autobackupdir = App.configurator.getUserPath('datalocation', 'automatic_backups');
 
           App.gitManager.verifyGit()
+              .then(function (version) {
+                  App.reporter.logNotice(version, 'Git Version');
+              })
               .then(function () {
                   App.ipc.send('loading-status', 'Retrieving User Info...');
                   mythis.retrieveUser();

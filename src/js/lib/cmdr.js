@@ -5,10 +5,8 @@ var exec = require('child_process').exec;
 module.exports = function cmdr (paths) {
 
 	const pathStr = (function makePathString (paths) {
-	    if (paths && paths.length) {
-	        return process.platform === 'win32' ?
-	            'set PATH=' + paths.join(';') + ';%PATH% & ' :
-	            'PATH=' + paths.join(':') + ':$PATH ';
+	    if (paths && paths.length && process.platform !== 'win32') {
+	        return 'PATH=' + paths.join(':') + ':$PATH ';
 	    }
 
 	    return '';
@@ -40,14 +38,6 @@ module.exports = function cmdr (paths) {
 	            var c = process.platform === 'win32' ?
 	                        `set ${name}=${val} & ` :
 	                        `${name}='${val}' `;
-
-	            return cmd(str + c);
-	        },
-
-	        withPaths: function (paths) {
-	            var c = process.platform === 'win32' ?
-	                'set PATH=' + paths.join(';') + ';%PATH% & ' :
-	                'PATH=' + paths.join(':') + ':$PATH ';
 
 	            return cmd(str + c);
 	        },

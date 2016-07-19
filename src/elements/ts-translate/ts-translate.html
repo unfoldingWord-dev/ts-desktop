@@ -1254,6 +1254,7 @@
 
         gohome: function () {
             var mythis = this;
+            mythis.$.reviewmode.closeresource();
             mythis.savestate();
             mythis.stoptimers();
             return mythis.saveAll()
@@ -1272,6 +1273,7 @@
                 mythis.set('options.loading', true);
                 mythis.$.loading.open();
                 setTimeout(function() {
+                    mythis.$.reviewmode.closeresource();
                     mythis.savestate();
                     mythis.setleftanimation();
                     mythis.stoptimers();

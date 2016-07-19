@@ -46,6 +46,7 @@
     "electron-prebuilt": "^1.2.5",
     "gulp": "^3.9.1",
     "gulp-mocha": "^2.2.0",
+    "gulp-replace": "^0.5.4",
     "mocha": "^2.5.3",
     "yargs": "^3.17.1"
   },

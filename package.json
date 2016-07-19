@@ -1,7 +1,7 @@
 {
   "name": "translationstudio",
   "productName": "translationStudio",
-  "version": "9.1.0",
+  "version": "9.2.0",
   "build": "27",
   "description": "A utility for translating the Bible and biblical content into any language.",
   "keywords": [],

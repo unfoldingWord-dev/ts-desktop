@@ -34,25 +34,34 @@ function GitManager() {
 
         getVersion: function () {
             var status = cmd().do('git --version');
-            
+
             return status.run()
                 .then(function (log) {
-                    var wordarray = log.stdout.split(" ");
-                    var versionarray = wordarray[2].split(".");
-                    
-                    return {major: versionarray[0], minor: versionarray[1]};                    
-                })
+                    var wordarray = log.stdout.split('\n')[0].split(" ");
+                    var versionstring = wordarray[2];
+                    var versionarray = versionstring.split(".");
+
+                    return {
+                        major: versionarray[0],
+                        minor: versionarray[1],
+                        patch: versionarray[2],
+                        toString: function () {
+                            return wordarray.slice(2).join(' ');
+                        }
+                    };
+                });
         },
 
-        verifyGit: function () {            
+        verifyGit: function () {
             var installed = false;
 
             return this.getVersion()
-                .then(function (version) {                    
+                .then(function (version) {
                     if (version.major < 2 || (version.major == 2 && version.minor < 3)) {
                         installed = true;
                         throw "error";
                     }
+                    return version;
                 })
                 .catch(function (err) {
                     if (installed) {
@@ -125,7 +134,7 @@ function GitManager() {
                     } else {
                         pull = cmd().cd(localPath).and.do(`git pull "${remotePath}" master`);
                     }
-                    
+
                     return pull.run()
                         .catch(function (err) {
                             if (err.stdout.includes('fix conflicts')) {
@@ -135,7 +144,7 @@ function GitManager() {
                                     });
                             }
                             throw err;
-                        })
+                        });
                 })
                 .then(function () {
                     if (conflictlist.length) {

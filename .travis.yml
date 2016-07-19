@@ -14,7 +14,7 @@ before_install:
 - innoextract --version
 - ./scripts/innosetup/innoinstall.sh
 - sudo cp scripts/innosetup/iscc /usr/local/bin/iscc
-- iscc /? 2> | grep "Inno Setup Preprocessor"
+- iscc /? 2> /dev/null | grep "Inno Setup Preprocessor"
 before_script:
 - npm install
 - npm install gulp -g

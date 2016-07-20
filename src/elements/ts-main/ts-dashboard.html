@@ -288,9 +288,9 @@
       showErrorMessage: function (title, defaultBody, err) {
           App.reporter.logError(err, title, 1);
 
-          var errmessage = App.utils.convertError(err, defaultBody);
+          //var errmessage = App.utils.convertError(err, defaultBody);
 
-          this.showMessage(title, errmessage);
+          this.showMessage(title, defaultBody);
       },
 
       showConflictsMessage: function (title, body, conflicts) {
@@ -671,15 +671,19 @@
               })
               .catch(function (err) {
                   err = err || '';
+                  var errmessage = "";
 
-                  var errmessage = err.status == 401
-                      ? "Cannot upload without connecting to a Door43 account."
-                      : (err.data || err.stderr || "An error occurred while trying to upload your project.");
+                  if (err.syscall === "getaddrinfo") {
+                      errmessage = "Unable to connect to server";
+                  } else if (err.status === 401) {
+                      errmessage = "Cannot upload without connecting to a Door43 account.";
+                  } else {
+                      errmessage = err.data || err.stderr || "An error occurred while trying to upload your project.";
+                  }
 
                   if (typeof errmessage === 'string' && errmessage.includes("rejected because the remote contains work")) {
                       errmessage = "Cannot upload this project because a project already exists that has no shared history";
                   }
-
                   mythis.showErrorMessage('Backup Failed', errmessage, err);
               });
       },
@@ -813,6 +817,9 @@
           var autobackupdir = App.configurator.getUserPath('datalocation', 'automatic_backups');
 
           App.gitManager.verifyGit()
+              .then(function (version) {
+                  App.reporter.logNotice('Git Version ' + version);
+              })
               .then(function () {
                   App.ipc.send('loading-status', 'Retrieving User Info...');
                   mythis.retrieveUser();
@@ -832,10 +839,19 @@
                   return App.exportManager.backupAllTranslations(mythis.projectlist, autobackupdir)
               })
               .catch(function (err) {
-                  App.reporter.logError(err.stack, 'Error on startup');
+                  err && err.stack && App.reporter.logError(err.stack, 'Error on startup');
 
                   mythis.set('options', {});
-                  mythis.showErrorMessage('Error on startup', 'Something broke.', err);
+
+                  var msg = 'Something broke.';
+
+                  if (err && typeof err === 'string') {
+                      msg = err;
+                  } else if (err && err.toString() !== '[object Object]') {
+                      msg = err.toString();
+                  }
+
+                  mythis.showErrorMessage('Error on startup', msg, err);
               })
               .then(function () {
                   App.ipc.send('loading-done');

@@ -61,6 +61,14 @@
         "visible": true
     },
     {
+        "name": "gitversion",
+        "mainText": "Git Version",
+        "value": "N/A",
+        "group": "about",
+        "enabled": false,
+        "visible": true
+    },
+    {
         "name": "datapath",
         "mainText": "Data Path",
         "value": "/test/path",

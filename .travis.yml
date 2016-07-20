@@ -24,7 +24,9 @@ before_script:
 - npm install gulp -g
 script: npm test
 after_success:
-- gulp build
+- gulp build --win
+- gulp build --osx
+- pwd
 - ls -l out
 - mkdir out/build
 - zip -r out/build/tS_9.2-28_osx.zip out/translationStudio-darwin-x64/translationStudio.app

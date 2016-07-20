@@ -23,7 +23,7 @@ script: npm test
 after_success:
 - gulp build
 - mkdir out/build
-- zip -r out/build/tS_9.2-28_osx.zip out/translationStudio-darwin-x64
+- zip -r out/build/tS_9.2-28_osx.zip out/translationStudio-darwin-x64/translationStudio.app
 - "./scripts/download_git.sh ./vendor 2.9.2 64"
 - "./scripts/download_git.sh ./vendor 2.9.2 32"
 - iscc win64_installer.iss

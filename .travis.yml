@@ -27,7 +27,7 @@ before_script:
 - npm install
 - npm install gulp -g
 script: npm test
-after_success:
+before_deploy:
 - gulp build --win
 - gulp build --osx
 - pwd
@@ -38,8 +38,6 @@ after_success:
 - "./scripts/download_git.sh ./vendor 2.9.2 32"
 - iscc win64_installer.iss
 - iscc win32_installer.iss
-before_deploy:
-- echo "deploying builds"
 deploy:
 - provider: releases
   api_key:

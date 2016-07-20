@@ -166,6 +166,10 @@
         },
 
         input: function () {
+            var text = event.target.value;
+
+            this.set('chunk.transcontent', text);
+            this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
             this.fire('setheight');
         },
 

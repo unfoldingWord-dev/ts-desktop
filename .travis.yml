@@ -25,6 +25,7 @@ before_script:
 script: npm test
 after_success:
 - gulp build
+- ls -l out
 - mkdir out/build
 - zip -r out/build/tS_9.2-28_osx.zip out/translationStudio-darwin-x64/translationStudio.app
 - "./scripts/download_git.sh ./vendor 2.9.2 64"

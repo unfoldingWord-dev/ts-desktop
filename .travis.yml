@@ -4,6 +4,10 @@ node_js:
 os:
 - linux
 sudo: true
+env:
+  global:
+  - secure: R61XmjAE1j2w1ynoBud6mliJX5Y73u9ncyVaSM9LajclYAEWRWD7n/bvAf8rfI/Al1FeLIedscMsfgdpBc4Lu+USO4NnH2cpjrWXQmU5xTF3sHSKK9a+jzHxa7kZQf+e2uePO39Ty7FypxBJ01Zsuiv6/Hv3PVpufZU60sywg/E=
+  - secure: hiF+Sfpzc4C2Kxg+VgOHQ6ITPJRRwQJ802b6wnZy7Z1Ta9Gl01AgOFGWkf2raq4cQMlWw82UfiL7dEJ/bHwsEo3PoBMVhRG1AjiTY3dpoiKUjlX3MAl4SCZtBjmBN+4QT8HGOruhlKBG3xLNryg1UhjSbThPnw1rI//Be3IWH+o=
 cache:
   directories:
   - node_modules
@@ -17,8 +21,8 @@ before_install:
 - sudo cp scripts/innosetup/iscc /usr/local/bin/iscc
 - iscc /? 2> /dev/null | grep "Inno Setup Preprocessor"
 - if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then openssl aes-256-cbc -K $encrypted_54b2df9dba46_key
- -iv $encrypted_54b2df9dba46_iv -in private.json.enc -out src/config/private.json -d;
- fi
+  -iv $encrypted_54b2df9dba46_iv -in private.json.enc -out src/config/private.json
+  -d; fi
 before_script:
 - npm install
 - npm install gulp -g
@@ -37,15 +41,21 @@ after_success:
 before_deploy:
 - echo "deploying builds"
 deploy:
-  provider: releases
+- provider: releases
   api_key:
     secure: brjmL3cyCTr6swNCqka2fkc41j+PO2tqXZhE9QyNoDEXcxR1FOwPoPut/8h4N/pISfkf2FibtsWqThhW1Xz1pVNNMBlHRblJsSecfvXOtn7kneCsAV+QBngbPuA8OKzfhXTUeIQNlIpfG+rwlDg28wOthDI/7ADBOYgGQWeOd7o=
   file:
-    - out/build/tS_9.2-28_win_x32.exe
-    - out/build/tS_9.2-28_win_x64.exe
-    - out/build/tS_9.2-28_osx.exe
+  - out/build/tS_9.2-28_win_x32.exe
+  - out/build/tS_9.2-28_win_x64.exe
+  - out/build/tS_9.2-28_osx.exe
   skip_cleanup: true
   overwrite: true
   on:
     tags: true
     repo: unfoldingWord-dev/ts-desktop
+- provider: surge
+  project: "./out/build/"
+  domain: painstaking-development.surge.sh
+  skip_cleanup: true
+  on:
+    all_branches: true

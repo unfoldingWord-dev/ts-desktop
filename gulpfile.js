@@ -43,6 +43,7 @@ gulp.task('build', ['clean'], function (done) {
         'unit_tests',
         'acceptance_tests',
         'out',
+        'vendor',
         'scripts',
         '\\.'
     ]).map(function (name) {

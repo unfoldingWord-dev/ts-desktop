@@ -44,6 +44,7 @@ gulp.task('build', ['clean'], function (done) {
     var ignored = Object.keys(p['devDependencies']).concat([
         'unit_tests',
         'acceptance_tests',
+        'out',
         BUILD_DIR,
         RELEASE_DIR,
         'vendor',
@@ -119,6 +120,7 @@ gulp.task('release', function(done) {
             console.log('Preparing release for ' + os);
             switch (os) {
                 case 'win32':
+                    // TODO: download git if we do not have it in vendor
                     promises.push(new Promise(function(os, resolve, reject) {
                         var file = `tS_${p.version}-${p.build}_win_x32.exe`;
                         var cmd = `iscc scripts/win_installer_template.iss /DArch=x86 /DRootPath=../ /DVersion=${p.version} /DBuild=${p.build} /DGitVersion=${gitVersion} /DDestFile=${file} /DDestDir=${RELEASE_DIR} /DBuildDir=${BUILD_DIR}`;
@@ -139,6 +141,7 @@ gulp.task('release', function(done) {
                     }.bind(undefined, os)));
                     break;
                 case 'win64':
+                    // TODO: download git if we do not have it in vendor
                     promises.push(new Promise(function(os, resolve, reject) {
                         var file = `tS_${p.version}-${p.build}_win_x64.exe`;
                         var cmd = `iscc scripts/win_installer_template.iss /DArch=x64 /DRootPath=../ /DVersion=${p.version} /DBuild=${p.build} /DGitVersion=${gitVersion} /DDestFile=${file} /DDestDir=${RELEASE_DIR} /DBuildDir=${BUILD_DIR}`;
@@ -183,7 +186,7 @@ gulp.task('release', function(done) {
                 case 'linux':
                     dest = '';
                     promises.push(new Promise(function(os, resolve, reject) {
-                        var dest = `${RELEASE_DIR}/tS_${p.version}-${p.build}_osx_x64.zip`;
+                        var dest = `${RELEASE_DIR}/tS_${p.version}-${p.build}_linux_x64.zip`;
                         try {
                             var output = fs.createWriteStream(dest);
                             output.on('close', function () {
@@ -195,7 +198,7 @@ gulp.task('release', function(done) {
                             var archive = archiver.create('zip');
                             archive.on('error', reject);
                             archive.pipe(output);
-                            archive.directory(BUILD_DIR + '/translationStudio-darwin-x64/translationStudio.app/', 'translationStudio.app');
+                            archive.directory(BUILD_DIR + '/translationStudio-linux-x64/', 'translationStudio');
                             archive.finalize();
                         } catch (e) {
                             reject(e);

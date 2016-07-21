@@ -65,7 +65,7 @@ Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescrip
 
 [Files]
 Source: "{#RootPath}vendor\{#GitExecutable}"; DestDir: "{app}\vendor"; Flags: ignoreversion recursesubdirs deleteafterinstall
-Source: "{#RootPath}scripts\win32_git_installer.iss"; DestDir: "{app}\vendor"; Flags: ignoreversion recursesubdirs deleteafterinstall
+Source: "{#RootPath}scripts\git\win32_git_installer.iss"; DestDir: "{app}\vendor"; Flags: ignoreversion recursesubdirs deleteafterinstall
 Source: "{#RootPath}out\translationStudio-win32-ia32\*.*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 
 [Icons]

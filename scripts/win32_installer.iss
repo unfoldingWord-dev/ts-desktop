@@ -3,12 +3,13 @@
 
 #define MyAppName "translationStudio"
 #define Version "9.2"
-#define Build "29"
+#define Build "30"
 #define MyAppPublisher "Unfolding Word"
 #define MyAppURL "https://unfoldingword.org"
 #define MyAppExeName "translationStudio.exe"
-#define MyLicenseFile "LICENSE"
-#define GitExecutable "Git-2.9.2-64-bit.exe"
+#define RootPath = "..\"
+#define MyLicenseFile RootPath + "LICENSE"
+#define GitExecutable "Git-2.9.2-32-bit.exe"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
@@ -25,9 +26,9 @@ DefaultDirName={pf}\{#MyAppName}
 DisableDirPage=yes
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
-OutputDir=out\
-OutputBaseFilename=tS_{#Version}-{#Build}_win_x64
-SetupIconFile=icons\icon.ico
+OutputDir={#RootPath}out\
+OutputBaseFilename=tS_{#Version}-{#Build}_win_x32
+SetupIconFile={#RootPath}icons\icon.ico
 Compression=lzma
 SolidCompression=yes
 LicenseFile={#MyLicenseFile}
@@ -63,9 +64,9 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 0,6.1
 
 [Files]
-Source: "vendor\{#GitExecutable}"; DestDir: "{app}\vendor"; Flags: ignoreversion recursesubdirs deleteafterinstall
-Source: "scripts\win64_git_installer.iss"; DestDir: "{app}\vendor"; Flags: ignoreversion recursesubdirs deleteafterinstall
-Source: "out\translationStudio-win32-x64\*.*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
+Source: "{#RootPath}vendor\{#GitExecutable}"; DestDir: "{app}\vendor"; Flags: ignoreversion recursesubdirs deleteafterinstall
+Source: "{#RootPath}scripts\win32_git_installer.iss"; DestDir: "{app}\vendor"; Flags: ignoreversion recursesubdirs deleteafterinstall
+Source: "{#RootPath}out\translationStudio-win32-ia32\*.*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
@@ -74,6 +75,6 @@ Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: 
 Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: quicklaunchicon
 
 [Run]
-Filename: "{app}\vendor\{#GitExecutable}"; Parameters: "/SILENT /LOADINF=""{app}\vendor\win64_git_installer.iss""";
+Filename: "{app}\vendor\{#GitExecutable}"; Parameters: "/SILENT /LOADINF=""{app}\vendor\win32_git_installer.iss""";
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: postinstall skipifsilent
 

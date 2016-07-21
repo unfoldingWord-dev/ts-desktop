@@ -7,6 +7,7 @@ tmp/
 vendor/
 build/
 out/
+release/
 .brackets.json
 .idea
 test.html

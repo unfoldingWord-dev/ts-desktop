@@ -34,10 +34,10 @@ before_deploy:
 - ls -l out
 - mkdir out/build
 - zip -r out/build/tS_9.2-28_osx.zip out/translationStudio-darwin-x64/translationStudio.app
-- "./scripts/download_git.sh ./vendor 2.9.2 64"
-- "./scripts/download_git.sh ./vendor 2.9.2 32"
-- iscc win64_installer.iss
-- iscc win32_installer.iss
+- "./scripts/git/download_git.sh ./vendor 2.9.2 64"
+- "./scripts/git/download_git.sh ./vendor 2.9.2 32"
+- iscc scripts/win64_installer.iss
+- iscc scripts/win32_installer.iss
 deploy:
 - provider: releases
   api_key:

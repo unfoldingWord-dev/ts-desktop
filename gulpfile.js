@@ -4,18 +4,20 @@
  * Copyright 2016
  */
 
-var gulp = require('gulp'),
+const gulp = require('gulp'),
     mocha = require('gulp-mocha'),
     rimraf = require('rimraf'),
     argv = require('yargs').argv,
     packager = require('electron-packager'),
     path = require('path'),
+    mkdirp = require('mkdirp'),
     fs = require('fs');
 
-var APP_NAME = 'translationStudio',
+const APP_NAME = 'translationStudio',
     JS_FILES = './src/js/**/*.js',
     UNIT_TEST_FILES = './unit_tests/**/*.js',
-    BUILD_DIR = 'out';
+    BUILD_DIR = 'build/',
+    RELEASE_DIR = 'release/';
 
 gulp.task('test', function () {
     return gulp.src(UNIT_TEST_FILES, { read: false })
@@ -42,7 +44,8 @@ gulp.task('build', ['clean'], function (done) {
     var ignored = Object.keys(p['devDependencies']).concat([
         'unit_tests',
         'acceptance_tests',
-        'out',
+        BUILD_DIR,
+        RELEASE_DIR,
         'vendor',
         'scripts',
         '\\.'
@@ -64,7 +67,7 @@ gulp.task('build', ['clean'], function (done) {
 
             return false;
         },
-        'out': 'out',
+        'out': BUILD_DIR,
         'app-version': p.version,
         'icon': './icons/icon'
     }, function () {
@@ -93,6 +96,123 @@ gulp.task('build', ['clean'], function (done) {
     //         }
     //     });
     // }
+});
+
+gulp.task('release', function(done) {
+    const p = require('./package');
+    const archiver = require('archiver');
+    const exec = require('child_process').exec;
+
+    var promises = [];
+    var platforms = [];
+    const gitVersion = '2.9.2';
+
+    if (argv.win) platforms.push('win32', 'win64');
+    if (argv.win32) platforms.push('win32');
+    if (argv.win64) platforms.push('win64');
+    if (argv.osx) platforms.push('darwin');
+    if (argv.linux) platforms.push('linux');
+    if (!platforms.length) platforms.push('win32', 'win64', 'darwin', 'linux');
+
+    mkdirp('release', function() {
+        for(var os of platforms) {
+            console.log('Preparing release for ' + os);
+            switch (os) {
+                case 'win32':
+                    promises.push(new Promise(function(os, resolve, reject) {
+                        var file = `tS_${p.version}-${p.build}_win_x32.exe`;
+                        var cmd = `iscc scripts/win_installer_template.iss /DArch=x86 /DRootPath=../ /DVersion=${p.version} /DBuild=${p.build} /DGitVersion=${gitVersion} /DDestFile=${file} /DDestDir=${RELEASE_DIR} /DBuildDir=${BUILD_DIR}`;
+                        exec(cmd, function(err, stdout, stderr) {
+                            if(err) {
+                                console.error(err);
+                                resolve({
+                                    os: os,
+                                    status: 'error'
+                                });
+                            } else {
+                                resolve({
+                                    os: os,
+                                    status: RELEASE_DIR + '/' + file
+                                });
+                            }
+                        });
+                    }.bind(undefined, os)));
+                    break;
+                case 'win64':
+                    promises.push(new Promise(function(os, resolve, reject) {
+                        var file = `tS_${p.version}-${p.build}_win_x64.exe`;
+                        var cmd = `iscc scripts/win_installer_template.iss /DArch=x64 /DRootPath=../ /DVersion=${p.version} /DBuild=${p.build} /DGitVersion=${gitVersion} /DDestFile=${file} /DDestDir=${RELEASE_DIR} /DBuildDir=${BUILD_DIR}`;
+                        exec(cmd, function(err, stdout, stderr) {
+                            if(err) {
+                                console.error(err);
+                                resolve({
+                                    os: os,
+                                    path: 'error'
+                                });
+                            } else {
+                                resolve({
+                                    os: os,
+                                    status: RELEASE_DIR + '/' + file
+                                });
+                            }
+                        });
+                    }.bind(undefined, os)));
+                    break;
+                    break;
+                case 'darwin':
+                    promises.push(new Promise(function(os, resolve, reject) {
+                        var dest = `${RELEASE_DIR}/tS_${p.version}-${p.build}_osx_x64.zip`;
+                        try {
+                            var output = fs.createWriteStream(dest);
+                            output.on('close', function () {
+                                resolve({
+                                    os: os,
+                                    status: dest
+                                });
+                            });
+                            var archive = archiver.create('zip');
+                            archive.on('error', reject);
+                            archive.pipe(output);
+                            archive.directory(BUILD_DIR + '/translationStudio-darwin-x64/translationStudio.app/', 'translationStudio.app');
+                            archive.finalize();
+                        } catch (e) {
+                            reject(e);
+                        }
+                    }.bind(undefined, os)));
+                    break;
+                case 'linux':
+                    dest = '';
+                    promises.push(new Promise(function(os, resolve, reject) {
+                        var dest = `${RELEASE_DIR}/tS_${p.version}-${p.build}_osx_x64.zip`;
+                        try {
+                            var output = fs.createWriteStream(dest);
+                            output.on('close', function () {
+                                resolve({
+                                    os: os,
+                                    status: dest
+                                });
+                            });
+                            var archive = archiver.create('zip');
+                            archive.on('error', reject);
+                            archive.pipe(output);
+                            archive.directory(BUILD_DIR + '/translationStudio-darwin-x64/translationStudio.app/', 'translationStudio.app');
+                            archive.finalize();
+                        } catch (e) {
+                            reject(e);
+                        }
+                    }.bind(undefined, os)));
+                    break;
+                default:
+                    console.warn('No release procedure has been defined for ' + os);
+            }
+        }
+        Promise.all(promises).then(function(values) {
+            for(var release of values) {
+                console.log(`${release.os}: ${release.status}`);
+            }
+            done();
+        }).catch(done);
+    });
 });
 
 gulp.task('default', ['test']);

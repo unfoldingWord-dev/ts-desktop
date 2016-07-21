@@ -2,4 +2,4 @@
 unset DISPLAY
 scriptname=$1
 [ -f "$scriptname" ] && scriptname=$(winepath -w "$scriptname")
-wine "C:\inno\ISCC.exe" "$scriptname" "/q"
+wine "C:\inno\ISCC.exe" "$@" "/q"

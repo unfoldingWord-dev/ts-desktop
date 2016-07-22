@@ -30,8 +30,6 @@ script: npm test
 before_deploy:
 - gulp build --win
 - gulp build --osx
-- "./scripts/git/download_git.sh ./vendor 2.9.2 64"
-- "./scripts/git/download_git.sh ./vendor 2.9.2 32"
 - gulp release --win
 - gulp release --osx
 deploy:
@@ -39,9 +37,9 @@ deploy:
   api_key:
     secure: brjmL3cyCTr6swNCqka2fkc41j+PO2tqXZhE9QyNoDEXcxR1FOwPoPut/8h4N/pISfkf2FibtsWqThhW1Xz1pVNNMBlHRblJsSecfvXOtn7kneCsAV+QBngbPuA8OKzfhXTUeIQNlIpfG+rwlDg28wOthDI/7ADBOYgGQWeOd7o=
   file:
-  - out/build/tS_9.2-28_win_x32.exe
-  - out/build/tS_9.2-28_win_x64.exe
-  - out/build/tS_9.2-28_osx.exe
+  - release/tS_9.2-30_win_x32.exe
+  - release/tS_9.2-30_win_x64.exe
+  - release/tS_9.2-30_osx_x64.exe
   skip_cleanup: true
   overwrite: true
   on:

@@ -163,58 +163,64 @@ gulp.task('release', function(done) {
 
     mkdirp('release', function() {
         for(var os of platforms) {
-            console.log('Preparing release for ' + os);
             switch (os) {
                 case 'win32':
-                    promises.push(downloadGit(gitVersion, '32')
-                        .then(releaseWin.bind(undefined, '32')));
+                    if (fs.existsSync(BUILD_DIR + 'translationStudio-win32-ia32/')) {
+                        promises.push(downloadGit(gitVersion, '32')
+                            .then(releaseWin.bind(undefined, '32')));
+                    }
                     break;
                 case 'win64':
-                    promises.push(downloadGit(gitVersion, '64')
-                        .then(releaseWin.bind(undefined, '64')));
+                    if (fs.existsSync(BUILD_DIR + 'translationStudio-win32-x64/')) {
+                        promises.push(downloadGit(gitVersion, '64')
+                            .then(releaseWin.bind(undefined, '64')));
+                    }
                     break;
                 case 'darwin':
-                    promises.push(new Promise(function(os, resolve, reject) {
-                        var dest = `${RELEASE_DIR}/tS_${p.version}-${p.build}_osx_x64.zip`;
-                        try {
-                            var output = fs.createWriteStream(dest);
-                            output.on('close', function () {
-                                resolve({
-                                    os: os,
-                                    status: dest
+                    if (fs.existsSync(BUILD_DIR + 'translationStudio-darwin-x64/')) {
+                        promises.push(new Promise(function (os, resolve, reject) {
+                            var dest = `${RELEASE_DIR}tS_${p.version}-${p.build}_osx_x64.zip`;
+                            try {
+                                var output = fs.createWriteStream(dest);
+                                output.on('close', function () {
+                                    resolve({
+                                        os: os,
+                                        status: dest
+                                    });
                                 });
-                            });
-                            var archive = archiver.create('zip');
-                            archive.on('error', reject);
-                            archive.pipe(output);
-                            archive.directory(BUILD_DIR + '/translationStudio-darwin-x64/translationStudio.app/', 'translationStudio.app');
-                            archive.finalize();
-                        } catch (e) {
-                            reject(e);
-                        }
-                    }.bind(undefined, os)));
+                                var archive = archiver.create('zip');
+                                archive.on('error', reject);
+                                archive.pipe(output);
+                                archive.directory(BUILD_DIR + 'translationStudio-darwin-x64/translationStudio.app/', 'translationStudio.app');
+                                archive.finalize();
+                            } catch (e) {
+                                reject(e);
+                            }
+                        }.bind(undefined, os)));
+                    }
                     break;
                 case 'linux':
-                    dest = '';
-                    promises.push(new Promise(function(os, resolve, reject) {
-                        var dest = `${RELEASE_DIR}/tS_${p.version}-${p.build}_linux_x64.zip`;
-                        try {
-                            var output = fs.createWriteStream(dest);
-                            output.on('close', function () {
-                                resolve({
-                                    os: os,
-                                    status: dest
+                    if (fs.existsSync(BUILD_DIR + 'translationStudio-linux-x64/')) {
+                        promises.push(new Promise(function (os, resolve, reject) {
+                            var dest = `${RELEASE_DIR}tS_${p.version}-${p.build}_linux_x64.zip`;
+                            try {
+                                var output = fs.createWriteStream(dest);
+                                output.on('close', function () {
+                                    resolve({
+                                        os: os,
+                                        status: dest
+                                    });
                                 });
-                            });
-                            var archive = archiver.create('zip');
-                            archive.on('error', reject);
-                            archive.pipe(output);
-                            archive.directory(BUILD_DIR + '/translationStudio-linux-x64/', 'translationStudio');
-                            archive.finalize();
-                        } catch (e) {
-                            reject(e);
-                        }
-                    }.bind(undefined, os)));
+                                var archive = archiver.create('zip');
+                                archive.on('error', reject);
+                                archive.pipe(output);
+                                archive.directory(BUILD_DIR + 'translationStudio-linux-x64/', 'translationStudio');
+                                archive.finalize();
+                            } catch (e) {
+                                reject(e);
+                            }
+                        }.bind(undefined, os)));
+                    }
                     break;
                 default:
                     console.warn('No release procedure has been defined for ' + os);

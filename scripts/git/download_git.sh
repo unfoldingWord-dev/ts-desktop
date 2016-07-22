@@ -4,5 +4,12 @@ dir=$1
 version=$2
 osbits=$3
 
-mkdir $dir
-wget wget -O "$dir/git-$osbits-bit.exe" "https://github.com/git-for-windows/git/releases/download/v$version.windows.1/Git-$version-$osbits-bit.exe"
+if [ ! -d "$dir" ]; then
+  mkdir $dir
+fi
+
+dest=$dir/Git-$version-$osbits-bit.exe
+if [ ! -f "$dest" ]; then
+  echo "downloading git $version for win$osbits"
+  wget -O "$dest" "https://github.com/git-for-windows/git/releases/download/v$version.windows.1/Git-$version-$osbits-bit.exe"
+fi

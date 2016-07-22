@@ -30,14 +30,10 @@ script: npm test
 before_deploy:
 - gulp build --win
 - gulp build --osx
-- pwd
-- ls -l out
-- mkdir out/build
-- zip -r out/build/tS_9.2-28_osx.zip out/translationStudio-darwin-x64/translationStudio.app
 - "./scripts/git/download_git.sh ./vendor 2.9.2 64"
 - "./scripts/git/download_git.sh ./vendor 2.9.2 32"
-- iscc scripts/win64_installer.iss
-- iscc scripts/win32_installer.iss
+- gulp release --win
+- gulp release --osx
 deploy:
 - provider: releases
   api_key:

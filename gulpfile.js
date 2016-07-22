@@ -103,6 +103,7 @@ gulp.task('release', function(done) {
     const p = require('./package');
     const archiver = require('archiver');
     const exec = require('child_process').exec;
+    const spawn = require('child_process').spawn;
 
     var promises = [];
     var platforms = [];
@@ -115,52 +116,62 @@ gulp.task('release', function(done) {
     if (argv.linux) platforms.push('linux');
     if (!platforms.length) platforms.push('win32', 'win64', 'darwin', 'linux');
 
+    /**
+     *
+     * @param version 2.9.2
+     * @param arch 64|32
+     * @returns {Promise}
+     */
+    const downloadGit = function(version, arch) {
+        return new Promise(function (resolve, reject) {
+            var cmd = `./scripts/git/download_git.sh ./vendor ${version} ${arch}`;
+            exec(cmd, function(err, stdout, stderr) {
+                if(err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
+    };
+
+    /**
+     *
+     * @param arch 64|32
+     * @returns {Promise}
+     */
+    const releaseWin = function(arch) {
+        var file = `tS_${p.version}-${p.build}_win_x${arch}.exe`;
+        var cmd = `iscc scripts/win_installer_template.iss /DArch=${arch === 64 ? 'x64' : 'x86'} /DRootPath=../ /DVersion=${p.version} /DBuild=${p.build} /DGitVersion=${gitVersion} /DDestFile=${file} /DDestDir=${RELEASE_DIR} /DBuildDir=${BUILD_DIR}`;
+        return new Promise(function(resolve, reject) {
+            exec(cmd, function(err, stdout, stderr) {
+                if(err) {
+                    console.error(err);
+                    resolve({
+                        os: os,
+                        status: 'error'
+                    });
+                } else {
+                    resolve({
+                        os: 'win' + arch,
+                        status: RELEASE_DIR + file
+                    });
+                }
+            });
+        });
+    };
+
     mkdirp('release', function() {
         for(var os of platforms) {
             console.log('Preparing release for ' + os);
             switch (os) {
                 case 'win32':
-                    // TODO: download git if we do not have it in vendor
-                    promises.push(new Promise(function(os, resolve, reject) {
-                        var file = `tS_${p.version}-${p.build}_win_x32.exe`;
-                        var cmd = `iscc scripts/win_installer_template.iss /DArch=x86 /DRootPath=../ /DVersion=${p.version} /DBuild=${p.build} /DGitVersion=${gitVersion} /DDestFile=${file} /DDestDir=${RELEASE_DIR} /DBuildDir=${BUILD_DIR}`;
-                        exec(cmd, function(err, stdout, stderr) {
-                            if(err) {
-                                console.error(err);
-                                resolve({
-                                    os: os,
-                                    status: 'error'
-                                });
-                            } else {
-                                resolve({
-                                    os: os,
-                                    status: RELEASE_DIR + '/' + file
-                                });
-                            }
-                        });
-                    }.bind(undefined, os)));
+                    promises.push(downloadGit(gitVersion, '32')
+                        .then(releaseWin.bind(undefined, '32')));
                     break;
                 case 'win64':
-                    // TODO: download git if we do not have it in vendor
-                    promises.push(new Promise(function(os, resolve, reject) {
-                        var file = `tS_${p.version}-${p.build}_win_x64.exe`;
-                        var cmd = `iscc scripts/win_installer_template.iss /DArch=x64 /DRootPath=../ /DVersion=${p.version} /DBuild=${p.build} /DGitVersion=${gitVersion} /DDestFile=${file} /DDestDir=${RELEASE_DIR} /DBuildDir=${BUILD_DIR}`;
-                        exec(cmd, function(err, stdout, stderr) {
-                            if(err) {
-                                console.error(err);
-                                resolve({
-                                    os: os,
-                                    path: 'error'
-                                });
-                            } else {
-                                resolve({
-                                    os: os,
-                                    status: RELEASE_DIR + '/' + file
-                                });
-                            }
-                        });
-                    }.bind(undefined, os)));
-                    break;
+                    promises.push(downloadGit(gitVersion, '64')
+                        .then(releaseWin.bind(undefined, '64')));
                     break;
                 case 'darwin':
                     promises.push(new Promise(function(os, resolve, reject) {

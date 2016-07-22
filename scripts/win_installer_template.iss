@@ -65,7 +65,7 @@ SetupIconFile={#RootPath}icons\icon.ico
 Compression=lzma
 SolidCompression=yes
 LicenseFile={#MyLicenseFile}
-#ifdef Arch32
+#if Arch == "x86"
 ArchitecturesAllowed=x86
 #else
 ArchitecturesAllowed=x64

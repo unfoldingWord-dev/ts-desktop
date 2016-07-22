@@ -33,6 +33,12 @@ before_deploy:
 - gulp release --win
 - gulp release --osx
 deploy:
+- provider: surge
+  project: "./release/"
+  domain: painstaking-development.surge.sh
+  skip_cleanup: true
+  on:
+    all_branches: true
 - provider: releases
   api_key:
     secure: brjmL3cyCTr6swNCqka2fkc41j+PO2tqXZhE9QyNoDEXcxR1FOwPoPut/8h4N/pISfkf2FibtsWqThhW1Xz1pVNNMBlHRblJsSecfvXOtn7kneCsAV+QBngbPuA8OKzfhXTUeIQNlIpfG+rwlDg28wOthDI/7ADBOYgGQWeOd7o=
@@ -45,9 +51,3 @@ deploy:
   on:
     tags: true
     repo: unfoldingWord-dev/ts-desktop
-- provider: surge
-  project: "./out/build/"
-  domain: painstaking-development.surge.sh
-  skip_cleanup: true
-  on:
-    all_branches: true

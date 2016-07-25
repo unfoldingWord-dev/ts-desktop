@@ -9,6 +9,7 @@ const gulp = require('gulp'),
     rimraf = require('rimraf'),
     argv = require('yargs').argv,
     packager = require('electron-packager'),
+    replace = require('gulp-replace'),
     path = require('path'),
     mkdirp = require('mkdirp'),
     fs = require('fs');
@@ -28,6 +29,19 @@ gulp.task('clean', function () {
     rimraf.sync('src/logs');
     rimraf.sync('logs');
     rimraf.sync('ssh');
+});
+
+gulp.task('bump', function () {
+    var build = require('./package').build;
+
+    var bumped = ++build;
+
+    var replaceString = '$1"' + bumped + '"$2';
+
+    return gulp.src(['package.json', 'win32_installer.iss', 'win64_installer.iss'])
+        .pipe(replace(/("build"\s*:\s*)"\d+"(.*)/, replaceString))
+        .pipe(replace(/(#define\s*Build\s*)"\d+"(.*)/, replaceString))
+        .pipe(gulp.dest('./'));
 });
 
 // pass parameters like: gulp build --win --osx --linux

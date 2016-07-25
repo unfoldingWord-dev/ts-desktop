@@ -103,7 +103,6 @@ gulp.task('release', function(done) {
     const p = require('./package');
     const archiver = require('archiver');
     const exec = require('child_process').exec;
-    const spawn = require('child_process').spawn;
 
     var promises = [];
     var platforms = [];
@@ -267,93 +266,32 @@ gulp.task('release', function(done) {
             }
         }
         Promise.all(promises).then(function(values) {
-            var releaseLog = fs.createWriteStream(RELEASE_DIR + 'index.html');
-            releaseLog.on('error', function(e) {
+            var releaseNotes = fs.createWriteStream(RELEASE_DIR + 'index.html');
+            releaseNotes.on('error', function(e) {
                 console.error(e);
             });
-            releaseLog.write(`<style>
-body {
-    font-family: Arial,serif;
-    font-size: 16px;
-    color: #2f2f2f;
-    margin: 2px;
-}
-h1, h2 {
-    text-align: center;
-    color: #2f2f2f;
-    font-family: Arial,serif;
-    margin: 10px 0;
-}
-h2 a {
-    text-decoration: none;
-    font-size: 18px;
-    font-weight: normal;
-}
-h2 a:hover {
-    text-decoration: underline;
-}
-ul {
-    padding: 0;
-    margin: 0;
-}
-li {
-    padding: 5px;
-    margin-bottom: 2px;
-}
-li a {
-     float: right;
-}
-li:hover {
-    opacity: 0.8;
-}
-.ok {
-    background-color: #9ce498
-}
-.ok .status {
-    color: #0f8e00;
-}
-a, a:visited {
- color: #078800
-}
-a:hover {
-    color: #055800;
-}
-.missing {
-    background-color: #d0d0d0;
-}
-.missing .status {
-    color: #808080;
-}
-.error {
-    background-color: #e4b498
-}
-.error .status {
-    color: #c12d00;
-}
-.status {
-    text-transform: uppercase;
-}
-</style>`);
-            releaseLog.write(`<h1>tS Desktop build #<span id="build-num">${p.build}</span></h1><ul>`);
+            releaseNotes.write('<link rel="stylesheet" href="style.css">');
+            fs.createReadStream('scripts/release/style.css').pipe(fs.createWriteStream('release/style.css'));
+            releaseNotes.write(`<h1>tS Desktop build #<span id="build-num">${p.build}</span></h1><ul>`);
             if(process.env.TRAVIS_COMMIT) {
                 var commit = process.env.TRAVIS_COMMIT;
                 var buildNumber = process.env.TRAVIS_BUILD_NUMBER;
                 var buildId = process.env.TRAVIS_BUILD_ID;
                 var repoSlug = process.env.TRAVIS_REPO_SLUG;
-                releaseLog.write(`<h2><a href="https://github.com/${repoSlug}/commit/${commit}" target="_blank">Commit ${commit.substring(0, 7)}</a></h2>`);
-                releaseLog.write(`<h2><a href="https://travis-ci.org/${repoSlug}/builds/${buildId}" target="_blank">Travis build #${buildNumber}</a></h2>`);
+                releaseNotes.write(`<h2><a href="https://github.com/${repoSlug}/commit/${commit}" target="_blank">Commit ${commit.substring(0, 7)}</a></h2>`);
+                releaseNotes.write(`<h2><a href="https://travis-ci.org/${repoSlug}/builds/${buildId}" target="_blank">Travis build #${buildNumber}</a></h2>`);
             }
             for(var release of values) {
                 if(release.status === 'ok') {
                     release.path = release.path.substring(release.path.indexOf('/') + 1);
-                    releaseLog.write(`<li class="ok">${release.os} <span class="status">${release.status}</span> <a href="${release.path}" class="build-link" data-os="${release.os}">Download</a></li>`);
+                    releaseNotes.write(`<li class="ok">${release.os} <span class="status">${release.status}</span> <a href="${release.path}" class="build-link" data-os="${release.os}">Download</a></li>`);
                 } else {
-                    releaseLog.write(`<li class="${release.status}">${release.os} <span class="status">${release.status}</span>`);
+                    releaseNotes.write(`<li class="${release.status}">${release.os} <span class="status">${release.status}</span>`);
                 }
                 console.log(`${release.os}: ${release.status} : ${release.path}`);
             }
-            releaseLog.write('</ul>');
-            releaseLog.end();
+            releaseNotes.write('</ul>');
+            releaseNotes.end();
             done();
         }).catch(done);
     });

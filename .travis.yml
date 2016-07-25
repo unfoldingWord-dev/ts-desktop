@@ -32,8 +32,7 @@ before_deploy:
 - bower install
 - gulp build --win
 - gulp build --osx
-- gulp release --win
-- gulp release --osx
+- gulp release
 deploy:
 - provider: surge
   project: "./release/"

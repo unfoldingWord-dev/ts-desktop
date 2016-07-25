@@ -30,8 +30,7 @@ before_script:
 script: npm test
 before_deploy:
 - bower install
-- gulp build --win
-- gulp build --osx
+- gulp build
 - ls -la build
 - gulp release
 deploy:

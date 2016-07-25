@@ -272,7 +272,6 @@ gulp.task('release', function(done) {
             });
             releaseNotes.write('<link rel="stylesheet" href="style.css">');
             fs.createReadStream('scripts/release/style.css').pipe(fs.createWriteStream('release/style.css'));
-            fs.createReadStream('scripts/release/favicon.ico').pipe(fs.createWriteStream('release/favicon.ico'));
             releaseNotes.write(`<h1>tS Desktop build #<span id="build-num">${p.build}</span></h1><ul>`);
             if(process.env.TRAVIS_COMMIT) {
                 var commit = process.env.TRAVIS_COMMIT;

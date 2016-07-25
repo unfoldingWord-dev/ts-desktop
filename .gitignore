@@ -1,4 +1,5 @@
 .DS_Store
+.sync
 node_modules/
 src/components/
 dist/

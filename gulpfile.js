@@ -138,9 +138,10 @@ gulp.task('release', function(done) {
     /**
      *
      * @param arch 64|32
+     * @param os
      * @returns {Promise}
      */
-    const releaseWin = function(arch) {
+    const releaseWin = function(arch, os) {
         var file = `tS_${p.version}-${p.build}_win_x${arch}.exe`;
         var cmd = `iscc scripts/win_installer_template.iss /DArch=${arch === 64 ? 'x64' : 'x86'} /DRootPath=../ /DVersion=${p.version} /DBuild=${p.build} /DGitVersion=${gitVersion} /DDestFile=${file} /DDestDir=${RELEASE_DIR} /DBuildDir=${BUILD_DIR}`;
         return new Promise(function(resolve, reject) {
@@ -149,12 +150,14 @@ gulp.task('release', function(done) {
                     console.error(err);
                     resolve({
                         os: os,
-                        status: 'error'
+                        status: 'error',
+                        path: null
                     });
                 } else {
                     resolve({
                         os: 'win' + arch,
-                        status: RELEASE_DIR + file
+                        status: 'ok',
+                        path: RELEASE_DIR + file
                     });
                 }
             });
@@ -167,13 +170,25 @@ gulp.task('release', function(done) {
                 case 'win32':
                     if (fs.existsSync(BUILD_DIR + 'translationStudio-win32-ia32/')) {
                         promises.push(downloadGit(gitVersion, '32')
-                            .then(releaseWin.bind(undefined, '32')));
+                            .then(releaseWin.bind(undefined, '32', os)));
+                    } else {
+                        promises.push(Promise.resolve({
+                            os: os,
+                            status: 'missing',
+                            path: null
+                        }));
                     }
                     break;
                 case 'win64':
                     if (fs.existsSync(BUILD_DIR + 'translationStudio-win32-x64/')) {
                         promises.push(downloadGit(gitVersion, '64')
-                            .then(releaseWin.bind(undefined, '64')));
+                            .then(releaseWin.bind(undefined, '64', os)));
+                    } else {
+                        promises.push(Promise.resolve({
+                            os: os,
+                            status: 'missing',
+                            path: null
+                        }));
                     }
                     break;
                 case 'darwin':
@@ -185,7 +200,8 @@ gulp.task('release', function(done) {
                                 output.on('close', function () {
                                     resolve({
                                         os: os,
-                                        status: dest
+                                        status: 'ok',
+                                        path: dest
                                     });
                                 });
                                 var archive = archiver.create('zip');
@@ -194,9 +210,20 @@ gulp.task('release', function(done) {
                                 archive.directory(BUILD_DIR + 'translationStudio-darwin-x64/translationStudio.app/', 'translationStudio.app');
                                 archive.finalize();
                             } catch (e) {
-                                reject(e);
+                                console.error(e);
+                                resolve({
+                                    os: os,
+                                    status: 'error',
+                                    path: null
+                                });
                             }
                         }.bind(undefined, os)));
+                    } else {
+                        promises.push(Promise.resolve({
+                            os: os,
+                            status: 'missing',
+                            path: null
+                        }));
                     }
                     break;
                 case 'linux':
@@ -208,7 +235,8 @@ gulp.task('release', function(done) {
                                 output.on('close', function () {
                                     resolve({
                                         os: os,
-                                        status: dest
+                                        status: 'ok',
+                                        path: dest
                                     });
                                 });
                                 var archive = archiver.create('zip');
@@ -217,19 +245,122 @@ gulp.task('release', function(done) {
                                 archive.directory(BUILD_DIR + 'translationStudio-linux-x64/', 'translationStudio');
                                 archive.finalize();
                             } catch (e) {
-                                reject(e);
+                                console.error(e);
+                                resolve({
+                                    os: os,
+                                    status: 'error',
+                                    path: null
+                                });
                             }
                         }.bind(undefined, os)));
+                    } else {
+                        promises.push(Promise.resolve({
+                            os: os,
+                            status: 'missing',
+                            path: null
+                        }));
                     }
                     break;
                 default:
                     console.warn('No release procedure has been defined for ' + os);
             }
         }
+        // promises.reduce(function(cur, next) {
+        //     return cur.then(function(release ) {
+        //         console.log(`${release.os}: ${release.status} : ${release.path}`);
+        //         return next;
+        //     });
+        // }).then(function(stuff) {
+        //     // all done
+        //     console.log('done');
+        // });
+        //
+        // return;
         Promise.all(promises).then(function(values) {
-            for(var release of values) {
-                console.log(`${release.os}: ${release.status}`);
+            var releaseLog = fs.createWriteStream(RELEASE_DIR + 'index.html');
+            releaseLog.on('error', function(e) {
+                console.error(e);
+            });
+            releaseLog.write(`<style>
+body {
+    font-family: Arial,serif;
+    font-size: 16px;
+    color: #2f2f2f;
+    margin: 2px;
+}
+h1, h2 {
+    text-align: center;
+    color: #2f2f2f;
+    font-family: Arial,serif;
+    margin: 10px 0;
+}
+h2 a {
+    text-decoration: none;
+}
+h2 a:hover {
+    text-decoration: underline;
+}
+ul {
+    padding: 0;
+    margin: 0;
+}
+li {
+    padding: 5px;
+    margin-bottom: 2px;
+}
+li a {
+     float: right;
+}
+li:hover {
+    opacity: 0.8;
+}
+.ok {
+    background-color: #9ce498
+}
+.ok .status {
+    color: #0f8e00;
+}
+a, a:visited {
+ color: #078800
+}
+a:hover {
+    color: #055800;
+}
+.missing {
+    background-color: #d0d0d0;
+}
+.missing .status {
+    color: #808080;
+}
+.error {
+    background-color: #e4b498
+}
+.error .status {
+    color: #c12d00;
+}
+.status {
+    text-transform: uppercase;
+}
+</style>`);
+            releaseLog.write(`<h1>tS Desktop build #<span id="build-num">${p.build}</span></h1><ul>`);
+            process.env.TRAVIS_COMMIT = '4761a502dd4cb51f0cd57599f73459d7a52e5589';
+            process.env.TRAVIS_REPO_SLUG = 'unfoldingWord-dev/ts-desktop';
+            if(process.env.TRAVIS_COMMIT) {
+                var commit = process.env.TRAVIS_COMMIT;
+                var repoSlug = process.env.TRAVIS_REPO_SLUG;
+                releaseLog.write(`<h2><a href="https://github.com/${repoSlug}/commit/${commit}" target="_blank">Commit ${commit.substring(0, 7)}</a></h2>`);
             }
+            for(var release of values) {
+                if(release.status === 'ok') {
+                    release.path = release.path.substring(release.path.indexOf('/') + 1);
+                    releaseLog.write(`<li class="ok">${release.os} <span class="status">${release.status}</span> <a href="${release.path}" class="build-link" data-os="${release.os}">Download</a></li>`);
+                } else {
+                    releaseLog.write(`<li class="${release.status}">${release.os} <span class="status">${release.status}</span>`);
+                }
+                console.log(`${release.os}: ${release.status} : ${release.path}`);
+            }
+            releaseLog.write('</ul>');
+            releaseLog.end();
             done();
         }).catch(done);
     });

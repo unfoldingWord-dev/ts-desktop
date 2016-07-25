@@ -286,6 +286,8 @@ h1, h2 {
 }
 h2 a {
     text-decoration: none;
+    font-size: 18px;
+    font-weight: normal;
 }
 h2 a:hover {
     text-decoration: underline;
@@ -335,8 +337,11 @@ a:hover {
             releaseLog.write(`<h1>tS Desktop build #<span id="build-num">${p.build}</span></h1><ul>`);
             if(process.env.TRAVIS_COMMIT) {
                 var commit = process.env.TRAVIS_COMMIT;
+                var buildNumber = process.env.TRAVIS_BUILD_NUMBER;
+                var buildId = process.env.TRAVIS_BUILD_ID;
                 var repoSlug = process.env.TRAVIS_REPO_SLUG;
                 releaseLog.write(`<h2><a href="https://github.com/${repoSlug}/commit/${commit}" target="_blank">Commit ${commit.substring(0, 7)}</a></h2>`);
+                releaseLog.write(`<h2><a href="https://travis-ci.org/${repoSlug}/builds/${buildId}" target="_blank">Travis build #${buildNumber}</a></h2>`);
             }
             for(var release of values) {
                 if(release.status === 'ok') {

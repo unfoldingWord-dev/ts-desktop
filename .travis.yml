@@ -26,8 +26,10 @@ before_install:
 before_script:
 - npm install
 - npm install gulp -g
+- npm install bower -g
 script: npm test
 before_deploy:
+- bower install
 - gulp build --win
 - gulp build --osx
 - gulp release --win

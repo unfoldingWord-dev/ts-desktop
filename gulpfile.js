@@ -142,8 +142,9 @@ gulp.task('release', function(done) {
      * @returns {Promise}
      */
     const releaseWin = function(arch, os) {
-        var file = `tS_${p.version}-${p.build}_win_x${arch}.exe`;
-        var cmd = `iscc scripts/win_installer_template.iss /DArch=${arch === 64 ? 'x64' : 'x86'} /DRootPath=../ /DVersion=${p.version} /DBuild=${p.build} /DGitVersion=${gitVersion} /DDestFile=${file} /DDestDir=${RELEASE_DIR} /DBuildDir=${BUILD_DIR}`;
+        // TRICKY: the iss script cannot take the .exe extension on the file name
+        var file = `tS_${p.version}-${p.build}_win_x${arch}`;
+        var cmd = `iscc scripts/win_installer.iss /DArch=${arch === 64 ? 'x64' : 'x86'} /DRootPath=../ /DVersion=${p.version} /DBuild=${p.build} /DGitVersion=${gitVersion} /DDestFile=${file} /DDestDir=${RELEASE_DIR} /DBuildDir=${BUILD_DIR}`;
         return new Promise(function(resolve, reject) {
             exec(cmd, function(err, stdout, stderr) {
                 if(err) {
@@ -157,7 +158,7 @@ gulp.task('release', function(done) {
                     resolve({
                         os: 'win' + arch,
                         status: 'ok',
-                        path: RELEASE_DIR + file
+                        path: RELEASE_DIR + file + '.exe'
                     });
                 }
             });
@@ -265,17 +266,6 @@ gulp.task('release', function(done) {
                     console.warn('No release procedure has been defined for ' + os);
             }
         }
-        // promises.reduce(function(cur, next) {
-        //     return cur.then(function(release ) {
-        //         console.log(`${release.os}: ${release.status} : ${release.path}`);
-        //         return next;
-        //     });
-        // }).then(function(stuff) {
-        //     // all done
-        //     console.log('done');
-        // });
-        //
-        // return;
         Promise.all(promises).then(function(values) {
             var releaseLog = fs.createWriteStream(RELEASE_DIR + 'index.html');
             releaseLog.on('error', function(e) {
@@ -343,8 +333,6 @@ a:hover {
 }
 </style>`);
             releaseLog.write(`<h1>tS Desktop build #<span id="build-num">${p.build}</span></h1><ul>`);
-            process.env.TRAVIS_COMMIT = '4761a502dd4cb51f0cd57599f73459d7a52e5589';
-            process.env.TRAVIS_REPO_SLUG = 'unfoldingWord-dev/ts-desktop';
             if(process.env.TRAVIS_COMMIT) {
                 var commit = process.env.TRAVIS_COMMIT;
                 var repoSlug = process.env.TRAVIS_REPO_SLUG;

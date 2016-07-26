@@ -17,7 +17,7 @@ function DataManager(db) {
         updateLanguageList: function () {
             var req = utils.promisify(request);
 
-            return req('http://td.unfoldingword.org/exports/langnames.json')
+            return req({url: 'http://td.unfoldingword.org/exports/langnames.json', timeout: 60000})
                 .then(function (response) {
                     return JSON.parse(response.body);
                 })

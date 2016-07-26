@@ -13,8 +13,9 @@ cache:
   - node_modules
 before_install:
 - sudo add-apt-repository --yes ppa:arx/release
+- sudo add-apt-repository --yes ppa:ubuntu-wine/ppa
 - sudo apt-get update -d
-- sudo apt-get install -y -q innoextract wine python-software-properties
+- sudo apt-get install -y -q innoextract wine1.8 python-software-properties
 - wine --version
 - innoextract --version
 - "./scripts/innosetup/innoinstall.sh"

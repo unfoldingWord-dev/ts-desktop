@@ -38,6 +38,7 @@ gulp.task('bump', function () {
 
     var replaceString = '$1"' + bumped + '"$2';
 
+    console.log(bumped);
     return gulp.src(['package.json'])
         .pipe(replace(/("build"\s*:\s*)"\d+"(.*)/, replaceString))
         .pipe(gulp.dest('./'));

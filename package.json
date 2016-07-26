@@ -16,6 +16,11 @@
     "type": "git",
     "url": "git@github.com:unfoldingWord-dev/ts-desktop.git"
   },
+    "jest": {
+        "testPathIgnorePatterns": [
+            "build"
+        ]
+    },
   "dependencies": {
     "adm-zip": "^0.4.7",
     "archiver": "^0.21.0",

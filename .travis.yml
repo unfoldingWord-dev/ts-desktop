@@ -39,7 +39,7 @@ before_deploy:
 deploy:
 - provider: surge
   project: "./release/"
-  domain: painstaking-development.surge.sh
+  domain: ts-desktop.surge.sh
   skip_cleanup: true
   on:
     all_branches: true

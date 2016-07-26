@@ -2,7 +2,7 @@
   "name": "translationstudio",
   "productName": "translationStudio",
   "version": "9.2.0",
-  "build": "31",
+  "build": "32",
   "description": "A utility for translating the Bible and biblical content into any language.",
   "keywords": [],
   "homepage": "https://github.com/unfoldingWord-dev/ts-desktop",

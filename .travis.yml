@@ -31,6 +31,7 @@ before_script:
 script: npm test
 before_deploy:
 - bower install
+- gulp bump
 - gulp build --win
 - gulp build --linux
 - gulp build --osx

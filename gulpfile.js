@@ -38,9 +38,8 @@ gulp.task('bump', function () {
 
     var replaceString = '$1"' + bumped + '"$2';
 
-    return gulp.src(['package.json', 'win32_installer.iss', 'win64_installer.iss'])
+    return gulp.src(['package.json'])
         .pipe(replace(/("build"\s*:\s*)"\d+"(.*)/, replaceString))
-        .pipe(replace(/(#define\s*Build\s*)"\d+"(.*)/, replaceString))
         .pipe(gulp.dest('./'));
 });
 

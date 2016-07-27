@@ -169,7 +169,7 @@
 
         #printpopup {
             width: 450px;
-            height: 280px;
+            height: 380px;
             font-size: 110%;
         }
 
@@ -272,7 +272,10 @@
             <div>
                 <p><paper-checkbox id="imagebox"></paper-checkbox><span id="imagetext">Include images</span></p>
                 <p><paper-checkbox id="chunkbox" checked="true"></paper-checkbox><span>Include incomplete chunks</span></p>
-                 <p><paper-checkbox id="doublespacebox"></paper-checkbox><span>Double space text</span></p>
+                <p><paper-checkbox id="doublespacebox"></paper-checkbox><span>Double space text</span></p>
+                <p><paper-checkbox id="justifybox"></paper-checkbox><span>Fully justify text</span></p>
+                <p><paper-checkbox id="linebox"></paper-checkbox><span>New line for each chunk</span></p>
+                <p><paper-checkbox id="pagebox"></paper-checkbox><span>New page for each chapter</span></p>
             </div>
             <div id="printbuttons">
                 <paper-button dialog-dismiss>Cancel</paper-button>
@@ -1402,7 +1405,14 @@
             var projectmeta = this.currentproject.projectmeta;
             var translation = this.currentproject.chunks;
             var name = this.currentproject.projectmeta.unique_id;
-            var options = {includeIncompleteFrames: this.$.chunkbox.checked, includeImages: this.$.imagebox.checked, doubleSpace: this.$.doublespacebox.checked};
+            var options = {
+                includeIncompleteFrames: this.$.chunkbox.checked,
+                includeImages: this.$.imagebox.checked,
+                doubleSpace: this.$.doublespacebox.checked,
+                justify: this.$.justifybox.checked,
+                newline: this.$.linebox.checked,
+                newpage: this.$.pagebox.checked
+            };
             var filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'PDF Files', extensions: ['pdf']}]}});
             if (!filePath) {
                 return;

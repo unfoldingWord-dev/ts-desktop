@@ -79,10 +79,12 @@ function PrintManager(configurator) {
             }
             var defaultfont = path.join(srcDir, 'assets', 'NotoSans-Regular.ttf');
             var pagenumfont = ("Helvetica");
+            /*
             var targetfont = configurator.getUserSetting('targetfont').path;
             if (targetfont === "default") {
                 targetfont = defaultfont;
             }
+            */
 
             return new Promise(function (resolve, reject) {
                 if (meta.project_type_class === "standard") {
@@ -147,7 +149,7 @@ function PrintManager(configurator) {
 
                         // book title
                         doc.fontSize(25)
-                            .font(targetfont)
+                            .font(defaultfont)
                             .text(doc.info.Title, 72, doc.page.height / 2, {align: 'center'});
 
                         mythis.renderLicense(doc, "OBS_LICENSE.md");
@@ -238,7 +240,7 @@ function PrintManager(configurator) {
                         doc.fontSize(25)
                             .lineGap(0)
                             .text('Table of Contents', 72, 72)
-                            .font(targetfont)
+                            .font(defaultfont)
                             .moveDown();
                         _.forEach(project.chapters, function (chapter) {
                             if (tocPages[chapter.id] !== undefined && tocPages[chapter.id] !== currTocPage) {
@@ -274,30 +276,42 @@ function PrintManager(configurator) {
                         //set the title
                         doc.info.Title = translation[0].transcontent || meta.project.name;
                         doc.fontSize(25)
-                            .font(targetfont)
+                            .font(defaultfont)
                             .text(doc.info.Title, 72, doc.page.height / 2, {align: 'center'});
 
                         mythis.renderLicense(doc, "LICENSE.md");
+                        
+                        var justify = {};
+                        if (options.justify) {
+                            justify = {continued: true, align: 'justify'};
+                        } else {
+                            justify = {continued: true, align: 'left'};
+                        }
 
                              // book body
                         _.forEach(project.chapters, function (chapter) {
 
-                            doc.addPage();//start each chapter on new page
+                            if (chapter.id === "01" || options.newpage) {
+                                doc.addPage();
+                            } else {
+                                doc.moveDown()
+                                    .text("");
+                            }
 
                             //list chapters (remove leading zeros in the numbers)
                             var chapterNum = chapter.id.replace(/\b0+/, '');
                             doc.fontSize(20)
                                 .lineGap(10)
-                                .text(chapterNum + ' ', {continued: true});
+                                .text(chapterNum, {align: 'center'});
                             chapter.page = doc.bufferedPageRange().count;
 
                             // frames
-                            if (options.doubleSpace === true) {
+                            if (options.doubleSpace) {
                                 doc.lineGap(20);
                             }
 
                             _.forEach(chapter.frames, function (frame) {
-                                if (options.includeIncompleteFrames === true || frame.completed === true) {
+                                if (options.includeIncompleteFrames || frame.completed) {
                                     var content = frame.transcontent.split(/[\\]*[\\||\/][v][ ]([0-9]+)/g);
 
                                     _.forEach(content, function (info) {
@@ -305,11 +319,14 @@ function PrintManager(configurator) {
                                        //superscript for verses not supported by pdfkit: https://github.com/devongovett/pdfkit/issues/15
                                        output = output.replace(/[\\][\\c][ ][0-9]+ /g, '');
                                         doc.fontSize(10)
-                                            .text(output + ' ',  { continued: true});
+                                            .text(output + ' ', justify);
                                     });
                                 }
-                                doc.moveDown()
-                                    .text("");
+                                if (options.newline) {
+                                    doc.moveDown()
+                                        .text("");
+                                }
+
                             });
                         });
 

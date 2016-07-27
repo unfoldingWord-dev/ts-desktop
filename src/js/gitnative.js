@@ -1,10 +1,10 @@
 'use strict';
 
 var path = require('path'),
-    fs = require('fs'),
-    exec = require('child_process').exec,
-    utils = require('../js/lib/utils');
+    utils = require('../js/lib/utils'),
+    cmdr = require('../js/lib/cmdr');
 
+// NOTE: could use moment module for this
 function createTagName(datetime) {
     return 'R2P/' +
         datetime.getFullYear().toString() + '-' +
@@ -18,89 +18,63 @@ function createTagName(datetime) {
 function GitManager() {
 
     var logr = utils.logr;
-    var toJSON = _.partialRight(JSON.stringify, null, '\t');
+    var toJSON = function (obj) {
+        return JSON.stringify(obj, null, '\t');
+    };
 
-    function cmd(s) {
-        var str = s || '';
+    // NOTE: This could be configured or passed in.
+    const paths = ['/usr/local/bin'];
 
-        return {
-            cd: function (dir) {
-                return cmd(str + 'cd "' + dir + '"');
-            },
+    const cmd = cmdr(paths);
 
-            get and () {
-                return cmd(str + ' && ');
-            },
-
-            get then () {
-                var c = process.platform === 'win32' ? '& ' : '; ';
-
-                return cmd(str + c);
-            },
-
-            get or () {
-                return cmd(str + ' || ');
-            },
-
-            set: function (name, val) {
-                var c = process.platform === 'win32' ?
-                            `set ${name}=${val} & ` :
-                            `${name}='${val}' `;
-
-                return cmd(str + c);
-            },
-
-            do: function (c) {
-                return cmd(str + c);
-            },
-
-            run: function () {
-                return new Promise(function (resolve, reject) {
-                    exec(str, function (err, stdout, stderr) {
-                        var ret = {
-                            stdout: stdout,
-                            stderr: stderr,
-                            error: err
-                        };
-
-                        (err && reject(ret)) || resolve(ret);
-                    });
-                });
-            },
-
-            toString: function () {
-                return str;
-            }
-        };
-    }
+    const minGitVersion = {
+        major: 2,
+        minor: 3,
+        toString: function () {
+            return this.major + '.' + this.minor;
+        }
+    };
 
     return {
+        get _cmd () {
+            return cmd;
+        },
 
         getVersion: function () {
             var status = cmd().do('git --version');
-            
+
             return status.run()
                 .then(function (log) {
-                    var wordarray = log.stdout.split(" ");
-                    var versionarray = wordarray[2].split(".");
-                    
-                    return {major: versionarray[0], minor: versionarray[1]};                    
-                })
+                    var wordarray = log.stdout.split('\n')[0].split(" ");
+                    var versionstring = wordarray[2];
+                    var versionarray = versionstring.split(".");
+
+                    return {
+                        major: versionarray[0],
+                        minor: versionarray[1],
+                        patch: versionarray[2],
+                        toString: function () {
+                            return wordarray.slice(2).join(' ');
+                        }
+                    };
+                });
         },
 
-        verifyGit: function () {            
+        verifyGit: function () {
             var installed = false;
 
             return this.getVersion()
-                .then(function (version) {                    
-                    if (version.major < 2 || (version.major == 2 && version.minor < 3)) {
+                .then(function (version) {
+                    if (version.major < minGitVersion.major || (version.major == minGitVersion.major && version.minor < minGitVersion.minor)) {
                         installed = true;
-                        throw "error";
+                        throw version;
                     }
+                    return version;
                 })
                 .catch(function (err) {
                     if (installed) {
-                        throw "Your git is out of date. Please update to the latest version."
+                        var msg = "Your version of Git is out of date. We detected "  + err + ", but the app needs at least version " + minGitVersion + " in order to run.";
+                        throw msg;
                     } else {
                         throw "Git is not installed. It is required to run tStudio Desktop."
                     }
@@ -169,7 +143,7 @@ function GitManager() {
                     } else {
                         pull = cmd().cd(localPath).and.do(`git pull "${remotePath}" master`);
                     }
-                    
+
                     return pull.run()
                         .catch(function (err) {
                             if (err.stdout.includes('fix conflicts')) {
@@ -179,7 +153,7 @@ function GitManager() {
                                     });
                             }
                             throw err;
-                        })
+                        });
                 })
                 .then(function () {
                     if (conflictlist.length) {

@@ -307,6 +307,10 @@ function PrintManager(configurator) {
 
                             //list chapters (remove leading zeros in the numbers)
                             var chapterNum = chapter.id.replace(/\b0+/, '');
+                            if (doc.y > 600) {
+                                doc.text("");
+                                doc.addPage();
+                            }
                             doc.fontSize(20)
                                 .lineGap(10)
                                 .text(chapterNum, {align: 'center'});
@@ -325,6 +329,10 @@ function PrintManager(configurator) {
                                         let output = info;
                                        //superscript for verses not supported by pdfkit: https://github.com/devongovett/pdfkit/issues/15
                                        output = output.replace(/[\\][\\c][ ][0-9]+ /g, '');
+                                        if (doc.y > 650) {
+                                            doc.text("");
+                                            doc.addPage();
+                                        }
                                         doc.fontSize(10)
                                             .text(output + ' ', justify);
                                     });

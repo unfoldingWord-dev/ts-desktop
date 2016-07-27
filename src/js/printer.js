@@ -271,6 +271,7 @@ function PrintManager(configurator) {
                                 right: 72
                             }
                         });
+                        var startpagenum = 1;
                         doc.pipe(fs.createWriteStream(filePath));
 
                         //set the title
@@ -280,7 +281,7 @@ function PrintManager(configurator) {
                             .text(doc.info.Title, 72, doc.page.height / 2, {align: 'center'});
 
                         mythis.renderLicense(doc, "LICENSE.md");
-                        
+
                         var justify = {};
                         if (options.justify) {
                             justify = {continued: true, align: 'justify'};
@@ -292,10 +293,16 @@ function PrintManager(configurator) {
                         _.forEach(project.chapters, function (chapter) {
 
                             if (chapter.id === "01" || options.newpage) {
-                                doc.addPage();
+                                doc.addPage()
+                                    .text("");
                             } else {
                                 doc.moveDown()
                                     .text("");
+                            }
+
+                            if (chapter.id === "01") {
+                                startpagenum = doc.bufferedPageRange().count;
+                                console.log(startpagenum);
                             }
 
                             //list chapters (remove leading zeros in the numbers)
@@ -331,12 +338,15 @@ function PrintManager(configurator) {
                         });
 
                         // number pages
+                        doc.text("");
                         var range = doc.bufferedPageRange();
                         for (var i = range.start; i < range.start + range.count; i ++) {
-                            doc.switchToPage(i);
-                            doc.fontSize(10)
-                                .font(pagenumfont)
-                                .text(i + 1, 72, doc.page.height - 50 - 12, {align: 'center'});
+                            if (i + 1 >= startpagenum) {
+                                doc.switchToPage(i);
+                                doc.fontSize(10)
+                                    .font(pagenumfont)
+                                    .text(i + 2 - startpagenum, 72, doc.page.height - 50 - 12, {align: 'center'});
+                            }
                         }
 
                         doc.end();

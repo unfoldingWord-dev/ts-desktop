@@ -123,10 +123,16 @@ function PrintManager(configurator) {
                         return o.frames.length > 0;
                     }), 'id');
                     chapters = null;
+                    
+                    var doc;
+                    var startpagenum = 1;
+                    var range = {};
+                    var justify = {};
+                    var i = 0;
 
                     if (project.format === 'markdown') {
 
-                        var doc = new PDFDocument({
+                        doc = new PDFDocument({
                             bufferPages: true,
                             margins:{
                                 top: 72,
@@ -135,6 +141,7 @@ function PrintManager(configurator) {
                                 right: 72
                             }
                         });
+                        
                         doc.pipe(fs.createWriteStream(filePath));
                         // default meta
                         if (project.title.transcontent !== "") {
@@ -163,6 +170,13 @@ function PrintManager(configurator) {
                         doc.fontSize(25)
                             .text(' ', 72, 72)
                             .moveDown();
+                        
+                        if (options.justify) {
+                            justify = {continued: true, align: 'justify'};
+                        } else {
+                            justify = {continued: true, align: 'left'};
+                        }
+
                         _.forEach(project.chapters, function (chapter) {
                             doc.fontSize(10)
                                 .text(' ')
@@ -181,56 +195,67 @@ function PrintManager(configurator) {
                         });
 
                         // book body
-                        _.forEach(project.chapters, function (chapter) {
+                        _.forEach(project.chapters, function (chapter) {                            
                             // chapter title
                             doc.addPage();
+                            if (chapter.id === "01") {
+                                startpagenum = doc.bufferedPageRange().count;
+                            }
+                            doc.lineGap(10);
                             doc.fontSize(20)
                                 .text(chapter.title.transcontent || chapter.title.chunkmeta.title, 72, doc.page.height / 2, {align: 'center'});
                             chapter.page = doc.bufferedPageRange().count;
+                            // chapter reference
+                            if (chapter.reference !== null) {
+                                doc.moveDown()
+                                    .fontSize(10)
+                                    .text(chapter.reference.transcontent, {align: 'center'});
+                            }
 
                             // frames
-                            if (options.doubleSpace === true) {
+                            if (options.doubleSpace) {
                                 doc.lineGap(20);
                             }
                             doc.addPage();
                             _.forEach(chapter.frames, function (frame) {
-                                if (options.includeIncompleteFrames === true || frame.completed === true) {
-                                    doc.moveDown();
-                                    if (options.includeImages === true) {
-                                        //console.debug(meta);
-                                        //console.debug(frame);
-                                        // TRICKY: right now all images are en
+                                if (options.includeIncompleteFrames || frame.completed) {
+                                    
+                                    if (options.includeImages) {
+
                                         var imgPath = path.join(imagePath, meta.resource.id + "-en-" + frame.chunkmeta.chapterid + "-" + frame.chunkmeta.frameid + ".jpg");
                                         //check the position of the text on the page.
                                         // 792 (total ht of page) - 50 ( lower margin) - 263.25 (height of pic) = 478.75 (max amount of space used before image)
                                         if (doc.y > 478.75) {
                                             doc.addPage();
                                         }
-                                       doc.image(imgPath, {width:doc.page.width - 72*2});
+                                       doc.image(imgPath, {width: doc.page.width - 72*2});
+                                    }
+                                    if (doc.y > 650) {
+                                        doc.text("");
+                                        doc.addPage();
                                     }
                                     doc.fontSize(10)
-                                        .text(frame.transcontent);
-                                    if (options.includeImages === true) {
-                                        doc.moveDown();//add extra line break after image and text as per github issue527
+                                        .text(frame.transcontent + ' ', justify);
+                                    
+                                    if (options.includeImages) {
+                                        doc.moveDown();
                                     }
                                 }
                             });
+                            doc.text("");
 
-                            // chapter reference
-                            if (chapter.reference !== null) {
-                                doc.moveDown()
-                                    .fontSize(10)
-                                    .text(chapter.reference.transcontent);
-                            }
                         });
 
                         // number pages
-                        var range = doc.bufferedPageRange();
-                        for (var i = range.start; i < range.start + range.count; i ++) {
-                            doc.switchToPage(i);
-                            doc.fontSize(10)
-                                .font(pagenumfont)
-                                .text(i + 1, 72, doc.page.height - 50 - 12, {align: 'center'});
+                        doc.text("");
+                        range = doc.bufferedPageRange();
+                        for (i = range.start; i < range.count; i ++) {
+                            if (i + 1 >= startpagenum) {
+                                doc.switchToPage(i);
+                                doc.fontSize(10)
+                                    .font(pagenumfont)
+                                    .text(i + 2 - startpagenum, 72, doc.page.height - 50 - 12, {align: 'center'});
+                            }
                         }
 
                         // write TOC
@@ -254,7 +279,7 @@ function PrintManager(configurator) {
                             doc.fontSize(10)
                                 .text(chapter.title.transcontent || chapter.title.chunkmeta.title)
                                 .moveUp()
-                                .text(chapter.page + '', {align: 'right'})
+                                .text(chapter.page - startpagenum + 1 + '', {align: 'right'})
                                 .moveDown();
                         });
 
@@ -262,7 +287,7 @@ function PrintManager(configurator) {
                         resolve(true);
                     } else if (project.format === 'usfm') {
 
-                         var doc = new PDFDocument({
+                         doc = new PDFDocument({
                             bufferPages: true,
                             margins:{
                                 top: 72,
@@ -271,7 +296,7 @@ function PrintManager(configurator) {
                                 right: 72
                             }
                         });
-                        var startpagenum = 1;
+                        
                         doc.pipe(fs.createWriteStream(filePath));
 
                         //set the title
@@ -282,7 +307,6 @@ function PrintManager(configurator) {
 
                         mythis.renderLicense(doc, "LICENSE.md");
 
-                        var justify = {};
                         if (options.justify) {
                             justify = {continued: true, align: 'justify'};
                         } else {
@@ -302,7 +326,6 @@ function PrintManager(configurator) {
 
                             if (chapter.id === "01") {
                                 startpagenum = doc.bufferedPageRange().count;
-                                console.log(startpagenum);
                             }
 
                             //list chapters (remove leading zeros in the numbers)
@@ -337,18 +360,14 @@ function PrintManager(configurator) {
                                             .text(output + ' ', justify);
                                     });
                                 }
-                                if (options.newline) {
-                                    doc.moveDown()
-                                        .text("");
-                                }
-
+                                
                             });
                         });
 
                         // number pages
                         doc.text("");
-                        var range = doc.bufferedPageRange();
-                        for (var i = range.start; i < range.start + range.count; i ++) {
+                        range = doc.bufferedPageRange();
+                        for (i = range.start; i < range.count; i ++) {
                             if (i + 1 >= startpagenum) {
                                 doc.switchToPage(i);
                                 doc.fontSize(10)

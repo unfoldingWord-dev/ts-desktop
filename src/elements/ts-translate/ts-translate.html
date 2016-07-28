@@ -169,7 +169,7 @@
 
         #printpopup {
             width: 450px;
-            height: 380px;
+            height: 320px;
             font-size: 110%;
         }
 
@@ -274,8 +274,7 @@
                 <p><paper-checkbox id="chunkbox" checked="true"></paper-checkbox><span>Include incomplete chunks</span></p>
                 <p><paper-checkbox id="doublespacebox"></paper-checkbox><span>Double space text</span></p>
                 <p><paper-checkbox id="justifybox"></paper-checkbox><span>Fully justify text</span></p>
-                <p><paper-checkbox id="linebox"></paper-checkbox><span>New line for each chunk</span></p>
-                <p><paper-checkbox id="pagebox"></paper-checkbox><span>New page for each chapter</span></p>
+                <p><paper-checkbox id="pagebox"></paper-checkbox><span id="pagetext">New page for each chapter</span></p>
             </div>
             <div id="printbuttons">
                 <paper-button dialog-dismiss>Cancel</paper-button>
@@ -1372,15 +1371,18 @@
             this.$.imagebox.checked = false;
             this.$.doublespacebox.checked = false;
             this.$.justifybox.checked = false;
-            this.$.linebox.checked = false;
             this.$.pagebox.checked = false;
             var project = this.currentproject.projectmeta.project.id;
             if (project === 'obs') {
                 this.$.imagebox.hidden = false;
                 this.$.imagetext.hidden = false;
+                this.$.pagebox.hidden = true;
+                this.$.pagetext.hidden = true;
             } else {
                 this.$.imagebox.hidden = true;
                 this.$.imagetext.hidden = true;
+                this.$.pagebox.hidden = false;
+                this.$.pagetext.hidden = false;
             }
             this.$.printpopup.open();
         },
@@ -1413,7 +1415,6 @@
                 includeImages: this.$.imagebox.checked,
                 doubleSpace: this.$.doublespacebox.checked,
                 justify: this.$.justifybox.checked,
-                newline: this.$.linebox.checked,
                 newpage: this.$.pagebox.checked
             };
             var filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'PDF Files', extensions: ['pdf']}]}});

@@ -78,312 +78,259 @@ function PrintManager(configurator) {
                 filePath += '.pdf';
             }
             var defaultfont = path.join(srcDir, 'assets', 'NotoSans-Regular.ttf');
-            var pagenumfont = ("Helvetica");
-            /*
-            var targetfont = configurator.getUserSetting('targetfont').path;
-            if (targetfont === "default") {
-                targetfont = defaultfont;
+            var pagenumfont = ("Helvetica");            
+            var startpagenum = 0;
+            var range = {};
+            var justify = {};
+            var i = 0;
+
+            var doc = new PDFDocument({
+                bufferPages: true,
+                margins:{
+                    top: 72,
+                    bottom: 50,
+                    left: 72,
+                    right: 72
+                }
+            });
+
+            if (options.justify) {
+                justify = {continued: true, align: 'justify'};
+            } else {
+                justify = {continued: true, align: 'left'};
             }
-            */
 
-            return new Promise(function (resolve, reject) {
-                if (meta.project_type_class === "standard") {
-                    // normalize input
-                    var chapters = _.mapValues(_.groupBy(translation, function (obj) {
-                        //console.debug('map chapter values', obj);
-                        return obj.chunkmeta.chapterid;
-                    }), function (chapter, key) {
-                        var frames = _.mapKeys(chapter, function (obj) {
-                            //console.debug('map chapter keys', obj);
-                            return obj.chunkmeta.frameid;
-                        });
+            var chapters = _.mapValues(_.groupBy(translation, function (obj) {
+                return obj.chunkmeta.chapterid;
+            }), function (chapter, key) {
+                var frames = _.mapKeys(chapter, function (obj) {
+                    return obj.chunkmeta.frameid;
+                });
 
-                        var chapterObj = {
-                            id: key,
-                            title: frames.title || key,
-                            reference: frames.reference === undefined ? null : frames.reference,
-                            format: meta.format
-                        };
-                        delete frames.reference;
-                        delete frames.title;
-                        chapterObj.frames = _.sortBy(_.filter(frames, function (o) {
-                            return o.transcontent !== '';
-                        }), function (f) {
-                            //console.debug('sort frames',f);
-                            return f.chunkmeta.frame;
-                        });
-                        return chapterObj;
+                var chapterObj = {
+                    id: key,
+                    title: frames.title || key,
+                    reference: frames.reference === undefined ? null : frames.reference,
+                    format: meta.format
+                };
+                delete frames.reference;
+                delete frames.title;
+
+                if (options.includeIncompleteFrames) {
+                    chapterObj.frames = _.sortBy(_.filter(frames, function (o) {
+                        return o.transcontent !== '';
+                    }), function (f) {
+                        return f.chunkmeta.frame;
                     });
-                    var project = {
-                        format: meta.format,
-                        title: chapters['00'].title
-                    };
-                    delete chapters['00'];
-                    project.chapters = _.sortBy(_.filter(chapters, function (o) {
-                        return o.frames.length > 0;
-                    }), 'id');
-                    chapters = null;
+                } else {
+                    chapterObj.frames = _.sortBy(_.filter(frames, function (o) {
+                        return o.completed;
+                    }), function (f) {
+                        return f.chunkmeta.frame;
+                    });
+                }
+
+                return chapterObj;
+            });
+
+            var project = {
+                id: meta.project.id,
+                format: meta.format,
+                title: chapters['00'].title
+            };
+            delete chapters['00'];
+            project.chapters = _.sortBy(_.filter(chapters, function (o) {
+                return o.frames.length > 0;
+            }), 'id');
+            
+            return new Promise(function (resolve, reject) {
+                if (project.id === 'obs') {
+                    doc.pipe(fs.createWriteStream(filePath));
                     
-                    var doc;
-                    var startpagenum = 1;
-                    var range = {};
-                    var justify = {};
-                    var i = 0;
+                    if (project.title.transcontent !== "") {
+                        doc.info.Title = project.title.transcontent;
+                    } else {
+                        doc.info.Title = project.title.projectmeta.project.name;
+                    }
 
-                    if (project.format === 'markdown') {
+                    doc.fontSize(25);
+                    doc.font(defaultfont);
+                    doc.text(doc.info.Title, 72, doc.page.height / 2, {align: 'center'});
 
-                        doc = new PDFDocument({
-                            bufferPages: true,
-                            margins:{
-                                top: 72,
-                                bottom: 50,
-                                left: 72,
-                                right: 72
-                            }
-                        });
-                        
-                        doc.pipe(fs.createWriteStream(filePath));
-                        // default meta
-                        if (project.title.transcontent !== "") {
-                            doc.info.Title = project.title.transcontent;
-                        } else {
-                            doc.info.Title = project.title.projectmeta.project.name;
+                    mythis.renderLicense(doc, "OBS_LICENSE.md");
+
+                    doc.addPage();
+                    var lastTOCPage = doc.bufferedPageRange().count;
+                    var tocPages = {
+                        start: lastTOCPage - 1
+                    };
+                    doc.fontSize(25);
+                    doc.text(' ', 72, 72);
+                    doc.moveDown();
+
+                    _.forEach(project.chapters, function (chapter) {
+                        doc.fontSize(10);
+                        doc.text(' ');
+                        doc.moveDown();
+                        var currPage = doc.bufferedPageRange().count;
+                        if (lastTOCPage !== currPage) {
+                            // record toc page split
+                            tocPages[chapter.id] = currPage - 1;
+                            lastTOCPage = currPage;
+
+                            doc.fontSize(25);
+                            doc.text(' ', 72, 72);
+                            doc.moveDown();
                         }
+                    });
 
-                        //doc.info.Author = 'Joel Lonbeck'; // todo: translators
-                        //doc.info.Subject = 'an unrestricted, visual mini-Bible in any language'; // todo: project sub-title
-                        doc.info.Keywords = meta.target_language.name;
-
-                        // book title
-                        doc.fontSize(25)
-                            .font(defaultfont)
-                            .text(doc.info.Title, 72, doc.page.height / 2, {align: 'center'});
-
-                        mythis.renderLicense(doc, "OBS_LICENSE.md");
-
-                        // TOC placeholders
+                    _.forEach(project.chapters, function (chapter) {                        
                         doc.addPage();
-                        var lastTOCPage = doc.bufferedPageRange().count;
-                        var tocPages = {
-                            start: lastTOCPage - 1
-                        };
-                        doc.fontSize(25)
-                            .text(' ', 72, 72)
-                            .moveDown();
+                        if (chapter.id === "01") {
+                            startpagenum = doc.bufferedPageRange().count;
+                        }
+                        doc.lineGap(10);
+                        doc.fontSize(20);
+                        doc.text(chapter.title.transcontent || chapter.title.chunkmeta.title, 72, doc.page.height / 2, {align: 'center'});
+                        chapter.page = doc.bufferedPageRange().count;
                         
-                        if (options.justify) {
-                            justify = {continued: true, align: 'justify'};
-                        } else {
-                            justify = {continued: true, align: 'left'};
+                        if (chapter.reference) {
+                            doc.moveDown();
+                            doc.fontSize(10);
+                            doc.text(chapter.reference.transcontent, {align: 'center'});
                         }
 
-                        _.forEach(project.chapters, function (chapter) {
-                            doc.fontSize(10)
-                                .text(' ')
-                                .moveDown();
-                            var currPage = doc.bufferedPageRange().count;
-                            if (lastTOCPage !== currPage) {
-                                // record toc page split
-                                tocPages[chapter.id] = currPage - 1;
-                                lastTOCPage = currPage;
-
-                                // give room for header on new page
-                                doc.fontSize(25)
-                                    .text(' ', 72, 72)
-                                    .moveDown();
-                            }
-                        });
-
-                        // book body
-                        _.forEach(project.chapters, function (chapter) {                            
-                            // chapter title
-                            doc.addPage();
-                            if (chapter.id === "01") {
-                                startpagenum = doc.bufferedPageRange().count;
-                            }
-                            doc.lineGap(10);
-                            doc.fontSize(20)
-                                .text(chapter.title.transcontent || chapter.title.chunkmeta.title, 72, doc.page.height / 2, {align: 'center'});
-                            chapter.page = doc.bufferedPageRange().count;
-                            // chapter reference
-                            if (chapter.reference !== null) {
-                                doc.moveDown()
-                                    .fontSize(10)
-                                    .text(chapter.reference.transcontent, {align: 'center'});
-                            }
-
-                            // frames
-                            if (options.doubleSpace) {
-                                doc.lineGap(20);
-                            }
-                            doc.addPage();
-                            _.forEach(chapter.frames, function (frame) {
-                                if (options.includeIncompleteFrames || frame.completed) {
-                                    
-                                    if (options.includeImages) {
-
-                                        var imgPath = path.join(imagePath, meta.resource.id + "-en-" + frame.chunkmeta.chapterid + "-" + frame.chunkmeta.frameid + ".jpg");
-                                        //check the position of the text on the page.
-                                        // 792 (total ht of page) - 50 ( lower margin) - 263.25 (height of pic) = 478.75 (max amount of space used before image)
-                                        if (doc.y > 478.75) {
-                                            doc.addPage();
-                                        }
-                                       doc.image(imgPath, {width: doc.page.width - 72*2});
-                                    }
-                                    if (doc.y > 650) {
-                                        doc.text("");
-                                        doc.addPage();
-                                    }
-                                    doc.fontSize(10)
-                                        .text(frame.transcontent + ' ', justify);
-                                    
-                                    if (options.includeImages) {
-                                        doc.moveDown();
-                                    }
+                        if (options.doubleSpace) {
+                            doc.lineGap(20);
+                        }
+                        doc.addPage();
+                        _.forEach(chapter.frames, function (frame) {
+                            if (options.includeImages) {
+                                var imgPath = path.join(imagePath, meta.resource.id + "-en-" + frame.chunkmeta.chapterid + "-" + frame.chunkmeta.frameid + ".jpg");
+                                //check the position of the text on the page.
+                                // 792 (total ht of page) - 50 ( lower margin) - 263.25 (height of pic) = 478.75 (max amount of space used before image)
+                                if (doc.y > 478.75) {
+                                    doc.addPage();
                                 }
-                            });
-                            doc.text("");
-
-                        });
-
-                        // number pages
-                        doc.text("");
-                        range = doc.bufferedPageRange();
-                        for (i = range.start; i < range.count; i ++) {
-                            if (i + 1 >= startpagenum) {
-                                doc.switchToPage(i);
-                                doc.fontSize(10)
-                                    .font(pagenumfont)
-                                    .text(i + 2 - startpagenum, 72, doc.page.height - 50 - 12, {align: 'center'});
+                                doc.image(imgPath, {width: doc.page.width - 72*2});
                             }
-                        }
-
-                        // write TOC
-                        var currTocPage = tocPages.start;
-                        doc.switchToPage(currTocPage);
-                        // TODO: display correct title of TOC based on the project
-                        doc.fontSize(25)
-                            .lineGap(0)
-                            .text('Table of Contents', 72, 72)
-                            .font(defaultfont)
-                            .moveDown();
-                        _.forEach(project.chapters, function (chapter) {
-                            if (tocPages[chapter.id] !== undefined && tocPages[chapter.id] !== currTocPage) {
-                                currTocPage = tocPages[chapter.id];
-                                doc.switchToPage(currTocPage);
-                                doc.fontSize(10)
-                                    .text(' ')
-                                    .moveUp();
-                            }
-                            doc.switchToPage(currTocPage);
-                            doc.fontSize(10)
-                                .text(chapter.title.transcontent || chapter.title.chunkmeta.title)
-                                .moveUp()
-                                .text(chapter.page - startpagenum + 1 + '', {align: 'right'})
-                                .moveDown();
-                        });
-
-                        doc.end();
-                        resolve(true);
-                    } else if (project.format === 'usfm') {
-
-                         doc = new PDFDocument({
-                            bufferPages: true,
-                            margins:{
-                                top: 72,
-                                bottom: 50,
-                                left: 72,
-                                right: 72
-                            }
-                        });
-                        
-                        doc.pipe(fs.createWriteStream(filePath));
-
-                        //set the title
-                        doc.info.Title = translation[0].transcontent || meta.project.name;
-                        doc.fontSize(25)
-                            .font(defaultfont)
-                            .text(doc.info.Title, 72, doc.page.height / 2, {align: 'center'});
-
-                        mythis.renderLicense(doc, "LICENSE.md");
-
-                        if (options.justify) {
-                            justify = {continued: true, align: 'justify'};
-                        } else {
-                            justify = {continued: true, align: 'left'};
-                        }
-
-                             // book body
-                        _.forEach(project.chapters, function (chapter) {
-
-                            if (chapter.id === "01" || options.newpage) {
-                                doc.addPage()
-                                    .text("");
-                            } else {
-                                doc.moveDown()
-                                    .text("");
-                            }
-
-                            if (chapter.id === "01") {
-                                startpagenum = doc.bufferedPageRange().count;
-                            }
-
-                            //list chapters (remove leading zeros in the numbers)
-                            var chapterNum = chapter.id.replace(/\b0+/, '');
-                            if (doc.y > 600) {
+                            if (doc.y > 650) {
                                 doc.text("");
                                 doc.addPage();
                             }
-                            doc.fontSize(20)
-                                .lineGap(10)
-                                .text(chapterNum, {align: 'center'});
-                            chapter.page = doc.bufferedPageRange().count;
+                            doc.fontSize(10);
+                            doc.text(frame.transcontent + ' ', justify);
 
-                            // frames
-                            if (options.doubleSpace) {
-                                doc.lineGap(20);
+                            if (options.includeImages) {
+                                doc.moveDown();
                             }
-
-                            _.forEach(chapter.frames, function (frame) {
-                                if (options.includeIncompleteFrames || frame.completed) {
-                                    var content = frame.transcontent.split(/[\\]*[\\||\/][v][ ]([0-9]+)/g);
-
-                                    _.forEach(content, function (info) {
-                                        let output = info;
-                                       //superscript for verses not supported by pdfkit: https://github.com/devongovett/pdfkit/issues/15
-                                       output = output.replace(/[\\][\\c][ ][0-9]+ /g, '');
-                                        if (doc.y > 650) {
-                                            doc.text("");
-                                            doc.addPage();
-                                        }
-                                        doc.fontSize(10)
-                                            .text(output + ' ', justify);
-                                    });
-                                }
-                                
-                            });
                         });
-
-                        // number pages
                         doc.text("");
-                        range = doc.bufferedPageRange();
-                        for (i = range.start; i < range.count; i ++) {
-                            if (i + 1 >= startpagenum) {
-                                doc.switchToPage(i);
-                                doc.fontSize(10)
-                                    .font(pagenumfont)
-                                    .text(i + 2 - startpagenum, 72, doc.page.height - 50 - 12, {align: 'center'});
-                            }
+                    });
+
+                    doc.text("");
+                    range = doc.bufferedPageRange();
+                    for (i = range.start; i < range.count; i ++) {
+                        if (i + 1 >= startpagenum) {
+                            doc.switchToPage(i);
+                            doc.fontSize(10);
+                            doc.font(pagenumfont);
+                            doc.text(i + 2 - startpagenum, 72, doc.page.height - 50 - 12, {align: 'center'});
+                        }
+                    }
+
+                    var currTocPage = tocPages.start;
+                    doc.switchToPage(currTocPage);                    
+                    doc.fontSize(25);
+                    doc.lineGap(0);
+                    doc.text('Table of Contents', 72, 72);
+                    doc.font(defaultfont);
+                    doc.moveDown();
+                    
+                    _.forEach(project.chapters, function (chapter) {
+                        if (tocPages[chapter.id] && tocPages[chapter.id] !== currTocPage) {
+                            currTocPage = tocPages[chapter.id];
+                            doc.switchToPage(currTocPage);
+                            doc.fontSize(10);
+                            doc.text(' ');
+                            doc.moveUp();
+                        }
+                        doc.switchToPage(currTocPage);
+                        doc.fontSize(10);
+                        doc.text(chapter.title.transcontent || chapter.title.chunkmeta.title);
+                        doc.moveUp();
+                        doc.text(chapter.page - startpagenum + 1 + '', {align: 'right'});
+                        doc.moveDown();
+                    });
+
+                    doc.end();
+                    resolve(true);
+                    
+                } else {
+                    doc.pipe(fs.createWriteStream(filePath));
+
+                    doc.info.Title = translation[0].transcontent || meta.project.name;
+                    doc.fontSize(25);
+                    doc.font(defaultfont);
+                    doc.text(doc.info.Title, 72, doc.page.height / 2, {align: 'center'});
+
+                    mythis.renderLicense(doc, "LICENSE.md");
+
+                    _.forEach(project.chapters, function (chapter) {
+                        if (chapter.id === "01" || options.newpage) {
+                            doc.addPage();
+                            doc.text("");
+                        } else {
+                            doc.moveDown();
+                            doc.text("");
                         }
 
-                        doc.end();
-                        resolve(true);
-                    } else {
-                        reject('We only support printing OBS and Bible projects for now');
+                        if (chapter.id === "01") {
+                            startpagenum = doc.bufferedPageRange().count;
+                        }
+
+                        var chapterNum = chapter.id.replace(/\b0+/, '');
+                        if (doc.y > 600) {
+                            doc.text("");
+                            doc.addPage();
+                        }
+                        doc.fontSize(20);
+                        doc.lineGap(10);
+                        doc.text(chapterNum, {align: 'center'});
+                        chapter.page = doc.bufferedPageRange().count;
+
+                        if (options.doubleSpace) {
+                            doc.lineGap(20);
+                        }
+
+                        _.forEach(chapter.frames, function (frame) {
+                            var content = frame.transcontent.split(/[\\]*[\\||\/][v][ ]([0-9]+)/g);
+
+                            _.forEach(content, function (info) {                                
+                                var output = info.replace(/[\\][\\c][ ][0-9]+ /g, '');
+                                if (doc.y > 650) {
+                                    doc.text("");
+                                    doc.addPage();
+                                }
+                                doc.fontSize(10);
+                                doc.text(output + ' ', justify);
+                            });                            
+                        });
+                    });
+
+                    doc.text("");
+                    range = doc.bufferedPageRange();
+                    for (i = range.start; i < range.count; i ++) {
+                        if (i + 1 >= startpagenum) {
+                            doc.switchToPage(i);
+                            doc.fontSize(10);
+                            doc.font(pagenumfont);
+                            doc.text(i + 2 - startpagenum, 72, doc.page.height - 50 - 12, {align: 'center'});
+                        }
                     }
-                } else {
-                    // TODO: support exporting other target translation types if needed e.g. notes, words, questions
-                    reject('We do not support printing that project type yet');
+
+                    doc.end();
+                    resolve(true);
                 }
             });
         }

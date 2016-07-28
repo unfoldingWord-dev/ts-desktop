@@ -634,7 +634,6 @@
         },
 
         updatecompletion: function () {
-            var key = this.currentproject.projectmeta.unique_id;
             var chunks = this.currentproject.chunks;
             var finished = [];
 
@@ -643,10 +642,8 @@
                     finished.push(chunks[i].chunkmeta.chapterid + "-" + chunks[i].chunkmeta.frameid);
                 }
             }
-            var completion = Math.round((finished.length / chunks.length) * 100);
+
             this.set('currentproject.projectmeta.finished_chunks', finished);
-            this.set('currentproject.projectmeta.completion', completion);
-            App.configurator.setValue(key + "-completion", completion);
             this.savemanifest();
         },
 
@@ -1338,8 +1335,10 @@
             mythis.stoptimers();
             return mythis.saveAll()
                 .then(function () {
-                    mythis.set('route', "home");
-                    mythis.reset();
+                    setTimeout(function() {
+                        mythis.set('route', "home");
+                        mythis.reset();
+                    }, 500);
                 });
         },
 

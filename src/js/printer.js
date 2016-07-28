@@ -77,27 +77,34 @@ function PrintManager(configurator) {
             if(filePath.split('.').pop() !== 'pdf') {
                 filePath += '.pdf';
             }
-            var defaultfont = path.join(srcDir, 'assets', 'NotoSans-Regular.ttf');
-            var pagenumfont = ("Helvetica");            
+            var font = path.join(srcDir, 'assets', 'NotoSans-Regular.ttf');
+            var textgap = 10;
+            var textsize = 10;
+            var headersize = 25;
             var startpagenum = 0;
             var range = {};
             var justify = {};
-            var i = 0;
 
             var doc = new PDFDocument({
                 bufferPages: true,
                 margins:{
                     top: 72,
-                    bottom: 50,
+                    bottom: 40,
                     left: 72,
                     right: 72
                 }
             });
 
+            doc.font(font);
+
             if (options.justify) {
                 justify = {continued: true, align: 'justify'};
             } else {
                 justify = {continued: true, align: 'left'};
+            }
+
+            if (options.doubleSpace) {
+                textgap = textgap * 2;
             }
 
             var chapters = _.mapValues(_.groupBy(translation, function (obj) {
@@ -110,8 +117,7 @@ function PrintManager(configurator) {
                 var chapterObj = {
                     id: key,
                     title: frames.title || key,
-                    reference: frames.reference === undefined ? null : frames.reference,
-                    format: meta.format
+                    reference: frames.reference === undefined ? null : frames.reference
                 };
                 delete frames.reference;
                 delete frames.title;
@@ -135,26 +141,24 @@ function PrintManager(configurator) {
 
             var project = {
                 id: meta.project.id,
-                format: meta.format,
                 title: chapters['00'].title
             };
             delete chapters['00'];
             project.chapters = _.sortBy(_.filter(chapters, function (o) {
                 return o.frames.length > 0;
             }), 'id');
-            
+
             return new Promise(function (resolve, reject) {
                 if (project.id === 'obs') {
                     doc.pipe(fs.createWriteStream(filePath));
-                    
-                    if (project.title.transcontent !== "") {
+
+                    if (project.title.transcontent) {
                         doc.info.Title = project.title.transcontent;
                     } else {
                         doc.info.Title = project.title.projectmeta.project.name;
                     }
 
-                    doc.fontSize(25);
-                    doc.font(defaultfont);
+                    doc.fontSize(headersize);
                     doc.text(doc.info.Title, 72, doc.page.height / 2, {align: 'center'});
 
                     mythis.renderLicense(doc, "OBS_LICENSE.md");
@@ -164,45 +168,41 @@ function PrintManager(configurator) {
                     var tocPages = {
                         start: lastTOCPage - 1
                     };
-                    doc.fontSize(25);
+                    doc.fontSize(headersize);
                     doc.text(' ', 72, 72);
                     doc.moveDown();
 
                     _.forEach(project.chapters, function (chapter) {
-                        doc.fontSize(10);
+                        doc.fontSize(textsize);
                         doc.text(' ');
                         doc.moveDown();
                         var currPage = doc.bufferedPageRange().count;
                         if (lastTOCPage !== currPage) {
-                            // record toc page split
                             tocPages[chapter.id] = currPage - 1;
                             lastTOCPage = currPage;
 
-                            doc.fontSize(25);
+                            doc.fontSize(headersize);
                             doc.text(' ', 72, 72);
                             doc.moveDown();
                         }
                     });
 
-                    _.forEach(project.chapters, function (chapter) {                        
+                    _.forEach(project.chapters, function (chapter) {
                         doc.addPage();
+                        doc.lineGap(textgap);
                         if (chapter.id === "01") {
                             startpagenum = doc.bufferedPageRange().count;
                         }
-                        doc.lineGap(10);
-                        doc.fontSize(20);
+                        doc.fontSize(headersize);
                         doc.text(chapter.title.transcontent || chapter.title.chunkmeta.title, 72, doc.page.height / 2, {align: 'center'});
                         chapter.page = doc.bufferedPageRange().count;
-                        
+
                         if (chapter.reference) {
                             doc.moveDown();
-                            doc.fontSize(10);
+                            doc.fontSize(textsize);
                             doc.text(chapter.reference.transcontent, {align: 'center'});
                         }
 
-                        if (options.doubleSpace) {
-                            doc.lineGap(20);
-                        }
                         doc.addPage();
                         _.forEach(chapter.frames, function (frame) {
                             if (options.includeImages) {
@@ -218,7 +218,7 @@ function PrintManager(configurator) {
                                 doc.text("");
                                 doc.addPage();
                             }
-                            doc.fontSize(10);
+                            doc.fontSize(textsize);
                             doc.text(frame.transcontent + ' ', justify);
 
                             if (options.includeImages) {
@@ -229,34 +229,31 @@ function PrintManager(configurator) {
                     });
 
                     doc.text("");
+                    doc.lineGap(0);
                     range = doc.bufferedPageRange();
-                    for (i = range.start; i < range.count; i ++) {
+                    for (var i = range.start; i < range.count; i++) {
                         if (i + 1 >= startpagenum) {
                             doc.switchToPage(i);
-                            doc.fontSize(10);
-                            doc.font(pagenumfont);
-                            doc.text(i + 2 - startpagenum, 72, doc.page.height - 50 - 12, {align: 'center'});
+                            doc.fontSize(textsize);
+                            doc.text(i + 2 - startpagenum, 72, doc.page.height - 60, {align: 'center'});
                         }
                     }
 
                     var currTocPage = tocPages.start;
-                    doc.switchToPage(currTocPage);                    
-                    doc.fontSize(25);
-                    doc.lineGap(0);
+                    doc.switchToPage(currTocPage);
+                    doc.fontSize(headersize);
                     doc.text('Table of Contents', 72, 72);
-                    doc.font(defaultfont);
                     doc.moveDown();
-                    
+
                     _.forEach(project.chapters, function (chapter) {
+                        doc.fontSize(textsize);
                         if (tocPages[chapter.id] && tocPages[chapter.id] !== currTocPage) {
                             currTocPage = tocPages[chapter.id];
                             doc.switchToPage(currTocPage);
-                            doc.fontSize(10);
                             doc.text(' ');
                             doc.moveUp();
                         }
                         doc.switchToPage(currTocPage);
-                        doc.fontSize(10);
                         doc.text(chapter.title.transcontent || chapter.title.chunkmeta.title);
                         doc.moveUp();
                         doc.text(chapter.page - startpagenum + 1 + '', {align: 'right'});
@@ -265,13 +262,12 @@ function PrintManager(configurator) {
 
                     doc.end();
                     resolve(true);
-                    
+
                 } else {
                     doc.pipe(fs.createWriteStream(filePath));
 
                     doc.info.Title = translation[0].transcontent || meta.project.name;
-                    doc.fontSize(25);
-                    doc.font(defaultfont);
+                    doc.fontSize(headersize);
                     doc.text(doc.info.Title, 72, doc.page.height / 2, {align: 'center'});
 
                     mythis.renderLicense(doc, "LICENSE.md");
@@ -294,38 +290,34 @@ function PrintManager(configurator) {
                             doc.text("");
                             doc.addPage();
                         }
-                        doc.fontSize(20);
-                        doc.lineGap(10);
+                        doc.fontSize(headersize);
+                        doc.lineGap(textgap);
                         doc.text(chapterNum, {align: 'center'});
                         chapter.page = doc.bufferedPageRange().count;
-
-                        if (options.doubleSpace) {
-                            doc.lineGap(20);
-                        }
 
                         _.forEach(chapter.frames, function (frame) {
                             var content = frame.transcontent.split(/[\\]*[\\||\/][v][ ]([0-9]+)/g);
 
-                            _.forEach(content, function (info) {                                
+                            _.forEach(content, function (info) {
                                 var output = info.replace(/[\\][\\c][ ][0-9]+ /g, '');
                                 if (doc.y > 650) {
                                     doc.text("");
                                     doc.addPage();
                                 }
-                                doc.fontSize(10);
+                                doc.fontSize(textsize);
                                 doc.text(output + ' ', justify);
-                            });                            
+                            });
                         });
                     });
 
                     doc.text("");
+                    doc.lineGap(0);
                     range = doc.bufferedPageRange();
-                    for (i = range.start; i < range.count; i ++) {
-                        if (i + 1 >= startpagenum) {
-                            doc.switchToPage(i);
-                            doc.fontSize(10);
-                            doc.font(pagenumfont);
-                            doc.text(i + 2 - startpagenum, 72, doc.page.height - 50 - 12, {align: 'center'});
+                    for (var j = range.start; j < range.count; j++) {
+                        if (j + 1 >= startpagenum) {
+                            doc.switchToPage(j);
+                            doc.fontSize(textsize);
+                            doc.text(j + 2 - startpagenum, 72, doc.page.height - 60, {align: 'center'});
                         }
                     }
 

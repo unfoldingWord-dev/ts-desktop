@@ -75,27 +75,47 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 if (!manifest.finished_chunks) {
                     meta.finished_chunks = [];
                 }
-
-                var completion = configurator.getValue(meta.unique_id + "-completion");
-                if (completion !== undefined && completion !== "") {
-                    meta.completion = completion;
+                
+                var framenum = this.getProjectFrameNum(meta);
+                
+                if (meta.finished_chunks && framenum) {
+                    meta.completion = Math.round((meta.finished_chunks.length / framenum) * 100);
                 } else {
-                    if (meta.source_translations.length && meta.finished_chunks) {
-                        var frames = dataManager.getSourceFrames(meta.source_translations[0]);
-                        if (frames.length) {
-                            meta.completion = Math.round((meta.finished_chunks.length / frames.length) * 100);
-                        } else {
-                            meta.completion = 0;
-                        }
-                    } else {
-                        meta.completion = 0;
-                    }
+                    meta.completion = 0;
                 }
+                
             } catch (err) {
                 reporter.logError(err);
                 return null;
             }
             return meta;
+        },
+
+        getProjectFrameNum: function (meta) {
+            var frames = [];
+            var sources = dataManager.getSources();
+            var filtered = _.filter(sources, {'language_id': "en", 'resource_id': "ulb", 'checking_level': 3});
+
+            if (meta.type.id === "tw") {
+                frames = dataManager.getAllWords(filtered[0]);
+                return frames.length;
+            } else if (meta.type.id === "ta") {
+                frames = dataManager.getTa(meta.project.id);
+                return frames.length;
+            } else if (meta.source_translations.length) {
+                frames = dataManager.getSourceFrames(meta.source_translations[0]);
+                if (meta.type.id === "text") {
+                    if (meta.project.id === "obs") {
+                        return frames.length + 101;
+                    } else {
+                        return frames.length + 1;
+                    }
+                } else {
+                    return frames.length;
+                }
+            } else {
+                return 0;
+            }
         },
 
         makeUniqueId: function (manifest) {

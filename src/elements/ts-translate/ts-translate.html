@@ -1444,27 +1444,30 @@
 
             mythis.$.printpopup.close();
             mythis.set('options', {});
+            mythis.set('options.body', "Preparing to Print. Please wait...");
             mythis.set('options.loading', true);
             mythis.$.loading.open();
 
-            if (options.includeImages) {
-                mythis.set('options.body', "Downloading Images. Please wait...");
-                App.printManager.downloadImages().then(function(){
-                    mythis.set('options.body', "Extracting Images. Please wait...");
-                    App.printManager.extractImages();
+            setTimeout(function() {
+                if (options.includeImages) {
+                    mythis.set('options.body', "Downloading Images. Please wait...");
+                    App.printManager.downloadImages().then(function(){
+                        mythis.set('options.body', "Extracting Images. Please wait...");
+                        App.printManager.extractImages();
+                        generatePdf();
+                    }).catch(function(err){
+                        var errmessage = "An error occurred while downloading images";
+                        if(err !== null) {
+                            errmessage += "\n" + err;
+                        }
+                        mythis.set('options.title', "Download Failed");
+                        mythis.set('options.body', errmessage);
+                        mythis.set('options.loading', false);
+                    });
+                } else {
                     generatePdf();
-                }).catch(function(err){
-                    var errmessage = "An error occurred while downloading images";
-                    if(err !== null) {
-                        errmessage += "\n" + err;
-                    }
-                    mythis.set('options.title', "Download Failed");
-                    mythis.set('options.body', errmessage);
-                    mythis.set('options.loading', false);
-                });
-            } else {
-                generatePdf();
-            }
+                }
+            }, 500);
         },
 
         setrightanimation: function () {

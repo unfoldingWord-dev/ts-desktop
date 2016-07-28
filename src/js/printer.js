@@ -207,12 +207,11 @@ function PrintManager(configurator) {
                         _.forEach(chapter.frames, function (frame) {
                             if (options.includeImages) {
                                 var imgPath = path.join(imagePath, meta.resource.id + "-en-" + frame.chunkmeta.chapterid + "-" + frame.chunkmeta.frameid + ".jpg");
-                                //check the position of the text on the page.
-                                // 792 (total ht of page) - 50 ( lower margin) - 263.25 (height of pic) = 478.75 (max amount of space used before image)
-                                if (doc.y > 478.75) {
+                                if (doc.y > 475) {
                                     doc.addPage();
                                 }
-                                doc.image(imgPath, {width: doc.page.width - 72*2});
+                                doc.image(imgPath, {width: doc.page.width - 200});
+                                doc.text("");
                             }
                             if (doc.y > 650) {
                                 doc.text("");

@@ -48,10 +48,18 @@ deploy:
     branch: develop
 - provider: surge
   project: "./release/"
+  domain: sandbox.ts-desktop.surge.sh
+  skip_cleanup: true
+  on:
+    branch: **
+    condition: $TRAVIS_BRANCH != develop && !($TRAVIS_BRANCH =~ release-*) && $TRAVIS_BRANCH != master
+- provider: surge
+  project: "./release/"
   domain: release.ts-desktop.surge.sh
   skip_cleanup: true
   on:
-    branch: release-*
+    branch: **
+    condition: $TRAVIS_BRANCH =~ release-*
 - provider: releases
   api_key:
     secure: brjmL3cyCTr6swNCqka2fkc41j+PO2tqXZhE9QyNoDEXcxR1FOwPoPut/8h4N/pISfkf2FibtsWqThhW1Xz1pVNNMBlHRblJsSecfvXOtn7kneCsAV+QBngbPuA8OKzfhXTUeIQNlIpfG+rwlDg28wOthDI/7ADBOYgGQWeOd7o=

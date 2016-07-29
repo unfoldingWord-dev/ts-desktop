@@ -288,11 +288,12 @@ gulp.task('release', function(done) {
             fs.createReadStream('scripts/release/style.css').pipe(fs.createWriteStream('release/style.css'));
             releaseNotes.write(`<h1>tS Desktop build #<span id="build-num">${p.build}</span></h1><ul>`);
             if(process.env.TRAVIS_COMMIT) {
+                var branch = process.env.TRAVIS_BRANCH;
                 var commit = process.env.TRAVIS_COMMIT;
                 var buildNumber = process.env.TRAVIS_BUILD_NUMBER;
                 var buildId = process.env.TRAVIS_BUILD_ID;
                 var repoSlug = process.env.TRAVIS_REPO_SLUG;
-                releaseNotes.write(`<h2><a href="https://github.com/${repoSlug}/commit/${commit}" target="_blank">Commit ${commit.substring(0, 7)}</a></h2>`);
+                releaseNotes.write(`<h2><a href="https://github.com/${repoSlug}/commit/${commit}" target="_blank">Commit ${commit.substring(0, 7)} on ${branch}</a></h2>`);
                 releaseNotes.write(`<h2><a href="https://travis-ci.org/${repoSlug}/builds/${buildId}" target="_blank">Travis build #${buildNumber}</a></h2>`);
             }
             for(var release of values) {

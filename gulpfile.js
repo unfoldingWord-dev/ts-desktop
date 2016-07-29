@@ -17,7 +17,7 @@ const gulp = require('gulp'),
 const APP_NAME = 'translationStudio',
     JS_FILES = './src/js/**/*.js',
     UNIT_TEST_FILES = './unit_tests/**/*.js',
-    BUILD_DIR = 'build/',
+    BUILD_DIR = 'out/',
     RELEASE_DIR = 'release/';
 
 gulp.task('test', function () {

@@ -33,9 +33,8 @@ before_script:
 - npm install bower -g
 script: npm test
 before_deploy:
-- test $TRAVIS_TEST_RESULT = 0
+- test $TRAVIS_TEST_RESULT = 0 && $TRAVIS_PULL_REQUEST == "false" && ./scripts/before_deploy.sh && ./scripts/bump.sh
 - bower install
-- test $TRAVIS_PULL_REQUEST == "false" && ./scripts/bump.sh
 - gulp build --win
 - gulp build --linux
 - gulp build --osx

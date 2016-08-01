@@ -27,6 +27,7 @@ before_install:
   -iv $encrypted_54b2df9dba46_iv -in private.json.enc -out src/config/private.json
   -d; fi
 before_script:
+- git config --global url."https://" # fix for bower
 - npm install
 - npm install gulp -g
 - npm install bower -g

@@ -61,27 +61,6 @@
             color: var(--accent-color);
         }
 
-        #conflictpopup {
-            width: 350px;
-            height: 200px;
-            text-align: center;
-            color: var(--primary-text-color);
-        }
-
-        #conflictpopup p {
-            margin: 0;
-        }
-
-        #conflictpopup .buttons {
-            display: flex;
-            justify-content: center;
-            color: var(--secondary-text-color);
-        }
-
-        #conflictpopup .buttons paper-button:hover {
-            color: var(--accent-color);
-        }
-
         #editpopup {
             width: 350px;
             height: 175px;
@@ -232,17 +211,6 @@
             </div>
         </paper-dialog>
 
-        <paper-dialog id="conflictpopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <h2>Confirm Conflict Resolution</h2>
-            <div>
-                <p>You are keeping the <span>{{conflictchoice}}</span> version of text. The other version will be lost.</p>
-            </div>
-            <div class="buttons">
-                <paper-button dialog-dismiss>Cancel</paper-button>
-                <paper-button dialog-confirm on-tap="confirmconflict">Confirm</paper-button>
-            </div>
-        </paper-dialog>
-
         <paper-dialog id="editpopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <h2>Edit Chunk</h2>
             <div>
@@ -314,7 +282,6 @@
         <iron-signals on-iron-signal-loadproject="loadproject"></iron-signals>
         <iron-signals on-iron-signal-updatecompletion="updatecompletion"></iron-signals>
         <iron-signals on-iron-signal-openchecklist="openchecklist"></iron-signals>
-        <iron-signals on-iron-signal-openconflict="openconflict"></iron-signals>
         <iron-signals on-iron-signal-opendelete="opendelete"></iron-signals>
         <iron-signals on-iron-signal-openedit="openedit"></iron-signals>
         <iron-signals on-iron-signal-opennodata="opennodata"></iron-signals>
@@ -389,10 +356,6 @@
                 type: String,
                 value: "Idle",
                 notify: true
-            },
-            conflictchoice: {
-                type: String,
-                value: ""
             },
             animationConfig: {
                 value: function () {
@@ -551,18 +514,6 @@
         closechecklist: function () {
             var index = this.modestatus.index;
             this.fire('iron-signal', {name: 'completechunk', data: {index: index}});
-        },
-
-        openconflict: function (event, data) {
-            this.conflictchoice = data.choice;
-            this.modestatus.index = data.index;
-            this.$.conflictpopup.open();
-        },
-
-        confirmconflict: function () {
-            var choice = this.conflictchoice;
-            var index = this.modestatus.index;
-            this.fire('iron-signal', {name: 'saveconflict', data: {index: index, choice: choice}});
         },
 
         opendelete: function (event, data) {

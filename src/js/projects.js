@@ -18,6 +18,13 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
         toJSON = _.partialRight(JSON.stringify, null, '\t'),
         fromJSON = JSON.parse.bind(JSON);
 
+    var custom = ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings",
+        "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah",
+        "Lamentations", "Ezekial", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah",
+        "Malachi", "Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians", "Colossians",
+        "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter", "1 John", "2 John",
+        "3 John", "Jude", "Revelation", "Open Bible Stories", "translationWords", "translationAcademy Vol 1", "translationAcademy Vol 2"];
+
     return {
 
         moveBackups: function(oldPath, newPath) {
@@ -37,13 +44,24 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
         },
 
         sortProjectList: function (list) {
-            var custom = ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings",
-            "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah",
-            "Lamentations", "Ezekial", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah",
-            "Malachi", "Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians", "Colossians",
-            "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter", "1 John", "2 John",
-            "3 John", "Jude", "Revelation", "Open Bible Stories", "translationWords", "translationAcademy Vol 1", "translationAcademy Vol 2"];
+            var sort = configurator.getValue("sort") || {default: true, language: false};
+            
+            if (sort.default) {
+                if (sort.language) {
+                    return this.sortByLangBible(list);
+                } else {
+                    return this.sortByBibleLang(list);
+                }
+            } else {
+                if (sort.language) {
+                    return this.sortByLangProject(list);
+                } else {
+                    return this.sortByProjectLang(list);
+                }
+            }
+        },
 
+        sortByBibleLang: function (list) {            
             return list.sort(function (a, b) {
                 if (custom.indexOf(a.project.name) > custom.indexOf(b.project.name)) {
                     return 1;
@@ -55,11 +73,88 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                     } else if (a.target_language.name < b.target_language.name) {
                         return -1;
                     } else {
-                        return 0;
+                        if (a.resource.id > b.resource.id) {
+                            return -1;
+                        } else if (a.resource.id < b.resource.id) {
+                            return 1;
+                        } else {
+                            return 0;
+                        }
                     }
                 }
             });
-            
+        },
+
+        sortByProjectLang: function (list) {
+            return list.sort(function (a, b) {
+                if (a.project.name > b.project.name) {
+                    return 1;
+                } else if (a.project.name < b.project.name) {
+                    return -1;
+                } else {
+                    if (a.target_language.name > b.target_language.name) {
+                        return 1;
+                    } else if (a.target_language.name < b.target_language.name) {
+                        return -1;
+                    } else {
+                        if (a.resource.id > b.resource.id) {
+                            return -1;
+                        } else if (a.resource.id < b.resource.id) {
+                            return 1;
+                        } else {
+                            return 0;
+                        }
+                    }
+                }
+            });
+        },
+
+        sortByLangProject: function (list) {            
+            return list.sort(function (a, b) {
+                if (a.target_language.name > b.target_language.name) {
+                    return 1;
+                } else if (a.target_language.name < b.target_language.name) {
+                    return -1;
+                } else {
+                    if (a.project.name > b.project.name) {
+                        return 1;
+                    } else if (a.project.name < b.project.name) {
+                        return -1;
+                    } else {
+                        if (a.resource.id > b.resource.id) {
+                            return -1;
+                        } else if (a.resource.id < b.resource.id) {
+                            return 1;
+                        } else {
+                            return 0;
+                        }
+                    }
+                }
+            });
+        },
+
+        sortByLangBible: function (list) {            
+            return list.sort(function (a, b) {
+                if (a.target_language.name > b.target_language.name) {
+                    return 1;
+                } else if (a.target_language.name < b.target_language.name) {
+                    return -1;
+                } else {
+                    if (custom.indexOf(a.project.name) > custom.indexOf(b.project.name)) {
+                        return 1;
+                    } else if (custom.indexOf(a.project.name) < custom.indexOf(b.project.name)) {
+                        return -1;
+                    } else {
+                        if (a.resource.id > b.resource.id) {
+                            return -1;
+                        } else if (a.resource.id < b.resource.id) {
+                            return 1;
+                        } else {
+                            return 0;
+                        }
+                    }
+                }
+            });
         },
 
         updateManifestToMeta: function (manifest) {

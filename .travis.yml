@@ -35,8 +35,8 @@ script: npm test
 before_deploy:
 - test $TRAVIS_TEST_RESULT == 0
 - test $TRAVIS_PULL_REQUEST == "false"
-- test ./scripts/before_deploy.sh
-- test ./scripts/bump.sh
+- test $(./scripts/before_deploy.sh) == "true"
+- $./scripts/bump.sh
 - bower install
 - gulp build --win
 - gulp build --linux

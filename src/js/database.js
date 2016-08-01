@@ -23,6 +23,7 @@ function DataManager(db) {
                 })
                 .then(function (newlist) {
                     var result = {};
+                    var added = 0;
                     zipper(query('select slug from target_language')).forEach(function (item) {
                         result [item.slug] = true;
                     });
@@ -35,11 +36,14 @@ function DataManager(db) {
 
                         if (!result[lc]) {
                             query('insert into target_language (slug, name, direction, region) values ("' + lc + '", "' + ln + '", "' + ld + '", "' + lr + '")');
+                            added++;
                         }
                     }
+                    return added;
                 })
-                .then(function () {
+                .then(function (added) {
                     save();
+                    return added;
                 })
                 .catch(function (err) {
                     console.log(err);

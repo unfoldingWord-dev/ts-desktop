@@ -9,7 +9,7 @@ git config user.name "Travis-CI"
 # setup remote
 REMOTE=upstream
 HAS_REMOTE=$(scripts/git/has_remote.sh $REMOTE)
-if [[ $HAS_REMOTE ]]; then
+if [ $HAS_REMOTE ]; then
     git remote remove $REMOTE
 fi
 git remote add $REMOTE "https://$GITHUB_TOKEN@github.com/unfoldingWord-dev/ts-desktop.git"

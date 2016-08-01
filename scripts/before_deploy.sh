@@ -1,10 +1,17 @@
 #!/bin/bash
 
 # the travis before_deploy block runs for every deploy provider (as odd as that is).
-# testing this script at the beginning of that block will ensure the contents only get ran once.
+# this script will on run its contents once
 
-
-if ! [ "$BEFORE_DEPLOY_RUN" ]; then
+if ! [[ "$BEFORE_DEPLOY_RUN" ]]; then
   export BEFORE_DEPLOY_RUN=1;
-  echo true
+
+  if [[ $TRAVIS_TAG ]]; then
+    ./scripts/bump.sh
+  fi
+  bower install
+  gulp build --win
+  gulp build --linux
+  gulp build --osx
+  gulp release
 fi

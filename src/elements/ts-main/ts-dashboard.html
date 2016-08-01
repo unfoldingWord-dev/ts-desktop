@@ -299,8 +299,7 @@
           if (conflicts && conflicts.length) {
               App.reporter.logNotice(conflicts, 'Chunk Conflicts');
 
-              msg += ' The following chunks contain conflicts that need your attention: ';
-              msg += conflicts.join(', ');
+              msg += ' There are ' + conflicts.length + ' chunks that contain conflicts that need your attention.';
           }
 
           this.showMessage(title, msg);

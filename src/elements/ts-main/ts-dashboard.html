@@ -804,7 +804,8 @@
                   return _.compact(list);
               })
               .then(function (list) {
-                  mythis.set('projectlist', list);
+                  var sorted = App.projectsManager.sortProjectList(list);
+                  mythis.set('projectlist', sorted);
               })
               .catch(function (err) {
                   mythis.showErrorMessage('Error updating projects', 'An error occurred while updating projects', err);

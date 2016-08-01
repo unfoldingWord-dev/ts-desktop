@@ -36,6 +36,32 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 });
         },
 
+        sortProjectList: function (list) {
+            var custom = ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings",
+            "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah",
+            "Lamentations", "Ezekial", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah",
+            "Malachi", "Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians", "Colossians",
+            "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter", "1 John", "2 John",
+            "3 John", "Jude", "Revelation", "Open Bible Stories", "translationWords", "translationAcademy Vol 1", "translationAcademy Vol 2"];
+
+            return list.sort(function (a, b) {
+                if (custom.indexOf(a.project.name) > custom.indexOf(b.project.name)) {
+                    return 1;
+                } else if (custom.indexOf(a.project.name) < custom.indexOf(b.project.name)) {
+                    return -1;
+                } else {
+                    if (a.target_language.name > b.target_language.name) {
+                        return 1;
+                    } else if (a.target_language.name < b.target_language.name) {
+                        return -1;
+                    } else {
+                        return 0;
+                    }
+                }
+            });
+            
+        },
+
         updateManifestToMeta: function (manifest) {
             var meta = _.cloneDeep(manifest);
             try {
@@ -75,15 +101,15 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 if (!manifest.finished_chunks) {
                     meta.finished_chunks = [];
                 }
-                
+
                 var framenum = this.getProjectFrameNum(meta);
-                
+
                 if (meta.finished_chunks && framenum) {
                     meta.completion = Math.round((meta.finished_chunks.length / framenum) * 100);
                 } else {
                     meta.completion = 0;
                 }
-                
+
             } catch (err) {
                 reporter.logError(err);
                 return null;

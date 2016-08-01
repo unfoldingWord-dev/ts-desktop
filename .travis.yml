@@ -4,6 +4,7 @@ node_js:
 os:
 - linux
 sudo: true
+# we need to test this. we still want tags on master to be built, just not the master branch
 branches:
   except:
     - master
@@ -58,7 +59,8 @@ deploy:
   skip_cleanup: true
   on:
     all_branches: true
-    condition: "$TRAVIS_BRANCH != develop && !($TRAVIS_BRANCH =~ release-.*) && $TRAVIS_BRANCH != master"
+    # need to make sure this is working correctly
+    condition: "$TRAVIS_BRANCH != develop && !($TRAVIS_BRANCH =~ ^release-.*$) && $TRAVIS_BRANCH != master"
 - provider: surge
   project: "./release/"
   domain: release.ts-desktop.surge.sh

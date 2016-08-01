@@ -8,4 +8,4 @@ git remote add upstream "https://$GITHUB_TOKEN@github.com/unfoldingWord-dev/ts-d
 BUILD=$(gulp bump --silent)
 git add package.json
 git commit -m "bumped build number to $BUILD [ci skip]"
-git push -q upstream HEAD:$TRAVIS_BRANCH
+git push -q upstream HEAD:$TRAVIS_BRANCH && 0 # skip errors

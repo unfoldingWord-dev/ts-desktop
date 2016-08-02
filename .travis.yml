@@ -37,18 +37,7 @@ before_script:
 - npm install bower -g
 script: npm test
 before_deploy:
-if [[ $TRAVIS_TEST_RESULT == 0 && $TRAVIS_PULL_REQUEST == "false" && -z "$BEFORE_DEPLOY_RUN" ]]; then
-  export BEFORE_DEPLOY_RUN=1;
-
-  if [[ -z $TRAVIS_TAG ]]; then
-    ./scripts/bump.sh
-  fi
-  bower install
-  gulp build --win
-  gulp build --linux
-  gulp build --osx
-  gulp release
-fi
+- test $TRAVIS_TEST_RESULT == 0 && $TRAVIS_PULL_REQUEST == "false" && ./scripts/before_deploy.sh
 deploy:
 - provider: surge
   project: "./release/"

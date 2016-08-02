@@ -39,7 +39,6 @@
             margin-top: 24px;
 			padding: 0 16px;
             flex: auto;
-            display: flex;
 		}
 
         #content.editmode {
@@ -72,12 +71,30 @@
             display: none;
         }
 
+        #conflict {
+            flex: auto;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .review {
+            background: var(--review-color);
+            color: var(--reverse-text-color);
+            text-transform: uppercase;
+            font-size: 90%;
+        }
+
         .rtl {
             direction: rtl;
         }
 
         .hide {
             display: none;
+        }
+
+        .flex {
+            display: flex;
         }
 
 	</style>
@@ -91,9 +108,12 @@
                 </div>
                 <iron-icon icon="done" on-tap="review"></iron-icon>
             </div>
-            <div id="content" class="editmode targetfont">
+            <div id="content" class$="[[noconflictclass(chunk.conflicts.exists)]]">
                 <iron-autogrow-textarea id="textbox" class$="[[chunk.projectmeta.target_language.direction]]" on-change="change" value="[[chunk.transcontent]]" on-input="input"></iron-autogrow-textarea>
                 <div id="textholder" class$="[[chunk.projectmeta.target_language.direction]]"></div>
+            </div>
+            <div id="conflict" class$="[[conflictclass(chunk.conflicts.exists)]]">
+                <paper-button raised class="review" on-tap="gotoreview">Conflict Exists</paper-button>
             </div>
         </paper-material>
 
@@ -121,6 +141,19 @@
 
         focustextbox: function () {
             this.$.textbox.textarea.focus();
+        },
+
+        gotoreview: function () {
+            var index = this.chunk.index;
+            this.fire('iron-signal', {name: 'gotoreview', data: {index: index}});
+        },
+
+        conflictclass: function (exists) {
+            return exists ? 'flex' : 'hide';
+        },
+
+        noconflictclass: function (exists) {
+            return exists ? 'hide' : 'flex editmode targetfont';
         },
 
         rendertext: function () {

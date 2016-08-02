@@ -294,6 +294,7 @@
         <iron-signals on-iron-signal-reset="reset"></iron-signals>
         <iron-signals on-iron-signal-saveclose="saveAndClose"></iron-signals>
         <iron-signals on-iron-signal-saveall="saveAll"></iron-signals>
+        <iron-signals on-iron-signal-gotoreview="goToReview"></iron-signals>
 
     </template>
 
@@ -393,6 +394,12 @@
         stoptimers: function () {
             clearTimeout(this.savetimer);
             clearTimeout(this.backuptimer);
+        },
+
+        goToReview: function (event, data) {
+            this.set('selected', 0);
+            this.set('modestatus.index', data.index);
+            this.set('selected', 3);
         },
 
         saveAndClose: function () {

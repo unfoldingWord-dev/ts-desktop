@@ -57,6 +57,7 @@ deploy:
   skip_cleanup: true
   on:
     all_branches: true
+    tags: false
     condition: "-d ./release && $TRAVIS_BRANCH != develop && ! ($TRAVIS_BRANCH =~ ^release-.*$) && $TRAVIS_BRANCH != master"
 - provider: surge
   project: "./release/"
@@ -64,6 +65,7 @@ deploy:
   skip_cleanup: true
   on:
     all_branches: true
+    tags: false
     condition: "-d ./release && $TRAVIS_BRANCH =~ ^release-.*$"
 - provider: releases
   api_key:

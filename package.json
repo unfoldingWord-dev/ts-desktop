@@ -2,7 +2,7 @@
   "name": "translationstudio",
   "productName": "translationStudio",
   "version": "9.2.0",
-  "build": "31",
+  "build": "45",
   "description": "A utility for translating the Bible and biblical content into any language.",
   "keywords": [],
   "homepage": "https://github.com/unfoldingWord-dev/ts-desktop",
@@ -16,6 +16,11 @@
     "type": "git",
     "url": "git@github.com:unfoldingWord-dev/ts-desktop.git"
   },
+    "jest": {
+        "testPathIgnorePatterns": [
+            "out"
+        ]
+    },
   "dependencies": {
     "adm-zip": "^0.4.7",
     "archiver": "^0.21.0",
@@ -46,6 +51,8 @@
     "electron-prebuilt": "^1.2.5",
     "gulp": "^3.9.1",
     "gulp-mocha": "^2.2.0",
+    "jest": "^14.0.1",
+    "gulp-replace": "^0.5.4",
     "mocha": "^2.5.3",
     "yargs": "^3.17.1"
   },
@@ -53,7 +60,8 @@
     "electron": "1.2.5"
   },
   "scripts": {
-    "start": "electron src/js/main.js"
+    "start": "electron src/js/main.js",
+    "test": "jest"
   },
   "main": "src/js/main.js",
   "license": "GPL-2.0"

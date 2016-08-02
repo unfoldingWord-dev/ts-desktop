@@ -1,14 +1,82 @@
 language: node_js
+node_js:
+- '6'
+os:
+- linux
+sudo: true
+# we need to test this. we still want tags on master to be built, just not the master branch
+branches:
+  except:
+    - master
+env:
+  global:
+  - secure: R61XmjAE1j2w1ynoBud6mliJX5Y73u9ncyVaSM9LajclYAEWRWD7n/bvAf8rfI/Al1FeLIedscMsfgdpBc4Lu+USO4NnH2cpjrWXQmU5xTF3sHSKK9a+jzHxa7kZQf+e2uePO39Ty7FypxBJ01Zsuiv6/Hv3PVpufZU60sywg/E=
+  - secure: hiF+Sfpzc4C2Kxg+VgOHQ6ITPJRRwQJ802b6wnZy7Z1Ta9Gl01AgOFGWkf2raq4cQMlWw82UfiL7dEJ/bHwsEo3PoBMVhRG1AjiTY3dpoiKUjlX3MAl4SCZtBjmBN+4QT8HGOruhlKBG3xLNryg1UhjSbThPnw1rI//Be3IWH+o=
+  - secure: TVM/SM0AXEVRKDFoLWhJy3zaCnlcOTxasWuufnnWPS1yyROPMUzel40OlByc4RJs0s7L7EPyFloBjF0hAwFB+KnPFsyrnLqvLto3egWEcfnA1rIjN98bM4y2qIF1TIuV7/DFIk5YJFhlDC8amc6l82yKtkdDb2LD4k0TKx3fySc=
 cache:
   directories:
-  - "$HOME/build/unfoldingWord-dev/ts-desktop/node_modules"
-sudo: false
-node_js:
-- '5.1'
+  - node_modules
+before_install:
+- ./scripts/skip_travis_commits.sh
+- sudo add-apt-repository --yes ppa:ubuntu-wine/ppa
+- sudo add-apt-repository --yes ppa:arx/release
+- sudo apt-get update -d
+- sudo apt-get install -y -q innoextract wine python-software-properties
+- wine --version
+- innoextract --version
+- "./scripts/innosetup/innoinstall.sh"
+- sudo cp scripts/innosetup/iscc /usr/local/bin/iscc
+- iscc /? 2> /dev/null | grep "Inno Setup Preprocessor"
+- if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then openssl aes-256-cbc -K $encrypted_54b2df9dba46_key
+  -iv $encrypted_54b2df9dba46_iv -in private.json.enc -out src/config/private.json
+  -d; fi
 before_script:
+- git config --global url."https://".insteadOf git://
 - npm install
 - npm install gulp -g
-script: gulp
-before_install:
-- if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then openssl aes-256-cbc -K $encrypted_54b2df9dba46_key -iv $encrypted_54b2df9dba46_iv -in config.json.enc -out unit_tests/git/config.json -d; fi
-
+- npm install bower -g
+script: npm test
+before_deploy:
+- test $TRAVIS_TEST_RESULT == 0 && $TRAVIS_PULL_REQUEST == "false" && ./scripts/before_deploy.sh
+#- test $TRAVIS_TEST_RESULT == 0
+#- test $TRAVIS_PULL_REQUEST == "false"
+#- test $(./scripts/before_deploy.sh) == "true"
+#- ./scripts/bump.sh
+#- bower install
+#- gulp build --win
+#- gulp build --linux
+#- gulp build --osx
+#- gulp release
+deploy:
+- provider: surge
+  project: "./release/"
+  domain: develop.ts-desktop.surge.sh
+  skip_cleanup: true
+  on:
+    branch: develop
+- provider: surge
+  project: "./release/"
+  domain: sandbox.ts-desktop.surge.sh
+  skip_cleanup: true
+  on:
+    all_branches: true
+    # need to make sure this is working correctly
+    condition: "$TRAVIS_BRANCH != develop && !($TRAVIS_BRANCH =~ ^release-.*$) && $TRAVIS_BRANCH != master"
+- provider: surge
+  project: "./release/"
+  domain: release.ts-desktop.surge.sh
+  skip_cleanup: true
+  on:
+    all_branches: true
+    condition: "$TRAVIS_BRANCH =~ ^release-.*$"
+- provider: releases
+  api_key:
+    secure: brjmL3cyCTr6swNCqka2fkc41j+PO2tqXZhE9QyNoDEXcxR1FOwPoPut/8h4N/pISfkf2FibtsWqThhW1Xz1pVNNMBlHRblJsSecfvXOtn7kneCsAV+QBngbPuA8OKzfhXTUeIQNlIpfG+rwlDg28wOthDI/7ADBOYgGQWeOd7o=
+  file:
+  - release/*.exe
+  - release/*.zip
+  skip_cleanup: true
+  overwrite: true
+  on:
+    tags: true
+    repo: unfoldingWord-dev/ts-desktop

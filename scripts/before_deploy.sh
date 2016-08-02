@@ -5,10 +5,10 @@
 
 set -e
 
-if ! [[ "$BEFORE_DEPLOY_RUN" ]]; then
+if [[ -z "$BEFORE_DEPLOY_RUN" ]]; then
   export BEFORE_DEPLOY_RUN=1;
 
-  if [[ $TRAVIS_TAG ]]; then
+  if [[ -z $TRAVIS_TAG ]]; then
     ./scripts/bump.sh
   fi
   bower install

@@ -78,6 +78,13 @@
             font-size: 80%;
         }
 
+        .conflict {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
         .rtl {
             direction: rtl;
             width: 100%;
@@ -112,10 +119,17 @@
                     </div>
                 </div>
                 <template is="dom-if" if="{{!chunk.completed}}">
-                    <div class="body targetfont">
-                        <p class$="[[standardclass(chunk.typeclass, chunk.direction)]]">[[chunk.transcontent]]</p>
-                        <p class$="[[notstandardclass(chunk.typeclass, chunk.direction)]]">[[chunk.helpscontent.0.title]]</p>
-                    </div>
+                    <template is="dom-if" if="{{!chunk.conflicts.exists}}">
+                        <div class="body targetfont">
+                            <p class$="[[standardclass(chunk.typeclass, chunk.direction)]]">[[chunk.transcontent]]</p>
+                            <p class$="[[notstandardclass(chunk.typeclass, chunk.direction)]]">[[chunk.helpscontent.0.title]]</p>
+                        </div>
+                    </template>
+                    <template is="dom-if" if="{{chunk.conflicts.exists}}">
+                        <div class="conflict">
+                            <paper-button raised class="review" on-tap="gotochunk">Conflict Exists</paper-button>
+                        </div>
+                    </template>
                 </template>
             </paper-material>
             <template is="dom-if" if="{{chunk.combined}}">

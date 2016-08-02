@@ -36,8 +36,17 @@ before_script:
 - npm install gulp -g
 - npm install bower -g
 script: npm test
+after_success:
+- test $TRAVIS_TEST_RESULT == 0 && $TRAVIS_PULL_REQUEST == "false"
+- test -z $TRAVIS_TAG && ./scripts/bump.sh
+- bower install
+- gulp build --win
+- gulp build --linux
+- gulp build --osx
+- gulp release
 before_deploy:
-- test $TRAVIS_TEST_RESULT == 0 && $TRAVIS_PULL_REQUEST == "false" && ./scripts/before_deploy.sh
+
+#- test $TRAVIS_TEST_RESULT == 0 && $TRAVIS_PULL_REQUEST == "false" && ./scripts/before_deploy.sh
 deploy:
 - provider: surge
   project: "./release/"
@@ -45,6 +54,7 @@ deploy:
   skip_cleanup: true
   on:
     branch: develop
+    condition: -d "./release"
 - provider: surge
   project: "./release/"
   domain: sandbox.ts-desktop.surge.sh
@@ -52,14 +62,14 @@ deploy:
   on:
     all_branches: true
     # need to make sure this is working correctly
-    condition: "$TRAVIS_BRANCH != develop && !($TRAVIS_BRANCH =~ ^release-.*$) && $TRAVIS_BRANCH != master"
+    condition: -d "./release" && "$TRAVIS_BRANCH != develop && !($TRAVIS_BRANCH =~ ^release-.*$) && $TRAVIS_BRANCH != master"
 - provider: surge
   project: "./release/"
   domain: release.ts-desktop.surge.sh
   skip_cleanup: true
   on:
     all_branches: true
-    condition: "$TRAVIS_BRANCH =~ ^release-.*$"
+    condition: -d "./release" && "$TRAVIS_BRANCH =~ ^release-.*$"
 - provider: releases
   api_key:
     secure: brjmL3cyCTr6swNCqka2fkc41j+PO2tqXZhE9QyNoDEXcxR1FOwPoPut/8h4N/pISfkf2FibtsWqThhW1Xz1pVNNMBlHRblJsSecfvXOtn7kneCsAV+QBngbPuA8OKzfhXTUeIQNlIpfG+rwlDg28wOthDI/7ADBOYgGQWeOd7o=
@@ -71,3 +81,4 @@ deploy:
   on:
     tags: true
     repo: unfoldingWord-dev/ts-desktop
+    condition: -d "./release"

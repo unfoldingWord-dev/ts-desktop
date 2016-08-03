@@ -173,6 +173,8 @@
             }
             this.set('chunk.conflicts', {exists: false});
             this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
+            this.fire('setheight');
+            this.fire('iron-signal', {name: 'resolveconflict'});
         },
 
         cancel: function () {

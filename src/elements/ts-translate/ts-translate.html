@@ -8,6 +8,7 @@
 <link rel="import" href="./ts-read-mode/ts-read-mode.html">
 <link rel="import" href="./ts-chunk-mode/ts-chunk-mode.html">
 <link rel="import" href="./ts-review-mode/ts-review-mode.html">
+<link rel="import" href="./ts-conflict-mode/ts-conflict-mode.html">
 <link rel="import" href="./ts-translate-sidebar.html">
 <link rel="import" href="./ts-nosource-mode.html">
 <link rel="import" href="./ts-source/ts-source-modal.html">
@@ -195,6 +196,7 @@
             <ts-chunk-mode id="chunkmode" chunks="{{currentproject.chunks}}" modestatus="{{modestatus}}"></ts-chunk-mode>
             <ts-review-mode id="reviewmode" chunks="{{currentproject.chunks}}" modestatus="{{modestatus}}"></ts-review-mode>
             <ts-nosource-mode id="nosourcemode" projectmeta="[[currentproject.projectmeta]]"></ts-nosource-mode>
+            <ts-conflict-mode id="conflictmode" chunks="{{currentproject.chunks}}" modestatus="{{modestatus}}"></ts-conflict-mode>
         </div>
 
         <paper-dialog id="checklistpopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -295,6 +297,7 @@
         <iron-signals on-iron-signal-saveclose="saveAndClose"></iron-signals>
         <iron-signals on-iron-signal-saveall="saveAll"></iron-signals>
         <iron-signals on-iron-signal-gotoreview="goToReview"></iron-signals>
+        <iron-signals on-iron-signal-resolveconflict="resolveConflict"></iron-signals>
 
     </template>
 
@@ -573,6 +576,14 @@
             this.$.readmode.notifyResize();
             this.$.chunkmode.notifyResize();
             this.$.reviewmode.notifyResize();
+            this.$.conflictmode.notifyResize();
+        },
+
+        resolveConflict: function () {
+            this.set('currentproject.conflicts', this.currentproject.conflicts - 1);
+            if (this.currentproject.conflicts === 0 && this.selected === 5) {
+                this.set('selected', 3);
+            }
         },
 
         updatestate: function (event, data) {
@@ -800,6 +811,8 @@
             var frames = App.dataManager.getSourceFrames(currentsource);
             var chunkarray = [];
             var index = 0;
+
+            this.set('currentproject.conflicts', 0);
 
             for (var i = 0; i < frames.length; i++) {
                 if (frames[i].verse === "00") {
@@ -1063,6 +1076,7 @@
             } else {
                 return {exists: false};
             }
+            this.set('currentproject.conflicts', this.currentproject.conflicts + 1);
             return {exists: true, content1: content1, content2: content2};
         },
 
@@ -1135,6 +1149,7 @@
             var chunk = this.$.chunkmode;
             var review = this.$.reviewmode;
             var nosource = this.$.nosourcemode;
+            var conflict = this.$.conflictmode;
 
             if (frommode > 0) {
                 this.set('modestatus.lastmode', frommode);
@@ -1148,6 +1163,8 @@
                 review.frommode();
             } else if (frommode === 4) {
                 nosource.frommode();
+            } else if (frommode === 5) {
+                conflict.frommode();
             }
 
             if (tomode === 1) {
@@ -1158,6 +1175,8 @@
                 review.tomode();
             } else if (tomode === 4) {
                 nosource.tomode();
+            } else if (tomode === 5) {
+                conflict.tomode();
             }
         },
 
@@ -1167,6 +1186,7 @@
             var chunk = this.$.chunkmode;
             var review = this.$.reviewmode;
             var nosource = this.$.nosourcemode;
+            var conflict = this.$.conflictmode;
 
             mythis.set('selected', 0);
             mythis.set('modestatus', {"chapter": 1, "lastmode": 1, "index": -1});
@@ -1174,6 +1194,7 @@
             chunk.classList.add("hide");
             review.classList.add("hide");
             nosource.classList.add("hide");
+            conflict.classList.add("hide");
         },
 
         setmodestate: function () {
@@ -1239,6 +1260,7 @@
             var read = this.$.readmode;
             var chunk = this.$.chunkmode;
             var review = this.$.reviewmode;
+            var conflict = this.$.conflictmode;
 
             if (selected === 1) {
                 read.getlocation();
@@ -1246,6 +1268,8 @@
                 chunk.getlocation();
             } else if (selected === 3) {
                 review.getlocation();
+            } else if (selected === 5) {
+                conflict.getlocation();
             }
         },
 
@@ -1254,6 +1278,7 @@
             var read = this.$.readmode;
             var chunk = this.$.chunkmode;
             var review = this.$.reviewmode;
+            var conflict = this.$.conflictmode;
 
             if (selected === 1) {
                 read.setlocation();
@@ -1261,6 +1286,8 @@
                 chunk.setlocation();
             } else if (selected === 3) {
                 review.setlocation();
+            } else if (selected === 5) {
+                conflict.setlocation();
             }
         },
 
@@ -1289,6 +1316,7 @@
         gohome: function () {
             var mythis = this;
             mythis.$.reviewmode.closeresource();
+            mythis.$.conflictmode.closeresource();
             mythis.savestate();
             mythis.stoptimers();
             return mythis.saveAll()
@@ -1310,6 +1338,7 @@
                 mythis.$.loading.open();
                 setTimeout(function() {
                     mythis.$.reviewmode.closeresource();
+                    mythis.$.conflictmode.closeresource();
                     mythis.savestate();
                     mythis.setleftanimation();
                     mythis.stoptimers();

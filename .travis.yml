@@ -71,8 +71,9 @@ deploy:
   api_key:
     secure: brjmL3cyCTr6swNCqka2fkc41j+PO2tqXZhE9QyNoDEXcxR1FOwPoPut/8h4N/pISfkf2FibtsWqThhW1Xz1pVNNMBlHRblJsSecfvXOtn7kneCsAV+QBngbPuA8OKzfhXTUeIQNlIpfG+rwlDg28wOthDI/7ADBOYgGQWeOd7o=
   file:
-    - release/.*\.exe
-    - release/.*\.zip
+    - release/*.exe
+    - release/*.zip
+  file_glob: true
   skip_cleanup: true
   overwrite: true
   on:

@@ -145,7 +145,8 @@
 
         gotoreview: function () {
             var index = this.chunk.index;
-            this.fire('iron-signal', {name: 'gotoreview', data: {index: index}});
+            var chapter = this.chunk.chunkmeta.chapter;
+            this.fire('iron-signal', {name: 'gotoreview', data: {index: index, chapter: chapter}});
         },
 
         conflictclass: function (exists) {

@@ -402,6 +402,7 @@
         goToReview: function (event, data) {
             this.set('selected', 0);
             this.set('modestatus.index', data.index);
+            this.set('modestatus.chapter', data.chapter);
             this.set('selected', 3);
         },
 
@@ -865,6 +866,7 @@
                 return chunk.chunkmeta.chapter;
             }), function (data, chap) {
                 var chapcomplete = true;
+                var conflicts = false;
                 var transcontent = "";
                 var srccontent = "";
                 var chaptermeta = {};
@@ -873,6 +875,9 @@
                     if (chunk.chunkmeta.frame > 0) {
                         if (!chunk.completed) {
                             chapcomplete = false;
+                        }
+                        if (chunk.conflicts.exists) {
+                            conflicts = true;
                         }
                         transcontent += chunk.transcontent + " ";
                         srccontent += chunk.srccontent + " ";
@@ -885,7 +890,7 @@
                     mythis.currentproject.statedata[chaptermeta.chapterid] = statedata;
                 }
                 if (chaptermeta.chapter > 0) {
-                    chapters.push({completed: chapcomplete, transcontent: transcontent, srccontent: srccontent, projectmeta: _.cloneDeep(projectmeta), chaptermeta: chaptermeta, state: statedata});
+                    chapters.push({completed: chapcomplete, conflicts: conflicts, transcontent: transcontent, srccontent: srccontent, projectmeta: _.cloneDeep(projectmeta), chaptermeta: chaptermeta, state: statedata});
                 }
             });
             this.set('currentproject.chapters', chapters);

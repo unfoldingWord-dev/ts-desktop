@@ -83,6 +83,11 @@
             align-items: center;
         }
 
+        #headings .bigspan {
+            color: var(--accent-color);
+            cursor: pointer;
+        }
+
         #list {
             max-height: calc(100vh - 200px);
             display: flex;
@@ -297,9 +302,9 @@
                 <div class="contain">
                     <div id="headings" class="smalltext">
                         <span class="smallspan"></span>
-                        <span class="bigspan">{{locale.project}}</span>
+                        <span class="bigspan" on-tap="sortproj">{{locale.project}}</span>
                         <span class="smallspan">{{locale.type}}</span>
-                        <span class="bigspan">{{locale.language}}</span>
+                        <span class="bigspan" on-tap="sortlang">{{locale.language}}</span>
                         <span>{{locale.progress}}</span>
                     </div>
                     <div id="list">
@@ -445,6 +450,20 @@
 
         checkicon: function (projectmeta) {
             return projectmeta.project.id === "obs" || projectmeta.project_type_class === "extant" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
+        },
+
+        sortproj: function () {
+            var sort = App.configurator.getValue("sort") || {default: true, language: false};
+            sort.default = !sort.default;
+            App.configurator.setValue("sort", sort);
+            this.fire('iron-signal', {name: 'updatelist'});
+        },
+
+        sortlang: function () {
+            var sort = App.configurator.getValue("sort") || {default: true, language: false};
+            sort.language = !sort.language;
+            App.configurator.setValue("sort", sort);
+            this.fire('iron-signal', {name: 'updatelist'});
         },
 
         changelanguage: function () {

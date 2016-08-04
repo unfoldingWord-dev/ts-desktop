@@ -1,0 +1,85 @@
+
+<link rel="import" href="../ts-target/ts-target-conflict.html">
+<link rel="import" href="../ts-source/ts-source-chunk.html">
+<link rel="import" href="../ts-resource/ts-resource-card.html">
+
+<dom-module id="ts-conflict-card">
+
+	<style>
+
+        :host {
+            flex: auto;
+            display: flex;
+        }
+
+        .contain {
+            display: flex;
+            margin-top: 16px;
+            flex: auto;
+        }
+
+        .middle {
+            flex: 1 0 400px;
+            margin-right: 16px;
+            display: flex;
+        }
+
+        .right {
+            margin-right: 16px;
+            flex: 0 0 400px;
+        }
+
+        .left {
+            margin: 0 16px;
+            flex: 1 0 400px;
+        }
+
+        .hide {
+            display: none;
+        }
+
+	</style>
+
+	<template>
+
+        <div class="contain">
+            <ts-source-chunk class="left" reviewmode chunk="[[chunk]]"></ts-source-chunk>
+            <div class="middle">
+                <ts-target-conflict chunk="{{chunk}}" on-setheight="setheight"></ts-target-conflict>
+            </div>
+            <ts-resource-card class="right" chunk="[[chunk]]" on-setheight="setheight"></ts-resource-card>
+        </div>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+		is: 'ts-conflict-card',
+
+        behaviors: [
+            Polymer.IronResizableBehavior
+        ],
+
+		properties: {
+            chunk: {
+                type: Object,
+                value: {},
+                notify: true
+            }
+		},
+
+        setheight: function () {
+            this.fire('updateheight');
+        },
+
+		ready: function() {
+
+		}
+
+	});
+
+</script>

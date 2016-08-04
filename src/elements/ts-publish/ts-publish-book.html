@@ -100,7 +100,7 @@
                     start = chunk.chunkmeta.frame;
                     end = chunk.chunkmeta.frame;
                 }
-                return {transcontent: chunk.transcontent, helpscontent: chunk.helpscontent, completed: chunk.completed, chunkmeta: chunk.chunkmeta, index: index, start: start, end: end, combined: false, typeclass: typeclass, direction: direction};
+                return {transcontent: chunk.transcontent, helpscontent: chunk.helpscontent, completed: chunk.completed, conflicts: chunk.conflicts, chunkmeta: chunk.chunkmeta, index: index, start: start, end: end, combined: false, typeclass: typeclass, direction: direction};
             });
 
             for (var i = 0; i < transdata.length; i++) {

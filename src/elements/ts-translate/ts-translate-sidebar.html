@@ -78,6 +78,7 @@
             <paper-icon-button id="read" class$="[[checkclass(currentproject.projectmeta.project_type_class)]]" icon="assignment" title="Read Mode" on-tap="read"></paper-icon-button>
             <paper-icon-button id="chunk" class$="[[checkclass(currentproject.projectmeta.project_type_class)]]" icon="flip-to-front" title="Chunk Mode" on-tap="chunk"></paper-icon-button>
             <paper-icon-button id="review" class$="[[checkclass(currentproject.projectmeta.project_type_class)]]" icon="assignment-turned-in" title="Review Mode" on-tap="review"></paper-icon-button>
+            <paper-icon-button id="conflict" class$="[[conflictclass(currentproject.projectmeta.project_type_class, currentproject.conflicts)]]" icon="alarm-on" title="Conflict Mode" on-tap="conflict"></paper-icon-button>
         </div>
         <paper-menu-button id="menu" horizontal-offset="10" vertical-offset="10" vertical-align="bottom">
             <paper-icon-button class="current dropdown-trigger" icon="more-vert"></paper-icon-button>
@@ -85,7 +86,7 @@
                 <paper-item on-tap="home"><iron-icon class="smallicon" icon="project:project"></iron-icon>Home</paper-item>
                 <paper-item on-tap="publish"><iron-icon class="smallicon" icon="cloud-done"></iron-icon>Upload</paper-item>
                 <paper-item on-tap="backup"><iron-icon class="smallicon" icon="file-upload"></iron-icon>Backup</paper-item>
-                <paper-item on-tap="print"><iron-icon class="smallicon" icon="print"></iron-icon>Print</paper-item>
+                <paper-item on-tap="print" class$="[[checkclass(currentproject.projectmeta.project_type_class)]]"><iron-icon class="smallicon" icon="print"></iron-icon>Print</paper-item>
                 <paper-item on-tap="academy"><iron-icon class="smallicon" icon="book"></iron-icon>translationAcademy</paper-item>
                 <paper-item on-tap="feedback"><iron-icon class="smallicon" icon="announcement"></iron-icon>Feedback</paper-item>
                 <paper-item on-tap="settings"><iron-icon class="smallicon" icon="settings"></iron-icon>Settings</paper-item>
@@ -121,38 +122,65 @@
             return typeclass === "standard" ? '' : 'hide';
         },
 
+        conflictclass: function (typeclass, conflicts) {
+            if (this.selected === 5) {
+                return typeclass === "standard" && conflicts > 0 ? 'current' : 'hide';
+            } else {
+                return typeclass === "standard" && conflicts > 0 ? '' : 'hide';
+            }
+        },
+
         modechange: function (selected) {
             var read = this.$.read;
             var chunk = this.$.chunk;
             var review = this.$.review;
+            var conflict = this.$.conflict;
+
             if (selected === 1) {
                 read.classList.add("current");
                 chunk.classList.remove("current");
                 review.classList.remove("current");
+                conflict.classList.remove("current");
                 read.disabled = false;
                 chunk.disabled = false;
                 review.disabled = false;
+                conflict.disabled = false;
             } else if (selected === 2) {
                 read.classList.remove("current");
                 chunk.classList.add("current");
                 review.classList.remove("current");
+                conflict.classList.remove("current");
                 read.disabled = false;
                 chunk.disabled = false;
                 review.disabled = false;
+                conflict.disabled = false;
             } else if (selected === 3) {
                 read.classList.remove("current");
                 chunk.classList.remove("current");
                 review.classList.add("current");
+                conflict.classList.remove("current");
                 read.disabled = false;
                 chunk.disabled = false;
                 review.disabled = false;
+                conflict.disabled = false;
             } else if (selected === 4 || selected === 0) {
                 read.classList.remove("current");
                 chunk.classList.remove("current");
                 review.classList.remove("current");
+                conflict.classList.remove("current");
                 read.disabled = true;
                 chunk.disabled = true;
                 review.disabled = true;
+                conflict.disabled = true;
+            } else if (selected === 5) {
+                read.classList.remove("current");
+                chunk.classList.remove("current");
+                review.classList.remove("current");
+                conflict.classList.add("current");
+                read.disabled = false;
+                chunk.disabled = false;
+                review.disabled = false;
+                conflict.disabled = false;
             }
         },
 
@@ -166,6 +194,10 @@
 
         review: function () {
             this.selected = 3;
+        },
+
+        conflict: function () {
+            this.selected = 5;
         },
 
         backup: function () {

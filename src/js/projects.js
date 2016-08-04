@@ -18,6 +18,13 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
         toJSON = _.partialRight(JSON.stringify, null, '\t'),
         fromJSON = JSON.parse.bind(JSON);
 
+    var custom = ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings",
+        "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah",
+        "Lamentations", "Ezekial", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah",
+        "Malachi", "Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians", "Colossians",
+        "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter", "1 John", "2 John",
+        "3 John", "Jude", "Revelation", "Open Bible Stories", "translationWords", "translationAcademy Vol 1", "translationAcademy Vol 2"];
+
     return {
 
         moveBackups: function(oldPath, newPath) {
@@ -34,6 +41,120 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                         utils.fs.mover(path.join(oldPath, 'backups'), path.join(newPath, 'backups'));
                     }
                 });
+        },
+
+        sortProjectList: function (list) {
+            var sort = configurator.getValue("sort") || {default: true, language: false};
+            
+            if (sort.default) {
+                if (sort.language) {
+                    return this.sortByLangBible(list);
+                } else {
+                    return this.sortByBibleLang(list);
+                }
+            } else {
+                if (sort.language) {
+                    return this.sortByLangProject(list);
+                } else {
+                    return this.sortByProjectLang(list);
+                }
+            }
+        },
+
+        sortByBibleLang: function (list) {            
+            return list.sort(function (a, b) {
+                if (custom.indexOf(a.project.name) > custom.indexOf(b.project.name)) {
+                    return 1;
+                } else if (custom.indexOf(a.project.name) < custom.indexOf(b.project.name)) {
+                    return -1;
+                } else {
+                    if (a.target_language.name > b.target_language.name) {
+                        return 1;
+                    } else if (a.target_language.name < b.target_language.name) {
+                        return -1;
+                    } else {
+                        if (a.resource.id > b.resource.id) {
+                            return -1;
+                        } else if (a.resource.id < b.resource.id) {
+                            return 1;
+                        } else {
+                            return 0;
+                        }
+                    }
+                }
+            });
+        },
+
+        sortByProjectLang: function (list) {
+            return list.sort(function (a, b) {
+                if (a.project.name > b.project.name) {
+                    return 1;
+                } else if (a.project.name < b.project.name) {
+                    return -1;
+                } else {
+                    if (a.target_language.name > b.target_language.name) {
+                        return 1;
+                    } else if (a.target_language.name < b.target_language.name) {
+                        return -1;
+                    } else {
+                        if (a.resource.id > b.resource.id) {
+                            return -1;
+                        } else if (a.resource.id < b.resource.id) {
+                            return 1;
+                        } else {
+                            return 0;
+                        }
+                    }
+                }
+            });
+        },
+
+        sortByLangProject: function (list) {            
+            return list.sort(function (a, b) {
+                if (a.target_language.name > b.target_language.name) {
+                    return 1;
+                } else if (a.target_language.name < b.target_language.name) {
+                    return -1;
+                } else {
+                    if (a.project.name > b.project.name) {
+                        return 1;
+                    } else if (a.project.name < b.project.name) {
+                        return -1;
+                    } else {
+                        if (a.resource.id > b.resource.id) {
+                            return -1;
+                        } else if (a.resource.id < b.resource.id) {
+                            return 1;
+                        } else {
+                            return 0;
+                        }
+                    }
+                }
+            });
+        },
+
+        sortByLangBible: function (list) {            
+            return list.sort(function (a, b) {
+                if (a.target_language.name > b.target_language.name) {
+                    return 1;
+                } else if (a.target_language.name < b.target_language.name) {
+                    return -1;
+                } else {
+                    if (custom.indexOf(a.project.name) > custom.indexOf(b.project.name)) {
+                        return 1;
+                    } else if (custom.indexOf(a.project.name) < custom.indexOf(b.project.name)) {
+                        return -1;
+                    } else {
+                        if (a.resource.id > b.resource.id) {
+                            return -1;
+                        } else if (a.resource.id < b.resource.id) {
+                            return 1;
+                        } else {
+                            return 0;
+                        }
+                    }
+                }
+            });
         },
 
         updateManifestToMeta: function (manifest) {
@@ -76,26 +197,46 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                     meta.finished_chunks = [];
                 }
 
-                var completion = configurator.getValue(meta.unique_id + "-completion");
-                if (completion !== undefined && completion !== "") {
-                    meta.completion = completion;
+                var framenum = this.getProjectFrameNum(meta);
+
+                if (meta.finished_chunks && framenum) {
+                    meta.completion = Math.round((meta.finished_chunks.length / framenum) * 100);
                 } else {
-                    if (meta.source_translations.length && meta.finished_chunks) {
-                        var frames = dataManager.getSourceFrames(meta.source_translations[0]);
-                        if (frames.length) {
-                            meta.completion = Math.round((meta.finished_chunks.length / frames.length) * 100);
-                        } else {
-                            meta.completion = 0;
-                        }
-                    } else {
-                        meta.completion = 0;
-                    }
+                    meta.completion = 0;
                 }
+
             } catch (err) {
                 reporter.logError(err);
                 return null;
             }
             return meta;
+        },
+
+        getProjectFrameNum: function (meta) {
+            var frames = [];
+            var sources = dataManager.getSources();
+            var filtered = _.filter(sources, {'language_id': "en", 'resource_id': "ulb", 'checking_level': 3});
+
+            if (meta.type.id === "tw") {
+                frames = dataManager.getAllWords(filtered[0]);
+                return frames.length;
+            } else if (meta.type.id === "ta") {
+                frames = dataManager.getTa(meta.project.id);
+                return frames.length;
+            } else if (meta.source_translations.length) {
+                frames = dataManager.getSourceFrames(meta.source_translations[0]);
+                if (meta.type.id === "text") {
+                    if (meta.project.id === "obs") {
+                        return frames.length + 101;
+                    } else {
+                        return frames.length + 1;
+                    }
+                } else {
+                    return frames.length;
+                }
+            } else {
+                return 0;
+            }
         },
 
         makeUniqueId: function (manifest) {

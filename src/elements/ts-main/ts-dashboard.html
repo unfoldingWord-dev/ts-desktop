@@ -299,8 +299,7 @@
           if (conflicts && conflicts.length) {
               App.reporter.logNotice(conflicts, 'Chunk Conflicts');
 
-              msg += ' The following chunks contain conflicts that need your attention: ';
-              msg += conflicts.join(', ');
+              msg += ' There are ' + conflicts.length + ' chunks that contain conflicts that need your attention.';
           }
 
           this.showMessage(title, msg);
@@ -313,8 +312,8 @@
 
           setTimeout(function () {
               return App.dataManager.updateLanguageList()
-                  .then(function () {
-                      mythis.showMessage('Update Complete', 'The language list has been updated');
+                  .then(function (added) {
+                      mythis.showMessage('Update Complete', 'The language list has been updated. ' + added + ' new languages were added.');
                   })
                   .catch(function (err) {
                       mythis.showErrorMessage('Update Failed', 'An error occurred while updating', err);
@@ -805,7 +804,8 @@
                   return _.compact(list);
               })
               .then(function (list) {
-                  mythis.set('projectlist', list);
+                  var sorted = App.projectsManager.sortProjectList(list);
+                  mythis.set('projectlist', sorted);
               })
               .catch(function (err) {
                   mythis.showErrorMessage('Error updating projects', 'An error occurred while updating projects', err);

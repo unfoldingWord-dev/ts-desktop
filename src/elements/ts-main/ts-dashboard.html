@@ -766,7 +766,7 @@
           mythis.$.loading.open();
 
           if (App.reporter.canReportToGithub()) {
-              App.reporter.reportBug(message, function (res) {
+              App.reporter.reportBug(message).then(function (res) {
                   var response;
 
                   try {

@@ -58,12 +58,13 @@ gulp.task('build', ['clean'], function (done) {
     var ignored = Object.keys(p['devDependencies']).concat([
         'unit_tests',
         'acceptance_tests',
+        '__tests__',
+        '__mocks__',
         'out',
         BUILD_DIR,
         RELEASE_DIR,
         'vendor',
-        'scripts',
-        '\\.'
+        'scripts'
     ]).map(function (name) {
         return new RegExp('(^/' + name + '|' + '^/node_modules/' + name + ')');
     });

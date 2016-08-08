@@ -64,7 +64,8 @@ gulp.task('build', ['clean'], function (done) {
         BUILD_DIR,
         RELEASE_DIR,
         'vendor',
-        'scripts'
+        'scripts',
+        '\\.'
     ]).map(function (name) {
         return new RegExp('(^/' + name + '|' + '^/node_modules/' + name + ')');
     });

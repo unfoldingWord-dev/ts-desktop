@@ -35,6 +35,7 @@ before_install:
 - tar xvfz git-lfs-linux-amd64-1.3.1.tar.gz
 - mv git-lfs-1.3.1/git-lfs $HOME/bin/git-lfs
 - export PATH=$PATH:$HOME/bin/
+- rm git-lfs-linux-amd64-1.3.1.tar.gz
 before_script:
 - git config --global url."https://".insteadOf git://
 - npm install

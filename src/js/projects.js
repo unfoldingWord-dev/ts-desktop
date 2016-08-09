@@ -45,7 +45,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
 
         sortProjectList: function (list) {
             var sort = configurator.getValue("sort") || {default: true, language: false};
-            
+
             if (sort.default) {
                 if (sort.language) {
                     return this.sortByLangBible(list);
@@ -61,7 +61,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             }
         },
 
-        sortByBibleLang: function (list) {            
+        sortByBibleLang: function (list) {
             return list.sort(function (a, b) {
                 if (custom.indexOf(a.project.name) > custom.indexOf(b.project.name)) {
                     return 1;
@@ -109,7 +109,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             });
         },
 
-        sortByLangProject: function (list) {            
+        sortByLangProject: function (list) {
             return list.sort(function (a, b) {
                 if (a.target_language.name > b.target_language.name) {
                     return 1;
@@ -133,7 +133,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             });
         },
 
-        sortByLangBible: function (list) {            
+        sortByLangBible: function (list) {
             return list.sort(function (a, b) {
                 if (a.target_language.name > b.target_language.name) {
                     return 1;

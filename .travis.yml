@@ -39,6 +39,7 @@ after_success:
 - test $TRAVIS_TEST_RESULT == 0 && $TRAVIS_PULL_REQUEST == "false"
 - test -z $TRAVIS_TAG && ./scripts/bump.sh
 - curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+- git lfs install
 - git lfs pull
 - bower install
 # ensure bower installed correctly

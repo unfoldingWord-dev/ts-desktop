@@ -371,7 +371,7 @@
                 <p>{{locale.confirm_delete_translation}}</p>
             </div>
             <div id="deletebuttons">
-                <paper-button on-tap="closedelete">{{locale.no}}</paper-button>
+                <paper-button on-tap="closedelete">Cancel</paper-button>
                 <paper-button on-tap="deleteproject">{{locale.confirm}}</paper-button>
             </div>
         </paper-dialog>
@@ -382,8 +382,8 @@
                 <p>This project already exists.  If you continue with this change, the two projects will be merged together.</p>
             </div>
             <div class="buttons">
-                <paper-button on-tap="firechange">Continue</paper-button>
                 <paper-button on-tap="cancelconfirm">Cancel</paper-button>
+                <paper-button on-tap="firechange">Continue</paper-button>
             </div>
         </paper-dialog>
 

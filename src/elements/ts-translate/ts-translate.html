@@ -1025,7 +1025,7 @@
             var maindata = this.currentproject.rawdata.main[complexid];
             var seconddata = this.currentproject.rawdata.second[complexid];
             var statedata = this.currentproject.statedata[complexid];
-            var completed = false;
+            var completed = projectmeta.finished_chunks.indexOf(complexid) >= 0;
             var transcontent = "";
             var helpscontent = [];
             var conflicts = {exists: false};
@@ -1035,7 +1035,6 @@
             }
 
             if (maindata) {
-                completed = projectmeta.finished_chunks.indexOf(complexid) >= 0;
                 if (typeclass === "standard") {
                     transcontent = maindata.transcontent;
                     conflicts = this.checkForConflicts(transcontent);

@@ -118,9 +118,14 @@
         }
 
         .smallspan {
-            width: 70px;
+            width: 60px;
             display: inline-flex;
             justify-content: center;
+        }
+
+        .medspan {
+            width: 100px;
+            display: inline-block;
         }
 
         .bigspan {
@@ -303,9 +308,9 @@
                     <div id="headings" class="smalltext">
                         <span class="smallspan"></span>
                         <span class="bigspan" on-tap="sortproj">{{locale.project}}</span>
-                        <span class="smallspan">{{locale.type}}</span>
+                        <span class="medspan">{{locale.type}}</span>
                         <span class="bigspan" on-tap="sortlang">{{locale.language}}</span>
-                        <span>{{locale.progress}}</span>
+                        <span class="smallspan">{{locale.progress}}</span>
                     </div>
                     <div id="list">
                         <template is="dom-repeat" items="[[projectlist]]" as="project">
@@ -313,7 +318,7 @@
                                 <div class="left" on-tap="openproject">
                                     <span class="smallspan"><iron-icon class="smallicon" icon$="[[checkicon(project)]]"></iron-icon></span>
                                     <span class="bigspan">[[project.project.name]]</span>
-                                    <span class="smallspan smalltext"><span>[[project.type.name]]</span><span class$="[[typeclass(project.resource.id)]]">[[project.resource.id]]</span></span>
+                                    <span class="medspan smalltext"><span>[[project.type.name]]</span><span class$="[[typeclass(project.resource.id)]]">[[project.resource.id]]</span></span>
                                     <span class="smalltext bigspan">[[project.target_language.name]]</span>
                                     <span class="smallspan"><ts-completion-icon percent="[[project.completion]]"></ts-completion-icon></span>
                                 </div>

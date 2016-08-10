@@ -78,7 +78,7 @@
             <paper-icon-button id="read" class$="[[checkclass(currentproject.projectmeta.project_type_class)]]" icon="assignment" title="Read Mode" on-tap="read"></paper-icon-button>
             <paper-icon-button id="chunk" class$="[[checkclass(currentproject.projectmeta.project_type_class)]]" icon="flip-to-front" title="Chunk Mode" on-tap="chunk"></paper-icon-button>
             <paper-icon-button id="review" class$="[[checkclass(currentproject.projectmeta.project_type_class)]]" icon="assignment-turned-in" title="Review Mode" on-tap="review"></paper-icon-button>
-            <paper-icon-button id="conflict" class$="[[conflictclass(currentproject.projectmeta.project_type_class, currentproject.conflicts)]]" icon="alarm-on" title="Conflict Mode" on-tap="conflict"></paper-icon-button>
+            <paper-icon-button id="conflict" class$="[[conflictclass(currentproject.projectmeta.project_type_class, currentproject.conflicts)]]" icon="assignment-late" title="Conflict Mode" on-tap="conflict"></paper-icon-button>
         </div>
         <paper-menu-button id="menu" horizontal-offset="10" vertical-offset="10" vertical-align="bottom">
             <paper-icon-button class="current dropdown-trigger" icon="more-vert"></paper-icon-button>

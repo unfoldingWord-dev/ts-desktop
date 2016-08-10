@@ -232,19 +232,35 @@
       },
 
       openLicense: function () {
-          this.$.license.open();
+          var legal = this.$.license;
+          legal.open();
+          setTimeout(function () {
+              legal.scrollTop = 0;
+          }, 250);
       },
 
       openGuidelines: function () {
-          this.$.guidelines.open();
+          var legal = this.$.guidelines;
+          legal.open();
+          setTimeout(function () {
+              legal.scrollTop = 0;
+          }, 250);
       },
 
       openStatement: function () {
-          this.$.statement.open();
+          var legal = this.$.statement;
+          legal.open();
+          setTimeout(function () {
+              legal.scrollTop = 0;
+          }, 250);
       },
 
       openAttribution: function () {
-          this.$.attribution.open();
+          var legal = this.$.attribution;
+          legal.open();
+          setTimeout(function () {
+              legal.scrollTop = 0;
+          }, 250);
       },
 
       updateUser: function (event, data) {

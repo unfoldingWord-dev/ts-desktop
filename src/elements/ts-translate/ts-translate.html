@@ -1420,7 +1420,7 @@
                         .catch(function (err) {
                             var errmessage = "An error occurred saving your project";
                             if(err !== null) {
-                                errmessage += "\n" + err;
+                                errmessage = err;
                             }
                             mythis.set('options.title', "Print Failed");
                             mythis.set('options.body', errmessage);

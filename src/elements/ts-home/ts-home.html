@@ -4,6 +4,8 @@
 <link rel="import" href="../../components/paper-button/paper-button.html">
 <link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../../components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
 <link rel="import" href="../../components/iron-list/iron-list.html">
 <link rel="import" href="../../components/paper-progress/paper-progress.html">
@@ -83,9 +85,11 @@
             align-items: center;
         }
 
-        #headings .bigspan {
-            color: var(--accent-color);
-            cursor: pointer;
+        #sort {
+            flex: 0 0 50px;
+            display: flex;
+            width: 620px;
+            justify-content: space-around;
         }
 
         #list {
@@ -305,11 +309,26 @@
             </template>
             <template is="dom-if" if="{{projectlist.length}}">
                 <div class="contain">
+                    <div id="sort">
+                        <paper-dropdown-menu label="Sort Order">
+                            <paper-listbox class="dropdown-content">
+                                <paper-item on-tap="sortproj">Project then Language</paper-item>
+                                <paper-item on-tap="sortlang">Language then Project</paper-item>
+                                <paper-item on-tap="sortprog">Progress then Project</paper-item>
+                            </paper-listbox>
+                        </paper-dropdown-menu>
+                        <paper-dropdown-menu label="Sort Projects By">
+                            <paper-listbox class="dropdown-content">
+                                <paper-item on-tap="sortbible">Bible Order</paper-item>
+                                <paper-item on-tap="sortalpha">Alphabetical Order</paper-item>
+                            </paper-listbox>
+                        </paper-dropdown-menu>
+                    </div>
                     <div id="headings" class="smalltext">
                         <span class="smallspan"></span>
-                        <span class="bigspan" on-tap="sortproj">{{locale.project}}</span>
+                        <span class="bigspan">{{locale.project}}</span>
                         <span class="medspan">{{locale.type}}</span>
-                        <span class="bigspan" on-tap="sortlang">{{locale.language}}</span>
+                        <span class="bigspan">{{locale.language}}</span>
                         <span class="smallspan">{{locale.progress}}</span>
                     </div>
                     <div id="list">
@@ -457,16 +476,37 @@
             return projectmeta.project.id === "obs" || projectmeta.project_type_class === "extant" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
         },
 
+        sortbible: function () {
+            var sort = App.configurator.getValue("sort") || {project: "bible", order: "project"};
+            sort.project = "bible";
+            App.configurator.setValue("sort", sort);
+            this.fire('iron-signal', {name: 'updatelist'});
+        },
+
+        sortalpha: function () {
+            var sort = App.configurator.getValue("sort") || {project: "bible", order: "project"};
+            sort.project = "alpha";
+            App.configurator.setValue("sort", sort);
+            this.fire('iron-signal', {name: 'updatelist'});
+        },
+
         sortproj: function () {
-            var sort = App.configurator.getValue("sort") || {default: true, language: false};
-            sort.default = !sort.default;
+            var sort = App.configurator.getValue("sort") || {project: "bible", order: "project"};
+            sort.order = "project";
             App.configurator.setValue("sort", sort);
             this.fire('iron-signal', {name: 'updatelist'});
         },
 
         sortlang: function () {
-            var sort = App.configurator.getValue("sort") || {default: true, language: false};
-            sort.language = !sort.language;
+            var sort = App.configurator.getValue("sort") || {project: "bible", order: "project"};
+            sort.order = "language";
+            App.configurator.setValue("sort", sort);
+            this.fire('iron-signal', {name: 'updatelist'});
+        },
+
+        sortprog: function () {
+            var sort = App.configurator.getValue("sort") || {project: "bible", order: "project"};
+            sort.order = "progress";
             App.configurator.setValue("sort", sort);
             this.fire('iron-signal', {name: 'updatelist'});
         },

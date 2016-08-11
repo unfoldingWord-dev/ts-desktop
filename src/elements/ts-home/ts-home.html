@@ -79,10 +79,11 @@
         }
 
         #headings {
-            flex: 0 0 50px;
+            flex: 0 0 40px;
             width: 620px;
             display: flex;
-            align-items: center;
+            align-items: flex-end;
+            padding-bottom: 10px;
         }
 
         #sort {
@@ -93,7 +94,7 @@
         }
 
         #list {
-            max-height: calc(100vh - 200px);
+            max-height: calc(100vh - 250px);
             display: flex;
             flex-direction: column;
             font-size: 110%;
@@ -311,14 +312,14 @@
                 <div class="contain">
                     <div id="sort">
                         <paper-dropdown-menu label="Columns To Sort By">
-                            <paper-listbox class="dropdown-content">
+                            <paper-listbox id="sort1" class="dropdown-content">
                                 <paper-item on-tap="sortproj">Project then Language</paper-item>
                                 <paper-item on-tap="sortlang">Language then Project</paper-item>
                                 <paper-item on-tap="sortprog">Progress then Project</paper-item>
                             </paper-listbox>
                         </paper-dropdown-menu>
                         <paper-dropdown-menu label="Sort Project Column By">
-                            <paper-listbox class="dropdown-content">
+                            <paper-listbox id="sort2" class="dropdown-content">
                                 <paper-item on-tap="sortbible">Bible Order</paper-item>
                                 <paper-item on-tap="sortalpha">Alphabetical Order</paper-item>
                             </paper-listbox>
@@ -594,6 +595,26 @@
 
         start: function () {
             this.route = "new";
+        },
+
+        setsortfields: function () {
+            var sort = App.configurator.getValue("sort") || {project: "bible", order: "project"};
+            var sort1 = this.querySelector("#sort1");
+            var sort2 = this.querySelector("#sort2");
+
+            if (sort.order === "project") {
+                sort1.selected = 0;
+            } else if (sort.order === "language") {
+                sort1.selected = 1;
+            } else {
+                sort1.selected = 2;
+            }
+
+            if (sort.project === "bible") {
+                sort2.selected = 0;
+            } else {
+                sort2.selected = 1;
+            }
         },
 
         ready: function() {

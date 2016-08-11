@@ -310,14 +310,14 @@
             <template is="dom-if" if="{{projectlist.length}}">
                 <div class="contain">
                     <div id="sort">
-                        <paper-dropdown-menu label="Sort Order">
+                        <paper-dropdown-menu label="Columns To Sort By">
                             <paper-listbox class="dropdown-content">
                                 <paper-item on-tap="sortproj">Project then Language</paper-item>
                                 <paper-item on-tap="sortlang">Language then Project</paper-item>
                                 <paper-item on-tap="sortprog">Progress then Project</paper-item>
                             </paper-listbox>
                         </paper-dropdown-menu>
-                        <paper-dropdown-menu label="Sort Projects By">
+                        <paper-dropdown-menu label="Sort Project Column By">
                             <paper-listbox class="dropdown-content">
                                 <paper-item on-tap="sortbible">Bible Order</paper-item>
                                 <paper-item on-tap="sortalpha">Alphabetical Order</paper-item>

@@ -166,9 +166,9 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
         sortByProgAlpha: function (list) {
             return list.sort(function (a, b) {
                 if (a.completion > b.completion) {
-                    return 1;
-                } else if (a.completion < b.completion) {
                     return -1;
+                } else if (a.completion < b.completion) {
+                    return 1;
                 } else {
                     if (a.project.name > b.project.name) {
                         return 1;
@@ -190,9 +190,9 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
         sortByProgBible: function (list) {
             return list.sort(function (a, b) {
                 if (a.completion > b.completion) {
-                    return 1;
-                } else if (a.completion < b.completion) {
                     return -1;
+                } else if (a.completion < b.completion) {
+                    return 1;
                 } else {
                     if (custom.indexOf(a.project.name) > custom.indexOf(b.project.name)) {
                         return 1;

@@ -1039,14 +1039,12 @@
                     transcontent = maindata.transcontent;
                     conflicts = this.checkForConflicts(transcontent);
                     if (conflicts.exists) {
-                        conflicts.content1 = App.renderer.convertVerseMarkers(conflicts.content1).text;
-                        conflicts.content1 = App.renderer.migrateMarkers(conflicts.content1);
-                        conflicts.content1 = App.renderer.removeChapterMarkers(conflicts.content1);
-                        conflicts.content1 = App.renderer.validateVerseMarkers(conflicts.content1, verses);
-                        conflicts.content2 = App.renderer.convertVerseMarkers(conflicts.content2).text;
-                        conflicts.content2 = App.renderer.migrateMarkers(conflicts.content2);
-                        conflicts.content2 = App.renderer.removeChapterMarkers(conflicts.content2);
-                        conflicts.content2 = App.renderer.validateVerseMarkers(conflicts.content2, verses);
+                        for (var i = 0; i < conflicts.array.length; i++) {
+                            conflicts.array[i] = App.renderer.convertVerseMarkers(conflicts.array[i]).text;
+                            conflicts.array[i] = App.renderer.migrateMarkers(conflicts.array[i]);
+                            conflicts.array[i] = App.renderer.removeChapterMarkers(conflicts.array[i]);
+                            conflicts.array[i] = App.renderer.validateVerseMarkers(conflicts.array[i], verses);
+                        }
                     } else {
                         transcontent = App.renderer.convertVerseMarkers(transcontent).text;
                         transcontent = App.renderer.migrateMarkers(transcontent);
@@ -1071,17 +1069,32 @@
         },
 
         checkForConflicts: function (content) {
-            if (content.includes("<<<<<<< HEAD")) {
-                var starts = content.indexOf("<<<<");
-                var endOf1 = content.indexOf("====");
-                var endOf2 = content.indexOf(">>>>");
-                var content1 = content.substring(starts + 13, endOf1 - 1);
-                var content2 = content.substring(endOf1 + 8, endOf2 - 1);
+            var conflicttest = new RegExp(/<{7}[^<=>]*={7}[^<=>]*>{7}\s[\w\d]*/);
+            var conmarker = "conflict";
+            var conarray = [];
+
+            if (conflicttest.test(content)) {
+                while (conflicttest.test(content)) {
+                    var subcontent = content.match(conflicttest)[0];
+                    var starts = subcontent.indexOf("<<<<");
+                    var endOf1 = subcontent.indexOf("====");
+                    var endOf2 = subcontent.indexOf(">>>>");
+                    var content1 = subcontent.substring(starts + 13, endOf1 - 1);
+                    var content2 = subcontent.substring(endOf1 + 8, endOf2 - 1);
+
+                    if (content1 !== conmarker) {
+                        conarray.push(content1);
+                    }
+                    if (content2 !== conmarker) {
+                        conarray.push(content2);
+                    }
+                    content = content.replace(conflicttest, conmarker);
+                }
             } else {
-                return {exists: false};
+                return {exists: false, array: conarray};
             }
             this.set('currentproject.conflicts', this.currentproject.conflicts + 1);
-            return {exists: true, content1: content1, content2: content2};
+            return {exists: true, array: conarray};
         },
 
         createProjectTitleFrame: function (chunkmeta, projectmeta, index) {

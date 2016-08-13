@@ -1069,26 +1069,14 @@
         },
 
         checkForConflicts: function (content) {
-            var conflicttest = new RegExp(/<{7}[^<=>]*={7}[^<=>]*>{7}\s[\w\d]*/);
-            var conmarker = "conflict";
+            var conflicttest = new RegExp(/(<{7} HEAD\n|={7}\n)([^<=>]+)(\n>{7} [\w]{40}|\n={7})/);
             var conarray = [];
 
             if (conflicttest.test(content)) {
                 while (conflicttest.test(content)) {
-                    var subcontent = content.match(conflicttest)[0];
-                    var starts = subcontent.indexOf("<<<<");
-                    var endOf1 = subcontent.indexOf("====");
-                    var endOf2 = subcontent.indexOf(">>>>");
-                    var content1 = subcontent.substring(starts + 13, endOf1 - 1);
-                    var content2 = subcontent.substring(endOf1 + 8, endOf2 - 1);
-
-                    if (content1 !== conmarker) {
-                        conarray.push(content1);
-                    }
-                    if (content2 !== conmarker) {
-                        conarray.push(content2);
-                    }
-                    content = content.replace(conflicttest, conmarker);
+                    var subcontent = conflicttest.exec(content)[2];
+                    conarray.push(subcontent);
+                    content = content.replace(subcontent, "");
                 }
             } else {
                 return {exists: false, array: conarray};

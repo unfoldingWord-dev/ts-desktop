@@ -32,22 +32,28 @@
             padding: 0 16px;
 		}
 
+        #middle {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+            margin: 4px 0;
+        }
+
         .content {
             flex: auto;
             color: var(--primary-text-color);
             line-height: 2;
             cursor: pointer;
             padding: 16px;
+            margin: 4px 0;
 		}
 
-        #top {
+        .green {
             background: var(--primary-color-light);
-            margin: 8px 0 4px;
         }
 
-        #bottom {
+        .blue {
             background: var(--accent-color-light);
-            margin: 4px 0 8px;
         }
 
         #footer {
@@ -110,14 +116,13 @@
                     <span>[[chunk.chunkmeta.chunkref]]</span><span>[[chunk.chunkmeta.refaddon]]</span>
                 </div>
             </div>
-
-            <template is="dom-repeat" items="[[chunk.conflicts.array]]" as="conflict">
-                <div id="top" class="targetfont content" on-tap="selecttop">
-                    <div class$="[[chunk.projectmeta.target_language.direction]]">{{conflict}}</div>
-                </div>
-            </template>
-
-
+            <div id="middle">
+                <template is="dom-repeat" items="[[chunk.conflicts.array]]" as="conflict">
+                    <div id="{{createid(index)}}" class$="[[conflictclass(index)]]" on-tap="select">
+                        <div class$="[[chunk.projectmeta.target_language.direction]]">{{conflict}}</div>
+                    </div>
+                </template>
+            </div>
             <div id="footer">
                 <p id="resolve">Resolve Conflict - Click on the version to keep</p>
                 <div id="buttons" class="hide">
@@ -145,34 +150,40 @@
             }
         },
 
-        selecttop: function () {
-            this.set('chunk.conflicts.choice', "top");
-            this.$.top.classList.add('highlight');
-            this.$.top.classList.remove('fade');
-            this.$.bottom.classList.add('fade');
-            this.$.bottom.classList.remove('highlight');
-            this.$.resolve.classList.add('hide');
-            this.$.buttons.classList.remove('hide');
-            this.fire('setheight');
+        createid: function (index) {
+            return "conflict" + index;
         },
 
-        selectbottom: function () {
-            this.set('chunk.conflicts.choice', "bottom");
-            this.$.bottom.classList.add('highlight');
-            this.$.bottom.classList.remove('fade');
-            this.$.top.classList.add('fade');
-            this.$.top.classList.remove('highlight');
+        conflictclass: function (index) {
+            return index % 2 === 0 ? 'targetfont content green' : 'targetfont content blue';
+        },
+
+        select: function (e) {
+            var index = e.model.index;
+            this.set('chunk.conflicts.choice', index);
+
+            for (var i = 0; i < this.chunk.conflicts.array.length; i++) {
+                var id = "#conflict" + i;
+                var conflict = this.querySelector(id);
+
+                if (i === index) {
+                    conflict.classList.add('highlight');
+                    conflict.classList.remove('fade');
+                } else {
+                    conflict.classList.remove('highlight');
+                    conflict.classList.add('fade');
+                }
+            }
             this.$.resolve.classList.add('hide');
             this.$.buttons.classList.remove('hide');
             this.fire('setheight');
         },
 
         savechoice: function () {
-            if (this.chunk.conflicts.choice === "top") {
-                this.set('chunk.transcontent', this.chunk.conflicts.content1);
-            } else {
-                this.set('chunk.transcontent', this.chunk.conflicts.content2);
-            }
+            var choice = this.chunk.conflicts.choice;
+
+            this.set('chunk.transcontent', this.chunk.conflicts.array[choice]);
+            this.cancel();
             this.set('chunk.conflicts', {exists: false});
             this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
             this.fire('setheight');
@@ -180,10 +191,13 @@
         },
 
         cancel: function () {
-            this.$.top.classList.remove('fade');
-            this.$.bottom.classList.remove('highlight');
-            this.$.bottom.classList.remove('fade');
-            this.$.top.classList.remove('highlight');
+            for (var i = 0; i < this.chunk.conflicts.array.length; i++) {
+                var id = "#conflict" + i;
+                var conflict = this.querySelector(id);
+
+                conflict.classList.remove('highlight');
+                conflict.classList.remove('fade');
+            }
             this.$.resolve.classList.remove('hide');
             this.$.buttons.classList.add('hide');
             this.fire('setheight');

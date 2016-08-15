@@ -311,14 +311,14 @@
             <template is="dom-if" if="{{projectlist.length}}">
                 <div class="contain">
                     <div id="sort">
-                        <paper-dropdown-menu label="Columns To Sort By">
+                        <paper-dropdown-menu id="sortorder" label="Columns To Sort By">
                             <paper-listbox id="sort1" class="dropdown-content">
                                 <paper-item on-tap="sortproj">Project then Language</paper-item>
                                 <paper-item on-tap="sortlang">Language then Project</paper-item>
                                 <paper-item on-tap="sortprog">Progress then Project</paper-item>
                             </paper-listbox>
                         </paper-dropdown-menu>
-                        <paper-dropdown-menu label="Sort Project Column By">
+                        <paper-dropdown-menu id="projectsort" label="Sort Project Column By">
                             <paper-listbox id="sort2" class="dropdown-content">
                                 <paper-item on-tap="sortbible">Bible Order</paper-item>
                                 <paper-item on-tap="sortalpha">Alphabetical Order</paper-item>
@@ -479,37 +479,52 @@
 
         sortbible: function () {
             var sort = App.configurator.getValue("sort") || {project: "bible", order: "project"};
+            var dropdown = this.querySelector("#projectsort");
+
             sort.project = "bible";
             App.configurator.setValue("sort", sort);
             this.fire('iron-signal', {name: 'updatelist'});
+            dropdown.close();
         },
 
         sortalpha: function () {
             var sort = App.configurator.getValue("sort") || {project: "bible", order: "project"};
+            var dropdown = this.querySelector("#projectsort");
+
             sort.project = "alpha";
             App.configurator.setValue("sort", sort);
             this.fire('iron-signal', {name: 'updatelist'});
+            dropdown.close();
         },
 
         sortproj: function () {
             var sort = App.configurator.getValue("sort") || {project: "bible", order: "project"};
+            var dropdown = this.querySelector("#sortorder");
+
             sort.order = "project";
             App.configurator.setValue("sort", sort);
             this.fire('iron-signal', {name: 'updatelist'});
+            dropdown.close();
         },
 
         sortlang: function () {
             var sort = App.configurator.getValue("sort") || {project: "bible", order: "project"};
+            var dropdown = this.querySelector("#sortorder");
+
             sort.order = "language";
             App.configurator.setValue("sort", sort);
             this.fire('iron-signal', {name: 'updatelist'});
+            dropdown.close();
         },
 
         sortprog: function () {
             var sort = App.configurator.getValue("sort") || {project: "bible", order: "project"};
+            var dropdown = this.querySelector("#sortorder");
+
             sort.order = "progress";
             App.configurator.setValue("sort", sort);
             this.fire('iron-signal', {name: 'updatelist'});
+            dropdown.close();
         },
 
         changelanguage: function () {

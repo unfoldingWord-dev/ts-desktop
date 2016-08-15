@@ -58,6 +58,8 @@ gulp.task('build', ['clean'], function (done) {
     var ignored = Object.keys(p['devDependencies']).concat([
         'unit_tests',
         'acceptance_tests',
+        '__tests__',
+        '__mocks__',
         'out',
         BUILD_DIR,
         RELEASE_DIR,
@@ -157,7 +159,7 @@ gulp.task('release', function(done) {
     const releaseWin = function(arch, os) {
         // TRICKY: the iss script cannot take the .exe extension on the file name
         var file = `tS_${p.version}-${p.build}_win_x${arch}`;
-        var cmd = `iscc scripts/win_installer.iss /DArch=${arch === 64 ? 'x64' : 'x86'} /DRootPath=../ /DVersion=${p.version} /DBuild=${p.build} /DGitVersion=${gitVersion} /DDestFile=${file} /DDestDir=${RELEASE_DIR} /DBuildDir=${BUILD_DIR}`;
+        var cmd = `iscc scripts/win_installer.iss /DArch=${arch == '64' ? 'x64' : 'x86'} /DRootPath=../ /DVersion=${p.version} /DBuild=${p.build} /DGitVersion=${gitVersion} /DDestFile=${file} /DDestDir=${RELEASE_DIR} /DBuildDir=${BUILD_DIR}`;
         return new Promise(function(resolve, reject) {
             exec(cmd, function(err, stdout, stderr) {
                 if(err) {

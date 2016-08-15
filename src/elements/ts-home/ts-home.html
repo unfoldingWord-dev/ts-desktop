@@ -598,22 +598,24 @@
         },
 
         setsortfields: function () {
-            var sort = App.configurator.getValue("sort") || {project: "bible", order: "project"};
-            var sort1 = this.querySelector("#sort1");
-            var sort2 = this.querySelector("#sort2");
+            if (this.projectlist.length) {
+                var sort = App.configurator.getValue("sort") || {project: "bible", order: "project"};
+                var sort1 = this.querySelector("#sort1");
+                var sort2 = this.querySelector("#sort2");
 
-            if (sort.order === "project") {
-                sort1.selected = 0;
-            } else if (sort.order === "language") {
-                sort1.selected = 1;
-            } else {
-                sort1.selected = 2;
-            }
+                if (sort.order === "project") {
+                    sort1.selected = 0;
+                } else if (sort.order === "language") {
+                    sort1.selected = 1;
+                } else if (sort.order === "progress") {
+                    sort1.selected = 2;
+                }
 
-            if (sort.project === "bible") {
-                sort2.selected = 0;
-            } else {
-                sort2.selected = 1;
+                if (sort.project === "bible") {
+                    sort2.selected = 0;
+                } else if (sort.project === "alpha") {
+                    sort2.selected = 1;
+                }
             }
         },
 

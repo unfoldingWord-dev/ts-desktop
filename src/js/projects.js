@@ -64,6 +64,8 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 } else {
                     return this.sortByProgAlpha(list);
                 }
+            } else {
+                return this.sortByBibleLang(list);
             }
         },
 

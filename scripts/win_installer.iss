@@ -24,9 +24,9 @@
   #define RootPath "./"
 #endif
 
-; Specify the Architecture by adding the command line argument /DARCH32
+; Specify the Architecture by adding the command line argument /DArch=
 #ifndef Arch
-  #def Arch "x64"
+  #define Arch "x64"
 #endif
 #if Arch == "x86"
   #define GitExecutable "Git-" + GitVersion + "-32-bit.exe"

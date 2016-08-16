@@ -156,16 +156,42 @@
             display: none;
         }
 
+        #marker {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--accent-color-dark);
+            color: var(--reverse-text-color);
+            font-size: 150%;
+            border-radius: 10px;
+            box-shadow: 1px 1px 2px 2px var(--shadow-color);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            right: 50px;
+            margin: auto 0;
+            width: 50px;
+            height: 50px;
+        }
+
+        #marker.hide {
+            display: none;
+        }
+
 	</style>
 
 	<template>
 
         <div id="contain">
-            <iron-list id="reviewlist" items="{{chunks}}" as="chunk">
+            <iron-list id="reviewlist" items="{{chunks}}" as="chunk" on-scroll="displayposition">
                 <template>
                     <ts-review-card chunk="{{chunk}}" on-updateheight="updateheight"></ts-review-card>
                 </template>
             </iron-list>
+
+            <paper-material id="marker" class="hide">
+                <div id="display"></div>
+            </paper-material>
 
             <paper-material id="resourcepopup" class="hide">
                 <div class="buttons">
@@ -240,6 +266,20 @@
                 type: Array,
                 value: []
             }
+        },
+
+        displayposition: function () {
+            var list = this.$.reviewlist;
+            var index = list.firstVisibleIndex || 0;
+            var chapter = this.chunks[index].chunkmeta.chapter;
+            var display = this.$.display;
+            var marker = this.$.marker;
+
+            display.innerHTML = chapter;
+            marker.classList.remove("hide");
+            setTimeout(function() {
+                marker.classList.add("hide");
+            }, 1000);
         },
 
         updateheight: function (e) {

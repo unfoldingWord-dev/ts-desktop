@@ -474,11 +474,17 @@
                 })
                 .then(function () {
                     if (mythis.saveoptions.backup) {
-                        return App.exportManager.backupTranslation(projectmeta, filePath)
+                        return App.exportManager.autoBackupTranslation(projectmeta, filePath)
                             .then(function () {
                                 mythis.set('saveoptions.backup', false);
                             })
                             .catch(function (err) {
+                                mythis.set('options', {});
+                                mythis.set('options.title', "Auto Backup Failed");
+                                mythis.set('options.body', err);
+                                mythis.set('options.loading', false);
+                                mythis.$.loading.open();
+                                mythis.set('saveoptions.backup', false);
                                 App.reporter.logError(err, 'Error backing up translation');
                             });
                     }
@@ -1324,6 +1330,7 @@
             return mythis.saveAll()
                 .then(function () {
                     setTimeout(function() {
+                        mythis.$.loading.close();
                         mythis.set('route', "home");
                         mythis.reset();
                     }, 500);
@@ -1381,6 +1388,7 @@
             mythis.stoptimers();
             return mythis.saveAll()
                 .then(function () {
+                    mythis.$.loading.close();
                     mythis.fire('iron-signal', {name: 'openbackup', data: {projectmeta: projectmeta}});
                     mythis.starttimers();
                 });

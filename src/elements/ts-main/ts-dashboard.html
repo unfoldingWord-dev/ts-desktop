@@ -115,7 +115,7 @@
 
       <ts-app-titlebar currentuser="[[currentuser]]"></ts-app-titlebar>
       <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
-          <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]"></ts-home>
+          <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]" id="home"></ts-home>
           <ts-new data-route="new" route="{{route}}" importdata="{{importdata}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]"></ts-new>
           <ts-translate data-route="translate" route="{{route}}" message="{{message}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]"></ts-translate>
           <ts-publish data-route="publish" route="{{route}}" currentproject="{{currentproject}}" currentuser="[[currentuser]]"></ts-publish>
@@ -232,19 +232,35 @@
       },
 
       openLicense: function () {
-          this.$.license.open();
+          var legal = this.$.license;
+          legal.open();
+          setTimeout(function () {
+              legal.scrollTop = 0;
+          }, 250);
       },
 
       openGuidelines: function () {
-          this.$.guidelines.open();
+          var legal = this.$.guidelines;
+          legal.open();
+          setTimeout(function () {
+              legal.scrollTop = 0;
+          }, 250);
       },
 
       openStatement: function () {
-          this.$.statement.open();
+          var legal = this.$.statement;
+          legal.open();
+          setTimeout(function () {
+              legal.scrollTop = 0;
+          }, 250);
       },
 
       openAttribution: function () {
-          this.$.attribution.open();
+          var legal = this.$.attribution;
+          legal.open();
+          setTimeout(function () {
+              legal.scrollTop = 0;
+          }, 250);
       },
 
       updateUser: function (event, data) {
@@ -855,6 +871,7 @@
               })
               .then(function () {
                   App.ipc.send('loading-done');
+                  mythis.$.home.setsortfields();
               });
       }
 

@@ -258,7 +258,7 @@
                 <p>This will permanently remove this note/question. Continue?</p>
             </div>
             <div id="deletebuttons">
-                <paper-button on-tap="closedelete">No</paper-button>
+                <paper-button on-tap="closedelete">Cancel</paper-button>
                 <paper-button on-tap="deletehelp">Confirm</paper-button>
             </div>
         </paper-dialog>
@@ -474,11 +474,17 @@
                 })
                 .then(function () {
                     if (mythis.saveoptions.backup) {
-                        return App.exportManager.backupTranslation(projectmeta, filePath)
+                        return App.exportManager.autoBackupTranslation(projectmeta, filePath)
                             .then(function () {
                                 mythis.set('saveoptions.backup', false);
                             })
                             .catch(function (err) {
+                                mythis.set('options', {});
+                                mythis.set('options.title', "Auto Backup Failed");
+                                mythis.set('options.body', err);
+                                mythis.set('options.loading', false);
+                                mythis.$.loading.open();
+                                mythis.set('saveoptions.backup', false);
                                 App.reporter.logError(err, 'Error backing up translation');
                             });
                     }
@@ -1025,7 +1031,7 @@
             var maindata = this.currentproject.rawdata.main[complexid];
             var seconddata = this.currentproject.rawdata.second[complexid];
             var statedata = this.currentproject.statedata[complexid];
-            var completed = false;
+            var completed = projectmeta.finished_chunks.indexOf(complexid) >= 0;
             var transcontent = "";
             var helpscontent = [];
             var conflicts = {exists: false};
@@ -1035,19 +1041,16 @@
             }
 
             if (maindata) {
-                completed = projectmeta.finished_chunks.indexOf(complexid) >= 0;
                 if (typeclass === "standard") {
                     transcontent = maindata.transcontent;
                     conflicts = this.checkForConflicts(transcontent);
                     if (conflicts.exists) {
-                        conflicts.content1 = App.renderer.convertVerseMarkers(conflicts.content1).text;
-                        conflicts.content1 = App.renderer.migrateMarkers(conflicts.content1);
-                        conflicts.content1 = App.renderer.removeChapterMarkers(conflicts.content1);
-                        conflicts.content1 = App.renderer.validateVerseMarkers(conflicts.content1, verses);
-                        conflicts.content2 = App.renderer.convertVerseMarkers(conflicts.content2).text;
-                        conflicts.content2 = App.renderer.migrateMarkers(conflicts.content2);
-                        conflicts.content2 = App.renderer.removeChapterMarkers(conflicts.content2);
-                        conflicts.content2 = App.renderer.validateVerseMarkers(conflicts.content2, verses);
+                        for (var i = 0; i < conflicts.array.length; i++) {
+                            conflicts.array[i] = App.renderer.convertVerseMarkers(conflicts.array[i]).text;
+                            conflicts.array[i] = App.renderer.migrateMarkers(conflicts.array[i]);
+                            conflicts.array[i] = App.renderer.removeChapterMarkers(conflicts.array[i]);
+                            conflicts.array[i] = App.renderer.validateVerseMarkers(conflicts.array[i], verses);
+                        }
                     } else {
                         transcontent = App.renderer.convertVerseMarkers(transcontent).text;
                         transcontent = App.renderer.migrateMarkers(transcontent);
@@ -1072,17 +1075,20 @@
         },
 
         checkForConflicts: function (content) {
-            if (content.includes("<<<<<<< HEAD")) {
-                var starts = content.indexOf("<<<<");
-                var endOf1 = content.indexOf("====");
-                var endOf2 = content.indexOf(">>>>");
-                var content1 = content.substring(starts + 13, endOf1 - 1);
-                var content2 = content.substring(endOf1 + 8, endOf2 - 1);
+            var conflicttest = new RegExp(/(<{7} HEAD\n|={7}\n)([^<=>]+)(\n>{7} [\w]{40}|\n={7})/);
+            var conarray = [];
+
+            if (conflicttest.test(content)) {
+                while (conflicttest.test(content)) {
+                    var subcontent = conflicttest.exec(content)[2];
+                    conarray.push(subcontent);
+                    content = content.replace(subcontent, "");
+                }
             } else {
-                return {exists: false};
+                return {exists: false, array: conarray};
             }
             this.set('currentproject.conflicts', this.currentproject.conflicts + 1);
-            return {exists: true, content1: content1, content2: content2};
+            return {exists: true, array: conarray};
         },
 
         createProjectTitleFrame: function (chunkmeta, projectmeta, index) {
@@ -1265,7 +1271,6 @@
             var read = this.$.readmode;
             var chunk = this.$.chunkmode;
             var review = this.$.reviewmode;
-            var conflict = this.$.conflictmode;
 
             if (selected === 1) {
                 read.getlocation();
@@ -1325,6 +1330,7 @@
             return mythis.saveAll()
                 .then(function () {
                     setTimeout(function() {
+                        mythis.$.loading.close();
                         mythis.set('route', "home");
                         mythis.reset();
                     }, 500);
@@ -1382,6 +1388,7 @@
             mythis.stoptimers();
             return mythis.saveAll()
                 .then(function () {
+                    mythis.$.loading.close();
                     mythis.fire('iron-signal', {name: 'openbackup', data: {projectmeta: projectmeta}});
                     mythis.starttimers();
                 });
@@ -1422,7 +1429,7 @@
                         .catch(function (err) {
                             var errmessage = "An error occurred saving your project";
                             if(err !== null) {
-                                errmessage += "\n" + err;
+                                errmessage = err;
                             }
                             mythis.set('options.title', "Print Failed");
                             mythis.set('options.body', errmessage);

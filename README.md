@@ -38,6 +38,3 @@ The following commands are available from within the project directory:
 * `$ npm start` runs the application (without building it)
 
 > Note: You can open the Chrome Developer Tools while the app is running by pressing `Ctrl+Shift+I` on Windows/Linux or `Cmd-Shift-I` on macOS.
-
-##Windows Installer
-In order to create a native windows installer you must have [Inno Setup](http://www.jrsoftware.org/isinfo.php) installed then you can open and run `win64_installer.iss`. You may need to update the `Version` and `Build` values before generating your installer. Everything else should remain the same.

@@ -36,7 +36,6 @@
         #content {
 			padding: 0 50px;
             flex: auto;
-            display: flex;
 		}
 
         #textholder {
@@ -49,8 +48,30 @@
             color: var(--primary-text-color);
 		}
 
+        #conflict {
+            flex: auto;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .review {
+            background: var(--review-color);
+            color: var(--reverse-text-color);
+            text-transform: uppercase;
+            font-size: 90%;
+        }
+
         .rtl {
             direction: rtl;
+        }
+
+        .hide {
+            display: none;
+        }
+
+        .flex {
+            display: flex;
         }
 
 	</style>
@@ -63,8 +84,11 @@
                     <span>[[chunk.chaptermeta.chapterref]]</span><span>[[chunk.chaptermeta.refaddon]]</span>
                 </div>
             </div>
-            <div id="content" class="targetfont">
+            <div id="content" class$="[[noconflictclass(chunk.conflicts)]]">
                 <div id="textholder" class$="[[chunk.projectmeta.target_language.direction]]"></div>
+            </div>
+            <div id="conflict" class$="[[conflictclass(chunk.conflicts)]]">
+                <paper-button raised class="review" on-tap="gotoreview">Conflict Exists</paper-button>
             </div>
         </paper-material>
 
@@ -96,6 +120,20 @@
 
                 this.$.textholder.innerHTML = App.renderer.renderTargetWithVerses(text, module);
             }
+        },
+
+        gotoreview: function () {
+            var index = -1;
+            var chapter = this.chunk.chaptermeta.chapter;
+            this.fire('iron-signal', {name: 'gotoreview', data: {index: index, chapter: chapter}});
+        },
+
+        conflictclass: function (exists) {
+            return exists ? 'flex' : 'hide';
+        },
+
+        noconflictclass: function (exists) {
+            return exists ? 'hide' : 'flex targetfont';
         },
 
 		ready: function() {

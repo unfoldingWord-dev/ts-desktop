@@ -1,0 +1,399 @@
+
+<link rel="import" href="../../../components/iron-list/iron-list.html">
+<link rel="import" href="../../../components/iron-signals/iron-signals.html">
+<link rel="import" href="../../../components/paper-button/paper-button.html">
+<link rel="import" href="../../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../../components/paper-material/paper-material.html">
+<link rel="import" href="../../../components/iron-icons/iron-icons.html">
+
+<link rel="import" href="./ts-conflict-card.html">
+
+<dom-module id="ts-conflict-mode">
+
+	<style>
+
+		:host {
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            display: flex;
+        }
+
+        #contain {
+            flex: auto;
+        }
+
+        iron-list {
+            max-height: calc(100vh - 70px);
+        }
+
+        :host(.preview) {
+            opacity: 0;
+        }
+
+        :host(.hide) {
+            visibility: hidden;
+        }
+
+        .movein {
+            -webkit-animation: moveinto .5s;
+        }
+
+        .moveout {
+            -webkit-animation: moveout .5s;
+        }
+
+        @-webkit-keyframes moveinto {
+            0% {transform: scale(0,0); opacity: 0}
+            100% {transform: scale(1,1); opacity: 1}
+        }
+
+        @-webkit-keyframes moveout {
+            0% {transform: scale(1,1); opacity: 1}
+            100% {transform: scale(0,0); opacity: 0}
+        }
+
+        :host::shadow #items {
+            margin-bottom: 300px;
+        }
+
+        #resourcepopup {
+            position: fixed;
+            top: 40px;
+            right: 17px;
+            background: var(--card-background-color);
+            color: var(--primary-text-color);
+            width: 416px;
+            height: calc(100% - 70px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #resourcepopup.hide {
+            visibility: hidden;
+        }
+
+        .slidein {
+            -webkit-animation: slidein .5s;
+        }
+
+        .slideout {
+            -webkit-animation: slideout .5s;
+        }
+
+        @-webkit-keyframes slidein {
+            0% {transform: translateX(450px)}
+            100% {transform: translateX(0)}
+        }
+
+        @-webkit-keyframes slideout {
+            0% {transform: translateX(0)}
+            100% {transform: translateX(450px)}
+        }
+
+        #resourcepopup .buttons {
+            flex: 0 0 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--secondary-text-color);
+            border-bottom: 1px solid var(--secondary-text-color);
+        }
+
+        #resourcepopup .buttons paper-button:hover {
+            color: var(--accent-color);
+        }
+
+        #resourcecontent {
+            padding: 0 40px 40px 40px;
+            overflow-y: auto;
+            flex: auto;
+        }
+
+        #resourcecontent h2 {
+            color: var(--accent-color);
+        }
+
+        #resourcecontent h3 {
+            margin: 10px 0;
+        }
+
+        #resourcecontent p {
+            margin: 0;
+        }
+
+        #resourcecontent #textholder p {
+            font-size: 120%;
+        }
+
+        #resourcepopup #footer {
+            flex: 0 0 50px;
+            display: flex;
+            align-items: center;
+            border-top: 1px solid var(--border-color);
+            text-transform: uppercase;
+            padding-left: 40px;
+        }
+
+        #examples {
+            margin-top: 10px;
+        }
+
+        .link {
+            color: var(--accent-color);
+            cursor: pointer;
+        }
+
+        .words {
+            padding: 5px 0;
+        }
+
+        #resourcepopup #footer.hide {
+            display: none;
+        }
+
+        .hide {
+            display: none;
+        }
+
+	</style>
+
+	<template>
+
+        <div id="contain">
+            <iron-list id="conflictlist" items="{{chunks}}" as="chunk">
+                <template>
+                    <ts-conflict-card class$="[[conflictclass(chunk.conflicts.exists)]]" chunk="{{chunk}}" on-updateheight="updateheight"></ts-conflict-card>
+                </template>
+            </iron-list>
+
+            <paper-material id="resourcepopup" class="hide">
+                <div class="buttons">
+                    <paper-button on-tap="closeresource"><iron-icon icon="clear"></iron-icon>Close</paper-button>
+                </div>
+                <div id="resourcecontent" class="sourcefont">
+                    <div id="textholder"></div>
+                    <template is="dom-if" if="{{related.length}}">
+                        <h3>See Also:</h3>
+                        <template is="dom-repeat" items="{{related}}" as="word">
+                            <p class="link" on-tap="newword">{{word.title}}</p>
+                        </template>
+                    </template>
+                    <template is="dom-if" if="{{examples.length}}">
+                        <h3>Examples:</h3>
+                        <template is="dom-repeat" items="{{examples}}" as="example">
+                            <div id="examples">
+                                <p class="link" on-tap="examplescroll"><span>{{chunks.0.projectmeta.project.name}}</span> <span>{{example.chapter}}</span>:<span>{{example.frame}}</span></p>
+                                <ts-text-holder text="[[example.body]]"></ts-text-holder>
+                            </div>
+                        </template>
+                    </template>
+                    <template is="dom-if" if="{{allwords.length}}">
+                        <h3>Words Index</h3>
+                        <template is="dom-repeat" items="{{allwords}}" as="word">
+                            <p class="link words" on-tap="newword">{{word.title}}</p>
+                        </template>
+                    </template>
+                </div>
+                <div id="footer">
+                    <p class="link" on-tap="openindex">Words Index</p>
+                </div>
+            </paper-material>
+        </div>
+
+        <iron-signals on-iron-signal-openresource="openresource"></iron-signals>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+		is: 'ts-conflict-mode',
+
+        behaviors: [
+            Polymer.IronResizableBehavior
+        ],
+
+        properties: {
+            chunks: {
+                type: Array,
+                value: [],
+                notify: true
+            },
+            modestatus: {
+                type: Object,
+                value: {},
+                notify: true
+            },
+            related: {
+                type: Array,
+                value: []
+            },
+            examples: {
+                type: Array,
+                value: []
+            },
+            allwords: {
+                type: Array,
+                value: []
+            }
+        },
+
+        conflictclass: function (conflicts) {
+            return conflicts ? '' : 'hide';
+        },
+
+        updateheight: function (e) {
+            var list = this.$.conflictlist;
+            var index = e.model.index;
+            list.updateSizeForItem(index);
+        },
+
+        openresource: function (event, data) {
+            var popup = this.$.resourcepopup;
+            this.fillresource(data.content);
+            popup.classList.remove("hide");
+            popup.classList.add("slidein");
+            setTimeout(function() {
+                popup.classList.remove("slidein");
+            }, 500);
+        },
+
+        fillresource: function (data) {
+            var textholder = this.$.textholder;
+            var content = "";
+            var clear = [];
+            var footer = this.$.footer;
+            var projectmeta = this.chunks[0].projectmeta;
+            var current = projectmeta.currentsource;
+            var currentsource = projectmeta.source_translations[current];
+
+            if (data.type === "Notes") {
+                this.set('related', clear);
+                this.set('examples', clear);
+                this.set('allwords', clear);
+                footer.classList.add("hide");
+                content = "\<h2 class='style-scope ts-conflict-mode'\>" + data.title + "\<\/h2\>\<p class='style-scope ts-conflict-mode'\>" + data.body + "\<\/p\>";
+            }
+            if (data.type === "Words") {
+                if (projectmeta.project.id === "obs") {
+                    this.set('examples', App.dataManager.getWordExamples(data.id));
+                } else {
+                    this.set('examples', clear);
+                }
+                this.set('related', App.dataManager.getRelatedWords(data.id, currentsource));
+                this.set('allwords', clear);
+                footer.classList.remove("hide");
+                content = "\<h2 class='style-scope ts-conflict-mode'\>" + data.title + "\<\/h2\>\<h3 class='style-scope ts-conflict-mode'\>" + data.deftitle + "\<\/h3\>" + data.body;
+            }
+            if (data.type === "Questions") {
+                this.set('related', clear);
+                this.set('examples', clear);
+                this.set('allwords', clear);
+                footer.classList.add("hide");
+                content = "\<h2 class='style-scope ts-conflict-mode'\>" + data.title + "\<\/h2\>\<p class='style-scope ts-conflict-mode'\>" + data.body + "\<\/p\>";
+            }
+            if (data.type === "allwords") {
+                this.set('related', clear);
+                this.set('examples', clear);
+                this.set('allwords', App.dataManager.getAllWords(currentsource));
+                footer.classList.add("hide");
+                content = "";
+            }
+            textholder.innerHTML = content;
+            this.$.resourcecontent.scrollTop = 0;
+        },
+
+        openindex: function () {
+            var data = {type: "allwords"};
+            this.fillresource(data);
+        },
+
+        newword: function (e) {
+            var word = e.model.word;
+            word.type = "Words";
+            this.fillresource(word);
+        },
+
+        examplescroll: function (e) {
+            var example = e.model.example;
+            var chapter = example.chapter;
+            var frame = example.frame;
+            var list = this.$.conflictlist;
+            var found = false;
+            var i = 0;
+
+            while (i < 10000 && !found) {
+                list.scrollToIndex(i);
+                if (this.chunks[i].chunkmeta.chapter === chapter && this.chunks[i].chunkmeta.frame === frame) {
+                    found = true;
+                }
+                i++;
+            }
+        },
+
+        closeresource: function () {
+            var popup = this.$.resourcepopup;
+            popup.classList.add("slideout");
+            setTimeout(function() {
+                popup.classList.remove("slideout");
+                popup.classList.add("hide");
+            }, 500);
+        },
+
+        frommode: function () {
+            this.moveout();
+        },
+
+        tomode: function () {
+            this.setpreview();
+            this.setlocation();
+            this.movein();
+        },
+
+        moveout: function () {
+            var mythis = this;
+            var contain = this.$.contain;
+
+            contain.classList.add("moveout");
+            setTimeout(function() {
+                contain.classList.remove("moveout");
+                mythis.classList.add("hide");
+            }, 500);
+        },
+
+        movein: function () {
+            var mythis = this;
+            var contain = this.$.contain;
+
+            setTimeout(function() {
+                mythis.classList.remove("preview");
+                contain.classList.add("movein");
+                setTimeout(function() {
+                    contain.classList.remove("movein");
+                }, 500);
+            }, 500);
+        },
+
+        setpreview: function () {
+            this.classList.add("preview");
+            this.classList.remove("hide");
+        },
+
+        setlocation: function () {
+            var list = this.$.conflictlist;
+            list.scrollToIndex(0);
+        },
+
+		ready: function() {
+
+		}
+
+	});
+
+</script>

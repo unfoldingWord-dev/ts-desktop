@@ -8,6 +8,7 @@
 <link rel="import" href="./ts-read-mode/ts-read-mode.html">
 <link rel="import" href="./ts-chunk-mode/ts-chunk-mode.html">
 <link rel="import" href="./ts-review-mode/ts-review-mode.html">
+<link rel="import" href="./ts-conflict-mode/ts-conflict-mode.html">
 <link rel="import" href="./ts-translate-sidebar.html">
 <link rel="import" href="./ts-nosource-mode.html">
 <link rel="import" href="./ts-source/ts-source-modal.html">
@@ -148,7 +149,7 @@
 
         #printpopup {
             width: 450px;
-            height: 280px;
+            height: 320px;
             font-size: 110%;
         }
 
@@ -195,6 +196,7 @@
             <ts-chunk-mode id="chunkmode" chunks="{{currentproject.chunks}}" modestatus="{{modestatus}}"></ts-chunk-mode>
             <ts-review-mode id="reviewmode" chunks="{{currentproject.chunks}}" modestatus="{{modestatus}}"></ts-review-mode>
             <ts-nosource-mode id="nosourcemode" projectmeta="[[currentproject.projectmeta]]"></ts-nosource-mode>
+            <ts-conflict-mode id="conflictmode" chunks="{{currentproject.chunks}}" modestatus="{{modestatus}}"></ts-conflict-mode>
         </div>
 
         <paper-dialog id="checklistpopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -240,7 +242,9 @@
             <div>
                 <p><paper-checkbox id="imagebox"></paper-checkbox><span id="imagetext">Include images</span></p>
                 <p><paper-checkbox id="chunkbox" checked="true"></paper-checkbox><span>Include incomplete chunks</span></p>
-                 <p><paper-checkbox id="doublespacebox"></paper-checkbox><span>Double space text</span></p>
+                <p><paper-checkbox id="doublespacebox"></paper-checkbox><span>Double space text</span></p>
+                <p><paper-checkbox id="justifybox"></paper-checkbox><span>Fully justify text</span></p>
+                <p><paper-checkbox id="pagebox"></paper-checkbox><span id="pagetext">New page for each chapter</span></p>
             </div>
             <div id="printbuttons">
                 <paper-button dialog-dismiss>Cancel</paper-button>
@@ -254,7 +258,7 @@
                 <p>This will permanently remove this note/question. Continue?</p>
             </div>
             <div id="deletebuttons">
-                <paper-button on-tap="closedelete">No</paper-button>
+                <paper-button on-tap="closedelete">Cancel</paper-button>
                 <paper-button on-tap="deletehelp">Confirm</paper-button>
             </div>
         </paper-dialog>
@@ -292,6 +296,8 @@
         <iron-signals on-iron-signal-reset="reset"></iron-signals>
         <iron-signals on-iron-signal-saveclose="saveAndClose"></iron-signals>
         <iron-signals on-iron-signal-saveall="saveAll"></iron-signals>
+        <iron-signals on-iron-signal-gotoreview="goToReview"></iron-signals>
+        <iron-signals on-iron-signal-resolveconflict="resolveConflict"></iron-signals>
 
     </template>
 
@@ -393,6 +399,13 @@
             clearTimeout(this.backuptimer);
         },
 
+        goToReview: function (event, data) {
+            this.set('selected', 0);
+            this.set('modestatus.index', data.index);
+            this.set('modestatus.chapter', data.chapter);
+            this.set('selected', 3);
+        },
+
         saveAndClose: function () {
             if (this.route === "translate") {
                 this.savestate();
@@ -461,11 +474,17 @@
                 })
                 .then(function () {
                     if (mythis.saveoptions.backup) {
-                        return App.exportManager.backupTranslation(projectmeta, filePath)
+                        return App.exportManager.autoBackupTranslation(projectmeta, filePath)
                             .then(function () {
                                 mythis.set('saveoptions.backup', false);
                             })
                             .catch(function (err) {
+                                mythis.set('options', {});
+                                mythis.set('options.title', "Auto Backup Failed");
+                                mythis.set('options.body', err);
+                                mythis.set('options.loading', false);
+                                mythis.$.loading.open();
+                                mythis.set('saveoptions.backup', false);
                                 App.reporter.logError(err, 'Error backing up translation');
                             });
                     }
@@ -564,6 +583,14 @@
             this.$.readmode.notifyResize();
             this.$.chunkmode.notifyResize();
             this.$.reviewmode.notifyResize();
+            this.$.conflictmode.notifyResize();
+        },
+
+        resolveConflict: function () {
+            this.set('currentproject.conflicts', this.currentproject.conflicts - 1);
+            if (this.currentproject.conflicts === 0 && this.selected === 5) {
+                this.set('selected', 3);
+            }
         },
 
         updatestate: function (event, data) {
@@ -583,7 +610,6 @@
         },
 
         updatecompletion: function () {
-            var key = this.currentproject.projectmeta.unique_id;
             var chunks = this.currentproject.chunks;
             var finished = [];
 
@@ -592,10 +618,8 @@
                     finished.push(chunks[i].chunkmeta.chapterid + "-" + chunks[i].chunkmeta.frameid);
                 }
             }
-            var completion = Math.round((finished.length / chunks.length) * 100);
+
             this.set('currentproject.projectmeta.finished_chunks', finished);
-            this.set('currentproject.projectmeta.completion', completion);
-            App.configurator.setValue(key + "-completion", completion);
             this.savemanifest();
         },
 
@@ -795,6 +819,8 @@
             var chunkarray = [];
             var index = 0;
 
+            this.set('currentproject.conflicts', 0);
+
             for (var i = 0; i < frames.length; i++) {
                 if (frames[i].verse === "00") {
                     frames.push(frames.splice(i, 1)[0]);
@@ -846,6 +872,7 @@
                 return chunk.chunkmeta.chapter;
             }), function (data, chap) {
                 var chapcomplete = true;
+                var conflicts = false;
                 var transcontent = "";
                 var srccontent = "";
                 var chaptermeta = {};
@@ -854,6 +881,9 @@
                     if (chunk.chunkmeta.frame > 0) {
                         if (!chunk.completed) {
                             chapcomplete = false;
+                        }
+                        if (chunk.conflicts.exists) {
+                            conflicts = true;
                         }
                         transcontent += chunk.transcontent + " ";
                         srccontent += chunk.srccontent + " ";
@@ -866,7 +896,7 @@
                     mythis.currentproject.statedata[chaptermeta.chapterid] = statedata;
                 }
                 if (chaptermeta.chapter > 0) {
-                    chapters.push({completed: chapcomplete, transcontent: transcontent, srccontent: srccontent, projectmeta: _.cloneDeep(projectmeta), chaptermeta: chaptermeta, state: statedata});
+                    chapters.push({completed: chapcomplete, conflicts: conflicts, transcontent: transcontent, srccontent: srccontent, projectmeta: _.cloneDeep(projectmeta), chaptermeta: chaptermeta, state: statedata});
                 }
             });
             this.set('currentproject.chapters', chapters);
@@ -1001,23 +1031,35 @@
             var maindata = this.currentproject.rawdata.main[complexid];
             var seconddata = this.currentproject.rawdata.second[complexid];
             var statedata = this.currentproject.statedata[complexid];
-            var completed = false;
+            var completed = projectmeta.finished_chunks.indexOf(complexid) >= 0;
             var transcontent = "";
             var helpscontent = [];
+            var conflicts = {exists: false};
 
             if (typeclass === "extant") {
                 helpscontent = [{title: "", body: ""}];
             }
 
             if (maindata) {
-                completed = projectmeta.finished_chunks.indexOf(complexid) >= 0;
                 if (typeclass === "standard") {
-                    transcontent = App.renderer.convertVerseMarkers(maindata.transcontent).text;
-                    transcontent = App.renderer.migrateMarkers(transcontent);
-                    transcontent = App.renderer.removeChapterMarkers(transcontent);
-                    transcontent = App.renderer.validateVerseMarkers(transcontent, verses);
+                    transcontent = maindata.transcontent;
+                    conflicts = this.checkForConflicts(transcontent);
+                    if (conflicts.exists) {
+                        for (var i = 0; i < conflicts.array.length; i++) {
+                            conflicts.array[i] = App.renderer.convertVerseMarkers(conflicts.array[i]).text;
+                            conflicts.array[i] = App.renderer.migrateMarkers(conflicts.array[i]);
+                            conflicts.array[i] = App.renderer.removeChapterMarkers(conflicts.array[i]);
+                            conflicts.array[i] = App.renderer.validateVerseMarkers(conflicts.array[i], verses);
+                        }
+                    } else {
+                        transcontent = App.renderer.convertVerseMarkers(transcontent).text;
+                        transcontent = App.renderer.migrateMarkers(transcontent);
+                        transcontent = App.renderer.removeChapterMarkers(transcontent);
+                        transcontent = App.renderer.validateVerseMarkers(transcontent, verses);
+                    }
                 } else {
                     helpscontent = maindata.helpscontent;
+                    conflicts = this.checkForConflicts(helpscontent);
                 }
             }
             if (seconddata && typeclass === "helps") {
@@ -1029,7 +1071,24 @@
                 statedata = {chunk: true, review: true, resource: 0};
                 this.currentproject.statedata[complexid] = statedata;
             }
-            return {projectmeta: _.cloneDeep(projectmeta), chunkmeta: chunkmeta, transcontent: transcontent, helpscontent: helpscontent, completed: completed, state: statedata};
+            return {projectmeta: _.cloneDeep(projectmeta), chunkmeta: chunkmeta, transcontent: transcontent, helpscontent: helpscontent, conflicts: conflicts, completed: completed, state: statedata};
+        },
+
+        checkForConflicts: function (content) {
+            var conflicttest = new RegExp(/(<{7} HEAD\n|={7}\n)([^<=>]+)(\n>{7} [\w]{40}|\n={7})/);
+            var conarray = [];
+
+            if (conflicttest.test(content)) {
+                while (conflicttest.test(content)) {
+                    var subcontent = conflicttest.exec(content)[2];
+                    conarray.push(subcontent);
+                    content = content.replace(subcontent, "");
+                }
+            } else {
+                return {exists: false, array: conarray};
+            }
+            this.set('currentproject.conflicts', this.currentproject.conflicts + 1);
+            return {exists: true, array: conarray};
         },
 
         createProjectTitleFrame: function (chunkmeta, projectmeta, index) {
@@ -1101,6 +1160,7 @@
             var chunk = this.$.chunkmode;
             var review = this.$.reviewmode;
             var nosource = this.$.nosourcemode;
+            var conflict = this.$.conflictmode;
 
             if (frommode > 0) {
                 this.set('modestatus.lastmode', frommode);
@@ -1114,6 +1174,8 @@
                 review.frommode();
             } else if (frommode === 4) {
                 nosource.frommode();
+            } else if (frommode === 5) {
+                conflict.frommode();
             }
 
             if (tomode === 1) {
@@ -1124,6 +1186,8 @@
                 review.tomode();
             } else if (tomode === 4) {
                 nosource.tomode();
+            } else if (tomode === 5) {
+                conflict.tomode();
             }
         },
 
@@ -1133,6 +1197,7 @@
             var chunk = this.$.chunkmode;
             var review = this.$.reviewmode;
             var nosource = this.$.nosourcemode;
+            var conflict = this.$.conflictmode;
 
             mythis.set('selected', 0);
             mythis.set('modestatus', {"chapter": 1, "lastmode": 1, "index": -1});
@@ -1140,6 +1205,7 @@
             chunk.classList.add("hide");
             review.classList.add("hide");
             nosource.classList.add("hide");
+            conflict.classList.add("hide");
         },
 
         setmodestate: function () {
@@ -1220,6 +1286,7 @@
             var read = this.$.readmode;
             var chunk = this.$.chunkmode;
             var review = this.$.reviewmode;
+            var conflict = this.$.conflictmode;
 
             if (selected === 1) {
                 read.setlocation();
@@ -1227,6 +1294,8 @@
                 chunk.setlocation();
             } else if (selected === 3) {
                 review.setlocation();
+            } else if (selected === 5) {
+                conflict.setlocation();
             }
         },
 
@@ -1255,12 +1324,16 @@
         gohome: function () {
             var mythis = this;
             mythis.$.reviewmode.closeresource();
+            mythis.$.conflictmode.closeresource();
             mythis.savestate();
             mythis.stoptimers();
             return mythis.saveAll()
                 .then(function () {
-                    mythis.set('route', "home");
-                    mythis.reset();
+                    setTimeout(function() {
+                        mythis.$.loading.close();
+                        mythis.set('route', "home");
+                        mythis.reset();
+                    }, 500);
                 });
         },
 
@@ -1274,6 +1347,7 @@
                 mythis.$.loading.open();
                 setTimeout(function() {
                     mythis.$.reviewmode.closeresource();
+                    mythis.$.conflictmode.closeresource();
                     mythis.savestate();
                     mythis.setleftanimation();
                     mythis.stoptimers();
@@ -1291,13 +1365,19 @@
             this.$.chunkbox.checked = true;
             this.$.imagebox.checked = false;
             this.$.doublespacebox.checked = false;
+            this.$.justifybox.checked = false;
+            this.$.pagebox.checked = false;
             var project = this.currentproject.projectmeta.project.id;
             if (project === 'obs') {
                 this.$.imagebox.hidden = false;
                 this.$.imagetext.hidden = false;
+                this.$.pagebox.hidden = true;
+                this.$.pagetext.hidden = true;
             } else {
                 this.$.imagebox.hidden = true;
                 this.$.imagetext.hidden = true;
+                this.$.pagebox.hidden = false;
+                this.$.pagetext.hidden = false;
             }
             this.$.printpopup.open();
         },
@@ -1308,6 +1388,7 @@
             mythis.stoptimers();
             return mythis.saveAll()
                 .then(function () {
+                    mythis.$.loading.close();
                     mythis.fire('iron-signal', {name: 'openbackup', data: {projectmeta: projectmeta}});
                     mythis.starttimers();
                 });
@@ -1325,7 +1406,13 @@
             var projectmeta = this.currentproject.projectmeta;
             var translation = this.currentproject.chunks;
             var name = this.currentproject.projectmeta.unique_id;
-            var options = {includeIncompleteFrames: this.$.chunkbox.checked, includeImages: this.$.imagebox.checked, doubleSpace: this.$.doublespacebox.checked};
+            var options = {
+                includeIncompleteFrames: this.$.chunkbox.checked,
+                includeImages: this.$.imagebox.checked,
+                doubleSpace: this.$.doublespacebox.checked,
+                justify: this.$.justifybox.checked,
+                newpage: this.$.pagebox.checked
+            };
             var filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'PDF Files', extensions: ['pdf']}]}});
             if (!filePath) {
                 return;
@@ -1342,7 +1429,7 @@
                         .catch(function (err) {
                             var errmessage = "An error occurred saving your project";
                             if(err !== null) {
-                                errmessage += "\n" + err;
+                                errmessage = err;
                             }
                             mythis.set('options.title', "Print Failed");
                             mythis.set('options.body', errmessage);
@@ -1353,27 +1440,30 @@
 
             mythis.$.printpopup.close();
             mythis.set('options', {});
+            mythis.set('options.body', "Preparing to Print. Please wait...");
             mythis.set('options.loading', true);
             mythis.$.loading.open();
 
-            if (options.includeImages) {
-                mythis.set('options.body', "Downloading Images. Please wait...");
-                App.printManager.downloadImages().then(function(){
-                    mythis.set('options.body', "Extracting Images. Please wait...");
-                    App.printManager.extractImages();
+            setTimeout(function() {
+                if (options.includeImages) {
+                    mythis.set('options.body', "Downloading Images. Please wait...");
+                    App.printManager.downloadImages().then(function(){
+                        mythis.set('options.body', "Extracting Images. Please wait...");
+                        App.printManager.extractImages();
+                        generatePdf();
+                    }).catch(function(err){
+                        var errmessage = "An error occurred while downloading images";
+                        if(err !== null) {
+                            errmessage += "\n" + err;
+                        }
+                        mythis.set('options.title', "Download Failed");
+                        mythis.set('options.body', errmessage);
+                        mythis.set('options.loading', false);
+                    });
+                } else {
                     generatePdf();
-                }).catch(function(err){
-                    var errmessage = "An error occurred while downloading images";
-                    if(err !== null) {
-                        errmessage += "\n" + err;
-                    }
-                    mythis.set('options.title', "Download Failed");
-                    mythis.set('options.body', errmessage);
-                    mythis.set('options.loading', false);
-                });
-            } else {
-                generatePdf();
-            }
+                }
+            }, 500);
         },
 
         setrightanimation: function () {

@@ -1,4 +1,5 @@
 .DS_Store
+.sync
 node_modules/
 src/components/
 dist/
@@ -7,6 +8,7 @@ tmp/
 vendor/
 build/
 out/
+/release/
 .brackets.json
 .idea
 test.html

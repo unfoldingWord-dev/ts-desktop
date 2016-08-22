@@ -1,0 +1,61 @@
+body {
+    font-family: Arial,serif;
+    font-size: 16px;
+    color: #2f2f2f;
+    margin: 2px;
+}
+h1, h2 {
+    text-align: center;
+    color: #2f2f2f;
+    font-family: Arial,serif;
+    margin: 10px 0;
+}
+h2 a {
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: normal;
+}
+h2 a:hover {
+    text-decoration: underline;
+}
+ul {
+    padding: 0;
+    margin: 0;
+}
+li {
+    padding: 5px;
+    margin-bottom: 2px;
+}
+li a {
+    float: right;
+}
+li:hover {
+    opacity: 0.8;
+}
+.ok {
+    background-color: #9ce498
+}
+.ok .status {
+    color: #0f8e00;
+}
+a, a:visited {
+    color: #078800
+}
+a:hover {
+    color: #055800;
+}
+.missing {
+    background-color: #d0d0d0;
+}
+.missing .status {
+    color: #808080;
+}
+.error {
+    background-color: #e4b498
+}
+.error .status {
+    color: #c12d00;
+}
+.status {
+    text-transform: uppercase;
+}

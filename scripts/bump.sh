@@ -16,5 +16,7 @@ git remote add $REMOTE "https://$GITHUB_TOKEN@github.com/unfoldingWord-dev/ts-de
 
 BUILD=$(gulp bump --silent)
 git add package.json
+git config user.email builder@travis-ci.com
+git config user.name "Travis CI"
 git commit -m "bumped build number to $BUILD [ci skip]"
 git push -q $REMOTE HEAD:$TRAVIS_BRANCH && true # skip errors

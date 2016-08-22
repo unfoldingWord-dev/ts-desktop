@@ -4,6 +4,8 @@
 <link rel="import" href="../../components/paper-button/paper-button.html">
 <link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../../components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
 <link rel="import" href="../../components/iron-list/iron-list.html">
 <link rel="import" href="../../components/paper-progress/paper-progress.html">
@@ -77,19 +79,22 @@
         }
 
         #headings {
-            flex: 0 0 50px;
+            flex: 0 0 40px;
             width: 620px;
             display: flex;
-            align-items: center;
+            align-items: flex-end;
+            padding-bottom: 10px;
         }
 
-        #headings .bigspan {
-            color: var(--accent-color);
-            cursor: pointer;
+        #sort {
+            flex: 0 0 50px;
+            display: flex;
+            width: 620px;
+            justify-content: space-around;
         }
 
         #list {
-            max-height: calc(100vh - 200px);
+            max-height: calc(100vh - 250px);
             display: flex;
             flex-direction: column;
             font-size: 110%;
@@ -118,9 +123,14 @@
         }
 
         .smallspan {
-            width: 70px;
+            width: 60px;
             display: inline-flex;
             justify-content: center;
+        }
+
+        .medspan {
+            width: 100px;
+            display: inline-block;
         }
 
         .bigspan {
@@ -137,7 +147,7 @@
         .info {
             --iron-icon-height: 22px;
             --iron-icon-width: 22px;
-            color: var(--border-color);
+            color: var(--icon-color);
         }
 
         .smalltext {
@@ -300,12 +310,27 @@
             </template>
             <template is="dom-if" if="{{projectlist.length}}">
                 <div class="contain">
+                    <div id="sort">
+                        <paper-dropdown-menu id="sortorder" label="Columns To Sort By">
+                            <paper-listbox id="sort1" class="dropdown-content">
+                                <paper-item on-tap="sortproj">Project then Language</paper-item>
+                                <paper-item on-tap="sortlang">Language then Project</paper-item>
+                                <paper-item on-tap="sortprog">Progress then Project</paper-item>
+                            </paper-listbox>
+                        </paper-dropdown-menu>
+                        <paper-dropdown-menu id="projectsort" label="Sort Project Column By">
+                            <paper-listbox id="sort2" class="dropdown-content">
+                                <paper-item on-tap="sortbible">Bible Order</paper-item>
+                                <paper-item on-tap="sortalpha">Alphabetical Order</paper-item>
+                            </paper-listbox>
+                        </paper-dropdown-menu>
+                    </div>
                     <div id="headings" class="smalltext">
                         <span class="smallspan"></span>
-                        <span class="bigspan" on-tap="sortproj">{{locale.project}}</span>
-                        <span class="smallspan">{{locale.type}}</span>
-                        <span class="bigspan" on-tap="sortlang">{{locale.language}}</span>
-                        <span>{{locale.progress}}</span>
+                        <span class="bigspan">{{locale.project}}</span>
+                        <span class="medspan">{{locale.type}}</span>
+                        <span class="bigspan">{{locale.language}}</span>
+                        <span class="smallspan">{{locale.progress}}</span>
                     </div>
                     <div id="list">
                         <template is="dom-repeat" items="[[projectlist]]" as="project">
@@ -313,7 +338,7 @@
                                 <div class="left" on-tap="openproject">
                                     <span class="smallspan"><iron-icon class="smallicon" icon$="[[checkicon(project)]]"></iron-icon></span>
                                     <span class="bigspan">[[project.project.name]]</span>
-                                    <span class="smallspan smalltext"><span>[[project.type.name]]</span><span class$="[[typeclass(project.resource.id)]]">[[project.resource.id]]</span></span>
+                                    <span class="medspan smalltext"><span>[[project.type.name]]</span><span class$="[[typeclass(project.resource.id)]]">[[project.resource.id]]</span></span>
                                     <span class="smalltext bigspan">[[project.target_language.name]]</span>
                                     <span class="smallspan"><ts-completion-icon percent="[[project.completion]]"></ts-completion-icon></span>
                                 </div>
@@ -366,7 +391,7 @@
                 <p>{{locale.confirm_delete_translation}}</p>
             </div>
             <div id="deletebuttons">
-                <paper-button on-tap="closedelete">{{locale.no}}</paper-button>
+                <paper-button on-tap="closedelete">Cancel</paper-button>
                 <paper-button on-tap="deleteproject">{{locale.confirm}}</paper-button>
             </div>
         </paper-dialog>
@@ -377,8 +402,8 @@
                 <p>This project already exists.  If you continue with this change, the two projects will be merged together.</p>
             </div>
             <div class="buttons">
-                <paper-button on-tap="firechange">Continue</paper-button>
                 <paper-button on-tap="cancelconfirm">Cancel</paper-button>
+                <paper-button on-tap="firechange">Continue</paper-button>
             </div>
         </paper-dialog>
 
@@ -452,18 +477,54 @@
             return projectmeta.project.id === "obs" || projectmeta.project_type_class === "extant" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
         },
 
-        sortproj: function () {
-            var sort = App.configurator.getValue("sort") || {default: true, language: false};
-            sort.default = !sort.default;
+        sortbible: function () {
+            var sort = App.configurator.getValue("sort") || {project: "bible", order: "project"};
+            var dropdown = this.querySelector("#projectsort");
+
+            sort.project = "bible";
             App.configurator.setValue("sort", sort);
             this.fire('iron-signal', {name: 'updatelist'});
+            dropdown.close();
+        },
+
+        sortalpha: function () {
+            var sort = App.configurator.getValue("sort") || {project: "bible", order: "project"};
+            var dropdown = this.querySelector("#projectsort");
+
+            sort.project = "alpha";
+            App.configurator.setValue("sort", sort);
+            this.fire('iron-signal', {name: 'updatelist'});
+            dropdown.close();
+        },
+
+        sortproj: function () {
+            var sort = App.configurator.getValue("sort") || {project: "bible", order: "project"};
+            var dropdown = this.querySelector("#sortorder");
+
+            sort.order = "project";
+            App.configurator.setValue("sort", sort);
+            this.fire('iron-signal', {name: 'updatelist'});
+            dropdown.close();
         },
 
         sortlang: function () {
-            var sort = App.configurator.getValue("sort") || {default: true, language: false};
-            sort.language = !sort.language;
+            var sort = App.configurator.getValue("sort") || {project: "bible", order: "project"};
+            var dropdown = this.querySelector("#sortorder");
+
+            sort.order = "language";
             App.configurator.setValue("sort", sort);
             this.fire('iron-signal', {name: 'updatelist'});
+            dropdown.close();
+        },
+
+        sortprog: function () {
+            var sort = App.configurator.getValue("sort") || {project: "bible", order: "project"};
+            var dropdown = this.querySelector("#sortorder");
+
+            sort.order = "progress";
+            App.configurator.setValue("sort", sort);
+            this.fire('iron-signal', {name: 'updatelist'});
+            dropdown.close();
         },
 
         changelanguage: function () {
@@ -549,6 +610,28 @@
 
         start: function () {
             this.route = "new";
+        },
+
+        setsortfields: function () {
+            if (this.projectlist.length) {
+                var sort = App.configurator.getValue("sort") || {project: "bible", order: "project"};
+                var sort1 = this.querySelector("#sort1");
+                var sort2 = this.querySelector("#sort2");
+
+                if (sort.order === "project") {
+                    sort1.selected = 0;
+                } else if (sort.order === "language") {
+                    sort1.selected = 1;
+                } else if (sort.order === "progress") {
+                    sort1.selected = 2;
+                }
+
+                if (sort.project === "bible") {
+                    sort2.selected = 0;
+                } else if (sort.project === "alpha") {
+                    sort2.selected = 1;
+                }
+            }
         },
 
         ready: function() {

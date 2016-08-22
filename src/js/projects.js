@@ -44,20 +44,28 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
         },
 
         sortProjectList: function (list) {
-            var sort = configurator.getValue("sort") || {default: true, language: false};
-
-            if (sort.default) {
-                if (sort.language) {
+            var sort = configurator.getValue("sort") || {project: "bible", order: "project"};
+            
+            if (sort.order === "project") {
+                if (sort.project === "bible") {
+                    return this.sortByBibleLang(list);
+                } else {
+                    return this.sortByAlphaLang(list);
+                }
+            } else if (sort.order === "language") {
+                if (sort.project === "bible") {
                     return this.sortByLangBible(list);
                 } else {
-                    return this.sortByBibleLang(list);
+                    return this.sortByLangAlpha(list);
+                }
+            } else if (sort.order === "progress") {
+                if (sort.project === "bible") {
+                    return this.sortByProgBible(list);
+                } else {
+                    return this.sortByProgAlpha(list);
                 }
             } else {
-                if (sort.language) {
-                    return this.sortByLangProject(list);
-                } else {
-                    return this.sortByProjectLang(list);
-                }
+                return this.sortByBibleLang(list);
             }
         },
 
@@ -85,7 +93,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             });
         },
 
-        sortByProjectLang: function (list) {
+        sortByAlphaLang: function (list) {
             return list.sort(function (a, b) {
                 if (a.project.name > b.project.name) {
                     return 1;
@@ -109,7 +117,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             });
         },
 
-        sortByLangProject: function (list) {
+        sortByLangAlpha: function (list) {
             return list.sort(function (a, b) {
                 if (a.target_language.name > b.target_language.name) {
                     return 1;
@@ -139,6 +147,54 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                     return 1;
                 } else if (a.target_language.name < b.target_language.name) {
                     return -1;
+                } else {
+                    if (custom.indexOf(a.project.name) > custom.indexOf(b.project.name)) {
+                        return 1;
+                    } else if (custom.indexOf(a.project.name) < custom.indexOf(b.project.name)) {
+                        return -1;
+                    } else {
+                        if (a.resource.id > b.resource.id) {
+                            return -1;
+                        } else if (a.resource.id < b.resource.id) {
+                            return 1;
+                        } else {
+                            return 0;
+                        }
+                    }
+                }
+            });
+        },
+
+        sortByProgAlpha: function (list) {
+            return list.sort(function (a, b) {
+                if (a.completion > b.completion) {
+                    return -1;
+                } else if (a.completion < b.completion) {
+                    return 1;
+                } else {
+                    if (a.project.name > b.project.name) {
+                        return 1;
+                    } else if (a.project.name < b.project.name) {
+                        return -1;
+                    } else {
+                        if (a.resource.id > b.resource.id) {
+                            return -1;
+                        } else if (a.resource.id < b.resource.id) {
+                            return 1;
+                        } else {
+                            return 0;
+                        }
+                    }
+                }
+            });
+        },
+
+        sortByProgBible: function (list) {
+            return list.sort(function (a, b) {
+                if (a.completion > b.completion) {
+                    return -1;
+                } else if (a.completion < b.completion) {
+                    return 1;
                 } else {
                     if (custom.indexOf(a.project.name) > custom.indexOf(b.project.name)) {
                         return 1;

@@ -235,7 +235,7 @@
         </paper-dialog>
 
         <paper-dialog id="printpopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <h2>Print</h2>
+            <h2>Print / Export to PDF</h2>
             <div>
                 <p><span>[[currentproject.projectmeta.project.name]]</span> - <span>[[currentproject.projectmeta.target_language.name]]</span></p>
             </div>
@@ -659,9 +659,9 @@
                     mythis.setmodestate();
                     mythis.checksources();
                     mythis.starttimers();
-                    if (type === "publish") {
+                    if (type === "export") {
                         setTimeout(function() {
-                            mythis.gopublish();
+                            mythis.createUSFM();
                         }, 750);
                     }
                     if (type === "print") {
@@ -1463,6 +1463,48 @@
                 } else {
                     generatePdf();
                 }
+            }, 500);
+        },
+
+        createUSFM: function () {
+            var mythis = this;
+            var projectmeta = this.currentproject.projectmeta;
+            var translation = this.currentproject.chunks;
+            var mediaServer = "https://api.unfoldingword.org/";
+            var name = projectmeta.unique_id;
+            var filePath;
+
+            if (projectmeta.format === 'markdown') {
+                filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'Zip Files', extensions: ['zip']}]}});
+            } else {
+                filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'USFM Files', extensions: ['usfm']}]}});
+            }
+            if (!filePath) {
+                return;
+            }
+
+            mythis.set('options', {});
+            mythis.set('options.body', "Exporting Project.  Please wait...");
+            mythis.set('options.loading', true);
+            mythis.$.loading.open();
+
+            setTimeout(function() {
+                return App.exportManager.exportTranslation(translation, projectmeta, filePath, mediaServer)
+                    .then(function () {
+                        mythis.set('options.title', "Project Exported");
+                        mythis.set('options.body', "Your project has been successfully exported to a file.");
+                        //mythis.set('options.showhome', true);
+                        mythis.set('options.loading', false);
+                    })
+                    .catch(function (err) {
+                        var errmessage = "An error occurred while trying to export your project";
+                        if(err !== null) {
+                            errmessage = err;
+                        }
+                        mythis.set('options.title', "Export Failed");
+                        mythis.set('options.body', errmessage);
+                        mythis.set('options.loading', false);
+                    });
             }, 500);
         },
 

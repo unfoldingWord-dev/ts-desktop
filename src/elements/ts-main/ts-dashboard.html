@@ -87,7 +87,7 @@
 
       #backup {
           width: 450px;
-          height: 300px;
+          height: 480px;
       }
 
       #repo {
@@ -117,7 +117,7 @@
       <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
           <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]" id="home"></ts-home>
           <ts-new data-route="new" route="{{route}}" importdata="{{importdata}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]"></ts-new>
-          <ts-translate data-route="translate" route="{{route}}" message="{{message}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]"></ts-translate>
+          <ts-translate data-route="translate" route="{{route}}" message="{{message}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]" id="translate"></ts-translate>
           <ts-publish data-route="publish" route="{{route}}" currentproject="{{currentproject}}" currentuser="[[currentuser]]"></ts-publish>
           <ts-settings data-route="settings" route="{{route}}"></ts-settings>
           <ts-profile data-route="profile" currentuser="[[currentuser]]"></ts-profile>
@@ -148,7 +148,7 @@
       </paper-dialog>
 
       <paper-dialog id="backup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-          <ts-backup-options on-filebackup="createFileBackup" on-repobackup="createRepoBackup"></ts-backup-options>
+          <ts-backup-options on-filebackup="createFileBackup" on-repobackup="createRepoBackup" on-checkprint="checkPrint" on-checkexport="checkExport"></ts-backup-options>
       </paper-dialog>
 
       <paper-dialog id="license" class="popup legal" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -335,6 +335,32 @@
                       mythis.showErrorMessage('Update Failed', 'An error occurred while updating', err);
                   });
           }, 500);
+      },
+
+      checkPrint: function () {
+          var projectmeta = this.backupdata;
+          var translate = this.$.translate;
+
+          this.$.backup.close();
+
+          if (this.route === "translate") {
+              translate.goprint();
+          } else {
+              this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, type: "print"}});
+          }
+      },
+
+      checkExport: function () {
+          var projectmeta = this.backupdata;
+          var translate = this.$.translate;
+
+          this.$.backup.close();
+
+          if (this.route === "translate") {
+              translate.createUSFM();
+          } else {
+              this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, type: "export"}});
+          }
       },
 
       deleteProject: function (event, data) {
@@ -673,8 +699,8 @@
                   return App.gitManager.push(user, paths.projectDir, repo).then(App.utils.ret(repo.html_url));
               })
               .then(function (url) {
-                  mythis.set('options.title', "Backup Complete");
-                  mythis.set('options.body', "Your project has been backed up to:");
+                  mythis.set('options.title', "Upload Complete");
+                  mythis.set('options.body', "Your project has been uploaded to:");
                   mythis.set('options.link', url);
                   mythis.set('options.showlink', true);
                   mythis.set('options.loading', false);
@@ -699,7 +725,7 @@
                   if (typeof errmessage === 'string' && errmessage.includes("rejected because the remote contains work")) {
                       errmessage = "Cannot upload this project because a project already exists that has no shared history";
                   }
-                  mythis.showErrorMessage('Backup Failed', errmessage, err);
+                  mythis.showErrorMessage('Upload Failed', errmessage, err);
               });
       },
 

@@ -62,7 +62,7 @@
             <h2>Upload/Export Options</h2>
         </div>
         <div id="body">
-            <div class="option" on-tap="repobackup">
+            <div class="option" on-tap="upload">
                 <span class="optiontitle">Upload to Door43</span>
                 <p>Uploads project to your Door43 Account</p>
             </div>
@@ -74,7 +74,7 @@
                 <span class="optiontitle">Export to PDF File</span>
                 <p>Creates a .pdf file of your project</p>
             </div>
-            <div class="option" on-tap="filebackup">
+            <div class="option" on-tap="backup">
                 <span class="optiontitle">Export to Project File</span>
                 <p>Creates a .tstudio file of your project</p>
             </div>
@@ -97,12 +97,12 @@
 
         },
 
-        filebackup: function () {
-            this.fire('filebackup');
+        backup: function () {
+            this.fire('backup');
         },
 
-        repobackup: function () {
-            this.fire('repobackup');
+        upload: function () {
+            this.fire('upload');
         },
 
         checkprint: function () {

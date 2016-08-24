@@ -148,7 +148,7 @@
       </paper-dialog>
 
       <paper-dialog id="backup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-          <ts-backup-options on-filebackup="createFileBackup" on-repobackup="createRepoBackup" on-checkprint="checkPrint" on-checkexport="checkExport"></ts-backup-options>
+          <ts-backup-options on-backup="backupProject" on-upload="uploadProject" on-checkprint="checkPrint" on-checkexport="checkExport"></ts-backup-options>
       </paper-dialog>
 
       <paper-dialog id="license" class="popup legal" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -657,7 +657,7 @@
           this.$.backup.open();
       },
 
-      createRepoBackup: function () {
+      uploadProject: function () {
           var mythis = this;
           var projectmeta = this.backupdata;
           var loading = this.$.wideloading;
@@ -729,7 +729,7 @@
               });
       },
 
-      createFileBackup: function () {
+      backupProject: function () {
           var mythis = this;
           var meta = this.backupdata;
           var defaultPath = App.configurator.getUserPath('datalocation', 'backups', meta.unique_id);
@@ -739,15 +739,15 @@
           }
 
           mythis.$.backup.close();
-          mythis.showLoadingMessage('Creating Backup.  Please wait...');
+          mythis.showLoadingMessage('Creating Project File.  Please wait...');
 
           setTimeout(function() {
               return App.exportManager.backupTranslation(meta, filePath)
                   .then(function () {
-                      mythis.showMessage('Backup Complete', 'Your project has been successfully backed up.');
+                      mythis.showMessage('Project File Complete', 'Your project has been successfully saved.');
                   })
                   .catch(function (err) {
-                      mythis.showErrorMessage('Backup Failed', 'An error occurred while trying to backup your project', err);
+                      mythis.showErrorMessage('File Failed', 'An error occurred while trying to save your project', err);
                   });
           }, 500);
       },

@@ -88,12 +88,6 @@
             margin-top: 20px;
         }
 
-        #next {
-            background: var(--accent-color);
-            color: var(--reverse-text-color);
-            text-transform: uppercase;
-        }
-
         #add {
             background: var(--card-background-color);
             color: var(--accent-color);
@@ -146,8 +140,7 @@
                 </div>
             </paper-material>
             <div id="buttons">
-                <paper-button raised id="add" on-tap="addnew">Add Contributor</paper-button>
-                <paper-button raised id="next" on-tap="next">Next Step</paper-button>
+                <paper-button raised id="add" on-tap="add">Add Contributor</paper-button>
             </div>
         </div>
 
@@ -186,11 +179,7 @@
             }
         },
 
-        addnew: function () {
-            this.add(false);
-        },
-
-        add: function (flag) {
+        add: function () {
             var mythis = this;
             var name = mythis.newinfo.name;
             var check = mythis.$.check.checked;
@@ -211,21 +200,6 @@
                 mythis.fire('iron-signal', {name: 'saveall'});
                 mythis.set('newinfo', {});
                 mythis.$.check.checked = false;
-                if (flag) {
-                    mythis.set('selected', mythis.selected + 1);
-                }
-            }
-        },
-
-        next: function () {
-            var mythis = this;
-            var name = mythis.newinfo.name;
-            var length = mythis.currentproject.projectmeta.translators.length;
-
-            if (!name && length) {
-                mythis.set('selected', mythis.selected + 1);
-            } else {
-                mythis.add(true);
             }
         },
 

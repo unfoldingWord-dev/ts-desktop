@@ -1,12 +1,12 @@
 
 <link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
 <link rel="import" href="../../components/iron-icons/iron-icons.html">
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
 
 <link rel="import" href="./ts-publish-book.html">
 <link rel="import" href="./ts-publish-profile.html">
 <link rel="import" href="./ts-publish-review.html">
-<link rel="import" href="./ts-publish-publish.html">
 
 <dom-module id="ts-publish">
 
@@ -52,51 +52,10 @@
             min-height: 60px;
         }
 
-        .future {
-            color: var(--primary-color-light);
-            display: inline-block;
-        }
-
-        .current {
-            color: var(--reverse-text-color);
-            display: inline-block;
-        }
-
-        .past {
-            color: var(--reverse-text-color);
-            display: inline-block;
-        }
-
-        .icon {
-            --iron-icon-height: 17px;
-            --iron-icon-width: 17px;
-        }
-
-        .circle {
-            border-radius: 50%;
-            border: 1px solid;
-            width: 25px;
-            height: 25px;
-            text-align: center;
-            display: inline-block;
-            margin: 0 10px 0 20px;
-            line-height: 25px;
-        }
-
-        .current .circle {
+        .buttons {
             background: var(--accent-color);
-        }
-
-        .past .text {
-            display: none;
-        }
-
-        .current .icon {
-            display: none;
-        }
-
-        .future .icon {
-            display: none;
+            color: var(--reverse-text-color);
+            text-transform: uppercase;
         }
 
     </style>
@@ -106,15 +65,13 @@
         <div id="header">
             <div id="title">
                 <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
-                <span>Upload Project</span>
+                <span>Review Project</span>
             </div>
             <div id="steps">
-                <template is="dom-repeat" items="[[stepslist]]" as="step">
-                    <div class$="[[step.level]]">
-                        <div class="circle"><span class="text">[[step.number]]</span><iron-icon icon="done" class="icon"></iron-icon></div>
-                        <span>[[step.name]]</span>
-                    </div>
-                </template>
+                <paper-button raised class="buttons" on-tap="gotochunks">Chunks</paper-button>
+                <paper-button raised class="buttons" on-tap="gotocontrib">Contributors</paper-button>
+                <paper-button raised class="buttons" on-tap="gotoagree">Agreements</paper-button>
+                <paper-button raised class="buttons" on-tap="gotoupload">Upload</paper-button>
             </div>
         </div>
 
@@ -122,7 +79,6 @@
             <ts-publish-book selected="{{selected}}" currentproject="[[currentproject]]"></ts-publish-book>
             <ts-publish-profile selected="{{selected}}" currentproject="{{currentproject}}"></ts-publish-profile>
             <ts-publish-review selected="{{selected}}" currentproject="[[currentproject]]"></ts-publish-review>
-            <ts-publish-publish route="{{route}}" selected="{{selected}}" currentproject="[[currentproject]]" currentuser="[[currentuser]]"></ts-publish-publish>
         </neon-animated-pages>
 
     </template>
@@ -154,15 +110,6 @@
                 value: {},
                 notify: true
             },
-            stepslist: {
-                type: Array,
-                value: [],
-                computed: 'createlist(selected)'
-            },
-            currentuser: {
-                type: Object,
-                value: {}
-            },
             animationConfig: {
                 value: function () {
                     return {
@@ -179,38 +126,22 @@
             }
         },
 
-        createlist: function (selected) {
-            var list = [];
-            if (selected === 0) {
-                list = [
-                    {number: 1, name: "PROJECT", level: "current"},
-                    {number: 2, name: "TRANSLATORS", level: "future"},
-                    {number: 3, name: "REVIEW", level: "future"},
-                    {number: 4, name: "UPLOAD", level: "future"}
-                ]
-            } else if (selected === 1) {
-                list = [
-                    {number: 1, name: "PROJECT", level: "past"},
-                    {number: 2, name: "TRANSLATORS", level: "current"},
-                    {number: 3, name: "REVIEW", level: "future"},
-                    {number: 4, name: "UPLOAD", level: "future"}
-                ]
-            } else if (selected === 2) {
-                list = [
-                    {number: 1, name: "PROJECT", level: "past"},
-                    {number: 2, name: "TRANSLATORS", level: "past"},
-                    {number: 3, name: "REVIEW", level: "current"},
-                    {number: 4, name: "UPLOAD", level: "future"}
-                ]
-            } else if (selected === 3) {
-                list = [
-                    {number: 1, name: "PROJECT", level: "past"},
-                    {number: 2, name: "TRANSLATORS", level: "past"},
-                    {number: 3, name: "REVIEW", level: "past"},
-                    {number: 4, name: "UPLOAD", level: "current"}
-                ]
-            }
-            return list;
+        gotochunks: function () {
+            this.set('selected', 0);
+        },
+
+        gotocontrib: function () {
+            this.set('selected', 1);
+        },
+
+        gotoagree: function () {
+            this.set('selected', 2);
+        },
+
+        gotoupload: function () {
+            var projectmeta = this.currentproject.projectmeta;
+
+            this.fire('iron-signal', {name: 'openbackup', data: {projectmeta: projectmeta}});
         },
 
         back: function () {

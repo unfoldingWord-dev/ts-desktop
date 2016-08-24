@@ -34,12 +34,6 @@
             align-items: stretch;
         }
 
-        #next {
-            background: var(--accent-color);
-            color: var(--reverse-text-color);
-            text-transform: uppercase;
-        }
-
         ul {
             margin: 0;
             padding: 0;
@@ -80,14 +74,11 @@
         <div id="contain">
             <div id="list">
                 <ul>
-                    <li><div>Project: <span>[[currentproject.projectmeta.project.name]]</span> — <span>[[currentproject.projectmeta.target_language.name]]</span></div><span class="right"><iron-icon class="done" icon="done"></iron-icon></span></li>
-                    <li>Contributors<span class="right"><iron-icon class="done" icon="done"></iron-icon></span></li>
                     <li>License Agreement<span class="right"><paper-icon-button icon="visibility" on-tap="openlicense"></paper-icon-button><iron-icon class="done" icon="done"></iron-icon></span></li>
                     <li>Translation Guidelines<span class="right"><paper-icon-button icon="visibility" on-tap="openguidelines"></paper-icon-button><iron-icon class="done" icon="done"></iron-icon></span></li>
                     <li>Statement of Faith<span class="right"><paper-icon-button icon="visibility" on-tap="openstatement"></paper-icon-button><iron-icon class="done" icon="done"></iron-icon></span></li>
                 </ul>
             </div>
-            <paper-button raised id="next" on-tap="next">Next Step</paper-button>
         </div>
 
     </template>
@@ -110,10 +101,6 @@
                 type: Object,
                 value: {}
             }
-        },
-
-        next: function () {
-            this.selected = this.selected + 1;
         },
 
         openlicense: function () {

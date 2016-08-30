@@ -122,11 +122,11 @@
       <ts-app-titlebar currentuser="[[currentuser]]"></ts-app-titlebar>
       <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
           <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]" id="home"></ts-home>
-          <ts-new data-route="new" route="{{route}}" importdata="{{importdata}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]"></ts-new>
-          <ts-translate data-route="translate" route="{{route}}" message="{{message}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]" id="translate"></ts-translate>
-          <ts-review data-route="publish" route="{{route}}" currentproject="{{currentproject}}" currentuser="[[currentuser]]"></ts-review>
-          <ts-settings data-route="settings" route="{{route}}"></ts-settings>
-          <ts-profile data-route="profile" currentuser="[[currentuser]]"></ts-profile>
+          <ts-new data-route="new" route="{{route}}" importdata="{{importdata}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]" options="{{options}}"></ts-new>
+          <ts-translate data-route="translate" route="{{route}}" message="{{message}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}" id="translate"></ts-translate>
+          <ts-review data-route="publish" route="{{route}}" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}"></ts-review>
+          <ts-settings data-route="settings" route="{{route}}" options="{{options}}"></ts-settings>
+          <ts-profile data-route="profile" currentuser="[[currentuser]]" options="{{options}}"></ts-profile>
           <ts-terms data-route="terms"></ts-terms>
       </neon-animated-pages>
       <div id="statusbar">
@@ -192,6 +192,8 @@
       <iron-signals on-iron-signal-deleteproject="deleteProject"></iron-signals>
       <iron-signals on-iron-signal-updatelanguages="updateLanguages"></iron-signals>
       <iron-signals on-iron-signal-print="print"></iron-signals>
+      <iron-signals on-iron-signal-openloading="openLoading"></iron-signals>
+      <iron-signals on-iron-signal-closeloading="closeLoading"></iron-signals>
 
   </template>
 
@@ -295,6 +297,14 @@
           } else {
               this.set('route', 'profile');
           }
+      },
+
+      openLoading: function () {
+          this.$.loading.open();
+      },
+
+      closeLoading: function () {
+          this.$.loading.close();
       },
 
       showLoadingMessage: function (msg) {

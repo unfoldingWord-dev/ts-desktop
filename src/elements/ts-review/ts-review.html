@@ -75,7 +75,7 @@
 
         <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
             <ts-review-project selected="{{selected}}" currentproject="[[currentproject]]"></ts-review-project>
-            <ts-review-contrib selected="{{selected}}" currentproject="{{currentproject}}"></ts-review-contrib>
+            <ts-review-contrib selected="{{selected}}" currentproject="{{currentproject}}" options="{{options}}"></ts-review-contrib>
         </neon-animated-pages>
 
     </template>
@@ -100,6 +100,11 @@
             route: {
                 type: String,
                 value: '',
+                notify: true
+            },
+            options: {
+                type: Object,
+                value: {},
                 notify: true
             },
             currentproject: {

@@ -12,7 +12,6 @@
 <link rel="import" href="./ts-translate-sidebar.html">
 <link rel="import" href="./ts-nosource-mode.html">
 <link rel="import" href="./ts-source/ts-source-modal.html">
-<link rel="import" href="../ts-main/ts-loading.html">
 
 <dom-module id="ts-translate">
 
@@ -147,16 +146,6 @@
             color: var(--accent-color);
         }
 
-        #loading {
-            width: 320px;
-            height: 220px;
-        }
-
-        #loading * {
-            margin: 0;
-            padding: 0;
-        }
-
         .nodisplay {
             display: none;
         }
@@ -233,10 +222,6 @@
             <ts-source-modal id="modal" on-close="closesource"></ts-source-modal>
         </paper-dialog>
 
-        <paper-dialog id="loading" class="popup" modal="true" exit-animation="scale-down-animation">
-            <ts-loading options="[[options]]"></ts-loading>
-        </paper-dialog>
-
         <iron-signals on-iron-signal-frompublish="frompublish"></iron-signals>
         <iron-signals on-iron-signal-updatesources="updatesources"></iron-signals>
         <iron-signals on-iron-signal-loadproject="loadproject"></iron-signals>
@@ -302,7 +287,8 @@
             },
             options: {
                 type: Object,
-                value: {}
+                value: {},
+                notify: true
             },
             saveoptions: {
                 type: Object,
@@ -441,7 +427,7 @@
                                 mythis.set('options.title', "Auto Backup Failed");
                                 mythis.set('options.body', err);
                                 mythis.set('options.loading', false);
-                                mythis.$.loading.open();
+                                mythis.fire('iron-signal', {name: 'openloading'});
                                 mythis.set('saveoptions.backup', false);
                                 App.reporter.logError(err, 'Error backing up translation');
                             });
@@ -612,7 +598,7 @@
                     mythis.createchunks();
                     mythis.createchapters();
                 }
-                mythis.$.loading.close();
+                mythis.fire('iron-signal', {name: 'closeloading'});
                 setTimeout(function() {
                     if (nav) {
                         mythis.setmodestate();
@@ -687,7 +673,7 @@
                 mythis.set('options', {});
                 mythis.set('options.body', "Loading project. Please wait...");
                 mythis.set('options.loading', true);
-                mythis.$.loading.open();
+                mythis.fire('iron-signal', {name: 'openloading'});
                 setTimeout(function() {
                     return App.projectsManager.loadTargetTranslation(projectmeta)
                         .then(function (translation) {
@@ -713,7 +699,7 @@
             mythis.set('options', {});
             mythis.set('options.body', "Loading source. Please wait...");
             mythis.set('options.loading', true);
-            mythis.$.loading.open();
+            mythis.fire('iron-signal', {name: 'openloading'});
             setTimeout(function() {
                 mythis.set('currentproject.projectmeta.source_translations', data.sources);
                 mythis.set('currentproject.projectmeta.currentsource', data.selected);
@@ -733,7 +719,7 @@
                     mythis.set('currentproject.rawdata.main', translation);
                     mythis.createchunks();
                     mythis.createchapters();
-                    mythis.$.loading.close();
+                    mythis.fire('iron-signal', {name: 'closeloading'});
                     mythis.forceResize();
                     mythis.setlocation();
                     if (full) {
@@ -1284,7 +1270,7 @@
             return mythis.saveAll()
                 .then(function () {
                     setTimeout(function() {
-                        mythis.$.loading.close();
+                        mythis.fire('iron-signal', {name: 'closeloading'});
                         mythis.set('route', "home");
                         mythis.reset();
                     }, 500);
@@ -1298,7 +1284,7 @@
                 mythis.set('options', {});
                 mythis.set('options.body', "Loading review page. Please wait...");
                 mythis.set('options.loading', true);
-                mythis.$.loading.open();
+                mythis.fire('iron-signal', {name: 'openloading'});
                 setTimeout(function() {
                     mythis.$.reviewmode.closeresource();
                     mythis.$.conflictmode.closeresource();
@@ -1308,7 +1294,7 @@
                     return mythis.saveAll()
                         .then(function () {
                             mythis.fire('iron-signal', {name: 'updatepublish'});
-                            mythis.$.loading.close();
+                            mythis.fire('iron-signal', {name: 'closeloading'});
                             mythis.set('route', "publish");
                         });
                 }, 250);
@@ -1326,7 +1312,7 @@
             mythis.stoptimers();
             return mythis.saveAll()
                 .then(function () {
-                    mythis.$.loading.close();
+                    mythis.fire('iron-signal', {name: 'closeloading'});
                     mythis.fire('iron-signal', {name: 'openbackup', data: {projectmeta: projectmeta}});
                     mythis.starttimers();
                 });
@@ -1359,7 +1345,7 @@
             mythis.set('options', {});
             mythis.set('options.body', "Exporting Project.  Please wait...");
             mythis.set('options.loading', true);
-            mythis.$.loading.open();
+            mythis.fire('iron-signal', {name: 'openloading'});
 
             setTimeout(function() {
                 return App.exportManager.exportTranslation(translation, projectmeta, filePath, mediaServer)

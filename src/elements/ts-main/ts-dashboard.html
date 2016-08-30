@@ -15,7 +15,7 @@
 <link rel="import" href="./ts-import-options.html">
 <link rel="import" href="./ts-feedback.html">
 <link rel="import" href="./ts-loading.html">
-<link rel="import" href="./ts-backup-options.html">
+<link rel="import" href="./ts-export-options.html">
 <link rel="import" href="./ts-print-options.html">
 <link rel="import" href="./ts-license.html">
 <link rel="import" href="./ts-statement.html">
@@ -86,7 +86,7 @@
           height: 550px;
       }
 
-      #backup {
+      #export {
           width: 450px;
           height: 480px;
       }
@@ -157,8 +157,8 @@
           <ts-loading options="[[options]]"></ts-loading>
       </paper-dialog>
 
-      <paper-dialog id="backup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-          <ts-backup-options on-backup="backupProject" on-upload="uploadProject" on-checkprint="checkPrint" on-checkexport="checkExport"></ts-backup-options>
+      <paper-dialog id="export" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <ts-export-options on-backup="backupProject" on-upload="uploadProject" on-checkprint="checkPrint" on-checkexport="checkExport"></ts-export-options>
       </paper-dialog>
 
       <paper-dialog id="license" class="popup legal" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -351,7 +351,7 @@
       checkPrint: function () {
           var projectmeta = this.backupdata;
 
-          this.$.backup.close();
+          this.$.export.close();
 
           if (this.route === "home") {
               this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: false}});
@@ -424,7 +424,7 @@
           var projectmeta = this.backupdata;
           var translate = this.$.translate;
 
-          this.$.backup.close();
+          this.$.export.close();
 
           if (this.route === "translate") {
               translate.createUSFM();
@@ -724,7 +724,7 @@
 
       openBackup: function (event, data) {
           this.set('backupdata', data.projectmeta);
-          this.$.backup.open();
+          this.$.export.open();
       },
 
       uploadProject: function () {
@@ -738,7 +738,7 @@
           var shell = require('electron').shell;
           var deviceId = "";
 
-          mythis.$.backup.close();
+          mythis.$.export.close();
           mythis.set('options', {});
           mythis.set('options.body', "Uploading Project.  Please wait...");
           mythis.set('options.loading', true);
@@ -808,7 +808,7 @@
               return;
           }
 
-          mythis.$.backup.close();
+          mythis.$.export.close();
           mythis.showLoadingMessage('Creating Project File.  Please wait...');
 
           setTimeout(function() {

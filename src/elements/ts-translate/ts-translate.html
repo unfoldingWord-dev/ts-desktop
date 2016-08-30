@@ -147,30 +147,6 @@
             color: var(--accent-color);
         }
 
-        #printpopup {
-            width: 450px;
-            height: 320px;
-            font-size: 110%;
-        }
-
-        #printbuttons {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            padding: 0 10px;
-            color: var(--secondary-text-color);
-            border-top: 1px solid var(--border-color);
-        }
-
-        #printbuttons paper-button:hover {
-            color: var(--accent-color);
-        }
-
-        paper-checkbox {
-            --paper-checkbox-checked-color: var(--accent-color-dark);
-            --paper-checkbox-unchecked-color: var(--accent-color-dark);
-        }
-
         #loading {
             width: 320px;
             height: 220px;
@@ -231,24 +207,6 @@
             </div>
             <div class="buttons">
                 <paper-button dialog-dismiss>OK</paper-button>
-            </div>
-        </paper-dialog>
-
-        <paper-dialog id="printpopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <h2>Print / Export to PDF</h2>
-            <div>
-                <p><span>[[currentproject.projectmeta.project.name]]</span> - <span>[[currentproject.projectmeta.target_language.name]]</span></p>
-            </div>
-            <div>
-                <p><paper-checkbox id="imagebox"></paper-checkbox><span id="imagetext">Include images</span></p>
-                <p><paper-checkbox id="chunkbox" checked="true"></paper-checkbox><span>Include incomplete chunks</span></p>
-                <p><paper-checkbox id="doublespacebox"></paper-checkbox><span>Double space text</span></p>
-                <p><paper-checkbox id="justifybox"></paper-checkbox><span>Fully justify text</span></p>
-                <p><paper-checkbox id="pagebox"></paper-checkbox><span id="pagetext">New page for each chapter</span></p>
-            </div>
-            <div id="printbuttons">
-                <paper-button dialog-dismiss>Cancel</paper-button>
-                <paper-button on-tap="print">Save to PDF</paper-button>
             </div>
         </paper-dialog>
 
@@ -643,7 +601,7 @@
 
         loadproject: function (event, data) {
             var mythis = this;
-            var type = data.type;
+            var nav = data.nav;
             var projectmeta = data.projectmeta;
             var list = this.projectlist;
 
@@ -656,16 +614,10 @@
                 }
                 mythis.$.loading.close();
                 setTimeout(function() {
-                    mythis.setmodestate();
-                    mythis.checksources();
-                    mythis.starttimers();
-                    if (type === "export") {
-                        setTimeout(function() {
-                            mythis.createUSFM();
-                        }, 750);
-                    }
-                    if (type === "print") {
-                        mythis.goprint();
+                    if (nav) {
+                        mythis.setmodestate();
+                        mythis.checksources();
+                        mythis.starttimers();
                     }
                 }, 250);
             };
@@ -728,7 +680,9 @@
             mythis.set('currentproject.statedata', {});
             mythis.set('currentproject.rawdata', {});
             mythis.retrievesource();
-            this.route = "translate";
+            if (nav) {
+                mythis.route = "translate";
+            }
             setTimeout(function() {
                 mythis.set('options', {});
                 mythis.set('options.body', "Loading project. Please wait...");
@@ -1362,24 +1316,8 @@
         },
 
         goprint: function () {
-            this.$.chunkbox.checked = true;
-            this.$.imagebox.checked = false;
-            this.$.doublespacebox.checked = false;
-            this.$.justifybox.checked = false;
-            this.$.pagebox.checked = false;
-            var project = this.currentproject.projectmeta.project.id;
-            if (project === 'obs') {
-                this.$.imagebox.hidden = false;
-                this.$.imagetext.hidden = false;
-                this.$.pagebox.hidden = true;
-                this.$.pagetext.hidden = true;
-            } else {
-                this.$.imagebox.hidden = true;
-                this.$.imagetext.hidden = true;
-                this.$.pagebox.hidden = false;
-                this.$.pagetext.hidden = false;
-            }
-            this.$.printpopup.open();
+
+            //this.$.printpopup.open();
         },
 
         gobackup: function () {
@@ -1399,71 +1337,6 @@
             this.setleftanimation();
             App.configurator.setValue("backto", this.route);
             this.route = "settings";
-        },
-
-        print: function () {
-            var mythis = this;
-            var projectmeta = this.currentproject.projectmeta;
-            var translation = this.currentproject.chunks;
-            var name = this.currentproject.projectmeta.unique_id;
-            var options = {
-                includeIncompleteFrames: this.$.chunkbox.checked,
-                includeImages: this.$.imagebox.checked,
-                doubleSpace: this.$.doublespacebox.checked,
-                justify: this.$.justifybox.checked,
-                newpage: this.$.pagebox.checked
-            };
-            var filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'PDF Files', extensions: ['pdf']}]}});
-            if (!filePath) {
-                return;
-            }
-            var generatePdf = function(){
-                mythis.set('options.body', "Creating PDF. Please wait...");
-                setTimeout(function() {
-                    return App.printManager.targetTranslationToPdf(translation, projectmeta, filePath, options)
-                        .then(function () {
-                            mythis.set('options.title', "PDF Created");
-                            mythis.set('options.body', "Your project has been successfully saved to a PDF.");
-                            mythis.set('options.loading', false);
-                        })
-                        .catch(function (err) {
-                            var errmessage = "An error occurred saving your project";
-                            if(err !== null) {
-                                errmessage = err;
-                            }
-                            mythis.set('options.title', "Print Failed");
-                            mythis.set('options.body', errmessage);
-                            mythis.set('options.loading', false);
-                        });
-                }, 500);
-            };
-
-            mythis.$.printpopup.close();
-            mythis.set('options', {});
-            mythis.set('options.body', "Preparing to Print. Please wait...");
-            mythis.set('options.loading', true);
-            mythis.$.loading.open();
-
-            setTimeout(function() {
-                if (options.includeImages) {
-                    mythis.set('options.body', "Downloading Images. Please wait...");
-                    App.printManager.downloadImages().then(function(){
-                        mythis.set('options.body', "Extracting Images. Please wait...");
-                        App.printManager.extractImages();
-                        generatePdf();
-                    }).catch(function(err){
-                        var errmessage = "An error occurred while downloading images";
-                        if(err !== null) {
-                            errmessage += "\n" + err;
-                        }
-                        mythis.set('options.title', "Download Failed");
-                        mythis.set('options.body', errmessage);
-                        mythis.set('options.loading', false);
-                    });
-                } else {
-                    generatePdf();
-                }
-            }, 500);
         },
 
         createUSFM: function () {

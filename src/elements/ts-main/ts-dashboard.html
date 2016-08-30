@@ -16,6 +16,7 @@
 <link rel="import" href="./ts-feedback.html">
 <link rel="import" href="./ts-loading.html">
 <link rel="import" href="./ts-backup-options.html">
+<link rel="import" href="./ts-print-options.html">
 <link rel="import" href="./ts-license.html">
 <link rel="import" href="./ts-statement.html">
 <link rel="import" href="./ts-guidelines.html">
@@ -105,6 +106,11 @@
           height: 220px;
       }
 
+      #print {
+          width: 450px;
+          height: 330px;
+      }
+
       .hide {
           display: none;
       }
@@ -126,6 +132,10 @@
       <div id="statusbar">
           <span>Status: </span><span id="message">{{message}}</span>
       </div>
+
+      <paper-dialog id="print" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <ts-print-options id="printoptions" currentproject="{{currentproject}}"></ts-print-options>
+      </paper-dialog>
 
       <paper-dialog id="feedback" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
           <ts-feedback feedback="{{feedback}}" on-close="closeFeedback" on-send="sendFeedback"></ts-feedback>
@@ -181,6 +191,7 @@
       <iron-signals on-iron-signal-changeproject="changeProject"></iron-signals>
       <iron-signals on-iron-signal-deleteproject="deleteProject"></iron-signals>
       <iron-signals on-iron-signal-updatelanguages="updateLanguages"></iron-signals>
+      <iron-signals on-iron-signal-print="print"></iron-signals>
 
   </template>
 
@@ -339,15 +350,74 @@
 
       checkPrint: function () {
           var projectmeta = this.backupdata;
-          var translate = this.$.translate;
 
           this.$.backup.close();
 
-          if (this.route === "translate") {
-              translate.goprint();
-          } else {
-              this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, type: "print"}});
+          if (this.route === "home") {
+              this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: false}});
           }
+
+          this.$.print.open();
+          this.$.printoptions.reset();
+      },
+
+      print: function (event, data) {
+          var mythis = this;
+          var projectmeta = this.currentproject.projectmeta;
+          var translation = this.currentproject.chunks;
+          var name = this.currentproject.projectmeta.unique_id;
+          var options = data.options;
+          var filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'PDF Files', extensions: ['pdf']}]}});
+          if (!filePath) {
+              return;
+          }
+          var generatePdf = function(){
+              mythis.set('options.body', "Creating PDF. Please wait...");
+              setTimeout(function() {
+                  return App.printManager.targetTranslationToPdf(translation, projectmeta, filePath, options)
+                      .then(function () {
+                          mythis.set('options.title', "PDF Created");
+                          mythis.set('options.body', "Your project has been successfully saved to a PDF.");
+                          mythis.set('options.loading', false);
+                      })
+                      .catch(function (err) {
+                          var errmessage = "An error occurred saving your project";
+                          if(err !== null) {
+                              errmessage = err;
+                          }
+                          mythis.set('options.title', "Print Failed");
+                          mythis.set('options.body', errmessage);
+                          mythis.set('options.loading', false);
+                      });
+              }, 500);
+          };
+
+          mythis.$.print.close();
+          mythis.set('options', {});
+          mythis.set('options.body', "Preparing to Print. Please wait...");
+          mythis.set('options.loading', true);
+          mythis.$.loading.open();
+
+          setTimeout(function() {
+              if (options.includeImages) {
+                  mythis.set('options.body', "Downloading Images. Please wait...");
+                  App.printManager.downloadImages().then(function(){
+                      mythis.set('options.body', "Extracting Images. Please wait...");
+                      App.printManager.extractImages();
+                      generatePdf();
+                  }).catch(function(err){
+                      var errmessage = "An error occurred while downloading images";
+                      if(err !== null) {
+                          errmessage += "\n" + err;
+                      }
+                      mythis.set('options.title', "Download Failed");
+                      mythis.set('options.body', errmessage);
+                      mythis.set('options.loading', false);
+                  });
+              } else {
+                  generatePdf();
+              }
+          }, 500);
       },
 
       checkExport: function () {
@@ -359,7 +429,7 @@
           if (this.route === "translate") {
               translate.createUSFM();
           } else {
-              this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, type: "export"}});
+              this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: false}});
           }
       },
 

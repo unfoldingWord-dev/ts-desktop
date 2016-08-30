@@ -334,7 +334,7 @@
                     .then(function() {
                         mythis.$.loading.close();
                         mythis.fire('iron-signal', {name: 'updatelist'});
-                        mythis.fire('iron-signal', {name: 'loadproject', data: {projectmeta: newprojectmeta, type: "new"}});
+                        mythis.fire('iron-signal', {name: 'loadproject', data: {projectmeta: newprojectmeta, nav: true}});
                     })
                     .catch(function (err) {
                         mythis.set('options.title', "Error");

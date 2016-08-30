@@ -1,0 +1,129 @@
+
+<link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/paper-checkbox/paper-checkbox.html">
+
+<dom-module id="ts-print-options">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #header {
+            display: flex;
+            flex-direction: column;
+            padding-top: 15px;
+            font-size: 120%;
+            align-items: center;
+        }
+
+        h2 {
+            padding-bottom: 10px;
+        }
+
+        #body {
+            display: flex;
+            flex-direction: column;
+            border-top: 1px solid var(--border-color);
+            padding: 10px 40px;
+            font-size: 130%;
+        }
+
+        #body div {
+            padding: 10px;
+        }
+
+        paper-checkbox {
+            --paper-checkbox-checked-color: var(--accent-color-dark);
+            --paper-checkbox-unchecked-color: var(--accent-color-dark);
+        }
+
+        #footer {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 0 50px;
+            color: var(--secondary-text-color);
+            border-top: 1px solid var(--border-color);
+            font-size: 120%;
+        }
+
+        #footer paper-button:hover {
+            color: var(--accent-color);
+        }
+
+    </style>
+
+    <template>
+
+        <div id="header">
+            <h2>Print/Export to PDF Options</h2>
+            <h2><span>[[currentproject.projectmeta.project.name]]</span> - <span>[[currentproject.projectmeta.target_language.name]]</span></h2>
+        </div>
+        <div id="body">
+            <div id="image"><paper-checkbox id="imagebox"></paper-checkbox><span>Include images</span></div>
+            <div><paper-checkbox id="chunkbox" checked="true"></paper-checkbox><span>Include incomplete chunks</span></div>
+            <div><paper-checkbox id="doublespacebox"></paper-checkbox><span>Double space text</span></div>
+            <div><paper-checkbox id="justifybox"></paper-checkbox><span>Fully justify text</span></div>
+            <div id="page"><paper-checkbox id="pagebox"></paper-checkbox><span>New page for each chapter</span></div>
+        </div>
+        <div id="footer">
+            <paper-button dialog-dismiss>Cancel</paper-button>
+            <paper-button on-tap="print">Save to PDF</paper-button>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-print-options',
+
+        properties: {
+            currentproject: {
+                type: Object,
+                value: {},
+                notify: true
+            }
+        },
+
+        reset: function () {
+            this.$.chunkbox.checked = true;
+            this.$.imagebox.checked = false;
+            this.$.doublespacebox.checked = false;
+            this.$.justifybox.checked = false;
+            this.$.pagebox.checked = false;
+            var project = this.currentproject.projectmeta.project.id;
+            if (project === 'obs') {
+                this.$.image.hidden = false;
+                this.$.page.hidden = true;
+            } else {
+                this.$.image.hidden = true;
+                this.$.page.hidden = false;
+            }
+        },
+
+        print: function () {
+            var options = {
+                includeIncompleteFrames: this.$.chunkbox.checked,
+                includeImages: this.$.imagebox.checked,
+                doubleSpace: this.$.doublespacebox.checked,
+                justify: this.$.justifybox.checked,
+                newpage: this.$.pagebox.checked
+            };
+
+            this.fire('iron-signal', {name: 'print', data: {options: options}});
+        },
+
+        ready: function () {
+
+        }
+
+    });
+
+</script>

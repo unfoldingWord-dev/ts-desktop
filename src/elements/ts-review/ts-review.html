@@ -4,10 +4,10 @@
 <link rel="import" href="../../components/iron-icons/iron-icons.html">
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
 
-<link rel="import" href="./ts-publish-book.html">
-<link rel="import" href="./ts-publish-profile.html">
+<link rel="import" href="./ts-review-project.html">
+<link rel="import" href="./ts-review-contrib.html">
 
-<dom-module id="ts-publish">
+<dom-module id="ts-review">
 
     <style>
 
@@ -67,15 +67,15 @@
                 <span>Review Project</span>
             </div>
             <div id="steps">
-                <paper-button raised class="buttons" on-tap="gotochunks">Chunks</paper-button>
+                <paper-button raised class="buttons" on-tap="gotochunks">Project</paper-button>
                 <paper-button raised class="buttons" on-tap="gotocontrib">Contributors</paper-button>
                 <paper-button raised class="buttons" on-tap="gotoupload">Upload/Export</paper-button>
             </div>
         </div>
 
         <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
-            <ts-publish-book selected="{{selected}}" currentproject="[[currentproject]]"></ts-publish-book>
-            <ts-publish-profile selected="{{selected}}" currentproject="{{currentproject}}"></ts-publish-profile>
+            <ts-review-project selected="{{selected}}" currentproject="[[currentproject]]"></ts-review-project>
+            <ts-review-contrib selected="{{selected}}" currentproject="{{currentproject}}"></ts-review-contrib>
         </neon-animated-pages>
 
     </template>
@@ -85,7 +85,7 @@
 <script>
 
     Polymer({
-        is: 'ts-publish',
+        is: 'ts-review',
 
         behaviors: [
             Polymer.IronResizableBehavior,

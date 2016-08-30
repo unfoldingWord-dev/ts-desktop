@@ -1,9 +1,9 @@
 
 <link rel="import" href="../../components/iron-signals/iron-signals.html">
 
-<link rel="import" href="./ts-publish-chapter.html">
+<link rel="import" href="./ts-review-chapter.html">
 
-<dom-module id="ts-publish-book">
+<dom-module id="ts-review-project">
 
     <style>
 
@@ -23,7 +23,7 @@
 
         <div id="contain">
             <template is="dom-repeat" items="{{chapters}}" as="chapter">
-                <ts-publish-chapter chapter="[[chapter]]"></ts-publish-chapter>
+                <ts-review-chapter chapter="[[chapter]]"></ts-review-chapter>
             </template>
         </div>
 
@@ -37,7 +37,7 @@
 
     Polymer({
 
-        is: 'ts-publish-book',
+        is: 'ts-review-project',
 
         properties: {
             selected: {

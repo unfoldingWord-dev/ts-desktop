@@ -144,7 +144,7 @@
 
         back: function () {
             this.set('selected', 0);
-            this.set('route', "translate");
+            this.fire('iron-signal', {name: 'fromreview', data: {index: null}});
         },
 
         ready: function() {

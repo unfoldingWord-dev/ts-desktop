@@ -224,7 +224,7 @@
         }
 
         #righticons {
-            width: 30%;
+            width: 50%;
             display: flex;
             justify-content: space-between;
         }
@@ -376,6 +376,7 @@
                 </div>
                 <div id="righticons">
                     <paper-icon-button on-tap="goprint" class="smallicon" icon="print" title="print"></paper-icon-button>
+                    <paper-icon-button on-tap="goreview" class="smallicon" icon="cloud-done" title="review"></paper-icon-button>
                     <paper-icon-button on-tap="goexport" class="smallicon" icon="file-upload" title="upload/export"></paper-icon-button>
                 </div>
             </div>
@@ -568,6 +569,12 @@
             var projectmeta = this.currentinfo;
             this.closeinfo();
             this.fire('iron-signal', {name: 'openexport', data: {projectmeta: projectmeta}});
+        },
+
+        goreview: function () {
+            var projectmeta = this.currentinfo;
+            this.closeinfo();
+            this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: "review"}});
         },
 
         openproject: function (e) {

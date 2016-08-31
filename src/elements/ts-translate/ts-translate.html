@@ -598,7 +598,11 @@
                     mythis.createchunks();
                     mythis.createchapters();
                 }
-                mythis.fire('iron-signal', {name: 'closeloading'});
+                if (nav === "review") {
+                    mythis.goreview();
+                } else {
+                    mythis.fire('iron-signal', {name: 'closeloading'});
+                }
                 setTimeout(function() {
                     if (nav === "translate") {
                         mythis.setmodestate();
@@ -1255,12 +1259,21 @@
 
         fromreview: function (event, data) {
             var mythis = this;
-            this.selected = 0;
-            this.set('modestatus.index', data.index);
-            this.route = "translate";
-            setTimeout(function() {
-                mythis.selected = 3;
-            }, 500);
+
+            if (data.index === null) {
+                mythis.set('route', "translate");
+                mythis.setmodestate();
+                mythis.checksources();
+                mythis.starttimers();
+            } else {
+                mythis.set('selected', 0);
+                mythis.set('modestatus.index', data.index);
+                mythis.set('route', "translate");
+                setTimeout(function() {
+                    mythis.set('selected', 3);
+                    mythis.starttimers();
+                }, 500);
+            }
         },
 
         gohome: function () {
@@ -1282,7 +1295,7 @@
         goreview: function () {
             var mythis = this;
             var typeclass = mythis.currentproject.projectmeta.project_type_class;
-            if(mythis.currentproject.projectmeta.source_translations.length || typeclass === "extant") {
+            if (mythis.currentproject.projectmeta.source_translations.length || typeclass === "extant") {
                 mythis.set('options', {});
                 mythis.set('options.body', "Loading review page. Please wait...");
                 mythis.set('options.loading', true);
@@ -1300,6 +1313,12 @@
                             mythis.set('route', "review");
                         });
                 }, 250);
+            } else {
+                mythis.set('options', {});
+                mythis.set('options.title', "Project Empty");
+                mythis.set('options.body', "This project has nothing to review");
+                mythis.set('options.loading', false);
+                mythis.fire('iron-signal', {name: 'openloading'});
             }
         },
 

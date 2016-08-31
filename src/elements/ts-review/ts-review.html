@@ -51,10 +51,23 @@
             min-height: 60px;
         }
 
+        #steps span {
+            padding: 4px;
+        }
+
+        paper-button {
+            padding: 6px;
+        }
+
         .buttons {
             background: var(--accent-color);
             color: var(--reverse-text-color);
             text-transform: uppercase;
+        }
+
+        .highlight {
+            border: 1px solid var(--reverse-text-color);
+            padding: 3px;
         }
 
     </style>
@@ -67,9 +80,9 @@
                 <span>Review Project</span>
             </div>
             <div id="steps">
-                <paper-button raised class="buttons" on-tap="goproject">Project</paper-button>
-                <paper-button raised class="buttons" on-tap="gocontrib">Contributors</paper-button>
-                <paper-button raised class="buttons" on-tap="goexport">Upload/Export</paper-button>
+                <paper-button raised class="buttons" on-tap="goproject"><span id="project">Project</span></paper-button>
+                <paper-button raised class="buttons" on-tap="gocontrib"><span id="contrib">Contributors</span></paper-button>
+                <paper-button raised class="buttons" on-tap="goexport"><span>Upload/Export</span></paper-button>
             </div>
         </div>
 
@@ -95,7 +108,8 @@
         properties: {
             selected: {
                 type: Number,
-                value: 0
+                value: 0,
+                observer: 'change'
             },
             route: {
                 type: String,
@@ -125,6 +139,16 @@
                         }
                     }
                 }
+            }
+        },
+
+        change: function (selected) {
+            if (selected === 0) {
+                this.$.project.classList.add('highlight');
+                this.$.contrib.classList.remove('highlight');
+            } else {
+                this.$.project.classList.remove('highlight');
+                this.$.contrib.classList.add('highlight');
             }
         },
 

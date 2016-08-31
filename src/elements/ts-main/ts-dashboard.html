@@ -124,7 +124,7 @@
           <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]" id="home"></ts-home>
           <ts-new data-route="new" route="{{route}}" importdata="{{importdata}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]" options="{{options}}"></ts-new>
           <ts-translate data-route="translate" route="{{route}}" message="{{message}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}" id="translate"></ts-translate>
-          <ts-review data-route="publish" route="{{route}}" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}"></ts-review>
+          <ts-review data-route="review" route="{{route}}" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}"></ts-review>
           <ts-settings data-route="settings" route="{{route}}" options="{{options}}"></ts-settings>
           <ts-profile data-route="profile" currentuser="[[currentuser]]" options="{{options}}"></ts-profile>
           <ts-terms data-route="terms"></ts-terms>
@@ -180,7 +180,7 @@
       <iron-signals on-iron-signal-updatelist="updateList"></iron-signals>
       <iron-signals on-iron-signal-openfeedback="openFeedback"></iron-signals>
       <iron-signals on-iron-signal-openimport="openImport"></iron-signals>
-      <iron-signals on-iron-signal-openbackup="openBackup"></iron-signals>
+      <iron-signals on-iron-signal-openexport="openExport"></iron-signals>
       <iron-signals on-iron-signal-updateuser="updateUser"></iron-signals>
       <iron-signals on-iron-signal-finishusfm="finishUsfm"></iron-signals>
       <iron-signals on-iron-signal-importfromrepo="importFromRepo"></iron-signals>
@@ -230,7 +230,7 @@
               type: Object,
               value: {importing: false}
           },
-          backupdata: {
+          exportdata: {
               type: Object,
               value: {}
           },
@@ -359,7 +359,7 @@
       },
 
       checkPrint: function () {
-          var projectmeta = this.backupdata;
+          var projectmeta = this.exportdata;
 
           this.$.export.close();
 
@@ -431,7 +431,7 @@
       },
 
       checkExport: function () {
-          var projectmeta = this.backupdata;
+          var projectmeta = this.exportdata;
           var translate = this.$.translate;
 
           this.$.export.close();
@@ -732,14 +732,14 @@
           }, 500);
       },
 
-      openBackup: function (event, data) {
-          this.set('backupdata', data.projectmeta);
+      openExport: function (event, data) {
+          this.set('exportdata', data.projectmeta);
           this.$.export.open();
       },
 
       uploadProject: function () {
           var mythis = this;
-          var projectmeta = this.backupdata;
+          var projectmeta = this.exportdata;
           var loading = this.$.wideloading;
           var target = App.configurator.getValue('targetTranslationsDir');
           var paths = App.utils.makeProjectPaths(target, projectmeta);
@@ -811,7 +811,7 @@
 
       backupProject: function () {
           var mythis = this;
-          var meta = this.backupdata;
+          var meta = this.exportdata;
           var defaultPath = App.configurator.getUserPath('datalocation', 'backups', meta.unique_id);
           var filePath = App.ipc.sendSync('save-as', {options: {defaultPath: defaultPath, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}]}});
           if (!filePath) {

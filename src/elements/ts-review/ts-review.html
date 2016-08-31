@@ -67,9 +67,9 @@
                 <span>Review Project</span>
             </div>
             <div id="steps">
-                <paper-button raised class="buttons" on-tap="gotochunks">Project</paper-button>
-                <paper-button raised class="buttons" on-tap="gotocontrib">Contributors</paper-button>
-                <paper-button raised class="buttons" on-tap="gotoupload">Upload/Export</paper-button>
+                <paper-button raised class="buttons" on-tap="goproject">Project</paper-button>
+                <paper-button raised class="buttons" on-tap="gocontrib">Contributors</paper-button>
+                <paper-button raised class="buttons" on-tap="goexport">Upload/Export</paper-button>
             </div>
         </div>
 
@@ -128,18 +128,18 @@
             }
         },
 
-        gotochunks: function () {
+        goproject: function () {
             this.set('selected', 0);
         },
 
-        gotocontrib: function () {
+        gocontrib: function () {
             this.set('selected', 1);
         },
 
-        gotoupload: function () {
+        goexport: function () {
             var projectmeta = this.currentproject.projectmeta;
 
-            this.fire('iron-signal', {name: 'openbackup', data: {projectmeta: projectmeta}});
+            this.fire('iron-signal', {name: 'openexport', data: {projectmeta: projectmeta}});
         },
 
         back: function () {

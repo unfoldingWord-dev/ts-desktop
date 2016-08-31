@@ -154,7 +154,7 @@
 
     <template>
 
-        <ts-translate-sidebar selected="{{selected}}" currentproject="[[currentproject]]" on-gohome="gohome" on-gopublish="gopublish" on-gobackup="gobackup" on-goprint="goprint" on-gosettings="gosettings"></ts-translate-sidebar>
+        <ts-translate-sidebar selected="{{selected}}" currentproject="[[currentproject]]" on-gohome="gohome" on-goreview="goreview" on-goexport="goexport" on-goprint="goprint" on-gosettings="gosettings"></ts-translate-sidebar>
 
         <div id="pages">
             <ts-read-mode id="readmode" chapters="[[currentproject.chapters]]" modestatus="{{modestatus}}"></ts-read-mode>
@@ -222,7 +222,7 @@
             <ts-source-modal id="modal" on-close="closesource"></ts-source-modal>
         </paper-dialog>
 
-        <iron-signals on-iron-signal-frompublish="frompublish"></iron-signals>
+        <iron-signals on-iron-signal-fromreview="fromreview"></iron-signals>
         <iron-signals on-iron-signal-updatesources="updatesources"></iron-signals>
         <iron-signals on-iron-signal-loadproject="loadproject"></iron-signals>
         <iron-signals on-iron-signal-updatecompletion="updatecompletion"></iron-signals>
@@ -1251,7 +1251,7 @@
             }
         },
 
-        frompublish: function (event, data) {
+        fromreview: function (event, data) {
             var mythis = this;
             this.selected = 0;
             this.set('modestatus.index', data.index);
@@ -1277,7 +1277,7 @@
                 });
         },
 
-        gopublish: function () {
+        goreview: function () {
             var mythis = this;
             var typeclass = mythis.currentproject.projectmeta.project_type_class;
             if(mythis.currentproject.projectmeta.source_translations.length || typeclass === "extant") {
@@ -1293,9 +1293,9 @@
                     mythis.stoptimers();
                     return mythis.saveAll()
                         .then(function () {
-                            mythis.fire('iron-signal', {name: 'updatepublish'});
+                            mythis.fire('iron-signal', {name: 'updatereview'});
                             mythis.fire('iron-signal', {name: 'closeloading'});
-                            mythis.set('route', "publish");
+                            mythis.set('route', "review");
                         });
                 }, 250);
             }
@@ -1306,14 +1306,14 @@
             //this.$.printpopup.open();
         },
 
-        gobackup: function () {
+        goexport: function () {
             var mythis = this;
             var projectmeta = mythis.currentproject.projectmeta;
             mythis.stoptimers();
             return mythis.saveAll()
                 .then(function () {
                     mythis.fire('iron-signal', {name: 'closeloading'});
-                    mythis.fire('iron-signal', {name: 'openbackup', data: {projectmeta: projectmeta}});
+                    mythis.fire('iron-signal', {name: 'openexport', data: {projectmeta: projectmeta}});
                     mythis.starttimers();
                 });
         },

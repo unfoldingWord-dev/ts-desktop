@@ -27,7 +27,7 @@
             </template>
         </div>
 
-        <iron-signals on-iron-signal-updatepublish="updatepublish"></iron-signals>
+        <iron-signals on-iron-signal-updatereview="updatereview"></iron-signals>
 
     </template>
 
@@ -55,7 +55,7 @@
             }
         },
 
-        updatepublish: function () {
+        updatereview: function () {
             this.createchapters();
             var mythis = this;
             setTimeout(function() {

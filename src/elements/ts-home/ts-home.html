@@ -376,7 +376,7 @@
                 </div>
                 <div id="righticons">
                     <paper-icon-button on-tap="goprint" class="smallicon" icon="print" title="print"></paper-icon-button>
-                    <paper-icon-button on-tap="gobackup" class="smallicon" icon="file-upload" title="upload/export"></paper-icon-button>
+                    <paper-icon-button on-tap="goexport" class="smallicon" icon="file-upload" title="upload/export"></paper-icon-button>
                 </div>
             </div>
             <div id="infobuttons">
@@ -564,10 +564,10 @@
             this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, type: "print"}});
         },
 
-        gobackup: function () {
+        goexport: function () {
             var projectmeta = this.currentinfo;
             this.closeinfo();
-            this.fire('iron-signal', {name: 'openbackup', data: {projectmeta: projectmeta}});
+            this.fire('iron-signal', {name: 'openexport', data: {projectmeta: projectmeta}});
         },
 
         openproject: function (e) {

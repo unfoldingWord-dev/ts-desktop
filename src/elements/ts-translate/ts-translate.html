@@ -610,8 +610,10 @@
                         mythis.starttimers();
                     } else if (nav === "print") {
                         mythis.fire('openprint');
+                    } else if (nav === "export") {
+                        mythis.fire('saveusfm');
                     }
-                }, 250);
+                }, 500);
             };
 
             var loadwords = function () {
@@ -1343,47 +1345,6 @@
             this.setleftanimation();
             App.configurator.setValue("backto", this.route);
             this.route = "settings";
-        },
-
-        createUSFM: function () {
-            var mythis = this;
-            var projectmeta = this.currentproject.projectmeta;
-            var translation = this.currentproject.chunks;
-            var mediaServer = "https://api.unfoldingword.org/";
-            var name = projectmeta.unique_id;
-            var filePath;
-
-            if (projectmeta.format === 'markdown') {
-                filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'Zip Files', extensions: ['zip']}]}});
-            } else {
-                filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'USFM Files', extensions: ['usfm']}]}});
-            }
-            if (!filePath) {
-                return;
-            }
-
-            mythis.set('options', {});
-            mythis.set('options.body', "Exporting Project.  Please wait...");
-            mythis.set('options.loading', true);
-            mythis.fire('iron-signal', {name: 'openloading'});
-
-            setTimeout(function() {
-                return App.exportManager.exportTranslation(translation, projectmeta, filePath, mediaServer)
-                    .then(function () {
-                        mythis.set('options.title', "Project Exported");
-                        mythis.set('options.body', "Your project has been successfully exported to a file.");
-                        mythis.set('options.loading', false);
-                    })
-                    .catch(function (err) {
-                        var errmessage = "An error occurred while trying to export your project";
-                        if(err !== null) {
-                            errmessage = err;
-                        }
-                        mythis.set('options.title', "Export Failed");
-                        mythis.set('options.body', errmessage);
-                        mythis.set('options.loading', false);
-                    });
-            }, 500);
         },
 
         setrightanimation: function () {

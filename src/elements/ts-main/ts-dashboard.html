@@ -123,7 +123,7 @@
       <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
           <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]" id="home"></ts-home>
           <ts-new data-route="new" route="{{route}}" importdata="{{importdata}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]" options="{{options}}"></ts-new>
-          <ts-translate data-route="translate" route="{{route}}" message="{{message}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}" id="translate"></ts-translate>
+          <ts-translate data-route="translate" route="{{route}}" message="{{message}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}" id="translate" on-openprint="openPrint"></ts-translate>
           <ts-review data-route="review" route="{{route}}" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}"></ts-review>
           <ts-settings data-route="settings" route="{{route}}" options="{{options}}"></ts-settings>
           <ts-profile data-route="profile" currentuser="[[currentuser]]" options="{{options}}"></ts-profile>
@@ -191,7 +191,7 @@
       <iron-signals on-iron-signal-changeproject="changeProject"></iron-signals>
       <iron-signals on-iron-signal-deleteproject="deleteProject"></iron-signals>
       <iron-signals on-iron-signal-updatelanguages="updateLanguages"></iron-signals>
-      <iron-signals on-iron-signal-print="print"></iron-signals>
+      <iron-signals on-iron-signal-saveprint="savePrint"></iron-signals>
       <iron-signals on-iron-signal-openloading="openLoading"></iron-signals>
       <iron-signals on-iron-signal-closeloading="closeLoading"></iron-signals>
 
@@ -364,14 +364,18 @@
           this.$.export.close();
 
           if (this.route === "home") {
-              this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: false}});
+              this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: "print"}});
+          } else {
+              this.openPrint();
           }
+      },
 
+      openPrint: function () {
           this.$.print.open();
           this.$.printoptions.reset();
       },
 
-      print: function (event, data) {
+      savePrint: function (event, data) {
           var mythis = this;
           var projectmeta = this.currentproject.projectmeta;
           var translation = this.currentproject.chunks;

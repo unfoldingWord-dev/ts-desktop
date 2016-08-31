@@ -561,7 +561,7 @@
         goprint: function () {
             var projectmeta = this.currentinfo;
             this.closeinfo();
-            this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, type: "print"}});
+            this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: "print"}});
         },
 
         goexport: function () {
@@ -572,7 +572,7 @@
 
         openproject: function (e) {
             var projectmeta = e.model.project;
-            this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: true}});
+            this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: "translate"}});
         },
 
         openinfo: function (e) {

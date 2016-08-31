@@ -117,7 +117,7 @@
                 newpage: this.$.pagebox.checked
             };
 
-            this.fire('iron-signal', {name: 'print', data: {options: options}});
+            this.fire('iron-signal', {name: 'saveprint', data: {options: options}});
         },
 
         ready: function () {

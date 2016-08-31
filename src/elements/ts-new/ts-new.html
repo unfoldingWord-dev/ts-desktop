@@ -324,7 +324,7 @@
                 App.projectsManager.createTargetTranslation([], newprojectmeta, this.currentuser)
                     .then(function() {
                         mythis.fire('iron-signal', {name: 'updatelist'});
-                        mythis.fire('iron-signal', {name: 'loadproject', data: {projectmeta: newprojectmeta, nav: true}});
+                        mythis.fire('iron-signal', {name: 'loadproject', data: {projectmeta: newprojectmeta, nav: "translate"}});
                     })
                     .catch(function (err) {
                         mythis.set('options.title', "Error");

@@ -600,10 +600,12 @@
                 }
                 mythis.fire('iron-signal', {name: 'closeloading'});
                 setTimeout(function() {
-                    if (nav) {
+                    if (nav === "translate") {
                         mythis.setmodestate();
                         mythis.checksources();
                         mythis.starttimers();
+                    } else if (nav === "print") {
+                        mythis.fire('openprint');
                     }
                 }, 250);
             };
@@ -666,7 +668,7 @@
             mythis.set('currentproject.statedata', {});
             mythis.set('currentproject.rawdata', {});
             mythis.retrievesource();
-            if (nav) {
+            if (nav === "translate") {
                 mythis.route = "translate";
             }
             setTimeout(function() {
@@ -1302,8 +1304,7 @@
         },
 
         goprint: function () {
-
-            //this.$.printpopup.open();
+            this.fire('openprint');
         },
 
         goexport: function () {

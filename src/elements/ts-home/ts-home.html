@@ -376,8 +376,8 @@
                 </div>
                 <div id="righticons">
                     <paper-icon-button on-tap="goprint" class="smallicon" icon="print" title="print"></paper-icon-button>
-                    <paper-icon-button on-tap="gopublish" class="smallicon" icon="cloud-done" title="upload"></paper-icon-button>
-                    <paper-icon-button on-tap="gobackup" class="smallicon" icon="file-upload" title="backup"></paper-icon-button>
+                    <paper-icon-button on-tap="goreview" class="smallicon" icon="cloud-done" title="review"></paper-icon-button>
+                    <paper-icon-button on-tap="goexport" class="smallicon" icon="file-upload" title="upload/export"></paper-icon-button>
                 </div>
             </div>
             <div id="infobuttons">
@@ -559,27 +559,27 @@
             this.fire('iron-signal', {name: 'changeproject', data: this.changedata});
         },
 
-        gopublish: function () {
-            var projectmeta = this.currentinfo;
-            this.closeinfo();
-            this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, type: "publish"}});
-        },
-
         goprint: function () {
             var projectmeta = this.currentinfo;
             this.closeinfo();
-            this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, type: "print"}});
+            this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: "print"}});
         },
 
-        gobackup: function () {
+        goexport: function () {
             var projectmeta = this.currentinfo;
             this.closeinfo();
-            this.fire('iron-signal', {name: 'openbackup', data: {projectmeta: projectmeta}});
+            this.fire('iron-signal', {name: 'openexport', data: {projectmeta: projectmeta}});
+        },
+
+        goreview: function () {
+            var projectmeta = this.currentinfo;
+            this.closeinfo();
+            this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: "review"}});
         },
 
         openproject: function (e) {
             var projectmeta = e.model.project;
-            this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, type: "home"}});
+            this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: "translate"}});
         },
 
         openinfo: function (e) {

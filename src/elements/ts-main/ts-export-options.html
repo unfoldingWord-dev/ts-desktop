@@ -2,7 +2,7 @@
 <link rel="import" href="../../components/iron-signals/iron-signals.html">
 <link rel="import" href="../../components/paper-button/paper-button.html">
 
-<dom-module id="ts-backup-options">
+<dom-module id="ts-export-options">
 
     <style>
 
@@ -59,16 +59,24 @@
     <template>
 
         <div id="header">
-            <h2>Backup Options</h2>
+            <h2>Upload/Export Options</h2>
         </div>
         <div id="body">
-            <div class="option" on-tap="filebackup">
-                <span class="optiontitle">Backup to Tstudio file</span>
-                <p>Creates an archive file on your local file system</p>
+            <div class="option" on-tap="upload">
+                <span class="optiontitle">Upload to Door43</span>
+                <p>Uploads project to your Door43 Account</p>
             </div>
-            <div class="option" on-tap="repobackup">
-                <span class="optiontitle">Backup to your Door43 account</span>
-                <p>Uploads project to a repository online</p>
+            <div class="option" on-tap="checkexport">
+                <span class="optiontitle">Export to USFM File</span>
+                <p>Creates a .usfm file of your project</p>
+            </div>
+            <div class="option" on-tap="checkprint">
+                <span class="optiontitle">Export to PDF File</span>
+                <p>Creates a .pdf file of your project</p>
+            </div>
+            <div class="option" on-tap="backup">
+                <span class="optiontitle">Export to Project File</span>
+                <p>Creates a .tstudio file of your project</p>
             </div>
         </div>
         <div id="footer">
@@ -83,18 +91,26 @@
 
     Polymer({
 
-        is: 'ts-backup-options',
+        is: 'ts-export-options',
 
         properties: {
 
         },
 
-        filebackup: function () {
-            this.fire('filebackup');
+        backup: function () {
+            this.fire('backup');
         },
 
-        repobackup: function () {
-            this.fire('repobackup');
+        upload: function () {
+            this.fire('upload');
+        },
+
+        checkprint: function () {
+            this.fire('checkprint');
+        },
+
+        checkexport: function () {
+            this.fire('checkexport');
         },
 
         ready: function () {

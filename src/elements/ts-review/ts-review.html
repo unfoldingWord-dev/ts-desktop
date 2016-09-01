@@ -1,0 +1,179 @@
+
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../components/neon-animation/neon-animation.html">
+
+<link rel="import" href="./ts-review-project.html">
+<link rel="import" href="./ts-review-contrib.html">
+
+<dom-module id="ts-review">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
+
+        neon-animated-pages {
+            flex: auto;
+            display: flex;
+        }
+
+        neon-animated-pages > * {
+            flex: auto;
+        }
+
+        #header {
+            background-color: var(--primary-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #title {
+            color: var(--reverse-text-color);
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 45px;
+            font-size: 125%;
+        }
+
+        [icon="arrow-back"] {
+            margin: 0 1em 0 .2em;
+        }
+
+        #steps {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 60px;
+        }
+
+        #steps span {
+            padding: 4px;
+        }
+
+        paper-button {
+            padding: 6px;
+        }
+
+        .buttons {
+            background: var(--accent-color);
+            color: var(--reverse-text-color);
+            text-transform: uppercase;
+        }
+
+        .highlight {
+            border: 1px solid var(--reverse-text-color);
+            padding: 3px;
+        }
+
+    </style>
+
+    <template>
+
+        <div id="header">
+            <div id="title">
+                <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
+                <span>Review Project</span>
+            </div>
+            <div id="steps">
+                <paper-button raised class="buttons" on-tap="goproject"><span id="project">Project</span></paper-button>
+                <paper-button raised class="buttons" on-tap="gocontrib"><span id="contrib">Contributors</span></paper-button>
+                <paper-button raised class="buttons" on-tap="goexport"><span>Upload/Export</span></paper-button>
+            </div>
+        </div>
+
+        <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
+            <ts-review-project selected="{{selected}}" currentproject="[[currentproject]]"></ts-review-project>
+            <ts-review-contrib selected="{{selected}}" currentproject="{{currentproject}}" options="{{options}}"></ts-review-contrib>
+        </neon-animated-pages>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+        is: 'ts-review',
+
+        behaviors: [
+            Polymer.IronResizableBehavior,
+            Polymer.NeonAnimatableBehavior
+        ],
+
+        properties: {
+            selected: {
+                type: Number,
+                value: 0,
+                observer: 'change'
+            },
+            route: {
+                type: String,
+                value: '',
+                notify: true
+            },
+            options: {
+                type: Object,
+                value: {},
+                notify: true
+            },
+            currentproject: {
+                type: Object,
+                value: {},
+                notify: true
+            },
+            animationConfig: {
+                value: function () {
+                    return {
+                        'entry': {
+                            name: 'slide-from-right-animation',
+                            node: this
+                        },
+                        'exit': {
+                            name: 'slide-right-animation',
+                            node: this
+                        }
+                    }
+                }
+            }
+        },
+
+        change: function (selected) {
+            if (selected === 0) {
+                this.$.project.classList.add('highlight');
+                this.$.contrib.classList.remove('highlight');
+            } else {
+                this.$.project.classList.remove('highlight');
+                this.$.contrib.classList.add('highlight');
+            }
+        },
+
+        goproject: function () {
+            this.set('selected', 0);
+        },
+
+        gocontrib: function () {
+            this.set('selected', 1);
+        },
+
+        goexport: function () {
+            var projectmeta = this.currentproject.projectmeta;
+
+            this.fire('iron-signal', {name: 'openexport', data: {projectmeta: projectmeta}});
+        },
+
+        back: function () {
+            this.set('selected', 0);
+            this.fire('iron-signal', {name: 'fromreview', data: {index: null}});
+        },
+
+        ready: function() {
+
+        }
+    });
+
+</script>

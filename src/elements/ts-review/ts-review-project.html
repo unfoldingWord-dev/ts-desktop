@@ -1,10 +1,9 @@
 
-<link rel="import" href="../../components/paper-button/paper-button.html">
 <link rel="import" href="../../components/iron-signals/iron-signals.html">
 
-<link rel="import" href="./ts-publish-chapter.html">
+<link rel="import" href="./ts-review-chapter.html">
 
-<dom-module id="ts-publish-book">
+<dom-module id="ts-review-project">
 
     <style>
 
@@ -18,32 +17,17 @@
             padding-bottom: 100px;
         }
 
-        #next {
-            background: var(--accent-color);
-            color: var(--reverse-text-color);
-            text-transform: uppercase;
-        }
-
-        #button {
-            display: flex;
-            justify-content: center;
-            margin-top: 25px;
-        }
-
     </style>
 
     <template>
 
         <div id="contain">
             <template is="dom-repeat" items="{{chapters}}" as="chapter">
-                <ts-publish-chapter chapter="[[chapter]]"></ts-publish-chapter>
+                <ts-review-chapter chapter="[[chapter]]"></ts-review-chapter>
             </template>
-            <div id="button">
-                <paper-button raised id="next" on-tap="next">Next Step</paper-button>
-            </div>
         </div>
 
-        <iron-signals on-iron-signal-updatepublish="updatepublish"></iron-signals>
+        <iron-signals on-iron-signal-updatereview="updatereview"></iron-signals>
 
     </template>
 
@@ -53,7 +37,7 @@
 
     Polymer({
 
-        is: 'ts-publish-book',
+        is: 'ts-review-project',
 
         properties: {
             selected: {
@@ -71,7 +55,7 @@
             }
         },
 
-        updatepublish: function () {
+        updatereview: function () {
             this.createchapters();
             var mythis = this;
             setTimeout(function() {
@@ -148,10 +132,6 @@
             }
 
             this.set('chapters', transchapters);
-        },
-
-        next: function () {
-            this.selected = this.selected + 1;
         },
 
         ready: function() {

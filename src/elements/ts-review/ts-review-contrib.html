@@ -1,15 +1,10 @@
 
-<link rel="import" href="../../components/iron-icons/iron-icons.html">
 <link rel="import" href="../../components/iron-input/iron-input.html">
 <link rel="import" href="../../components/paper-button/paper-button.html">
 <link rel="import" href="../../components/paper-material/paper-material.html">
-<link rel="import" href="../../components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../components/paper-checkbox/paper-checkbox.html">
-<link rel="import" href="../../components/neon-animation/neon-animation.html">
 
-<link rel="import" href="../ts-main/ts-loading.html">
-
-<dom-module id="ts-publish-profile">
+<dom-module id="ts-review-contrib">
 
     <style>
 
@@ -88,35 +83,10 @@
             margin-top: 20px;
         }
 
-        #next {
-            background: var(--accent-color);
-            color: var(--reverse-text-color);
-            text-transform: uppercase;
-        }
-
         #add {
             background: var(--card-background-color);
             color: var(--accent-color);
             text-transform: uppercase;
-        }
-
-        .popup {
-            position: fixed;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            margin: auto;
-        }
-
-        #loading {
-            width: 320px;
-            height: 220px;
-        }
-
-        #loading * {
-            margin: 0;
-            padding: 0;
         }
 
     </style>
@@ -146,14 +116,9 @@
                 </div>
             </paper-material>
             <div id="buttons">
-                <paper-button raised id="add" on-tap="addnew">Add Contributor</paper-button>
-                <paper-button raised id="next" on-tap="next">Next Step</paper-button>
+                <paper-button raised id="add" on-tap="add">Add Contributor</paper-button>
             </div>
         </div>
-
-        <paper-dialog id="loading" class="popup" modal="true" exit-animation="scale-down-animation">
-            <ts-loading options="[[options]]"></ts-loading>
-        </paper-dialog>
 
     </template>
 
@@ -163,7 +128,7 @@
 
     Polymer({
 
-        is: 'ts-publish-profile',
+        is: 'ts-review-contrib',
 
         properties: {
             selected: {
@@ -178,7 +143,8 @@
             },
             options: {
                 type: Object,
-                value: {}
+                value: {},
+                notify: true
             },
             newinfo: {
                 type: Object,
@@ -186,11 +152,7 @@
             }
         },
 
-        addnew: function () {
-            this.add(false);
-        },
-
-        add: function (flag) {
+        add: function () {
             var mythis = this;
             var name = mythis.newinfo.name;
             var check = mythis.$.check.checked;
@@ -199,33 +161,20 @@
                 mythis.set('options', {});
                 mythis.set('options.title', "Missing Info");
                 mythis.set('options.body', "Must enter a contributor name");
-                mythis.$.loading.open();
+                mythis.set('options.loading', false);
+                mythis.fire('iron-signal', {name: 'openloading'});
             } else if (!check) {
                 mythis.set('options', {});
                 mythis.set('options.title', "No Agreement");
                 mythis.set('options.body', "Must agree to terms");
-                mythis.$.loading.open();
+                mythis.set('options.loading', false);
+                mythis.fire('iron-signal', {name: 'openloading'});
             } else {
                 mythis.push('currentproject.projectmeta.translators', name);
                 mythis.fire('iron-signal', {name: 'savemanifest'});
                 mythis.fire('iron-signal', {name: 'saveall'});
                 mythis.set('newinfo', {});
                 mythis.$.check.checked = false;
-                if (flag) {
-                    mythis.set('selected', mythis.selected + 1);
-                }
-            }
-        },
-
-        next: function () {
-            var mythis = this;
-            var name = mythis.newinfo.name;
-            var length = mythis.currentproject.projectmeta.translators.length;
-
-            if (!name && length) {
-                mythis.set('selected', mythis.selected + 1);
-            } else {
-                mythis.add(true);
             }
         },
 

@@ -45,7 +45,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
 
         sortProjectList: function (list) {
             var sort = configurator.getValue("sort") || {project: "bible", order: "project"};
-            
+
             if (sort.order === "project") {
                 if (sort.project === "bible") {
                     return this.sortByBibleLang(list);
@@ -559,7 +559,6 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             configurator.unsetValue(key + "-chapter");
             configurator.unsetValue(key + "-index");
             configurator.unsetValue(key + "-selected");
-            configurator.unsetValue(key + "-completion");
             configurator.unsetValue(key + "-source");
         },
 

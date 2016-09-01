@@ -27,7 +27,7 @@ process.stdout.write = console.log.bind(console);
     let mkdirp = require('mkdirp');
 
     setMsg('Loading DB...');
-    let Db = require('../js/lib/db').Db;
+    let Db = require('door43-client');
 
     setMsg('Loading Reporter...');
     let Reporter = require('../js/reporter').Reporter;
@@ -111,9 +111,10 @@ process.stdout.write = console.log.bind(console);
         var libraryDir = configurator.getValue('libraryDir');
         var libraryPath = path.join(libraryDir, "index.sqlite");
         var srcDir = path.resolve(path.join(__dirname, '..'));
-        var schemaPath = path.join(srcDir, 'config', 'schema.sql');
+        var resourceDir = path.join(libraryDir, 'resources');
         var srcDB = path.join(srcDir, 'index', 'index.sqlite');
         var appData = configurator.getAppData();
+        var apiURL = configurator.getValue('apiUrl');
         var stat;
 
         try {
@@ -121,16 +122,16 @@ process.stdout.write = console.log.bind(console);
         } catch(e) {}
 
         if (!stat || configurator.getValue("libraryBuild") != appData.build) {
-            setMsg('Setting up index files...');            
+            setMsg('Setting up index files...');
             mkdirp.sync(libraryDir);
             var content = fs.readFileSync(srcDB);
             fs.writeFileSync(libraryPath, content);
             configurator.setValue("libraryBuild", appData.build);
         }
 
-        var db = new Db(schemaPath, libraryPath);
+        var db = new Db(libraryPath, resourceDir);
 
-        return new DataManager(db);
+        return new DataManager(db, apiURL);
     })();
 
     setMsg('Initializing modules...');

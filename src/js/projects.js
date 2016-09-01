@@ -253,13 +253,13 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                     meta.finished_chunks = [];
                 }
 
-                var framenum = this.getProjectFrameNum(meta);
+                //var framenum = this.getProjectFrameNum(meta);
 
-                if (meta.finished_chunks && framenum) {
-                    meta.completion = Math.round((meta.finished_chunks.length / framenum) * 100);
-                } else {
+                //if (meta.finished_chunks && framenum) {
+                    //meta.completion = Math.round((meta.finished_chunks.length / framenum) * 100);
+                //} else {
                     meta.completion = 0;
-                }
+                //}
 
             } catch (err) {
                 reporter.logError(err);

@@ -8,7 +8,7 @@ function zipper (r) {
     return r.length ? _.map(r[0].values, _.zipObject.bind(_, r[0].columns)) : [];
 }
 
-function DataManager(db) {
+function DataManager(db, apiURL) {
     var query = db.query;
     var save = db.save;
 
@@ -52,8 +52,15 @@ function DataManager(db) {
         },
 
         getTargetLanguages: function () {
-            var r = query("select slug 'id', name, direction from target_language order by lower(slug)");
-            return zipper(r);
+            return db.index.getTargetLanguages()
+                .then(function (list) {
+                    return list.map(function (language) {
+                        return {id: language.slug, name: language.name, direction: language.direction};
+                    })
+                });
+
+            //var r = query("select slug 'id', name, direction from target_language order by lower(slug)");
+            //return zipper(r);
         },
 
         getProjects: function (lang) {
@@ -87,6 +94,8 @@ function DataManager(db) {
 		},
 
         getSources: function () {
+
+
             var r = query([
                     "select r.id, r.slug 'resource_id', r.name 'resource_name', l.name 'language_name', l.direction, l.slug 'language_id', p.slug 'project_id', r.checking_level, r.version, r.modified_at 'date_modified' from resource r",
                     "join source_language l on l.id=r.source_language_id",

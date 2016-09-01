@@ -155,17 +155,24 @@
 
       createprojects: function () {
           var mythis = this;
-          var projects = App.dataManager.getProjects();
           var temparray = [];
-          _.forEach(_.groupBy(projects, 'category'), function (data, category) {
-              if (category === 'null' && !mythis.importdata.importing) {
-                  temparray.push({"name": "Open Bible Stories", "data": data});
-              } else if (category === 'Bible: OT') {
-                  temparray.push({"name": "Old Testament", "data": data});
-              } else if (category === 'Bible: NT') {
-                  temparray.push({"name": "New Testament", "data": data});
-              }
-          });
+
+          App.dataManager.getProjects()
+              .then(function (projects) {
+                  _.forEach(_.groupBy(projects, 'category_id'), function (data, category) {
+                      if (category === "0" && !mythis.importdata.importing) {
+                          temparray.push({"name": "Other", "data": data});
+                      } else if (category === "1") {
+                          temparray.push({"name": "Old Testament", "data": data});
+                      } else if (category === "6") {
+                          temparray.push({"name": "New Testament", "data": data});
+                      }
+                  });
+                  mythis.set('newdata.categorylist', temparray);
+              });
+
+
+          /*
           if (App.configurator.getUserSetting('glmode') && !mythis.importdata.importing) {
               temparray.push({"name": "translationWords", "data": [{name: "translationWords", slug: "bible"}]});
               var volumes = App.dataManager.getVolumes();
@@ -173,8 +180,8 @@
                   var name = "translationAcademy " + volumes[i].title;
                   temparray.push({"name": name, "data": [{name: name, slug: volumes[i].slug}]});
               }
-          }
-          this.set('newdata.categorylist', temparray);
+          }*/
+
       },
 
       ready: function () {

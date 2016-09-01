@@ -58,20 +58,14 @@ function DataManager(db, apiURL) {
                         return {id: language.slug, name: language.name, direction: language.direction};
                     })
                 });
-
-            //var r = query("select slug 'id', name, direction from target_language order by lower(slug)");
-            //return zipper(r);
         },
 
         getProjects: function (lang) {
-            var r = query([
-                    "select p.id, p.slug, sl.project_name 'name', sl.project_description 'desc', c.category_name 'category' from project p",
-                    "join source_language sl on sl.project_id=p.id",
-                    "left join source_language__category c on c.source_language_id=sl.id",
-                    "where sl.slug='" + (lang || 'en') + "'",
-                    "order by p.sort"
-                ].join(' '));
-            return zipper(r);
+            return db.index.getProjects(lang || 'en');
+        },
+
+        getResources: function (project, lang) {
+            return db.index.getResources(lang || 'en', project);
         },
 
         getProjectName: function (id) {

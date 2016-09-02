@@ -100,13 +100,9 @@ function DataManager(db, apiURL) {
         },
 
         getSourceDetails: function (project_id, language_id, resource_id) {
-            var r = query([
-                "select r.id, r.name 'resource_name', l.name 'language_name', l.direction, p.slug 'project_id' from resource r",
-                "join source_language l on l.id=r.source_language_id",
-                "join project p on p.id=l.project_id",
-                "where p.slug='" + project_id + "' and l.slug='" + language_id + "' and r.slug='" + resource_id + "'"
-            ].join(' '));
-            return zipper(r);
+
+            return db.index.getResource(language_id, project_id, resource_id);
+
         },
 
         getSourceFrames: function (source) {

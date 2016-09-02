@@ -22,6 +22,7 @@ process.stdout.write = console.log.bind(console);
     setMsg('Loading path...');
     let path = require('path');
     let fs = require('fs');
+    let fse = require('fs-extra');
 
     setMsg('Loading mkdirp...');
     let mkdirp = require('mkdirp');
@@ -116,21 +117,31 @@ process.stdout.write = console.log.bind(console);
         var srcResource = path.join(srcDir, 'index', 'resource_containers');
         var appData = configurator.getAppData();
         var apiURL = configurator.getValue('apiUrl');
-        var stat;
+        var indexstat;
+        var resourcestat;
 
         try {
-            stat = fs.statSync(libraryPath);
+            indexstat = fs.statSync(libraryPath);
         } catch(e) {}
 
-        if (!stat || configurator.getValue("libraryBuild") != appData.build) {
-            setMsg('Setting up index files...');
+        try {
+            resourcestat = fs.statSync(resourceDir);
+        } catch(e) {}
+
+        if (!indexstat || configurator.getValue("libraryBuild") != appData.build) {
+            setMsg('Setting up index file...');
             mkdirp.sync(libraryDir);
-            mkdirp.sync(resourceDir);
             var content = fs.readFileSync(srcDB);
             fs.writeFileSync(libraryPath, content);
-            //fs.copyDir(srcResource, resourceDir);
-            configurator.setValue("libraryBuild", appData.build);
         }
+
+        if (!resourcestat || configurator.getValue("libraryBuild") != appData.build) {
+            setMsg('Setting up resource containers...');
+            mkdirp.sync(resourceDir);
+            fse.copySync(srcResource, resourceDir, {clobber: true});
+        }
+
+        configurator.setValue("libraryBuild", appData.build);
 
         var db = new Db(libraryPath, resourceDir);
 

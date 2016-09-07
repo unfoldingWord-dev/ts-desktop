@@ -227,7 +227,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 for (var j = 0; j < manifest.source_translations.length; j++) {
                     var details = dataManager.getSourceDetails(manifest.project.id, manifest.source_translations[j].language_id, manifest.source_translations[j].resource_id)
                         .then(function (details) {
-                            console.log(details);
+                            //console.log(details);
                         });
                     //meta.source_translations[j].project_id = details.project_id;
                     //meta.source_translations[j].id = details.id;

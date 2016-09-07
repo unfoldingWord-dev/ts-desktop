@@ -64,8 +64,17 @@ function DataManager(db, apiURL) {
             return db.index.getProjects(lang || 'en');
         },
 
-        getResources: function (project, lang) {
-            return db.index.getResources(lang || 'en', project);
+        getResourcesByProject: function (project) {
+            return db.index.getResources(null, project)
+                .then(function (list) {
+                    return list.filter(function (item) {
+                        return item.type === 'book'  && item.status.checking_level === "3";
+                    })
+                });
+        },
+
+        openContainer: function (language, project, resource) {
+            return db.openResourceContainer(language, project, resource);
         },
 
         getProjectName: function (id) {

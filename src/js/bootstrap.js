@@ -145,7 +145,7 @@ process.stdout.write = console.log.bind(console);
 
         var db = new Db(libraryPath, resourceDir);
 
-        return new DataManager(db, apiURL);
+        return new DataManager(db, resourceDir, apiURL);
     })();
 
     setMsg('Initializing modules...');

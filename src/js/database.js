@@ -3,12 +3,14 @@
 var _ = require('lodash');
 var request = require('request');
 var utils = require('../js/lib/utils');
+var fs = require('fs-extra');
+var path = require('path');
 
 function zipper (r) {
     return r.length ? _.map(r[0].values, _.zipObject.bind(_, r[0].columns)) : [];
 }
 
-function DataManager(db, apiURL) {
+function DataManager(db, resourceDir, apiURL) {
     var query = db.query;
     var save = db.save;
 
@@ -73,8 +75,38 @@ function DataManager(db, apiURL) {
                 });
         },
 
+
+
         openContainer: function (language, project, resource) {
-            return db.openResourceContainer(language, project, resource);
+            var name = language + "_" + project + "_" + resource;
+            var contentpath = path.join(resourceDir, name, "content");
+            var data = [];
+
+
+            return db.openResourceContainer(language, project, resource)
+                .then(function () {
+                    var dirs = fs.readdirSync(contentpath);
+                    var chaps = dirs.filter(function (dir) {
+                        var stat = fs.statSync(path.join(contentpath, dir));
+                        return stat.isDirectory();
+                    });
+
+                    chaps.forEach(function (chap) {
+                        var chunks = fs.readdirSync(path.join(contentpath, chap));
+
+                        chunks.forEach(function (chunk) {
+                            var verse = chunk.split(".")[0];
+                            var text = fs.readFileSync(path.join(contentpath, chap, chunk), 'utf8');
+                            data.push({chapter: chap, verse: verse, chunk: text});
+                        });
+                    });
+                    //return db.closeResourceContainer(language, project, resource);
+                    //console.log(data);
+
+                })
+                .then(function () {
+                    return data;
+                });
         },
 
         getProjectName: function (id) {

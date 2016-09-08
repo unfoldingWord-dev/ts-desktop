@@ -777,14 +777,14 @@
             }
 
             for (i = 0; i < frames.length; i++) {
-                var resources = this.getFrameResources(frames[i], currentsource);
+                //var resources = this.getFrameResources(frames[i], currentsource);
                 var sourcedata = App.renderer.convertVerseMarkers(frames[i].chunk);
                 var chunkmeta = this.createFrameMeta(frames[i], projectmeta, sourcedata.verses);
                 var chunk = this.getFrameData(chunkmeta, projectmeta);
                 var sourcecontent = App.renderer.convertNoteMarkers(sourcedata.text);
                 chunk.srccontent = App.renderer.renderSourceWithVerses(sourcecontent);
                 chunk.wordcontent = "";
-                chunk.resources = resources;
+                /*chunk.resources = resources;
                 if (projectmeta.project_type_class === "standard" && chunkmeta.frameid === "01") {
                     if (chunkmeta.chapterid === "01") {
                         chunkarray.push(this.createProjectTitleFrame(chunkmeta, projectmeta, index));
@@ -798,7 +798,7 @@
                         chunkarray.push(this.createChapterRefFrame(chunkmeta, projectmeta, index));
                         index++;
                     }
-                }
+                }*/
                 chunk.index = index;
                 chunkarray.push(chunk);
                 index++;

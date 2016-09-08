@@ -141,6 +141,7 @@ function DataManager(db, resourceDir, apiURL) {
             var lang = db.indexSync.getSourceLanguage(language_id);
 
             return {
+                id: res.id,
                 language_id: language_id,
                 resource_id: resource_id,
                 checking_level: res.status.checking_level,
@@ -156,21 +157,10 @@ function DataManager(db, resourceDir, apiURL) {
         getSourceFrames: function (source) {
             var frames = this.extractContainer(source.language_id, source.project_id, source.resource_id);
 
-            return frames;
+            return frames.map(function (item) {
+                return {chapter: item.dir, verse: item.filename, chunk: item.content};
+            });
 
-
-            /*
-            var s = typeof source === 'object' ? source.id : source,
-                r = query([
-                    "select f.id, f.slug 'verse', f.body 'chunk', c.slug 'chapter', c.title, c.reference, f.format from frame f",
-                    "join chapter c on c.id=f.chapter_id",
-                    "join resource r on r.id=c.resource_id",
-                    "join source_language sl on sl.id=r.source_language_id",
-                    "join project p on p.id=sl.project_id where r.id='" + s + "'",
-                    "order by c.sort, f.sort"
-                ].join(' '));
-
-            return zipper(r);*/
         },
 
         getFrameUdb: function (source, chapterid, verseid) {

@@ -226,22 +226,11 @@
       },
 
       updateList: function () {
-          var mythis = this;
-
-          App.dataManager.getTargetLanguages()
-              .then(function (list) {
-                  mythis.set('languagelist', list);
-              });
+          this.set('languagelist', App.dataManager.getTargetLanguages());
       },
 
       ready: function () {
-          var mythis = this;
-
-          App.dataManager.getTargetLanguages()
-              .then(function (list) {
-                  mythis.set('languagelist', list);
-              });
-
+          this.set('languagelist', App.dataManager.getTargetLanguages());
       }
 
   });

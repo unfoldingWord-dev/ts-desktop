@@ -505,13 +505,13 @@
         opensource: function () {
             var projectmeta = this.currentproject.projectmeta;
             var modal = this.$.modal;
-            var sources = App.dataManager.getSources();
-            var projectid = projectmeta.project.id;
+            var sources = App.dataManager.getResourcesByProject(projectmeta.project.id);
+
             if (projectmeta.resource.id === "udb") {
-                modal.allSources = _.filter(sources, {'project_id': projectid, 'checking_level': 3});
+                modal.allSources = sources;
             } else {
                 modal.allSources = _.filter(sources, function(source) {
-                    return source.project_id === projectid && source.checking_level === 3 && source.resource_id !== "udb";
+                    return source.resource_id !== "udb";
                 });
             }
             modal.sources = projectmeta.source_translations;

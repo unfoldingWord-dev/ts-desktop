@@ -618,8 +618,8 @@
                   var name = "";
                   if (id) {
                       var data = App.dataManager.getProjectName(id);
-                      if (data.length) {
-                          name = data[0].name;
+                      if (data) {
+                          name = data;
                       } else {
                           id = "";
                       }

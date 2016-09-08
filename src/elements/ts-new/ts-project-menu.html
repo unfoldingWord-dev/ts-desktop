@@ -155,22 +155,19 @@
 
       createprojects: function () {
           var mythis = this;
+          var projects = App.dataManager.getProjects();
           var temparray = [];
 
-          App.dataManager.getProjects()
-              .then(function (projects) {
-                  _.forEach(_.groupBy(projects, 'category_id'), function (data, category) {
-                      if (category === "0" && !mythis.importdata.importing) {
-                          temparray.push({"name": "Other", "data": data});
-                      } else if (category === "1") {
-                          temparray.push({"name": "Old Testament", "data": data});
-                      } else if (category === "6") {
-                          temparray.push({"name": "New Testament", "data": data});
-                      }
-                  });
-                  mythis.set('newdata.categorylist', temparray);
-              });
-
+          _.forEach(_.groupBy(projects, 'category_id'), function (data, category) {
+              if (category === "0" && !mythis.importdata.importing) {
+                  temparray.push({"name": "Other", "data": data});
+              } else if (category === "1") {
+                  temparray.push({"name": "Old Testament", "data": data});
+              } else if (category === "6") {
+                  temparray.push({"name": "New Testament", "data": data});
+              }
+          });
+          mythis.set('newdata.categorylist', temparray);
 
           /*
           if (App.configurator.getUserSetting('glmode') && !mythis.importdata.importing) {

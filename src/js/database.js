@@ -54,68 +54,64 @@ function DataManager(db, resourceDir, apiURL) {
         },
 
         getTargetLanguages: function () {
-            return db.index.getTargetLanguages()
-                .then(function (list) {
-                    return list.map(function (language) {
-                        return {id: language.slug, name: language.name, direction: language.direction};
-                    })
-                });
+            var list = db.indexSync.getTargetLanguages();
+
+            return list.map(function (item) {
+                return {id: item.slug, name: item.name, direction: item.direction};
+            });
         },
 
         getProjects: function (lang) {
-            return db.index.getProjects(lang || 'en');
+            return db.indexSync.getProjects(lang || 'en');
         },
 
         getResourcesByProject: function (project) {
-            return db.index.getResources(null, project)
-                .then(function (list) {
-                    return list.filter(function (item) {
-                        return item.type === 'book'  && item.status.checking_level === "3";
-                    })
-                });
+            var mythis = this;
+            var allres = db.indexSync.getResources(null, project);
+            var filterres = allres.filter(function (item) {
+                return item.type === 'book' && item.status.checking_level === "3";
+            });
+
+            return filterres.map(function (res) {
+                return mythis.getSourceDetails(res.project_slug, res.source_language_slug, res.slug);
+            });
         },
 
-
-
         openContainer: function (language, project, resource) {
-            var name = language + "_" + project + "_" + resource;
-            var contentpath = path.join(resourceDir, name, "content");
+            return db.openResourceContainer(language, project, resource);
+        },
+
+        closeContainer: function (language, project, resource) {
+            return db.closeResourceContainer(language, project, resource);
+        },
+
+        extractContainer: function (language, project, resource) {
+            var containername = language + "_" + project + "_" + resource;
+            var contentpath = path.join(resourceDir, containername, "content");
             var data = [];
+            var alldirs = fs.readdirSync(contentpath);
+            var contentdirs = alldirs.filter(function (dir) {
+                var stat = fs.statSync(path.join(contentpath, dir));
+                return stat.isDirectory();
+            });
 
+            contentdirs.forEach(function (dir) {
+                var files = fs.readdirSync(path.join(contentpath, dir));
 
-            return db.openResourceContainer(language, project, resource)
-                .then(function () {
-                    var dirs = fs.readdirSync(contentpath);
-                    var chaps = dirs.filter(function (dir) {
-                        var stat = fs.statSync(path.join(contentpath, dir));
-                        return stat.isDirectory();
-                    });
-
-                    chaps.forEach(function (chap) {
-                        var chunks = fs.readdirSync(path.join(contentpath, chap));
-
-                        chunks.forEach(function (chunk) {
-                            var verse = chunk.split(".")[0];
-                            var text = fs.readFileSync(path.join(contentpath, chap, chunk), 'utf8');
-                            data.push({chapter: chap, verse: verse, chunk: text});
-                        });
-                    });
-                    //return db.closeResourceContainer(language, project, resource);
-                    //console.log(data);
-
-                })
-                .then(function () {
-                    return data;
+                files.forEach(function (file) {
+                    var filename = file.split(".")[0];
+                    var content = fs.readFileSync(path.join(contentpath, dir, file), 'utf8');
+                    data.push({dir: dir, filename: filename, content: content});
                 });
+            });
+
+            return data;
         },
 
         getProjectName: function (id) {
-            var r = query([
-                "select sl.project_name 'name' from project p",
-                "join source_language sl on sl.project_id=p.id",
-                "where sl.slug='en' and p.slug='" + id + "'"
-            ].join(' '));
-            return zipper(r);
+            var proj = db.indexSync.getProject('en', id);
+
+            return proj.name;
         },
 
 		getChunkMarkers: function (id) {
@@ -141,12 +137,29 @@ function DataManager(db, resourceDir, apiURL) {
         },
 
         getSourceDetails: function (project_id, language_id, resource_id) {
+            var res = db.indexSync.getResource(language_id, project_id, resource_id);
+            var lang = db.indexSync.getSourceLanguage(language_id);
 
-            return db.index.getResource(language_id, project_id, resource_id);
-
+            return {
+                language_id: language_id,
+                resource_id: resource_id,
+                checking_level: res.status.checking_level,
+                date_modified: res.status.pub_date,
+                version: res.status.version,
+                project_id: project_id,
+                resource_name: res.name,
+                language_name: lang.name,
+                direction: lang.direction
+            }
         },
 
         getSourceFrames: function (source) {
+            var frames = this.extractContainer(source.language_id, source.project_id, source.resource_id);
+
+            return frames;
+
+
+            /*
             var s = typeof source === 'object' ? source.id : source,
                 r = query([
                     "select f.id, f.slug 'verse', f.body 'chunk', c.slug 'chapter', c.title, c.reference, f.format from frame f",
@@ -157,7 +170,7 @@ function DataManager(db, resourceDir, apiURL) {
                     "order by c.sort, f.sort"
                 ].join(' '));
 
-            return zipper(r);
+            return zipper(r);*/
         },
 
         getFrameUdb: function (source, chapterid, verseid) {

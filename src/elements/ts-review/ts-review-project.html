@@ -1,5 +1,6 @@
 
 <link rel="import" href="../../components/iron-signals/iron-signals.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
 
 <link rel="import" href="./ts-review-chapter.html">
 
@@ -17,6 +18,18 @@
             padding-bottom: 100px;
         }
 
+        #next {
+            background: var(--accent-color);
+            color: var(--reverse-text-color);
+            text-transform: uppercase;
+        }
+
+        #button {
+            display: flex;
+            justify-content: center;
+            margin-top: 25px;
+        }
+
     </style>
 
     <template>
@@ -25,6 +38,9 @@
             <template is="dom-repeat" items="{{chapters}}" as="chapter">
                 <ts-review-chapter chapter="[[chapter]]"></ts-review-chapter>
             </template>
+            <div id="button">
+                <paper-button raised id="next" on-tap="next">Next</paper-button>
+            </div>
         </div>
 
         <iron-signals on-iron-signal-updatereview="updatereview"></iron-signals>
@@ -132,6 +148,10 @@
             }
 
             this.set('chapters', transchapters);
+        },
+
+        next: function () {
+            this.fire('next');
         },
 
         ready: function() {

@@ -70,7 +70,7 @@
             bottom: 0;
             right: 50px;
             margin: auto 0;
-            width: 50px;
+            width: 175px;
             height: 50px;
         }
 
@@ -142,7 +142,7 @@
             var display = this.$.display;
             var marker = this.$.marker;
 
-            display.innerHTML = chapter;
+            display.innerHTML = "Chapter " + chapter;
             marker.classList.remove("hide");
             setTimeout(function() {
                 marker.classList.add("hide");

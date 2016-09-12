@@ -89,6 +89,12 @@
             text-transform: uppercase;
         }
 
+        #next {
+            background: var(--accent-color);
+            color: var(--reverse-text-color);
+            text-transform: uppercase;
+        }
+
     </style>
 
     <template>
@@ -116,7 +122,8 @@
                 </div>
             </paper-material>
             <div id="buttons">
-                <paper-button raised id="add" on-tap="add">Add Contributor</paper-button>
+                <paper-button raised id="add" on-tap="addnew">Add Contributor</paper-button>
+                <paper-button raised id="next" on-tap="next">Next</paper-button>
             </div>
         </div>
 
@@ -152,7 +159,11 @@
             }
         },
 
-        add: function () {
+        addnew: function () {
+            this.add(false);
+        },
+
+        add: function (flag) {
             var mythis = this;
             var name = mythis.newinfo.name;
             var check = mythis.$.check.checked;
@@ -175,6 +186,21 @@
                 mythis.fire('iron-signal', {name: 'saveall'});
                 mythis.set('newinfo', {});
                 mythis.$.check.checked = false;
+                if (flag) {
+                    mythis.fire('next');
+                }
+            }
+        },
+
+        next: function () {
+            var mythis = this;
+            var name = mythis.newinfo.name;
+            var length = mythis.currentproject.projectmeta.translators.length;
+
+            if (!name && length) {
+                mythis.fire('next');
+            } else {
+                mythis.add(true);
             }
         },
 

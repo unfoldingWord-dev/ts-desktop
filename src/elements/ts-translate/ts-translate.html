@@ -721,8 +721,12 @@
         reloaddata: function (full) {
             var mythis = this;
             var projectmeta = mythis.currentproject.projectmeta;
+            var source = projectmeta.source_translations[projectmeta.currentsource];
 
-            App.projectsManager.loadTargetTranslation(projectmeta)
+            App.dataManager.openContainer(source.language_id, projectmeta.project.id, source.resource_id)
+                .then(function () {
+                    return App.projectsManager.loadTargetTranslation(projectmeta);
+                })
                 .then(function (translation) {
                     mythis.set('currentproject.rawdata.main', translation);
                     mythis.createchunks();

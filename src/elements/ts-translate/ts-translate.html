@@ -768,6 +768,8 @@
             }
             var currentsource = projectmeta.source_translations[current];
             var frames = App.dataManager.getSourceFrames(currentsource);
+            var notes = App.dataManager.getSourceHelps(currentsource, "tn");
+            var questions = App.dataManager.getSourceHelps(currentsource, "tq");
             var chunkarray = [];
             var index = 0;
 
@@ -781,15 +783,15 @@
             }
 
             for (i = 0; i < frames.length; i++) {
-                var resources = this.getFrameResources(frames[i], currentsource);
+                var resources = this.getFrameResources(frames[i], notes, questions);
                 var sourcedata = App.renderer.convertVerseMarkers(frames[i].chunk);
                 var chunkmeta = this.createFrameMeta(frames[i], projectmeta, sourcedata.verses);
                 var chunk = this.getFrameData(chunkmeta, projectmeta);
                 var sourcecontent = App.renderer.convertNoteMarkers(sourcedata.text);
                 chunk.srccontent = App.renderer.renderSourceWithVerses(sourcecontent);
                 chunk.wordcontent = "";
-                /*chunk.resources = resources;
-                if (projectmeta.project_type_class === "standard" && chunkmeta.frameid === "01") {
+                chunk.resources = resources;
+                 /*if (projectmeta.project_type_class === "standard" && chunkmeta.frameid === "01") {
                     if (chunkmeta.chapterid === "01") {
                         chunkarray.push(this.createProjectTitleFrame(chunkmeta, projectmeta, index));
                         index++;
@@ -892,30 +894,36 @@
             this.set('currentproject.chunks', chunkarray);
         },
 
-        getFrameResources: function (frame, currentsource) {
+        getFrameResources: function (frame, notes, questions) {
             var resources = [];
-            /*var notes = App.dataManager.getFrameNotes(frame, currentsource);
+            var note = [];
+            var question = [];
 
-            console.log(notes);
-
-            if (notes.length) {
-                resources.push({title: "Notes", array: true, data: notes});
+            var framenotes = notes.filter(function (note) {
+                return note.chapter === frame.chapter && note.verse === frame.verse;
+            });
+            if (framenotes.length) {
+                note = framenotes[0].data;
+            }
+            if (note.length) {
+                resources.push({title: "Notes", array: true, data: note});
             }
 
-
-            //console.log(frame, notes);
+            var frameques = questions.filter(function (ques) {
+                return ques.chapter === frame.chapter && ques.verse === frame.verse;
+            });
+            if (frameques.length) {
+                question = frameques[0].data;
+            }
+            if (question.length) {
+                resources.push({title: "Questions", array: true, data: question});
+            }
 
             /*
             var words = App.dataManager.getFrameWords(frame.id);
-            var questions = App.dataManager.getFrameQuestions(frame.id);
+
             var udbtext = null;
 
-
-            for (var n = 0; n < notes.length; n++) {
-                if (notes[n].title === "") {
-                    notes[n].title = notes[n].body;
-                }
-            }
             for (var w = 0; w < words.length; w++) {
                 var worddata = this.currentproject.rawdata.words["01-" + words[w].slug];
                 if (worddata && worddata.helpscontent[0].body !== "" && worddata.helpscontent[0].title !== "") {
@@ -927,9 +935,7 @@
             if (words.length) {
                 resources.push({title: "Words", array: true, data: words});
             }
-            if (questions.length) {
-                resources.push({title: "Questions", array: true, data: questions});
-            }
+
             if (currentsource.resource_id === "ulb") {
                 var result = App.dataManager.getFrameUdb(currentsource, frame.chapter, frame.verse)[0];
                 if (result) {

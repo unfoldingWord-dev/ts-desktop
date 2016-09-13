@@ -97,6 +97,12 @@ function DataManager(db, resourceDir, apiURL) {
                         .catch(function () {
                             return true;
                         });
+                })
+                .then(function () {
+                    return db.openResourceContainer(language, "bible", "tw")
+                        .catch(function () {
+                            return true;
+                        });
                 });
         },
 
@@ -229,14 +235,13 @@ function DataManager(db, resourceDir, apiURL) {
             return zipper(r);
         },
 
-        getFrameNotes: function (frame, source) {
-            var frames = this.extractContainer(source.language_id, source.project_id, "tn");
+        getSourceHelps: function (source, type) {
+            var mythis = this;
+            var frames = this.extractContainer(source.language_id, source.project_id, type);
 
-            var notes = frames.filter(function (item) {
-                return item.dir === frame.chapter && item.filename === frame.verse;
+            return frames.map(function (item) {
+                return {chapter: item.dir, verse: item.filename, data: mythis.parseHelps(item.content)};
             });
-
-            return this.parseHelps(notes[0].content);
         },
 
         parseHelps: function (content) {

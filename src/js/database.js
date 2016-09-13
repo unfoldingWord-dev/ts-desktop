@@ -5,6 +5,7 @@ var request = require('request');
 var utils = require('../js/lib/utils');
 var fs = require('fs-extra');
 var path = require('path');
+var yaml = require('js-yaml');
 
 function zipper (r) {
     return r.length ? _.map(r[0].values, _.zipObject.bind(_, r[0].columns)) : [];
@@ -156,10 +157,29 @@ function DataManager(db, resourceDir, apiURL) {
 
         getSourceFrames: function (source) {
             var frames = this.extractContainer(source.language_id, source.project_id, source.resource_id);
+            var toc = this.parseToc(source);
+            var sorted = [];
 
-            return frames.map(function (item) {
+            var mapped = frames.map(function (item) {
                 return {chapter: item.dir, verse: item.filename, chunk: item.content};
             });
+
+            toc.forEach (function (chapter) {
+                var chunks = mapped.filter(function (item) {
+                    return item.chapter === chapter.chapter;
+                });
+                chapter.chunks.forEach (function (chunk) {
+                    sorted.push(chunks.filter(function (item) {
+                        return item.verse === chunk;
+                    })[0]);
+                });
+            });
+
+            if (sorted[0].chapter === "front") {
+                sorted[0].chapter = "00";
+            }
+
+            return sorted;
 
         },
 
@@ -178,13 +198,50 @@ function DataManager(db, resourceDir, apiURL) {
             return zipper(r);
         },
 
-        getFrameNotes: function (frameid) {
+        getFrameNotes: function (frame, source) {
+            var frames = this.extractContainer(source.language_id, source.project_id, "tn");
+
+            var notes = frames.filter(function (item) {
+                return item.dir === frame.chapter && item.filename === frame.verse;
+            });
+
+            return this.parseHelps(notes[0].content);
+
+            /*
+
+            return filterres.map(function (res) {
+                return mythis.getSourceDetails(res.project_slug, res.source_language_slug, res.slug);
+            });
+
+
                 var r = query([
                     "select title, body from translation_note",
                     "where frame_id='" + frameid + "'"
                 ].join(' '));
 
-            return zipper(r);
+            return zipper(r);*/
+        },
+
+        parseHelps: function (content) {
+            var array = [];
+            var contentarray = content.split("\n\n");
+
+            for (var i = 0; i < contentarray.length; i++) {
+                array.push({title: contentarray[i].replace(/^#/, ''), body: contentarray[i+1]});
+                i++;
+            }
+
+            return array;
+        },
+
+        parseToc: function (source) {
+            var containername = source.language_id + "_" + source.project_id + "_" + source.resource_id;
+            var yamlpath = path.join(resourceDir, containername, "content", "toc.yml");
+
+            var file = fs.readFileSync(yamlpath, "utf8");
+            var toc = yaml.load(file);
+
+            return toc;
         },
 
         getFrameWords: function (frameid) {

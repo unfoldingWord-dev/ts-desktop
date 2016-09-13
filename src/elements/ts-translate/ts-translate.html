@@ -781,7 +781,7 @@
             }
 
             for (i = 0; i < frames.length; i++) {
-                //var resources = this.getFrameResources(frames[i], currentsource);
+                var resources = this.getFrameResources(frames[i], currentsource);
                 var sourcedata = App.renderer.convertVerseMarkers(frames[i].chunk);
                 var chunkmeta = this.createFrameMeta(frames[i], projectmeta, sourcedata.verses);
                 var chunk = this.getFrameData(chunkmeta, projectmeta);
@@ -893,11 +893,23 @@
         },
 
         getFrameResources: function (frame, currentsource) {
-            var notes = App.dataManager.getFrameNotes(frame.id);
+            var resources = [];
+            /*var notes = App.dataManager.getFrameNotes(frame, currentsource);
+
+            console.log(notes);
+
+            if (notes.length) {
+                resources.push({title: "Notes", array: true, data: notes});
+            }
+
+
+            //console.log(frame, notes);
+
+            /*
             var words = App.dataManager.getFrameWords(frame.id);
             var questions = App.dataManager.getFrameQuestions(frame.id);
             var udbtext = null;
-            var resources = [];
+
 
             for (var n = 0; n < notes.length; n++) {
                 if (notes[n].title === "") {
@@ -911,9 +923,7 @@
                     words[w].body = worddata.helpscontent[0].body;
                 }
             }
-            if (notes.length) {
-                resources.push({title: "Notes", array: true, data: notes});
-            }
+
             if (words.length) {
                 resources.push({title: "Words", array: true, data: words});
             }
@@ -927,7 +937,7 @@
                     udbtext = App.renderer.renderSourceWithVerses(udbtext);
                     resources.push({title: "UDB", array: false, data: [udbtext]});
                 }
-            }
+            }*/
             return resources;
         },
 

@@ -127,28 +127,33 @@ function DataManager(db, resourceDir, apiURL) {
             var containername = language + "_" + project + "_" + resource;
             var contentpath = path.join(resourceDir, containername, "content");
             var data = [];
-            var alldirs = fs.readdirSync(contentpath);
-            var contentdirs = alldirs.filter(function (dir) {
-                var stat = fs.statSync(path.join(contentpath, dir));
-                return stat.isDirectory();
-            });
 
-            contentdirs.forEach(function (dir) {
-                var files = fs.readdirSync(path.join(contentpath, dir));
-
-                files.forEach(function (file) {
-                    var filename = file.split(".")[0];
-                    var content = fs.readFileSync(path.join(contentpath, dir, file), 'utf8');
-
-                    if (dir === "front") {
-                        dir = "00";
-                    }
-
-                    data.push({dir: dir, filename: filename, content: content});
+            try {
+                var alldirs = fs.readdirSync(contentpath);
+                var contentdirs = alldirs.filter(function (dir) {
+                    var stat = fs.statSync(path.join(contentpath, dir));
+                    return stat.isDirectory();
                 });
-            });
 
-            return data;
+                contentdirs.forEach(function (dir) {
+                    var files = fs.readdirSync(path.join(contentpath, dir));
+
+                    files.forEach(function (file) {
+                        var filename = file.split(".")[0];
+                        var content = fs.readFileSync(path.join(contentpath, dir, file), 'utf8');
+
+                        if (dir === "front") {
+                            dir = "00";
+                        }
+
+                        data.push({dir: dir, filename: filename, content: content});
+                    });
+                });
+
+                return data;
+            } catch (err) {
+                return data;
+            }
         },
 
         getProjectName: function (id) {
@@ -220,19 +225,16 @@ function DataManager(db, resourceDir, apiURL) {
             return sorted;
         },
 
-        getFrameUdb: function (source, chapterid, verseid) {
-            var sources = this.getSources();
-            var udbsource = _.filter(sources, {'language_id': source.language_id, 'project_id': source.project_id, 'checking_level': 3, 'resource_id': 'udb'});
-            var s = udbsource[0].id,
-                r = query([
-                    "select f.id, f.slug 'verse', f.body 'chunk', c.slug 'chapter', c.title, c.reference, f.format from frame f",
-                    "join chapter c on c.id=f.chapter_id",
-                    "join resource r on r.id=c.resource_id",
-                    "join source_language sl on sl.id=r.source_language_id",
-                    "join project p on p.id=sl.project_id where r.id='" + s + "' and c.slug='" + chapterid + "' and f.slug='" + verseid + "'"
-                ].join(' '));
+        getSourceUdb: function (source) {
+            if (source.resource_id === "ulb") {
+                var frames = this.extractContainer(source.language_id, source.project_id, "udb");
 
-            return zipper(r);
+                return frames.map(function (item) {
+                    return {chapter: item.dir, verse: item.filename, chunk: item.content};
+                });
+            } else {
+                return [];
+            }
         },
 
         getSourceHelps: function (source, type) {
@@ -308,16 +310,6 @@ function DataManager(db, resourceDir, apiURL) {
             var r = query([
                 "select cast(e.frame_slug as int) 'frame', cast(e.chapter_slug as int) 'chapter', e.body from translation_word_example e",
                 "where e.translation_word_id='" + wordid + "'"
-            ].join(' '));
-
-            return zipper(r);
-        },
-
-        getFrameQuestions: function (frameid) {
-            var r = query([
-                "select q.question 'title', q.answer 'body' from checking_question q",
-                "join frame__checking_question f on q.id=f.checking_question_id",
-                "where f.frame_id='" + frameid + "'"
             ].join(' '));
 
             return zipper(r);

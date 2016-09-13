@@ -770,6 +770,7 @@
             var frames = App.dataManager.getSourceFrames(currentsource);
             var notes = App.dataManager.getSourceHelps(currentsource, "tn");
             var questions = App.dataManager.getSourceHelps(currentsource, "tq");
+            var udb = App.dataManager.getSourceUdb(currentsource);
             var chunkarray = [];
             var index = 0;
 
@@ -783,7 +784,7 @@
             }
 
             for (i = 0; i < frames.length; i++) {
-                var resources = this.getFrameResources(frames[i], notes, questions);
+                var resources = this.getFrameResources(frames[i], notes, questions, udb);
                 var sourcedata = App.renderer.convertVerseMarkers(frames[i].chunk);
                 var chunkmeta = this.createFrameMeta(frames[i], projectmeta, sourcedata.verses);
                 var chunk = this.getFrameData(chunkmeta, projectmeta);
@@ -894,10 +895,11 @@
             this.set('currentproject.chunks', chunkarray);
         },
 
-        getFrameResources: function (frame, notes, questions) {
+        getFrameResources: function (frame, notes, questions, udb) {
             var resources = [];
             var note = [];
             var question = [];
+            var udbtext = null;
 
             var framenotes = notes.filter(function (note) {
                 return note.chapter === frame.chapter && note.verse === frame.verse;
@@ -919,10 +921,20 @@
                 resources.push({title: "Questions", array: true, data: question});
             }
 
+            var frameudb = udb.filter(function (chunk) {
+                return chunk.chapter === frame.chapter && chunk.verse === frame.verse;
+            });
+            if (frameudb.length) {
+                udbtext = frameudb[0].chunk;
+            }
+            if (udbtext) {
+                udbtext = App.renderer.convertVerseMarkers(udbtext).text;
+                udbtext = App.renderer.renderSourceWithVerses(udbtext);
+                resources.push({title: "UDB", array: false, data: [udbtext]});
+            }
+
             /*
             var words = App.dataManager.getFrameWords(frame.id);
-
-            var udbtext = null;
 
             for (var w = 0; w < words.length; w++) {
                 var worddata = this.currentproject.rawdata.words["01-" + words[w].slug];
@@ -936,14 +948,7 @@
                 resources.push({title: "Words", array: true, data: words});
             }
 
-            if (currentsource.resource_id === "ulb") {
-                var result = App.dataManager.getFrameUdb(currentsource, frame.chapter, frame.verse)[0];
-                if (result) {
-                    udbtext = App.renderer.convertVerseMarkers(result.chunk).text;
-                    udbtext = App.renderer.renderSourceWithVerses(udbtext);
-                    resources.push({title: "UDB", array: false, data: [udbtext]});
-                }
-            }*/
+            */
             return resources;
         },
 

@@ -102,6 +102,11 @@ function DataManager(db, resourceDir, apiURL) {
                 files.forEach(function (file) {
                     var filename = file.split(".")[0];
                     var content = fs.readFileSync(path.join(contentpath, dir, file), 'utf8');
+
+                    if (dir === "front") {
+                        dir = "00";
+                    }
+
                     data.push({dir: dir, filename: filename, content: content});
                 });
             });
@@ -157,7 +162,7 @@ function DataManager(db, resourceDir, apiURL) {
 
         getSourceFrames: function (source) {
             var frames = this.extractContainer(source.language_id, source.project_id, source.resource_id);
-            var toc = this.parseToc(source);
+            var toc = this.parseYaml(source, "toc.yml");
             var sorted = [];
 
             var mapped = frames.map(function (item) {
@@ -175,12 +180,7 @@ function DataManager(db, resourceDir, apiURL) {
                 });
             });
 
-            if (sorted[0].chapter === "front") {
-                sorted[0].chapter = "00";
-            }
-
             return sorted;
-
         },
 
         getFrameUdb: function (source, chapterid, verseid) {
@@ -206,20 +206,6 @@ function DataManager(db, resourceDir, apiURL) {
             });
 
             return this.parseHelps(notes[0].content);
-
-            /*
-
-            return filterres.map(function (res) {
-                return mythis.getSourceDetails(res.project_slug, res.source_language_slug, res.slug);
-            });
-
-
-                var r = query([
-                    "select title, body from translation_note",
-                    "where frame_id='" + frameid + "'"
-                ].join(' '));
-
-            return zipper(r);*/
         },
 
         parseHelps: function (content) {
@@ -234,14 +220,17 @@ function DataManager(db, resourceDir, apiURL) {
             return array;
         },
 
-        parseToc: function (source) {
+        parseYaml: function (source, filename) {
             var containername = source.language_id + "_" + source.project_id + "_" + source.resource_id;
-            var yamlpath = path.join(resourceDir, containername, "content", "toc.yml");
+            var filepath = path.join(resourceDir, containername, "content", filename);
+            var file = fs.readFileSync(filepath, "utf8");
+            var parsed = yaml.load(file);
 
-            var file = fs.readFileSync(yamlpath, "utf8");
-            var toc = yaml.load(file);
+            if (parsed[0].chapter === "front") {
+                parsed[0].chapter = "00";
+            }
 
-            return toc;
+            return parsed;
         },
 
         getFrameWords: function (frameid) {

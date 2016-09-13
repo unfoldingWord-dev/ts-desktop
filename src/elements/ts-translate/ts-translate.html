@@ -771,6 +771,7 @@
             var notes = App.dataManager.getSourceHelps(currentsource, "tn");
             var questions = App.dataManager.getSourceHelps(currentsource, "tq");
             var udb = App.dataManager.getSourceUdb(currentsource);
+            var worddata = App.dataManager.getSourceWords(currentsource);
             var chunkarray = [];
             var index = 0;
 
@@ -784,7 +785,7 @@
             }
 
             for (i = 0; i < frames.length; i++) {
-                var resources = this.getFrameResources(frames[i], notes, questions, udb);
+                var resources = this.getFrameResources(frames[i], notes, questions, udb, worddata);
                 var sourcedata = App.renderer.convertVerseMarkers(frames[i].chunk);
                 var chunkmeta = this.createFrameMeta(frames[i], projectmeta, sourcedata.verses);
                 var chunk = this.getFrameData(chunkmeta, projectmeta);
@@ -895,11 +896,17 @@
             this.set('currentproject.chunks', chunkarray);
         },
 
-        getFrameResources: function (frame, notes, questions, udb) {
+        getFrameResources: function (frame, notes, questions, udb, worddata) {
             var resources = [];
             var note = [];
             var question = [];
+            var words = [];
+            var framewords = [];
             var udbtext = null;
+
+            if (frame.chapter === "00") {
+                return resources;
+            }
 
             var framenotes = notes.filter(function (note) {
                 return note.chapter === frame.chapter && note.verse === frame.verse;
@@ -909,6 +916,22 @@
             }
             if (note.length) {
                 resources.push({title: "Notes", array: true, data: note});
+            }
+
+            if (worddata.config[frame.chapter][frame.verse]) {
+                framewords = worddata.config[frame.chapter][frame.verse].words;
+            }
+
+            framewords.forEach(function (frameword) {
+                var name = frameword.split("/").pop();
+                var filter = worddata.words.filter(function (item) {
+                    return item.word === name;
+                });
+                words.push(filter[0].data);
+            });
+
+            if (words.length) {
+                resources.push({title: "Words", array: true, data: words});
             }
 
             var frameques = questions.filter(function (ques) {
@@ -934,7 +957,6 @@
             }
 
             /*
-            var words = App.dataManager.getFrameWords(frame.id);
 
             for (var w = 0; w < words.length; w++) {
                 var worddata = this.currentproject.rawdata.words["01-" + words[w].slug];
@@ -942,10 +964,6 @@
                     words[w].title = worddata.helpscontent[0].title;
                     words[w].body = worddata.helpscontent[0].body;
                 }
-            }
-
-            if (words.length) {
-                resources.push({title: "Words", array: true, data: words});
             }
 
             */

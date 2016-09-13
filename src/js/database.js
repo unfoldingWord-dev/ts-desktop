@@ -174,14 +174,6 @@ function DataManager(db, resourceDir, apiURL) {
 
         getSources: function () {
 
-
-            var r = query([
-                    "select r.id, r.slug 'resource_id', r.name 'resource_name', l.name 'language_name', l.direction, l.slug 'language_id', p.slug 'project_id', r.checking_level, r.version, r.modified_at 'date_modified' from resource r",
-                    "join source_language l on l.id=r.source_language_id",
-                    "join project p on p.id=l.project_id",
-                    "order by r.name"
-                ].join(' '));
-            return zipper(r);
         },
 
         getSourceDetails: function (project_id, language_id, resource_id) {
@@ -246,6 +238,18 @@ function DataManager(db, resourceDir, apiURL) {
             });
         },
 
+        getSourceWords: function (source) {
+            var mythis = this;
+            var config = this.parseYaml(source, "config.yml");
+            var frames = this.extractContainer(source.language_id, "bible", "tw");
+
+            var words = frames.map(function (item) {
+                return {word: item.dir, data: mythis.parseHelps(item.content)[0]};
+            });
+
+            return {config: config.content, words: words};
+        },
+
         parseHelps: function (content) {
             var array = [];
             var contentarray = content.split("\n\n");
@@ -264,7 +268,7 @@ function DataManager(db, resourceDir, apiURL) {
             var file = fs.readFileSync(filepath, "utf8");
             var parsed = yaml.load(file);
 
-            if (parsed[0].chapter === "front") {
+            if (filename === "toc.yml" && parsed[0].chapter === "front") {
                 parsed[0].chapter = "00";
             }
 

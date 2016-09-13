@@ -78,12 +78,43 @@ function DataManager(db, resourceDir, apiURL) {
             });
         },
 
-        openContainer: function (language, project, resource) {
-            return db.openResourceContainer(language, project, resource);
+        openContainers: function (language, project, resource) {
+            return db.openResourceContainer(language, project, resource)
+                .then(function () {
+                    return db.openResourceContainer(language, project, "tn")
+                        .catch(function () {
+                            return true;
+                        });
+                })
+                .then(function () {
+                    return db.openResourceContainer(language, project, "tq")
+                        .catch(function () {
+                            return true;
+                        });
+                })
+                .then(function () {
+                    return db.openResourceContainer(language, project, "udb")
+                        .catch(function () {
+                            return true;
+                        });
+                });
         },
 
-        closeContainer: function (language, project, resource) {
-            return db.closeResourceContainer(language, project, resource);
+        closeAllContainers: function () {
+            var allfiles = fs.readdirSync(resourceDir);
+            var alldirs = allfiles.filter(function (file) {
+                var stat = fs.statSync(path.join(resourceDir, file));
+                return stat.isDirectory();
+            });
+            var promises = [];
+
+            alldirs.forEach(function (dir) {
+                var name = dir.split("_");
+                var close = db.closeResourceContainer(name[0], name[1], name[2]);
+                promises.push(close);
+            });
+
+            return Promise.all(promises);
         },
 
         extractContainer: function (language, project, resource) {

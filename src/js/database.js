@@ -121,9 +121,8 @@ function DataManager(db, resourceDir, apiURL) {
             return Promise.all(promises);
         },
 
-        extractContainer: function (language, project, resource) {
-            var containername = language + "_" + project + "_" + resource;
-            var contentpath = path.join(resourceDir, containername, "content");
+        extractContainer: function (container) {
+            var contentpath = path.join(resourceDir, container, "content");
             var data = [];
 
             try {
@@ -193,8 +192,9 @@ function DataManager(db, resourceDir, apiURL) {
         },
 
         getSourceFrames: function (source) {
-            var frames = this.extractContainer(source.language_id, source.project_id, source.resource_id);
-            var toc = this.parseYaml(source, "toc.yml");
+            var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;
+            var frames = this.extractContainer(container);
+            var toc = this.parseYaml(container, "toc.yml");
             var sorted = [];
 
             var mapped = frames.map(function (item) {
@@ -216,8 +216,9 @@ function DataManager(db, resourceDir, apiURL) {
         },
 
         getSourceUdb: function (source) {
+            var container = source.language_id + "_" + source.project_id + "_udb";
             if (source.resource_id === "ulb") {
-                var frames = this.extractContainer(source.language_id, source.project_id, "udb");
+                var frames = this.extractContainer(container);
 
                 return frames.map(function (item) {
                     return {chapter: item.dir, verse: item.filename, chunk: item.content};
@@ -229,7 +230,8 @@ function DataManager(db, resourceDir, apiURL) {
 
         getSourceHelps: function (source, type) {
             var mythis = this;
-            var frames = this.extractContainer(source.language_id, source.project_id, type);
+            var container = source.language_id + "_" + source.project_id + "_" + type;
+            var frames = this.extractContainer(container);
 
             return frames.map(function (item) {
                 return {chapter: item.dir, verse: item.filename, data: mythis.parseHelps(item.content)};
@@ -237,19 +239,9 @@ function DataManager(db, resourceDir, apiURL) {
         },
 
         getSourceWords: function (source) {
-            var mythis = this;
-            var config = this.parseYaml(source, "config.yml");
-            var dict = "bible";
-            if (source.resource_id === "obs") {
-                dict = "bible-obs";
-            }
-            var frames = this.extractContainer(source.language_id, dict, "tw");
+            var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;
 
-            var words = frames.map(function (item) {
-                return {word: item.dir, data: mythis.parseHelps(item.content)[0]};
-            });
-
-            return {config: config.content, words: words};
+            return this.parseYaml(container, "config.yml").content;
         },
 
         parseHelps: function (content) {
@@ -264,9 +256,8 @@ function DataManager(db, resourceDir, apiURL) {
             return array;
         },
 
-        parseYaml: function (source, filename) {
-            var containername = source.language_id + "_" + source.project_id + "_" + source.resource_id;
-            var filepath = path.join(resourceDir, containername, "content", filename);
+        parseYaml: function (container, filename) {
+            var filepath = path.join(resourceDir, container, "content", filename);
             var file = fs.readFileSync(filepath, "utf8");
             var parsed = yaml.load(file);
 
@@ -277,39 +268,53 @@ function DataManager(db, resourceDir, apiURL) {
             return parsed;
         },
 
-        getFrameWords: function (frameid) {
-            var r = query([
-                "select w.id, w.slug, w.term 'title', w.definition 'body', w.definition_title 'deftitle' from translation_word w",
-                "join frame__translation_word f on w.id=f.translation_word_id",
-                "where f.frame_id='" + frameid + "'"
-            ].join(' '));
+        getRelatedWords: function (source, slug) {
+            var mythis = this;
+            var dict = "bible";
+            if (source.resource_id === "obs") {
+                dict = "bible-obs";
+            }
+            var container = "en_" + dict + "_tw";
+            var list = this.parseYaml(container, "config.yml");
 
-            return zipper(r);
+            if (list[slug] && list[slug]["see_also"]) {
+                var slugs = list[slug]["see_also"];
+
+                return slugs.map(function (item) {
+                    return mythis.getWord(dict, item);
+                });
+            } else {
+                return [];
+            }
         },
 
-        getRelatedWords: function (wordid, source) {
-            var s = typeof source === 'object' ? source.id : source;
-            var r = query([
-                "select w.id, w.term 'title', w.definition 'body', w.definition_title 'deftitle' from translation_word w",
-                "join resource__translation_word x on x.translation_word_id=w.id",
-                "join translation_word_related r on w.slug=r.slug",
-                "where r.translation_word_id='" + wordid + "' and x.resource_id='" + s + "'",
-                "order by lower(w.term)"
-            ].join(' '));
+        getWord: function (dict, slug) {
+            var container = 'en_' + dict + '_tw';
+            var contentpath = path.join(resourceDir, container, "content", slug, "01.md");
 
-            return zipper(r);
+            try {
+                var data = this.parseHelps(fs.readFileSync(contentpath, 'utf8'))[0];
+                data.slug = slug;
+                return data;
+            } catch (err) {
+                return null;
+            }
         },
 
         getAllWords: function (source) {
-            var s = typeof source === 'object' ? source.id : source;
-            var r = query([
-                "select w.id, w.slug, w.term 'title', w.definition 'body', w.definition_title 'deftitle' from translation_word w",
-                "join resource__translation_word r on r.translation_word_id=w.id",
-                "where r.resource_id='" + s + "'",
-                "order by lower(w.term)"
-            ].join(' '));
+            var mythis = this;
+            var dict = "bible";
+            if (source.resource_id === "obs") {
+                dict = "bible-obs";
+            }
+            var container = "en_" + dict + "_tw";
+            var frames = this.extractContainer(container);
 
-            return zipper(r);
+            return frames.map(function (item) {
+                var data = mythis.parseHelps(item.content)[0];
+                data.slug = item.dir;
+                return data;
+            });
         },
 
         getWordExamples: function (wordid) {

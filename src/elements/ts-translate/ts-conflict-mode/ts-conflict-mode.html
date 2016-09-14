@@ -282,14 +282,14 @@
             }
             if (data.type === "Words") {
                 if (projectmeta.project.id === "obs") {
-                    this.set('examples', App.dataManager.getWordExamples(data.id));
+                    //this.set('examples', App.dataManager.getWordExamples(data.id));
                 } else {
                     this.set('examples', clear);
                 }
-                this.set('related', App.dataManager.getRelatedWords(data.id, currentsource));
+                this.set('related', App.dataManager.getRelatedWords(currentsource, data.slug));
                 this.set('allwords', clear);
                 footer.classList.remove("hide");
-                content = "\<h2 class='style-scope ts-conflict-mode'\>" + data.title + "\<\/h2\>\<h3 class='style-scope ts-conflict-mode'\>" + data.deftitle + "\<\/h3\>" + data.body;
+                content = "\<h2 class='style-scope ts-review-mode'\>" + data.title + "\<\/h2\>" + data.body;
             }
             if (data.type === "Questions") {
                 this.set('related', clear);

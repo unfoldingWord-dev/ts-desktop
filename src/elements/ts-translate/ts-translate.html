@@ -771,7 +771,7 @@
             var notes = App.dataManager.getSourceHelps(currentsource, "tn");
             var questions = App.dataManager.getSourceHelps(currentsource, "tq");
             var udb = App.dataManager.getSourceUdb(currentsource);
-            var worddata = App.dataManager.getSourceWords(currentsource);
+            var wordlist = App.dataManager.getSourceWords(currentsource);
             var chunkarray = [];
             var title = "";
 
@@ -781,7 +781,7 @@
                 if (frames[i].verse === "title") {
                     title = frames[i].chunk;
                 }
-                var resources = this.getFrameResources(frames[i], notes, questions, udb, worddata);
+                var resources = this.getFrameResources(frames[i], notes, questions, udb, wordlist);
                 var sourcedata = App.renderer.convertVerseMarkers(frames[i].chunk);
                 var chunkmeta = this.createFrameMeta(frames[i], projectmeta, sourcedata.verses, title);
                 var chunk = this.getFrameData(chunkmeta, projectmeta);
@@ -877,7 +877,7 @@
             this.set('currentproject.chunks', chunkarray);
         },
 
-        getFrameResources: function (frame, notes, questions, udb, worddata) {
+        getFrameResources: function (frame, notes, questions, udb, wordlist) {
             var resources = [];
             var note = [];
             var question = [];
@@ -899,21 +899,19 @@
                 resources.push({title: "Notes", array: true, data: note});
             }
 
-            if (worddata.config[frame.chapter][frame.verse]) {
-                framewords = worddata.config[frame.chapter][frame.verse].words;
+            if (wordlist[frame.chapter][frame.verse]) {
+                framewords = wordlist[frame.chapter][frame.verse].words;
             }
 
             framewords.forEach(function (frameword) {
-                var name = frameword.split("/").pop();
-                var filter = worddata.words.filter(function (item) {
-                    return item.word === name;
-                });
-                if (filter.length) {
-                    words.push(filter[0].data);
-                } else {
-                    console.log("Cannot find data for: " + name);
-                }
+                var split = _.compact(frameword.split("/"));
+                var word = App.dataManager.getWord(split[0], split[2]);
 
+                if (word) {
+                    words.push(word);
+                } else {
+                    console.log("Cannot find data for: " + frameword);
+                }
             });
 
             if (words.length) {

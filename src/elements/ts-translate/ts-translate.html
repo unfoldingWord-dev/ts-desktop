@@ -773,13 +773,17 @@
             var udb = App.dataManager.getSourceUdb(currentsource);
             var worddata = App.dataManager.getSourceWords(currentsource);
             var chunkarray = [];
+            var title = "";
 
             this.set('currentproject.conflicts', 0);
 
             for (var i = 0; i < frames.length; i++) {
+                if (frames[i].verse === "title") {
+                    title = frames[i].chunk;
+                }
                 var resources = this.getFrameResources(frames[i], notes, questions, udb, worddata);
                 var sourcedata = App.renderer.convertVerseMarkers(frames[i].chunk);
-                var chunkmeta = this.createFrameMeta(frames[i], projectmeta, sourcedata.verses);
+                var chunkmeta = this.createFrameMeta(frames[i], projectmeta, sourcedata.verses, title);
                 var chunk = this.getFrameData(chunkmeta, projectmeta);
                 var sourcecontent = App.renderer.convertNoteMarkers(sourcedata.text);
                 chunk.srccontent = App.renderer.renderSourceWithVerses(sourcecontent);
@@ -952,7 +956,7 @@
             return resources;
         },
 
-        createFrameMeta: function (frame, projectmeta, verses) {
+        createFrameMeta: function (frame, projectmeta, verses, title) {
             var refaddon = projectmeta.target_language.name;
             var resource = projectmeta.resource.id;
             var name = projectmeta.project.name;
@@ -960,7 +964,6 @@
             var chapternum = parseInt(chapterid);
             var frameid = frame.verse;
             var framenum = parseInt(frameid);
-            var title = frame.title;
             var chapterref;
             var chunkref;
 

@@ -773,18 +773,10 @@
             var udb = App.dataManager.getSourceUdb(currentsource);
             var worddata = App.dataManager.getSourceWords(currentsource);
             var chunkarray = [];
-            var index = 0;
 
             this.set('currentproject.conflicts', 0);
 
             for (var i = 0; i < frames.length; i++) {
-                if (frames[i].verse === "00") {
-                    frames.push(frames.splice(i, 1)[0]);
-                    i = frames.length;
-                }
-            }
-
-            for (i = 0; i < frames.length; i++) {
                 var resources = this.getFrameResources(frames[i], notes, questions, udb, worddata);
                 var sourcedata = App.renderer.convertVerseMarkers(frames[i].chunk);
                 var chunkmeta = this.createFrameMeta(frames[i], projectmeta, sourcedata.verses);
@@ -793,23 +785,8 @@
                 chunk.srccontent = App.renderer.renderSourceWithVerses(sourcecontent);
                 chunk.wordcontent = "";
                 chunk.resources = resources;
-                 /*if (projectmeta.project_type_class === "standard" && chunkmeta.frameid === "01") {
-                    if (chunkmeta.chapterid === "01") {
-                        chunkarray.push(this.createProjectTitleFrame(chunkmeta, projectmeta, index));
-                        index++;
-                    }
-                    if (chunkmeta.title) {
-                        chunkarray.push(this.createChapterTitleFrame(chunkmeta, projectmeta, index));
-                        index++;
-                    }
-                    if (chunkmeta.reference) {
-                        chunkarray.push(this.createChapterRefFrame(chunkmeta, projectmeta, index));
-                        index++;
-                    }
-                }*/
-                chunk.index = index;
+                chunk.index = i;
                 chunkarray.push(chunk);
-                index++;
             }
             this.set('currentproject.chunks', chunkarray);
         },
@@ -927,7 +904,12 @@
                 var filter = worddata.words.filter(function (item) {
                     return item.word === name;
                 });
-                words.push(filter[0].data);
+                if (filter.length) {
+                    words.push(filter[0].data);
+                } else {
+                    console.log("Cannot find data for: " + name);
+                }
+
             });
 
             if (words.length) {
@@ -979,33 +961,44 @@
             var frameid = frame.verse;
             var framenum = parseInt(frameid);
             var title = frame.title;
-            var reference = frame.reference;
             var chapterref;
             var chunkref;
 
             if (resource === "ulb" || resource === "udb") {
                 refaddon += " (" + resource + ")";
             }
-            if (framenum === 0) {
-                framenum = verses[0];
-                frameid = framenum.toString();
-                if (frameid.length === 1) {
-                    frameid = "0" + frameid;
-                }
-            }
+
             if (name === "Open Bible Stories") {
-                chapterref = title;
-                chunkref = title + ":" + framenum;
+                if (chapterid === "00" && frameid === "title") {
+                    chapterref = "Project Title";
+                    chunkref = "Project Title";
+                    framenum = 0;
+                } else if (frameid === "title") {
+                    chapterref = "Story Title";
+                    chunkref = "Story Title";
+                    framenum = 0;
+                } else if (frameid === "reference") {
+                    chapterref = "Story Reference";
+                    chunkref = "Story Reference";
+                    framenum = 0;
+                } else {
+                    chapterref = title;
+                    chunkref = title + ":" + framenum;
+                }
             } else {
-                chapterref = name + " " + chapternum;
-                chunkref = name + " " + chapternum + ":" + verses[0] + "–" + verses[verses.length-1];
+                if (chapterid === "00" && frameid === "title") {
+                    chapterref = "Project Title";
+                    chunkref = "Project Title";
+                    framenum = 0;
+                } else {
+                    chapterref = name + " " + chapternum;
+                    chunkref = name + " " + chapternum + ":" + verses[0] + "–" + verses[verses.length-1];
+                }
             }
 
             return {
                 chapter: chapternum,
                 frame: framenum,
-                title: title,
-                reference: reference,
                 chapterid: chapterid,
                 frameid: frameid,
                 verses: verses,
@@ -1080,70 +1073,6 @@
             }
             this.set('currentproject.conflicts', this.currentproject.conflicts + 1);
             return {exists: true, array: conarray};
-        },
-
-        createProjectTitleFrame: function (chunkmeta, projectmeta, index) {
-            var titlemeta = {
-                chapter: 0,
-                frame: 0,
-                chapterid: "00",
-                frameid: "title",
-                chunkref: "Project Title",
-                refaddon: chunkmeta.refaddon,
-                verses: []
-            };
-            var chunk = this.getFrameData(titlemeta, projectmeta);
-            chunk.projectmeta = projectmeta;
-            chunk.chunkmeta = titlemeta;
-            chunk.srccontent = projectmeta.project.name;
-            chunk.wordcontent = "";
-            chunk.resources = [];
-            chunk.index = index;
-            return chunk;
-        },
-
-        createChapterTitleFrame: function (chunkmeta, projectmeta, index) {
-            var titlemeta = {
-                chapter: chunkmeta.chapter,
-                frame: 0,
-                title: chunkmeta.title,
-                reference: chunkmeta.reference,
-                chapterid: chunkmeta.chapterid,
-                frameid: "title",
-                verses: [],
-                chunkref: "Story Title",
-                refaddon: chunkmeta.refaddon
-            };
-            var chunk = this.getFrameData(titlemeta, projectmeta);
-            chunk.projectmeta = projectmeta;
-            chunk.chunkmeta = titlemeta;
-            chunk.srccontent = chunkmeta.title;
-            chunk.wordcontent = "";
-            chunk.resources = [];
-            chunk.index = index;
-            return chunk;
-        },
-
-        createChapterRefFrame: function (chunkmeta, projectmeta, index) {
-            var refmeta = {
-                chapter: chunkmeta.chapter,
-                frame: 0,
-                title: chunkmeta.title,
-                reference: chunkmeta.reference,
-                chapterid: chunkmeta.chapterid,
-                frameid: "reference",
-                verses: [],
-                chunkref: "Story Reference",
-                refaddon: chunkmeta.refaddon
-            };
-            var chunk = this.getFrameData(refmeta, projectmeta);
-            chunk.projectmeta = projectmeta;
-            chunk.chunkmeta = refmeta;
-            chunk.srccontent = chunkmeta.reference;
-            chunk.wordcontent = "";
-            chunk.resources = [];
-            chunk.index = index;
-            return chunk;
         },
 
         modechange: function (tomode, frommode) {

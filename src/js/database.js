@@ -78,6 +78,10 @@ function DataManager(db, resourceDir, apiURL) {
             });
         },
 
+        openContainer: function (language, project, resource) {
+            return db.openResourceContainer(language, project, resource);
+        },
+
         openContainers: function (language, project, resource) {
             return db.openResourceContainer(language, project, resource)
                 .then(function () {
@@ -94,12 +98,6 @@ function DataManager(db, resourceDir, apiURL) {
                 })
                 .then(function () {
                     return db.openResourceContainer(language, project, "udb")
-                        .catch(function () {
-                            return true;
-                        });
-                })
-                .then(function () {
-                    return db.openResourceContainer(language, "bible", "tw")
                         .catch(function () {
                             return true;
                         });
@@ -241,7 +239,11 @@ function DataManager(db, resourceDir, apiURL) {
         getSourceWords: function (source) {
             var mythis = this;
             var config = this.parseYaml(source, "config.yml");
-            var frames = this.extractContainer(source.language_id, "bible", "tw");
+            var dict = "bible";
+            if (source.resource_id === "obs") {
+                dict = "bible-obs";
+            }
+            var frames = this.extractContainer(source.language_id, dict, "tw");
 
             var words = frames.map(function (item) {
                 return {word: item.dir, data: mythis.parseHelps(item.content)[0]};

@@ -898,7 +898,7 @@
                 resources.push({title: "Notes", array: true, data: note});
             }
 
-            if (wordlist[frame.chapter][frame.verse]) {
+            if (wordlist && wordlist[frame.chapter] && wordlist[frame.chapter][frame.verse]) {
                 framewords = wordlist[frame.chapter][frame.verse].words;
             }
 

@@ -964,6 +964,7 @@
           return App.projectsManager.loadTargetTranslationsList()
               .then(function (list) {
                   var promises = [];
+                  var strings = {};
 
                   for (var i = 0; i < list.length; i++) {
                       var proj = list[i].project.id;
@@ -971,9 +972,12 @@
                       for (var j = 0; j < list[i].source_translations.length; j++) {
                           var lang = list[i].source_translations[j].language_id;
                           var res = list[i].source_translations[j].resource_id;
-                          var open = App.dataManager.openContainers(lang, proj, res);
-
-                          promises.push(open);
+                          var string = lang + "_" + proj + "_" + res;
+                          if (!strings[string]) {
+                              strings[string] = true;
+                              var open = App.dataManager.openContainers(lang, proj, res);
+                              promises.push(open);
+                          }
                       }
                   }
                   promises.push(App.dataManager.openContainer('en', 'bible', 'tw'));

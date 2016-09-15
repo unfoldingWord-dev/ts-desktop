@@ -209,7 +209,6 @@
                         <template is="dom-repeat" items="{{examples}}" as="example">
                             <div id="examples">
                                 <p class="link" on-tap="examplescroll"><span>{{chunks.0.projectmeta.project.name}}</span> <span>{{example.chapter}}</span>:<span>{{example.frame}}</span></p>
-                                <ts-text-holder text="[[example.body]]"></ts-text-holder>
                             </div>
                         </template>
                     </template>
@@ -318,11 +317,7 @@
                 content = "\<h2 class='style-scope ts-review-mode'\>" + data.title + "\<\/h2\>\<p class='style-scope ts-review-mode'\>" + data.body + "\<\/p\>";
             }
             if (data.type === "Words") {
-                if (projectmeta.project.id === "obs") {
-                    //this.set('examples', App.dataManager.getWordExamples(data.id));
-                } else {
-                    this.set('examples', clear);
-                }
+                this.set('examples', App.dataManager.getWordExamples(currentsource, data.slug));
                 this.set('related', App.dataManager.getRelatedWords(currentsource, data.slug));
                 this.set('allwords', clear);
                 footer.classList.remove("hide");
@@ -362,16 +357,14 @@
             var chapter = example.chapter;
             var frame = example.frame;
             var list = this.$.reviewlist;
-            var found = false;
-            var i = 0;
+            var chunks = this.chunks;
 
-            while (i < 10000 && !found) {
-                list.scrollToIndex(i);
-                if (this.chunks[i].chunkmeta.chapter === chapter && this.chunks[i].chunkmeta.frame === frame) {
-                    found = true;
-                }
-                i++;
-            }
+            var filtered = chunks.filter(function (chunk) {
+                return chunk.chunkmeta.chapter === chapter && chunk.chunkmeta.frame === frame;
+            });
+            var index = filtered[0].index;
+
+            list.scrollToIndex(index);
         },
 
         closeresource: function () {
@@ -433,21 +426,18 @@
 
         setlocation: function () {
             var list = this.$.reviewlist;
-            var found = false;
-            var i = 0;
             var index = this.modestatus.index;
+            var chunks = this.chunks;
+            var chapter = this.modestatus.chapter;
 
-            if (index >= 0) {
-                list.scrollToIndex(index);
-            } else {
-                while (i < 10000 && !found) {
-                    list.scrollToIndex(i);
-                    if (this.chunks[i].chunkmeta.chapter === this.modestatus.chapter) {
-                        found = true;
-                    }
-                    i++;
-                }
+            if (index < 0) {
+                var filtered = chunks.filter(function (chunk) {
+                    return chunk.chunkmeta.chapter === chapter;
+                });
+                index = filtered[0].index;
             }
+
+            list.scrollToIndex(index);
         },
 
 		ready: function() {

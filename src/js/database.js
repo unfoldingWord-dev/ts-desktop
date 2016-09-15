@@ -300,16 +300,24 @@ function DataManager(db, resourceDir, apiURL) {
             });
         },
 
-        getWordExamples: function (wordid) {
+        getWordExamples: function (source, slug) {
+            var dict = "bible";
+            if (source.resource_id === "obs") {
+                dict = "bible-obs";
+            }
+            var container = "en_" + dict + "_tw";
+            var list = this.parseYaml(container, "config.yml");
 
+            if (list[slug] && list[slug]["examples"]) {
+                var references = list[slug]["examples"];
 
-            /*
-            var r = query([
-                "select cast(e.frame_slug as int) 'frame', cast(e.chapter_slug as int) 'chapter', e.body from translation_word_example e",
-                "where e.translation_word_id='" + wordid + "'"
-            ].join(' '));
-
-            return zipper(r);*/
+                return references.map(function (item) {
+                    var split = item.split("-");
+                    return {chapter: parseInt(split[0]), frame: parseInt(split[1])};
+                });
+            } else {
+                return [];
+            }
         },
 
         getTa: function (volume) {

@@ -846,11 +846,10 @@
             var frames;
             var volume = "vol1";
             var chunkarray = [];
-            var sources = App.dataManager.getSources();
-            var filtered = _.filter(sources, {'language_id': "en", 'resource_id': "ulb", 'checking_level': 3});
 
             if (type === "tw") {
-                frames = App.dataManager.getAllWords(filtered[0]);
+                var dict = projectmeta.project.id;
+                frames = App.dataManager.getAllWords(dict);
             } else if (type === "ta") {
                 if (projectmeta.project.id !== "ta") {
                     volume = projectmeta.project.id;

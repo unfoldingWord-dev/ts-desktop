@@ -305,6 +305,10 @@
             var projectmeta = this.chunks[0].projectmeta;
             var current = projectmeta.currentsource;
             var currentsource = projectmeta.source_translations[current];
+            var dict = "bible";
+            if (currentsource.resource_id === "obs") {
+                dict = "bible-obs";
+            }
 
             if (data.type === "Notes") {
                 this.set('related', clear);
@@ -334,7 +338,7 @@
             if (data.type === "allwords") {
                 this.set('related', clear);
                 this.set('examples', clear);
-                this.set('allwords', App.dataManager.getAllWords(currentsource));
+                this.set('allwords', App.dataManager.getAllWords(dict));
                 footer.classList.add("hide");
                 content = "";
             }

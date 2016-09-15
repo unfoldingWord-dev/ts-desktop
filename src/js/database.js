@@ -7,17 +7,14 @@ var fs = require('fs-extra');
 var path = require('path');
 var yaml = require('js-yaml');
 
-function zipper (r) {
-    return r.length ? _.map(r[0].values, _.zipObject.bind(_, r[0].columns)) : [];
-}
-
 function DataManager(db, resourceDir, apiURL) {
-    var query = db.query;
-    var save = db.save;
 
     return {
 
         updateLanguageList: function () {
+
+
+            /*
             var req = utils.promisify(request);
 
             return req({url: 'http://td.unfoldingword.org/exports/langnames.json', timeout: 60000})
@@ -51,7 +48,7 @@ function DataManager(db, resourceDir, apiURL) {
                 .catch(function (err) {
                     console.log(err);
                     throw "Could not update language list";
-                });
+                });*/
         },
 
         getTargetLanguages: function () {
@@ -160,18 +157,17 @@ function DataManager(db, resourceDir, apiURL) {
         },
 
 		getChunkMarkers: function (id) {
+
+
+            /*
 			var r = query([
 				"select cm.chapter_slug 'chapter_slug', cm.first_verse_slug 'first_verse_slug'",
 				"from chunk_marker as cm",
 				"left join project as p on p.id=cm.project_id",
 				"where p.slug='" + id + "'"
 			].join(' '));
-			return zipper(r);
+			return zipper(r);*/
 		},
-
-        getSources: function () {
-
-        },
 
         getSourceDetails: function (project_id, language_id, resource_id) {
             var res = db.indexSync.getResource(language_id, project_id, resource_id);
@@ -301,12 +297,8 @@ function DataManager(db, resourceDir, apiURL) {
             }
         },
 
-        getAllWords: function (source) {
+        getAllWords: function (dict) {
             var mythis = this;
-            var dict = "bible";
-            if (source.resource_id === "obs") {
-                dict = "bible-obs";
-            }
             var container = "en_" + dict + "_tw";
             var frames = this.extractContainer(container);
 
@@ -318,15 +310,21 @@ function DataManager(db, resourceDir, apiURL) {
         },
 
         getWordExamples: function (wordid) {
+
+
+            /*
             var r = query([
                 "select cast(e.frame_slug as int) 'frame', cast(e.chapter_slug as int) 'chapter', e.body from translation_word_example e",
                 "where e.translation_word_id='" + wordid + "'"
             ].join(' '));
 
-            return zipper(r);
+            return zipper(r);*/
         },
 
         getTa: function (volume) {
+
+
+            /*
             var r = query([
                 "select t.id, t.slug, t.title, t.text 'body', t.reference from translation_academy_article t",
                 "join translation_academy_manual m on m.id=t.translation_academy_manual_id",
@@ -334,61 +332,18 @@ function DataManager(db, resourceDir, apiURL) {
                 "where v.slug like '" + volume + "'"
             ].join(' '));
 
-            return zipper(r);
+            return zipper(r);*/
         },
 
         getVolumes: function () {
+
+
+            /*
             var r = query([
                 "select v.slug, v.title from translation_academy_volume v"
             ].join(' '));
 
-            return zipper(r);
-        },
-
-        checkProject: function (project) {
-            var allsources = this.getSources();
-            var mysources = _.filter(allsources, 'project_id', project);
-            var combined = {};
-            var sources = [];
-            for (var i = 0; i < mysources.length; i++) {
-                var source = mysources[i].resource_id;
-                var frames = this.getSourceFrames(mysources[i]);
-                if (frames.length) {
-                    console.log("resource:", source, "chunks:", frames.length);
-                    combined[source] = frames;
-                    sources.push(source);
-                }
-            }
-            var match = true;
-            var j = 0;
-            while (match && j < combined[sources[0]].length) {
-                var testref = combined[sources[0]][j].chapter + combined[sources[0]][j].verse;
-                for (var k = 1; k < sources.length; k++) {
-                    var checkref = combined[sources[k]][j].chapter + combined[sources[k]][j].verse;
-                    if (testref !== checkref) {
-                        match = false;
-                        var firsterror = testref;
-                    }
-                }
-                j++;
-            }
-            if (match) {
-                console.log("                             ALL CHUNKS LINE UP!");
-            } else {
-                console.log("                             First error occurs at " + firsterror);
-            }
-            console.log("Data:");
-            console.log(combined);
-        },
-
-        checkAllProjects: function () {
-            var allsources = this.getSources();
-            var ulbsources = _.filter(allsources, 'resource_id', 'ulb');
-            for (var i = 0; i < ulbsources.length; i++) {
-                console.log("Project Results              Name: " + ulbsources[i].project_id);
-                this.checkProject(ulbsources[i].project_id);
-                console.log("---------------------------------------------------------------");
-            }
+            return zipper(r);*/
         }
     };
 }

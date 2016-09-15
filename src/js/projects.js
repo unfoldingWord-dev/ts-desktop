@@ -265,11 +265,10 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
 
         getProjectFrameNum: function (meta) {
             var frames = [];
-            //var sources = dataManager.getSources();
-            //var filtered = _.filter(sources, {'language_id': "en", 'resource_id': "ulb", 'checking_level': 3});
 
             if (meta.type.id === "tw") {
-                //frames = dataManager.getAllWords(filtered[0]);
+                var dict = meta.project.id;
+                frames = dataManager.getAllWords(dict);
                 return frames.length;
             } else if (meta.type.id === "ta") {
                 //frames = dataManager.getTa(meta.project.id);

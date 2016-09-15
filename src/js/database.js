@@ -157,16 +157,7 @@ function DataManager(db, resourceDir, apiURL) {
         },
 
 		getChunkMarkers: function (id) {
-
-
-            /*
-			var r = query([
-				"select cm.chapter_slug 'chapter_slug', cm.first_verse_slug 'first_verse_slug'",
-				"from chunk_marker as cm",
-				"left join project as p on p.id=cm.project_id",
-				"where p.slug='" + id + "'"
-			].join(' '));
-			return zipper(r);*/
+            return db.indexSync.getChunkMarkers(id, 'en-US');
 		},
 
         getSourceDetails: function (project_id, language_id, resource_id) {

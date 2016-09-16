@@ -975,7 +975,7 @@
                           var string = lang + "_" + proj + "_" + res;
                           if (!strings[string]) {
                               strings[string] = true;
-                              var open = App.dataManager.openContainers(lang, proj, res);
+                              var open = App.dataManager.openProjectContainers(lang, proj, res);
                               promises.push(open);
                           }
                       }

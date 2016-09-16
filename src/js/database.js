@@ -49,32 +49,62 @@ function DataManager(db, resourceDir, apiURL) {
             });
         },
 
-        openContainer: function (language, project, resource) {
-            return db.openResourceContainer(language, project, resource)
-                .catch(function () {
-                    return true;
+        downloadContainer: function (language, project, resource) {
+            return db.downloadResourceContainer(language, project, resource)
+                .catch(function (err) {
+                    throw err;
                 });
         },
 
-        openContainers: function (language, project, resource) {
+        downloadProjectContainers: function (language, project, resource) {
+            var mythis = this;
+
+            return mythis.downloadContainer(language, project, resource)
+                .then(function () {
+                    return mythis.downloadContainer(language, project, "tn")
+                        .catch(function () {
+                            return true;
+                        });
+                })
+                .then(function () {
+                    return mythis.downloadContainer(language, project, "tq")
+                        .catch(function () {
+                            return true;
+                        });
+                })
+                .then(function () {
+                    return mythis.downloadContainer(language, project, "udb")
+                        .catch(function () {
+                            return true;
+                        });
+                });
+        },
+
+        openContainer: function (language, project, resource) {
             return db.openResourceContainer(language, project, resource)
-                .catch(function () {
-                    return true;
-                })
+                .catch(function (err) {
+                    throw err;
+                });
+        },
+
+        openProjectContainers: function (language, project, resource) {
+            var mythis = this;
+
+            return mythis.openContainer(language, project, resource)
                 .then(function () {
-                    return db.openResourceContainer(language, project, "tn")
+                    return mythis.openContainer(language, project, "tn")
                         .catch(function () {
                             return true;
                         });
                 })
                 .then(function () {
-                    return db.openResourceContainer(language, project, "tq")
+                    return mythis.openContainer(language, project, "tq")
                         .catch(function () {
                             return true;
                         });
                 })
                 .then(function () {
-                    return db.openResourceContainer(language, project, "udb")
+                    return mythis.openContainer(language, project, "udb")
                         .catch(function () {
                             return true;
                         });

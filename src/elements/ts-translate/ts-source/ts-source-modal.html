@@ -108,6 +108,12 @@
             opacity: 1;
         }
 
+        #download {
+            background: var(--accent-color);
+            color: var(--reverse-text-color);
+            text-transform: uppercase;
+        }
+
     </style>
 
     <template>
@@ -135,7 +141,14 @@
                         <div>
                             <span>[[source.language_name]]</span> - <span>[[source.resource_name]]</span>
                         </div>
-                        <paper-checkbox disabled></paper-checkbox>
+                        <div>
+                            <template is="dom-if" if="{{source.exists}}">
+                                <paper-checkbox disabled></paper-checkbox>
+                            </template>
+                            <template is="dom-if" if="{{!source.exists}}">
+                                <paper-button raised id="download">Download</paper-button>
+                            </template>
+                        </div>
                     </div>
                 </template>
             </div>
@@ -203,6 +216,22 @@
             }
         },
 
+        download: function (source) {
+            var mythis = this;
+            var all = this.allSources;
+            var index = all.indexOf(source);
+
+
+            App.dataManager.downloadProjectContainers(source.language_id, source.project_id, source.resource_id)
+                .then(function () {
+                    source.exists = true;
+                    all[index] = source;
+                    mythis.set('allSources', all);
+                    console.log("finished");
+                });
+
+        },
+
         updateavailable: function() {
             var all = this.allSources;
             var selected = this.sources;
@@ -238,9 +267,14 @@
 
         addsource: function(event) {
             var source = event.model.source;
-            if (this.sources.length < 3) {
-                this.push('sources', source);
-                this.selectedSource = this.sources.indexOf(source);
+
+            if (source.exists) {
+                if (this.sources.length < 3) {
+                    this.push('sources', source);
+                    this.selectedSource = this.sources.indexOf(source);
+                }
+            } else {
+                this.download(source);
             }
         },
 

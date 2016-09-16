@@ -723,7 +723,7 @@
             var projectmeta = mythis.currentproject.projectmeta;
             var source = projectmeta.source_translations[projectmeta.currentsource];
 
-            App.dataManager.openContainers(source.language_id, projectmeta.project.id, source.resource_id)
+            App.dataManager.openProjectContainers(source.language_id, projectmeta.project.id, source.resource_id)
                 .then(function () {
                     return App.projectsManager.loadTargetTranslation(projectmeta);
                 })

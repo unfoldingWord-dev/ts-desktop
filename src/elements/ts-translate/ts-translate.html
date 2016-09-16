@@ -854,7 +854,7 @@
                 if (projectmeta.project.id !== "ta") {
                     volume = projectmeta.project.id;
                 }
-                frames = App.dataManager.getTa(volume);
+                //frames = App.dataManager.getTa(volume);
             }
 
             for (var i = 0; i < frames.length; i++) {
@@ -913,6 +913,14 @@
                 }
             });
 
+            for (var w = 0; w < words.length; w++) {
+                var worddata = this.currentproject.rawdata.words["01-" + words[w].slug];
+                if (worddata && worddata.helpscontent[0].body !== "" && worddata.helpscontent[0].title !== "") {
+                    words[w].title = worddata.helpscontent[0].title;
+                    words[w].body = worddata.helpscontent[0].body;
+                }
+            }
+
             if (words.length) {
                 resources.push({title: "Words", array: true, data: words});
             }
@@ -939,17 +947,6 @@
                 resources.push({title: "UDB", array: false, data: [udbtext]});
             }
 
-            /*
-
-            for (var w = 0; w < words.length; w++) {
-                var worddata = this.currentproject.rawdata.words["01-" + words[w].slug];
-                if (worddata && worddata.helpscontent[0].body !== "" && worddata.helpscontent[0].title !== "") {
-                    words[w].title = worddata.helpscontent[0].title;
-                    words[w].body = worddata.helpscontent[0].body;
-                }
-            }
-
-            */
             return resources;
         },
 

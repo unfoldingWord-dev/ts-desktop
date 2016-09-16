@@ -322,27 +322,6 @@ function DataManager(db, resourceDir, apiURL) {
 
         getTa: function (volume) {
 
-
-            /*
-            var r = query([
-                "select t.id, t.slug, t.title, t.text 'body', t.reference from translation_academy_article t",
-                "join translation_academy_manual m on m.id=t.translation_academy_manual_id",
-                "join translation_academy_volume v on v.id=m.translation_academy_volume_id",
-                "where v.slug like '" + volume + "'"
-            ].join(' '));
-
-            return zipper(r);*/
-        },
-
-        getVolumes: function () {
-
-
-            /*
-            var r = query([
-                "select v.slug, v.title from translation_academy_volume v"
-            ].join(' '));
-
-            return zipper(r);*/
         }
     };
 }

@@ -11,44 +11,10 @@ function DataManager(db, resourceDir, apiURL) {
 
     return {
 
-        updateLanguageList: function () {
+        updateLibrary: function () {
 
+            return db.updatePrimaryIndex(apiURL);
 
-            /*
-            var req = utils.promisify(request);
-
-            return req({url: 'http://td.unfoldingword.org/exports/langnames.json', timeout: 60000})
-                .then(function (response) {
-                    return JSON.parse(response.body);
-                })
-                .then(function (newlist) {
-                    var result = {};
-                    var added = 0;
-                    zipper(query('select slug from target_language')).forEach(function (item) {
-                        result [item.slug] = true;
-                    });
-
-                    for (var i = 0; i < newlist.length; i++) {
-                        var lc = newlist[i].lc;
-                        var ln = newlist[i].ln;
-                        var ld = newlist[i].ld;
-                        var lr = newlist[i].lr;
-
-                        if (!result[lc]) {
-                            query('insert into target_language (slug, name, direction, region) values ("' + lc + '", "' + ln + '", "' + ld + '", "' + lr + '")');
-                            added++;
-                        }
-                    }
-                    return added;
-                })
-                .then(function (added) {
-                    save();
-                    return added;
-                })
-                .catch(function (err) {
-                    console.log(err);
-                    throw "Could not update language list";
-                });*/
         },
 
         getTargetLanguages: function () {

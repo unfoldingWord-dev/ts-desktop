@@ -61,8 +61,8 @@
         <paper-menu-button id="menu" horizontal-offset="10" vertical-offset="10" vertical-align="bottom">
             <paper-icon-button class="dropdown-trigger" icon="more-vert"></paper-icon-button>
             <paper-menu class="dropdown-content">
-                <paper-item on-tap="update"><iron-icon class="smallicon" icon="maps:local-library"></iron-icon>Update Languages</paper-item>
-                <paper-item on-tap="import"><iron-icon class="smallicon" icon="file-download"></iron-icon>Import/Restore</paper-item>
+                <paper-item on-tap="update"><iron-icon class="smallicon" icon="maps:local-library"></iron-icon>Update Library</paper-item>
+                <paper-item on-tap="importmenu"><iron-icon class="smallicon" icon="file-download"></iron-icon>Import/Restore</paper-item>
                 <paper-item class="hide" on-tap="academy"><iron-icon class="smallicon" icon="book"></iron-icon>translationAcademy</paper-item>
                 <paper-item on-tap="feedback"><iron-icon class="smallicon" icon="announcement"></iron-icon>Feedback</paper-item>
                 <paper-item on-tap="logout"><iron-icon class="smallicon" icon="perm-identity"></iron-icon>Logout</paper-item>
@@ -104,14 +104,14 @@
             App.keyManager.destroyKeys();
         },
 
-        import: function() {
+        importmenu: function() {
             this.$.menu.close();
             this.fire('iron-signal', {name: 'openimport'});
         },
 
         update: function() {
             this.$.menu.close();
-            this.fire('iron-signal', {name: 'updatelanguages'});
+            this.fire('iron-signal', {name: 'updatelibrary'});
         },
 
         academy: function () {

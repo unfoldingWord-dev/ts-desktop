@@ -190,7 +190,7 @@
       <iron-signals on-iron-signal-openattribution="openAttribution"></iron-signals>
       <iron-signals on-iron-signal-changeproject="changeProject"></iron-signals>
       <iron-signals on-iron-signal-deleteproject="deleteProject"></iron-signals>
-      <iron-signals on-iron-signal-updatelanguages="updateLanguages"></iron-signals>
+      <iron-signals on-iron-signal-updatelibrary="updateLibrary"></iron-signals>
       <iron-signals on-iron-signal-saveprint="savePrint"></iron-signals>
       <iron-signals on-iron-signal-openloading="openLoading"></iron-signals>
       <iron-signals on-iron-signal-closeloading="closeLoading"></iron-signals>
@@ -342,15 +342,15 @@
           this.showMessage(title, msg);
       },
 
-      updateLanguages: function () {
+      updateLibrary: function () {
           var mythis = this;
 
-          mythis.showLoadingMessage('Updating Languages. This may take several minutes. Please wait...');
+          mythis.showLoadingMessage('Updating Library. This may take several minutes. Please wait...');
 
           setTimeout(function () {
-              return App.dataManager.updateLanguageList()
-                  .then(function (added) {
-                      mythis.showMessage('Update Complete', 'The language list has been updated. ' + added + ' new languages were added.');
+              return App.dataManager.updateLibrary()
+                  .then(function () {
+                      mythis.showMessage('Update Complete', 'The library has been updated.');
                   })
                   .catch(function (err) {
                       mythis.showErrorMessage('Update Failed', 'An error occurred while updating', err);

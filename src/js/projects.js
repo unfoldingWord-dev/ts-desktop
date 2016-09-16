@@ -23,7 +23,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
         "Lamentations", "Ezekial", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah",
         "Malachi", "Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians", "Colossians",
         "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter", "1 John", "2 John",
-        "3 John", "Jude", "Revelation", "Open Bible Stories", "translationWords", "translationAcademy Vol 1", "translationAcademy Vol 2"];
+        "3 John", "Jude", "Revelation", "Open Bible Stories", "translationWords", "translationWords OBS", "translationAcademy Vol 1", "translationAcademy Vol 2"];
 
     return {
 

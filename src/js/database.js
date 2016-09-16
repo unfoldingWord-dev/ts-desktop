@@ -50,11 +50,17 @@ function DataManager(db, resourceDir, apiURL) {
         },
 
         openContainer: function (language, project, resource) {
-            return db.openResourceContainer(language, project, resource);
+            return db.openResourceContainer(language, project, resource)
+                .catch(function () {
+                    return true;
+                });
         },
 
         openContainers: function (language, project, resource) {
             return db.openResourceContainer(language, project, resource)
+                .catch(function () {
+                    return true;
+                })
                 .then(function () {
                     return db.openResourceContainer(language, project, "tn")
                         .catch(function () {
@@ -137,9 +143,18 @@ function DataManager(db, resourceDir, apiURL) {
         getSourceDetails: function (project_id, language_id, resource_id) {
             var res = db.indexSync.getResource(language_id, project_id, resource_id);
             var lang = db.indexSync.getSourceLanguage(language_id);
+            var filename = language_id + "_" + project_id + "_" + resource_id + ".ts";
+            var exists;
+
+            try {
+                exists = fs.statSync(path.join(resourceDir, filename)).isFile();
+            } catch (err) {
+                exists = false;
+            }
 
             return {
                 id: res.id,
+                exists: exists,
                 language_id: language_id,
                 resource_id: resource_id,
                 checking_level: res.status.checking_level,

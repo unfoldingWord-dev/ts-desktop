@@ -33,7 +33,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                     return utils.fs.mkdirs(configurator.getUserPath('datalocation', 'backups'));
                 })
                 .then(function () {
-                    return utils.fs.stat(oldPath).then(App.utils.ret(true)).catch(App.utils.ret(false));
+                    return utils.fs.stat(oldPath).then(utils.ret(true)).catch(utils.ret(false));
                 })
                 .then(function (exists) {
                     if (exists) {
@@ -551,7 +551,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
         deleteTargetTranslation: function (meta) {
             var paths = utils.makeProjectPaths(targetDir, meta);
 
-            return utils.fs.stat(paths.projectDir).then(App.utils.ret(true)).catch(App.utils.ret(false))
+            return utils.fs.stat(paths.projectDir).then(utils.ret(true)).catch(utils.ret(false))
                 .then(function (exists) {
                     if (exists) {
                         return trash([paths.projectDir]);

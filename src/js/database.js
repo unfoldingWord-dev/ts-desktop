@@ -37,16 +37,48 @@ function DataManager(db, resourceDir, apiURL) {
             return db.indexSync.getProjects(lang || 'en');
         },
 
-        getResourcesByProject: function (project) {
+        getSourcesByProject: function (project) {
             var mythis = this;
             var allres = db.indexSync.getResources(null, project);
             var filterres = allres.filter(function (item) {
                 return item.type === 'book' && item.status.checking_level === "3";
             });
 
-            return filterres.map(function (res) {
+            var mapped = filterres.map(function (res) {
                 return mythis.getSourceDetails(res.project_slug, res.source_language_slug, res.slug);
             });
+
+            return utils.chain(this.validateSource.bind(this))(mapped);
+        },
+
+        validateSource: function (source) {
+            var mythis = this;
+            var lang = source.language_id;
+            var proj = source.project_id;
+            var res = source.resource_id;
+            var container = lang + "_" + proj + "_" + res;
+            var zipname = container + ".ts";
+            var manifest = path.join(resourceDir, container, "package.json");
+
+            return utils.fs.stat(path.join(resourceDir, zipname)).then(utils.ret(true)).catch(utils.ret(false))
+                .then(function (exists) {
+                    source.exists = exists;
+
+                    if (exists) {
+                        return mythis.openContainer(lang, proj, res)
+                            .then(function () {
+                                return utils.fs.readFile(manifest);
+                            })
+                            .then(function (contents) {
+                                var json = JSON.parse(contents);
+                                source.uptodate = json.resource.status.pub_date === source.date_modified;
+                                return source;
+                            });
+                    }
+
+                    source.uptodate = false;
+                    return source;
+                });
         },
 
         downloadContainer: function (language, project, resource) {
@@ -173,18 +205,9 @@ function DataManager(db, resourceDir, apiURL) {
         getSourceDetails: function (project_id, language_id, resource_id) {
             var res = db.indexSync.getResource(language_id, project_id, resource_id);
             var lang = db.indexSync.getSourceLanguage(language_id);
-            var filename = language_id + "_" + project_id + "_" + resource_id + ".ts";
-            var exists;
-
-            try {
-                exists = fs.statSync(path.join(resourceDir, filename)).isFile();
-            } catch (err) {
-                exists = false;
-            }
 
             return {
                 id: res.id,
-                exists: exists,
                 language_id: language_id,
                 resource_id: resource_id,
                 checking_level: res.status.checking_level,

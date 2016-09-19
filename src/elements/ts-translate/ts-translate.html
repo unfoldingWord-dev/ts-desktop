@@ -503,20 +503,23 @@
         },
 
         opensource: function () {
+            var mythis = this;
             var projectmeta = this.currentproject.projectmeta;
             var modal = this.$.modal;
-            var sources = App.dataManager.getResourcesByProject(projectmeta.project.id);
 
-            if (projectmeta.resource.id === "udb") {
-                modal.allSources = sources;
-            } else {
-                modal.allSources = _.filter(sources, function(source) {
-                    return source.resource_id !== "udb";
+            App.dataManager.getSourcesByProject(projectmeta.project.id)
+                .then(function (sources) {
+                    if (projectmeta.resource.id === "udb") {
+                        modal.allSources = sources;
+                    } else {
+                        modal.allSources = _.filter(sources, function(source) {
+                            return source.resource_id !== "udb";
+                        });
+                    }
+                    modal.sources = projectmeta.source_translations;
+                    modal.selectedSource = projectmeta.currentsource;
+                    mythis.$.sourcepopup.open();
                 });
-            }
-            modal.sources = projectmeta.source_translations;
-            modal.selectedSource = projectmeta.currentsource;
-            this.$.sourcepopup.open();
         },
 
         closesource: function () {

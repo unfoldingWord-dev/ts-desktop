@@ -537,7 +537,7 @@
                     });
 
                     modal.selected = selected;
-                    modal.available = available;
+                    modal.sortavailable(available);
                     modal.current = selected.length - 1;
                     mythis.fire('iron-signal', {name: 'closeloading'});
                     setTimeout(function() {

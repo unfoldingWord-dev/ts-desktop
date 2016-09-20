@@ -203,8 +203,10 @@ function DataManager(db, resourceDir, apiURL) {
         getSourceDetails: function (project_id, language_id, resource_id) {
             var res = db.indexSync.getResource(language_id, project_id, resource_id);
             var lang = db.indexSync.getSourceLanguage(language_id);
+            var id = language_id + "_" + project_id + "_" + resource_id;
 
             return {
+                unique_id: id,
                 language_id: language_id,
                 resource_id: resource_id,
                 checking_level: res.status.checking_level,

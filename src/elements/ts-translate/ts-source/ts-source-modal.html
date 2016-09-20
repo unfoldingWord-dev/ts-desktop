@@ -59,11 +59,6 @@
             border-bottom: 1px solid var(--border-color);
         }
 
-        .row:hover {
-            background: var(--accent-color-light);
-            cursor: pointer;
-        }
-
         .left {
             justify-content: space-between;
         }
@@ -90,28 +85,20 @@
             border-top: 1px solid var(--border-color);
         }
 
-        paper-button {
+        .footer paper-button {
             color: var(--secondary-text-color);
         }
 
-        paper-button:hover {
+        .footer paper-button:hover {
             color: var(--accent-color);
         }
 
-        paper-checkbox {
-            --paper-checkbox-checked-color: var(--accent-color-dark);
-            --paper-checkbox-unchecked-color: var(--accent-color-dark);
-            padding-left: 15px;
-        }
-
-        paper-checkbox[disabled]::shadow #checkbox.paper-checkbox {
-            opacity: 1;
-        }
-
-        #download {
+        .body paper-button {
             background: var(--accent-color);
             color: var(--reverse-text-color);
             text-transform: uppercase;
+            font-size: 75%;
+            padding: 5px 10px;
         }
 
         .hide {
@@ -130,24 +117,25 @@
 
             <div class="body">
                 <div class="row-header">Selected</div>
-                <template is="dom-repeat" items="[[sources]]" as="source">
-                    <div class$="[[rowclass(source.direction)]]" on-tap="removesource">
+                <template is="dom-repeat" items="[[selected]]" as="source">
+                    <div class$="[[rowclass(source.direction)]]">
                         <div>
                             <span>[[source.language_name]]</span> - <span>[[source.resource_name]]</span>
                         </div>
-                        <paper-checkbox disabled checked></paper-checkbox>
+                        <paper-button raised class$="[[checkdownload(source.uptodate)]]" on-tap="download">Update</paper-button>
+                        <paper-button raised on-tap="removesource">Remove</paper-button>
                     </div>
                 </template>
 
                 <div class="row-header">Available</div>
                 <template is="dom-repeat" items="{{searchfilter(query, available)}}" as="source">
-                    <div class$="[[rowclass(source.direction)]]" on-tap="addsource">
+                    <div class$="[[rowclass(source.direction)]]">
                         <div>
                             <span>[[source.language_name]]</span> - <span>[[source.resource_name]]</span>
                         </div>
                         <div>
-                            <paper-checkbox disabled class$="[[checkavailable(source.uptodate)]]"></paper-checkbox>
-                            <paper-button raised id="download" class$="[[checkdownload(source.uptodate)]]">Download</paper-button>
+                            <paper-button raised class$="[[checkavailable(source.uptodate)]]" on-tap="addsource">Select</paper-button>
+                            <paper-button raised class$="[[checkdownload(source.uptodate)]]" on-tap="download">Download</paper-button>
                         </div>
                     </div>
                 </template>
@@ -175,11 +163,7 @@
         ],
 
         properties: {
-            allSources: {
-                type: Array,
-                value: []
-            },
-            sources: {
+            selected: {
                 type: Array,
                 value: []
             },
@@ -187,19 +171,20 @@
                 type: Array,
                 value: []
             },
-            selectedSource: {
+            current: {
                 type: Number,
                 value: null
+            },
+            options: {
+                type: Object,
+                value: {},
+                notify: true
             },
             query: {
                 type: String,
                 value: ""
             }
         },
-
-        observers: [
-            'updateavailable(allSources.*, sources.*)'
-        ],
 
         rowclass: function (direction) {
             return direction === "ltr" ? 'row left' : 'row right';
@@ -224,40 +209,25 @@
             }
         },
 
-        download: function (source) {
+        download: function (event) {
             var mythis = this;
-            var all = this.allSources;
-            var index = all.indexOf(source);
+            var source = event.model.source;
 
+            mythis.fire('close');
 
-            App.dataManager.downloadProjectContainers(source.language_id, source.project_id, source.resource_id)
-                .then(function () {
-                    source.uptodate = true;
-                    all[index] = source;
-                    mythis.set('allSources', all);
-                    console.log("finished");
-                });
+            setTimeout(function() {
+                mythis.set('options', {});
+                mythis.set('options.body', "Downloading source data. Please wait...");
+                mythis.set('options.loading', true);
+                mythis.fire('iron-signal', {name: 'openloading'});
 
-        },
-
-        updateavailable: function() {
-            var all = this.allSources;
-            var selected = this.sources;
-            var available = [];
-            var check;
-
-            for (var i = 0; i < all.length; i++) {
-                check = false;
-                for (var j = 0; j < selected.length; j++) {
-                    if (all[i].id === selected[j].id) {
-                        check = true;
-                    }
-                }
-                if (!check) {
-                    available.push(all[i]);
-                }
-            }
-            this.set('available', available);
+                setTimeout(function() {
+                    App.dataManager.downloadProjectContainers(source.language_id, source.project_id, source.resource_id)
+                        .then(function () {
+                            mythis.fire('iron-signal', {name: 'opensource'});
+                        });
+                }, 500);
+            }, 500);
         },
 
         cancel: function() {
@@ -266,39 +236,38 @@
         },
 
         confirm: function() {
-            var sources = this.sources;
-            var selected = this.selectedSource;
+            var sources = this.selected;
+            var current = this.current;
             this.query = "";
-            this.fire('iron-signal', {name: 'updatesources', data: {sources: sources, selected: selected, full: true}});
+            this.fire('iron-signal', {name: 'updatesources', data: {sources: sources, current: current, full: true}});
             this.fire('close');
         },
 
         addsource: function(event) {
             var source = event.model.source;
+            var index = event.model.index;
 
-            if (source.uptodate) {
-                if (this.sources.length < 3) {
-                    this.push('sources', source);
-                    this.selectedSource = this.sources.indexOf(source);
-                }
-            } else {
-                this.download(source);
+            if (this.selected.length < 3) {
+                this.push('selected', source);
+                this.current = this.selected.indexOf(source);
+                this.splice('available', index, 1);
             }
         },
 
         removesource: function(event) {
+            var source = event.model.source;
             var index = event.model.index;
-            this.splice('sources', index, 1);
-            if (this.selectedSource === index) {
-                if (this.sources.length === 0) {
-                    this.selectedSource = null;
+
+            this.push('available', source);
+            this.splice('selected', index, 1);
+            if (this.current === index) {
+                if (this.selected.length === 0) {
+                    this.current = null;
+                } else if (index >= this.selected.length - 1) {
+                    this.current = (this.selected.length - 1);
                 }
-                else if (index >= this.sources.length - 1) {
-                    this.selectedSource = (this.sources.length - 1);
-                }
-            }
-            else if (index < this.selectedSource) {
-                this.selectedSource -= 1;
+            } else if (index < this.current) {
+                this.current -= 1;
             }
         },
 

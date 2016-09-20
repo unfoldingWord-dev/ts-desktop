@@ -57,13 +57,11 @@ function DataManager(db, resourceDir, apiURL) {
             var proj = source.project_id;
             var res = source.resource_id;
             var container = lang + "_" + proj + "_" + res;
-            var zipname = container + ".ts";
+            var zipname = container + ".tsrc";
             var manifest = path.join(resourceDir, container, "package.json");
 
             return utils.fs.stat(path.join(resourceDir, zipname)).then(utils.ret(true)).catch(utils.ret(false))
                 .then(function (exists) {
-                    source.exists = exists;
-
                     if (exists) {
                         return mythis.openContainer(lang, proj, res)
                             .then(function () {
@@ -207,7 +205,6 @@ function DataManager(db, resourceDir, apiURL) {
             var lang = db.indexSync.getSourceLanguage(language_id);
 
             return {
-                id: res.id,
                 language_id: language_id,
                 resource_id: resource_id,
                 checking_level: res.status.checking_level,

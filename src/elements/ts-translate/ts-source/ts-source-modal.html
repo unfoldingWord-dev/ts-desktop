@@ -114,6 +114,10 @@
             text-transform: uppercase;
         }
 
+        .hide {
+            display: none;
+        }
+
     </style>
 
     <template>
@@ -142,12 +146,8 @@
                             <span>[[source.language_name]]</span> - <span>[[source.resource_name]]</span>
                         </div>
                         <div>
-                            <template is="dom-if" if="{{source.exists}}">
-                                <paper-checkbox disabled></paper-checkbox>
-                            </template>
-                            <template is="dom-if" if="{{!source.exists}}">
-                                <paper-button raised id="download">Download</paper-button>
-                            </template>
+                            <paper-checkbox disabled class$="[[checkavailable(source.uptodate)]]"></paper-checkbox>
+                            <paper-button raised id="download" class$="[[checkdownload(source.uptodate)]]">Download</paper-button>
                         </div>
                     </div>
                 </template>
@@ -205,6 +205,14 @@
             return direction === "ltr" ? 'row left' : 'row right';
         },
 
+        checkavailable: function (uptodate) {
+            return uptodate ? '' : 'hide';
+        },
+
+        checkdownload: function (uptodate) {
+            return uptodate ? 'hide' : '';
+        },
+
         searchfilter: function(query, available) {
             if (query) {
                 var search = App.utils.startsWithBase.bind(null, query);
@@ -224,7 +232,7 @@
 
             App.dataManager.downloadProjectContainers(source.language_id, source.project_id, source.resource_id)
                 .then(function () {
-                    source.exists = true;
+                    source.uptodate = true;
                     all[index] = source;
                     mythis.set('allSources', all);
                     console.log("finished");
@@ -268,7 +276,7 @@
         addsource: function(event) {
             var source = event.model.source;
 
-            if (source.exists) {
+            if (source.uptodate) {
                 if (this.sources.length < 3) {
                     this.push('sources', source);
                     this.selectedSource = this.sources.indexOf(source);

@@ -259,6 +259,12 @@
                     App.dataManager.downloadProjectContainers(source.language_id, source.project_id, source.resource_id)
                         .then(function () {
                             mythis.fire('iron-signal', {name: 'opensource'});
+                        })
+                        .catch(function (err) {
+                            console.log(err);
+                            mythis.set('options.title', "Download Failed");
+                            mythis.set('options.body', "Unable to download at this time.");
+                            mythis.set('options.loading', false);
                         });
                 }, 500);
             }, 500);

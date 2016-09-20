@@ -111,8 +111,8 @@
 
         <div id="contain">
             <div class="header">
-                <input is="iron-input" bind-value="{{query}}" on-input="searchfilter" placeholder="Choose source translations">
-                <paper-icon-button icon="search" title="Search Languages"></paper-icon-button>
+                <input is="iron-input" id="input" bind-value="{{query}}" on-input="searchfilter" placeholder="Choose source translations">
+                <paper-icon-button icon="search" on-tap="focussearch"></paper-icon-button>
             </div>
 
             <div class="body">
@@ -209,6 +209,10 @@
 
             this.set('available', sorted);
             this.searchfilter();
+        },
+
+        focussearch: function () {
+            this.$.input.focus();
         },
 
         rowclass: function (direction) {

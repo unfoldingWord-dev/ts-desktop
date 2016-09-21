@@ -11,18 +11,19 @@ function DataManager(db, resourceDir, apiURL) {
 
     return {
 
-        updateLibrary: function () {
-            return db.updatePrimaryIndex(apiURL)
-                .then(function () {
-                    var catalogs = db.indexSync.getCatalogs();
+        updateLanguages: function () {
+            var catalogs = db.indexSync.getCatalogs();
 
-                    return utils.chain(function (item) {
-                        return db.updateCatalogIndex(item.slug);
-                    }, function (err, item) {
-                        console.log("Cannot find catalog: " + item.slug);
-                        return false;
-                    })(catalogs);
-                });
+            return utils.chain(function (item) {
+                return db.updateCatalogIndex(item.slug);
+            }, function (err, item) {
+                console.log("Cannot find catalog: " + item.slug);
+                return false;
+            })(catalogs);
+        },
+
+        updateSources: function () {
+            return db.updatePrimaryIndex(apiURL);
         },
 
         getTargetLanguages: function () {

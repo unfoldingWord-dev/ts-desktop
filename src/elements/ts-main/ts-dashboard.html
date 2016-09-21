@@ -16,6 +16,7 @@
 <link rel="import" href="./ts-feedback.html">
 <link rel="import" href="./ts-loading.html">
 <link rel="import" href="./ts-export-options.html">
+<link rel="import" href="./ts-update-options.html">
 <link rel="import" href="./ts-print-options.html">
 <link rel="import" href="./ts-license.html">
 <link rel="import" href="./ts-statement.html">
@@ -91,6 +92,11 @@
           height: 480px;
       }
 
+      #update {
+          width: 450px;
+          height: 390px;
+      }
+
       #repo {
           width: 500px;
           height: 500px;
@@ -161,6 +167,10 @@
           <ts-export-options on-backup="backupProject" on-upload="uploadProject" on-checkprint="checkPrint" on-checkexport="checkExport"></ts-export-options>
       </paper-dialog>
 
+      <paper-dialog id="update" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <ts-update-options on-language="updateLanguages" on-source="updateSources" on-both="updateAll"></ts-update-options>
+      </paper-dialog>
+
       <paper-dialog id="license" class="popup legal" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
           <ts-license></ts-license>
       </paper-dialog>
@@ -190,7 +200,7 @@
       <iron-signals on-iron-signal-openattribution="openAttribution"></iron-signals>
       <iron-signals on-iron-signal-changeproject="changeProject"></iron-signals>
       <iron-signals on-iron-signal-deleteproject="deleteProject"></iron-signals>
-      <iron-signals on-iron-signal-updatelibrary="updateLibrary"></iron-signals>
+      <iron-signals on-iron-signal-openupdate="openUpdate"></iron-signals>
       <iron-signals on-iron-signal-saveprint="savePrint"></iron-signals>
       <iron-signals on-iron-signal-openloading="openLoading"></iron-signals>
       <iron-signals on-iron-signal-closeloading="closeLoading"></iron-signals>
@@ -342,15 +352,62 @@
           this.showMessage(title, msg);
       },
 
-      updateLibrary: function () {
+      openUpdate: function () {
+          this.$.update.open();
+      },
+
+      updateLanguages: function () {
           var mythis = this;
 
-          mythis.showLoadingMessage('Updating Library. This may take several minutes. Please wait...');
+          mythis.$.update.close();
+
+          mythis.showLoadingMessage('Updating Languages. This may take several minutes. Please wait...');
 
           setTimeout(function () {
-              return App.dataManager.updateLibrary()
+              return App.dataManager.updateLanguages()
                   .then(function () {
-                      mythis.showMessage('Update Complete', 'The library has been updated.');
+                      mythis.showMessage('Update Complete', 'The language list has been updated.');
+                  })
+                  .catch(function (err) {
+                      mythis.showErrorMessage('Update Failed', 'An error occurred while updating', err);
+                  });
+          }, 500);
+      },
+
+      updateSources: function () {
+          var mythis = this;
+
+          mythis.$.update.close();
+
+          mythis.showLoadingMessage('Updating Sources. This may take several minutes. Please wait...');
+
+          setTimeout(function () {
+              return App.dataManager.updateSources()
+                  .then(function () {
+                      mythis.showMessage('Update Complete', 'The source list has been updated.');
+                  })
+                  .catch(function (err) {
+                      mythis.showErrorMessage('Update Failed', 'An error occurred while updating', err);
+                  });
+          }, 500);
+      },
+
+      updateAll: function () {
+          var mythis = this;
+
+          mythis.$.update.close();
+
+          mythis.showLoadingMessage('Updating Sources. This may take several minutes. Please wait...');
+
+          setTimeout(function () {
+              return App.dataManager.updateSources()
+                  .then(function () {
+                      mythis.showLoadingMessage('Updating Languages. This may take several minutes. Please wait...');
+
+                      return App.dataManager.updateLanguages();
+                  })
+                  .then(function () {
+                      mythis.showMessage('Update Complete', 'Everything has been updated.');
                   })
                   .catch(function (err) {
                       mythis.showErrorMessage('Update Failed', 'An error occurred while updating', err);

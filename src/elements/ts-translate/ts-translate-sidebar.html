@@ -123,10 +123,14 @@
         },
 
         conflictclass: function (typeclass, conflicts) {
-            if (this.selected === 5) {
-                return typeclass === "standard" && conflicts > 0 ? 'current' : 'hide';
+            if (typeclass === 'standard' && conflicts) {
+                if (this.selected === 5) {
+                    return 'current';
+                } else {
+                    return '';
+                }
             } else {
-                return typeclass === "standard" && conflicts > 0 ? '' : 'hide';
+                return 'hide';
             }
         },
 

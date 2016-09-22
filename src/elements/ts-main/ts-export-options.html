@@ -54,6 +54,10 @@
             font-weight: bold;
         }
 
+        .hide {
+            display: none;
+        }
+
         span {
             margin-bottom: 10px;
             text-align: center;
@@ -72,11 +76,15 @@
                 <span>Uploads project to your Door43 Account</span>
                 <span>By uploading the project to your Door43 account, the content is available to be downloaded by other translators, merged with other projects, or used as an online backup.</span>
             </div>
-            <div class="option" on-tap="checkexport">
+            <div class$="[[checkusfmclass(exportdata.project_type_class, exportdata.format)]]" on-tap="checkexport">
                 <span class="optiontitle">Export to USFM File</span>
                 <span>Creates a .usfm file of your project</span>
             </div>
-            <div class="option" on-tap="checkprint">
+            <div class$="[[checkmarkdownclass(exportdata.project_type_class, exportdata.format)]]" on-tap="checkexport">
+                <span class="optiontitle">Export to Markdown Files</span>
+                <span>Creates a .zip file of your project</span>
+            </div>
+            <div class$="[[checkprintclass(exportdata.project_type_class)]]" on-tap="checkprint">
                 <span class="optiontitle">Export to PDF File</span>
                 <span>Creates a .pdf file of your project</span>
             </div>
@@ -100,7 +108,22 @@
         is: 'ts-export-options',
 
         properties: {
+            exportdata: {
+                type: Object,
+                value: {}
+            }
+        },
 
+        checkprintclass: function (typeclass) {
+            return typeclass === "standard" ? 'option' : 'hide';
+        },
+
+        checkusfmclass: function (typeclass, format) {
+            return typeclass === "standard" && format === "usfm" ? 'option' : 'hide';
+        },
+
+        checkmarkdownclass: function (typeclass, format) {
+            return typeclass === "standard" && format === "markdown" ? 'option' : 'hide';
         },
 
         backup: function () {

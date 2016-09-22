@@ -16,6 +16,7 @@
 <link rel="import" href="./ts-feedback.html">
 <link rel="import" href="./ts-loading.html">
 <link rel="import" href="./ts-export-options.html">
+<link rel="import" href="./ts-update-options.html">
 <link rel="import" href="./ts-print-options.html">
 <link rel="import" href="./ts-license.html">
 <link rel="import" href="./ts-statement.html">
@@ -91,6 +92,11 @@
           height: 510px;
       }
 
+      #update {
+          width: 450px;
+          height: 390px;
+      }
+
       #repo {
           width: 500px;
           height: 500px;
@@ -158,7 +164,11 @@
       </paper-dialog>
 
       <paper-dialog id="export" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-          <ts-export-options on-backup="backupProject" on-upload="uploadProject" on-checkprint="checkPrint" on-checkexport="checkExport"></ts-export-options>
+          <ts-export-options on-backup="backupProject" on-upload="uploadProject" on-checkprint="checkPrint" on-checkexport="checkExport" exportdata="[[exportdata]]"></ts-export-options>
+      </paper-dialog>
+
+      <paper-dialog id="update" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <ts-update-options on-language="updateLanguages" on-source="updateSources" on-both="updateAll"></ts-update-options>
       </paper-dialog>
 
       <paper-dialog id="license" class="popup legal" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -190,7 +200,7 @@
       <iron-signals on-iron-signal-openattribution="openAttribution"></iron-signals>
       <iron-signals on-iron-signal-changeproject="changeProject"></iron-signals>
       <iron-signals on-iron-signal-deleteproject="deleteProject"></iron-signals>
-      <iron-signals on-iron-signal-updatelanguages="updateLanguages"></iron-signals>
+      <iron-signals on-iron-signal-openupdate="openUpdate"></iron-signals>
       <iron-signals on-iron-signal-saveprint="savePrint"></iron-signals>
       <iron-signals on-iron-signal-openloading="openLoading"></iron-signals>
       <iron-signals on-iron-signal-closeloading="closeLoading"></iron-signals>
@@ -342,15 +352,62 @@
           this.showMessage(title, msg);
       },
 
+      openUpdate: function () {
+          this.$.update.open();
+      },
+
       updateLanguages: function () {
           var mythis = this;
+
+          mythis.$.update.close();
 
           mythis.showLoadingMessage('Updating Languages. This may take several minutes. Please wait...');
 
           setTimeout(function () {
-              return App.dataManager.updateLanguageList()
-                  .then(function (added) {
-                      mythis.showMessage('Update Complete', 'The language list has been updated. ' + added + ' new languages were added.');
+              return App.dataManager.updateLanguages()
+                  .then(function () {
+                      mythis.showMessage('Update Complete', 'The language list has been updated.');
+                  })
+                  .catch(function (err) {
+                      mythis.showErrorMessage('Update Failed', 'An error occurred while updating', err);
+                  });
+          }, 500);
+      },
+
+      updateSources: function () {
+          var mythis = this;
+
+          mythis.$.update.close();
+
+          mythis.showLoadingMessage('Updating Sources. This may take several minutes. Please wait...');
+
+          setTimeout(function () {
+              return App.dataManager.updateSources()
+                  .then(function () {
+                      mythis.showMessage('Update Complete', 'The source list has been updated.');
+                  })
+                  .catch(function (err) {
+                      mythis.showErrorMessage('Update Failed', 'An error occurred while updating', err);
+                  });
+          }, 500);
+      },
+
+      updateAll: function () {
+          var mythis = this;
+
+          mythis.$.update.close();
+
+          mythis.showLoadingMessage('Updating Sources. This may take several minutes. Please wait...');
+
+          setTimeout(function () {
+              return App.dataManager.updateSources()
+                  .then(function () {
+                      mythis.showLoadingMessage('Updating Languages. This may take several minutes. Please wait...');
+
+                      return App.dataManager.updateLanguages();
+                  })
+                  .then(function () {
+                      mythis.showMessage('Update Complete', 'Everything has been updated.');
                   })
                   .catch(function (err) {
                       mythis.showErrorMessage('Update Failed', 'An error occurred while updating', err);
@@ -618,8 +675,8 @@
                   var name = "";
                   if (id) {
                       var data = App.dataManager.getProjectName(id);
-                      if (data.length) {
-                          name = data[0].name;
+                      if (data) {
+                          name = data;
                       } else {
                           id = "";
                       }
@@ -820,9 +877,11 @@
                   return App.userManager.createRepo(user, repo);
               })
               .then(function (repo) {
-                  return App.gitManager.push(user, paths.projectDir, repo).then(App.utils.ret(repo.html_url));
+                  return App.gitManager.push(user, paths.projectDir, repo).then(App.utils.ret(repo.full_name));
               })
-              .then(function (url) {
+              .then(function (fullname) {
+                  var url = "https://door43.org/u/" + fullname;
+
                   mythis.set('options.title', "Upload Complete");
                   mythis.set('options.body', "Your project has been uploaded to:");
                   mythis.set('options.link', url);
@@ -962,6 +1021,32 @@
           var mythis = this;
 
           return App.projectsManager.loadTargetTranslationsList()
+              .then(function (list) {
+                  var promises = [];
+                  var strings = {};
+
+                  for (var i = 0; i < list.length; i++) {
+                      var proj = list[i].project.id;
+
+                      for (var j = 0; j < list[i].source_translations.length; j++) {
+                          var lang = list[i].source_translations[j].language_id;
+                          var res = list[i].source_translations[j].resource_id;
+                          var string = lang + "_" + proj + "_" + res;
+                          if (!strings[string]) {
+                              strings[string] = true;
+                              var open = App.dataManager.openProjectContainers(lang, proj, res);
+                              promises.push(open);
+                          }
+                      }
+                  }
+                  promises.push(App.dataManager.openContainer('en', 'bible', 'tw'));
+                  promises.push(App.dataManager.openContainer('en', 'bible-obs', 'tw'));
+
+                  return Promise.all(promises)
+                      .then(function () {
+                          return list;
+                      });
+              })
               .then(function(list) {
                   App.ipc.send('loading-status', 'Updating Manifest Files...');
                   for (var i = 0; i < list.length; i++) {

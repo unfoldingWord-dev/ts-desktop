@@ -3,264 +3,367 @@
 var _ = require('lodash');
 var request = require('request');
 var utils = require('../js/lib/utils');
+var fs = require('fs-extra');
+var path = require('path');
+var yaml = require('js-yaml');
 
-function zipper (r) {
-    return r.length ? _.map(r[0].values, _.zipObject.bind(_, r[0].columns)) : [];
-}
-
-function DataManager(db) {
-    var query = db.query;
-    var save = db.save;
+function DataManager(db, resourceDir, apiURL) {
 
     return {
 
-        updateLanguageList: function () {
-            var req = utils.promisify(request);
+        updateLanguages: function () {
+            var catalogs = db.indexSync.getCatalogs();
 
-            return req({url: 'http://td.unfoldingword.org/exports/langnames.json', timeout: 60000})
-                .then(function (response) {
-                    return JSON.parse(response.body);
-                })
-                .then(function (newlist) {
-                    var result = {};
-                    var added = 0;
-                    zipper(query('select slug from target_language')).forEach(function (item) {
-                        result [item.slug] = true;
-                    });
+            return utils.chain(function (item) {
+                return db.updateCatalogIndex(item.slug);
+            }, function (err, item) {
+                console.log("Cannot find catalog: " + item.slug);
+                return false;
+            })(catalogs);
+        },
 
-                    for (var i = 0; i < newlist.length; i++) {
-                        var lc = newlist[i].lc;
-                        var ln = newlist[i].ln;
-                        var ld = newlist[i].ld;
-                        var lr = newlist[i].lr;
-
-                        if (!result[lc]) {
-                            query('insert into target_language (slug, name, direction, region) values ("' + lc + '", "' + ln + '", "' + ld + '", "' + lr + '")');
-                            added++;
-                        }
-                    }
-                    return added;
-                })
-                .then(function (added) {
-                    save();
-                    return added;
-                })
-                .catch(function (err) {
-                    console.log(err);
-                    throw "Could not update language list";
-                });
+        updateSources: function () {
+            return db.updatePrimaryIndex(apiURL);
         },
 
         getTargetLanguages: function () {
-            var r = query("select slug 'id', name, direction from target_language order by lower(slug)");
-            return zipper(r);
+            var list = db.indexSync.getTargetLanguages();
+
+            return list.map(function (item) {
+                return {id: item.slug, name: item.name, direction: item.direction};
+            });
         },
 
         getProjects: function (lang) {
-            var r = query([
-                    "select p.id, p.slug, sl.project_name 'name', sl.project_description 'desc', c.category_name 'category' from project p",
-                    "join source_language sl on sl.project_id=p.id",
-                    "left join source_language__category c on c.source_language_id=sl.id",
-                    "where sl.slug='" + (lang || 'en') + "'",
-                    "order by p.sort"
-                ].join(' '));
-            return zipper(r);
+            return db.indexSync.getProjects(lang || 'en');
+        },
+
+        getSourcesByProject: function (project) {
+            var mythis = this;
+            var allres = db.indexSync.getResources(null, project);
+            var filterres = allres.filter(function (item) {
+                return item.type === 'book' && item.status.checking_level === "3";
+            });
+
+            var mapped = filterres.map(function (res) {
+                return mythis.getSourceDetails(res.project_slug, res.source_language_slug, res.slug);
+            });
+
+            return utils.chain(this.validateSource.bind(this))(mapped);
+        },
+
+        validateSource: function (source) {
+            var mythis = this;
+            var lang = source.language_id;
+            var proj = source.project_id;
+            var res = source.resource_id;
+            var container = lang + "_" + proj + "_" + res;
+            var zipname = container + ".tsrc";
+            var manifest = path.join(resourceDir, container, "package.json");
+
+            return utils.fs.stat(path.join(resourceDir, zipname)).then(utils.ret(true)).catch(utils.ret(false))
+                .then(function (exists) {
+                    if (exists) {
+                        return mythis.openContainer(lang, proj, res)
+                            .then(function () {
+                                return utils.fs.readFile(manifest);
+                            })
+                            .then(function (contents) {
+                                var json = JSON.parse(contents);
+                                source.uptodate = json.resource.status.pub_date === source.date_modified;
+                                return source;
+                            });
+                    }
+
+                    source.uptodate = false;
+                    return source;
+                });
+        },
+
+        downloadContainer: function (language, project, resource) {
+            return db.downloadResourceContainer(language, project, resource)
+                .catch(function (err) {
+                    throw err;
+                });
+        },
+
+        downloadProjectContainers: function (language, project, resource) {
+            var mythis = this;
+
+            return mythis.downloadContainer(language, project, resource)
+                .then(function () {
+                    return mythis.downloadContainer(language, project, "tn")
+                        .catch(function () {
+                            return true;
+                        });
+                })
+                .then(function () {
+                    return mythis.downloadContainer(language, project, "tq")
+                        .catch(function () {
+                            return true;
+                        });
+                })
+                .then(function () {
+                    return mythis.downloadContainer(language, project, "udb")
+                        .catch(function () {
+                            return true;
+                        });
+                });
+        },
+
+        openContainer: function (language, project, resource) {
+            return db.openResourceContainer(language, project, resource)
+                .catch(function (err) {
+                    throw err;
+                });
+        },
+
+        openProjectContainers: function (language, project, resource) {
+            var mythis = this;
+
+            return mythis.openContainer(language, project, resource)
+                .then(function () {
+                    return mythis.openContainer(language, project, "tn")
+                        .catch(function () {
+                            return true;
+                        });
+                })
+                .then(function () {
+                    return mythis.openContainer(language, project, "tq")
+                        .catch(function () {
+                            return true;
+                        });
+                })
+                .then(function () {
+                    return mythis.openContainer(language, project, "udb")
+                        .catch(function () {
+                            return true;
+                        });
+                });
+        },
+
+        closeAllContainers: function () {
+            var allfiles = fs.readdirSync(resourceDir);
+            var alldirs = allfiles.filter(function (file) {
+                var stat = fs.statSync(path.join(resourceDir, file));
+                return stat.isDirectory();
+            });
+            var promises = [];
+
+            alldirs.forEach(function (dir) {
+                var name = dir.split("_");
+                var close = db.closeResourceContainer(name[0], name[1], name[2]);
+                promises.push(close);
+            });
+
+            return Promise.all(promises);
+        },
+
+        extractContainer: function (container) {
+            var contentpath = path.join(resourceDir, container, "content");
+            var data = [];
+
+            try {
+                var alldirs = fs.readdirSync(contentpath);
+                var contentdirs = alldirs.filter(function (dir) {
+                    var stat = fs.statSync(path.join(contentpath, dir));
+                    return stat.isDirectory();
+                });
+
+                contentdirs.forEach(function (dir) {
+                    var files = fs.readdirSync(path.join(contentpath, dir));
+
+                    files.forEach(function (file) {
+                        var filename = file.split(".")[0];
+                        var content = fs.readFileSync(path.join(contentpath, dir, file), 'utf8');
+
+                        if (dir === "front") {
+                            dir = "00";
+                        }
+
+                        data.push({dir: dir, filename: filename, content: content});
+                    });
+                });
+
+                return data;
+            } catch (err) {
+                return data;
+            }
         },
 
         getProjectName: function (id) {
-            var r = query([
-                "select sl.project_name 'name' from project p",
-                "join source_language sl on sl.project_id=p.id",
-                "where sl.slug='en' and p.slug='" + id + "'"
-            ].join(' '));
-            return zipper(r);
+            var proj = db.indexSync.getProject('en', id);
+
+            return proj.name;
         },
 
 		getChunkMarkers: function (id) {
-			var r = query([
-				"select cm.chapter_slug 'chapter_slug', cm.first_verse_slug 'first_verse_slug'",
-				"from chunk_marker as cm",
-				"left join project as p on p.id=cm.project_id",
-				"where p.slug='" + id + "'"
-			].join(' '));
-			return zipper(r);
+            return db.indexSync.getChunkMarkers(id, 'en-US');
 		},
 
-        getSources: function () {
-            var r = query([
-                    "select r.id, r.slug 'resource_id', r.name 'resource_name', l.name 'language_name', l.direction, l.slug 'language_id', p.slug 'project_id', r.checking_level, r.version, r.modified_at 'date_modified' from resource r",
-                    "join source_language l on l.id=r.source_language_id",
-                    "join project p on p.id=l.project_id",
-                    "order by r.name"
-                ].join(' '));
-            return zipper(r);
-        },
-
         getSourceDetails: function (project_id, language_id, resource_id) {
-            var r = query([
-                "select r.id, r.name 'resource_name', l.name 'language_name', l.direction, p.slug 'project_id' from resource r",
-                "join source_language l on l.id=r.source_language_id",
-                "join project p on p.id=l.project_id",
-                "where p.slug='" + project_id + "' and l.slug='" + language_id + "' and r.slug='" + resource_id + "'"
-            ].join(' '));
-            return zipper(r);
+            var res = db.indexSync.getResource(language_id, project_id, resource_id);
+            var lang = db.indexSync.getSourceLanguage(language_id);
+            var id = language_id + "_" + project_id + "_" + resource_id;
+
+            return {
+                unique_id: id,
+                language_id: language_id,
+                resource_id: resource_id,
+                checking_level: res.status.checking_level,
+                date_modified: res.status.pub_date,
+                version: res.status.version,
+                project_id: project_id,
+                resource_name: res.name,
+                language_name: lang.name,
+                direction: lang.direction
+            }
         },
 
         getSourceFrames: function (source) {
-            var s = typeof source === 'object' ? source.id : source,
-                r = query([
-                    "select f.id, f.slug 'verse', f.body 'chunk', c.slug 'chapter', c.title, c.reference, f.format from frame f",
-                    "join chapter c on c.id=f.chapter_id",
-                    "join resource r on r.id=c.resource_id",
-                    "join source_language sl on sl.id=r.source_language_id",
-                    "join project p on p.id=sl.project_id where r.id='" + s + "'",
-                    "order by c.sort, f.sort"
-                ].join(' '));
+            var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;
+            var frames = this.extractContainer(container);
+            var toc = this.parseYaml(container, "toc.yml");
+            var sorted = [];
 
-            return zipper(r);
+            var mapped = frames.map(function (item) {
+                return {chapter: item.dir, verse: item.filename, chunk: item.content};
+            });
+
+            toc.forEach (function (chapter) {
+                var chunks = mapped.filter(function (item) {
+                    return item.chapter === chapter.chapter;
+                });
+                chapter.chunks.forEach (function (chunk) {
+                    sorted.push(chunks.filter(function (item) {
+                        return item.verse === chunk;
+                    })[0]);
+                });
+            });
+
+            return sorted;
         },
 
-        getFrameUdb: function (source, chapterid, verseid) {
-            var sources = this.getSources();
-            var udbsource = _.filter(sources, {'language_id': source.language_id, 'project_id': source.project_id, 'checking_level': 3, 'resource_id': 'udb'});
-            var s = udbsource[0].id,
-                r = query([
-                    "select f.id, f.slug 'verse', f.body 'chunk', c.slug 'chapter', c.title, c.reference, f.format from frame f",
-                    "join chapter c on c.id=f.chapter_id",
-                    "join resource r on r.id=c.resource_id",
-                    "join source_language sl on sl.id=r.source_language_id",
-                    "join project p on p.id=sl.project_id where r.id='" + s + "' and c.slug='" + chapterid + "' and f.slug='" + verseid + "'"
-                ].join(' '));
+        getSourceUdb: function (source) {
+            var container = source.language_id + "_" + source.project_id + "_udb";
+            if (source.resource_id === "ulb") {
+                var frames = this.extractContainer(container);
 
-            return zipper(r);
+                return frames.map(function (item) {
+                    return {chapter: item.dir, verse: item.filename, chunk: item.content};
+                });
+            } else {
+                return [];
+            }
         },
 
-        getFrameNotes: function (frameid) {
-                var r = query([
-                    "select title, body from translation_note",
-                    "where frame_id='" + frameid + "'"
-                ].join(' '));
+        getSourceHelps: function (source, type) {
+            var mythis = this;
+            var container = source.language_id + "_" + source.project_id + "_" + type;
+            var frames = this.extractContainer(container);
 
-            return zipper(r);
+            return frames.map(function (item) {
+                return {chapter: item.dir, verse: item.filename, data: mythis.parseHelps(item.content)};
+            });
         },
 
-        getFrameWords: function (frameid) {
-            var r = query([
-                "select w.id, w.slug, w.term 'title', w.definition 'body', w.definition_title 'deftitle' from translation_word w",
-                "join frame__translation_word f on w.id=f.translation_word_id",
-                "where f.frame_id='" + frameid + "'"
-            ].join(' '));
+        getSourceWords: function (source) {
+            var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;
 
-            return zipper(r);
+            return this.parseYaml(container, "config.yml").content;
         },
 
-        getRelatedWords: function (wordid, source) {
-            var s = typeof source === 'object' ? source.id : source;
-            var r = query([
-                "select w.id, w.term 'title', w.definition 'body', w.definition_title 'deftitle' from translation_word w",
-                "join resource__translation_word x on x.translation_word_id=w.id",
-                "join translation_word_related r on w.slug=r.slug",
-                "where r.translation_word_id='" + wordid + "' and x.resource_id='" + s + "'",
-                "order by lower(w.term)"
-            ].join(' '));
+        parseHelps: function (content) {
+            var array = [];
+            var contentarray = content.split("\n\n");
 
-            return zipper(r);
+            for (var i = 0; i < contentarray.length; i++) {
+                array.push({title: contentarray[i].replace(/^#/, ''), body: contentarray[i+1]});
+                i++;
+            }
+
+            return array;
         },
 
-        getAllWords: function (source) {
-            var s = typeof source === 'object' ? source.id : source;
-            var r = query([
-                "select w.id, w.slug, w.term 'title', w.definition 'body', w.definition_title 'deftitle' from translation_word w",
-                "join resource__translation_word r on r.translation_word_id=w.id",
-                "where r.resource_id='" + s + "'",
-                "order by lower(w.term)"
-            ].join(' '));
+        parseYaml: function (container, filename) {
+            var filepath = path.join(resourceDir, container, "content", filename);
+            var file = fs.readFileSync(filepath, "utf8");
+            var parsed = yaml.load(file);
 
-            return zipper(r);
+            if (filename === "toc.yml" && parsed[0].chapter === "front") {
+                parsed[0].chapter = "00";
+            }
+
+            return parsed;
         },
 
-        getWordExamples: function (wordid) {
-            var r = query([
-                "select cast(e.frame_slug as int) 'frame', cast(e.chapter_slug as int) 'chapter', e.body from translation_word_example e",
-                "where e.translation_word_id='" + wordid + "'"
-            ].join(' '));
+        getRelatedWords: function (source, slug) {
+            var mythis = this;
+            var dict = "bible";
+            if (source.resource_id === "obs") {
+                dict = "bible-obs";
+            }
+            var container = "en_" + dict + "_tw";
+            var list = this.parseYaml(container, "config.yml");
 
-            return zipper(r);
+            if (list[slug] && list[slug]["see_also"]) {
+                var slugs = list[slug]["see_also"];
+
+                return slugs.map(function (item) {
+                    return mythis.getWord(dict, item);
+                });
+            } else {
+                return [];
+            }
         },
 
-        getFrameQuestions: function (frameid) {
-            var r = query([
-                "select q.question 'title', q.answer 'body' from checking_question q",
-                "join frame__checking_question f on q.id=f.checking_question_id",
-                "where f.frame_id='" + frameid + "'"
-            ].join(' '));
+        getWord: function (dict, slug) {
+            var container = 'en_' + dict + '_tw';
+            var contentpath = path.join(resourceDir, container, "content", slug, "01.md");
 
-            return zipper(r);
+            try {
+                var data = this.parseHelps(fs.readFileSync(contentpath, 'utf8'))[0];
+                data.slug = slug;
+                return data;
+            } catch (err) {
+                return null;
+            }
+        },
+
+        getAllWords: function (dict) {
+            var mythis = this;
+            var container = "en_" + dict + "_tw";
+            var frames = this.extractContainer(container);
+
+            return frames.map(function (item) {
+                var data = mythis.parseHelps(item.content)[0];
+                data.slug = item.dir;
+                return data;
+            });
+        },
+
+        getWordExamples: function (source, slug) {
+            var dict = "bible";
+            if (source.resource_id === "obs") {
+                dict = "bible-obs";
+            }
+            var container = "en_" + dict + "_tw";
+            var list = this.parseYaml(container, "config.yml");
+
+            if (list[slug] && list[slug]["examples"]) {
+                var references = list[slug]["examples"];
+
+                return references.map(function (item) {
+                    var split = item.split("-");
+                    return {chapter: parseInt(split[0]), frame: parseInt(split[1])};
+                });
+            } else {
+                return [];
+            }
         },
 
         getTa: function (volume) {
-            var r = query([
-                "select t.id, t.slug, t.title, t.text 'body', t.reference from translation_academy_article t",
-                "join translation_academy_manual m on m.id=t.translation_academy_manual_id",
-                "join translation_academy_volume v on v.id=m.translation_academy_volume_id",
-                "where v.slug like '" + volume + "'"
-            ].join(' '));
 
-            return zipper(r);
-        },
-
-        getVolumes: function () {
-            var r = query([
-                "select v.slug, v.title from translation_academy_volume v"
-            ].join(' '));
-
-            return zipper(r);
-        },
-
-        checkProject: function (project) {
-            var allsources = this.getSources();
-            var mysources = _.filter(allsources, 'project_id', project);
-            var combined = {};
-            var sources = [];
-            for (var i = 0; i < mysources.length; i++) {
-                var source = mysources[i].resource_id;
-                var frames = this.getSourceFrames(mysources[i]);
-                if (frames.length) {
-                    console.log("resource:", source, "chunks:", frames.length);
-                    combined[source] = frames;
-                    sources.push(source);
-                }
-            }
-            var match = true;
-            var j = 0;
-            while (match && j < combined[sources[0]].length) {
-                var testref = combined[sources[0]][j].chapter + combined[sources[0]][j].verse;
-                for (var k = 1; k < sources.length; k++) {
-                    var checkref = combined[sources[k]][j].chapter + combined[sources[k]][j].verse;
-                    if (testref !== checkref) {
-                        match = false;
-                        var firsterror = testref;
-                    }
-                }
-                j++;
-            }
-            if (match) {
-                console.log("                             ALL CHUNKS LINE UP!");
-            } else {
-                console.log("                             First error occurs at " + firsterror);
-            }
-            console.log("Data:");
-            console.log(combined);
-        },
-
-        checkAllProjects: function () {
-            var allsources = this.getSources();
-            var ulbsources = _.filter(allsources, 'resource_id', 'ulb');
-            for (var i = 0; i < ulbsources.length; i++) {
-                console.log("Project Results              Name: " + ulbsources[i].project_id);
-                this.checkProject(ulbsources[i].project_id);
-                console.log("---------------------------------------------------------------");
-            }
         }
     };
 }

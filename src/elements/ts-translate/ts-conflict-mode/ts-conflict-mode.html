@@ -29,6 +29,10 @@
             max-height: calc(100vh - 70px);
         }
 
+        :host(.hide) iron-list {
+            overflow: hidden !important;
+        }
+
         :host(.preview) {
             opacity: 0;
         }
@@ -186,7 +190,6 @@
                         <template is="dom-repeat" items="{{examples}}" as="example">
                             <div id="examples">
                                 <p class="link" on-tap="examplescroll"><span>{{chunks.0.projectmeta.project.name}}</span> <span>{{example.chapter}}</span>:<span>{{example.frame}}</span></p>
-                                <ts-text-holder text="[[example.body]]"></ts-text-holder>
                             </div>
                         </template>
                     </template>
@@ -272,6 +275,10 @@
             var projectmeta = this.chunks[0].projectmeta;
             var current = projectmeta.currentsource;
             var currentsource = projectmeta.source_translations[current];
+            var dict = "bible";
+            if (currentsource.resource_id === "obs") {
+                dict = "bible-obs";
+            }
 
             if (data.type === "Notes") {
                 this.set('related', clear);
@@ -281,15 +288,11 @@
                 content = "\<h2 class='style-scope ts-conflict-mode'\>" + data.title + "\<\/h2\>\<p class='style-scope ts-conflict-mode'\>" + data.body + "\<\/p\>";
             }
             if (data.type === "Words") {
-                if (projectmeta.project.id === "obs") {
-                    this.set('examples', App.dataManager.getWordExamples(data.id));
-                } else {
-                    this.set('examples', clear);
-                }
-                this.set('related', App.dataManager.getRelatedWords(data.id, currentsource));
+                this.set('examples', App.dataManager.getWordExamples(currentsource, data.slug));
+                this.set('related', App.dataManager.getRelatedWords(currentsource, data.slug));
                 this.set('allwords', clear);
                 footer.classList.remove("hide");
-                content = "\<h2 class='style-scope ts-conflict-mode'\>" + data.title + "\<\/h2\>\<h3 class='style-scope ts-conflict-mode'\>" + data.deftitle + "\<\/h3\>" + data.body;
+                content = "\<h2 class='style-scope ts-review-mode'\>" + data.title + "\<\/h2\>" + data.body;
             }
             if (data.type === "Questions") {
                 this.set('related', clear);
@@ -301,7 +304,7 @@
             if (data.type === "allwords") {
                 this.set('related', clear);
                 this.set('examples', clear);
-                this.set('allwords', App.dataManager.getAllWords(currentsource));
+                this.set('allwords', App.dataManager.getAllWords(dict));
                 footer.classList.add("hide");
                 content = "";
             }
@@ -325,16 +328,14 @@
             var chapter = example.chapter;
             var frame = example.frame;
             var list = this.$.conflictlist;
-            var found = false;
-            var i = 0;
+            var chunks = this.chunks;
 
-            while (i < 10000 && !found) {
-                list.scrollToIndex(i);
-                if (this.chunks[i].chunkmeta.chapter === chapter && this.chunks[i].chunkmeta.frame === frame) {
-                    found = true;
-                }
-                i++;
-            }
+            var filtered = chunks.filter(function (chunk) {
+                return chunk.chunkmeta.chapter === chapter && chunk.chunkmeta.frame === frame;
+            });
+            var index = filtered[0].index;
+
+            list.scrollToIndex(index);
         },
 
         closeresource: function () {

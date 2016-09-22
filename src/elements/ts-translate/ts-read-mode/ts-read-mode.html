@@ -26,6 +26,10 @@
             overflow-x: hidden !important;
         }
 
+        :host(.hide) iron-list {
+            overflow: hidden !important;
+        }
+
         :host(.preview) {
             opacity: 0;
         }
@@ -70,7 +74,7 @@
             bottom: 0;
             right: 50px;
             margin: auto 0;
-            width: 175px;
+            width: 50px;
             height: 50px;
         }
 
@@ -142,11 +146,11 @@
             var display = this.$.display;
             var marker = this.$.marker;
 
-            display.innerHTML = "Chapter " + chapter;
+            display.innerHTML = chapter;
             marker.classList.remove("hide");
             setTimeout(function() {
                 marker.classList.add("hide");
-            }, 1000);
+            }, 2000);
         },
 
         setheights: function () {

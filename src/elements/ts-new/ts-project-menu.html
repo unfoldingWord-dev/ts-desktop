@@ -71,7 +71,7 @@
 
       <div id="main">
           <div id="header">
-              <em>Choose a project</em>
+              <em>Choose a category</em>
           </div>
           <iron-list id="list" items="[[newdata.categorylist]]" as="category">
               <template>
@@ -79,7 +79,7 @@
                       <div>
                           <iron-icon class="small" icon$="[[checkicon(category.name)]]"></iron-icon>
                           <span>[[category.name]]</span>
-                          <iron-icon class="right" icon$="[[checkmore(category.name)]]"></iron-icon>
+                          <iron-icon class="right" icon="chevron-right"></iron-icon>
                       </div>
                   </div>
               </template>
@@ -121,60 +121,30 @@
       ],
 
       checkicon: function (name) {
-          return name === "Open Bible Stories" || name.substring(0, 11) === "translation" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
-      },
-
-      checkmore: function (name) {
-          return name === "Open Bible Stories" || name.substring(0, 11) === "translation" ? '' : 'chevron-right';
+          return name === "Other" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
       },
 
       store: function (e) {
           var category = e.model.category;
           this.set('newdata.category', category);
-          if (category.name === "Open Bible Stories") {
-              this.set('newdata.project', category.data[0]);
-              if (App.configurator.getUserSetting('glmode')) {
-                  this.fire('iron-signal', {name: 'createtypes'});
-                  this.set('selected', 3);
-              } else {
-                  this.set('newdata.typedata', {type: {id: "text", name: "Text"}, resource: {id: "obs", name: "Open Bible Stories"}, format: "markdown", allowed: true});
-                  this.fire('create');
-              }
-          } else if (category.name === "translationWords") {
-              this.set('newdata.project', category.data[0]);
-              this.set('newdata.typedata', {type: {id: "tw", name: "Words"}, resource: {id: "", name: ""}, format: "markdown", allowed: true});
-              this.fire('create');
-          } else if (category.name.substring(0, 18) === "translationAcademy") {
-              this.set('newdata.project', category.data[0]);
-              this.set('newdata.typedata', {type: {id: "ta", name: "Academy"}, resource: {id: "", name: ""}, format: "markdown", allowed: true});
-              this.fire('create');
-          } else {
-              this.set('selected', 2);
-          }
+          this.set('selected', 2);
       },
 
       createprojects: function () {
           var mythis = this;
           var projects = App.dataManager.getProjects();
           var temparray = [];
-          _.forEach(_.groupBy(projects, 'category'), function (data, category) {
-              if (category === 'null' && !mythis.importdata.importing) {
-                  temparray.push({"name": "Open Bible Stories", "data": data});
-              } else if (category === 'Bible: OT') {
+
+          _.forEach(_.groupBy(projects, 'category_id'), function (data, category) {
+              if (category === "1") {
                   temparray.push({"name": "Old Testament", "data": data});
-              } else if (category === 'Bible: NT') {
+              } else if (category === "6") {
                   temparray.push({"name": "New Testament", "data": data});
+              } else if (category === "0" && !mythis.importdata.importing) {
+                  temparray.push({"name": "Other", "data": data});
               }
           });
-          if (App.configurator.getUserSetting('glmode') && !mythis.importdata.importing) {
-              temparray.push({"name": "translationWords", "data": [{name: "translationWords", slug: "bible"}]});
-              var volumes = App.dataManager.getVolumes();
-              for (var i = 0; i < volumes.length; i++) {
-                  var name = "translationAcademy " + volumes[i].title;
-                  temparray.push({"name": name, "data": [{name: name, slug: volumes[i].slug}]});
-              }
-          }
-          this.set('newdata.categorylist', temparray);
+          mythis.set('newdata.categorylist', temparray);
       },
 
       ready: function () {

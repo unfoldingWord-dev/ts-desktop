@@ -54,6 +54,10 @@
             font-weight: bold;
         }
 
+        .hide {
+            display: none;
+        }
+
     </style>
 
     <template>
@@ -70,7 +74,7 @@
                 <span class="optiontitle">Export to USFM File</span>
                 <p>Creates a .usfm file of your project</p>
             </div>
-            <div class="option" on-tap="checkprint">
+            <div class$="[[checkprintclass(exportdata.project_type_class)]]" on-tap="checkprint">
                 <span class="optiontitle">Export to PDF File</span>
                 <p>Creates a .pdf file of your project</p>
             </div>
@@ -94,7 +98,14 @@
         is: 'ts-export-options',
 
         properties: {
+            exportdata: {
+                type: Object,
+                value: {}
+            }
+        },
 
+        checkprintclass: function (typeclass) {
+            return typeclass === "standard" ? 'option' : 'hide';
         },
 
         backup: function () {

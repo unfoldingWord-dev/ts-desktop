@@ -877,9 +877,11 @@
                   return App.userManager.createRepo(user, repo);
               })
               .then(function (repo) {
-                  return App.gitManager.push(user, paths.projectDir, repo).then(App.utils.ret(repo.html_url));
+                  return App.gitManager.push(user, paths.projectDir, repo).then(App.utils.ret(repo.full_name));
               })
-              .then(function (url) {
+              .then(function (fullname) {
+                  var url = "https://door43.org/u/" + fullname;
+
                   mythis.set('options.title', "Upload Complete");
                   mythis.set('options.body', "Your project has been uploaded to:");
                   mythis.set('options.link', url);

@@ -70,9 +70,13 @@
                 <span class="optiontitle">Upload to Door43</span>
                 <p>Uploads project to your Door43 Account</p>
             </div>
-            <div class="option" on-tap="checkexport">
+            <div class$="[[checkusfmclass(exportdata.project_type_class, exportdata.format)]]" on-tap="checkexport">
                 <span class="optiontitle">Export to USFM File</span>
                 <p>Creates a .usfm file of your project</p>
+            </div>
+            <div class$="[[checkmarkdownclass(exportdata.project_type_class, exportdata.format)]]" on-tap="checkexport">
+                <span class="optiontitle">Export to Markdown Files</span>
+                <p>Creates a .zip file of your project</p>
             </div>
             <div class$="[[checkprintclass(exportdata.project_type_class)]]" on-tap="checkprint">
                 <span class="optiontitle">Export to PDF File</span>
@@ -106,6 +110,14 @@
 
         checkprintclass: function (typeclass) {
             return typeclass === "standard" ? 'option' : 'hide';
+        },
+
+        checkusfmclass: function (typeclass, format) {
+            return typeclass === "standard" && format === "usfm" ? 'option' : 'hide';
+        },
+
+        checkmarkdownclass: function (typeclass, format) {
+            return typeclass === "standard" && format === "markdown" ? 'option' : 'hide';
         },
 
         backup: function () {

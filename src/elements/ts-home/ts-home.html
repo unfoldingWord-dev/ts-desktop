@@ -224,9 +224,16 @@
         }
 
         #righticons {
-            width: 50%;
             display: flex;
             justify-content: space-between;
+        }
+
+        #righticons.big {
+            width: 50%;
+        }
+
+        #righticons.small {
+            width: 30%;
         }
 
         #infobuttons {
@@ -374,8 +381,8 @@
                 <div id="lefticon">
                     <paper-icon-button on-tap="opendelete" class="smallicon" icon="delete" title="delete"></paper-icon-button>
                 </div>
-                <div id="righticons">
-                    <paper-icon-button on-tap="goprint" class="smallicon" icon="print" title="print"></paper-icon-button>
+                <div id="righticons" class$="[[checksize(currentinfo.project_type_class)]]">
+                    <paper-icon-button on-tap="goprint" class$="[[checkclass(currentinfo.project_type_class)]]" icon="print" title="print"></paper-icon-button>
                     <paper-icon-button on-tap="goreview" class="smallicon" icon="cloud-done" title="review"></paper-icon-button>
                     <paper-icon-button on-tap="goexport" class="smallicon" icon="file-upload" title="upload/export"></paper-icon-button>
                 </div>
@@ -463,6 +470,14 @@
                     }
                 }
             }
+        },
+
+        checkclass: function (typeclass) {
+            return typeclass === "standard" ? 'smallicon' : 'hide';
+        },
+
+        checksize: function (typeclass) {
+            return typeclass === "standard" ? 'big' : 'small';
         },
 
         typeclass: function (id) {

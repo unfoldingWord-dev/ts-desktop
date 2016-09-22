@@ -58,6 +58,11 @@
             display: none;
         }
 
+        span {
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
     </style>
 
     <template>
@@ -68,23 +73,24 @@
         <div id="body">
             <div class="option" on-tap="upload">
                 <span class="optiontitle">Upload to Door43</span>
-                <p>Uploads project to your Door43 Account</p>
+                <span>Uploads project to your Door43 Account</span>
+                <span>By uploading the project to your Door43 account, the content is available to be downloaded by other translators, merged with other projects, or used as an online backup.</span>
             </div>
             <div class$="[[checkusfmclass(exportdata.project_type_class, exportdata.format)]]" on-tap="checkexport">
                 <span class="optiontitle">Export to USFM File</span>
-                <p>Creates a .usfm file of your project</p>
+                <span>Creates a .usfm file of your project</span>
             </div>
             <div class$="[[checkmarkdownclass(exportdata.project_type_class, exportdata.format)]]" on-tap="checkexport">
                 <span class="optiontitle">Export to Markdown Files</span>
-                <p>Creates a .zip file of your project</p>
+                <span>Creates a .zip file of your project</span>
             </div>
             <div class$="[[checkprintclass(exportdata.project_type_class)]]" on-tap="checkprint">
                 <span class="optiontitle">Export to PDF File</span>
-                <p>Creates a .pdf file of your project</p>
+                <span>Creates a .pdf file of your project</span>
             </div>
             <div class="option" on-tap="backup">
-                <span class="optiontitle">Export to Project File</span>
-                <p>Creates a .tstudio file of your project</p>
+                <span class="optiontitle">Export Project File</span>
+                <span>Creates a copy of your project file</span>
             </div>
         </div>
         <div id="footer">

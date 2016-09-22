@@ -274,14 +274,17 @@
             var list = this.$.reviewlist;
             var index = list.firstVisibleIndex || 0;
             var chapter = this.chunks[index].chunkmeta.chapter;
+            var type = this.chunks[index].projectmeta.project_type_class;
             var display = this.$.display;
             var marker = this.$.marker;
 
-            display.innerHTML = chapter;
-            marker.classList.remove("hide");
-            setTimeout(function() {
-                marker.classList.add("hide");
-            }, 1000);
+            if (type !== "extant") {
+                display.innerHTML = chapter;
+                marker.classList.remove("hide");
+                setTimeout(function() {
+                    marker.classList.add("hide");
+                }, 2000);
+            }
         },
 
         updateheight: function (e) {

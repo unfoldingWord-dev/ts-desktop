@@ -7,7 +7,7 @@
 <link rel="import" href="../ts-profile/ts-profile.html">
 <link rel="import" href="../ts-home/ts-home.html">
 <link rel="import" href="../ts-new/ts-new.html">
-<link rel="import" href="../ts-publish/ts-publish.html">
+<link rel="import" href="../ts-review/ts-review.html">
 <link rel="import" href="../ts-translate/ts-translate.html">
 <link rel="import" href="../ts-settings/ts-settings.html">
 <link rel="import" href="./ts-terms.html">
@@ -15,7 +15,9 @@
 <link rel="import" href="./ts-import-options.html">
 <link rel="import" href="./ts-feedback.html">
 <link rel="import" href="./ts-loading.html">
-<link rel="import" href="./ts-backup-options.html">
+<link rel="import" href="./ts-export-options.html">
+<link rel="import" href="./ts-update-options.html">
+<link rel="import" href="./ts-print-options.html">
 <link rel="import" href="./ts-license.html">
 <link rel="import" href="./ts-statement.html">
 <link rel="import" href="./ts-guidelines.html">
@@ -85,9 +87,14 @@
           height: 550px;
       }
 
-      #backup {
+      #export {
           width: 450px;
-          height: 300px;
+          height: 510px;
+      }
+
+      #update {
+          width: 450px;
+          height: 390px;
       }
 
       #repo {
@@ -105,6 +112,11 @@
           height: 220px;
       }
 
+      #print {
+          width: 450px;
+          height: 330px;
+      }
+
       .hide {
           display: none;
       }
@@ -116,16 +128,20 @@
       <ts-app-titlebar currentuser="[[currentuser]]"></ts-app-titlebar>
       <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
           <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]" id="home"></ts-home>
-          <ts-new data-route="new" route="{{route}}" importdata="{{importdata}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]"></ts-new>
-          <ts-translate data-route="translate" route="{{route}}" message="{{message}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]"></ts-translate>
-          <ts-publish data-route="publish" route="{{route}}" currentproject="{{currentproject}}" currentuser="[[currentuser]]"></ts-publish>
-          <ts-settings data-route="settings" route="{{route}}"></ts-settings>
-          <ts-profile data-route="profile" currentuser="[[currentuser]]"></ts-profile>
+          <ts-new data-route="new" route="{{route}}" importdata="{{importdata}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]" options="{{options}}"></ts-new>
+          <ts-translate data-route="translate" route="{{route}}" message="{{message}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}" id="translate" on-saveusfm="saveUSFM" on-openprint="openPrint"></ts-translate>
+          <ts-review data-route="review" route="{{route}}" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}"></ts-review>
+          <ts-settings data-route="settings" route="{{route}}" options="{{options}}"></ts-settings>
+          <ts-profile data-route="profile" currentuser="[[currentuser]]" options="{{options}}"></ts-profile>
           <ts-terms data-route="terms"></ts-terms>
       </neon-animated-pages>
       <div id="statusbar">
           <span>Status: </span><span id="message">{{message}}</span>
       </div>
+
+      <paper-dialog id="print" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <ts-print-options id="printoptions" currentproject="{{currentproject}}"></ts-print-options>
+      </paper-dialog>
 
       <paper-dialog id="feedback" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
           <ts-feedback feedback="{{feedback}}" on-close="closeFeedback" on-send="sendFeedback"></ts-feedback>
@@ -147,8 +163,12 @@
           <ts-loading options="[[options]]"></ts-loading>
       </paper-dialog>
 
-      <paper-dialog id="backup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-          <ts-backup-options on-filebackup="createFileBackup" on-repobackup="createRepoBackup"></ts-backup-options>
+      <paper-dialog id="export" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <ts-export-options on-backup="backupProject" on-upload="uploadProject" on-checkprint="checkPrint" on-checkexport="checkExport" exportdata="[[exportdata]]"></ts-export-options>
+      </paper-dialog>
+
+      <paper-dialog id="update" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <ts-update-options on-language="updateLanguages" on-source="updateSources" on-both="updateAll"></ts-update-options>
       </paper-dialog>
 
       <paper-dialog id="license" class="popup legal" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -170,7 +190,7 @@
       <iron-signals on-iron-signal-updatelist="updateList"></iron-signals>
       <iron-signals on-iron-signal-openfeedback="openFeedback"></iron-signals>
       <iron-signals on-iron-signal-openimport="openImport"></iron-signals>
-      <iron-signals on-iron-signal-openbackup="openBackup"></iron-signals>
+      <iron-signals on-iron-signal-openexport="openExport"></iron-signals>
       <iron-signals on-iron-signal-updateuser="updateUser"></iron-signals>
       <iron-signals on-iron-signal-finishusfm="finishUsfm"></iron-signals>
       <iron-signals on-iron-signal-importfromrepo="importFromRepo"></iron-signals>
@@ -180,7 +200,10 @@
       <iron-signals on-iron-signal-openattribution="openAttribution"></iron-signals>
       <iron-signals on-iron-signal-changeproject="changeProject"></iron-signals>
       <iron-signals on-iron-signal-deleteproject="deleteProject"></iron-signals>
-      <iron-signals on-iron-signal-updatelanguages="updateLanguages"></iron-signals>
+      <iron-signals on-iron-signal-openupdate="openUpdate"></iron-signals>
+      <iron-signals on-iron-signal-saveprint="savePrint"></iron-signals>
+      <iron-signals on-iron-signal-openloading="openLoading"></iron-signals>
+      <iron-signals on-iron-signal-closeloading="closeLoading"></iron-signals>
 
   </template>
 
@@ -217,7 +240,7 @@
               type: Object,
               value: {importing: false}
           },
-          backupdata: {
+          exportdata: {
               type: Object,
               value: {}
           },
@@ -286,6 +309,14 @@
           }
       },
 
+      openLoading: function () {
+          this.$.loading.open();
+      },
+
+      closeLoading: function () {
+          this.$.loading.close();
+      },
+
       showLoadingMessage: function (msg) {
           this.set('options', {});
           this.set('options.body', msg);
@@ -321,18 +352,194 @@
           this.showMessage(title, msg);
       },
 
+      openUpdate: function () {
+          this.$.update.open();
+      },
+
       updateLanguages: function () {
           var mythis = this;
+
+          mythis.$.update.close();
 
           mythis.showLoadingMessage('Updating Languages. This may take several minutes. Please wait...');
 
           setTimeout(function () {
-              return App.dataManager.updateLanguageList()
-                  .then(function (added) {
-                      mythis.showMessage('Update Complete', 'The language list has been updated. ' + added + ' new languages were added.');
+              return App.dataManager.updateLanguages()
+                  .then(function () {
+                      mythis.showMessage('Update Complete', 'The language list has been updated.');
                   })
                   .catch(function (err) {
                       mythis.showErrorMessage('Update Failed', 'An error occurred while updating', err);
+                  });
+          }, 500);
+      },
+
+      updateSources: function () {
+          var mythis = this;
+
+          mythis.$.update.close();
+
+          mythis.showLoadingMessage('Updating Sources. This may take several minutes. Please wait...');
+
+          setTimeout(function () {
+              return App.dataManager.updateSources()
+                  .then(function () {
+                      mythis.showMessage('Update Complete', 'The source list has been updated.');
+                  })
+                  .catch(function (err) {
+                      mythis.showErrorMessage('Update Failed', 'An error occurred while updating', err);
+                  });
+          }, 500);
+      },
+
+      updateAll: function () {
+          var mythis = this;
+
+          mythis.$.update.close();
+
+          mythis.showLoadingMessage('Updating Sources. This may take several minutes. Please wait...');
+
+          setTimeout(function () {
+              return App.dataManager.updateSources()
+                  .then(function () {
+                      mythis.showLoadingMessage('Updating Languages. This may take several minutes. Please wait...');
+
+                      return App.dataManager.updateLanguages();
+                  })
+                  .then(function () {
+                      mythis.showMessage('Update Complete', 'Everything has been updated.');
+                  })
+                  .catch(function (err) {
+                      mythis.showErrorMessage('Update Failed', 'An error occurred while updating', err);
+                  });
+          }, 500);
+      },
+
+      checkPrint: function () {
+          var projectmeta = this.exportdata;
+
+          this.$.export.close();
+
+          if (this.route === "home") {
+              this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: "print"}});
+          } else {
+              this.openPrint();
+          }
+      },
+
+      openPrint: function () {
+          this.$.print.open();
+          this.$.printoptions.reset();
+      },
+
+      savePrint: function (event, data) {
+          var mythis = this;
+          var projectmeta = this.currentproject.projectmeta;
+          var translation = this.currentproject.chunks;
+          var name = this.currentproject.projectmeta.unique_id;
+          var options = data.options;
+          var filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'PDF Files', extensions: ['pdf']}]}});
+          if (!filePath) {
+              return;
+          }
+          var generatePdf = function(){
+              mythis.set('options.body', "Creating PDF. Please wait...");
+              setTimeout(function() {
+                  return App.printManager.targetTranslationToPdf(translation, projectmeta, filePath, options)
+                      .then(function () {
+                          mythis.set('options.title', "PDF Created");
+                          mythis.set('options.body', "Your project has been successfully saved to a PDF.");
+                          mythis.set('options.loading', false);
+                      })
+                      .catch(function (err) {
+                          var errmessage = "An error occurred saving your project";
+                          if(err !== null) {
+                              errmessage = err;
+                          }
+                          mythis.set('options.title', "Print Failed");
+                          mythis.set('options.body', errmessage);
+                          mythis.set('options.loading', false);
+                      });
+              }, 500);
+          };
+
+          mythis.$.print.close();
+          mythis.set('options', {});
+          mythis.set('options.body', "Preparing to Print. Please wait...");
+          mythis.set('options.loading', true);
+          mythis.$.loading.open();
+
+          setTimeout(function() {
+              if (options.includeImages) {
+                  mythis.set('options.body', "Downloading Images. Please wait...");
+                  App.printManager.downloadImages().then(function(){
+                      mythis.set('options.body', "Extracting Images. Please wait...");
+                      App.printManager.extractImages();
+                      generatePdf();
+                  }).catch(function(err){
+                      var errmessage = "An error occurred while downloading images";
+                      if(err !== null) {
+                          errmessage = err;
+                      }
+                      mythis.set('options.title', "Download Failed");
+                      mythis.set('options.body', errmessage);
+                      mythis.set('options.loading', false);
+                  });
+              } else {
+                  generatePdf();
+              }
+          }, 500);
+      },
+
+      checkExport: function () {
+          var projectmeta = this.exportdata;
+
+          this.$.export.close();
+
+          if (this.route === "home") {
+              this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: "export"}});
+          } else {
+              this.saveUSFM();
+          }
+      },
+
+      saveUSFM: function () {
+          var mythis = this;
+          var projectmeta = this.currentproject.projectmeta;
+          var translation = this.currentproject.chunks;
+          var mediaServer = "https://api.unfoldingword.org/";
+          var name = projectmeta.unique_id;
+          var filePath;
+
+          if (projectmeta.format === 'markdown') {
+              filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'Zip Files', extensions: ['zip']}]}});
+          } else {
+              filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'USFM Files', extensions: ['usfm']}]}});
+          }
+          if (!filePath) {
+              return;
+          }
+
+          mythis.set('options', {});
+          mythis.set('options.body', "Exporting Project.  Please wait...");
+          mythis.set('options.loading', true);
+          mythis.$.loading.open();
+
+          setTimeout(function() {
+              return App.exportManager.exportTranslation(translation, projectmeta, filePath, mediaServer)
+                  .then(function () {
+                      mythis.set('options.title', "Project Exported");
+                      mythis.set('options.body', "Your project has been successfully exported to a file.");
+                      mythis.set('options.loading', false);
+                  })
+                  .catch(function (err) {
+                      var errmessage = "An error occurred while trying to export your project";
+                      if(err !== null) {
+                          errmessage = err;
+                      }
+                      mythis.set('options.title', "Export Failed");
+                      mythis.set('options.body', errmessage);
+                      mythis.set('options.loading', false);
                   });
           }, 500);
       },
@@ -468,8 +675,8 @@
                   var name = "";
                   if (id) {
                       var data = App.dataManager.getProjectName(id);
-                      if (data.length) {
-                          name = data[0].name;
+                      if (data) {
+                          name = data;
                       } else {
                           id = "";
                       }
@@ -626,14 +833,14 @@
           }, 500);
       },
 
-      openBackup: function (event, data) {
-          this.set('backupdata', data.projectmeta);
-          this.$.backup.open();
+      openExport: function (event, data) {
+          this.set('exportdata', data.projectmeta);
+          this.$.export.open();
       },
 
-      createRepoBackup: function () {
+      uploadProject: function () {
           var mythis = this;
-          var projectmeta = this.backupdata;
+          var projectmeta = this.exportdata;
           var loading = this.$.wideloading;
           var target = App.configurator.getValue('targetTranslationsDir');
           var paths = App.utils.makeProjectPaths(target, projectmeta);
@@ -642,7 +849,7 @@
           var shell = require('electron').shell;
           var deviceId = "";
 
-          mythis.$.backup.close();
+          mythis.$.export.close();
           mythis.set('options', {});
           mythis.set('options.body', "Uploading Project.  Please wait...");
           mythis.set('options.loading', true);
@@ -670,11 +877,13 @@
                   return App.userManager.createRepo(user, repo);
               })
               .then(function (repo) {
-                  return App.gitManager.push(user, paths.projectDir, repo).then(App.utils.ret(repo.html_url));
+                  return App.gitManager.push(user, paths.projectDir, repo).then(App.utils.ret(repo.full_name));
               })
-              .then(function (url) {
-                  mythis.set('options.title', "Backup Complete");
-                  mythis.set('options.body', "Your project has been backed up to:");
+              .then(function (fullname) {
+                  var url = "https://door43.org/u/" + fullname;
+
+                  mythis.set('options.title', "Upload Complete");
+                  mythis.set('options.body', "Your project has been uploaded to:");
                   mythis.set('options.link', url);
                   mythis.set('options.showlink', true);
                   mythis.set('options.loading', false);
@@ -699,29 +908,29 @@
                   if (typeof errmessage === 'string' && errmessage.includes("rejected because the remote contains work")) {
                       errmessage = "Cannot upload this project because a project already exists that has no shared history";
                   }
-                  mythis.showErrorMessage('Backup Failed', errmessage, err);
+                  mythis.showErrorMessage('Upload Failed', errmessage, err);
               });
       },
 
-      createFileBackup: function () {
+      backupProject: function () {
           var mythis = this;
-          var meta = this.backupdata;
+          var meta = this.exportdata;
           var defaultPath = App.configurator.getUserPath('datalocation', 'backups', meta.unique_id);
           var filePath = App.ipc.sendSync('save-as', {options: {defaultPath: defaultPath, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}]}});
           if (!filePath) {
               return;
           }
 
-          mythis.$.backup.close();
-          mythis.showLoadingMessage('Creating Backup.  Please wait...');
+          mythis.$.export.close();
+          mythis.showLoadingMessage('Creating Project File.  Please wait...');
 
           setTimeout(function() {
               return App.exportManager.backupTranslation(meta, filePath)
                   .then(function () {
-                      mythis.showMessage('Backup Complete', 'Your project has been successfully backed up.');
+                      mythis.showMessage('Project File Complete', 'Your project has been successfully saved.');
                   })
                   .catch(function (err) {
-                      mythis.showErrorMessage('Backup Failed', 'An error occurred while trying to backup your project', err);
+                      mythis.showErrorMessage('File Failed', 'An error occurred while trying to save your project', err);
                   });
           }, 500);
       },
@@ -812,6 +1021,32 @@
           var mythis = this;
 
           return App.projectsManager.loadTargetTranslationsList()
+              .then(function (list) {
+                  var promises = [];
+                  var strings = {};
+
+                  for (var i = 0; i < list.length; i++) {
+                      var proj = list[i].project.id;
+
+                      for (var j = 0; j < list[i].source_translations.length; j++) {
+                          var lang = list[i].source_translations[j].language_id;
+                          var res = list[i].source_translations[j].resource_id;
+                          var string = lang + "_" + proj + "_" + res;
+                          if (!strings[string]) {
+                              strings[string] = true;
+                              var open = App.dataManager.openProjectContainers(lang, proj, res);
+                              promises.push(open);
+                          }
+                      }
+                  }
+                  promises.push(App.dataManager.openContainer('en', 'bible', 'tw'));
+                  promises.push(App.dataManager.openContainer('en', 'bible-obs', 'tw'));
+
+                  return Promise.all(promises)
+                      .then(function () {
+                          return list;
+                      });
+              })
               .then(function(list) {
                   App.ipc.send('loading-status', 'Updating Manifest Files...');
                   for (var i = 0; i < list.length; i++) {

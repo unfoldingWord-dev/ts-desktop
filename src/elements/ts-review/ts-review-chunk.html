@@ -1,0 +1,180 @@
+
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../components/paper-material/paper-material.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
+
+<dom-module id="ts-review-chunk">
+
+    <style>
+
+        :host {
+            color: var(--primary-text-color);
+            display: flex;
+            justify-content: center;
+        }
+
+        #contain {
+            flex: 0 0 auto;
+            position: relative;
+            margin-top: 15px;
+            width: 450px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .card {
+            background: var(--card-background-color);
+            width: 420px;
+            border-radius: 2px;
+        }
+
+        .top {
+            font-size: 110%;
+            z-index: 2;
+            flex: 0 0 auto;
+        }
+
+        .bottom {
+            position: absolute;
+            top: 5px;
+            left: 20px;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 50px;
+        }
+
+        .body {
+            padding: 10px 25px;
+            font-size: 90%;
+        }
+
+        .body p {
+            line-height: 2;
+            margin: 0;
+        }
+
+        .ref {
+            padding-left: 20px;
+        }
+
+        .icon {
+            padding-right: 20px;
+        }
+
+        .done {
+            color: var(--completed-color);
+        }
+
+        .review {
+            background: var(--review-color);
+            color: var(--reverse-text-color);
+            text-transform: uppercase;
+            font-size: 80%;
+        }
+
+        .conflict {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .rtl {
+            direction: rtl;
+            width: 100%;
+        }
+
+        .hide {
+            display: none;
+        }
+
+    </style>
+
+    <template>
+
+        <div id="contain">
+            <paper-material class="card top" elevation="1">
+                <div class="header">
+                    <div class="ref">
+                        <span>[[chunk.chunkmeta.chunkref]]</span>
+                    </div>
+                    <div class="icon">
+                        <template is="dom-if" if="{{chunk.completed}}">
+                            <template is="dom-if" if="{{!chunk.combined}}">
+                                <iron-icon class="done" icon="done"></iron-icon>
+                            </template>
+                            <template is="dom-if" if="{{chunk.combined}}">
+                                <iron-icon class="done" icon="done-all"></iron-icon>
+                            </template>
+                        </template>
+                        <template is="dom-if" if="{{!chunk.completed}}">
+                            <paper-button raised class="review" on-tap="gotochunk">Review</paper-button>
+                        </template>
+                    </div>
+                </div>
+                <template is="dom-if" if="{{!chunk.completed}}">
+                    <template is="dom-if" if="{{!chunk.conflicts.exists}}">
+                        <div class="body targetfont">
+                            <p class$="[[standardclass(chunk.typeclass, chunk.direction)]]">[[chunk.transcontent]]</p>
+                            <p class$="[[notstandardclass(chunk.typeclass, chunk.direction)]]">[[chunk.helpscontent.0.title]]</p>
+                        </div>
+                    </template>
+                    <template is="dom-if" if="{{chunk.conflicts.exists}}">
+                        <div class="conflict">
+                            <paper-button raised class="review" on-tap="gotochunk">Conflict Exists</paper-button>
+                        </div>
+                    </template>
+                </template>
+            </paper-material>
+            <template is="dom-if" if="{{chunk.combined}}">
+                <paper-material class="card bottom" elevation="1"></paper-material>
+            </template>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-review-chunk',
+
+        properties: {
+            chapter: {
+                type: Object,
+                value: {}
+            },
+            chunk: {
+                type: Object,
+                value: {}
+            }
+        },
+
+        standardclass: function (typeclass, direction) {
+            return typeclass === "standard" ? direction : direction + ' hide';
+        },
+
+        notstandardclass: function (typeclass, direction) {
+            return typeclass === "standard" ? direction + ' hide' : direction;
+        },
+
+        gotochunk: function () {
+            var index = this.chunk.index;
+            this.fire('iron-signal', {name: 'fromreview', data: {index: index}});
+        },
+
+        ready: function() {
+
+        }
+
+    });
+
+</script>

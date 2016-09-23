@@ -84,26 +84,26 @@ function ImportManager(configurator, migrator, dataManager) {
             return parser.load(filepath)
                 .then(function () {
                     var parsedData = parser.parse();
-    
+
                     if (JSON.stringify(parsedData) === JSON.stringify({})) {
                         throw new Error('This is not a valid USFM file.');
                     }
                     var chunks = [];
                     var markers = dataManager.getChunkMarkers(projectmeta.project.id);
-    
+
                     for (var i = 0; i < markers.length; i++) {
-                        var frameid = markers[i].first_verse_slug;
+                        var frameid = markers[i].verse;
                         var first = parseInt(frameid);
-                        var chapter = markers[i].chapter_slug;
-                        var isLastChunkOfChapter = !markers[i+1] || markers[i+1].chapter_slug !== chapter;
-                        var last = isLastChunkOfChapter ? Number.MAX_VALUE : parseInt(markers[i+1].first_verse_slug) - 1;
-    
+                        var chapter = markers[i].chapter;
+                        var isLastChunkOfChapter = !markers[i+1] || markers[i+1].chapter !== chapter;
+                        var last = isLastChunkOfChapter ? Number.MAX_VALUE : parseInt(markers[i+1].verse) - 1;
+
                         if (parsedData[chapter]) {
                             var transcontent = _.chain(parsedData[chapter].verses).filter(function (verse) {
                                 var id = parseInt(verse.id);
                                 return id <= last && id >= first;
                             }).map("contents").value().join("");
-    
+
                             chunks.push({
                                 chunkmeta: {
                                     chapterid: chapter,
@@ -114,7 +114,7 @@ function ImportManager(configurator, migrator, dataManager) {
                             });
                         }
                     }
-    
+
                     if (parsedData['00'] && parsedData['00'].contents) {
                         chunks.unshift({
                             chunkmeta: {

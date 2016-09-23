@@ -1,0 +1,124 @@
+
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../components/paper-material/paper-material.html">
+
+<link rel="import" href="./ts-review-chunk.html">
+
+<dom-module id="ts-review-chapter">
+
+    <style>
+
+        :host {
+            color: var(--primary-text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #contain {
+            flex: 0 0 auto;
+            position: relative;
+            margin-top: 15px;
+            width: 500px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .card {
+            background: var(--card-background-color);
+            width: 450px;
+            height: 60px;
+            border-radius: 2px;
+        }
+
+        .top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 110%;
+            z-index: 2;
+            flex: 0 0 auto;
+        }
+
+        .bottom {
+            position: absolute;
+            top: 5px;
+            left: 30px;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .ref {
+            padding-left: 20px;
+        }
+
+        .icon {
+            padding-right: 20px;
+        }
+
+        .done {
+            color: var(--completed-color);
+        }
+
+        .review {
+            color: var(--review-color);
+        }
+
+    </style>
+
+    <template>
+
+        <div id="contain">
+            <paper-material class="card top" elevation="1">
+                <div class="ref">
+                    <span>[[chapter.reference]]</span>
+                </div>
+                <div class="icon">
+                    <template is="dom-if" if="{{chapter.completed}}">
+                        <template is="dom-if" if="{{!chapter.combined}}">
+                            <iron-icon class="done" icon="done"></iron-icon>
+                        </template>
+                        <template is="dom-if" if="{{chapter.combined}}">
+                            <iron-icon class="done" icon="done-all"></iron-icon>
+                        </template>
+                    </template>
+                    <template is="dom-if" if="{{!chapter.completed}}">
+                        <iron-icon class="review" icon="report"></iron-icon>
+                    </template>
+                </div>
+            </paper-material>
+            <template is="dom-if" if="{{chapter.combined}}">
+                <paper-material class="card bottom" elevation="1"></paper-material>
+            </template>
+        </div>
+
+        <template is="dom-if" if="{{!chapter.completed}}">
+            <template is="dom-repeat" items="{{chapter.chunks}}" as="chunk">
+                <ts-review-chunk chapter="[[chapter]]" chunk="[[chunk]]"></ts-review-chunk>
+            </template>
+        </template>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-review-chapter',
+
+        properties: {
+            chapter: {
+                type: Object,
+                value: {}
+            }
+        },
+
+        ready: function() {
+
+        }
+
+    });
+
+</script>

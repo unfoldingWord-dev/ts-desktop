@@ -1,10 +1,9 @@
 
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
 <link rel="import" href="../../components/paper-checkbox/paper-checkbox.html">
-<link rel="import" href="../../components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 
 <link rel="import" href="./ts-setting-modal.html">
-<link rel="import" href="../ts-main/ts-loading.html">
 
 <dom-module id="ts-settings">
 
@@ -89,25 +88,6 @@
             --paper-checkbox-unchecked-color: var(--accent-color-dark);
         }
 
-        .popup {
-            position: fixed;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            margin: auto;
-        }
-
-        .popup * {
-            margin: 0;
-            padding: 0;
-        }
-
-        #loading {
-            width: 320px;
-            height: 220px;
-        }
-
         .hide {
             display: none;
         }
@@ -145,10 +125,6 @@
             </template>
         </div>
 
-        <paper-dialog id="loading" class="popup" modal="true" exit-animation="scale-down-animation">
-            <ts-loading options="[[options]]"></ts-loading>
-        </paper-dialog>
-
     </template>
 
 </dom-module>
@@ -170,7 +146,8 @@
             },
             options: {
                 type: Object,
-                value: {}
+                value: {},
+                notify: true
             },
             animationConfig: {
                 value: function () {
@@ -321,10 +298,10 @@
                     mythis.set('options', {});
                     mythis.set('options.body', "Updating Font List. Please wait...");
                     mythis.set('options.loading', true);
-                    mythis.$.loading.open();
+                    mythis.fire('iron-signal', {name: 'openloading'});
                     setTimeout(function() {
                         modal.options = App.utils.getSystemFonts();
-                        mythis.$.loading.close();
+                        mythis.fire('iron-signal', {name: 'closeloading'});
                         mythis.openModal(modal, event);
                     }, 500);
                 } else {

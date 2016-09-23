@@ -1,0 +1,151 @@
+
+<link rel="import" href="../../components/iron-signals/iron-signals.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
+
+<dom-module id="ts-export-options">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px;
+        }
+
+        #body {
+            display: flex;
+            flex-direction: column;
+            border-top: 1px solid var(--border-color);
+            padding: 0;
+        }
+
+        #footer {
+            display: flex;
+            justify-content: flex-end;
+            padding: 10px 50px;
+        }
+
+        #footer paper-button:hover {
+            color: var(--accent-color);
+        }
+
+        .option {
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 30px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background .3s, color .3s;
+            cursor: pointer;
+        }
+
+        .option:hover {
+            background: var(--accent-color-light);
+        }
+
+        .optiontitle {
+            font-size: 130%;
+            font-weight: bold;
+        }
+
+        .hide {
+            display: none;
+        }
+
+        span {
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+    </style>
+
+    <template>
+
+        <div id="header">
+            <h2>Upload/Export Options</h2>
+        </div>
+        <div id="body">
+            <div class="option" on-tap="upload">
+                <span class="optiontitle">Upload to Door43</span>
+                <span>Uploads project to your Door43 Account</span>
+                <span>By uploading the project to your Door43 account, the content is available to be downloaded by other translators, merged with other projects, or used as an online backup.</span>
+            </div>
+            <div class$="[[checkusfmclass(exportdata.project_type_class, exportdata.format)]]" on-tap="checkexport">
+                <span class="optiontitle">Export to USFM File</span>
+                <span>Creates a .usfm file of your project</span>
+            </div>
+            <div class$="[[checkmarkdownclass(exportdata.project_type_class, exportdata.format)]]" on-tap="checkexport">
+                <span class="optiontitle">Export to Markdown Files</span>
+                <span>Creates a .zip file of your project</span>
+            </div>
+            <div class$="[[checkprintclass(exportdata.project_type_class)]]" on-tap="checkprint">
+                <span class="optiontitle">Export to PDF File</span>
+                <span>Creates a .pdf file of your project</span>
+            </div>
+            <div class="option" on-tap="backup">
+                <span class="optiontitle">Export Project File</span>
+                <span>Creates a copy of your project file</span>
+            </div>
+        </div>
+        <div id="footer">
+            <paper-button dialog-dismiss>Cancel</paper-button>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-export-options',
+
+        properties: {
+            exportdata: {
+                type: Object,
+                value: {}
+            }
+        },
+
+        checkprintclass: function (typeclass) {
+            return typeclass === "standard" ? 'option' : 'hide';
+        },
+
+        checkusfmclass: function (typeclass, format) {
+            return typeclass === "standard" && format === "usfm" ? 'option' : 'hide';
+        },
+
+        checkmarkdownclass: function (typeclass, format) {
+            return typeclass === "standard" && format === "markdown" ? 'option' : 'hide';
+        },
+
+        backup: function () {
+            this.fire('backup');
+        },
+
+        upload: function () {
+            this.fire('upload');
+        },
+
+        checkprint: function () {
+            this.fire('checkprint');
+        },
+
+        checkexport: function () {
+            this.fire('checkexport');
+        },
+
+        ready: function () {
+
+        }
+
+    });
+
+</script>

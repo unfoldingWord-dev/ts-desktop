@@ -22,12 +22,13 @@ process.stdout.write = console.log.bind(console);
     setMsg('Loading path...');
     let path = require('path');
     let fs = require('fs');
+    let fse = require('fs-extra');
 
     setMsg('Loading mkdirp...');
     let mkdirp = require('mkdirp');
 
     setMsg('Loading DB...');
-    let Db = require('../js/lib/db').Db;
+    let Db = require('door43-client');
 
     setMsg('Loading Reporter...');
     let Reporter = require('../js/reporter').Reporter;
@@ -111,26 +112,40 @@ process.stdout.write = console.log.bind(console);
         var libraryDir = configurator.getValue('libraryDir');
         var libraryPath = path.join(libraryDir, "index.sqlite");
         var srcDir = path.resolve(path.join(__dirname, '..'));
-        var schemaPath = path.join(srcDir, 'config', 'schema.sql');
+        var resourceDir = path.join(libraryDir, 'resource_containers');
         var srcDB = path.join(srcDir, 'index', 'index.sqlite');
+        var srcResource = path.join(srcDir, 'index', 'resource_containers');
         var appData = configurator.getAppData();
-        var stat;
+        var apiURL = configurator.getValue('apiUrl');
+        var indexstat;
+        var resourcestat;
 
         try {
-            stat = fs.statSync(libraryPath);
+            indexstat = fs.statSync(libraryPath);
         } catch(e) {}
 
-        if (!stat || configurator.getValue("libraryBuild") != appData.build) {
-            setMsg('Setting up index files...');            
+        try {
+            resourcestat = fs.statSync(resourceDir);
+        } catch(e) {}
+
+        if (!indexstat || configurator.getValue("libraryBuild") != appData.build) {
+            setMsg('Setting up index file...');
             mkdirp.sync(libraryDir);
             var content = fs.readFileSync(srcDB);
             fs.writeFileSync(libraryPath, content);
-            configurator.setValue("libraryBuild", appData.build);
         }
 
-        var db = new Db(schemaPath, libraryPath);
+        if (!resourcestat || configurator.getValue("libraryBuild") != appData.build) {
+            setMsg('Setting up resource containers...');
+            mkdirp.sync(resourceDir);
+            fse.copySync(srcResource, resourceDir, {clobber: true});
+        }
 
-        return new DataManager(db);
+        configurator.setValue("libraryBuild", appData.build);
+
+        var db = new Db(libraryPath, resourceDir);
+
+        return new DataManager(db, resourceDir, apiURL);
     })();
 
     setMsg('Initializing modules...');

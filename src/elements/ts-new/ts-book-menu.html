@@ -58,6 +58,16 @@
             cursor: pointer;
         }
 
+        .small {
+            --iron-icon-height: 18px;
+            --iron-icon-width: 18px;
+            color: var(--secondary-text-color);
+        }
+
+        .row span {
+            padding-left: 15px;
+        }
+
     </style>
 
   <template>
@@ -66,12 +76,13 @@
           <div id="header">
               <span class="click" on-tap="togroup">[[newdata.category.name]]</span>
               <iron-icon icon="chevron-right"></iron-icon>
-              <em>Choose a book</em>
+              <em>Choose a project</em>
           </div>
           <iron-list id="list" items="[[newdata.category.data]]" as="project">
               <template>
                   <div class="row" on-tap="store">
                       <div>
+                          <iron-icon class="small" icon$="[[checkicon(project.category_id)]]"></iron-icon>
                           <span>[[project.name]]</span>
                       </div>
                   </div>
@@ -105,15 +116,28 @@
           Polymer.IronResizableBehavior
       ],
 
+      checkicon: function (category) {
+          return category === 0 ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
+      },
+
       store: function(e) {
-          this.set('newdata.project', e.model.project);
-          if (App.configurator.getUserSetting('glmode')) {
+          var project = e.model.project;
+          this.set('newdata.project', project);
+
+          if (project.slug === "bible" || project.slug === "bible-obs") {
+              this.set('newdata.typedata', {type: {id: "tw", name: "Words"}, resource: {id: "", name: ""}, format: "markdown", allowed: true});
+              this.fire('create');
+          } else if (App.configurator.getUserSetting('glmode')) {
               this.fire('iron-signal', {name: 'createtypes'});
               this.set('selected', 3);
+          } else if (project.slug === "obs") {
+              this.set('newdata.typedata', {type: {id: "text", name: "Text"}, resource: {id: "obs", name: "Open Bible Stories"}, format: "markdown", allowed: true});
+              this.fire('create');
           } else {
               this.set('newdata.typedata', {type: {id: "text", name: "Text"}, resource: {id: "reg", name: "Regular"}, format: "usfm", allowed: true});
               this.fire('create');
           }
+
           this.$.list.scrollTop = 0;
       },
 

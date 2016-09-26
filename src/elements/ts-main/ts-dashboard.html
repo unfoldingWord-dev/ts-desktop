@@ -22,6 +22,7 @@
 <link rel="import" href="./ts-statement.html">
 <link rel="import" href="./ts-guidelines.html">
 <link rel="import" href="./ts-attribution.html">
+<link rel="import" href="./ts-conflict.html">
 
 <dom-module id="ts-dashboard">
 
@@ -117,6 +118,11 @@
           height: 330px;
       }
 
+      #conflict {
+          width: 450px;
+          height: 200px;
+      }
+
       .hide {
           display: none;
       }
@@ -185,6 +191,10 @@
 
       <paper-dialog id="attribution" class="popup legal" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
           <ts-attribution></ts-attribution>
+      </paper-dialog>
+
+      <paper-dialog id="conflict" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <ts-conflict exportdata="[[exportdata]]" currentuser="[[currentuser]]"></ts-conflict>
       </paper-dialog>
 
       <iron-signals on-iron-signal-updatelist="updateList"></iron-signals>
@@ -906,9 +916,11 @@
                   }
 
                   if (typeof errmessage === 'string' && errmessage.includes("rejected because the remote contains work")) {
-                      errmessage = "Cannot upload this project because a project already exists that has no shared history";
+                      loading.close();
+                      mythis.$.conflict.open();
+                  } else {
+                      mythis.showErrorMessage('Upload Failed', errmessage, err);
                   }
-                  mythis.showErrorMessage('Upload Failed', errmessage, err);
               });
       },
 

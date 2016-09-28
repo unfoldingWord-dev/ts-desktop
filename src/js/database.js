@@ -361,6 +361,55 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             }
         },
 
+        extractTaContainer: function (container) {
+            var contentpath = path.join(resourceDir, container, "content");
+            var data = [];
+
+            try {
+                var alldirs = fs.readdirSync(contentpath);
+                var contentdirs = alldirs.filter(function (dir) {
+                    var stat = fs.statSync(path.join(contentpath, dir));
+                    return stat.isDirectory();
+                });
+
+                contentdirs.forEach(function (dir) {
+                    var files = fs.readdirSync(path.join(contentpath, dir));
+                    var filedata = {};
+
+                    files.forEach(function (file) {
+                        var filename = file.split(".")[0];
+                        filedata[filename] = fs.readFileSync(path.join(contentpath, dir, file), 'utf8');
+                    });
+                    data.push({article: dir, title: filedata["title"] || "", subtitle: filedata["sub-title"] || "", content: filedata["01"] || ""});
+                });
+
+                return data;
+            } catch (err) {
+                return data;
+            }
+        },
+
+        getAllTa: function () {
+            var mythis = this;
+            var containers = [
+                "en_ta-intro_vol1",
+                "en_ta-process_vol1",
+                "en_ta-translate_vol1",
+                "en_ta-translate_vol2",
+                "en_ta-checking_vol1",
+                "en_ta-checking_vol2",
+                "en_ta-audio_vol2",
+                "en_ta-gateway_vol3"
+            ];
+            var allchunks = [];
+
+            containers.forEach(function (container) {
+                allchunks.push(mythis.extractTaContainer(container));
+            });
+
+            return _.flatten(allchunks);
+        },
+
         getTa: function (volume) {
 
         }

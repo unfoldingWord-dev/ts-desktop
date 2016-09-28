@@ -6,8 +6,9 @@ var utils = require('../js/lib/utils');
 var fs = require('fs-extra');
 var path = require('path');
 var yaml = require('js-yaml');
+var mkdirp = require('mkdirp');
 
-function DataManager(db, resourceDir, apiURL) {
+function DataManager(db, resourceDir, apiURL, sourceDir) {
 
     return {
 
@@ -53,28 +54,36 @@ function DataManager(db, resourceDir, apiURL) {
         },
 
         validateSource: function (source) {
-            var mythis = this;
             var lang = source.language_id;
             var proj = source.project_id;
             var res = source.resource_id;
             var container = lang + "_" + proj + "_" + res;
-            var zipname = container + ".tsrc";
-            var manifest = path.join(resourceDir, container, "package.json");
+            var sourcePath = path.join(sourceDir, container);
+            var resourcePath = path.join(resourceDir, container);
 
-            return utils.fs.stat(path.join(resourceDir, zipname)).then(utils.ret(true)).catch(utils.ret(false))
-                .then(function (exists) {
-                    if (exists) {
-                        return mythis.openContainer(lang, proj, res)
-                            .then(function () {
-                                return utils.fs.readFile(manifest);
-                            })
+            return utils.fs.stat(resourcePath).then(utils.ret(true)).catch(utils.ret(false))
+                .then(function (resexists) {
+                    if (resexists) {
+                        return resourcePath;
+                    }
+                    return utils.fs.stat(sourcePath).then(utils.ret(true)).catch(utils.ret(false))
+                        .then(function (srcexists) {
+                            if (srcexists) {
+                                return sourcePath;
+                            }
+                            return false;
+                        });
+                })
+                .then(function (containerpath) {
+                    if (containerpath) {
+                        var manifest = path.join(containerpath, "package.json");
+                        return utils.fs.readFile(manifest)
                             .then(function (contents) {
                                 var json = JSON.parse(contents);
                                 source.uptodate = json.resource.status.pub_date === source.date_modified;
                                 return source;
                             });
                     }
-
                     source.uptodate = false;
                     return source;
                 });
@@ -112,9 +121,23 @@ function DataManager(db, resourceDir, apiURL) {
         },
 
         openContainer: function (language, project, resource) {
-            return db.openResourceContainer(language, project, resource)
-                .catch(function (err) {
-                    throw err;
+            var container = language + "_" + project + "_" + resource;
+            var resourcePath = path.join(resourceDir, container);
+            var sourcePath = path.join(sourceDir, container);
+
+            return utils.fs.stat(resourcePath).then(utils.ret(true)).catch(utils.ret(false))
+                .then(function (resexists) {
+                    if (!resexists) {
+                        return utils.fs.stat(sourcePath).then(utils.ret(true)).catch(utils.ret(false))
+                            .then(function (srcexists) {
+                                if (srcexists) {
+                                    mkdirp.sync(resourcePath);
+                                    return utils.fs.copy(sourcePath, resourcePath, {clobber: true});
+                                }
+                                throw "Resource container does not exist";
+                            });
+                    }
+                    return true;
                 });
         },
 
@@ -140,23 +163,6 @@ function DataManager(db, resourceDir, apiURL) {
                             return true;
                         });
                 });
-        },
-
-        closeAllContainers: function () {
-            var allfiles = fs.readdirSync(resourceDir);
-            var alldirs = allfiles.filter(function (file) {
-                var stat = fs.statSync(path.join(resourceDir, file));
-                return stat.isDirectory();
-            });
-            var promises = [];
-
-            alldirs.forEach(function (dir) {
-                var name = dir.split("_");
-                var close = db.closeResourceContainer(name[0], name[1], name[2]);
-                promises.push(close);
-            });
-
-            return Promise.all(promises);
         },
 
         extractContainer: function (container) {

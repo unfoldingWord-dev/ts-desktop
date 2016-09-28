@@ -118,14 +118,9 @@ process.stdout.write = console.log.bind(console);
         var appData = configurator.getAppData();
         var apiURL = configurator.getValue('apiUrl');
         var indexstat;
-        var resourcestat;
 
         try {
             indexstat = fs.statSync(libraryPath);
-        } catch(e) {}
-
-        try {
-            resourcestat = fs.statSync(resourceDir);
         } catch(e) {}
 
         if (!indexstat || configurator.getValue("libraryBuild") != appData.build) {
@@ -134,18 +129,13 @@ process.stdout.write = console.log.bind(console);
             var content = fs.readFileSync(srcDB);
             fs.writeFileSync(libraryPath, content);
         }
-
-        if (!resourcestat || configurator.getValue("libraryBuild") != appData.build) {
-            setMsg('Setting up resource containers...');
-            mkdirp.sync(resourceDir);
-            fse.copySync(srcResource, resourceDir, {clobber: true});
-        }
+        mkdirp.sync(resourceDir);
 
         configurator.setValue("libraryBuild", appData.build);
 
         var db = new Db(libraryPath, resourceDir);
 
-        return new DataManager(db, resourceDir, apiURL);
+        return new DataManager(db, resourceDir, apiURL, srcResource);
     })();
 
     setMsg('Initializing modules...');

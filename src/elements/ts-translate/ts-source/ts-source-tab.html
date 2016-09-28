@@ -138,9 +138,9 @@
         },
 
         choosesource: function(e) {
-            var selected = e.model.index;
+            var current = e.model.index;
             var sources = this.projectmeta.source_translations;
-            this.fire('iron-signal', {name: 'updatesources', data: {sources: sources, selected: selected, full: false}});
+            this.fire('iron-signal', {name: 'updatesources', data: {sources: sources, current: current, full: false}});
         },
 
         ready: function() {

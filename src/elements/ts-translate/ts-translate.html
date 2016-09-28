@@ -752,7 +752,7 @@
             var source = projectmeta.source_translations[projectmeta.currentsource];
 
             var open = function () {
-                return App.dataManager.openProjectContainers(source.language_id, projectmeta.project.id, source.resource_id)
+                return App.dataManager.activateProjectContainers(source.language_id, projectmeta.project.id, source.resource_id)
             };
 
             var checkOpen = source ? open() : Promise.resolve(true);

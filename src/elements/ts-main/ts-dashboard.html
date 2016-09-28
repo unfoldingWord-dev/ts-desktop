@@ -1046,21 +1046,21 @@
                           var string = lang + "_" + proj + "_" + res;
                           if (!strings[string]) {
                               strings[string] = true;
-                              var open = App.dataManager.openProjectContainers(lang, proj, res);
+                              var open = App.dataManager.activateProjectContainers(lang, proj, res);
                               promises.push(open);
                           }
                       }
                   }
-                  promises.push(App.dataManager.openContainer('en', 'bible', 'tw'));
-                  promises.push(App.dataManager.openContainer('en', 'bible-obs', 'tw'));
-                  promises.push(App.dataManager.openContainer('en', 'ta-audio', 'vol2'));
-                  promises.push(App.dataManager.openContainer('en', 'ta-checking', 'vol1'));
-                  promises.push(App.dataManager.openContainer('en', 'ta-checking', 'vol2'));
-                  promises.push(App.dataManager.openContainer('en', 'ta-gateway', 'vol3'));
-                  promises.push(App.dataManager.openContainer('en', 'ta-intro', 'vol1'));
-                  promises.push(App.dataManager.openContainer('en', 'ta-process', 'vol1'));
-                  promises.push(App.dataManager.openContainer('en', 'ta-translate', 'vol1'));
-                  promises.push(App.dataManager.openContainer('en', 'ta-translate', 'vol2'));
+                  promises.push(App.dataManager.activateContainer('en', 'bible', 'tw'));
+                  promises.push(App.dataManager.activateContainer('en', 'bible-obs', 'tw'));
+                  promises.push(App.dataManager.activateContainer('en', 'ta-audio', 'vol2'));
+                  promises.push(App.dataManager.activateContainer('en', 'ta-checking', 'vol1'));
+                  promises.push(App.dataManager.activateContainer('en', 'ta-checking', 'vol2'));
+                  promises.push(App.dataManager.activateContainer('en', 'ta-gateway', 'vol3'));
+                  promises.push(App.dataManager.activateContainer('en', 'ta-intro', 'vol1'));
+                  promises.push(App.dataManager.activateContainer('en', 'ta-process', 'vol1'));
+                  promises.push(App.dataManager.activateContainer('en', 'ta-translate', 'vol1'));
+                  promises.push(App.dataManager.activateContainer('en', 'ta-translate', 'vol2'));
 
                   return Promise.all(promises)
                       .then(function () {

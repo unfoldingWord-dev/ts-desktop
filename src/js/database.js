@@ -113,7 +113,7 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                 });
         },
 
-        openContainer: function (language, project, resource) {
+        activateContainer: function (language, project, resource) {
             var container = language + "_" + project + "_" + resource;
             var resourcePath = path.join(resourceDir, container);
             var sourcePath = path.join(sourceDir, container);
@@ -134,24 +134,24 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                 });
         },
 
-        openProjectContainers: function (language, project, resource) {
+        activateProjectContainers: function (language, project, resource) {
             var mythis = this;
 
-            return mythis.openContainer(language, project, resource)
+            return mythis.activateContainer(language, project, resource)
                 .then(function () {
-                    return mythis.openContainer(language, project, "tn")
+                    return mythis.activateContainer(language, project, "tn")
                         .catch(function () {
                             return true;
                         });
                 })
                 .then(function () {
-                    return mythis.openContainer(language, project, "tq")
+                    return mythis.activateContainer(language, project, "tq")
                         .catch(function () {
                             return true;
                         });
                 })
                 .then(function () {
-                    return mythis.openContainer(language, project, "udb")
+                    return mythis.activateContainer(language, project, "udb")
                         .catch(function () {
                             return true;
                         });

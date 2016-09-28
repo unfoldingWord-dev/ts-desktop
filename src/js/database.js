@@ -380,6 +380,11 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                         var filename = file.split(".")[0];
                         filedata[filename] = fs.readFileSync(path.join(contentpath, dir, file), 'utf8');
                     });
+
+                    if (dir === "front") {
+                        dir = "00";
+                    }
+
                     data.push({article: dir, title: filedata["title"] || "", subtitle: filedata["sub-title"] || "", content: filedata["01"] || ""});
                 });
 
@@ -404,10 +409,17 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             var allchunks = [];
 
             containers.forEach(function (container) {
-                allchunks.push(mythis.extractTaContainer(container));
+                var frames = mythis.extractTaContainer(container);
+                var toc = mythis.parseYaml(container, "toc.yml");
+
+                toc.forEach (function (listing) {
+                    allchunks.push(frames.filter(function (item) {
+                        return item.article === listing.chapter;
+                    })[0]);
+                });
             });
 
-            return _.flatten(allchunks);
+            return allchunks;
         },
 
         getTa: function (volume) {

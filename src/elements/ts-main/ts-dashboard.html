@@ -1053,6 +1053,14 @@
                   }
                   promises.push(App.dataManager.openContainer('en', 'bible', 'tw'));
                   promises.push(App.dataManager.openContainer('en', 'bible-obs', 'tw'));
+                  promises.push(App.dataManager.openContainer('en', 'ta-audio', 'vol2'));
+                  promises.push(App.dataManager.openContainer('en', 'ta-checking', 'vol1'));
+                  promises.push(App.dataManager.openContainer('en', 'ta-checking', 'vol2'));
+                  promises.push(App.dataManager.openContainer('en', 'ta-gateway', 'vol3'));
+                  promises.push(App.dataManager.openContainer('en', 'ta-intro', 'vol1'));
+                  promises.push(App.dataManager.openContainer('en', 'ta-process', 'vol1'));
+                  promises.push(App.dataManager.openContainer('en', 'ta-translate', 'vol1'));
+                  promises.push(App.dataManager.openContainer('en', 'ta-translate', 'vol2'));
 
                   return Promise.all(promises)
                       .then(function () {

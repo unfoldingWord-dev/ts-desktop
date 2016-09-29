@@ -53,9 +53,7 @@
         <div id="contain">
             <div id="body">
                 <template is="dom-repeat" items="[[academy]]" as="article">
-                    <div>
-                        <h2>{{article.title}}</h2>
-                        <h3>{{article.subtitle}}</h3>
+                    <div id$="[[idcheck(article.chapter, article.chunk)]]">
                         <marked-element markdown="{{article.content}}">
                             <div class="markdown-html"></div>
                         </marked-element>
@@ -88,8 +86,13 @@
             }
         },
 
+        idcheck: function (chapter, chunk) {
+            return chunk === "title" && chapter !== "00" ? chapter.replace(/_/g, "-") : '';
+        },
+
         ready: function() {
             var mythis = this;
+            var shell = require('electron').shell;
 
             mythis.set('options', {});
             mythis.set('options.body', "Loading translationAcademy...");
@@ -97,36 +100,34 @@
             mythis.$.loading.open();
 
             setTimeout(function() {
-
                 mythis.set('academy', App.dataManager.getAllTa());
 
-                /*
-                var text = "";
-                var test1 = new RegExp(/<a class="wikilink1" href="\//g);
-                var replace1 = '<a class="wikilink1" href="#/';
-                var test2 = new RegExp(/src="\/assets/g);
-                var replace2 = 'src="assets';
-                var test3 = new RegExp(/src="assets/g);
-                var replace3 = 'style="max-width:700px;" src="assets';
-                var shell = require('electron').shell;
-                for (var j = 0; j < academy.length; j++) {
-                    text += academy[j].body.replace("<h2 ", "<h2 id='" + academy[j].reference + "' ");
-                }
-                text = text.replace(test1, replace1);
-                text = text.replace(test2, replace2);
-                text = text.replace(test3, replace3);
-                mythis.$.body.innerHTML = text;
-                var links = mythis.$.body.getElementsByClassName('urlextern');
-                for (var i = 0; i < links.length; i++) {
-                    links[i].addEventListener('click', function (event) {
-                        event.preventDefault();
-                        shell.openExternal(this.href);
-                    });
-                }
-                */
+                setTimeout(function() {
+                    var links = mythis.$.body.getElementsByTagName("A");
 
+                    for (var i = 0; i < links.length; i++) {
+                        if (links[i].href.includes("git.door43.org/Door43/en-ta")) {
+                            var ref = links[i].href.split("/").pop().split(".")[0].replace(/_/g, "-");
 
-                mythis.$.loading.close();
+                            links[i].href = "#" + ref;
+
+                            //temporary code below to check for invalid links
+
+                            var check = document.getElementById(ref);
+
+                            if (!check) {
+                                console.log(links[i], i, ref);
+                            }
+
+                        } else {
+                            links[i].addEventListener('click', function (event) {
+                                event.preventDefault();
+                                shell.openExternal(this.href);
+                            });
+                        }
+                    }
+                    mythis.$.loading.close();
+                }, 3000);
             }, 500);
         }
 

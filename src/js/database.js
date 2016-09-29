@@ -374,18 +374,17 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
 
                 contentdirs.forEach(function (dir) {
                     var files = fs.readdirSync(path.join(contentpath, dir));
-                    var filedata = {};
 
                     files.forEach(function (file) {
                         var filename = file.split(".")[0];
-                        filedata[filename] = fs.readFileSync(path.join(contentpath, dir, file), 'utf8');
+                        var content = fs.readFileSync(path.join(contentpath, dir, file), 'utf8');
+
+                        if (dir === "front") {
+                            dir = "00";
+                        }
+
+                        data.push({dir: dir, filename: filename, content: content});
                     });
-
-                    if (dir === "front") {
-                        dir = "00";
-                    }
-
-                    data.push({article: dir, title: filedata["title"] || "", subtitle: filedata["sub-title"] || "", content: filedata["01"] || ""});
                 });
 
                 return data;
@@ -411,12 +410,34 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             containers.forEach(function (container) {
                 var frames = mythis.extractTaContainer(container);
                 var toc = mythis.parseYaml(container, "toc.yml");
+                var sorted = [];
 
-                toc.forEach (function (listing) {
-                    allchunks.push(frames.filter(function (item) {
-                        return item.article === listing.chapter;
-                    })[0]);
+                var mapped = frames.map(function (item) {
+                    return {chapter: item.dir, chunk: item.filename, content: item.content};
                 });
+
+                toc.forEach (function (chapter) {
+                    var chunks = mapped.filter(function (item) {
+                        return item.chapter === chapter.chapter;
+                    });
+                    chapter.chunks.forEach (function (chunk) {
+                        sorted.push(chunks.filter(function (item) {
+                            return item.chunk === chunk;
+                        })[0]);
+                    });
+                });
+                allchunks.push(sorted);
+            });
+
+            allchunks = _.flatten(allchunks);
+
+            allchunks.forEach(function (item) {
+                if (item.chunk === "title") {
+                    item.content = "# " + item.content;
+                }
+                if (item.chunk === "sub-title") {
+                    item.content = "## " + item.content;
+                }
             });
 
             return allchunks;

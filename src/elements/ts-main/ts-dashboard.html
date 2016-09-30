@@ -95,7 +95,7 @@
 
       #update {
           width: 450px;
-          height: 390px;
+          height: 500px;
       }
 
       #repo {
@@ -174,7 +174,7 @@
       </paper-dialog>
 
       <paper-dialog id="update" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-          <ts-update-options on-language="updateLanguages" on-source="updateSources" on-both="updateAll"></ts-update-options>
+          <ts-update-options on-language="updateLanguages" on-source="updateSources" on-chunk="updateChunks" on-updateall="updateAll"></ts-update-options>
       </paper-dialog>
 
       <paper-dialog id="license" class="popup legal" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -370,7 +370,6 @@
           var mythis = this;
 
           mythis.$.update.close();
-
           mythis.showLoadingMessage('Updating Languages. This may take several minutes. Please wait...');
 
           setTimeout(function () {
@@ -388,7 +387,6 @@
           var mythis = this;
 
           mythis.$.update.close();
-
           mythis.showLoadingMessage('Updating Sources. This may take several minutes. Please wait...');
 
           setTimeout(function () {
@@ -402,19 +400,38 @@
           }, 500);
       },
 
+      updateChunks: function () {
+          var mythis = this;
+
+          mythis.$.update.close();
+          mythis.showLoadingMessage('Updating Chunks. This may take several minutes. Please wait...');
+
+          setTimeout(function () {
+              return App.dataManager.updateChunks()
+                  .then(function () {
+                      mythis.showMessage('Update Complete', 'The chunk markers have been updated.');
+                  })
+                  .catch(function (err) {
+                      mythis.showErrorMessage('Update Failed', 'An error occurred while updating', err);
+                  });
+          }, 500);
+      },
+
       updateAll: function () {
           var mythis = this;
 
           mythis.$.update.close();
-
           mythis.showLoadingMessage('Updating Sources. This may take several minutes. Please wait...');
 
           setTimeout(function () {
               return App.dataManager.updateSources()
                   .then(function () {
                       mythis.showLoadingMessage('Updating Languages. This may take several minutes. Please wait...');
-
                       return App.dataManager.updateLanguages();
+                  })
+                  .then(function () {
+                      mythis.showLoadingMessage('Updating Chunks. This may take several minutes. Please wait...');
+                      return App.dataManager.updateChunks();
                   })
                   .then(function () {
                       mythis.showMessage('Update Complete', 'Everything has been updated.');

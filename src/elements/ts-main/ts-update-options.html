@@ -1,5 +1,7 @@
 
 <link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../components/iron-icons/notification-icons.html">
 
 <dom-module id="ts-update-options">
 
@@ -59,19 +61,24 @@
 
         <div id="header">
             <h2>Update Options</h2>
+            <span><iron-icon icon="notification:wifi"></iron-icon> This will use your internet connection</span>
         </div>
         <div id="body">
             <div class="option" on-tap="language">
                 <span class="optiontitle">Update Target Languages</span>
-                <p>Adds any new approved languages to list.  Fairly quick.</p>
+                <p>Adds any new approved languages.  Takes less than a minute.</p>
             </div>
             <div class="option" on-tap="source">
                 <span class="optiontitle">Update Sources</span>
-                <p>Adds new Level 3 source languages.  Takes forever!</p>
+                <p>Adds any new Level 3 source languages.  Takes a few minutes</p>
             </div>
-            <div class="option" on-tap="both">
+            <div class="option" on-tap="chunk">
+                <span class="optiontitle">Update Chunk Markers</span>
+                <p>Used when importing USFM. Takes a few minutes.</p>
+            </div>
+            <div class="option" on-tap="updateall">
                 <span class="optiontitle">Update All</span>
-                <p>Does both from above</p>
+                <p>Performs all 3 updates.  Takes awhile.</p>
             </div>
         </div>
         <div id="footer">
@@ -100,8 +107,12 @@
             this.fire('source');
         },
 
-        both: function () {
-            this.fire('both');
+        chunk: function () {
+            this.fire('chunk');
+        },
+
+        updateall: function () {
+            this.fire('updateall');
         },
 
         ready: function () {

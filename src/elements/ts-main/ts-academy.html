@@ -46,6 +46,11 @@
             height: 220px;
         }
 
+        img {
+            max-width: 80%;
+            height: auto;
+        }
+
     </style>
 
     <template>
@@ -87,12 +92,13 @@
         },
 
         idcheck: function (chapter, chunk) {
-            return chunk === "title" && chapter !== "00" ? chapter.replace(/_/g, "-") : '';
+            return chunk === "title" && chapter !== "front" ? chapter.replace(/_/g, "-") : '';
         },
 
         ready: function() {
             var mythis = this;
             var shell = require('electron').shell;
+            var path = require('path');
 
             mythis.set('options', {});
             mythis.set('options.body', "Loading translationAcademy...");
@@ -104,6 +110,12 @@
 
                 setTimeout(function() {
                     var links = mythis.$.body.getElementsByTagName("A");
+                    var images = mythis.$.body.getElementsByTagName("IMG");
+                    var imageDir = path.resolve(path.join(__dirname, '..', 'views', 'assets', 'img', 'ta'));
+
+                    for (var j = 0; j < images.length; j++) {
+                        images[j].src = images[j].src.replace("http://cdn.door43.org/ta/jpg", imageDir);
+                    }
 
                     for (var i = 0; i < links.length; i++) {
                         if (links[i].href.includes("git.door43.org/Door43/en-ta")) {

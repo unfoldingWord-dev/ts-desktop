@@ -176,11 +176,7 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                         var filename = file.split(".")[0];
                         var content = fs.readFileSync(path.join(contentpath, dir, file), 'utf8');
 
-                        if (dir === "front") {
-                            dir = "00";
-                        }
-
-                        data.push({dir: dir, filename: filename, content: content});
+                        data.push({chapter: dir, chunk: filename, content: content});
                     });
                 });
 
@@ -188,6 +184,25 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             } catch (err) {
                 return data;
             }
+        },
+
+        getContainerData: function (container) {
+            var frames = this.extractContainer(container);
+            var toc = this.parseYaml(container, "toc.yml");
+            var sorted = [];
+
+            toc.forEach (function (chapter) {
+                var chunks = frames.filter(function (item) {
+                    return item.chapter === chapter.chapter;
+                });
+                chapter.chunks.forEach (function (chunk) {
+                    sorted.push(chunks.filter(function (item) {
+                        return item.chunk === chunk;
+                    })[0]);
+                });
+            });
+
+            return sorted;
         },
 
         getProjectName: function (id) {
@@ -287,13 +302,7 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
         parseYaml: function (container, filename) {
             var filepath = path.join(resourceDir, container, "content", filename);
             var file = fs.readFileSync(filepath, "utf8");
-            var parsed = yaml.load(file);
-
-            if (filename === "toc.yml" && parsed[0].chapter === "front") {
-                parsed[0].chapter = "00";
-            }
-
-            return parsed;
+            return yaml.load(file);
         },
 
         getRelatedWords: function (source, slug) {
@@ -361,38 +370,6 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             }
         },
 
-        extractTaContainer: function (container) {
-            var contentpath = path.join(resourceDir, container, "content");
-            var data = [];
-
-            try {
-                var alldirs = fs.readdirSync(contentpath);
-                var contentdirs = alldirs.filter(function (dir) {
-                    var stat = fs.statSync(path.join(contentpath, dir));
-                    return stat.isDirectory();
-                });
-
-                contentdirs.forEach(function (dir) {
-                    var files = fs.readdirSync(path.join(contentpath, dir));
-
-                    files.forEach(function (file) {
-                        var filename = file.split(".")[0];
-                        var content = fs.readFileSync(path.join(contentpath, dir, file), 'utf8');
-
-                        if (dir === "front") {
-                            dir = "00";
-                        }
-
-                        data.push({dir: dir, filename: filename, content: content});
-                    });
-                });
-
-                return data;
-            } catch (err) {
-                return data;
-            }
-        },
-
         getAllTa: function () {
             var mythis = this;
             var containers = [
@@ -408,25 +385,7 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             var allchunks = [];
 
             containers.forEach(function (container) {
-                var frames = mythis.extractTaContainer(container);
-                var toc = mythis.parseYaml(container, "toc.yml");
-                var sorted = [];
-
-                var mapped = frames.map(function (item) {
-                    return {chapter: item.dir, chunk: item.filename, content: item.content};
-                });
-
-                toc.forEach (function (chapter) {
-                    var chunks = mapped.filter(function (item) {
-                        return item.chapter === chapter.chapter;
-                    });
-                    chapter.chunks.forEach (function (chunk) {
-                        sorted.push(chunks.filter(function (item) {
-                            return item.chunk === chunk;
-                        })[0]);
-                    });
-                });
-                allchunks.push(sorted);
+                allchunks.push(mythis.getContainerData(container));
             });
 
             allchunks = _.flatten(allchunks);

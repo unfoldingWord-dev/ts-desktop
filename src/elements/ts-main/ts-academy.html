@@ -47,7 +47,7 @@
         }
 
         img {
-            max-width: 80%;
+            max-width: 700px;
             height: auto;
         }
 
@@ -92,7 +92,7 @@
         },
 
         idcheck: function (chapter, chunk) {
-            return chunk === "title" && chapter !== "front" ? chapter.replace(/_/g, "-") : '';
+            return chunk === "title" && chapter !== "front" ? chapter : '';
         },
 
         ready: function() {

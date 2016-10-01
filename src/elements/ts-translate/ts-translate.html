@@ -796,27 +796,28 @@
 
         createchunks: function () {
             var projectmeta = this.currentproject.projectmeta;
-            var current = projectmeta.currentsource;
-            if (current === null || current === undefined) {
+            var selected = projectmeta.currentsource;
+            if (selected === null || selected === undefined) {
                 return;
             }
-            var currentsource = projectmeta.source_translations[current];
-            var frames = App.dataManager.getSourceFrames(currentsource);
-            var notes = App.dataManager.getSourceHelps(currentsource, "tn");
-            var questions = App.dataManager.getSourceHelps(currentsource, "tq");
-            var udb = App.dataManager.getSourceUdb(currentsource);
-            var wordlist = App.dataManager.getSourceWords(currentsource);
+            var source = projectmeta.source_translations[selected];
+            var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;
+            var frames = App.dataManager.getContainerData(container);
+            var notes = App.dataManager.getSourceHelps(source, "tn");
+            var questions = App.dataManager.getSourceHelps(source, "tq");
+            var udb = App.dataManager.getSourceUdb(source);
+            var wordlist = App.dataManager.getSourceWords(source);
             var chunkarray = [];
             var title = "";
 
             this.set('currentproject.conflicts', 0);
 
             for (var i = 0; i < frames.length; i++) {
-                if (frames[i].verse === "title") {
-                    title = frames[i].chunk;
+                if (frames[i].chunk === "title") {
+                    title = frames[i].content;
                 }
                 var resources = this.getFrameResources(frames[i], notes, questions, udb, wordlist);
-                var sourcedata = App.renderer.convertVerseMarkers(frames[i].chunk);
+                var sourcedata = App.renderer.convertVerseMarkers(frames[i].content);
                 var chunkmeta = this.createFrameMeta(frames[i], projectmeta, sourcedata.verses, title);
                 var chunk = this.getFrameData(chunkmeta, projectmeta);
                 var sourcecontent = App.renderer.convertNoteMarkers(sourcedata.text);
@@ -918,22 +919,22 @@
             var framewords = [];
             var udbtext = null;
 
-            if (frame.chapter === "00") {
+            if (frame.chapter === "front") {
                 return resources;
             }
 
             var framenotes = notes.filter(function (note) {
-                return note.chapter === frame.chapter && note.verse === frame.verse;
+                return note.chapter === frame.chapter && note.chunk === frame.chunk;
             });
             if (framenotes.length) {
-                note = framenotes[0].data;
+                note = framenotes[0].content;
             }
             if (note.length) {
                 resources.push({title: "Notes", array: true, data: note});
             }
 
-            if (wordlist && wordlist[frame.chapter] && wordlist[frame.chapter][frame.verse]) {
-                framewords = wordlist[frame.chapter][frame.verse].words;
+            if (wordlist && wordlist[frame.chapter] && wordlist[frame.chapter][frame.chunk]) {
+                framewords = wordlist[frame.chapter][frame.chunk].words;
             }
 
             framewords.forEach(function (frameword) {
@@ -960,20 +961,20 @@
             }
 
             var frameques = questions.filter(function (ques) {
-                return ques.chapter === frame.chapter && ques.verse === frame.verse;
+                return ques.chapter === frame.chapter && ques.chunk === frame.chunk;
             });
             if (frameques.length) {
-                question = frameques[0].data;
+                question = frameques[0].content;
             }
             if (question.length) {
                 resources.push({title: "Questions", array: true, data: question});
             }
 
             var frameudb = udb.filter(function (chunk) {
-                return chunk.chapter === frame.chapter && chunk.verse === frame.verse;
+                return chunk.chapter === frame.chapter && chunk.chunk === frame.chunk;
             });
             if (frameudb.length) {
-                udbtext = frameudb[0].chunk;
+                udbtext = frameudb[0].content;
             }
             if (udbtext) {
                 udbtext = App.renderer.convertVerseMarkers(udbtext).text;
@@ -990,7 +991,7 @@
             var name = projectmeta.project.name;
             var chapterid = frame.chapter;
             var chapternum = parseInt(chapterid);
-            var frameid = frame.verse;
+            var frameid = frame.chunk;
             var framenum = parseInt(frameid);
             var chapterref;
             var chunkref;
@@ -1000,7 +1001,7 @@
             }
 
             if (name === "Open Bible Stories") {
-                if (chapterid === "00" && frameid === "title") {
+                if (chapterid === "front" && frameid === "title") {
                     chapterref = "Project Title";
                     chunkref = "Project Title";
                     framenum = 0;
@@ -1017,7 +1018,7 @@
                     chunkref = title + ":" + framenum;
                 }
             } else {
-                if (chapterid === "00" && frameid === "title") {
+                if (chapterid === "front" && frameid === "title") {
                     chapterref = "Project Title";
                     chunkref = "Project Title";
                     framenum = 0;

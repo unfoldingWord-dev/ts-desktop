@@ -210,9 +210,7 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
         },
 
         getProjectName: function (id) {
-            var proj = db.indexSync.getProject('en', id);
-
-            return proj.name;
+            return db.indexSync.getProject('en', id).name;
         },
 
 		getChunkMarkers: function (id) {
@@ -238,38 +236,10 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             }
         },
 
-        getSourceFrames: function (source) {
-            var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;
-            var frames = this.extractContainer(container);
-            var toc = this.parseYaml(container, "toc.yml");
-            var sorted = [];
-
-            var mapped = frames.map(function (item) {
-                return {chapter: item.dir, verse: item.filename, chunk: item.content};
-            });
-
-            toc.forEach (function (chapter) {
-                var chunks = mapped.filter(function (item) {
-                    return item.chapter === chapter.chapter;
-                });
-                chapter.chunks.forEach (function (chunk) {
-                    sorted.push(chunks.filter(function (item) {
-                        return item.verse === chunk;
-                    })[0]);
-                });
-            });
-
-            return sorted;
-        },
-
         getSourceUdb: function (source) {
             var container = source.language_id + "_" + source.project_id + "_udb";
             if (source.resource_id === "ulb") {
-                var frames = this.extractContainer(container);
-
-                return frames.map(function (item) {
-                    return {chapter: item.dir, verse: item.filename, chunk: item.content};
-                });
+                return this.extractContainer(container);
             } else {
                 return [];
             }
@@ -280,9 +250,13 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             var container = source.language_id + "_" + source.project_id + "_" + type;
             var frames = this.extractContainer(container);
 
-            return frames.map(function (item) {
-                return {chapter: item.dir, verse: item.filename, data: mythis.parseHelps(item.content)};
+            frames.forEach(function (item) {
+                if (item.content) {
+                    item.content = mythis.parseHelps(item.content);
+                }
             });
+
+            return frames;
         },
 
         getSourceWords: function (source) {
@@ -349,7 +323,7 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
 
             return frames.map(function (item) {
                 var data = mythis.parseHelps(item.content)[0];
-                data.slug = item.dir;
+                data.slug = item.chapter;
                 return data;
             });
         },

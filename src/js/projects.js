@@ -269,16 +269,14 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             if (meta.type.id === "tw") {
                 var dict = meta.project.id;
                 frames = dataManager.getAllWords(dict);
-                return frames.length;
             } else if (meta.type.id === "ta") {
                 //frames = dataManager.getTa(meta.project.id);
-                return frames.length;
             } else if (meta.source_translations.length) {
-                frames = dataManager.getSourceFrames(meta.source_translations[0]);
-                return frames.length;
-            } else {
-                return 0;
+                var source = meta.source_translations[0];
+                var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;
+                frames = dataManager.getContainerData(container);
             }
+            return frames.length;
         },
 
         makeUniqueId: function (manifest) {

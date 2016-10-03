@@ -119,18 +119,7 @@
 
                     for (var i = 0; i < links.length; i++) {
                         if (links[i].href.includes("git.door43.org/Door43/en-ta")) {
-                            var ref = links[i].href.split("/").pop().split(".")[0].replace(/_/g, "-");
-
-                            links[i].href = "#" + ref;
-
-                            //temporary code below to check for invalid links
-
-                            var check = document.getElementById(ref);
-
-                            if (!check) {
-                                console.log(links[i], i, ref);
-                            }
-
+                            links[i].href = "#" + links[i].href.split("/").pop().split(".")[0].replace(/_/g, "-");
                         } else {
                             links[i].addEventListener('click', function (event) {
                                 event.preventDefault();

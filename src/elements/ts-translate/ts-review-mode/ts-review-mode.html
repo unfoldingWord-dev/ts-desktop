@@ -278,7 +278,7 @@
             var display = this.$.display;
             var marker = this.$.marker;
 
-            if (type !== "extant") {
+            if (chapter && type !== "extant") {
                 display.innerHTML = chapter;
                 marker.classList.remove("hide");
                 setTimeout(function() {

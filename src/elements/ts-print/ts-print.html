@@ -1,0 +1,105 @@
+
+<link rel="import" href="../../components/neon-animation/neon-animation.html">
+
+<dom-module id="ts-print">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background-color: var(--primary-color);
+            min-height: 50px;
+        }
+
+        .heading {
+            font-size: 125%;
+            color: var(--reverse-text-color);
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 45px;
+        }
+
+        [icon="arrow-back"] {
+            margin: 0 1em 0 .2em;
+        }
+
+        .body {
+            padding: 0 4rem;
+            overflow-y: auto;
+            background-color: var(--card-background-color);
+        }
+
+        .hide {
+            display: none;
+        }
+
+    </style>
+
+    <template>
+
+        <div class="header">
+            <div class="heading">
+                <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
+                <span>Print Preview</span>
+            </div>
+        </div>
+        <div class="body">
+
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-print',
+
+        behaviors: [
+            Polymer.NeonAnimatableBehavior
+        ],
+
+        properties: {
+            route: {
+                type: String,
+                notify: true
+            },
+            options: {
+                type: Object,
+                value: {},
+                notify: true
+            },
+            animationConfig: {
+                value: function () {
+                    return {
+                        'entry': {
+                            name: 'slide-from-right-animation',
+                            node: this
+                        },
+                        'exit': {
+                            name: 'slide-right-animation',
+                            node: this
+                        }
+                    }
+                }
+            }
+        },
+
+        back: function () {
+            this.route = App.configurator.getValue("backto");
+        },
+
+        ready: function () {
+
+        }
+
+    });
+
+</script>

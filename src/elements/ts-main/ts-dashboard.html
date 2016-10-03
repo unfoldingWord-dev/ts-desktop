@@ -95,7 +95,7 @@
 
       #update {
           width: 450px;
-          height: 390px;
+          height: 500px;
       }
 
       #repo {
@@ -174,7 +174,7 @@
       </paper-dialog>
 
       <paper-dialog id="update" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-          <ts-update-options on-language="updateLanguages" on-source="updateSources" on-both="updateAll"></ts-update-options>
+          <ts-update-options on-language="updateLanguages" on-source="updateSources" on-chunk="updateChunks" on-updateall="updateAll"></ts-update-options>
       </paper-dialog>
 
       <paper-dialog id="license" class="popup legal" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -368,15 +368,17 @@
 
       updateLanguages: function () {
           var mythis = this;
+          var before = App.dataManager.getMetrics();
 
           mythis.$.update.close();
-
           mythis.showLoadingMessage('Updating Languages. This may take several minutes. Please wait...');
 
           setTimeout(function () {
               return App.dataManager.updateLanguages()
                   .then(function () {
-                      mythis.showMessage('Update Complete', 'The language list has been updated.');
+                      var after = App.dataManager.getMetrics();
+                      var diff = after.target_language_count - before.target_language_count;
+                      mythis.showMessage('Update Complete', 'The language list has been updated. ' + diff + ' new languages were added.');
                   })
                   .catch(function (err) {
                       mythis.showErrorMessage('Update Failed', 'An error occurred while updating', err);
@@ -386,15 +388,34 @@
 
       updateSources: function () {
           var mythis = this;
+          var before = App.dataManager.getMetrics();
 
           mythis.$.update.close();
-
           mythis.showLoadingMessage('Updating Sources. This may take several minutes. Please wait...');
 
           setTimeout(function () {
               return App.dataManager.updateSources()
                   .then(function () {
-                      mythis.showMessage('Update Complete', 'The source list has been updated.');
+                      var after = App.dataManager.getMetrics();
+                      var diff = after.resource_count_level3 - before.resource_count_level3;
+                      mythis.showMessage('Update Complete', 'The source list has been updated. ' + diff + ' new sources were added.');
+                  })
+                  .catch(function (err) {
+                      mythis.showErrorMessage('Update Failed', 'An error occurred while updating', err);
+                  });
+          }, 500);
+      },
+
+      updateChunks: function () {
+          var mythis = this;
+
+          mythis.$.update.close();
+          mythis.showLoadingMessage('Updating Chunks. This may take several minutes. Please wait...');
+
+          setTimeout(function () {
+              return App.dataManager.updateChunks()
+                  .then(function () {
+                      mythis.showMessage('Update Complete', 'The chunk markers have been updated.');
                   })
                   .catch(function (err) {
                       mythis.showErrorMessage('Update Failed', 'An error occurred while updating', err);
@@ -404,20 +425,27 @@
 
       updateAll: function () {
           var mythis = this;
+          var before = App.dataManager.getMetrics();
 
           mythis.$.update.close();
-
           mythis.showLoadingMessage('Updating Sources. This may take several minutes. Please wait...');
 
           setTimeout(function () {
               return App.dataManager.updateSources()
                   .then(function () {
                       mythis.showLoadingMessage('Updating Languages. This may take several minutes. Please wait...');
-
                       return App.dataManager.updateLanguages();
                   })
                   .then(function () {
-                      mythis.showMessage('Update Complete', 'Everything has been updated.');
+                      mythis.showLoadingMessage('Updating Chunks. This may take several minutes. Please wait...');
+                      return App.dataManager.updateChunks();
+                  })
+                  .then(function () {
+                      var after = App.dataManager.getMetrics();
+                      var diffLang = after.target_language_count - before.target_language_count;
+                      var diffSrc = after.resource_count_level3 - before.resource_count_level3;
+
+                      mythis.showMessage('Update Complete', 'Everything has been updated. ' + diffLang + ' new languages were added. ' + diffSrc + ' new sources were added.');
                   })
                   .catch(function (err) {
                       mythis.showErrorMessage('Update Failed', 'An error occurred while updating', err);
@@ -1046,13 +1074,21 @@
                           var string = lang + "_" + proj + "_" + res;
                           if (!strings[string]) {
                               strings[string] = true;
-                              var open = App.dataManager.openProjectContainers(lang, proj, res);
+                              var open = App.dataManager.activateProjectContainers(lang, proj, res);
                               promises.push(open);
                           }
                       }
                   }
-                  promises.push(App.dataManager.openContainer('en', 'bible', 'tw'));
-                  promises.push(App.dataManager.openContainer('en', 'bible-obs', 'tw'));
+                  promises.push(App.dataManager.activateContainer('en', 'bible', 'tw'));
+                  promises.push(App.dataManager.activateContainer('en', 'bible-obs', 'tw'));
+                  promises.push(App.dataManager.activateContainer('en', 'ta-audio', 'vol2'));
+                  promises.push(App.dataManager.activateContainer('en', 'ta-checking', 'vol1'));
+                  promises.push(App.dataManager.activateContainer('en', 'ta-checking', 'vol2'));
+                  promises.push(App.dataManager.activateContainer('en', 'ta-gateway', 'vol3'));
+                  promises.push(App.dataManager.activateContainer('en', 'ta-intro', 'vol1'));
+                  promises.push(App.dataManager.activateContainer('en', 'ta-process', 'vol1'));
+                  promises.push(App.dataManager.activateContainer('en', 'ta-translate', 'vol1'));
+                  promises.push(App.dataManager.activateContainer('en', 'ta-translate', 'vol2'));
 
                   return Promise.all(promises)
                       .then(function () {

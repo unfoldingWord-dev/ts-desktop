@@ -147,11 +147,13 @@
             var display = this.$.display;
             var marker = this.$.marker;
 
-            display.innerHTML = chapter;
-            marker.classList.remove("hide");
-            setTimeout(function() {
-                marker.classList.add("hide");
-            }, 2000);
+            if (chapter) {
+                display.innerHTML = chapter;
+                marker.classList.remove("hide");
+                setTimeout(function() {
+                    marker.classList.add("hide");
+                }, 2000);
+            }
         },
 
         setheights: function () {

@@ -24,6 +24,10 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             return db.updateChunks();
         },
 
+        getMetrics: function () {
+            return db.indexSync.getMetrics();
+        },
+
         getTargetLanguages: function () {
             var list = db.indexSync.getTargetLanguages();
 

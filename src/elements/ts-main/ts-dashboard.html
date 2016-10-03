@@ -368,6 +368,7 @@
 
       updateLanguages: function () {
           var mythis = this;
+          var before = App.dataManager.getMetrics();
 
           mythis.$.update.close();
           mythis.showLoadingMessage('Updating Languages. This may take several minutes. Please wait...');
@@ -375,7 +376,9 @@
           setTimeout(function () {
               return App.dataManager.updateLanguages()
                   .then(function () {
-                      mythis.showMessage('Update Complete', 'The language list has been updated.');
+                      var after = App.dataManager.getMetrics();
+                      var diff = after.target_language_count - before.target_language_count;
+                      mythis.showMessage('Update Complete', 'The language list has been updated. ' + diff + ' new languages were added.');
                   })
                   .catch(function (err) {
                       mythis.showErrorMessage('Update Failed', 'An error occurred while updating', err);
@@ -385,6 +388,7 @@
 
       updateSources: function () {
           var mythis = this;
+          var before = App.dataManager.getMetrics();
 
           mythis.$.update.close();
           mythis.showLoadingMessage('Updating Sources. This may take several minutes. Please wait...');
@@ -392,7 +396,9 @@
           setTimeout(function () {
               return App.dataManager.updateSources()
                   .then(function () {
-                      mythis.showMessage('Update Complete', 'The source list has been updated.');
+                      var after = App.dataManager.getMetrics();
+                      var diff = after.resource_count_level3 - before.resource_count_level3;
+                      mythis.showMessage('Update Complete', 'The source list has been updated. ' + diff + ' new sources were added.');
                   })
                   .catch(function (err) {
                       mythis.showErrorMessage('Update Failed', 'An error occurred while updating', err);
@@ -419,6 +425,7 @@
 
       updateAll: function () {
           var mythis = this;
+          var before = App.dataManager.getMetrics();
 
           mythis.$.update.close();
           mythis.showLoadingMessage('Updating Sources. This may take several minutes. Please wait...');
@@ -434,7 +441,11 @@
                       return App.dataManager.updateChunks();
                   })
                   .then(function () {
-                      mythis.showMessage('Update Complete', 'Everything has been updated.');
+                      var after = App.dataManager.getMetrics();
+                      var diffLang = after.target_language_count - before.target_language_count;
+                      var diffSrc = after.resource_count_level3 - before.resource_count_level3;
+
+                      mythis.showMessage('Update Complete', 'Everything has been updated. ' + diffLang + ' new languages were added. ' + diffSrc + ' new sources were added.');
                   })
                   .catch(function (err) {
                       mythis.showErrorMessage('Update Failed', 'An error occurred while updating', err);

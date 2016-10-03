@@ -317,6 +317,11 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
 
         saveTargetChunk: function (chunk, meta) {
             var mythis = this;
+
+            if (chunk.chunkmeta.chapterid === "front") {
+                chunk.chunkmeta.chapterid = "00";
+            }
+
             return mythis.makeChapterDir(meta, chunk)
                 .then(function () {
                     return mythis.updateChunk(meta, chunk);
@@ -475,8 +480,12 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             var paths = utils.makeProjectPaths(targetDir, meta);
 
             var parseChunkName = function (f) {
-                var p = path.parse(f),
-                    ch = p.dir.split(path.sep).slice(-1);
+                var p = path.parse(f);
+                var ch = p.dir.split(path.sep).slice(-1)[0];
+
+                if (ch === "00") {
+                    ch = "front";
+                }
                 return ch + '-' + p.name;
             };
 

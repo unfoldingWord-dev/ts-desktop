@@ -13,68 +13,20 @@ process.stdout.write = console.log.bind(console);
 
 (function () {
     let ipcRenderer = require('electron').ipcRenderer;
-    let setMsg = ipcRenderer.send.bind(ipcRenderer, 'loading-status');
-
-    setMsg('Bootstrapping...');
 
     const DATA_PATH = ipcRenderer.sendSync('main-window', 'dataPath');
 
-    setMsg('Loading path...');
     let path = require('path');
     let fs = require('fs');
-    let fse = require('fs-extra');
-
-    setMsg('Loading mkdirp...');
     let mkdirp = require('mkdirp');
-
-    setMsg('Loading DB...');
     let Db = require('door43-client');
-
-    setMsg('Loading Reporter...');
     let Reporter = require('../js/reporter').Reporter;
-
-    setMsg('Loading Configurator...');
     let Configurator = require('../js/configurator').Configurator;
-
-    setMsg('Loading Git Manager...');
-    let GitManager = require('../js/gitnative').GitManager;
-
-    setMsg('Loading Key Manager...');
-    let KeyManager = require('../js/keys').KeyManager;
-
-    setMsg('Loading Projects Manager...');
-    let ProjectsManager = require('../js/projects').ProjectsManager;
-
-    setMsg('Loading Migrate Manager...');
-    let MigrateManager = require('../js/migrator').MigrateManager;
-
-    setMsg('Loading Data Manager...');
     let DataManager = require('../js/database').DataManager;
-
-    setMsg('Loading User Manager...');
-    let UserManager = require('../js/user').UserManager;
-
-    setMsg('Loading Import Manager...');
-    let ImportManager = require('../js/importer').ImportManager;
-
-    setMsg('Loading Export Manager...');
-    let ExportManager = require('../js/exporter').ExportManager;
-
-    setMsg('Loading Print Manager...');
-    let PrintManager = require('../js/printer').PrintManager;
-
-    setMsg('Loading Renderer...');
     let Renderer = require('../js/render').Renderer;
-
-    setMsg('Loading Locale...');
     let i18n = require('../js/i18n').Locale(path.resolve(path.join(__dirname, '..', '..', 'i18n')));
-
-    setMsg('Loading Utils...');
     let utils = require('../js/lib/utils');
 
-    setMsg('Initializing configurator...');
-
-    // TODO: refactor this so we can just pass an object to the constructor
     let configurator = (function () {
         var c = new Configurator();
 
@@ -124,7 +76,7 @@ process.stdout.write = console.log.bind(console);
         } catch(e) {}
 
         if (!indexstat || configurator.getValue("libraryBuild") != appData.build) {
-            setMsg('Setting up index file...');
+
             mkdirp.sync(libraryDir);
             var content = fs.readFileSync(srcDB);
             fs.writeFileSync(libraryPath, content);
@@ -137,15 +89,6 @@ process.stdout.write = console.log.bind(console);
 
         return new DataManager(db, resourceDir, apiURL, srcResource);
     })();
-
-    setMsg('Initializing modules...');
-
-    let gitManager = new GitManager();
-
-    let migrateManager = new MigrateManager(configurator, gitManager, reporter);
-
-    // TODO: where should this be?
-    mkdirp.sync(configurator.getValue('targetTranslationsDir'));
 
     var App = {
         appName: 'translationStudio',
@@ -191,59 +134,11 @@ process.stdout.write = console.log.bind(console);
 
         dataManager: dataManager,
 
-        gitManager: gitManager,
-
-        migrateManager: migrateManager,
-
         renderer: (function () {
             return new Renderer();
-        })(),
-
-        keyManager: (function () {
-            return new KeyManager(DATA_PATH);
-        })(),
-
-        printManager: (function () {
-            return new PrintManager(configurator);
-        })(),
-
-        projectsManager: (function () {
-            return new ProjectsManager(dataManager, configurator, reporter, gitManager, migrateManager);
-        })(),
-
-        userManager: (function () {
-            return new UserManager({
-                token: configurator.getValue('gogs-token')
-            });
-        })(),
-
-        importManager: (function () {
-            return new ImportManager(configurator, migrateManager, dataManager);
-        })(),
-
-        exportManager: (function () {
-            return new ExportManager(configurator, gitManager);
         })()
+
     };
-
-    // hook up global exception handler
-    // process.removeAllListeners('uncaughtException');
-    // process.on('uncaughtException', function (err) {
-    //     let date = new Date();
-    //     date = date.getFullYear() + '_' + date.getMonth() + '_' + date.getDay();
-    //     let crashPath = path.join(DATA_PATH, 'logs', date + '.crash');
-    //     let crashReporter = new Reporter({logPath: crashPath});
-    //     crashReporter.logError(err.message + '\n' + err.stack, function () {
-    //         /**
-    //          * TODO: Hook in a UI
-    //          * Currently the code quits quietly without notifying the user
-    //          * This should probably be the time when the user chooses to submit what happened or not
-    //          * then we restart the application
-    //          */
-    //     });
-    // });
-
-    setMsg('Loading UI...');
 
     window.App = App;
 

@@ -269,16 +269,14 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             if (meta.type.id === "tw") {
                 var dict = meta.project.id;
                 frames = dataManager.getAllWords(dict);
-                return frames.length;
             } else if (meta.type.id === "ta") {
                 //frames = dataManager.getTa(meta.project.id);
-                return frames.length;
             } else if (meta.source_translations.length) {
-                frames = dataManager.getSourceFrames(meta.source_translations[0]);
-                return frames.length;
-            } else {
-                return 0;
+                var source = meta.source_translations[0];
+                var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;
+                frames = dataManager.getContainerData(container);
             }
+            return frames.length;
         },
 
         makeUniqueId: function (manifest) {
@@ -319,6 +317,11 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
 
         saveTargetChunk: function (chunk, meta) {
             var mythis = this;
+
+            if (chunk.chunkmeta.chapterid === "front") {
+                chunk.chunkmeta.chapterid = "00";
+            }
+
             return mythis.makeChapterDir(meta, chunk)
                 .then(function () {
                     return mythis.updateChunk(meta, chunk);
@@ -477,8 +480,12 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             var paths = utils.makeProjectPaths(targetDir, meta);
 
             var parseChunkName = function (f) {
-                var p = path.parse(f),
-                    ch = p.dir.split(path.sep).slice(-1);
+                var p = path.parse(f);
+                var ch = p.dir.split(path.sep).slice(-1)[0];
+
+                if (ch === "00") {
+                    ch = "front";
+                }
                 return ch + '-' + p.name;
             };
 

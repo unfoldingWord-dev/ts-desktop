@@ -67,6 +67,11 @@
             justify-content: flex-end;
         }
 
+        .buttons {
+            display: flex;
+            justify-content: flex-end;
+        }
+
         .row-header {
             margin: 0;
             padding: 0.25em 1em;
@@ -120,10 +125,12 @@
                 <template is="dom-repeat" items="[[selected]]" as="source">
                     <div class$="[[rowclass(source.direction)]]">
                         <div>
-                            <span>[[source.language_name]]</span> - <span>[[source.resource_name]]</span>
+                            <span>[[source.language_name]]</span> (<span>[[source.language_id]]</span>) - <span>[[source.resource_name]]</span>
                         </div>
-                        <paper-button raised class$="[[checkdownload(source.uptodate)]]" on-tap="download">Update</paper-button>
-                        <paper-button raised on-tap="removesource">Remove</paper-button>
+                        <div class="buttons">
+                            <paper-button raised class$="[[checkdownload(source.uptodate)]]" on-tap="download">Update</paper-button>
+                            <paper-button raised on-tap="removesource">Remove</paper-button>
+                        </div>
                     </div>
                 </template>
 
@@ -131,9 +138,9 @@
                 <template is="dom-repeat" items="[[filtered]]" as="source">
                     <div class$="[[rowclass(source.direction)]]">
                         <div>
-                            <span>[[source.language_name]]</span> - <span>[[source.resource_name]]</span>
+                            <span>[[source.language_name]]</span> (<span>[[source.language_id]]</span>) - <span>[[source.resource_name]]</span>
                         </div>
-                        <div>
+                        <div class="buttons">
                             <paper-button raised class$="[[checkavailable(source.uptodate)]]" on-tap="addsource">Select</paper-button>
                             <paper-button raised class$="[[checkdownload(source.uptodate)]]" on-tap="download">Download</paper-button>
                         </div>
@@ -175,10 +182,6 @@
                 type: Array,
                 value: []
             },
-            current: {
-                type: Number,
-                value: null
-            },
             options: {
                 type: Object,
                 value: {},
@@ -190,11 +193,11 @@
             }
         },
 
-        sortavailable: function (list) {
-            var sorted = list.sort(function (a, b) {
-                if (a.language_name.toLowerCase() > b.language_name.toLowerCase()) {
+        sortlist: function (list) {
+            return list.sort(function (a, b) {
+                if (a.language_id.toLowerCase() > b.language_id.toLowerCase()) {
                     return 1;
-                } else if (a.language_name.toLowerCase() < b.language_name.toLowerCase()) {
+                } else if (a.language_id.toLowerCase() < b.language_id.toLowerCase()) {
                     return -1;
                 } else {
                     if (a.resource_name.toLowerCase() > b.resource_name.toLowerCase()) {
@@ -206,9 +209,6 @@
                     }
                 }
             });
-
-            this.set('available', sorted);
-            this.searchfilter();
         },
 
         focussearch: function () {
@@ -227,7 +227,7 @@
             return uptodate ? 'hide' : '';
         },
 
-        searchfilter: function() {
+        searchfilter: function () {
             var query = this.query;
             var available = _.cloneDeep(this.available);
             var filtered = [];
@@ -235,7 +235,7 @@
             if (query) {
                 var search = App.utils.startsWithBase.bind(null, query);
                 filtered = available.filter(function(source) {
-                    return search(source.language_name) || search(source.resource_name);
+                    return search(source.language_name) || search(source.resource_name) || search(source.language_id);
                 });
             } else {
                 filtered = available;
@@ -270,48 +270,42 @@
             }, 500);
         },
 
-        cancel: function() {
+        cancel: function () {
             this.query = "";
             this.fire('close');
         },
 
-        confirm: function() {
+        confirm: function () {
             var sources = this.selected;
-            var current = this.current;
+            var current = sources.length ? sources.length - 1 : null;
+
             this.query = "";
             this.fire('iron-signal', {name: 'updatesources', data: {sources: sources, current: current, full: true}});
             this.fire('close');
         },
 
-        addsource: function(event) {
+        addsource: function (event) {
             var source = event.model.source;
             var index = event.model.index;
+            var selected = _.cloneDeep(this.selected);
 
-            if (this.selected.length < 3) {
-                this.push('selected', source);
-                this.current = this.selected.indexOf(source);
+            if (selected.length < 3) {
+                selected.push(source);
+                this.set('selected', this.sortlist(selected));
                 this.splice('available', index, 1);
                 this.searchfilter();
             }
         },
 
-        removesource: function(event) {
+        removesource: function (event) {
             var source = event.model.source;
             var index = event.model.index;
             var available = _.cloneDeep(this.available);
 
             available.push(source);
-            this.sortavailable(available);
+            this.set('available', this.sortlist(available));
+            this.searchfilter();
             this.splice('selected', index, 1);
-            if (this.current === index) {
-                if (this.selected.length === 0) {
-                    this.current = null;
-                } else if (index >= this.selected.length - 1) {
-                    this.current = (this.selected.length - 1);
-                }
-            } else if (index < this.current) {
-                this.current -= 1;
-            }
         },
 
         ready: function () {

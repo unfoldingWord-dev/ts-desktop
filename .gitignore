@@ -21,4 +21,5 @@ ssh
 acceptance_tests/report.txt
 src/config/private.json
 src/logs/
+src/index/
 

@@ -6,24 +6,26 @@ var utils = require('../js/lib/utils');
 var fs = require('fs-extra');
 var path = require('path');
 var yaml = require('js-yaml');
+var mkdirp = require('mkdirp');
 
-function DataManager(db, resourceDir, apiURL) {
+function DataManager(db, resourceDir, apiURL, sourceDir) {
 
     return {
 
         updateLanguages: function () {
-            var catalogs = db.indexSync.getCatalogs();
-
-            return utils.chain(function (item) {
-                return db.updateCatalogIndex(item.slug);
-            }, function (err, item) {
-                console.log("Cannot find catalog: " + item.slug);
-                return false;
-            })(catalogs);
+            return db.updateCatalogs();
         },
 
         updateSources: function () {
-            return db.updatePrimaryIndex(apiURL);
+            return db.updateSources(apiURL);
+        },
+
+        updateChunks: function () {
+            return db.updateChunks();
+        },
+
+        getMetrics: function () {
+            return db.indexSync.getMetrics();
         },
 
         getTargetLanguages: function () {
@@ -53,28 +55,36 @@ function DataManager(db, resourceDir, apiURL) {
         },
 
         validateSource: function (source) {
-            var mythis = this;
             var lang = source.language_id;
             var proj = source.project_id;
             var res = source.resource_id;
             var container = lang + "_" + proj + "_" + res;
-            var zipname = container + ".tsrc";
-            var manifest = path.join(resourceDir, container, "package.json");
+            var sourcePath = path.join(sourceDir, container);
+            var resourcePath = path.join(resourceDir, container);
 
-            return utils.fs.stat(path.join(resourceDir, zipname)).then(utils.ret(true)).catch(utils.ret(false))
-                .then(function (exists) {
-                    if (exists) {
-                        return mythis.openContainer(lang, proj, res)
-                            .then(function () {
-                                return utils.fs.readFile(manifest);
-                            })
+            return utils.fs.stat(resourcePath).then(utils.ret(true)).catch(utils.ret(false))
+                .then(function (resexists) {
+                    if (resexists) {
+                        return resourcePath;
+                    }
+                    return utils.fs.stat(sourcePath).then(utils.ret(true)).catch(utils.ret(false))
+                        .then(function (srcexists) {
+                            if (srcexists) {
+                                return sourcePath;
+                            }
+                            return false;
+                        });
+                })
+                .then(function (containerpath) {
+                    if (containerpath) {
+                        var manifest = path.join(containerpath, "package.json");
+                        return utils.fs.readFile(manifest)
                             .then(function (contents) {
                                 var json = JSON.parse(contents);
                                 source.uptodate = json.resource.status.pub_date === source.date_modified;
                                 return source;
                             });
                     }
-
                     source.uptodate = false;
                     return source;
                 });
@@ -111,52 +121,49 @@ function DataManager(db, resourceDir, apiURL) {
                 });
         },
 
-        openContainer: function (language, project, resource) {
-            return db.openResourceContainer(language, project, resource)
-                .catch(function (err) {
-                    throw err;
+        activateContainer: function (language, project, resource) {
+            var container = language + "_" + project + "_" + resource;
+            var resourcePath = path.join(resourceDir, container);
+            var sourcePath = path.join(sourceDir, container);
+
+            return utils.fs.stat(resourcePath).then(utils.ret(true)).catch(utils.ret(false))
+                .then(function (resexists) {
+                    if (!resexists) {
+                        return utils.fs.stat(sourcePath).then(utils.ret(true)).catch(utils.ret(false))
+                            .then(function (srcexists) {
+                                if (srcexists) {
+                                    mkdirp.sync(resourcePath);
+                                    return utils.fs.copy(sourcePath, resourcePath, {clobber: true});
+                                }
+                                throw "Resource container does not exist";
+                            });
+                    }
+                    return true;
                 });
         },
 
-        openProjectContainers: function (language, project, resource) {
+        activateProjectContainers: function (language, project, resource) {
             var mythis = this;
 
-            return mythis.openContainer(language, project, resource)
+            return mythis.activateContainer(language, project, resource)
                 .then(function () {
-                    return mythis.openContainer(language, project, "tn")
+                    return mythis.activateContainer(language, project, "tn")
                         .catch(function () {
                             return true;
                         });
                 })
                 .then(function () {
-                    return mythis.openContainer(language, project, "tq")
+                    return mythis.activateContainer(language, project, "tq")
                         .catch(function () {
                             return true;
                         });
                 })
                 .then(function () {
-                    return mythis.openContainer(language, project, "udb")
+                    return mythis.activateContainer(language, project, "udb")
                         .catch(function () {
                             return true;
                         });
                 });
-        },
-
-        closeAllContainers: function () {
-            var allfiles = fs.readdirSync(resourceDir);
-            var alldirs = allfiles.filter(function (file) {
-                var stat = fs.statSync(path.join(resourceDir, file));
-                return stat.isDirectory();
-            });
-            var promises = [];
-
-            alldirs.forEach(function (dir) {
-                var name = dir.split("_");
-                var close = db.closeResourceContainer(name[0], name[1], name[2]);
-                promises.push(close);
-            });
-
-            return Promise.all(promises);
         },
 
         extractContainer: function (container) {
@@ -177,11 +184,7 @@ function DataManager(db, resourceDir, apiURL) {
                         var filename = file.split(".")[0];
                         var content = fs.readFileSync(path.join(contentpath, dir, file), 'utf8');
 
-                        if (dir === "front") {
-                            dir = "00";
-                        }
-
-                        data.push({dir: dir, filename: filename, content: content});
+                        data.push({chapter: dir, chunk: filename, content: content});
                     });
                 });
 
@@ -191,10 +194,27 @@ function DataManager(db, resourceDir, apiURL) {
             }
         },
 
-        getProjectName: function (id) {
-            var proj = db.indexSync.getProject('en', id);
+        getContainerData: function (container) {
+            var frames = this.extractContainer(container);
+            var toc = this.parseYaml(container, "toc.yml");
+            var sorted = [];
 
-            return proj.name;
+            toc.forEach (function (chapter) {
+                var chunks = frames.filter(function (item) {
+                    return item.chapter === chapter.chapter;
+                });
+                chapter.chunks.forEach (function (chunk) {
+                    sorted.push(chunks.filter(function (item) {
+                        return item.chunk === chunk;
+                    })[0]);
+                });
+            });
+
+            return sorted;
+        },
+
+        getProjectName: function (id) {
+            return db.indexSync.getProject('en', id).name;
         },
 
 		getChunkMarkers: function (id) {
@@ -220,38 +240,10 @@ function DataManager(db, resourceDir, apiURL) {
             }
         },
 
-        getSourceFrames: function (source) {
-            var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;
-            var frames = this.extractContainer(container);
-            var toc = this.parseYaml(container, "toc.yml");
-            var sorted = [];
-
-            var mapped = frames.map(function (item) {
-                return {chapter: item.dir, verse: item.filename, chunk: item.content};
-            });
-
-            toc.forEach (function (chapter) {
-                var chunks = mapped.filter(function (item) {
-                    return item.chapter === chapter.chapter;
-                });
-                chapter.chunks.forEach (function (chunk) {
-                    sorted.push(chunks.filter(function (item) {
-                        return item.verse === chunk;
-                    })[0]);
-                });
-            });
-
-            return sorted;
-        },
-
         getSourceUdb: function (source) {
             var container = source.language_id + "_" + source.project_id + "_udb";
             if (source.resource_id === "ulb") {
-                var frames = this.extractContainer(container);
-
-                return frames.map(function (item) {
-                    return {chapter: item.dir, verse: item.filename, chunk: item.content};
-                });
+                return this.extractContainer(container);
             } else {
                 return [];
             }
@@ -262,9 +254,13 @@ function DataManager(db, resourceDir, apiURL) {
             var container = source.language_id + "_" + source.project_id + "_" + type;
             var frames = this.extractContainer(container);
 
-            return frames.map(function (item) {
-                return {chapter: item.dir, verse: item.filename, data: mythis.parseHelps(item.content)};
+            frames.forEach(function (item) {
+                if (item.content) {
+                    item.content = mythis.parseHelps(item.content);
+                }
             });
+
+            return frames;
         },
 
         getSourceWords: function (source) {
@@ -288,13 +284,7 @@ function DataManager(db, resourceDir, apiURL) {
         parseYaml: function (container, filename) {
             var filepath = path.join(resourceDir, container, "content", filename);
             var file = fs.readFileSync(filepath, "utf8");
-            var parsed = yaml.load(file);
-
-            if (filename === "toc.yml" && parsed[0].chapter === "front") {
-                parsed[0].chapter = "00";
-            }
-
-            return parsed;
+            return yaml.load(file);
         },
 
         getRelatedWords: function (source, slug) {
@@ -337,7 +327,7 @@ function DataManager(db, resourceDir, apiURL) {
 
             return frames.map(function (item) {
                 var data = mythis.parseHelps(item.content)[0];
-                data.slug = item.dir;
+                data.slug = item.chapter;
                 return data;
             });
         },
@@ -360,6 +350,38 @@ function DataManager(db, resourceDir, apiURL) {
             } else {
                 return [];
             }
+        },
+
+        getAllTa: function () {
+            var mythis = this;
+            var containers = [
+                "en_ta-intro_vol1",
+                "en_ta-process_vol1",
+                "en_ta-translate_vol1",
+                "en_ta-translate_vol2",
+                "en_ta-checking_vol1",
+                "en_ta-checking_vol2",
+                "en_ta-audio_vol2",
+                "en_ta-gateway_vol3"
+            ];
+            var allchunks = [];
+
+            containers.forEach(function (container) {
+                allchunks.push(mythis.getContainerData(container));
+            });
+
+            allchunks = _.flatten(allchunks);
+
+            allchunks.forEach(function (item) {
+                if (item.chunk === "title") {
+                    item.content = "# " + item.content;
+                }
+                if (item.chunk === "sub-title") {
+                    item.content = "## " + item.content;
+                }
+            });
+
+            return allchunks;
         },
 
         getTa: function (volume) {

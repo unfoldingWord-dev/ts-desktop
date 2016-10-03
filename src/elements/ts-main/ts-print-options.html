@@ -71,7 +71,7 @@
         </div>
         <div id="footer">
             <paper-button dialog-dismiss>Cancel</paper-button>
-            <paper-button on-tap="print">Save to PDF</paper-button>
+            <paper-button on-tap="print">Create Preview</paper-button>
         </div>
 
     </template>
@@ -117,7 +117,7 @@
                 newpage: this.$.pagebox.checked
             };
 
-            this.fire('iron-signal', {name: 'saveprint', data: {options: options}});
+            this.fire('iron-signal', {name: 'createprint', data: {options: options}});
         },
 
         ready: function () {

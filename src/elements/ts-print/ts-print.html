@@ -29,13 +29,29 @@
         }
 
         .body {
-            padding: 0 4rem;
+            margin: 25px;
+            padding: 0 20px;
             overflow-y: auto;
             background-color: var(--card-background-color);
         }
 
+        .buttons {
+            background: var(--accent-color);
+            color: var(--reverse-text-color);
+            text-transform: uppercase;
+            padding: 6px;
+            margin-left: 50px;
+            font-size: 80%;
+        }
+
         .hide {
             display: none;
+        }
+
+        @media print {
+            .header {
+                display: none;
+            }
         }
 
     </style>
@@ -46,10 +62,12 @@
             <div class="heading">
                 <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
                 <span>Print Preview</span>
+                <paper-button raised class="buttons" on-tap="print">Print</paper-button>
             </div>
         </div>
-        <div class="body">
-
+        <div class="body targetfont">
+            <h2>Chapter 1</h2>
+            <p>This is the first verse.  And the only verse.</p>
         </div>
 
     </template>
@@ -76,6 +94,10 @@
                 value: {},
                 notify: true
             },
+            currentproject: {
+                type: Object,
+                value: {}
+            },
             animationConfig: {
                 value: function () {
                     return {
@@ -94,6 +116,10 @@
 
         back: function () {
             this.route = App.configurator.getValue("backto");
+        },
+
+        print: function () {
+            window.print();
         },
 
         ready: function () {

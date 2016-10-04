@@ -7,6 +7,7 @@ var fs = require('fs-extra');
 var path = require('path');
 var yaml = require('js-yaml');
 var mkdirp = require('mkdirp');
+var rc = require('resource-container');
 
 function DataManager(db, resourceDir, apiURL, sourceDir) {
 
@@ -55,11 +56,12 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
         },
 
         validateSource: function (source) {
+            var mythis = this;
             var lang = source.language_id;
             var proj = source.project_id;
             var res = source.resource_id;
             var container = lang + "_" + proj + "_" + res;
-            var sourcePath = path.join(sourceDir, container);
+            var sourcePath = path.join(sourceDir, container + ".tsrc");
             var resourcePath = path.join(resourceDir, container);
 
             return utils.fs.stat(resourcePath).then(utils.ret(true)).catch(utils.ret(false))
@@ -70,7 +72,10 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                     return utils.fs.stat(sourcePath).then(utils.ret(true)).catch(utils.ret(false))
                         .then(function (srcexists) {
                             if (srcexists) {
-                                return sourcePath;
+                                return mythis.activateContainer(lang, proj, res)
+                                    .then(function () {
+                                        return resourcePath;
+                                    });
                             }
                             return false;
                         });
@@ -124,7 +129,7 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
         activateContainer: function (language, project, resource) {
             var container = language + "_" + project + "_" + resource;
             var resourcePath = path.join(resourceDir, container);
-            var sourcePath = path.join(sourceDir, container);
+            var sourcePath = path.join(sourceDir, container + ".tsrc");
 
             return utils.fs.stat(resourcePath).then(utils.ret(true)).catch(utils.ret(false))
                 .then(function (resexists) {
@@ -132,8 +137,7 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                         return utils.fs.stat(sourcePath).then(utils.ret(true)).catch(utils.ret(false))
                             .then(function (srcexists) {
                                 if (srcexists) {
-                                    mkdirp.sync(resourcePath);
-                                    return utils.fs.copy(sourcePath, resourcePath, {clobber: true});
+                                    return rc.open(sourcePath, resourcePath);
                                 }
                                 throw "Resource container does not exist";
                             });

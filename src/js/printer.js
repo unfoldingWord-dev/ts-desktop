@@ -49,6 +49,10 @@ function PrintManager(configurator) {
             });
         },
 
+        getLicense: function (filename) {
+            return fs.readFileSync(path.join(srcDir, 'assets', filename), 'utf8');
+        },
+
         renderLicense: function (doc, filename) {
             var filePath = path.join(srcDir, 'assets', filename);
             var lines = fs.readFileSync(filePath).toString().split('\n');

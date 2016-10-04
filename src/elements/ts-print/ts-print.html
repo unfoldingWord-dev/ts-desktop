@@ -1,5 +1,6 @@
 
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../components/marked-element/marked-element.html">
 
 <dom-module id="ts-print">
 
@@ -10,12 +11,12 @@
             flex-direction: column;
         }
 
-        .header {
+        #header {
             background-color: var(--primary-color);
             min-height: 50px;
         }
 
-        .heading {
+        #heading {
             font-size: 125%;
             color: var(--reverse-text-color);
             display: flex;
@@ -28,14 +29,14 @@
             margin: 0 1em 0 .2em;
         }
 
-        .body {
-            margin: 25px;
-            padding: 0 20px;
+        #content {
+            margin: 0 25px;
+            padding: 0 25px;
             overflow-y: auto;
             background-color: var(--card-background-color);
         }
 
-        .buttons {
+        .button {
             background: var(--accent-color);
             color: var(--reverse-text-color);
             text-transform: uppercase;
@@ -44,7 +45,7 @@
             font-size: 80%;
         }
 
-        h2 {
+        h1, h2 {
             text-align: center;
         }
 
@@ -53,8 +54,11 @@
         }
 
         @media print {
-            .header {
+            #header {
                 display: none;
+            }
+            #title {
+                page-break-after: always;
             }
         }
 
@@ -62,15 +66,19 @@
 
     <template>
 
-        <div class="header">
-            <div class="heading">
+        <div id="header">
+            <div id="heading">
                 <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
                 <span>Print Preview</span>
-                <paper-button raised class="buttons" on-tap="print">Print</paper-button>
+                <paper-button raised class="button" on-tap="print">Print</paper-button>
             </div>
         </div>
-        <div class="body targetfont">
-            <div id="textholder"></div>
+        <div id="content">
+            <h1 id="title"></h1>
+            <marked-element id="license">
+                <div class="markdown-html"></div>
+            </marked-element>
+            <div id="textholder" class="targetfont"></div>
         </div>
 
     </template>
@@ -120,7 +128,11 @@
         rendertext: function () {
             var chunks = this.currentproject.chunks;
             var options = this.currentproject.printoptions;
+            var filename = "LICENSE.md";
 
+            this.$.license.markdown = App.printManager.getLicense(filename);
+
+            this.$.title.innerHTML = chunks[0].transcontent || chunks[0].srccontent;
             this.$.textholder.innerHTML = App.renderer.renderPrintPreview(chunks, options);
 
         },

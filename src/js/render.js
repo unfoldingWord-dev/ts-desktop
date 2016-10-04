@@ -140,8 +140,6 @@ function Renderer() {
             var startheader = "\<h2 class='style-scope " + module + "'\>";
             var endheader = "\<\/h2\>";
 
-            var title = chunks[0].transcontent || chunks[0].srccontent;
-
             var chapters = [];
             var text = "";
 
@@ -163,8 +161,6 @@ function Renderer() {
                     chapters.push({chapter: chap, content: content});
                 }
             });
-
-            text += startheader + title + endheader;
 
             chapters.forEach(function (chapter) {
                 text += startheader + chapter.chapter + endheader;

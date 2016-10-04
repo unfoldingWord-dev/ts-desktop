@@ -134,6 +134,48 @@ function Renderer() {
             return returnstr;
         },
 
+        renderPrintPreview: function (chunks, options) {
+            var mythis = this;
+            var module = "ts-print";
+            var startheader = "\<h2 class='style-scope " + module + "'\>";
+            var endheader = "\<\/h2\>";
+
+            var title = chunks[0].transcontent || chunks[0].srccontent;
+
+            var chapters = [];
+            var text = "";
+
+            _.forEach(_.groupBy(chunks, function(chunk) {
+                return chunk.chunkmeta.chapter;
+            }), function (data, chap) {
+
+                var content = "";
+
+                _.forEach(data, function (chunk) {
+                    if (chunk.chunkmeta.frame > 0) {
+
+                        content += chunk.transcontent + " ";
+
+                    }
+                });
+
+                if (chap > 0) {
+                    chapters.push({chapter: chap, content: content});
+                }
+            });
+
+            text += startheader + title + endheader;
+
+            chapters.forEach(function (chapter) {
+                text += startheader + chapter.chapter + endheader;
+                text += mythis.renderTargetWithVerses(chapter.content, module);
+
+            });
+
+            return text;
+
+        },
+
         validateVerseMarkers: function (text, verses) {
             var linearray = text.trim().split("\n");
             var returnstr = "";
@@ -145,7 +187,7 @@ function Renderer() {
                         returnstr += "";
                     } else {
                         returnstr += "\n";
-                    }                    
+                    }
                 } else {
                     var wordarray = linearray[j].split(" ");
                     for (var i = 0; i < wordarray.length; i++) {
@@ -168,15 +210,15 @@ function Renderer() {
             }
 
             var addon = "";
-            
-            if (returnstr) {                
+
+            if (returnstr) {
                 for (var k = 0; k < verses.length; k++) {
                     if (used.indexOf(verses[k]) < 0) {
                         addon += "\\v " + verses[k] + " ";
                     }
                 }
             }
-            
+
             return addon + returnstr;
         },
 

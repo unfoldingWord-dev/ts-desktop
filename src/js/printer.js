@@ -151,14 +151,14 @@ function PrintManager(configurator) {
             return new Promise(function (resolve, reject) {
                 var writestream = fs.createWriteStream(filePath);
 
-                writestream.on("error", function (err) {                    
+                writestream.on("error", function (err) {
                     reject("Cannot write to file. It may already be open.");
                 });
 
                 writestream.on("close", function () {
-                    resolve(true);                    
+                    resolve(true);
                 });
-                
+
                 if (project.id === 'obs') {
                     doc.pipe(writestream);
 
@@ -268,8 +268,8 @@ function PrintManager(configurator) {
                         doc.text(chapter.page - startpagenum + 1 + '', {align: 'right'});
                         doc.moveDown();
                     });
-                    doc.end();                    
-                } else {                    
+                    doc.end();
+                } else {
                     doc.pipe(writestream);
 
                     doc.info.Title = translation[0].transcontent || meta.project.name;
@@ -326,7 +326,7 @@ function PrintManager(configurator) {
                             doc.text(j + 2 - startpagenum, 72, doc.page.height - 60, {align: 'center'});
                         }
                     }
-                    doc.end();                    
+                    doc.end();
                 }
             });
         }

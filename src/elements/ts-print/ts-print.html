@@ -44,6 +44,10 @@
             font-size: 80%;
         }
 
+        h2 {
+            text-align: center;
+        }
+
         .hide {
             display: none;
         }
@@ -66,8 +70,7 @@
             </div>
         </div>
         <div class="body targetfont">
-            <h2>Chapter 1</h2>
-            <p>This is the first verse.  And the only verse.</p>
+            <div id="textholder"></div>
         </div>
 
     </template>
@@ -112,6 +115,14 @@
                     }
                 }
             }
+        },
+
+        rendertext: function () {
+            var chunks = this.currentproject.chunks;
+            var options = this.currentproject.printoptions;
+
+            this.$.textholder.innerHTML = App.renderer.renderPrintPreview(chunks, options);
+
         },
 
         back: function () {

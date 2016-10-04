@@ -48,7 +48,8 @@ after_success:
 - test -z $TRAVIS_TAG && ./scripts/bump.sh
 - door43-client index -i src/index/index.sqlite -f
 - test -f src/index/index.sqlite
-#- door43-client download -i src/index/index.sqlite -d src/index/resource_containers -f
+- door43-client download -i src/index/index.sqlite -d src/index/resource_containers -f -c
+- test -d src/index/resource_containers
 #- curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
 #- git lfs install
 #- git lfs pull

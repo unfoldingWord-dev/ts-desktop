@@ -47,10 +47,11 @@ after_success:
 - test $TRAVIS_TEST_RESULT == 0 && $TRAVIS_PULL_REQUEST == "false"
 - test -z $TRAVIS_TAG && ./scripts/bump.sh
 - door43-client index -i src/index/index.sqlite -f
-- door43-client download -i src/index/index.sqlite -d src/index/resource_containers -f
+- test -f src/index/index.sqlite
+#- door43-client download -i src/index/index.sqlite -d src/index/resource_containers -f
 #- curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
 #- git lfs install
-- git lfs pull
+#- git lfs pull
 - bower install
 # ensure bower installed correctly
 - test -d src/components

@@ -117,7 +117,7 @@
                 newpage: this.$.pagebox.checked
             };
 
-            this.fire('iron-signal', {name: 'createprint', data: {options: options}});
+            this.fire('iron-signal', {name: 'openpreview', data: {options: options}});
         },
 
         ready: function () {

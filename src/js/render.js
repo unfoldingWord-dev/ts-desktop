@@ -139,6 +139,8 @@ function Renderer() {
             var module = "ts-print";
             var startheader = "\<h2 class='style-scope " + module + "'\>";
             var endheader = "\<\/h2\>";
+            var startdiv = "\<div class='style-scope break " + module + "'\>";
+            var enddiv = "\<\/div\>";
 
             var chapters = [];
             var text = "";
@@ -164,8 +166,7 @@ function Renderer() {
 
             chapters.forEach(function (chapter) {
                 text += startheader + chapter.chapter + endheader;
-                text += mythis.renderTargetWithVerses(chapter.content, module);
-
+                text += startdiv + mythis.renderTargetWithVerses(chapter.content, module) + enddiv;
             });
 
             return text;

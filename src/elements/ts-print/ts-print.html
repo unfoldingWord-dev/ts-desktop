@@ -59,10 +59,9 @@
                 display: none;
             }
             #title {
-                color: red;
+                margin-top: 400px;
             }
-            #license {
-                page-break-before: always;
+            .break {
                 page-break-after: always;
             }
         }
@@ -79,10 +78,12 @@
             </div>
         </div>
         <div id="content">
-            <h1 id="title" class="targetfont"></h1>
-            <marked-element id="license">
-                <div class="markdown-html"></div>
-            </marked-element>
+            <h1 id="title" class="targetfont break"></h1>
+            <div class="break">
+                <marked-element id="license">
+                    <div class="markdown-html"></div>
+                </marked-element>
+            </div>
             <div id="textholder" class="targetfont"></div>
         </div>
 
@@ -143,7 +144,7 @@
         },
 
         back: function () {
-            this.route = App.configurator.getValue("backto");
+            this.fire('closepreview');
         },
 
         print: function () {

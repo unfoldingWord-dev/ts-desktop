@@ -31,8 +31,8 @@
         }
 
         #content {
-            margin: 0 25px;
-            padding: 0 25px;
+            margin: 25px 50px;
+            padding: 0 50px;
             overflow-y: auto;
             background-color: var(--card-background-color);
         }
@@ -54,6 +54,24 @@
             display: none;
         }
 
+        .break {
+            margin-bottom: 50px;
+            padding-bottom: 50px;
+            border-bottom: 1px dashed var(--secondary-text-color);
+        }
+
+        #title {
+            margin-top: 50px;
+        }
+
+        .justify p {
+            text-align: justify;
+        }
+
+        .double p {
+            line-height: 233%;
+        }
+
         @media print {
             #header {
                 display: none;
@@ -62,7 +80,13 @@
                 margin-top: 400px;
             }
             .break {
+                margin-bottom: 0;
+                padding-bottom: 0;
+                border-bottom: none;
                 page-break-after: always;
+            }
+            #content {
+                margin: 0;
             }
         }
 
@@ -78,7 +102,7 @@
             </div>
         </div>
         <div id="content">
-            <h1 id="title" class="targetfont break"></h1>
+            <h1 id="title" class="break"></h1>
             <div class="break">
                 <marked-element id="license">
                     <div class="markdown-html"></div>
@@ -137,10 +161,8 @@
             var filename = "LICENSE.md";
 
             this.$.license.markdown = App.printManager.getLicense(filename);
-
             this.$.title.innerHTML = chunks[0].transcontent || chunks[0].srccontent;
             this.$.textholder.innerHTML = App.renderer.renderPrintPreview(chunks, options);
-
         },
 
         back: function () {

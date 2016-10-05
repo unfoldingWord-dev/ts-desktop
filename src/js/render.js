@@ -139,23 +139,31 @@ function Renderer() {
             var module = "ts-print";
             var startheader = "\<h2 class='style-scope " + module + "'\>";
             var endheader = "\<\/h2\>";
-            var startdiv = "\<div class='style-scope break " + module + "'\>";
+            var add = "";
+            if (options.doubleSpace) {
+                add += "double ";
+            }
+            if (options.justify) {
+                add += "justify ";
+            }
+            if (options.newpage) {
+                add += "break ";
+            }
+            var startdiv = "\<div class='style-scope " + add + module + "'\>";
             var enddiv = "\<\/div\>";
-
             var chapters = [];
             var text = "";
 
             _.forEach(_.groupBy(chunks, function(chunk) {
                 return chunk.chunkmeta.chapter;
             }), function (data, chap) {
-
                 var content = "";
 
                 _.forEach(data, function (chunk) {
                     if (chunk.chunkmeta.frame > 0) {
-
-                        content += chunk.transcontent + " ";
-
+                        if (options.includeIncompleteFrames || chunk.completed) {
+                            content += chunk.transcontent + " ";
+                        }
                     }
                 });
 
@@ -165,12 +173,13 @@ function Renderer() {
             });
 
             chapters.forEach(function (chapter) {
-                text += startheader + chapter.chapter + endheader;
-                text += startdiv + mythis.renderTargetWithVerses(chapter.content, module) + enddiv;
+                if (chapter.content) {
+                    text += startheader + chapter.chapter + endheader;
+                    text += startdiv + mythis.renderTargetWithVerses(chapter.content, module) + enddiv;
+                }
             });
 
             return text;
-
         },
 
         validateVerseMarkers: function (text, verses) {

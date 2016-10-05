@@ -1,6 +1,7 @@
 
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
 <link rel="import" href="../../components/marked-element/marked-element.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
 
 <dom-module id="ts-print">
 
@@ -58,6 +59,10 @@
                 display: none;
             }
             #title {
+                color: red;
+            }
+            #license {
+                page-break-before: always;
                 page-break-after: always;
             }
         }
@@ -74,7 +79,7 @@
             </div>
         </div>
         <div id="content">
-            <h1 id="title"></h1>
+            <h1 id="title" class="targetfont"></h1>
             <marked-element id="license">
                 <div class="markdown-html"></div>
             </marked-element>

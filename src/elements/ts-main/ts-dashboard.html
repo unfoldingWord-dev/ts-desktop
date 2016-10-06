@@ -483,17 +483,53 @@
 
       openPreview: function (event, data) {
           var mythis = this;
+          var options = data.options;
 
-          mythis.set('currentproject.printoptions', data.options);
-          mythis.$.preview.rendertext();
+          var generatePreview = function(){
+              mythis.set('options.body', "Creating print preview. Please wait...");
+              setTimeout(function() {
+                  mythis.set('currentproject.printoptions', options);
+                  mythis.$.preview.rendertext();
+                  mythis.$.loading.close();
+                  mythis.$.preview.classList.remove("hide");
+                  mythis.$.pages.classList.add("hide");
+              }, 500);
+          };
+
           mythis.$.print.close();
-          mythis.$.preview.classList.remove("hide");
-          mythis.$.pages.classList.add("hide");
+          mythis.set('options', {});
+          mythis.set('options.body', "Preparing to Print. Please wait...");
+          mythis.set('options.loading', true);
+          mythis.$.loading.open();
+
+          setTimeout(function() {
+              if (options.includeImages) {
+                  mythis.set('options.body', "Downloading Images. Please wait...");
+                  App.printManager.downloadImages()
+                      .then(function(){
+                          mythis.set('options.body', "Extracting Images. Please wait...");
+                          App.printManager.extractImages();
+                          generatePreview();
+                      })
+                      .catch(function(err){
+                          var errmessage = "An error occurred while downloading images";
+                          if(err !== null) {
+                              errmessage = err;
+                          }
+                          mythis.set('options.title', "Download Failed");
+                          mythis.set('options.body', errmessage);
+                          mythis.set('options.loading', false);
+                      });
+              } else {
+                  generatePreview();
+              }
+          }, 500);
       },
 
       closePreview: function () {
           this.$.preview.classList.add("hide");
           this.$.pages.classList.remove("hide");
+          this._routeChanged();
       },
 
       savePrint: function (event, data) {

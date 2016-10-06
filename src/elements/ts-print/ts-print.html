@@ -156,13 +156,19 @@
         },
 
         rendertext: function () {
+            var path = require('path');
+            var imagePath = path.join(App.configurator.getValue('rootdir'), 'images', 'obs');
             var chunks = this.currentproject.chunks;
             var options = this.currentproject.printoptions;
-            var filename = "LICENSE.md";
+            var filename = this.currentproject.projectmeta.project.id === "obs" ? "OBS_LICENSE.md" : "LICENSE.md";
 
             this.$.license.markdown = App.printManager.getLicense(filename);
             this.$.title.innerHTML = chunks[0].transcontent || chunks[0].srccontent;
-            this.$.textholder.innerHTML = App.renderer.renderPrintPreview(chunks, options);
+            if (this.currentproject.projectmeta.project.id === "obs") {
+                this.$.textholder.innerHTML = App.renderer.renderObsPrintPreview(chunks, options, imagePath);
+            } else {
+                this.$.textholder.innerHTML = App.renderer.renderPrintPreview(chunks, options);
+            }
         },
 
         back: function () {

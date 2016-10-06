@@ -162,7 +162,7 @@ function Renderer() {
                 var content = "";
 
                 _.forEach(data, function (chunk) {
-                    if (chunk.chunkmeta.frame > 0) {
+                    if (chunk.chunkmeta.frame > 0 && chunk.transcontent) {
                         if (options.includeIncompleteFrames || chunk.completed) {
                             content += chunk.transcontent + " ";
                         }
@@ -185,10 +185,11 @@ function Renderer() {
         },
 
         renderObsPrintPreview: function (chunks, options, imagePath) {
-            var mythis = this;
             var module = "ts-print";
             var startheader = "\<h2 class='style-scope " + module + "'\>";
             var endheader = "\<\/h2\>";
+            var startp = "\<p class='style-scope " + module + "'\>";
+            var endp = "\<\/p\>";
             var add = "";
             if (options.doubleSpace) {
                 add += "double ";
@@ -196,10 +197,9 @@ function Renderer() {
             if (options.justify) {
                 add += "justify ";
             }
-            if (options.newpage) {
-                add += "break ";
-            }
-            var startdiv = "\<div class='style-scope " + add + module + "'\>";
+            var startbreakdiv = "\<div class='style-scope break " + add + module + "'\>";
+            var starttitlediv = "\<div class='style-scope break titles " + module + "'\>";
+            var startnobreakdiv = "\<div class='style-scope nobreak " + module + "'\>";
             var enddiv = "\<\/div\>";
             var chapters = [];
             var text = "";
@@ -208,30 +208,38 @@ function Renderer() {
                 return chunk.chunkmeta.chapter;
             }), function (data, chap) {
                 var content = "";
+                var title = "";
+                var ref = "";
 
                 _.forEach(data, function (chunk) {
-                    if (chunk.chunkmeta.frame > 0) {
+                    if (chunk.chunkmeta.frameid === "title") {
+                        title = chunk.transcontent || chunk.srccontent;
+                    }
+                    if (chunk.chunkmeta.frameid === "reference") {
+                        ref = chunk.transcontent || chunk.srccontent;
+                    }
+                    if (chunk.chunkmeta.frame > 0 && chunk.transcontent) {
                         if (options.includeIncompleteFrames || chunk.completed) {
                             if (options.includeImages) {
                                 var image = path.join(imagePath, chunk.projectmeta.resource.id + "-en-" + chunk.chunkmeta.chapterid + "-" + chunk.chunkmeta.frameid + ".jpg");
-                                if (chunk.transcontent) {
-                                    content += "\<img src='" + image + "'\>";
-                                }
+                                content += startnobreakdiv + "\<img src='" + image + "'\>";
+                                content += startp + chunk.transcontent + endp + enddiv;
+                            } else {
+                                content += chunk.transcontent + " ";
                             }
-                            content += chunk.transcontent + " ";
                         }
                     }
                 });
 
                 if (chap > 0) {
-                    chapters.push({chapter: chap, content: content.trim()});
+                    chapters.push({title: title, reference: ref, content: content.trim()});
                 }
             });
 
             chapters.forEach(function (chapter) {
                 if (chapter.content) {
-                    text += startheader + chapter.chapter + endheader;
-                    text += startdiv + mythis.renderTargetWithVerses(chapter.content, module) + enddiv;
+                    text += starttitlediv + startheader + chapter.title + endheader + startheader + chapter.reference + endheader + enddiv;
+                    text += startbreakdiv + chapter.content + enddiv;
                 }
             });
 

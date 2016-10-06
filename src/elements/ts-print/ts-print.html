@@ -60,7 +60,7 @@
             border-bottom: 1px dashed var(--secondary-text-color);
         }
 
-        #title {
+        .titles {
             margin-top: 50px;
         }
 
@@ -72,11 +72,15 @@
             line-height: 233%;
         }
 
+        .nobreak p {
+            margin-top: 0;
+        }
+
         @media print {
             #header {
                 display: none;
             }
-            #title {
+            .titles {
                 margin-top: 400px;
             }
             .break {
@@ -84,6 +88,9 @@
                 padding-bottom: 0;
                 border-bottom: none;
                 page-break-after: always;
+            }
+            .nobreak {
+                page-break-inside: avoid;
             }
             #content {
                 margin: 0;
@@ -102,7 +109,7 @@
             </div>
         </div>
         <div id="content">
-            <h1 id="title" class="break targetfont"></h1>
+            <h1 id="title" class="break titles targetfont"></h1>
             <div class="break">
                 <marked-element id="license">
                     <div class="markdown-html"></div>

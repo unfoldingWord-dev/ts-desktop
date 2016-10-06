@@ -120,7 +120,7 @@
                 </div>
                 <template is="dom-if" if="{{!chunk.completed}}">
                     <template is="dom-if" if="{{!chunk.conflicts.exists}}">
-                        <div class="body targetfont">
+                        <div class="body targetfont targetsize">
                             <p class$="[[standardclass(chunk.typeclass, chunk.direction)]]">[[chunk.transcontent]]</p>
                             <p class$="[[notstandardclass(chunk.typeclass, chunk.direction)]]">[[chunk.helpscontent.0.title]]</p>
                         </div>

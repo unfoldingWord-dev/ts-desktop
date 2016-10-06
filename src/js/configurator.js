@@ -258,31 +258,17 @@
                 var rules = sheet.cssRules;
 
                 for (var i = 0; i < rules.length; i++) {
-                    if (rules[i].selectorText.toLowerCase() === ".targetfont" || rules[i].selectorText.toLowerCase() === ".sourcefont") {
+                    if (rules[i].selectorText.toLowerCase() === ".targetfont" || rules[i].selectorText.toLowerCase() === ".sourcefont" || rules[i].selectorText.toLowerCase() === ".targetsize") {
                         sheet.deleteRule(i);
                         i--;
                     }
                 }
 
                 sheet.insertRule(".targetfont {font-family: " + targetfont + "}", 0);
-                sheet.insertRule(".targetfont {font-size: " + fontSize + "}", 1);
+                sheet.insertRule(".targetsize {font-size: " + fontSize + "}", 1);
                 sheet.insertRule(".sourcefont {font-family: " + sourcefont + "}", 2);
-                sheet.insertRule(".sourcefont {font-size: " + fontSize + "}", 3);
-
             },
 
-            /**
-             *
-             */
-            applyPrefBehavior: function() {
-                // We may not need this as settings that affects behavior is most likely called
-                //    using the App.configurator.getUserSetting(key) API.
-                // console.log('Pretend to apply behavior');
-            },
-
-            /**
-             *
-             */
             getAppData: function() {
                 try {
                     let p = require('../../package');

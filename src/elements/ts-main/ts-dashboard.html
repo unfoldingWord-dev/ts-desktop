@@ -1149,7 +1149,6 @@
                   App.ipc.send('loading-status', 'Retrieving User Info...');
                   mythis.retrieveUser();
                   App.configurator.applyPrefAppearance();
-                  App.configurator.applyPrefBehavior();
               })
               .then(function () {
                   App.ipc.send('loading-status', 'Migrating Projects List...');

@@ -392,7 +392,14 @@
                       mythis.showMessage('Update Complete', 'The language list has been updated. ' + diff + ' new languages were added.');
                   })
                   .catch(function (err) {
-                      mythis.showErrorMessage('Update Failed', 'An error occurred while updating', err);
+                      var errmessage = 'An error occurred while updating';
+                      if (err.syscall === "getaddrinfo") {
+                          errmessage = "Unable to connect to server";
+                      }
+                      if (err.syscall === "read") {
+                          errmessage = "Lost connection to server";
+                      }
+                      mythis.showErrorMessage('Update Failed', errmessage, err);
                   });
           }, 500);
       },
@@ -412,7 +419,14 @@
                       mythis.showMessage('Update Complete', 'The source list has been updated. ' + diff + ' new sources were added.');
                   })
                   .catch(function (err) {
-                      mythis.showErrorMessage('Update Failed', 'An error occurred while updating', err);
+                      var errmessage = 'An error occurred while updating';
+                      if (err.syscall === "getaddrinfo") {
+                          errmessage = "Unable to connect to server";
+                      }
+                      if (err.syscall === "read") {
+                          errmessage = "Lost connection to server";
+                      }
+                      mythis.showErrorMessage('Update Failed', errmessage, err);
                   });
           }, 500);
       },
@@ -429,7 +443,14 @@
                       mythis.showMessage('Update Complete', 'The chunk markers have been updated.');
                   })
                   .catch(function (err) {
-                      mythis.showErrorMessage('Update Failed', 'An error occurred while updating', err);
+                      var errmessage = 'An error occurred while updating';
+                      if (err.syscall === "getaddrinfo") {
+                          errmessage = "Unable to connect to server";
+                      }
+                      if (err.syscall === "read") {
+                          errmessage = "Lost connection to server";
+                      }
+                      mythis.showErrorMessage('Update Failed', errmessage, err);
                   });
           }, 500);
       },
@@ -459,7 +480,14 @@
                       mythis.showMessage('Update Complete', 'Everything has been updated. ' + diffLang + ' new languages were added. ' + diffSrc + ' new sources were added.');
                   })
                   .catch(function (err) {
-                      mythis.showErrorMessage('Update Failed', 'An error occurred while updating', err);
+                      var errmessage = 'An error occurred while updating';
+                      if (err.syscall === "getaddrinfo") {
+                          errmessage = "Unable to connect to server";
+                      }
+                      if (err.syscall === "read") {
+                          errmessage = "Lost connection to server";
+                      }
+                      mythis.showErrorMessage('Update Failed', errmessage, err);
                   });
           }, 500);
       },

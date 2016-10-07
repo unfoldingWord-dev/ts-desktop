@@ -883,6 +883,10 @@
           var errtitle = restore ? "Restore Failed" : "Import Failed";
 
           mythis.$.repo.close();
+          if (mythis.route !== "home") {
+              mythis.set('route', 'home');
+              mythis.$.translate.reset();
+          }
 
           mythis.showLoadingMessage(loadmessage);
 

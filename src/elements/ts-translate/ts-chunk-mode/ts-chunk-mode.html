@@ -87,7 +87,7 @@
     <template>
 
         <div id="contain">
-            <iron-list id="chunklist" items="{{chunks}}" as="chunk" on-scroll="scroll">
+            <iron-list id="chunklist" items="{{chunks}}" as="chunk" on-scroll="displayposition">
                 <template>
                     <ts-chunk-card id="{{createid(index)}}" chunk="{{chunk}}" on-updateheight="updateheight"></ts-chunk-card>
                 </template>
@@ -135,12 +135,8 @@
             list.updateSizeForItem(index);
         },
 
-        scroll: function () {
-            this.displayposition();
-            this.setheights();
-        },
-
         displayposition: function () {
+            var mythis = this;
             var list = this.$.chunklist;
             var index = list.firstVisibleIndex || 0;
             var chapter = this.chunks[index].chunkmeta.chapter;
@@ -150,18 +146,20 @@
             if (chapter) {
                 display.innerHTML = chapter;
                 marker.classList.remove("hide");
-                setTimeout(function() {
-                    marker.classList.add("hide");
-                }, 2000);
             }
+
+            setTimeout(function() {
+                marker.classList.add("hide");
+                mythis.setheights();
+            }, 2000);
         },
 
         setheights: function () {
-            for (var i = 0; i < this.chunks.length; i++) {
+            var list = this.$.chunklist;
+
+            for (var i = list.firstVisibleIndex; i <= list.lastVisibleIndex; i++) {
                 var card = document.getElementById(this.modename + i);
-                if (card !== null) {
-                    card.setheight();
-                }
+                card.setheight();
             }
         },
 

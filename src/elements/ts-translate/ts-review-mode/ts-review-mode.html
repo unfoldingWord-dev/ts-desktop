@@ -271,6 +271,7 @@
         },
 
         displayposition: function () {
+            var mythis = this;
             var list = this.$.reviewlist;
             var index = list.firstVisibleIndex || 0;
             var chapter = this.chunks[index].chunkmeta.chapter;
@@ -281,9 +282,19 @@
             if (chapter && type !== "extant") {
                 display.innerHTML = chapter;
                 marker.classList.remove("hide");
-                setTimeout(function() {
-                    marker.classList.add("hide");
-                }, 2000);
+            }
+
+            setTimeout(function() {
+                marker.classList.add("hide");
+                mythis.setheights();
+            }, 2000);
+        },
+
+        setheights: function () {
+            var list = this.$.reviewlist;
+
+            for (var i = list.firstVisibleIndex; i <= list.lastVisibleIndex; i++) {
+                list.updateSizeForItem(i);
             }
         },
 
@@ -390,6 +401,8 @@
 
         tomode: function () {
             this.setpreview();
+            this.setlocation();
+            this.setheights();
             this.setlocation();
             this.movein();
         },

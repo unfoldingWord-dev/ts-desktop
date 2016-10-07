@@ -83,10 +83,10 @@
 
       <div id="main">
           <div id="header">
-              <input is="iron-input" id="input" bind-value="{{query}}" placeholder="Choose target language">
+              <input is="iron-input" id="input" bind-value="{{query}}" on-input="searchfilter" placeholder="Choose target language">
               <paper-icon-button class="right" icon="search" on-tap="focussearch"></paper-icon-button>
           </div>
-          <iron-list id="list" items="{{searchfilter(query,languagelist)}}" as="language">
+          <iron-list id="list" items="[[filtered]]" as="language">
               <template>
                   <div class$="[[checkclass(language.id)]]" on-tap="store">
                       <div>
@@ -104,10 +104,8 @@
 
 <script>
 
-;(function (root) {
-  'use strict';
-
   Polymer({
+
       is: 'ts-language-menu',
 
       properties: {
@@ -127,6 +125,10 @@
               notify: true
           },
           languagelist: {
+              type: Array,
+              value: []
+          },
+          filtered: {
               type: Array,
               value: []
           },
@@ -152,20 +154,29 @@
           return this.changedata.changing && this.changedata.oldmeta.target_language.id === id ? 'row unavailable' : 'row';
       },
 
-      searchfilter: function (query, languagelist) {
-          var search = App.utils.startsWithBase.bind(null, query);
+      searchfilter: function () {
+          var query = this.query;
+          var languagelist = _.cloneDeep(this.languagelist);
+          var filtered = [];
 
-          var bycode = languagelist.filter(function (language) {
-              return search(language.id);
-          });
-          var byname = languagelist.filter(function (language) {
-              return search(language.name);
-          });
-          var combined = bycode.concat(byname);
+          if (query) {
+              var search = App.utils.startsWithBase.bind(null, query);
 
-          return combined.filter(function(item, index) {
-              return combined.indexOf(item) === index;
-          });
+              var bycode = languagelist.filter(function (language) {
+                  return search(language.id);
+              });
+              var byname = languagelist.filter(function (language) {
+                  return search(language.name);
+              });
+              var combined = bycode.concat(byname);
+
+              filtered = combined.filter(function(item, index) {
+                  return combined.indexOf(item) === index;
+              });
+          } else {
+              filtered = languagelist;
+          }
+          this.set('filtered', filtered);
       },
 
       change: function () {
@@ -227,14 +238,15 @@
 
       updateList: function () {
           this.set('languagelist', App.dataManager.getTargetLanguages());
+          this.reset();
+          this.searchfilter();
+          this.notifyResize();
       },
 
       ready: function () {
-          this.set('languagelist', App.dataManager.getTargetLanguages());
+          this.updateList();
       }
 
   });
-
-})(window);
 
 </script>

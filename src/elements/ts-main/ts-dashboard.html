@@ -23,6 +23,7 @@
 <link rel="import" href="./ts-guidelines.html">
 <link rel="import" href="./ts-attribution.html">
 <link rel="import" href="./ts-conflict.html">
+<link rel="import" href="../ts-print/ts-print.html">
 
 <dom-module id="ts-dashboard">
 
@@ -127,12 +128,21 @@
           display: none;
       }
 
+      @media print {
+          #statusbar {
+              display: none;
+          }
+          ts-app-titlebar {
+              display: none;
+          }
+      }
+
   </style>
 
   <template>
 
       <ts-app-titlebar currentuser="[[currentuser]]"></ts-app-titlebar>
-      <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
+      <neon-animated-pages attr-for-selected="data-route" selected="{{route}}" id="pages">
           <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]" id="home"></ts-home>
           <ts-new data-route="new" route="{{route}}" importdata="{{importdata}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]" options="{{options}}"></ts-new>
           <ts-translate data-route="translate" route="{{route}}" message="{{message}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}" id="translate" on-saveusfm="saveUSFM" on-openprint="openPrint"></ts-translate>
@@ -141,6 +151,7 @@
           <ts-profile data-route="profile" currentuser="[[currentuser]]" options="{{options}}"></ts-profile>
           <ts-terms data-route="terms"></ts-terms>
       </neon-animated-pages>
+      <ts-print class="hide" currentproject="[[currentproject]]" options="{{options}}" id="preview" on-closepreview="closePreview"></ts-print>
       <div id="statusbar">
           <span>Status: </span><span id="message">{{message}}</span>
       </div>
@@ -211,7 +222,7 @@
       <iron-signals on-iron-signal-changeproject="changeProject"></iron-signals>
       <iron-signals on-iron-signal-deleteproject="deleteProject"></iron-signals>
       <iron-signals on-iron-signal-openupdate="openUpdate"></iron-signals>
-      <iron-signals on-iron-signal-saveprint="savePrint"></iron-signals>
+      <iron-signals on-iron-signal-openpreview="openPreview"></iron-signals>
       <iron-signals on-iron-signal-openloading="openLoading"></iron-signals>
       <iron-signals on-iron-signal-closeloading="closeLoading"></iron-signals>
 
@@ -381,7 +392,14 @@
                       mythis.showMessage('Update Complete', 'The language list has been updated. ' + diff + ' new languages were added.');
                   })
                   .catch(function (err) {
-                      mythis.showErrorMessage('Update Failed', 'An error occurred while updating', err);
+                      var errmessage = 'An error occurred while updating';
+                      if (err.syscall === "getaddrinfo") {
+                          errmessage = "Unable to connect to server";
+                      }
+                      if (err.syscall === "read") {
+                          errmessage = "Lost connection to server";
+                      }
+                      mythis.showErrorMessage('Update Failed', errmessage, err);
                   });
           }, 500);
       },
@@ -401,7 +419,14 @@
                       mythis.showMessage('Update Complete', 'The source list has been updated. ' + diff + ' new sources were added.');
                   })
                   .catch(function (err) {
-                      mythis.showErrorMessage('Update Failed', 'An error occurred while updating', err);
+                      var errmessage = 'An error occurred while updating';
+                      if (err.syscall === "getaddrinfo") {
+                          errmessage = "Unable to connect to server";
+                      }
+                      if (err.syscall === "read") {
+                          errmessage = "Lost connection to server";
+                      }
+                      mythis.showErrorMessage('Update Failed', errmessage, err);
                   });
           }, 500);
       },
@@ -418,7 +443,14 @@
                       mythis.showMessage('Update Complete', 'The chunk markers have been updated.');
                   })
                   .catch(function (err) {
-                      mythis.showErrorMessage('Update Failed', 'An error occurred while updating', err);
+                      var errmessage = 'An error occurred while updating';
+                      if (err.syscall === "getaddrinfo") {
+                          errmessage = "Unable to connect to server";
+                      }
+                      if (err.syscall === "read") {
+                          errmessage = "Lost connection to server";
+                      }
+                      mythis.showErrorMessage('Update Failed', errmessage, err);
                   });
           }, 500);
       },
@@ -448,7 +480,14 @@
                       mythis.showMessage('Update Complete', 'Everything has been updated. ' + diffLang + ' new languages were added. ' + diffSrc + ' new sources were added.');
                   })
                   .catch(function (err) {
-                      mythis.showErrorMessage('Update Failed', 'An error occurred while updating', err);
+                      var errmessage = 'An error occurred while updating';
+                      if (err.syscall === "getaddrinfo") {
+                          errmessage = "Unable to connect to server";
+                      }
+                      if (err.syscall === "read") {
+                          errmessage = "Lost connection to server";
+                      }
+                      mythis.showErrorMessage('Update Failed', errmessage, err);
                   });
           }, 500);
       },
@@ -468,6 +507,57 @@
       openPrint: function () {
           this.$.print.open();
           this.$.printoptions.reset();
+      },
+
+      openPreview: function (event, data) {
+          var mythis = this;
+          var options = data.options;
+
+          var generatePreview = function(){
+              mythis.set('options.body', "Creating print preview. Please wait...");
+              setTimeout(function() {
+                  mythis.set('currentproject.printoptions', options);
+                  mythis.$.preview.rendertext();
+                  mythis.$.loading.close();
+                  mythis.$.preview.classList.remove("hide");
+                  mythis.$.pages.classList.add("hide");
+              }, 500);
+          };
+
+          mythis.$.print.close();
+          mythis.set('options', {});
+          mythis.set('options.body', "Preparing to Print. Please wait...");
+          mythis.set('options.loading', true);
+          mythis.$.loading.open();
+
+          setTimeout(function() {
+              if (options.includeImages) {
+                  mythis.set('options.body', "Downloading Images. Please wait...");
+                  App.printManager.downloadImages()
+                      .then(function(){
+                          mythis.set('options.body', "Extracting Images. Please wait...");
+                          App.printManager.extractImages();
+                          generatePreview();
+                      })
+                      .catch(function(err){
+                          var errmessage = "An error occurred while downloading images";
+                          if(err !== null) {
+                              errmessage = err;
+                          }
+                          mythis.set('options.title', "Download Failed");
+                          mythis.set('options.body', errmessage);
+                          mythis.set('options.loading', false);
+                      });
+              } else {
+                  generatePreview();
+              }
+          }, 500);
+      },
+
+      closePreview: function () {
+          this.$.preview.classList.add("hide");
+          this.$.pages.classList.remove("hide");
+          this._routeChanged();
       },
 
       savePrint: function (event, data) {
@@ -821,6 +911,10 @@
           var errtitle = restore ? "Restore Failed" : "Import Failed";
 
           mythis.$.repo.close();
+          if (mythis.route !== "home") {
+              mythis.set('route', 'home');
+              mythis.$.translate.reset();
+          }
 
           mythis.showLoadingMessage(loadmessage);
 
@@ -1123,7 +1217,6 @@
                   App.ipc.send('loading-status', 'Retrieving User Info...');
                   mythis.retrieveUser();
                   App.configurator.applyPrefAppearance();
-                  App.configurator.applyPrefBehavior();
               })
               .then(function () {
                   App.ipc.send('loading-status', 'Migrating Projects List...');

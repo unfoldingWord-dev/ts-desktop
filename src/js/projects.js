@@ -397,7 +397,11 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                     });
             };
 
-            return mkdirp(paths.projectDir)
+            return mythis.deleteTargetTranslation(meta).then(utils.ret(true)).catch(utils.ret(false))
+                .then(function () {
+                    mythis.unsetValues(meta);
+                    return mkdirp(paths.projectDir)
+                })
                 .then(setLicense())
                 .then(function () {
                     return mythis.saveTargetManifest(meta);
@@ -567,8 +571,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                     }
                 })
                 .catch(function (err) {
-                    reporter.logError(err);
-                    throw "Unable to delete file at this time. You may need to restart the app first.";
+                    throw err || "Unable to delete file at this time.";
                 });
         }
     };

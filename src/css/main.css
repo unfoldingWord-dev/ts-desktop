@@ -13,3 +13,10 @@ html, body {
     display: flex;
     flex-direction: column;
 }
+
+@media print {
+    * {
+        overflow: visible !important;
+        float: none !important;
+    }
+}

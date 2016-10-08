@@ -1,0 +1,195 @@
+
+<link rel="import" href="../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../components/marked-element/marked-element.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
+
+<dom-module id="ts-print">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #header {
+            background-color: var(--primary-color);
+            min-height: 50px;
+        }
+
+        #heading {
+            font-size: 125%;
+            color: var(--reverse-text-color);
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 45px;
+        }
+
+        [icon="arrow-back"] {
+            margin: 0 1em 0 .2em;
+        }
+
+        #content {
+            margin: 25px 50px;
+            padding: 0 50px;
+            overflow-y: auto;
+            background-color: var(--card-background-color);
+        }
+
+        .button {
+            background: var(--accent-color);
+            color: var(--reverse-text-color);
+            text-transform: uppercase;
+            padding: 6px;
+            margin-left: 50px;
+            font-size: 80%;
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        .hide {
+            display: none;
+        }
+
+        .break {
+            margin-bottom: 50px;
+            padding-bottom: 50px;
+            border-bottom: 1px dashed var(--secondary-text-color);
+        }
+
+        .titles {
+            margin-top: 50px;
+        }
+
+        .justify p {
+            text-align: justify;
+        }
+
+        .double p {
+            line-height: 233%;
+        }
+
+        .nobreak p {
+            margin-top: 0;
+        }
+
+        @media print {
+            #header {
+                display: none;
+            }
+            .titles {
+                margin-top: 400px;
+            }
+            .break {
+                margin-bottom: 0;
+                padding-bottom: 0;
+                border-bottom: none;
+                page-break-after: always;
+            }
+            .nobreak {
+                page-break-inside: avoid;
+            }
+            #content {
+                margin: 0;
+            }
+        }
+
+    </style>
+
+    <template>
+
+        <div id="header">
+            <div id="heading">
+                <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
+                <span>Print Preview</span>
+                <paper-button raised class="button" on-tap="print">Print</paper-button>
+            </div>
+        </div>
+        <div id="content">
+            <h1 id="title" class="break titles targetfont"></h1>
+            <div class="break">
+                <marked-element id="license">
+                    <div class="markdown-html"></div>
+                </marked-element>
+            </div>
+            <div id="textholder" class="targetfont targetsize"></div>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-print',
+
+        behaviors: [
+            Polymer.NeonAnimatableBehavior
+        ],
+
+        properties: {
+            route: {
+                type: String,
+                notify: true
+            },
+            options: {
+                type: Object,
+                value: {},
+                notify: true
+            },
+            currentproject: {
+                type: Object,
+                value: {}
+            },
+            animationConfig: {
+                value: function () {
+                    return {
+                        'entry': {
+                            name: 'slide-from-right-animation',
+                            node: this
+                        },
+                        'exit': {
+                            name: 'slide-right-animation',
+                            node: this
+                        }
+                    }
+                }
+            }
+        },
+
+        rendertext: function () {
+            var path = require('path');
+            var imagePath = path.join(App.configurator.getValue('rootdir'), 'images', 'obs');
+            var chunks = this.currentproject.chunks;
+            var options = this.currentproject.printoptions;
+            var filename = this.currentproject.projectmeta.project.id === "obs" ? "OBS_LICENSE.md" : "LICENSE.md";
+
+            this.$.license.markdown = App.printManager.getLicense(filename);
+            this.$.title.innerHTML = chunks[0].transcontent || chunks[0].srccontent;
+            if (this.currentproject.projectmeta.project.id === "obs") {
+                this.$.textholder.innerHTML = App.renderer.renderObsPrintPreview(chunks, options, imagePath);
+            } else {
+                this.$.textholder.innerHTML = App.renderer.renderPrintPreview(chunks, options);
+            }
+        },
+
+        back: function () {
+            this.fire('closepreview');
+        },
+
+        print: function () {
+            window.print();
+        },
+
+        ready: function () {
+
+        }
+
+    });
+
+</script>

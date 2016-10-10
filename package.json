@@ -41,6 +41,7 @@
     "moment": "2.14.1",
     "node-forge": "0.6.42",
     "pdfkit": "0.7.2",
+    "prince": "^1.2.1",
     "request": "2.74.0",
     "rimraf": "2.5.4",
     "sql.js": "0.3.2",

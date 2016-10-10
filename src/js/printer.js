@@ -6,6 +6,7 @@ var _ = require('lodash'),
     utils = require('../js/lib/utils'),
     AdmZip = require('adm-zip'),
     https = require('https'),
+    Prince = require('prince'),
     PDFDocument = require('pdfkit');
 
 function PrintManager(configurator) {
@@ -47,6 +48,26 @@ function PrintManager(configurator) {
                 });
                 fs.rmdirSync(dirPath);
             });
+        },
+
+        testPrince: function (data) {
+            var input = path.join(imageRoot, 'test.html');
+            var output = path.join(imageRoot, "prince.pdf");
+            var cssPath = path.join(srcDir, 'css', 'print.css');
+            var font = configurator.getUserSetting('targetfont').name;
+
+            var header = '\<!DOCTYPE html\>\<html\>\<head\>\<link rel="stylesheet" href="' + cssPath + '"\>\<\/head\>\<body style="font-family: ' + font + ';"\>';
+            var footer = '\<\/body\>\<\/html\>';
+
+            fs.writeFileSync(input, header + data + footer);
+
+            Prince().inputs(input)
+                .output(output)
+                .execute()
+                .then(function () {
+                    console.log("Finished");
+                });
+
         },
 
         getLicense: function (filename) {

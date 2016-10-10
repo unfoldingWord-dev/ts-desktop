@@ -110,7 +110,7 @@
         </div>
         <div id="content">
             <h1 id="title" class="break titles targetfont"></h1>
-            <div class="break">
+            <div class="break license">
                 <marked-element id="license">
                     <div class="markdown-html"></div>
                 </marked-element>
@@ -176,6 +176,8 @@
             } else {
                 this.$.textholder.innerHTML = App.renderer.renderPrintPreview(chunks, options);
             }
+
+            App.printManager.testPrince(this.$.content.innerHTML);
         },
 
         back: function () {

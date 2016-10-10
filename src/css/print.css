@@ -1,0 +1,60 @@
+
+* {
+    overflow: visible !important;
+    float: none !important;
+}
+
+h1, h2 {
+    text-align: center;
+}
+
+#textholder p {
+    widows: 4;
+    orphans: 4;
+    line-height: 20px;
+}
+
+body .license * {
+    font-family: 'Noto Sans', sans-serif;
+}
+
+.titles {
+    margin-top: 400px;
+}
+
+.break {
+    page-break-after: always;
+}
+
+.nobreak {
+    page-break-inside: avoid;
+}
+
+.justify p {
+    text-align: justify;
+}
+
+.double p {
+    line-height: 45px;
+}
+
+.nobreak p {
+    margin-top: 0;
+}
+
+@page main {
+    @bottom-center {
+        content: "Page " counter(page);
+    }
+}
+
+#textholder {
+    page: main;
+    counter-reset: page 1;
+}
+
+sup {
+    font-size: 60%;
+}
+
+

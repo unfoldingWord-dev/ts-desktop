@@ -29,16 +29,16 @@ h1, h2 {
     page-break-inside: avoid;
 }
 
-.justify, .justify p {
+.justify, .justify * {
     text-align: justify;
 }
 
-.double, .double p {
+.double, .double * {
     line-height: 233%;
 }
 
 .nobreak p {
-    margin-top: 0;
+    margin: 0 0 35px;
 }
 
 @page main {

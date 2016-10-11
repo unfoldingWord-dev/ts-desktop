@@ -198,11 +198,14 @@ function Renderer() {
                 add += "justify ";
             }
             var startbreakdiv = "\<div class='style-scope break " + add + module + "'\>";
-            var starttitlediv = "\<div class='style-scope break titles " + module + "'\>";
+            var starttocdiv = "\<div class='style-scope break toc " + module + "'\>";
+            var starttitlediv1 = "\<div id='chap";
+            var starttitlediv2 = "' class='style-scope break titles " + module + "'\>";
             var startnobreakdiv = "\<div class='style-scope nobreak " + module + "'\>";
             var enddiv = "\<\/div\>";
             var chapters = [];
             var text = "";
+            var toc = starttocdiv + startheader + "Table of Contents" + endheader;
 
             _.forEach(_.groupBy(chunks, function(chunk) {
                 return chunk.chunkmeta.chapter;
@@ -232,18 +235,25 @@ function Renderer() {
                 });
 
                 if (chap > 0) {
-                    chapters.push({title: title, reference: ref, content: content.trim()});
+                    chapters.push({chapter: chap, title: title, reference: ref, content: content.trim()});
                 }
             });
 
+            var startadiv1 = "\<div class='style-scope " + module + "'\>\<a href='#chap";
+            var startadiv2 = "'\>";
+            var endadiv = "\<\/a\>\<\/div\>";
+
             chapters.forEach(function (chapter) {
                 if (chapter.content) {
-                    text += starttitlediv + startheader + chapter.title + endheader + startheader + chapter.reference + endheader + enddiv;
+                    toc += startadiv1 + chapter.chapter + startadiv2 + chapter.title + endadiv;
+                    text += starttitlediv1 + chapter.chapter + starttitlediv2 + startheader + chapter.title + endheader + startheader + chapter.reference + endheader + enddiv;
                     text += startbreakdiv + chapter.content + enddiv;
                 }
             });
 
-            return text;
+            toc += enddiv;
+
+            return toc + text;
         },
 
         validateVerseMarkers: function (text, verses) {

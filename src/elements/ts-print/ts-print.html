@@ -174,7 +174,19 @@
         },
 
         back: function () {
-            this.set('route', App.configurator.getValue("backto"));
+            var mythis = this;
+            var backto = App.configurator.getValue("backto");
+
+            mythis.set('route', backto);
+
+            setTimeout(function() {
+                if (backto === "translate") {
+                    mythis.fire('iron-signal', {name: 'translateright'});
+                }
+                if (backto === "review") {
+                    mythis.fire('iron-signal', {name: 'reviewright'});
+                }
+            }, 500);
         },
 
         print: function () {

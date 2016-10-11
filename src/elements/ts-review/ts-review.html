@@ -3,6 +3,7 @@
 <link rel="import" href="../../components/paper-button/paper-button.html">
 <link rel="import" href="../../components/iron-icons/iron-icons.html">
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../components/iron-signals/iron-signals.html">
 
 <link rel="import" href="./ts-review-project.html">
 <link rel="import" href="./ts-review-contrib.html">
@@ -91,6 +92,9 @@
             <ts-review-contrib selected="{{selected}}" currentproject="{{currentproject}}" options="{{options}}" on-next="goexport"></ts-review-contrib>
         </neon-animated-pages>
 
+        <iron-signals on-iron-signal-reviewright="setrightanimation"></iron-signals>
+        <iron-signals on-iron-signal-reviewleft="setleftanimation"></iron-signals>
+
     </template>
 
 </dom-module>
@@ -169,6 +173,16 @@
         back: function () {
             this.set('selected', 0);
             this.fire('iron-signal', {name: 'fromreview', data: {index: null}});
+        },
+
+        setrightanimation: function () {
+            this.animationConfig.exit.name = 'slide-right-animation';
+            this.animationConfig.entry.name = 'slide-from-right-animation';
+        },
+
+        setleftanimation: function () {
+            this.animationConfig.exit.name = 'slide-left-animation';
+            this.animationConfig.entry.name = 'slide-from-left-animation';
         },
 
         ready: function() {

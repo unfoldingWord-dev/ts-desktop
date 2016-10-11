@@ -9,9 +9,8 @@ h1, h2 {
 }
 
 #textholder p {
-    widows: 4;
-    orphans: 4;
-    line-height: 20px;
+    widows: 3;
+    orphans: 3;
 }
 
 body .license * {
@@ -35,7 +34,7 @@ body .license * {
 }
 
 .double p {
-    line-height: 45px;
+    line-height: 233%;
 }
 
 .nobreak p {
@@ -44,7 +43,7 @@ body .license * {
 
 @page main {
     @bottom-center {
-        content: "Page " counter(page);
+        content: counter(page);
     }
 }
 

@@ -142,16 +142,16 @@
   <template>
 
       <ts-app-titlebar currentuser="[[currentuser]]"></ts-app-titlebar>
-      <neon-animated-pages attr-for-selected="data-route" selected="{{route}}" id="pages">
+      <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
           <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]" id="home"></ts-home>
           <ts-new data-route="new" route="{{route}}" importdata="{{importdata}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]" options="{{options}}"></ts-new>
           <ts-translate data-route="translate" route="{{route}}" message="{{message}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}" id="translate" on-saveusfm="saveUSFM" on-openprint="openPrint"></ts-translate>
           <ts-review data-route="review" route="{{route}}" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}"></ts-review>
           <ts-settings data-route="settings" route="{{route}}" options="{{options}}"></ts-settings>
           <ts-profile data-route="profile" currentuser="[[currentuser]]" options="{{options}}"></ts-profile>
+          <ts-print data-route="preview" route="{{route}}" currentproject="[[currentproject]]" options="{{options}}" id="preview"></ts-print>
           <ts-terms data-route="terms"></ts-terms>
       </neon-animated-pages>
-      <ts-print class="hide" currentproject="[[currentproject]]" options="{{options}}" id="preview" on-closepreview="closePreview"></ts-print>
       <div id="statusbar">
           <span>Status: </span><span id="message">{{message}}</span>
       </div>
@@ -519,8 +519,8 @@
                   mythis.set('currentproject.printoptions', options);
                   mythis.$.preview.rendertext();
                   mythis.$.loading.close();
-                  mythis.$.preview.classList.remove("hide");
-                  mythis.$.pages.classList.add("hide");
+                  App.configurator.setValue("backto", mythis.route);
+                  mythis.set('route', 'preview');
               }, 500);
           };
 
@@ -552,12 +552,6 @@
                   generatePreview();
               }
           }, 500);
-      },
-
-      closePreview: function () {
-          this.$.preview.classList.add("hide");
-          this.$.pages.classList.remove("hide");
-          this._routeChanged();
       },
 
       savePrint: function (event, data) {

@@ -6,6 +6,7 @@ var _ = require('lodash'),
     utils = require('../js/lib/utils'),
     AdmZip = require('adm-zip'),
     https = require('https'),
+    mkdirp = require('mkdirp'),
     Prince = require('prince'),
     PDFDocument = require('pdfkit');
 
@@ -50,22 +51,22 @@ function PrintManager(configurator) {
             });
         },
 
-        testPrince: function (data) {
-            var input = path.join(imageRoot, 'test.html');
-            var output = path.join(imageRoot, "prince.pdf");
+        savePdf: function (data, filePath) {
+            var tempPath = configurator.getValue('tempDir');
+            var input = path.join(tempPath, 'print.html');
             var cssPath = path.join(srcDir, 'css', 'print.css');
             var font = configurator.getUserSetting('targetfont').name;
-
             var header = '\<!DOCTYPE html\>\<html\>\<head\>\<link rel="stylesheet" href="' + cssPath + '"\>\<\/head\>\<body style="font-family: ' + font + ';"\>';
             var footer = '\<\/body\>\<\/html\>';
 
+            mkdirp.sync(tempPath);
             fs.writeFileSync(input, header + data + footer);
 
-            Prince().inputs(input)
-                .output(output)
+            return Prince().inputs(input)
+                .output(filePath)
                 .execute()
                 .then(function () {
-                    console.log("Finished");
+                    return utils.fs.remove(tempPath);
                 });
 
         },

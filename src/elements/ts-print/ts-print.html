@@ -105,7 +105,7 @@
             <div id="heading">
                 <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
                 <span>Print Preview</span>
-                <paper-button raised class="button" on-tap="print">Print</paper-button>
+                <paper-button raised class="button" on-tap="print">Save to PDF</paper-button>
             </div>
         </div>
         <div id="content">
@@ -176,16 +176,42 @@
             } else {
                 this.$.textholder.innerHTML = App.renderer.renderPrintPreview(chunks, options);
             }
-
-            App.printManager.testPrince(this.$.content.innerHTML);
         },
 
         back: function () {
-            this.fire('closepreview');
+            this.set('route', App.configurator.getValue("backto"));
         },
 
         print: function () {
-            window.print();
+            var mythis = this;
+            var name = this.currentproject.projectmeta.unique_id;
+            var filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'PDF Files', extensions: ['pdf']}]}});
+            if (!filePath) {
+                return;
+            }
+
+            mythis.set('options', {});
+            mythis.set('options.body', "Creating PDF. Please wait...");
+            mythis.set('options.loading', true);
+            mythis.fire('iron-signal', {name: 'openloading'});
+
+            setTimeout(function() {
+                return App.printManager.savePdf(mythis.$.content.innerHTML, filePath)
+                    .then(function () {
+                        mythis.set('options.title', "PDF Created");
+                        mythis.set('options.body', "Your project has been successfully saved to a PDF.");
+                        mythis.set('options.loading', false);
+                    })
+                    .catch(function (err) {
+                        var errmessage = "An error occurred saving your project";
+                        if(err !== null) {
+                            errmessage = err;
+                        }
+                        mythis.set('options.title', "Print Failed");
+                        mythis.set('options.body', errmessage);
+                        mythis.set('options.loading', false);
+                    });
+            }, 500);
         },
 
         ready: function () {

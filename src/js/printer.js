@@ -65,6 +65,17 @@ function PrintManager(configurator) {
             return Prince().inputs(input)
                 .output(filePath)
                 .execute()
+                .catch(function (err) {
+                    return utils.fs.remove(tempPath)
+                        .then(function () {
+                            if (err.stderr.includes("Permission denied")) {
+                                throw "Cannot write to file. It may already be open.";
+                            } else {
+                                console.log(err);
+                                throw "There was a problem creating the file."
+                            }
+                        });
+                })
                 .then(function () {
                     return utils.fs.remove(tempPath);
                 });

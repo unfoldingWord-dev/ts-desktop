@@ -154,7 +154,7 @@ function Renderer() {
             var startdiv = "\<div class='style-scope " + add + module + "'\>";
             var enddiv = "\<\/div\>";
             var chapters = [];
-            var text = "";
+            var text = "\<div id='startnum' class='style-scope " + module + "'\>";
 
             _.forEach(_.groupBy(chunks, function(chunk) {
                 return chunk.chunkmeta.chapter;
@@ -181,7 +181,7 @@ function Renderer() {
                 }
             });
 
-            return text;
+            return text + enddiv;
         },
 
         renderObsPrintPreview: function (chunks, options, imagePath) {
@@ -204,7 +204,7 @@ function Renderer() {
             var startnobreakdiv = "\<div class='style-scope nobreak " + module + "'\>";
             var enddiv = "\<\/div\>";
             var chapters = [];
-            var text = "";
+            var text = "\<div id='startnum' class='style-scope " + module + "'\>";
             var toc = starttocdiv + startheader + "Table of Contents" + endheader;
 
             _.forEach(_.groupBy(chunks, function(chunk) {
@@ -239,7 +239,7 @@ function Renderer() {
                 }
             });
 
-            var startadiv1 = "\<div class='style-scope " + module + "'\>\<a href='#chap";
+            var startadiv1 = "\<div class='style-scope " + module + "'\>\<a class='style-scope " + module + "' href='#chap";
             var startadiv2 = "'\>";
             var endadiv = "\<\/a\>\<\/div\>";
 
@@ -253,7 +253,7 @@ function Renderer() {
 
             toc += enddiv;
 
-            return toc + text;
+            return toc + text + enddiv;
         },
 
         validateVerseMarkers: function (text, verses) {

@@ -11,7 +11,6 @@ h1, h2 {
 #textholder p {
     widows: 3;
     orphans: 3;
-    line-height: 130%;
 }
 
 #licenseholder * {
@@ -48,7 +47,7 @@ h1, h2 {
     }
 }
 
-#textholder {
+#startnum {
     page: main;
     counter-reset: page 1;
 }
@@ -59,6 +58,15 @@ sup {
 
 .obs #notices- {
     page-break-before: always;
+}
+
+.toc a::after {
+    content: leader(".") target-counter(attr(href), page);
+}
+
+a {
+    text-decoration: none;
+    color: black;
 }
 
 

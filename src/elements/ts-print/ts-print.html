@@ -54,47 +54,36 @@
             display: none;
         }
 
+        #textholder p {
+            line-height: 130%;
+        }
+
         .break {
             margin-bottom: 50px;
             padding-bottom: 50px;
             border-bottom: 1px dashed var(--secondary-text-color);
         }
 
+        .obs #notices- {
+            margin-top: 50px;
+            padding-top: 50px;
+            border-top: 1px dashed var(--secondary-text-color);
+        }
+
         .titles {
             margin-top: 50px;
         }
 
-        .justify p {
+        .justify, .justify p {
             text-align: justify;
         }
 
-        .double p {
+        .double, .double p {
             line-height: 233%;
         }
 
         .nobreak p {
             margin-top: 0;
-        }
-
-        @media print {
-            #header {
-                display: none;
-            }
-            .titles {
-                margin-top: 400px;
-            }
-            .break {
-                margin-bottom: 0;
-                padding-bottom: 0;
-                border-bottom: none;
-                page-break-after: always;
-            }
-            .nobreak {
-                page-break-inside: avoid;
-            }
-            #content {
-                margin: 0;
-            }
         }
 
     </style>
@@ -110,8 +99,8 @@
         </div>
         <div id="content">
             <h1 id="title" class="break titles targetfont"></h1>
-            <div class="break license">
-                <marked-element id="license">
+            <div class="break">
+                <marked-element id="licenseholder">
                     <div class="markdown-html"></div>
                 </marked-element>
             </div>
@@ -169,9 +158,10 @@
             var options = this.currentproject.printoptions;
             var filename = this.currentproject.projectmeta.project.id === "obs" ? "OBS_LICENSE.md" : "LICENSE.md";
 
-            this.$.license.markdown = App.printManager.getLicense(filename);
+            this.$.licenseholder.markdown = App.printManager.getLicense(filename);
             this.$.title.innerHTML = chunks[0].transcontent || chunks[0].srccontent;
             if (this.currentproject.projectmeta.project.id === "obs") {
+                this.$.licenseholder.classList.add('obs');
                 this.$.textholder.innerHTML = App.renderer.renderObsPrintPreview(chunks, options, imagePath);
             } else {
                 this.$.textholder.innerHTML = App.renderer.renderPrintPreview(chunks, options);

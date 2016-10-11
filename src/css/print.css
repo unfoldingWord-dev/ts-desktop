@@ -11,9 +11,10 @@ h1, h2 {
 #textholder p {
     widows: 3;
     orphans: 3;
+    line-height: 130%;
 }
 
-body .license * {
+#licenseholder * {
     font-family: 'Noto Sans', sans-serif;
 }
 
@@ -29,11 +30,11 @@ body .license * {
     page-break-inside: avoid;
 }
 
-.justify p {
+.justify, .justify p {
     text-align: justify;
 }
 
-.double p {
+.double, .double p {
     line-height: 233%;
 }
 
@@ -54,6 +55,10 @@ body .license * {
 
 sup {
     font-size: 60%;
+}
+
+.obs #notices- {
+    page-break-before: always;
 }
 
 

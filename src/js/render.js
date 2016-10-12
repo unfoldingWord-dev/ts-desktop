@@ -154,7 +154,7 @@ function Renderer() {
             var startdiv = "\<div class='style-scope " + add + module + "'\>";
             var enddiv = "\<\/div\>";
             var chapters = [];
-            var text = "";
+            var text = "\<div id='startnum' class='style-scope " + module + "'\>";
 
             _.forEach(_.groupBy(chunks, function(chunk) {
                 return chunk.chunkmeta.chapter;
@@ -181,7 +181,7 @@ function Renderer() {
                 }
             });
 
-            return text;
+            return text + enddiv;
         },
 
         renderObsPrintPreview: function (chunks, options, imagePath) {
@@ -198,11 +198,17 @@ function Renderer() {
                 add += "justify ";
             }
             var startbreakdiv = "\<div class='style-scope break " + add + module + "'\>";
-            var starttitlediv = "\<div class='style-scope break titles " + module + "'\>";
+            var starttocdiv = "\<div class='style-scope double break toc " + module + "'\>";
+            var starttitlediv1 = "\<div id='chap";
+            var starttitlediv2 = "' class='style-scope break titles " + module + "'\>";
             var startnobreakdiv = "\<div class='style-scope nobreak " + module + "'\>";
             var enddiv = "\<\/div\>";
             var chapters = [];
-            var text = "";
+            var text = "\<div id='startnum' class='style-scope " + module + "'\>";
+            var toc = starttocdiv + startheader + "Table of Contents" + endheader;
+            var startadiv1 = "\<div class='style-scope " + module + "'\>\<a class='style-scope " + module + "' href='#chap";
+            var startadiv2 = "'\>";
+            var endadiv = "\<\/a\>\<\/div\>";
 
             _.forEach(_.groupBy(chunks, function(chunk) {
                 return chunk.chunkmeta.chapter;
@@ -232,18 +238,21 @@ function Renderer() {
                 });
 
                 if (chap > 0) {
-                    chapters.push({title: title, reference: ref, content: content.trim()});
+                    chapters.push({chapter: chap, title: title, reference: ref, content: content.trim()});
                 }
             });
 
             chapters.forEach(function (chapter) {
                 if (chapter.content) {
-                    text += starttitlediv + startheader + chapter.title + endheader + startheader + chapter.reference + endheader + enddiv;
+                    toc += startadiv1 + chapter.chapter + startadiv2 + chapter.title + endadiv;
+                    text += starttitlediv1 + chapter.chapter + starttitlediv2 + startheader + chapter.title + endheader + startheader + chapter.reference + endheader + enddiv;
                     text += startbreakdiv + chapter.content + enddiv;
                 }
             });
 
-            return text;
+            toc += enddiv;
+
+            return toc + text + enddiv;
         },
 
         validateVerseMarkers: function (text, verses) {

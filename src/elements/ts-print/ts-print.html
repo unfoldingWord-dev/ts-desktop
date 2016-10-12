@@ -2,6 +2,7 @@
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
 <link rel="import" href="../../components/marked-element/marked-element.html">
 <link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 
 <dom-module id="ts-print">
 
@@ -31,8 +32,9 @@
         }
 
         #content {
-            margin: 25px 50px;
+            margin: 25px auto;
             padding: 0 50px;
+            max-width: 730px;
             overflow-y: auto;
             background-color: var(--card-background-color);
         }
@@ -60,41 +62,31 @@
             border-bottom: 1px dashed var(--secondary-text-color);
         }
 
+        .obs #notices- {
+            margin-top: 50px;
+            padding-top: 50px;
+            border-top: 1px dashed var(--secondary-text-color);
+        }
+
         .titles {
             margin-top: 50px;
         }
 
-        .justify p {
+        .justify, .justify * {
             text-align: justify;
         }
 
-        .double p {
+        .double, .double * {
             line-height: 233%;
         }
 
         .nobreak p {
-            margin-top: 0;
+            margin: 0 0 35px;
         }
 
-        @media print {
-            #header {
-                display: none;
-            }
-            .titles {
-                margin-top: 400px;
-            }
-            .break {
-                margin-bottom: 0;
-                padding-bottom: 0;
-                border-bottom: none;
-                page-break-after: always;
-            }
-            .nobreak {
-                page-break-inside: avoid;
-            }
-            #content {
-                margin: 0;
-            }
+        a {
+            text-decoration: none;
+            color: var(--primary-text-color);
         }
 
     </style>
@@ -105,17 +97,17 @@
             <div id="heading">
                 <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
                 <span>Print Preview</span>
-                <paper-button raised class="button" on-tap="print">Print</paper-button>
+                <paper-button raised class="button" on-tap="print">Save to PDF</paper-button>
             </div>
         </div>
         <div id="content">
             <h1 id="title" class="break titles targetfont"></h1>
             <div class="break">
-                <marked-element id="license">
+                <marked-element id="licenseholder">
                     <div class="markdown-html"></div>
                 </marked-element>
             </div>
-            <div id="textholder" class="targetfont targetsize"></div>
+            <div id="textholder" class="targetfont"></div>
         </div>
 
     </template>
@@ -169,9 +161,10 @@
             var options = this.currentproject.printoptions;
             var filename = this.currentproject.projectmeta.project.id === "obs" ? "OBS_LICENSE.md" : "LICENSE.md";
 
-            this.$.license.markdown = App.printManager.getLicense(filename);
+            this.$.licenseholder.markdown = App.printManager.getLicense(filename);
             this.$.title.innerHTML = chunks[0].transcontent || chunks[0].srccontent;
             if (this.currentproject.projectmeta.project.id === "obs") {
+                this.$.licenseholder.classList.add('obs');
                 this.$.textholder.innerHTML = App.renderer.renderObsPrintPreview(chunks, options, imagePath);
             } else {
                 this.$.textholder.innerHTML = App.renderer.renderPrintPreview(chunks, options);
@@ -179,11 +172,52 @@
         },
 
         back: function () {
-            this.fire('closepreview');
+            var mythis = this;
+            var backto = App.configurator.getValue("backto");
+
+            mythis.$.content.scrollTop = 0;
+            mythis.set('route', backto);
+
+            setTimeout(function() {
+                if (backto === "translate") {
+                    mythis.fire('iron-signal', {name: 'translateright'});
+                }
+                if (backto === "review") {
+                    mythis.fire('iron-signal', {name: 'reviewright'});
+                }
+            }, 500);
         },
 
         print: function () {
-            window.print();
+            var mythis = this;
+            var name = this.currentproject.projectmeta.unique_id;
+            var filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'PDF Files', extensions: ['pdf']}]}});
+            if (!filePath) {
+                return;
+            }
+
+            mythis.set('options', {});
+            mythis.set('options.body', "Creating PDF. Please wait...");
+            mythis.set('options.loading', true);
+            mythis.fire('iron-signal', {name: 'openloading'});
+
+            setTimeout(function() {
+                return App.printManager.savePdf(mythis.$.content.innerHTML, filePath)
+                    .then(function () {
+                        mythis.set('options.title', "PDF Created");
+                        mythis.set('options.body', "Your project has been successfully saved to a PDF.");
+                        mythis.set('options.loading', false);
+                    })
+                    .catch(function (err) {
+                        var errmessage = "An error occurred saving your project";
+                        if(err !== null) {
+                            errmessage = err;
+                        }
+                        mythis.set('options.title', "Print Failed");
+                        mythis.set('options.body', errmessage);
+                        mythis.set('options.loading', false);
+                    });
+            }, 500);
         },
 
         ready: function () {

@@ -561,65 +561,6 @@
           }, 500);
       },
 
-      savePrint: function (event, data) {
-          var mythis = this;
-          var projectmeta = this.currentproject.projectmeta;
-          var translation = this.currentproject.chunks;
-          var name = this.currentproject.projectmeta.unique_id;
-          var options = data.options;
-          var filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'PDF Files', extensions: ['pdf']}]}});
-          if (!filePath) {
-              return;
-          }
-          var generatePdf = function(){
-              mythis.set('options.body', "Creating PDF. Please wait...");
-              setTimeout(function() {
-                  return App.printManager.targetTranslationToPdf(translation, projectmeta, filePath, options)
-                      .then(function () {
-                          mythis.set('options.title', "PDF Created");
-                          mythis.set('options.body', "Your project has been successfully saved to a PDF.");
-                          mythis.set('options.loading', false);
-                      })
-                      .catch(function (err) {
-                          var errmessage = "An error occurred saving your project";
-                          if(err !== null) {
-                              errmessage = err;
-                          }
-                          mythis.set('options.title', "Print Failed");
-                          mythis.set('options.body', errmessage);
-                          mythis.set('options.loading', false);
-                      });
-              }, 500);
-          };
-
-          mythis.$.print.close();
-          mythis.set('options', {});
-          mythis.set('options.body', "Preparing to Print. Please wait...");
-          mythis.set('options.loading', true);
-          mythis.$.loading.open();
-
-          setTimeout(function() {
-              if (options.includeImages) {
-                  mythis.set('options.body', "Downloading Images. Please wait...");
-                  App.printManager.downloadImages().then(function(){
-                      mythis.set('options.body', "Extracting Images. Please wait...");
-                      App.printManager.extractImages();
-                      generatePdf();
-                  }).catch(function(err){
-                      var errmessage = "An error occurred while downloading images";
-                      if(err !== null) {
-                          errmessage = err;
-                      }
-                      mythis.set('options.title', "Download Failed");
-                      mythis.set('options.body', errmessage);
-                      mythis.set('options.loading', false);
-                  });
-              } else {
-                  generatePdf();
-              }
-          }, 500);
-      },
-
       checkExport: function () {
           var projectmeta = this.exportdata;
 

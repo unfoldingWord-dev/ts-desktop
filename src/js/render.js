@@ -206,6 +206,9 @@ function Renderer() {
             var chapters = [];
             var text = "\<div id='startnum' class='style-scope " + module + "'\>";
             var toc = starttocdiv + startheader + "Table of Contents" + endheader;
+            var startadiv1 = "\<div class='style-scope " + module + "'\>\<a class='style-scope " + module + "' href='#chap";
+            var startadiv2 = "'\>";
+            var endadiv = "\<\/a\>\<\/div\>";
 
             _.forEach(_.groupBy(chunks, function(chunk) {
                 return chunk.chunkmeta.chapter;
@@ -238,10 +241,6 @@ function Renderer() {
                     chapters.push({chapter: chap, title: title, reference: ref, content: content.trim()});
                 }
             });
-
-            var startadiv1 = "\<div class='style-scope " + module + "'\>\<a class='style-scope " + module + "' href='#chap";
-            var startadiv2 = "'\>";
-            var endadiv = "\<\/a\>\<\/div\>";
 
             chapters.forEach(function (chapter) {
                 if (chapter.content) {

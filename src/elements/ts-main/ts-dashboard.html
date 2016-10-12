@@ -366,8 +366,11 @@
 
           if (conflicts && conflicts.length) {
               App.reporter.logNotice(conflicts, 'Chunk Conflicts');
-
-              msg += ' There are ' + conflicts.length + ' chunks that contain new conflicts that need your attention.';
+              if (conflicts.length === 1) {
+                  msg += ' There is ' + conflicts.length + ' chunk that contains a new conflict that needs your attention.';
+              } else {
+                  msg += ' There are ' + conflicts.length + ' chunks that contain new conflicts that need your attention.';
+              }
           }
 
           this.showMessage(title, msg);
@@ -389,7 +392,14 @@
                   .then(function () {
                       var after = App.dataManager.getMetrics();
                       var diff = after.target_language_count - before.target_language_count;
-                      mythis.showMessage('Update Complete', 'The language list has been updated. ' + diff + ' new languages were added.');
+                      var msg = diff + ' new languages were added.';
+                      if (diff < 1) {
+                          msg = 'No new languages were added.';
+                      }
+                      if (diff === 1) {
+                          msg = '1 new language was added.';
+                      }
+                      mythis.showMessage('Update Complete', 'The language list has been updated. ' + msg);
                   })
                   .catch(function (err) {
                       var errmessage = 'An error occurred while updating';
@@ -416,7 +426,14 @@
                   .then(function () {
                       var after = App.dataManager.getMetrics();
                       var diff = after.resource_count_level3 - before.resource_count_level3;
-                      mythis.showMessage('Update Complete', 'The source list has been updated. ' + diff + ' new sources were added.');
+                      var msg = diff + ' new sources were added.';
+                      if (diff < 1) {
+                          msg = 'No new sources were added.';
+                      }
+                      if (diff === 1) {
+                          msg = '1 new source was added.';
+                      }
+                      mythis.showMessage('Update Complete', 'The source list has been updated. ' + msg);
                   })
                   .catch(function (err) {
                       var errmessage = 'An error occurred while updating';
@@ -476,8 +493,21 @@
                       var after = App.dataManager.getMetrics();
                       var diffLang = after.target_language_count - before.target_language_count;
                       var diffSrc = after.resource_count_level3 - before.resource_count_level3;
-
-                      mythis.showMessage('Update Complete', 'Everything has been updated. ' + diffLang + ' new languages were added. ' + diffSrc + ' new sources were added.');
+                      var msgLang = diffLang + ' new languages were added. ';
+                      var msgSrc = diffSrc + ' new sources were added.';
+                      if (diffSrc < 1) {
+                          msgSrc = 'No new sources were added.';
+                      }
+                      if (diffSrc === 1) {
+                          msgSrc = '1 new source was added.';
+                      }
+                      if (diffLang < 1) {
+                          msgLang = 'No new languages were added. ';
+                      }
+                      if (diffLang === 1) {
+                          msgLang = '1 new language was added. ';
+                      }
+                      mythis.showMessage('Update Complete', 'Everything has been updated. ' + msgLang + msgSrc);
                   })
                   .catch(function (err) {
                       var errmessage = 'An error occurred while updating';

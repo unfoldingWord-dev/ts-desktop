@@ -31,8 +31,9 @@
         }
 
         #content {
-            margin: 25px 50px;
+            margin: 25px auto;
             padding: 0 50px;
+            max-width: 730px;
             overflow-y: auto;
             background-color: var(--card-background-color);
         }
@@ -173,6 +174,7 @@
             var mythis = this;
             var backto = App.configurator.getValue("backto");
 
+            mythis.$.content.scrollTop = 0;
             mythis.set('route', backto);
 
             setTimeout(function() {

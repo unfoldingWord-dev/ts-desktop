@@ -198,7 +198,7 @@ function Renderer() {
                 add += "justify ";
             }
             var startbreakdiv = "\<div class='style-scope break " + add + module + "'\>";
-            var starttocdiv = "\<div class='style-scope break toc " + module + "'\>";
+            var starttocdiv = "\<div class='style-scope double break toc " + module + "'\>";
             var starttitlediv1 = "\<div id='chap";
             var starttitlediv2 = "' class='style-scope break titles " + module + "'\>";
             var startnobreakdiv = "\<div class='style-scope nobreak " + module + "'\>";

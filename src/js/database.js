@@ -224,7 +224,13 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
         },
 
         getProjectName: function (id) {
-            return db.indexSync.getProject('en', id).name;
+            var project = db.indexSync.getProject('en', id);
+
+            if (project) {
+                return project.name;
+            } else {
+                return "";
+            }
         },
 
 		getChunkMarkers: function (id) {

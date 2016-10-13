@@ -268,7 +268,8 @@
             route: {
                 type: String,
                 value: '',
-                notify: true
+                notify: true,
+                observer: 'load'
             },
             projectlist: {
                 type: Array,
@@ -552,6 +553,12 @@
             this.$.sourcepopup.close();
         },
 
+        load: function (route) {
+            if (route === "translate") {
+                this.forceResize();
+            }
+        },
+
         forceResize: function () {
             this.$.readmode.notifyResize();
             this.$.chunkmode.notifyResize();
@@ -717,7 +724,7 @@
                         .then(function (translation) {
                             mythis.set('currentproject.rawdata.main', translation);
                             if (projectmeta.type.id === "ta") {
-                                throw "We do not currently support this project type";
+                                throw "At this time, translationAcademy translation projects are not supported.";
                             }
                             loaddata2();
                         })

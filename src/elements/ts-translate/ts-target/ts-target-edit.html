@@ -167,9 +167,16 @@
                     var textholder = this.$.textholder;
                     var text = this.chunk.transcontent;
                     var module = "ts-target-edit";
+                    var startp = "\<p class='style-scope " + module + "'\>";
+                    var endp = "\<\/p\>";
+                    var msg = "This chunk contains a conflict that should be resolved before continuing. Go to the corresponding project to review and resolve the conflict.";
 
                     if (completed || typeclass !== "standard") {
-                        textholder.innerHTML = App.renderer.renderTargetWithVerses(text, module);
+                        if (text.includes("<<<<<")) {
+                            textholder.innerHTML = startp + msg + endp;
+                        } else {
+                            textholder.innerHTML = App.renderer.renderTargetWithVerses(text, module);
+                        }
                         textholder.classList.remove("hide");
                         textbox.classList.add("hide");
                         contentbox.classList.remove("editmode");

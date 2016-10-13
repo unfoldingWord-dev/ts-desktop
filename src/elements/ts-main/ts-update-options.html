@@ -65,20 +65,12 @@
         </div>
         <div id="body">
             <div class="option" on-tap="language">
-                <span class="optiontitle">Update Target Languages</span>
-                <p>Adds any new approved languages.  Takes less than a minute.</p>
+                <span class="optiontitle">Download List of Target Languages</span>
+                <p>Will update the list of target languages available for translation projects. This process may take some time.</p>
             </div>
             <div class="option" on-tap="source">
-                <span class="optiontitle">Update Sources</span>
-                <p>Adds any new Level 3 source languages.  Takes a few minutes</p>
-            </div>
-            <div class="option" on-tap="chunk">
-                <span class="optiontitle">Update Chunk Markers</span>
-                <p>Used when importing USFM. Takes a few minutes.</p>
-            </div>
-            <div class="option" on-tap="updateall">
-                <span class="optiontitle">Update All</span>
-                <p>Performs all 3 updates.  Takes awhile.</p>
+                <span class="optiontitle">Download List of New and Updated Source Texts</span>
+                <p>This only updates the list of available source texts. After the download, an Internet connection will be required to update the content of the source text used in a Project. This process may take some time.</p>
             </div>
         </div>
         <div id="footer">
@@ -105,14 +97,6 @@
 
         source: function () {
             this.fire('source');
-        },
-
-        chunk: function () {
-            this.fire('chunk');
-        },
-
-        updateall: function () {
-            this.fire('updateall');
         },
 
         ready: function () {

@@ -177,7 +177,8 @@
             route: {
                 type: String,
                 value: '',
-                notify: true
+                notify: true,
+                observer: 'load'
             },
             newdata: {
                 type: Object,
@@ -221,9 +222,14 @@
             }
         },
 
-        forceResize: function (event) {
-            this.set('selected', 0);
-            this.$.languages.updateList();
+        load: function (route) {
+            var lang = this.$.languages;
+            if (route === "new") {
+                this.set('selected', 0);
+                setTimeout(function() {
+                    lang.updateList();
+                }, 500);
+            }
         },
 
         openconfirm: function () {

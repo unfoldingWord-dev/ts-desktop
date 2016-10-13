@@ -268,7 +268,8 @@
             route: {
                 type: String,
                 value: '',
-                notify: true
+                notify: true,
+                observer: 'load'
             },
             projectlist: {
                 type: Array,
@@ -550,6 +551,12 @@
 
         closesource: function () {
             this.$.sourcepopup.close();
+        },
+
+        load: function (route) {
+            if (route === "translate") {
+                this.forceResize();
+            }
         },
 
         forceResize: function () {

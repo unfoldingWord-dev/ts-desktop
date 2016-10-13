@@ -238,8 +238,7 @@
       properties: {
           route: {
               type: String,
-              value: '',
-              observer: '_routeChanged'
+              value: ''
           },
           projectlist: {
               type: Array,
@@ -1041,12 +1040,6 @@
           } else {
               mythis.showErrorMessage('Feedback Failed', 'You are not set up with a token to send feedback.', null);
           }
-      },
-
-      _routeChanged: function (event) {
-          var el = this.querySelector('[data-route="' + this.route + '"]');
-          // The async delay prevents a flicker. It's a UI thing, not a logic thing.
-          el && el.forceResize && this.async(el.forceResize.bind(el), 30);
       },
 
       updateList: function () {

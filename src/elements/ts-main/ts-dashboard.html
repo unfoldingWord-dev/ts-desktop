@@ -95,8 +95,8 @@
       }
 
       #update {
-          width: 450px;
-          height: 500px;
+          width: 500px;
+          height: 450px;
       }
 
       #repo {
@@ -185,7 +185,7 @@
       </paper-dialog>
 
       <paper-dialog id="update" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-          <ts-update-options on-language="updateLanguages" on-source="updateSources" on-chunk="updateChunks" on-updateall="updateAll"></ts-update-options>
+          <ts-update-options on-language="updateLanguages" on-source="updateSources"></ts-update-options>
       </paper-dialog>
 
       <paper-dialog id="license" class="popup legal" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -385,21 +385,21 @@
           var before = App.dataManager.getMetrics();
 
           mythis.$.update.close();
-          mythis.showLoadingMessage('Updating Languages. This may take several minutes. Please wait...');
+          mythis.showLoadingMessage('Updating list of Target Languages. This may take some time. Please wait...');
 
           setTimeout(function () {
               return App.dataManager.updateLanguages()
                   .then(function () {
                       var after = App.dataManager.getMetrics();
                       var diff = after.target_language_count - before.target_language_count;
-                      var msg = diff + ' new languages were added.';
+                      var msg = diff + ' new Target Languages have been added.';
                       if (diff < 1) {
-                          msg = 'No new languages were added.';
+                          msg = 'No new Target Languages have been added.';
                       }
                       if (diff === 1) {
-                          msg = '1 new language was added.';
+                          msg = '1 new Target Language has been added.';
                       }
-                      mythis.showMessage('Update Complete', 'The language list has been updated. ' + msg);
+                      mythis.showMessage('Update Complete', 'The Target Language list has been updated. ' + msg);
                   })
                   .catch(function (err) {
                       var errmessage = 'An error occurred while updating';
@@ -419,95 +419,21 @@
           var before = App.dataManager.getMetrics();
 
           mythis.$.update.close();
-          mythis.showLoadingMessage('Updating Sources. This may take several minutes. Please wait...');
+          mythis.showLoadingMessage('Updating list of Source Texts. After running this process, the new or updated source texts can be downloaded when starting a project that uses that source text. An Internet connection will be required at that time as well. This process may take some time. Please wait...');
 
           setTimeout(function () {
               return App.dataManager.updateSources()
                   .then(function () {
                       var after = App.dataManager.getMetrics();
                       var diff = after.resource_count_level3 - before.resource_count_level3;
-                      var msg = diff + ' new sources were added.';
+                      var msg = diff + ' new Source Texts have been added.';
                       if (diff < 1) {
-                          msg = 'No new sources were added.';
+                          msg = 'No new Source Texts have been added.';
                       }
                       if (diff === 1) {
-                          msg = '1 new source was added.';
+                          msg = '1 new Source Text has been added.';
                       }
-                      mythis.showMessage('Update Complete', 'The source list has been updated. ' + msg);
-                  })
-                  .catch(function (err) {
-                      var errmessage = 'An error occurred while updating';
-                      if (err.syscall === "getaddrinfo") {
-                          errmessage = "Unable to connect to server";
-                      }
-                      if (err.syscall === "read") {
-                          errmessage = "Lost connection to server";
-                      }
-                      mythis.showErrorMessage('Update Failed', errmessage, err);
-                  });
-          }, 500);
-      },
-
-      updateChunks: function () {
-          var mythis = this;
-
-          mythis.$.update.close();
-          mythis.showLoadingMessage('Updating Chunks. This may take several minutes. Please wait...');
-
-          setTimeout(function () {
-              return App.dataManager.updateChunks()
-                  .then(function () {
-                      mythis.showMessage('Update Complete', 'The chunk markers have been updated.');
-                  })
-                  .catch(function (err) {
-                      var errmessage = 'An error occurred while updating';
-                      if (err.syscall === "getaddrinfo") {
-                          errmessage = "Unable to connect to server";
-                      }
-                      if (err.syscall === "read") {
-                          errmessage = "Lost connection to server";
-                      }
-                      mythis.showErrorMessage('Update Failed', errmessage, err);
-                  });
-          }, 500);
-      },
-
-      updateAll: function () {
-          var mythis = this;
-          var before = App.dataManager.getMetrics();
-
-          mythis.$.update.close();
-          mythis.showLoadingMessage('Updating Sources. This may take several minutes. Please wait...');
-
-          setTimeout(function () {
-              return App.dataManager.updateSources()
-                  .then(function () {
-                      mythis.showLoadingMessage('Updating Languages. This may take several minutes. Please wait...');
-                      return App.dataManager.updateLanguages();
-                  })
-                  .then(function () {
-                      mythis.showLoadingMessage('Updating Chunks. This may take several minutes. Please wait...');
-                      return App.dataManager.updateChunks();
-                  })
-                  .then(function () {
-                      var after = App.dataManager.getMetrics();
-                      var diffLang = after.target_language_count - before.target_language_count;
-                      var diffSrc = after.resource_count_level3 - before.resource_count_level3;
-                      var msgLang = diffLang + ' new languages were added. ';
-                      var msgSrc = diffSrc + ' new sources were added.';
-                      if (diffSrc < 1) {
-                          msgSrc = 'No new sources were added.';
-                      }
-                      if (diffSrc === 1) {
-                          msgSrc = '1 new source was added.';
-                      }
-                      if (diffLang < 1) {
-                          msgLang = 'No new languages were added. ';
-                      }
-                      if (diffLang === 1) {
-                          msgLang = '1 new language was added. ';
-                      }
-                      mythis.showMessage('Update Complete', 'Everything has been updated. ' + msgLang + msgSrc);
+                      mythis.showMessage('Update Complete', 'The list of Source Texts has been updated. ' + msg);
                   })
                   .catch(function (err) {
                       var errmessage = 'An error occurred while updating';

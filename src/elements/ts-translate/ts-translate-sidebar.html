@@ -89,7 +89,7 @@
                 <paper-item on-tap="goprint" class$="[[checkclass(currentproject.projectmeta.project_type_class)]]"><iron-icon class="smallicon" icon="print"></iron-icon>Print</paper-item>
                 <paper-item on-tap="goacademy"><iron-icon class="smallicon" icon="book"></iron-icon>translationAcademy</paper-item>
                 <paper-item on-tap="gofeedback"><iron-icon class="smallicon" icon="announcement"></iron-icon>Feedback</paper-item>
-                <paper-item on-tap="gosearch"><iron-icon class="smallicon" icon="search"></iron-icon>Search</paper-item>
+                <paper-item on-tap="gosearch" class$="[[searchclass(currentproject.projectmeta.project_type_class, selected)]]"><iron-icon class="smallicon" icon="search"></iron-icon>Search</paper-item>
                 <paper-item on-tap="gosettings"><iron-icon class="smallicon" icon="settings"></iron-icon>Settings</paper-item>
             </paper-menu>
         </paper-menu-button>
@@ -121,6 +121,10 @@
 
         checkclass: function (typeclass) {
             return typeclass === "standard" ? '' : 'hide';
+        },
+
+        searchclass: function (typeclass, selected) {
+            return typeclass === "standard" && selected === 3 ? '' : 'hide';
         },
 
         conflictclass: function (typeclass, conflicts) {

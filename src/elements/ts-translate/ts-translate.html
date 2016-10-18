@@ -154,7 +154,7 @@
 
     <template>
 
-        <ts-translate-sidebar selected="{{selected}}" currentproject="[[currentproject]]" on-gohome="gohome" on-goreview="goreview" on-goexport="goexport" on-goprint="goprint" on-gosettings="gosettings"></ts-translate-sidebar>
+        <ts-translate-sidebar selected="{{selected}}" currentproject="[[currentproject]]" on-gohome="gohome" on-goreview="goreview" on-goexport="goexport" on-goprint="goprint" on-gosearch="gosearch" on-gosettings="gosettings"></ts-translate-sidebar>
 
         <div id="pages">
             <ts-read-mode id="readmode" chapters="[[currentproject.chapters]]" modestatus="{{modestatus}}"></ts-read-mode>
@@ -838,6 +838,7 @@
                 chunk.wordcontent = "";
                 chunk.resources = resources;
                 chunk.index = i;
+                chunk.search = {text: ""};
                 chunkarray.push(chunk);
             }
             this.set('currentproject.chunks', chunkarray);
@@ -1363,6 +1364,11 @@
             this.setleftanimation();
             App.configurator.setValue("backto", this.route);
             this.route = "settings";
+        },
+
+        gosearch: function () {
+            var review = this.$.reviewmode;
+            review.opensearch();
         },
 
         setrightanimation: function () {

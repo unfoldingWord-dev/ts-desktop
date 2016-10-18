@@ -5,6 +5,9 @@
 <link rel="import" href="../../../components/neon-animation/neon-animation.html">
 <link rel="import" href="../../../components/paper-material/paper-material.html">
 <link rel="import" href="../../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../../components/paper-radio-button/paper-radio-button.html">
+<link rel="import" href="../../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../../components/paper-radio-group/paper-radio-group.html">
 
 <link rel="import" href="./ts-review-card.html">
 <link rel="import" href="./ts-text-holder.html">
@@ -26,8 +29,28 @@
             flex: auto;
         }
 
-        iron-list {
+        #searchbar {
+            height: 49px;
+            border-bottom: 1px solid var(--primary-text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #searchbar.hide {
+            display: none;
+        }
+
+        #input {
+            height: 30px;
+        }
+
+        #reviewlist {
             max-height: calc(100vh - 70px);
+        }
+
+        #reviewlist.searchmode {
+            max-height: calc(100vh - 120px);
         }
 
         :host(.hide) iron-list {
@@ -186,6 +209,18 @@
 	<template>
 
         <div id="contain">
+            <div id="searchbar" class="hide">
+                <span>Search in: </span>
+                <paper-radio-group selected="{{selected}}" on-iron-select="search">
+                    <paper-radio-button name="source">Source</paper-radio-button>
+                    <paper-radio-button name="target">Target</paper-radio-button>
+                </paper-radio-group>
+                <input is="iron-input" id="input" bind-value="{{query}}" on-input="search" placeholder="Search for text">
+                <span>Found in <span>[[results.forward.length]]</span> chunks.</span>
+                <paper-icon-button icon="arrow-downward" on-tap="next"></paper-icon-button>
+                <paper-icon-button icon="arrow-upward" on-tap="previous"></paper-icon-button>
+                <paper-icon-button icon="close" on-tap="closesearch"></paper-icon-button>
+            </div>
             <iron-list id="reviewlist" items="{{chunks}}" as="chunk" on-scroll="displayposition">
                 <template>
                     <ts-review-card chunk="{{chunk}}" on-updateheight="updateheight"></ts-review-card>
@@ -267,7 +302,78 @@
             allwords: {
                 type: Array,
                 value: []
+            },
+            selected: {
+                type: String,
+                value: 'target'
+            },
+            query: {
+                type: String,
+                value: ""
+            },
+            results: {
+                type: Object,
+                value: {}
             }
+        },
+
+        opensearch: function () {
+            this.$.reviewlist.classList.add('searchmode');
+            this.$.searchbar.classList.remove('hide');
+        },
+
+        closesearch: function () {
+            this.$.reviewlist.classList.remove('searchmode');
+            this.$.searchbar.classList.add('hide');
+            this.query = "";
+            this.search();
+        },
+
+        search: function () {
+            var mythis = this;
+            var query = this.query;
+            var chunks = this.chunks;
+            var type = this.selected;
+            var forward = [];
+            var backward = [];
+
+            if (chunks && chunks.length) {
+                for (var i = 0; i < chunks.length; i++) {
+                    if (query && ((type === 'source' && chunks[i].srccontent.includes(query)) || (type === 'target' && chunks[i].transcontent.includes(query)))) {
+                        forward.push(i);
+                        backward.push(i);
+                    }
+                    var string = "chunks." + i + ".search";
+                    mythis.set(string, {text: query, type: type});
+                }
+
+                backward.reverse();
+                this.set('results', {forward: forward, backward: backward});
+            }
+        },
+
+        next: function () {
+            var list = this.$.reviewlist;
+            var index = list.firstVisibleIndex || 0;
+            var order = this.results.forward;
+
+            var next = order.find(function (num) {
+                return num > index;
+            });
+
+            list.scrollToIndex(next);
+        },
+
+        previous: function () {
+            var list = this.$.reviewlist;
+            var index = list.firstVisibleIndex || 0;
+            var order = this.results.backward;
+
+            var previous = order.find(function (num) {
+                return num < index;
+            });
+
+            list.scrollToIndex(previous);
         },
 
         displayposition: function () {

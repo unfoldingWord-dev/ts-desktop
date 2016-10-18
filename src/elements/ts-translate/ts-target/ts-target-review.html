@@ -85,6 +85,10 @@
             color: var(--accent-color);
         }
 
+        .searchhighlight {
+            background: yellow;
+        }
+
         .rtl {
             direction: rtl;
         }
@@ -135,7 +139,7 @@
         },
 
         observers: [
-            'rendertext(chunk.transcontent, chunk.completed)'
+            'rendertext(chunk.transcontent, chunk.completed, chunk.search.*)'
         ],
 
         iconclass: function (complete) {
@@ -147,14 +151,22 @@
                 if (this.chunk && this.chunk.srccontent && this.chunk.projectmeta.project_type_class === "standard") {
                     var mythis = this;
                     var completed = this.chunk.completed;
-                    var text = this.chunk.transcontent;
+                    var text = _.cloneDeep(this.chunk.transcontent);
                     var module = "ts-target-review";
                     var returnstr = "";
+                    var searchtext = this.chunk.search.text;
+                    var searchtype = this.chunk.search.type;
+                    var regex = new RegExp(searchtext + "(?![^<]*>)", "g");
+                    var startspan = "\<span class='style-scope ts-target-review searchhighlight'\>";
+                    var endspan = "\<\/span\>";
 
                     if (completed) {
                         returnstr = App.renderer.renderTargetWithVerses(text, module);
                     } else {
                         returnstr = App.renderer.markersToBalloons(mythis.chunk, module);
+                    }
+                    if (searchtext && searchtype === "target") {
+                        returnstr = returnstr.replace(regex, startspan + searchtext + endspan);
                     }
 
                     mythis.$.textholder.innerHTML = returnstr;

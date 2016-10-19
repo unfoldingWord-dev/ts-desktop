@@ -166,6 +166,7 @@
                         returnstr = App.renderer.markersToBalloons(mythis.chunk, module);
                     }
                     if (searchtext && searchtype === "target") {
+                        mythis.review();
                         returnstr = returnstr.replace(regex, startspan + searchtext + endspan);
                     }
 
@@ -270,6 +271,13 @@
             if (this.chunk.index === index) {
                 this.checkdone();
             }
+        },
+
+        review: function () {
+            var id = this.chunk.chunkmeta.chapterid + "-" + this.chunk.chunkmeta.frameid;
+            this.set('chunk.state.review', true);
+            this.fire('setheight');
+            this.fire('iron-signal', {name: 'updatestate', data: {id: id, mode: "review", value: true}});
         },
 
         edit: function () {

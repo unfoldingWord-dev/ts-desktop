@@ -763,6 +763,7 @@
             var mythis = this;
             var projectmeta = mythis.currentproject.projectmeta;
             var source = projectmeta.source_translations[projectmeta.currentsource];
+            var review = this.$.reviewmode;
 
             var open = function () {
                 return App.dataManager.activateProjectContainers(source.language_id, projectmeta.project.id, source.resource_id)
@@ -781,6 +782,7 @@
                     mythis.fire('iron-signal', {name: 'closeloading'});
                     mythis.forceResize();
                     mythis.setlocation();
+                    review.search();
                     if (full) {
                         mythis.checksources();
                     }

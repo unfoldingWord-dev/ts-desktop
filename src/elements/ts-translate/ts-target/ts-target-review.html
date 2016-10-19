@@ -156,6 +156,7 @@
                     var returnstr = "";
                     var searchtext = this.chunk.search.text;
                     var searchtype = this.chunk.search.type;
+                    var passive = this.chunk.search.passive;
                     var regex = new RegExp(searchtext + "(?![^<]*>)", "g");
                     var startspan = "\<span class='style-scope ts-target-review searchhighlight'\>";
                     var endspan = "\<\/span\>";
@@ -166,7 +167,10 @@
                         returnstr = App.renderer.markersToBalloons(mythis.chunk, module);
                     }
                     if (searchtext && searchtype === "target") {
-                        mythis.review();
+                        if (!passive) {
+                            mythis.review();
+                            mythis.set('chunk.search.passive', true);
+                        }
                         returnstr = returnstr.replace(regex, startspan + searchtext + endspan);
                     }
 
@@ -206,8 +210,11 @@
                     var dragid = event.dataTransfer.getData("text");
                     var dragelement = document.getElementById(dragid);
                     var targetelement = event.target;
-                    var parentelement = targetelement.parentNode;
                     targetelement.classList.remove("highlight");
+                    if (!targetelement.classList.contains("targets")) {
+                        targetelement = targetelement.parentNode;
+                    }
+                    var parentelement = targetelement.parentNode;
                     parentelement.insertBefore(dragelement, targetelement);
                     mythis.savemarkers();
                 });

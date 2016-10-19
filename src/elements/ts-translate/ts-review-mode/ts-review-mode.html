@@ -246,11 +246,11 @@
             <div id="searchbar" class="hide">
                 <div id="searchinfo">
                     <span>Search in: </span>
-                    <paper-radio-group selected="{{selected}}" on-iron-select="search">
+                    <paper-radio-group selected="{{selected}}" on-iron-select="activesearch">
                         <paper-radio-button name="source">Source</paper-radio-button>
                         <paper-radio-button name="target">Target</paper-radio-button>
                     </paper-radio-group>
-                    <input is="iron-input" id="input" bind-value="{{query}}" on-input="search" placeholder="Search for text">
+                    <input is="iron-input" id="input" bind-value="{{query}}" on-input="activesearch" placeholder="Search for text">
                     <div id="searchresults" class$="[[resultsclass(query)]]">
                         <paper-icon-button icon="arrow-downward" on-tap="next"></paper-icon-button>
                         <paper-icon-button icon="arrow-upward" on-tap="previous"></paper-icon-button>
@@ -305,6 +305,7 @@
         </div>
 
         <iron-signals on-iron-signal-openresource="openresource"></iron-signals>
+        <iron-signals on-iron-signal-passivesearch="passivesearch"></iron-signals>
 
 	</template>
 
@@ -370,10 +371,22 @@
             this.$.reviewlist.classList.remove('searchmode');
             this.$.searchbar.classList.add('hide');
             this.query = "";
-            this.search();
+            this.passivesearch();
         },
 
-        search: function () {
+        activesearch: function () {
+            if (this.selected === 'target') {
+                this.search(false);
+            } else {
+                this.search(true);
+            }
+        },
+
+        passivesearch: function () {
+            this.search(true);
+        },
+
+        search: function (passive) {
             var mythis = this;
             var query = this.query;
             var chunks = this.chunks;
@@ -388,7 +401,7 @@
                         backward.push(i);
                     }
                     var string = "chunks." + i + ".search";
-                    mythis.set(string, {text: query, type: type});
+                    mythis.set(string, {text: query, type: type, passive: passive});
                 }
 
                 backward.reverse();

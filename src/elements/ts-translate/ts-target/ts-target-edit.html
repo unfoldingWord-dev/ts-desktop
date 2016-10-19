@@ -212,6 +212,7 @@
             this.set('chunk.transcontent', text);
             this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
             this.fire('setheight');
+            this.fire('iron-signal', {name: 'passivesearch'});
         },
 
 		ready: function() {

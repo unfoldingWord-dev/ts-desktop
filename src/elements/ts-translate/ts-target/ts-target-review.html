@@ -154,24 +154,39 @@
                     var text = _.cloneDeep(this.chunk.transcontent);
                     var module = "ts-target-review";
                     var returnstr = "";
-                    var searchtext = this.chunk.search.text;
-                    var searchtype = this.chunk.search.type;
-                    var passive = this.chunk.search.passive;
-                    var regex = new RegExp(searchtext + "(?![^<]*>)", "g");
+                    var search = this.chunk.search;
                     var startspan = "\<span class='style-scope ts-target-review searchhighlight'\>";
                     var endspan = "\<\/span\>";
+                    var searcharray = search.text.trim().split(" ");
+                    var regexstr = "(\<span[^>]*>[^<]*)(" + searcharray[0] + ")";
+
+                    for (var i = 1; i < searcharray.length; i++) {
+                        regexstr += "(<\/span> *<span[^>]*>)(" + searcharray[i] + ")";
+                    }
+                    regexstr += "([^<]*<\/span>)(?! *<\/span>)";
+
+                    var regex = new RegExp(regexstr);
 
                     if (completed) {
                         returnstr = App.renderer.renderTargetWithVerses(text, module);
                     } else {
                         returnstr = App.renderer.markersToBalloons(mythis.chunk, module);
                     }
-                    if (searchtext && searchtype === "target") {
-                        if (!passive) {
+                    if (search.text && search.on && search.type === "target") {
+                        if (!search.passive) {
                             mythis.review();
                             mythis.set('chunk.search.passive', true);
                         }
-                        returnstr = returnstr.replace(regex, startspan + searchtext + endspan);
+
+                        if (completed || searcharray.length === 1) {
+                            var regex2 = new RegExp(search.text.trim() + "(?![^<]*>)", "g");
+                            returnstr = returnstr.replace(regex2, startspan + search.text.trim() + endspan);
+                        } else {
+                            while (regex.test(returnstr)) {
+                                var replace = startspan + regex.exec(returnstr)[0] + endspan;
+                                returnstr = returnstr.replace(regex, replace);
+                            }
+                        }
                     }
 
                     mythis.$.textholder.innerHTML = returnstr;
@@ -190,6 +205,10 @@
             for (var j = 0; j < markers.length; j++) {
                 markers[j].addEventListener("dragstart", function (event) {
                     event.dataTransfer.setData("text", event.target.id);
+                    mythis.set('chunk.search.on', false);
+                });
+                markers[j].addEventListener("dragend", function (event) {
+                    mythis.set('chunk.search.on', true);
                 });
             }
 

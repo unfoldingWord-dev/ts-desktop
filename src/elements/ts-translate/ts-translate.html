@@ -1038,6 +1038,10 @@
                     chapterref = "Project Title";
                     chunkref = "Project Title";
                     framenum = 0;
+                } else if (frameid === "title") {
+                    chapterref = name + " " + chapternum + " Title";
+                    chunkref = name + " " + chapternum + " Title";
+                    framenum = 0;
                 } else {
                     chapterref = name + " " + chapternum;
                     chunkref = name + " " + chapternum + ":" + verses[0] + "–" + verses[verses.length-1];

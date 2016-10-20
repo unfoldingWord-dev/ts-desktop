@@ -229,11 +229,9 @@
                     var dragid = event.dataTransfer.getData("text");
                     var dragelement = document.getElementById(dragid);
                     var targetelement = event.target;
-                    targetelement.classList.remove("highlight");
-                    if (!targetelement.classList.contains("targets")) {
-                        targetelement = targetelement.parentNode;
-                    }
                     var parentelement = targetelement.parentNode;
+
+                    targetelement.classList.remove("highlight");
                     parentelement.insertBefore(dragelement, targetelement);
                     mythis.savemarkers();
                 });

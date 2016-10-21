@@ -86,7 +86,7 @@
 
       #import {
           width: 450px;
-          height: 670px;
+          height: 470px;
       }
 
       #export {
@@ -165,7 +165,7 @@
       </paper-dialog>
 
       <paper-dialog id="import" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-          <ts-import-options on-restorebackup="restoreFromBackup" on-restorerepo="openRepoRestore" on-backup="importFromBackup" on-usfm="importFromUsfm" on-repo="openRepoImport" on-container="importContainer"></ts-import-options>
+          <ts-import-options on-backup="importFromBackup" on-usfm="importFromUsfm" on-repo="openRepoImport" on-container="importContainer"></ts-import-options>
       </paper-dialog>
 
       <paper-dialog id="repo" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -768,17 +768,8 @@
 
       openRepoImport: function () {
           this.$.import.close();
-          this.$.reposearch.username = "";
-          this.$.reposearch.project = "";
-          this.$.reposearch.restore = false;
-          this.$.repo.open();
-      },
-
-      openRepoRestore: function () {
-          this.$.import.close();
           this.$.reposearch.username = this.currentuser.username;
           this.$.reposearch.project = "";
-          this.$.reposearch.restore = true;
           this.$.repo.open();
       },
 

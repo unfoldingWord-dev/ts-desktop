@@ -83,7 +83,7 @@
         <div id="header">
             <h2>Search for Projects</h2>
             <div id="filters">
-                <input is="iron-input" bind-value="{{username}}" placeholder="Username" disabled="{{restore}}">
+                <input is="iron-input" bind-value="{{username}}" placeholder="Username">
                 <paper-spinner id="spinner"></paper-spinner>
                 <input is="iron-input" bind-value="{{project}}" placeholder="Project Name">
             </div>
@@ -122,10 +122,6 @@
             project: {
                 type: String,
                 value: ''
-            },
-            restore: {
-                type: Boolean,
-                value: false
             },
             p: {
                 type: Object,

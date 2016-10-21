@@ -128,7 +128,7 @@
                             <span>[[source.language_name]]</span> (<span>[[source.language_id]]</span>) - <span>[[source.resource_name]]</span>
                         </div>
                         <div class="buttons">
-                            <paper-button raised class$="[[checkdownload(source.uptodate)]]" on-tap="download">Update</paper-button>
+                            <paper-button raised class$="[[checkupdate(source.status)]]" on-tap="download">Update</paper-button>
                             <paper-button raised on-tap="removesource">Remove</paper-button>
                         </div>
                     </div>
@@ -141,8 +141,9 @@
                             <span>[[source.language_name]]</span> (<span>[[source.language_id]]</span>) - <span>[[source.resource_name]]</span>
                         </div>
                         <div class="buttons">
-                            <paper-button raised class$="[[checkavailable(source.uptodate)]]" on-tap="addsource">Select</paper-button>
-                            <paper-button raised class$="[[checkdownload(source.uptodate)]]" on-tap="download">Download</paper-button>
+                            <paper-button raised class$="[[checkupdate(source.status)]]" on-tap="download">Update</paper-button>
+                            <paper-button raised class$="[[checkdownload(source.status)]]" on-tap="download">Download</paper-button>
+                            <paper-button raised class$="[[checkavailable(source.status)]]" on-tap="addsource">Select</paper-button>
                         </div>
                     </div>
                 </template>
@@ -219,12 +220,16 @@
             return direction === "ltr" ? 'row left' : 'row right';
         },
 
-        checkavailable: function (uptodate) {
-            return uptodate ? '' : 'hide';
+        checkavailable: function (status) {
+            return status !== "download" ? '' : 'hide';
         },
 
-        checkdownload: function (uptodate) {
-            return uptodate ? 'hide' : '';
+        checkdownload: function (status) {
+            return status === "download" ? '' : 'hide';
+        },
+
+        checkupdate: function (status) {
+            return status === "update" ? '' : 'hide';
         },
 
         searchfilter: function () {

@@ -97,11 +97,15 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                         return utils.fs.readFile(manifest)
                             .then(function (contents) {
                                 var json = JSON.parse(contents);
-                                source.uptodate = json.resource.status.pub_date === source.date_modified;
+                                if (json.resource.status.pub_date === source.date_modified) {
+                                    source.status = "current";
+                                } else {
+                                    source.status = "update";
+                                }
                                 return source;
                             });
                     }
-                    source.uptodate = false;
+                    source.status = "download";
                     return source;
                 });
         },

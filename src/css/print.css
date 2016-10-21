@@ -1,4 +1,6 @@
 
+@import 'fonts/fonts.css';
+
 * {
     overflow: visible !important;
     float: none !important;

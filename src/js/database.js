@@ -24,6 +24,18 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             return db.updateChunks();
         },
 
+        importContainer: function (filePath) {
+
+
+            return new Promise(function (resolve, reject) {
+                if (filePath) {
+                    resolve(filePath);
+                } else {
+                    reject("Invalid file");
+                }
+            });
+        },
+
         getMetrics: function () {
             return db.indexSync.getMetrics();
         },

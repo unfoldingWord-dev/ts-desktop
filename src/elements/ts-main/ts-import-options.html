@@ -91,6 +91,10 @@
                 <span class="optiontitle">Restore from Door43</span>
                 <p>Will <span class="bold">overwrite</span> the existing project, if one exists</p>
             </div>
+            <div class="option" on-tap="container">
+                <span class="optiontitle">Import Resource Container</span>
+                <p>Import a new source from a local file in proper resource container format</p>
+            </div>
         </div>
         <div id="footer">
             <paper-button dialog-dismiss>Cancel</paper-button>
@@ -128,6 +132,10 @@
 
         repo: function () {
             this.fire('repo');
+        },
+
+        container: function () {
+            this.fire('container');
         },
 
         ready: function () {

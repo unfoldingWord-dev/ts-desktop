@@ -36,14 +36,15 @@ h1, h2 {
 }
 
 .double, .double * {
-    line-height: 233%;
+    line-height: 190%;
 }
 
 .nobreak p {
-    margin: 0 0 35px;
+    margin: 0 0 30px;
 }
 
 @page main {
+    margin: 50px 70px;
     @bottom-center {
         content: counter(page);
     }

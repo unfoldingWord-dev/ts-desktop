@@ -1,0 +1,97 @@
+
+<link rel="import" href="../../components/paper-button/paper-button.html">
+
+<dom-module id="ts-import-confirm">
+
+    <style>
+
+        :host {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #header {
+            flex: 0 0 50px;
+            color: var(--accent-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #body {
+            color: var(--primary-text-color);
+            flex: auto;
+            padding: 0 20px;
+            text-align: center;
+            font-size: 120%;
+        }
+
+        #footer {
+            flex: 0 0 50px;
+            color: var(--secondary-text-color);
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            font-size: 120%;
+        }
+
+        #footer paper-button:hover {
+            color: var(--accent-color);
+        }
+
+    </style>
+
+    <template>
+
+        <div id="header">
+            <h2>Project Already Exists</h2>
+        </div>
+        <div id="body">
+            <p>This project already exists locally. How would you like to proceed?</p>
+        </div>
+        <div id="footer">
+            <paper-button dialog-confirm on-tap="cancel">Cancel</paper-button>
+            <paper-button dialog-confirm on-tap="merge">Merge Projects</paper-button>
+            <paper-button dialog-confirm on-tap="overwrite">Overwrite Project</paper-button>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-import-confirm',
+
+        properties: {
+            importdata: {
+                type: Object,
+                value: {},
+                notify: true
+            }
+        },
+
+        cancel: function () {
+            this.fire('cancel');
+        },
+
+        merge: function () {
+            this.set('importdata.overwrite', false);
+            this.fire('finishimport');
+        },
+
+        overwrite: function () {
+            this.set('importdata.overwrite', true);
+            this.fire('finishimport');
+        },
+
+        ready: function () {
+
+        }
+
+    });
+
+</script>

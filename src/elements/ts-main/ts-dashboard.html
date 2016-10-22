@@ -23,6 +23,7 @@
 <link rel="import" href="./ts-guidelines.html">
 <link rel="import" href="./ts-attribution.html">
 <link rel="import" href="./ts-conflict.html">
+<link rel="import" href="./ts-import-confirm.html">
 <link rel="import" href="../ts-print/ts-print.html">
 
 <dom-module id="ts-dashboard">
@@ -124,6 +125,11 @@
           height: 200px;
       }
 
+      #importconfirm {
+          width: 450px;
+          height: 250px;
+      }
+
       .hide {
           display: none;
       }
@@ -143,7 +149,7 @@
 
       <ts-app-titlebar currentuser="[[currentuser]]"></ts-app-titlebar>
       <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
-          <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]" id="home"></ts-home>
+          <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]" importdata="{{importdata}}" id="home"></ts-home>
           <ts-new data-route="new" route="{{route}}" importdata="{{importdata}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]" options="{{options}}"></ts-new>
           <ts-translate data-route="translate" route="{{route}}" message="{{message}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}" id="translate" on-saveusfm="saveUSFM" on-openprint="openPrint"></ts-translate>
           <ts-review data-route="review" route="{{route}}" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}"></ts-review>
@@ -169,7 +175,7 @@
       </paper-dialog>
 
       <paper-dialog id="repo" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-          <ts-repo-search id="reposearch" on-cancel="cancelRepo"></ts-repo-search>
+          <ts-repo-search id="reposearch" importdata="{{importdata}}" on-cancel="cancelRepo" on-startrepoimport="startRepoImport"></ts-repo-search>
       </paper-dialog>
 
       <paper-dialog id="loading" class="popup" modal="true" exit-animation="scale-down-animation">
@@ -208,13 +214,16 @@
           <ts-conflict exportdata="[[exportdata]]" currentuser="[[currentuser]]"></ts-conflict>
       </paper-dialog>
 
+      <paper-dialog id="importconfirm" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <ts-import-confirm importdata="[[importdata]]"></ts-import-confirm>
+      </paper-dialog>
+
       <iron-signals on-iron-signal-updatelist="updateList"></iron-signals>
       <iron-signals on-iron-signal-openfeedback="openFeedback"></iron-signals>
       <iron-signals on-iron-signal-openimport="openImport"></iron-signals>
       <iron-signals on-iron-signal-openexport="openExport"></iron-signals>
       <iron-signals on-iron-signal-updateuser="updateUser"></iron-signals>
       <iron-signals on-iron-signal-finishusfm="finishUsfm"></iron-signals>
-      <iron-signals on-iron-signal-importfromrepo="importFromRepo"></iron-signals>
       <iron-signals on-iron-signal-openlicense="openLicense"></iron-signals>
       <iron-signals on-iron-signal-openguidelines="openGuidelines"></iron-signals>
       <iron-signals on-iron-signal-openstatement="openStatement"></iron-signals>
@@ -258,7 +267,7 @@
           },
           importdata: {
               type: Object,
-              value: {importing: false}
+              value: {}
           },
           exportdata: {
               type: Object,
@@ -767,10 +776,15 @@
       },
 
       openRepoImport: function () {
+          var mythis = this;
+
           this.$.import.close();
-          this.$.reposearch.username = this.currentuser.username;
-          this.$.reposearch.project = "";
+          this.set('importdata', {username: this.currentuser.username, project: ""});
           this.$.repo.open();
+
+          setTimeout(function() {
+              mythis.$.reposearch.searchRepos();
+          }, 500);
       },
 
       cancelRepo: function () {
@@ -778,7 +792,65 @@
           this.$.import.open();
       },
 
-      importFromRepo: function (event, data) {
+      startRepoImport: function () {
+          var mythis = this;
+          var conflicts = [];
+          var path = require('path');
+          var repo = this.importdata.repo.repo;
+          var project = this.importdata.repo.project;
+
+          var server = "git.door43.org";
+          var repourl = "https://" + server + "/" + repo;
+          var targetDir = App.configurator.getValue('targetTranslationsDir');
+          var tmpDir = App.configurator.getValue('tempDir');
+          var targetPath = path.join(targetDir, project);
+          var tmpPath = path.join(tmpDir, project);
+
+          var errmessage = "An error occurred while importing your project";
+
+          var errtitle = "Import Failed";
+
+          mythis.$.repo.close();
+          if (mythis.route !== "home") {
+              mythis.set('route', 'home');
+              mythis.$.translate.reset();
+          }
+
+          mythis.showLoadingMessage("Importing. Please wait...");
+
+          setTimeout(function() {
+              return App.utils.fs.mkdirs(tmpPath)
+                  .then(function () {
+                      return App.gitManager.clone(repourl, tmpDir)
+                  })
+                  .then(function () {
+                      var paths = App.utils.makeProjectPaths(tmpDir, project);
+                      return App.migrateManager.migrate(paths);
+                  })
+                  .then(function (data) {
+                      project = data.paths.projectDir.split(path.sep).pop();
+                      targetPath = path.join(targetDir, project);
+                      tmpPath = path.join(tmpDir, project);
+                      return App.utils.fs.stat(targetPath).then(App.utils.ret(true)).catch(App.utils.ret(false));
+                  })
+                  .then(function (exists) {
+                      if (exists) {
+                          mythis.$.loading.close();
+                          mythis.$.importconfirm.open();
+                      } else {
+                          mythis.set('importdata.overwrite', true);
+                          return mythis.finishRepoImport();
+                      }
+                  })
+                  .catch(function(err) {
+                      mythis.showErrorMessage(errtitle, errmessage, err && err.error ? err.error : err);
+
+                      return App.utils.fs.remove(App.configurator.getValue('tempDir'));
+                  });
+          }, 500);
+      },
+
+      finishRepoImport: function (event, data) {
           var mythis = this;
           var conflicts = [];
           var path = require('path');
@@ -798,42 +870,24 @@
           var title = restore ? "Restore Complete" : "Import Complete";
           var errtitle = restore ? "Restore Failed" : "Import Failed";
 
-          mythis.$.repo.close();
-          if (mythis.route !== "home") {
-              mythis.set('route', 'home');
-              mythis.$.translate.reset();
-          }
 
-          mythis.showLoadingMessage(loadmessage);
+
+
+          mythis.showLoadingMessage("Importing. Please wait...");
 
           setTimeout(function() {
               return App.utils.fs.mkdirs(tmpPath)
-                  .then(function () {
-                      return App.gitManager.clone(repourl, tmpDir)
-                  })
-                  .then(function () {
-                      var paths = App.utils.makeProjectPaths(tmpDir, project);
-                      return App.migrateManager.migrate(paths);
-                  })
-                  .then(function (data) {
-                      project = data.paths.projectDir.split(path.sep).pop();
-                      targetPath = path.join(targetDir, project);
-                      tmpPath = path.join(tmpDir, project);
-                      return App.utils.fs.stat(targetPath).then(App.utils.ret(true)).catch(App.utils.ret(false));
-                  })
+
                   .then(function (exists) {
-                      if (exists) {
-                          if (restore) {
-                              return App.utils.fs.mover(tmpPath, targetPath);
-                          } else {
-                              return App.gitManager.merge(mythis.currentuser, targetPath, tmpPath)
-                                  .then(function (list) {
-                                      conflicts = list;
-                                  });
-                          }
-                      } else {
+                      if (restore) {
                           return App.utils.fs.mover(tmpPath, targetPath);
+                      } else {
+                          return App.gitManager.merge(mythis.currentuser, targetPath, tmpPath)
+                              .then(function (list) {
+                                  conflicts = list;
+                              });
                       }
+
                   })
                   .then(function () {
                       return App.utils.fs.remove(App.configurator.getValue('tempDir'));
@@ -851,6 +905,10 @@
                       return App.utils.fs.remove(App.configurator.getValue('tempDir'));
                   });
           }, 500);
+      },
+
+      clearTempDir: function () {
+          return App.utils.fs.remove(App.configurator.getValue('tempDir'));
       },
 
       openExport: function (event, data) {

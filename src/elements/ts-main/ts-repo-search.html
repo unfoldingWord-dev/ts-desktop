@@ -83,9 +83,9 @@
         <div id="header">
             <h2>Search for Projects</h2>
             <div id="filters">
-                <input is="iron-input" bind-value="{{username}}" placeholder="Username">
+                <input is="iron-input" bind-value="{{importdata.username}}" on-input="searchRepos" placeholder="Username">
                 <paper-spinner id="spinner"></paper-spinner>
-                <input is="iron-input" bind-value="{{project}}" placeholder="Project Name">
+                <input is="iron-input" bind-value="{{importdata.project}}" on-input="searchRepos" placeholder="Project Name">
             </div>
         </div>
         <iron-list id="body" items="{{repos}}" as="repo">
@@ -115,13 +115,10 @@
                 type: Array,
                 value: []
             },
-            username: {
-                type: String,
-                value: ''
-            },
-            project: {
-                type: String,
-                value: ''
+            importdata: {
+                type: Object,
+                value: {},
+                notify: true
             },
             p: {
                 type: Object,
@@ -134,21 +131,20 @@
             }
         },
 
-        observers: [
-            'searchRepos(username, project)'
-        ],
-
         cancel: function () {
             this.fire('cancel');
         },
 
         selectrepo: function (e) {
             var repo = e.model.repo;
-            this.fire('iron-signal', {name: 'importfromrepo', data: {repo: repo, restore: this.restore}});
+            this.set('importdata', {repo: repo});
+            this.fire('startrepoimport');
         },
 
-        searchRepos: function (username, project) {
+        searchRepos: function () {
             var mythis = this;
+            var username = this.importdata.username;
+            var project = this.importdata.project;
 
             window.clearTimeout(mythis.timer);
             mythis.$.spinner.active = false;

@@ -211,7 +211,7 @@
       </paper-dialog>
 
       <paper-dialog id="conflict" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-          <ts-conflict exportdata="[[exportdata]]" currentuser="[[currentuser]]"></ts-conflict>
+          <ts-conflict exportdata="[[exportdata]]" importdata="{{importdata}}" currentuser="[[currentuser]]" on-startrepoimport="startRepoImport"></ts-conflict>
       </paper-dialog>
 
       <paper-dialog id="importconfirm" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -545,6 +545,7 @@
           var path = require('path');
           var repo = this.importdata.repo.repo;
           var project = this.importdata.repo.project;
+          var force = this.importdata.force || false;
           var server = "git.door43.org";
           var repourl = "https://" + server + "/" + repo;
           var targetDir = App.configurator.getValue('targetTranslationsDir');
@@ -577,7 +578,10 @@
                       return App.utils.fs.stat(targetPath).then(App.utils.ret(true)).catch(App.utils.ret(false));
                   })
                   .then(function (exists) {
-                      if (exists) {
+                      if (force) {
+                          mythis.set('importdata.overwrite', false);
+                          return mythis.finishImport();
+                      } else if (exists) {
                           mythis.closeLoading();
                           mythis.$.importconfirm.open();
                       } else {

@@ -225,10 +225,8 @@
         load: function (route) {
             var lang = this.$.languages;
             if (route === "new") {
+                lang.updateList();
                 this.set('selected', 0);
-                setTimeout(function() {
-                    lang.updateList();
-                }, 500);
             }
         },
 

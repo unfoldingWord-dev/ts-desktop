@@ -70,19 +70,19 @@
             <h2>Import Options</h2>
         </div>
         <div id="body">
-            <div class="option" on-tap="backup">
+            <div class="option" on-tap="repo">
+                <span class="optiontitle">Import from Door43</span>
+            </div>
+            <div class="option" on-tap="project">
                 <span class="optiontitle">Import Project File</span>
             </div>
             <div class="option" on-tap="usfm">
                 <span class="optiontitle">Import USFM File</span>
                 <p>Must have either .usfm or .txt extension</p>
             </div>
-            <div class="option" on-tap="repo">
-                <span class="optiontitle">Import from Door43</span>
-            </div>
             <div class="option" on-tap="container">
-                <span class="optiontitle">Import Resource Container</span>
-                <p>Import a new source from a local file in proper resource container format</p>
+                <span class="optiontitle">Import Source Text</span>
+                <p>Folder containing source data in proper format</p>
             </div>
         </div>
         <div id="footer">
@@ -103,8 +103,8 @@
 
         },
 
-        backup: function () {
-            this.fire('backup');
+        project: function () {
+            this.fire('project');
         },
 
         usfm: function () {

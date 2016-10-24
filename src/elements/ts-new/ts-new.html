@@ -342,7 +342,7 @@
         startimport: function () {
             this.$.confirmimport.close();
             this.set('route', "home");
-            this.fire('iron-signal', {name: 'finishusfm'});
+            this.fire('finishusfm');
             this.set('selected', 0);
             this.set('importdata', {importing: false});
         },

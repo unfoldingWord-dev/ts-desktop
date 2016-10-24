@@ -456,6 +456,431 @@
           }, 500);
       },
 
+      deleteProject: function (event, data) {
+          var mythis = this;
+          var projectmeta = data.projectmeta;
+
+          mythis.showLoadingMessage('Deleting project.  Please wait...');
+
+          setTimeout(function() {
+              return App.projectsManager.deleteTargetTranslation(projectmeta)
+                  .then(function() {
+                      App.projectsManager.unsetValues(projectmeta);
+
+                      mythis.showMessage('Project Deleted', 'Your project has been successfully deleted.');
+
+                      setTimeout(function() {
+                          mythis.updateList();
+                      }, 250);
+                  })
+                  .catch(function(err) {
+                      mythis.showErrorMessage('Delete Failed', 'An error occurred while trying to delete your project', err);
+                  });
+          }, 500);
+      },
+
+      changeProject: function (event, data) {
+          var mythis = this;
+          var conflicts = [];
+          var changedata = data;
+
+          mythis.set('route', 'home');
+          mythis.showLoadingMessage('Changing project.  Please wait...');
+
+          var choice = function () {
+              if (changedata.exists) {
+                  return App.gitManager.merge(mythis.currentuser, changedata.newpaths.projectDir, changedata.oldpaths.projectDir)
+                      .then(function (list) {
+                          conflicts = list;
+                      })
+                      .then(function () {
+                          return App.utils.fs.remove(changedata.oldpaths.projectDir);
+                      });
+              } else {
+                  return App.utils.fs.mover(changedata.oldpaths.projectDir, changedata.newpaths.projectDir)
+                      .then(function () {
+                          return App.projectsManager.saveTargetManifest(changedata.newmeta);
+                      })
+                      .then(function () {
+                          return App.projectsManager.commitProject(changedata.newmeta, mythis.currentuser);
+                      });
+              }
+          };
+
+          setTimeout(function () {
+              return choice()
+                  .then(function () {
+                      App.projectsManager.unsetValues(changedata.oldmeta);
+
+                      mythis.showConflictsMessage('Change Complete', 'Your project has been changed.', conflicts);
+
+                      setTimeout(function () {
+                          mythis.updateList();
+                      }, 250);
+                  })
+                  .catch(function(err) {
+                      mythis.showErrorMessage('Change Failed', 'An error occurred while trying to change the project', err);
+                  });
+          }, 500);
+      },
+
+      openImport: function () {
+          this.$.import.open();
+      },
+
+      openRepoImport: function () {
+          var mythis = this;
+
+          this.$.import.close();
+          this.set('importdata', {username: this.currentuser.username, project: ""});
+          this.$.repo.open();
+
+          setTimeout(function() {
+              mythis.$.reposearch.searchRepos();
+          }, 500);
+      },
+
+      cancelRepo: function () {
+          this.$.repo.close();
+          this.$.import.open();
+      },
+
+      startRepoImport: function () {
+          var mythis = this;
+          var path = require('path');
+          var repo = this.importdata.repo.repo;
+          var project = this.importdata.repo.project;
+          var server = "git.door43.org";
+          var repourl = "https://" + server + "/" + repo;
+          var targetDir = App.configurator.getValue('targetTranslationsDir');
+          var tmpDir = App.configurator.getValue('tempDir');
+          var targetPath = path.join(targetDir, project);
+          var tmpPath = path.join(tmpDir, project);
+
+          mythis.$.repo.close();
+          if (mythis.route !== "home") {
+              mythis.set('route', 'home');
+              mythis.$.translate.reset();
+          }
+          mythis.showLoadingMessage("Importing. Please wait...");
+
+          setTimeout(function() {
+              return App.utils.fs.mkdirs(tmpPath)
+                  .then(function () {
+                      return App.gitManager.clone(repourl, tmpDir)
+                  })
+                  .then(function () {
+                      var paths = App.utils.makeProjectPaths(tmpDir, project);
+                      return App.migrateManager.migrate(paths);
+                  })
+                  .then(function (data) {
+                      project = data.paths.projectDir.split(path.sep).pop();
+                      targetPath = path.join(targetDir, project);
+                      tmpPath = path.join(tmpDir, project);
+                      mythis.set('importdata.targetpath', targetPath);
+                      mythis.set('importdata.tmppath', tmpPath);
+                      return App.utils.fs.stat(targetPath).then(App.utils.ret(true)).catch(App.utils.ret(false));
+                  })
+                  .then(function (exists) {
+                      if (exists) {
+                          mythis.$.loading.close();
+                          mythis.$.importconfirm.open();
+                      } else {
+                          mythis.set('importdata.overwrite', true);
+                          return mythis.finishImport();
+                      }
+                  })
+                  .catch(function(err) {
+                      mythis.showErrorMessage("Import Failed", "An error occurred while importing your project", err && err.error ? err.error : err);
+
+                      return mythis.clearTempDir();
+                  });
+          }, 500);
+      },
+
+      startProjectImport: function() {
+          var mythis = this;
+          var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
+          var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}], properties: ['openFile']}});
+          if (!filePath) {
+              return;
+          }
+
+          mythis.$.import.close();
+          mythis.showLoadingMessage('Importing. Please wait...');
+
+          setTimeout(function() {
+              return App.importManager.extractBackup(filePath[0])
+                  .then(function (list) {
+                      return Promise.all(list.map(function (item) {
+                          mythis.set('importdata', {targetpath: item.targetPath, tmppath: item.tmpPath});
+                          if (item.targetExists) {
+                              mythis.$.loading.close();
+                              mythis.$.importconfirm.open();
+                          } else {
+                              mythis.set('importdata.overwrite', true);
+                              return mythis.finishImport();
+                          }
+                      }))
+                  })
+                  .catch(function(err) {
+                      mythis.showErrorMessage('Import Failed', 'An error occurred while importing your project', err);
+
+                      return mythis.clearTempDir();
+                  });
+          }, 500);
+      },
+
+      finishImport: function () {
+          var mythis = this;
+          var conflicts = [];
+          var overwrite = this.importdata.overwrite;
+          var targetPath = this.importdata.targetpath;
+          var tmpPath = this.importdata.tmppath;
+
+          mythis.showLoadingMessage("Importing. Please wait...");
+
+          setTimeout(function() {
+              return Promise.resolve(true)
+                  .then(function () {
+                      if (overwrite) {
+                          return App.utils.fs.mover(tmpPath, targetPath);
+                      } else {
+                          return App.gitManager.merge(mythis.currentuser, targetPath, tmpPath)
+                              .then(function (list) {
+                                  conflicts = list;
+                              });
+                      }
+                  })
+                  .then(function () {
+                      return mythis.clearTempDir();
+                  })
+                  .then(function() {
+                      mythis.showConflictsMessage("Import Complete", "Your project has been successfully imported.", conflicts);
+
+                      setTimeout(function() {
+                          mythis.updateList();
+                      }, 250);
+                  })
+                  .catch(function(err) {
+                      mythis.showErrorMessage("Import Failed", "An error occurred while importing your project", err && err.error ? err.error : err);
+
+                      return mythis.clearTempDir();
+                  });
+          }, 500);
+      },
+
+      clearTempDir: function () {
+          return App.utils.fs.remove(App.configurator.getValue('tempDir'));
+      },
+
+      importFromUsfm: function () {
+          var mythis = this;
+          var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
+          var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, filters: [{name: 'USFM Files', extensions: ['txt', 'usfm']}], properties: ['openFile']}});
+          if (!filePath) {
+              return;
+          }
+
+          mythis.$.import.close();
+
+          return App.importManager.retrieveUSFMProjectID(filePath[0])
+              .then(function (id) {
+                  var name = "";
+                  if (id) {
+                      var data = App.dataManager.getProjectName(id);
+                      if (data) {
+                          name = data;
+                      } else {
+                          id = "";
+                      }
+                  }
+                  mythis.set('importdata', {importing: true, filepath: filePath[0], project: {slug: id, name: name}});
+                  mythis.set('route', 'new');
+              }).catch(function (err) {
+                  var filename = (filePath && filePath[0]) || '';
+                  mythis.showErrorMessage('Import Failed', 'Error occurred reading file: ' + filename, err);
+              });
+      },
+
+      finishUsfm: function () {
+          var mythis = this;
+          var user = this.currentuser;
+          var filepath = this.importdata.filepath;
+          var projectmeta = this.importdata.projectmeta;
+          var overwrite = this.importdata.overwrite;
+          var timeString = App.utils.getTimeStamp();
+          var backupName = projectmeta.unique_id + '.' + timeString + '.tstudio';
+          var backupPath = App.configurator.getUserPath('datalocation', 'backups', backupName);
+
+          var backupTargetTranslation = function(){
+              return App.exportManager.backupTranslation(projectmeta, backupPath);
+          };
+          var checkOverwrite = overwrite ? backupTargetTranslation() : Promise.resolve(true);
+
+          mythis.showLoadingMessage('Importing.  Please wait...');
+
+          setTimeout(function() {
+              return checkOverwrite
+                  .then(function () {
+                      return App.importManager.importFromUSFM(filepath, projectmeta);
+                  })
+                  .then(function (chunks) {
+                      return App.projectsManager.createTargetTranslation(chunks, projectmeta, user);
+                  })
+                  .then(function () {
+                      mythis.showMessage('Import Complete', 'Your file has been imported. Please review it carefully. If it was not formatted properly, text may not appear as desired.');
+
+                      setTimeout(function() {
+                          mythis.updateList();
+                      }, 250);
+                  }).catch(function (err) {
+                      mythis.showErrorMessage('Import Failed', 'Error occurred importing project', err);
+
+                      if (overwrite) {
+                          return App.importManager.extractBackup(backupPath)
+                              .then(function (list) {
+                                  return Promise.all(list.map(function (item) {
+                                      return App.utils.fs.mover(item.tmpPath, item.targetPath);
+                                  }))
+                              })
+                              .then(function () {
+                                  return App.utils.fs.remove(App.configurator.getValue('tempDir'));
+                              })
+                              .catch(function () {
+                                  return App.utils.fs.remove(App.configurator.getValue('tempDir'));
+                              });
+                      }
+                  });
+          }, 500);
+      },
+
+      importContainer: function () {
+          var mythis = this;
+          var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
+          var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, properties: ['openDirectory']}});
+          if (!filePath) {
+              return;
+          }
+
+          mythis.$.import.close();
+          mythis.showLoadingMessage('Importing resource container. Please wait...');
+
+          setTimeout(function() {
+              return App.dataManager.importContainer(filePath[0])
+                  .then(function() {
+                      mythis.showMessage('Import Complete', 'Your resource container has been successfully imported.');
+                  })
+                  .catch(function(err) {
+                      mythis.showErrorMessage('Import Failed', 'An error occurred while importing your resource container', err);
+                  });
+          }, 500);
+      },
+
+      openExport: function (event, data) {
+          this.set('exportdata', data.projectmeta);
+          this.$.export.open();
+      },
+
+      uploadProject: function () {
+          var mythis = this;
+          var projectmeta = this.exportdata;
+          var loading = this.$.wideloading;
+          var target = App.configurator.getValue('targetTranslationsDir');
+          var paths = App.utils.makeProjectPaths(target, projectmeta);
+          var repo = projectmeta.unique_id;
+          var user = this.currentuser;
+          var shell = require('electron').shell;
+          var deviceId = "";
+
+          mythis.$.export.close();
+          mythis.set('options', {});
+          mythis.set('options.body', "Uploading Project.  Please wait...");
+          mythis.set('options.loading', true);
+          loading.open();
+
+          return App.gitManager.commitAll(user, paths.projectDir)
+              .then(function () {
+                  return App.utils.getDeviceId();
+              })
+              .then(function (devId) {
+                  deviceId = devId;
+                  var getreg = App.keyManager.getRegistrationInfo.bind(App.keyManager, deviceId),
+                      genreg = App.keyManager.generateRegistrationInfo.bind(App.keyManager, deviceId),
+                      rereg = function () {
+                          return App.userManager.unregister(user, deviceId).then(genreg);
+                      };
+
+                  return getreg().catch(rereg);
+              })
+              .then(function (reg) {
+                  user.reg = reg;
+                  return App.userManager.register(user, deviceId);
+              })
+              .then(function () {
+                  return App.userManager.createRepo(user, repo);
+              })
+              .then(function (repo) {
+                  return App.gitManager.push(user, paths.projectDir, repo).then(App.utils.ret(repo.full_name));
+              })
+              .then(function (fullname) {
+                  var url = "https://door43.org/u/" + fullname;
+
+                  mythis.set('options.title', "Upload Complete");
+                  mythis.set('options.body', "Your project has been uploaded to:");
+                  mythis.set('options.link', url);
+                  mythis.set('options.showlink', true);
+                  mythis.set('options.loading', false);
+                  var link = loading.getElementsByClassName("url");
+                  link[0].addEventListener('click', function (event) {
+                      event.preventDefault();
+                      shell.openExternal(url);
+                  });
+              })
+              .catch(function (err) {
+                  err = err || '';
+                  var errmessage = "";
+
+                  if (err.syscall === "getaddrinfo") {
+                      errmessage = "Unable to connect to server";
+                  } else if (err.status === 401) {
+                      errmessage = "Cannot upload without connecting to a Door43 account.";
+                  } else {
+                      errmessage = err.data || err.stderr || "An error occurred while trying to upload your project.";
+                  }
+
+                  if (typeof errmessage === 'string' && errmessage.includes("rejected because the remote contains work")) {
+                      loading.close();
+                      mythis.$.conflict.open();
+                  } else {
+                      mythis.showErrorMessage('Upload Failed', errmessage, err);
+                  }
+              });
+      },
+
+      backupProject: function () {
+          var mythis = this;
+          var meta = this.exportdata;
+          var defaultPath = App.configurator.getUserPath('datalocation', 'backups', meta.unique_id);
+          var filePath = App.ipc.sendSync('save-as', {options: {defaultPath: defaultPath, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}]}});
+          if (!filePath) {
+              return;
+          }
+
+          mythis.$.export.close();
+          mythis.showLoadingMessage('Creating Project File.  Please wait...');
+
+          setTimeout(function() {
+              return App.exportManager.backupTranslation(meta, filePath)
+                  .then(function () {
+                      mythis.showMessage('Project File Complete', 'Your project has been successfully saved.');
+                  })
+                  .catch(function (err) {
+                      mythis.showErrorMessage('File Failed', 'An error occurred while trying to save your project', err);
+                  });
+          }, 500);
+      },
+
       checkPrint: function () {
           var projectmeta = this.exportdata;
 
@@ -574,431 +999,6 @@
                       mythis.set('options.title', "Export Failed");
                       mythis.set('options.body', errmessage);
                       mythis.set('options.loading', false);
-                  });
-          }, 500);
-      },
-
-      deleteProject: function (event, data) {
-          var mythis = this;
-          var projectmeta = data.projectmeta;
-
-          mythis.showLoadingMessage('Deleting project.  Please wait...');
-
-          setTimeout(function() {
-              return App.projectsManager.deleteTargetTranslation(projectmeta)
-                  .then(function() {
-                      App.projectsManager.unsetValues(projectmeta);
-
-                      mythis.showMessage('Project Deleted', 'Your project has been successfully deleted.');
-
-                      setTimeout(function() {
-                          mythis.updateList();
-                      }, 250);
-                  })
-                  .catch(function(err) {
-                      mythis.showErrorMessage('Delete Failed', 'An error occurred while trying to delete your project', err);
-                  });
-          }, 500);
-      },
-
-      changeProject: function (event, data) {
-          var mythis = this;
-          var conflicts = [];
-          var changedata = data;
-
-          mythis.set('route', 'home');
-          mythis.showLoadingMessage('Changing project.  Please wait...');
-
-          var choice = function () {
-              if (changedata.exists) {
-                  return App.gitManager.merge(mythis.currentuser, changedata.newpaths.projectDir, changedata.oldpaths.projectDir)
-                      .then(function (list) {
-                          conflicts = list;
-                      })
-                      .then(function () {
-                          return App.utils.fs.remove(changedata.oldpaths.projectDir);
-                      });
-              } else {
-                  return App.utils.fs.mover(changedata.oldpaths.projectDir, changedata.newpaths.projectDir)
-                      .then(function () {
-                          return App.projectsManager.saveTargetManifest(changedata.newmeta);
-                      })
-                      .then(function () {
-                          return App.projectsManager.commitProject(changedata.newmeta, mythis.currentuser);
-                      });
-              }
-          };
-
-          setTimeout(function () {
-              return choice()
-                  .then(function () {
-                      App.projectsManager.unsetValues(changedata.oldmeta);
-
-                      mythis.showConflictsMessage('Change Complete', 'Your project has been changed.', conflicts);
-
-                      setTimeout(function () {
-                          mythis.updateList();
-                      }, 250);
-                  })
-                  .catch(function(err) {
-                      mythis.showErrorMessage('Change Failed', 'An error occurred while trying to change the project', err);
-                  });
-          }, 500);
-      },
-
-      openImport: function () {
-          this.$.import.open();
-      },
-
-      startProjectImport: function() {
-          var mythis = this;
-          var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
-          var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}], properties: ['openFile']}});
-          if (!filePath) {
-              return;
-          }
-
-          mythis.$.import.close();
-          mythis.showLoadingMessage('Importing. Please wait...');
-
-          setTimeout(function() {
-              return App.importManager.extractBackup(filePath[0])
-                  .then(function (list) {
-                      return Promise.all(list.map(function (item) {
-                          mythis.set('importdata', {targetpath: item.targetPath, tmppath: item.tmpPath});
-                          if (item.targetExists) {
-                              mythis.$.loading.close();
-                              mythis.$.importconfirm.open();
-                          } else {
-                              mythis.set('importdata.overwrite', true);
-                              return mythis.finishImport();
-                          }
-                      }))
-                  })
-                  .catch(function(err) {
-                      mythis.showErrorMessage('Import Failed', 'An error occurred while importing your project', err);
-
-                      return mythis.clearTempDir();
-                  });
-          }, 500);
-      },
-
-      importFromUsfm: function () {
-          var mythis = this;
-          var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
-          var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, filters: [{name: 'USFM Files', extensions: ['txt', 'usfm']}], properties: ['openFile']}});
-          if (!filePath) {
-              return;
-          }
-
-          mythis.$.import.close();
-
-          return App.importManager.retrieveUSFMProjectID(filePath[0])
-              .then(function (id) {
-                  var name = "";
-                  if (id) {
-                      var data = App.dataManager.getProjectName(id);
-                      if (data) {
-                          name = data;
-                      } else {
-                          id = "";
-                      }
-                  }
-                  mythis.set('importdata', {importing: true, filepath: filePath[0], project: {slug: id, name: name}});
-                  mythis.set('route', 'new');
-              }).catch(function (err) {
-                  var filename = (filePath && filePath[0]) || '';
-                  mythis.showErrorMessage('Import Failed', 'Error occurred reading file: ' + filename, err);
-              });
-      },
-
-      finishUsfm: function () {
-          var mythis = this;
-          var user = this.currentuser;
-          var filepath = this.importdata.filepath;
-          var projectmeta = this.importdata.projectmeta;
-          var overwrite = this.importdata.overwrite;
-          var timeString = App.utils.getTimeStamp();
-          var backupName = projectmeta.unique_id + '.' + timeString + '.tstudio';
-          var backupPath = App.configurator.getUserPath('datalocation', 'backups', backupName);
-
-          var backupTargetTranslation = function(){
-              return App.exportManager.backupTranslation(projectmeta, backupPath);
-          };
-          var checkOverwrite = overwrite ? backupTargetTranslation() : Promise.resolve(true);
-
-          mythis.showLoadingMessage('Importing.  Please wait...');
-
-          setTimeout(function() {
-              return checkOverwrite
-                  .then(function () {
-                      return App.importManager.importFromUSFM(filepath, projectmeta);
-                  })
-                  .then(function (chunks) {
-                      return App.projectsManager.createTargetTranslation(chunks, projectmeta, user);
-                  })
-                  .then(function () {
-                      mythis.showMessage('Import Complete', 'Your file has been imported. Please review it carefully. If it was not formatted properly, text may not appear as desired.');
-
-                      setTimeout(function() {
-                          mythis.updateList();
-                      }, 250);
-                  }).catch(function (err) {
-                      mythis.showErrorMessage('Import Failed', 'Error occurred importing project', err);
-
-                      if (overwrite) {
-                          return App.importManager.extractBackup(backupPath)
-                              .then(function (list) {
-                                  return Promise.all(list.map(function (item) {
-                                      return App.utils.fs.mover(item.tmpPath, item.targetPath);
-                                  }))
-                              })
-                              .then(function () {
-                                  return App.utils.fs.remove(App.configurator.getValue('tempDir'));
-                              })
-                              .catch(function () {
-                                  return App.utils.fs.remove(App.configurator.getValue('tempDir'));
-                              });
-                      }
-                  });
-          }, 500);
-      },
-
-      openRepoImport: function () {
-          var mythis = this;
-
-          this.$.import.close();
-          this.set('importdata', {username: this.currentuser.username, project: ""});
-          this.$.repo.open();
-
-          setTimeout(function() {
-              mythis.$.reposearch.searchRepos();
-          }, 500);
-      },
-
-      cancelRepo: function () {
-          this.$.repo.close();
-          this.$.import.open();
-      },
-
-      startRepoImport: function () {
-          var mythis = this;
-          var path = require('path');
-          var repo = this.importdata.repo.repo;
-          var project = this.importdata.repo.project;
-          var server = "git.door43.org";
-          var repourl = "https://" + server + "/" + repo;
-          var targetDir = App.configurator.getValue('targetTranslationsDir');
-          var tmpDir = App.configurator.getValue('tempDir');
-          var targetPath = path.join(targetDir, project);
-          var tmpPath = path.join(tmpDir, project);
-
-          mythis.$.repo.close();
-          if (mythis.route !== "home") {
-              mythis.set('route', 'home');
-              mythis.$.translate.reset();
-          }
-          mythis.showLoadingMessage("Importing. Please wait...");
-
-          setTimeout(function() {
-              return App.utils.fs.mkdirs(tmpPath)
-                  .then(function () {
-                      return App.gitManager.clone(repourl, tmpDir)
-                  })
-                  .then(function () {
-                      var paths = App.utils.makeProjectPaths(tmpDir, project);
-                      return App.migrateManager.migrate(paths);
-                  })
-                  .then(function (data) {
-                      project = data.paths.projectDir.split(path.sep).pop();
-                      targetPath = path.join(targetDir, project);
-                      tmpPath = path.join(tmpDir, project);
-                      mythis.set('importdata.targetpath', targetPath);
-                      mythis.set('importdata.tmppath', tmpPath);
-                      return App.utils.fs.stat(targetPath).then(App.utils.ret(true)).catch(App.utils.ret(false));
-                  })
-                  .then(function (exists) {
-                      if (exists) {
-                          mythis.$.loading.close();
-                          mythis.$.importconfirm.open();
-                      } else {
-                          mythis.set('importdata.overwrite', true);
-                          return mythis.finishImport();
-                      }
-                  })
-                  .catch(function(err) {
-                      mythis.showErrorMessage("Import Failed", "An error occurred while importing your project", err && err.error ? err.error : err);
-
-                      return mythis.clearTempDir();
-                  });
-          }, 500);
-      },
-
-      finishImport: function () {
-          var mythis = this;
-          var conflicts = [];
-          var overwrite = this.importdata.overwrite;
-          var targetPath = this.importdata.targetpath;
-          var tmpPath = this.importdata.tmppath;
-
-          mythis.showLoadingMessage("Importing. Please wait...");
-
-          setTimeout(function() {
-              return Promise.resolve(true)
-                  .then(function () {
-                      if (overwrite) {
-                          return App.utils.fs.mover(tmpPath, targetPath);
-                      } else {
-                          return App.gitManager.merge(mythis.currentuser, targetPath, tmpPath)
-                              .then(function (list) {
-                                  conflicts = list;
-                              });
-                      }
-                  })
-                  .then(function () {
-                      return mythis.clearTempDir();
-                  })
-                  .then(function() {
-                      mythis.showConflictsMessage("Import Complete", "Your project has been successfully imported.", conflicts);
-
-                      setTimeout(function() {
-                          mythis.updateList();
-                      }, 250);
-                  })
-                  .catch(function(err) {
-                      mythis.showErrorMessage("Import Failed", "An error occurred while importing your project", err && err.error ? err.error : err);
-
-                      return mythis.clearTempDir();
-                  });
-          }, 500);
-      },
-
-      clearTempDir: function () {
-          return App.utils.fs.remove(App.configurator.getValue('tempDir'));
-      },
-
-      openExport: function (event, data) {
-          this.set('exportdata', data.projectmeta);
-          this.$.export.open();
-      },
-
-      uploadProject: function () {
-          var mythis = this;
-          var projectmeta = this.exportdata;
-          var loading = this.$.wideloading;
-          var target = App.configurator.getValue('targetTranslationsDir');
-          var paths = App.utils.makeProjectPaths(target, projectmeta);
-          var repo = projectmeta.unique_id;
-          var user = this.currentuser;
-          var shell = require('electron').shell;
-          var deviceId = "";
-
-          mythis.$.export.close();
-          mythis.set('options', {});
-          mythis.set('options.body', "Uploading Project.  Please wait...");
-          mythis.set('options.loading', true);
-          loading.open();
-
-          return App.gitManager.commitAll(user, paths.projectDir)
-              .then(function () {
-                  return App.utils.getDeviceId();
-              })
-              .then(function (devId) {
-                  deviceId = devId;
-                  var getreg = App.keyManager.getRegistrationInfo.bind(App.keyManager, deviceId),
-                      genreg = App.keyManager.generateRegistrationInfo.bind(App.keyManager, deviceId),
-                      rereg = function () {
-                          return App.userManager.unregister(user, deviceId).then(genreg);
-                      };
-
-                  return getreg().catch(rereg);
-              })
-              .then(function (reg) {
-                  user.reg = reg;
-                  return App.userManager.register(user, deviceId);
-              })
-              .then(function () {
-                  return App.userManager.createRepo(user, repo);
-              })
-              .then(function (repo) {
-                  return App.gitManager.push(user, paths.projectDir, repo).then(App.utils.ret(repo.full_name));
-              })
-              .then(function (fullname) {
-                  var url = "https://door43.org/u/" + fullname;
-
-                  mythis.set('options.title', "Upload Complete");
-                  mythis.set('options.body', "Your project has been uploaded to:");
-                  mythis.set('options.link', url);
-                  mythis.set('options.showlink', true);
-                  mythis.set('options.loading', false);
-                  var link = loading.getElementsByClassName("url");
-                  link[0].addEventListener('click', function (event) {
-                      event.preventDefault();
-                      shell.openExternal(url);
-                  });
-              })
-              .catch(function (err) {
-                  err = err || '';
-                  var errmessage = "";
-
-                  if (err.syscall === "getaddrinfo") {
-                      errmessage = "Unable to connect to server";
-                  } else if (err.status === 401) {
-                      errmessage = "Cannot upload without connecting to a Door43 account.";
-                  } else {
-                      errmessage = err.data || err.stderr || "An error occurred while trying to upload your project.";
-                  }
-
-                  if (typeof errmessage === 'string' && errmessage.includes("rejected because the remote contains work")) {
-                      loading.close();
-                      mythis.$.conflict.open();
-                  } else {
-                      mythis.showErrorMessage('Upload Failed', errmessage, err);
-                  }
-              });
-      },
-
-      backupProject: function () {
-          var mythis = this;
-          var meta = this.exportdata;
-          var defaultPath = App.configurator.getUserPath('datalocation', 'backups', meta.unique_id);
-          var filePath = App.ipc.sendSync('save-as', {options: {defaultPath: defaultPath, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}]}});
-          if (!filePath) {
-              return;
-          }
-
-          mythis.$.export.close();
-          mythis.showLoadingMessage('Creating Project File.  Please wait...');
-
-          setTimeout(function() {
-              return App.exportManager.backupTranslation(meta, filePath)
-                  .then(function () {
-                      mythis.showMessage('Project File Complete', 'Your project has been successfully saved.');
-                  })
-                  .catch(function (err) {
-                      mythis.showErrorMessage('File Failed', 'An error occurred while trying to save your project', err);
-                  });
-          }, 500);
-      },
-
-      importContainer: function () {
-          var mythis = this;
-          var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
-          var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, properties: ['openDirectory']}});
-          if (!filePath) {
-              return;
-          }
-
-          mythis.$.import.close();
-          mythis.showLoadingMessage('Importing resource container. Please wait...');
-
-          setTimeout(function() {
-              return App.dataManager.importContainer(filePath[0])
-                  .then(function() {
-                      mythis.showMessage('Import Complete', 'Your resource container has been successfully imported.');
-                  })
-                  .catch(function(err) {
-                      mythis.showErrorMessage('Import Failed', 'An error occurred while importing your resource container', err);
                   });
           }, 500);
       },

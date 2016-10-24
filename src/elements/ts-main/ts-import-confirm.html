@@ -80,13 +80,23 @@
         },
 
         merge: function () {
+            var mythis = this;
+
             this.set('importdata.overwrite', false);
-            this.fire('finishimport');
+
+            setTimeout(function() {
+                mythis.fire('finishimport');
+            }, 500);
         },
 
         overwrite: function () {
+            var mythis = this;
+
             this.set('importdata.overwrite', true);
-            this.fire('finishimport');
+
+            setTimeout(function() {
+                mythis.fire('finishimport');
+            }, 500);
         },
 
         ready: function () {

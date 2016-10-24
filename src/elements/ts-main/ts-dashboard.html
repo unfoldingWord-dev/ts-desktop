@@ -215,7 +215,7 @@
       </paper-dialog>
 
       <paper-dialog id="importconfirm" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-          <ts-import-confirm importdata="[[importdata]]"></ts-import-confirm>
+          <ts-import-confirm importdata="{{importdata}}" on-cancel="clearTempDir" on-finishimport="finishRepoImport"></ts-import-confirm>
       </paper-dialog>
 
       <iron-signals on-iron-signal-updatelist="updateList"></iron-signals>
@@ -794,11 +794,9 @@
 
       startRepoImport: function () {
           var mythis = this;
-          var conflicts = [];
           var path = require('path');
           var repo = this.importdata.repo.repo;
           var project = this.importdata.repo.project;
-
           var server = "git.door43.org";
           var repourl = "https://" + server + "/" + repo;
           var targetDir = App.configurator.getValue('targetTranslationsDir');
@@ -806,16 +804,11 @@
           var targetPath = path.join(targetDir, project);
           var tmpPath = path.join(tmpDir, project);
 
-          var errmessage = "An error occurred while importing your project";
-
-          var errtitle = "Import Failed";
-
           mythis.$.repo.close();
           if (mythis.route !== "home") {
               mythis.set('route', 'home');
               mythis.$.translate.reset();
           }
-
           mythis.showLoadingMessage("Importing. Please wait...");
 
           setTimeout(function() {
@@ -831,6 +824,8 @@
                       project = data.paths.projectDir.split(path.sep).pop();
                       targetPath = path.join(targetDir, project);
                       tmpPath = path.join(tmpDir, project);
+                      mythis.set('importdata.targetpath', targetPath);
+                      mythis.set('importdata.tmppath', tmpPath);
                       return App.utils.fs.stat(targetPath).then(App.utils.ret(true)).catch(App.utils.ret(false));
                   })
                   .then(function (exists) {
@@ -843,43 +838,27 @@
                       }
                   })
                   .catch(function(err) {
-                      mythis.showErrorMessage(errtitle, errmessage, err && err.error ? err.error : err);
+                      var errmessage = "An error occurred while importing your project";
+                      mythis.showErrorMessage("Import Failed", errmessage, err && err.error ? err.error : err);
 
-                      return App.utils.fs.remove(App.configurator.getValue('tempDir'));
+                      return mythis.clearTempDir();
                   });
           }, 500);
       },
 
-      finishRepoImport: function (event, data) {
+      finishRepoImport: function () {
           var mythis = this;
           var conflicts = [];
-          var path = require('path');
-          var repo = data.repo.repo;
-          var project = data.repo.project;
-          var restore = data.restore;
-          var server = "git.door43.org";
-          var repourl = "https://" + server + "/" + repo;
-          var targetDir = App.configurator.getValue('targetTranslationsDir');
-          var tmpDir = App.configurator.getValue('tempDir');
-          var targetPath = path.join(targetDir, project);
-          var tmpPath = path.join(tmpDir, project);
-
-          var errmessage = restore ? "An error occurred while restoring your project" : "An error occurred while importing your project";
-          var message = restore ? "Your project has been successfully restored. " : "Your project has been successfully imported. ";
-          var loadmessage = restore ? "Restoring.  Please wait..." : "Importing.  Please wait...";
-          var title = restore ? "Restore Complete" : "Import Complete";
-          var errtitle = restore ? "Restore Failed" : "Import Failed";
-
-
-
+          var overwrite = this.importdata.overwrite;
+          var targetPath = this.importdata.targetpath;
+          var tmpPath = this.importdata.tmppath;
 
           mythis.showLoadingMessage("Importing. Please wait...");
 
           setTimeout(function() {
-              return App.utils.fs.mkdirs(tmpPath)
-
-                  .then(function (exists) {
-                      if (restore) {
+              return Promise.resolve(true)
+                  .then(function () {
+                      if (overwrite) {
                           return App.utils.fs.mover(tmpPath, targetPath);
                       } else {
                           return App.gitManager.merge(mythis.currentuser, targetPath, tmpPath)
@@ -887,22 +866,22 @@
                                   conflicts = list;
                               });
                       }
-
                   })
                   .then(function () {
-                      return App.utils.fs.remove(App.configurator.getValue('tempDir'));
+                      return mythis.clearTempDir();
                   })
                   .then(function() {
-                      mythis.showConflictsMessage(title, message, conflicts);
+                      mythis.showConflictsMessage("Import Complete", "Your project has been successfully imported. ", conflicts);
 
                       setTimeout(function() {
                           mythis.updateList();
                       }, 250);
                   })
                   .catch(function(err) {
-                      mythis.showErrorMessage(errtitle, errmessage, err && err.error ? err.error : err);
+                      var errmessage = "An error occurred while importing your project";
+                      mythis.showErrorMessage("Import Failed", errmessage, err && err.error ? err.error : err);
 
-                      return App.utils.fs.remove(App.configurator.getValue('tempDir'));
+                      return mythis.clearTempDir();
                   });
           }, 500);
       },

@@ -626,6 +626,7 @@
             var nav = data.nav;
             var projectmeta = data.projectmeta;
             var list = this.projectlist;
+            var review = this.$.reviewmode;
 
             var loadsource = function () {
                 if (projectmeta.project_type_class === "extant") {
@@ -710,6 +711,7 @@
             mythis.set('currentproject.statedata', {});
             mythis.set('currentproject.rawdata', {});
             mythis.set('currentproject.conflicts', 0);
+            review.closesearch();
             mythis.retrievesource();
             if (nav === "translate") {
                 mythis.route = "translate";

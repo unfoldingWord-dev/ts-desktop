@@ -171,7 +171,7 @@
       </paper-dialog>
 
       <paper-dialog id="import" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-          <ts-import-options on-backup="importFromBackup" on-usfm="importFromUsfm" on-repo="openRepoImport" on-container="importContainer"></ts-import-options>
+          <ts-import-options on-backup="startProjectImport" on-usfm="importFromUsfm" on-repo="openRepoImport" on-container="importContainer"></ts-import-options>
       </paper-dialog>
 
       <paper-dialog id="repo" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -215,7 +215,7 @@
       </paper-dialog>
 
       <paper-dialog id="importconfirm" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-          <ts-import-confirm importdata="{{importdata}}" on-cancel="clearTempDir" on-finishimport="finishRepoImport"></ts-import-confirm>
+          <ts-import-confirm importdata="{{importdata}}" on-cancel="clearTempDir" on-finishimport="finishImport"></ts-import-confirm>
       </paper-dialog>
 
       <iron-signals on-iron-signal-updatelist="updateList"></iron-signals>
@@ -650,9 +650,8 @@
           this.$.import.open();
       },
 
-      importFromBackup: function() {
+      startProjectImport: function() {
           var mythis = this;
-          var conflicts = [];
           var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
           var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}], properties: ['openFile']}});
           if (!filePath) {
@@ -660,36 +659,26 @@
           }
 
           mythis.$.import.close();
-          mythis.showLoadingMessage('Importing.  Please wait...');
+          mythis.showLoadingMessage('Importing. Please wait...');
 
           setTimeout(function() {
               return App.importManager.extractBackup(filePath[0])
                   .then(function (list) {
                       return Promise.all(list.map(function (item) {
+                          mythis.set('importdata', {targetpath: item.targetPath, tmppath: item.tmpPath});
                           if (item.targetExists) {
-                              return App.gitManager.merge(mythis.currentuser, item.targetPath, item.tmpPath)
-                                  .then(function (list) {
-                                      conflicts = list;
-                                  });
+                              mythis.$.loading.close();
+                              mythis.$.importconfirm.open();
                           } else {
-                              return App.utils.fs.mover(item.tmpPath, item.targetPath);
+                              mythis.set('importdata.overwrite', true);
+                              return mythis.finishImport();
                           }
                       }))
-                  })
-                  .then(function () {
-                      return App.utils.fs.remove(App.configurator.getValue('tempDir'));
-                  })
-                  .then(function() {
-                      mythis.showConflictsMessage('Import Complete', 'Your project has been successfully imported.', conflicts);
-
-                      setTimeout(function() {
-                          mythis.updateList();
-                      }, 250);
                   })
                   .catch(function(err) {
                       mythis.showErrorMessage('Import Failed', 'An error occurred while importing your project', err);
 
-                      return App.utils.fs.remove(App.configurator.getValue('tempDir'));
+                      return mythis.clearTempDir();
                   });
           }, 500);
       },
@@ -834,19 +823,18 @@
                           mythis.$.importconfirm.open();
                       } else {
                           mythis.set('importdata.overwrite', true);
-                          return mythis.finishRepoImport();
+                          return mythis.finishImport();
                       }
                   })
                   .catch(function(err) {
-                      var errmessage = "An error occurred while importing your project";
-                      mythis.showErrorMessage("Import Failed", errmessage, err && err.error ? err.error : err);
+                      mythis.showErrorMessage("Import Failed", "An error occurred while importing your project", err && err.error ? err.error : err);
 
                       return mythis.clearTempDir();
                   });
           }, 500);
       },
 
-      finishRepoImport: function () {
+      finishImport: function () {
           var mythis = this;
           var conflicts = [];
           var overwrite = this.importdata.overwrite;
@@ -871,15 +859,14 @@
                       return mythis.clearTempDir();
                   })
                   .then(function() {
-                      mythis.showConflictsMessage("Import Complete", "Your project has been successfully imported. ", conflicts);
+                      mythis.showConflictsMessage("Import Complete", "Your project has been successfully imported.", conflicts);
 
                       setTimeout(function() {
                           mythis.updateList();
                       }, 250);
                   })
                   .catch(function(err) {
-                      var errmessage = "An error occurred while importing your project";
-                      mythis.showErrorMessage("Import Failed", errmessage, err && err.error ? err.error : err);
+                      mythis.showErrorMessage("Import Failed", "An error occurred while importing your project", err && err.error ? err.error : err);
 
                       return mythis.clearTempDir();
                   });
@@ -990,42 +977,6 @@
                   })
                   .catch(function (err) {
                       mythis.showErrorMessage('File Failed', 'An error occurred while trying to save your project', err);
-                  });
-          }, 500);
-      },
-
-      restoreFromBackup: function() {
-          var mythis = this;
-          var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
-          var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}], properties: ['openFile']}});
-          if (!filePath) {
-              return;
-          }
-
-          mythis.$.import.close();
-          mythis.showLoadingMessage('Restoring.  Please wait...');
-
-          setTimeout(function() {
-              return App.importManager.extractBackup(filePath[0])
-                  .then(function (list) {
-                      return Promise.all(list.map(function (item) {
-                          return App.utils.fs.mover(item.tmpPath, item.targetPath);
-                      }))
-                  })
-                  .then(function () {
-                      return App.utils.fs.remove(App.configurator.getValue('tempDir'));
-                  })
-                  .then(function() {
-                      mythis.showMessage('Restore Complete', 'Your project has been successfully restored.');
-
-                      setTimeout(function() {
-                          mythis.updateList();
-                      }, 250);
-                  })
-                  .catch(function(err) {
-                      mythis.showErrorMessage('Restore Failed', 'An error occurred while trying to restore your project', err);
-
-                      return App.utils.fs.remove(App.configurator.getValue('tempDir'));
                   });
           }, 500);
       },

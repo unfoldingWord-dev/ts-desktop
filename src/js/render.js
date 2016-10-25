@@ -160,8 +160,12 @@ function Renderer() {
                 return chunk.chunkmeta.chapter;
             }), function (data, chap) {
                 var content = "";
+                var title = "";
 
                 _.forEach(data, function (chunk) {
+                    if (chunk.chunkmeta.frameid === "title") {
+                        title = chunk.transcontent || chunk.srccontent;
+                    }
                     if (chunk.chunkmeta.frame > 0 && chunk.transcontent) {
                         if (options.includeIncompleteFrames || chunk.completed) {
                             content += chunk.transcontent + " ";
@@ -170,13 +174,13 @@ function Renderer() {
                 });
 
                 if (chap > 0) {
-                    chapters.push({chapter: chap, content: content.trim()});
+                    chapters.push({title: title, content: content.trim()});
                 }
             });
 
             chapters.forEach(function (chapter) {
                 if (chapter.content) {
-                    text += startheader + chapter.chapter + endheader;
+                    text += startheader + chapter.title + endheader;
                     text += startdiv + mythis.renderTargetWithVerses(chapter.content, module) + enddiv;
                 }
             });

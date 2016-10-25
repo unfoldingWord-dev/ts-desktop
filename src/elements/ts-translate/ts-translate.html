@@ -882,7 +882,7 @@
                 });
                 var statedata = mythis.currentproject.statedata[chaptermeta.chapterid];
                 if (!statedata) {
-                    statedata = {read: true};
+                    statedata = {read: App.configurator.getUserSetting('bemode')};
                     mythis.currentproject.statedata[chaptermeta.chapterid] = statedata;
                 }
                 if (chaptermeta.chapter > 0) {

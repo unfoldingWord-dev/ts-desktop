@@ -24,6 +24,7 @@
 <link rel="import" href="./ts-attribution.html">
 <link rel="import" href="./ts-conflict.html">
 <link rel="import" href="./ts-import-confirm.html">
+<link rel="import" href="./ts-container-confirm.html">
 <link rel="import" href="../ts-print/ts-print.html">
 
 <dom-module id="ts-dashboard">
@@ -130,6 +131,11 @@
           height: 250px;
       }
 
+      #containerconfirm {
+          width: 450px;
+          height: 175px;
+      }
+
       .hide {
           display: none;
       }
@@ -216,6 +222,10 @@
 
       <paper-dialog id="importconfirm" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
           <ts-import-confirm importdata="{{importdata}}" on-cancel="clearTempDir" on-finishimport="finishImport"></ts-import-confirm>
+      </paper-dialog>
+
+      <paper-dialog id="containerconfirm" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <ts-container-confirm on-finish="finishContainerImport"></ts-container-confirm>
       </paper-dialog>
 
       <iron-signals on-iron-signal-updatelist="updateList"></iron-signals>
@@ -771,7 +781,7 @@
                   .then(function(exists) {
                       if (exists) {
                           mythis.closeLoading();
-                          mythis.$.importconfirm.open();
+                          mythis.$.containerconfirm.open();
                       } else {
                           return mythis.finishContainerImport();
                       }

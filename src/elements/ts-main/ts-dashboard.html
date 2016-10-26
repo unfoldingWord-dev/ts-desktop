@@ -762,14 +762,19 @@
               return;
           }
 
+          mythis.set('importdata', {filepath: filePath[0]});
           mythis.$.import.close();
           mythis.showLoadingMessage('Importing resource container. Please wait...');
 
           setTimeout(function() {
               return App.dataManager.checkForContainer(filePath[0])
                   .then(function(exists) {
-                      console.log("container exists", exists);
-                      mythis.showMessage('Import Complete', 'Your resource container has been successfully imported.');
+                      if (exists) {
+                          mythis.closeLoading();
+                          mythis.$.importconfirm.open();
+                      } else {
+                          return mythis.finishContainerImport();
+                      }
                   })
                   .catch(function(err) {
                       mythis.showErrorMessage('Import Failed', 'An error occurred while importing your resource container', err);
@@ -779,17 +784,12 @@
 
       finishContainerImport: function () {
           var mythis = this;
-          var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
-          var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, properties: ['openDirectory']}});
-          if (!filePath) {
-              return;
-          }
+          var filePath = this.importdata.filepath;
 
-          mythis.$.import.close();
           mythis.showLoadingMessage('Importing resource container. Please wait...');
 
           setTimeout(function() {
-              return App.dataManager.importContainer(filePath[0])
+              return App.dataManager.importContainer(filePath)
                   .then(function() {
                       mythis.showMessage('Import Complete', 'Your resource container has been successfully imported.');
                   })

@@ -28,6 +28,30 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             return db.importResourceContainer(filePath);
         },
 
+        checkForContainer: function (filePath) {
+            var resourcePath;
+            var sourcePath;
+
+            return db.loadResourceContainer(filePath)
+                .then(function (container) {
+                    var containername = container.slug;
+                    resourcePath = path.join(resourceDir, containername);
+                    sourcePath = path.join(sourceDir, containername + ".tsrc");
+                })
+                .then(function () {
+                    return utils.fs.stat(resourcePath).then(utils.ret(true)).catch(utils.ret(false));
+                })
+                .then(function (resexists) {
+                    if (!resexists) {
+                        return utils.fs.stat(sourcePath).then(utils.ret(true)).catch(utils.ret(false))
+                            .then(function (srcexists) {
+                                return srcexists;
+                            });
+                    }
+                    return true;
+                });
+        },
+
         getMetrics: function () {
             return db.indexSync.getMetrics();
         },

@@ -171,7 +171,7 @@
       </paper-dialog>
 
       <paper-dialog id="import" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-          <ts-import-options on-project="startProjectImport" on-usfm="startUsfmImport" on-repo="openRepoImport" on-container="importContainer"></ts-import-options>
+          <ts-import-options on-project="startProjectImport" on-usfm="startUsfmImport" on-repo="openRepoImport" on-container="startContainerImport"></ts-import-options>
       </paper-dialog>
 
       <paper-dialog id="repo" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -754,7 +754,30 @@
           }, 500);
       },
 
-      importContainer: function () {
+      startContainerImport: function () {
+          var mythis = this;
+          var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
+          var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, properties: ['openDirectory']}});
+          if (!filePath) {
+              return;
+          }
+
+          mythis.$.import.close();
+          mythis.showLoadingMessage('Importing resource container. Please wait...');
+
+          setTimeout(function() {
+              return App.dataManager.checkForContainer(filePath[0])
+                  .then(function(exists) {
+                      console.log("container exists", exists);
+                      mythis.showMessage('Import Complete', 'Your resource container has been successfully imported.');
+                  })
+                  .catch(function(err) {
+                      mythis.showErrorMessage('Import Failed', 'An error occurred while importing your resource container', err);
+                  });
+          }, 500);
+      },
+
+      finishContainerImport: function () {
           var mythis = this;
           var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
           var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, properties: ['openDirectory']}});

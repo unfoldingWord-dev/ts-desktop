@@ -25,7 +25,6 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
         },
 
         importContainer: function (filePath) {
-
             return db.importResourceContainer(filePath);
         },
 
@@ -49,7 +48,7 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             var mythis = this;
             var allres = db.indexSync.getResources(null, project);
             var filterres = allres.filter(function (item) {
-                return item.type === 'book' && item.status.checking_level === "3";
+                return item.type === 'book' && (item.status.checking_level === "3" || item.imported);
             });
 
             var mapped = filterres.map(function (res) {

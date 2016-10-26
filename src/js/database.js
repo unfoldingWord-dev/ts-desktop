@@ -26,14 +26,7 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
 
         importContainer: function (filePath) {
 
-
-            return new Promise(function (resolve, reject) {
-                if (filePath) {
-                    resolve(filePath);
-                } else {
-                    reject("Invalid file");
-                }
-            });
+            return db.importResourceContainer(filePath);
         },
 
         getMetrics: function () {

@@ -937,10 +937,6 @@
             var framewords = [];
             var udbtext = null;
 
-            if (frame.chapter === "front") {
-                return resources;
-            }
-
             var framenotes = notes.filter(function (note) {
                 return note.chapter === frame.chapter && note.chunk === frame.chunk;
             });
@@ -991,7 +987,7 @@
             var frameudb = udb.filter(function (chunk) {
                 return chunk.chapter === frame.chapter && chunk.chunk === frame.chunk;
             });
-            if (frameudb.length) {
+            if (frameudb.length && frame.chunk !== "title") {
                 udbtext = frameudb[0].content;
             }
             if (udbtext) {

@@ -75,11 +75,11 @@
 
     <template>
         <div id="top">
-            <paper-icon-button class$="[[readclass(currentproject.projectmeta.project_type_class, selected)]]" icon="assignment" on-tap="readmode"></paper-icon-button>
-            <paper-icon-button class$="[[chunkclass(currentproject.projectmeta.project_type_class, selected)]]" icon="flip-to-front" on-tap="chunkmode"></paper-icon-button>
-            <paper-icon-button class$="[[reviewclass(currentproject.projectmeta.project_type_class, selected)]]" icon="assignment-turned-in" on-tap="reviewmode"></paper-icon-button>
-            <paper-icon-button class$="[[simpleclass(currentproject.projectmeta.project_type_class, selected)]]" icon="assignment" on-tap="readmode"></paper-icon-button>
-            <paper-icon-button class$="[[conflictclass(currentproject.projectmeta.project_type_class, currentproject.conflicts, selected)]]" icon="assignment-late" on-tap="conflictmode"></paper-icon-button>
+            <paper-icon-button class$="[[readclass(currentproject.projectmeta.project_type_class, selected)]]" icon="subject" on-tap="readmode"></paper-icon-button>
+            <paper-icon-button class$="[[chunkclass(currentproject.projectmeta.project_type_class, selected)]]" icon="content-copy" on-tap="chunkmode"></paper-icon-button>
+            <paper-icon-button class$="[[reviewclass(currentproject.projectmeta.project_type_class, selected)]]" icon="view-week" on-tap="reviewmode"></paper-icon-button>
+            <paper-icon-button class$="[[simpleclass(currentproject.projectmeta.project_type_class, selected)]]" icon="subject" on-tap="readmode"></paper-icon-button>
+            <paper-icon-button class$="[[conflictclass(currentproject.projectmeta.project_type_class, currentproject.conflicts, selected)]]" icon="warning" on-tap="conflictmode"></paper-icon-button>
         </div>
         <paper-menu-button id="menu" horizontal-offset="10" vertical-offset="10" vertical-align="bottom">
             <paper-icon-button class="current dropdown-trigger" icon="more-vert"></paper-icon-button>

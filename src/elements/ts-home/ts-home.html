@@ -599,6 +599,7 @@
 
         openproject: function (e) {
             var projectmeta = e.model.project;
+            this.fire('iron-signal', {name: 'translateright'});
             this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: "translate"}});
         },
 

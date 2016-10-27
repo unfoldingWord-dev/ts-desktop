@@ -706,7 +706,6 @@
                 }
             };
 
-            this.setrightanimation();
             mythis.set('currentproject.projectmeta', projectmeta);
             mythis.set('currentproject.statedata', {});
             mythis.set('currentproject.rawdata', {});
@@ -1187,7 +1186,12 @@
             var index = App.configurator.getValue(key + "-index");
             var chapter = App.configurator.getValue(key + "-chapter");
             var selected = App.configurator.getValue(key + "-selected");
+            var bemode = App.configurator.getUserSetting('bemode');
             var typeclass = projectmeta.project_type_class;
+
+            if (selected === 2 && !bemode) {
+                selected = 3;
+            }
 
             if (chapter > 0) {
                 mythis.set('modestatus.chapter', chapter);

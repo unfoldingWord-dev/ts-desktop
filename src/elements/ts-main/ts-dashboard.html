@@ -774,7 +774,7 @@
 
           mythis.set('importdata', {filepath: filePath[0]});
           mythis.$.import.close();
-          mythis.showLoadingMessage('Importing resource container. Please wait...');
+          mythis.showLoadingMessage('Importing source text. Please wait...');
 
           setTimeout(function() {
               return App.dataManager.checkForContainer(filePath[0])
@@ -787,7 +787,7 @@
                       }
                   })
                   .catch(function(err) {
-                      mythis.showErrorMessage('Import Failed', 'An error occurred while importing your resource container', err);
+                      mythis.showErrorMessage('Import Failed', 'An error occurred while importing your source text.', err);
                   });
           }, 500);
       },
@@ -796,15 +796,15 @@
           var mythis = this;
           var filePath = this.importdata.filepath;
 
-          mythis.showLoadingMessage('Importing resource container. Please wait...');
+          mythis.showLoadingMessage('Importing source text. Please wait...');
 
           setTimeout(function() {
               return App.dataManager.importContainer(filePath)
                   .then(function() {
-                      mythis.showMessage('Import Complete', 'Your resource container has been successfully imported.');
+                      mythis.showMessage('Import Complete', 'Your source text has been successfully imported.');
                   })
                   .catch(function(err) {
-                      mythis.showErrorMessage('Import Failed', 'An error occurred while importing your resource container', err);
+                      mythis.showErrorMessage('Import Failed', 'An error occurred while importing your source text.', err);
                   });
           }, 500);
       },

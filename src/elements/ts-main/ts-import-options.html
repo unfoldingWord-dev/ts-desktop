@@ -82,7 +82,7 @@
             </div>
             <div class="option" on-tap="container">
                 <span class="optiontitle">Import Source Text</span>
-                <p>Folder containing source data in proper format</p>
+                <p>Must be a folder containing source data in the format specified here: <a href="http://resource-container.readthedocs.io/">http://resource-container.readthedocs.io/</a></p>
             </div>
         </div>
         <div id="footer">
@@ -100,7 +100,10 @@
         is: 'ts-import-options',
 
         properties: {
-
+            link: {
+                type: Boolean,
+                value: false
+            }
         },
 
         project: function () {
@@ -116,11 +119,25 @@
         },
 
         container: function () {
-            this.fire('container');
+            if (!this.link) {
+                this.fire('container');
+            }
         },
 
         ready: function () {
-
+            var mythis = this;
+            var shell = require('electron').shell;
+            var links = this.$.body.getElementsByTagName('a');
+            for (var i = 0; i < links.length; i++) {
+                links[i].addEventListener('click', function (event) {
+                    mythis.set('link', true);
+                    event.preventDefault();
+                    shell.openExternal(this.href);
+                    setTimeout(function() {
+                        mythis.set('link', false);
+                    }, 500);
+                });
+            }
         }
 
     });

@@ -804,7 +804,12 @@
                       mythis.showMessage('Import Complete', 'Your source text has been successfully imported.');
                   })
                   .catch(function(err) {
-                      mythis.showErrorMessage('Import Failed', 'An error occurred while importing your source text.', err);
+                      var errmessage = 'An error occurred while importing your source text.';
+
+                      if (err.toString() && err.toString() === "Error: Unsupported project") {
+                          errmessage = "This source text is not a valid project";
+                      }
+                      mythis.showErrorMessage('Import Failed', errmessage, err);
                   });
           }, 500);
       },

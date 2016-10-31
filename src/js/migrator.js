@@ -324,13 +324,27 @@ function MigrateManager(configurator, git, reporter) {
 
                 if (manifest.package_version <= 6) {
                     //add code here to migrate to v7
+
+                    // update package version
+                    manifest.package_version = 7;
+                }
+
+                return {manifest: manifest, paths: paths};
+            };
+
+            var migrateV7 = function (project) {
+                let manifest = project.manifest;
+                let paths = project.paths;
+
+                if (manifest.package_version <= 7) {
+                    //add code here to migrate to v8
                 }
 
                 return {manifest: manifest, paths: paths};
             };
 
             var checkVersion = function (project) {
-                if (project.manifest.package_version !== 6) {
+                if (project.manifest.package_version !== 7) {
                     throw new Error("Failed to migrate project");
                 }
                 return project;
@@ -341,8 +355,7 @@ function MigrateManager(configurator, git, reporter) {
                 let paths = project.paths;
 
                 manifest.generator.name = 'ts-desktop';
-                manifest.generator.build = "";
-                // TODO: update build number
+                manifest.generator.build = configurator.getAppData().build;
 
                 return write(paths.manifest, toJSON(manifest)).then(utils.ret({
                     manifest: manifest,
@@ -356,9 +369,10 @@ function MigrateManager(configurator, git, reporter) {
                 .then(migrateV4)
                 .then(migrateV5)
                 .then(migrateV6)
+                .then(migrateV7)
                 .then(checkVersion)
                 .then(saveManifest)
-                .then(function (project) {                    
+                .then(function (project) {
                     return git.commitAll(user, project.paths.projectDir).then(utils.ret(project));
                 })
 

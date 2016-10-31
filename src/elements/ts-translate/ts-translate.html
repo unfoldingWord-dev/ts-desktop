@@ -819,8 +819,8 @@
             var source = projectmeta.source_translations[selected];
             var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;
             var frames = App.dataManager.getContainerData(container);
-            var notes = App.dataManager.getSourceHelps(source, "tn");
-            var questions = App.dataManager.getSourceHelps(source, "tq");
+            var notes = App.dataManager.getSourceNotes(source);
+            var questions = App.dataManager.getSourceQuestions(source);
             var udb = App.dataManager.getSourceUdb(source);
             var wordlist = App.dataManager.getSourceWords(source);
             var chunkarray = [];

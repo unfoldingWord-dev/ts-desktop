@@ -147,7 +147,7 @@ process.stdout.write = console.log.bind(console);
 
     let gitManager = new GitManager();
 
-    let migrateManager = new MigrateManager(configurator, gitManager, reporter);
+    let migrateManager = new MigrateManager(configurator, gitManager, reporter, dataManager);
 
     // TODO: where should this be?
     mkdirp.sync(configurator.getValue('targetTranslationsDir'));

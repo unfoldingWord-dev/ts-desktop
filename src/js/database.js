@@ -12,6 +12,10 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
 
     return {
 
+        getResourceDir: function () {
+            return resourceDir;
+        },
+
         updateLanguages: function () {
             return db.updateCatalogs();
         },

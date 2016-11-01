@@ -326,10 +326,14 @@ function MigrateManager(configurator, git, reporter, dataManager) {
                     var targetPath;
                     var lastChapter = "00";
                     var lastChunk = "01";
+                    var titleexists = false;
 
                     return utils.fs.readdir(paths.projectDir)
                         .then(function (all) {
                             all.forEach(function (item) {
+                                if (item === "00") {
+                                    titleexists = true;
+                                }
                                 if (parseInt(item) && parseInt(item) > parseInt(lastChapter)) {
                                     lastChapter = item;
                                 }
@@ -368,6 +372,27 @@ function MigrateManager(configurator, git, reporter, dataManager) {
                                         if (index > -1) {
                                             manifest.finished_chunks.splice(index, 1);
                                             manifest.finished_chunks.push(newid);
+                                        }
+                                    });
+                            }
+                        })
+                        .then(function () {
+                            if (titleexists) {
+                                var oldPath = path.join(paths.projectDir, "00");
+                                var newPath = path.join(paths.projectDir, "front");
+
+                                return utils.fs.copy(oldPath, newPath, {clobber: true})
+                                    .then(function () {
+                                        return utils.fs.remove(oldPath);
+                                    })
+                                    .then(function () {
+                                        var oldid = "00-title";
+                                        var newid = "front-title";
+                                        var index = manifest.finished_chunks.indexOf(oldid);
+
+                                        if (index > -1) {
+                                            manifest.finished_chunks.splice(index, 1);
+                                            manifest.finished_chunks.unshift(newid);
                                         }
                                     });
                             }

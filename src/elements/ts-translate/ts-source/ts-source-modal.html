@@ -2,6 +2,7 @@
 <link rel="import" href="../../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../../components/paper-button/paper-button.html">
 <link rel="import" href="../../../components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../../../components/paper-spinner/paper-spinner.html">
 
 <dom-module id="ts-source-modal">
 
@@ -47,15 +48,17 @@
             outline: none;
         }
 
-        .body {
+        #body {
             flex: auto;
             overflow-y: auto;
         }
 
         .row {
             display: flex;
+            align-items: center;
             margin: 0;
-            padding: 1em;
+            padding: 10px 15px;
+            min-height: 50px;
             border-bottom: 1px solid var(--border-color);
         }
 
@@ -98,12 +101,20 @@
             color: var(--accent-color);
         }
 
-        .body paper-button {
+        #body paper-button {
             background: var(--accent-color);
             color: var(--reverse-text-color);
             text-transform: uppercase;
             font-size: 75%;
             padding: 5px 10px;
+        }
+
+        paper-spinner {
+            margin-right: 50px;
+            --paper-spinner-layer-1-color: var(--accent-color);
+            --paper-spinner-layer-2-color: var(--primary-color);
+            --paper-spinner-layer-3-color: var(--accent-color);
+            --paper-spinner-layer-4-color: var(--primary-color);
         }
 
         .hide {
@@ -120,31 +131,51 @@
                 <paper-icon-button icon="search" on-tap="focussearch"></paper-icon-button>
             </div>
 
-            <div class="body">
+            <div id="body">
                 <div class="row-header">Selected</div>
                 <template is="dom-repeat" items="[[selected]]" as="source">
                     <div class$="[[rowclass(source.direction)]]">
-                        <div>
-                            <span>[[source.language_name]]</span> (<span>[[source.language_id]]</span>) - <span>[[source.resource_name]]</span>
-                        </div>
-                        <div class="buttons">
-                            <paper-button raised class$="[[checkupdate(source.status)]]" on-tap="download">Update</paper-button>
-                            <paper-button raised on-tap="removesource">Remove</paper-button>
-                        </div>
+                        <template is="dom-if" if="{{!source.updating}}">
+                            <div>
+                                <span>[[source.language_name]]</span> (<span>[[source.language_id]]</span>) - <span>[[source.resource_name]]</span>
+                            </div>
+                            <div class="buttons">
+                                <paper-button raised class$="[[checkupdate(source.status)]]" on-tap="downloadselect">Update</paper-button>
+                                <paper-button raised on-tap="removesource">Remove</paper-button>
+                            </div>
+                        </template>
+                        <template is="dom-if" if="{{source.updating}}">
+                            <div>
+                                <span>Downloading source data. Please wait...</span>
+                            </div>
+                            <div>
+                                <paper-spinner active></paper-spinner>
+                            </div>
+                        </template>
                     </div>
                 </template>
 
                 <div class="row-header">Available</div>
                 <template is="dom-repeat" items="[[filtered]]" as="source">
                     <div class$="[[rowclass(source.direction)]]">
-                        <div>
-                            <span>[[source.language_name]]</span> (<span>[[source.language_id]]</span>) - <span>[[source.resource_name]]</span>
-                        </div>
-                        <div class="buttons">
-                            <paper-button raised class$="[[checkupdate(source.status)]]" on-tap="download">Update</paper-button>
-                            <paper-button raised class$="[[checkdownload(source.status)]]" on-tap="download">Download</paper-button>
-                            <paper-button raised class$="[[checkavailable(source.status)]]" on-tap="addsource">Select</paper-button>
-                        </div>
+                        <template is="dom-if" if="{{!source.updating}}">
+                            <div>
+                                <span>[[source.language_name]]</span> (<span>[[source.language_id]]</span>) - <span>[[source.resource_name]]</span>
+                            </div>
+                            <div class="buttons">
+                                <paper-button raised class$="[[checkupdate(source.status)]]" on-tap="downloadavail">Update</paper-button>
+                                <paper-button raised class$="[[checkdownload(source.status)]]" on-tap="downloadavail">Download</paper-button>
+                                <paper-button raised class$="[[checkavailable(source.status)]]" on-tap="addsource">Select</paper-button>
+                            </div>
+                        </template>
+                        <template is="dom-if" if="{{source.updating}}">
+                            <div>
+                                <span>Downloading source data. Please wait...</span>
+                            </div>
+                            <div>
+                                <paper-spinner active></paper-spinner>
+                            </div>
+                        </template>
                     </div>
                 </template>
             </div>
@@ -245,34 +276,87 @@
             } else {
                 filtered = available;
             }
+            this.set('filtered', []);
             this.set('filtered', filtered);
         },
 
-        download: function (event) {
+        downloadavail: function (event) {
             var mythis = this;
             var source = event.model.source;
+            var available = this.available;
+            var index = 0;
+            var buttons = mythis.querySelectorAll('paper-button');
 
-            mythis.fire('close');
+            buttons.forEach(function (button) {
+                button.disabled = true;
+            });
 
-            setTimeout(function() {
-                mythis.set('options', {});
-                mythis.set('options.body', "Downloading source data. Please wait...");
-                mythis.set('options.loading', true);
-                mythis.fire('iron-signal', {name: 'openloading'});
+            for (var i = 0; i < available.length; i++) {
+                if (available[i].unique_id === source.unique_id) {
+                    index = i;
+                }
+            }
 
-                setTimeout(function() {
-                    App.dataManager.downloadProjectContainers(source.language_id, source.project_id, source.resource_id)
-                        .then(function () {
-                            mythis.fire('iron-signal', {name: 'opensource'});
-                        })
-                        .catch(function (err) {
-                            console.log(err);
-                            mythis.set('options.title', "Download Failed");
-                            mythis.set('options.body', "Unable to download at this time.");
-                            mythis.set('options.loading', false);
-                        });
-                }, 500);
-            }, 500);
+            mythis.set('available.' + index + '.updating', true);
+            mythis.searchfilter();
+
+            App.dataManager.downloadProjectContainers(source.language_id, source.project_id, source.resource_id)
+                .then(function () {
+                    mythis.set('available.' + index + '.status', "current");
+                    mythis.set('available.' + index + '.updating', false);
+                    mythis.searchfilter();
+                    buttons.forEach(function (button) {
+                        button.disabled = false;
+                    });
+                })
+                .catch(function (err) {
+                    console.log(err);
+                    mythis.set('available.' + index + '.updating', false);
+                    mythis.searchfilter();
+                    buttons.forEach(function (button) {
+                        button.disabled = false;
+                    });
+                });
+        },
+
+        downloadselect: function (event) {
+            var mythis = this;
+            var source = event.model.source;
+            var index = 0;
+            var buttons = mythis.querySelectorAll('paper-button');
+            var selected = _.cloneDeep(this.selected);
+
+            buttons.forEach(function (button) {
+                button.disabled = true;
+            });
+
+            for (var i = 0; i < selected.length; i++) {
+                if (selected[i].unique_id === source.unique_id) {
+                    index = i;
+                }
+            }
+
+            selected[index].updating = true;
+            mythis.set('selected', []);
+            mythis.set('selected', selected);
+
+            App.dataManager.downloadProjectContainers(source.language_id, source.project_id, source.resource_id)
+                .then(function () {
+                    selected[index].status = "current";
+                    selected[index].updating = false;
+                    mythis.set('selected', []);
+                    mythis.set('selected', selected);
+                    buttons.forEach(function (button) {
+                        button.disabled = false;
+                    });
+                })
+                .catch(function (err) {
+                    console.log(err);
+                    mythis.set('selected.' + index + '.updating', false);
+                    buttons.forEach(function (button) {
+                        button.disabled = false;
+                    });
+                });
         },
 
         cancel: function () {
@@ -291,8 +375,15 @@
 
         addsource: function (event) {
             var source = event.model.source;
-            var index = event.model.index;
+            var available = this.available;
+            var index = 0;
             var selected = _.cloneDeep(this.selected);
+
+            for (var i = 0; i < available.length; i++) {
+                if (available[i].unique_id === source.unique_id) {
+                    index = i;
+                }
+            }
 
             if (selected.length < 3) {
                 selected.push(source);
@@ -306,6 +397,8 @@
             var source = event.model.source;
             var index = event.model.index;
             var available = _.cloneDeep(this.available);
+
+            console.log(source, index);
 
             available.push(source);
             this.set('available', this.sortlist(available));

@@ -112,6 +112,7 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                         });
                 })
                 .then(function (containerpath) {
+                    source.updating = false;
                     if (containerpath) {
                         var manifest = path.join(containerpath, "package.json");
                         return utils.fs.readFile(manifest)

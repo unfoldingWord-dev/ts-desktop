@@ -433,7 +433,7 @@
           var before = App.dataManager.getMetrics();
 
           mythis.$.update.close();
-          mythis.showLoadingMessage('Updating list of Source Texts. Please remember, this process will only update the list of Source Texts. This may take some time. Please wait...');
+          mythis.showLoadingMessage('Checking for New and Updated Source Texts. This may take a while. Please wait...');
 
           setTimeout(function () {
               return App.dataManager.updateSources()

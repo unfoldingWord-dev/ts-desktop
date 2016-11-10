@@ -156,13 +156,13 @@
                                 <span>[[source.language_name]]</span> (<span>[[source.language_id]]</span>) - <span>[[source.resource_name]]</span>
                             </div>
                             <div class="buttons">
-                                <paper-icon-button icon="refresh" title="update" class$="[[checkupdate(source.current)]]" on-tap="downloadselect"></paper-icon-button>
+                                <paper-icon-button icon="refresh" title="update" class$="[[checkupdate(source.current)]]" on-tap="downloadSource"></paper-icon-button>
                                 <paper-checkbox checked></paper-checkbox>
                             </div>
                         </template>
                         <template is="dom-if" if="{{source.updating}}">
                             <div>
-                                <span>Downloading source data. Please wait...</span>
+                                <span>Updating source data. Please wait...</span>
                             </div>
                             <div>
                                 <paper-spinner active></paper-spinner>
@@ -174,22 +174,12 @@
                 <div class="row-header">Available</div>
                 <template is="dom-repeat" items="[[available]]" as="source">
                     <div class$="[[rowclass(source.direction)]]">
-                        <template is="dom-if" if="{{!source.updating}}">
-                            <div>
-                                <span>[[source.language_name]]</span> (<span>[[source.language_id]]</span>) - <span>[[source.resource_name]]</span>
-                            </div>
-                            <div class="buttons">
-                                <paper-checkbox></paper-checkbox>
-                            </div>
-                        </template>
-                        <template is="dom-if" if="{{source.updating}}">
-                            <div>
-                                <span>Downloading source data. Please wait...</span>
-                            </div>
-                            <div>
-                                <paper-spinner active></paper-spinner>
-                            </div>
-                        </template>
+                        <div>
+                            <span>[[source.language_name]]</span> (<span>[[source.language_id]]</span>) - <span>[[source.resource_name]]</span>
+                        </div>
+                        <div class="buttons">
+                            <paper-checkbox></paper-checkbox>
+                        </div>
                     </div>
                 </template>
 
@@ -204,7 +194,7 @@
                                 <span>[[source.language_name]]</span> (<span>[[source.language_id]]</span>) - <span>[[source.resource_name]]</span>
                             </div>
                             <div class="buttons">
-                                <paper-icon-button icon="file-download" title="download" on-tap="downloadavail"></paper-icon-button>
+                                <paper-icon-button icon="file-download" title="download" on-tap="downloadSource"></paper-icon-button>
                             </div>
                         </template>
                         <template is="dom-if" if="{{source.updating}}">
@@ -331,83 +321,61 @@
                 });
         },
 
-        downloadavail: function (event) {
+        downloadSource: function (event) {
             var mythis = this;
             var source = event.model.source;
-            var available = this.available;
-            var index = 0;
-            var buttons = mythis.querySelectorAll('paper-button');
+            var index = this.findIndex(source);
 
-            buttons.forEach(function (button) {
-                button.disabled = true;
-            });
+            mythis.disableButtons();
+            mythis.set('master.' + index + '.updating', true);
 
-            for (var i = 0; i < available.length; i++) {
-                if (available[i].unique_id === source.unique_id) {
-                    index = i;
-                }
-            }
-
-            mythis.set('available.' + index + '.updating', true);
-            mythis.searchfilter();
-
-            App.dataManager.downloadProjectContainers(source.language_id, source.project_id, source.resource_id)
+            return mythis.organizeSources()
                 .then(function () {
-                    mythis.set('available.' + index + '.status', "current");
-                    mythis.set('available.' + index + '.updating', false);
-                    mythis.searchfilter();
-                    buttons.forEach(function (button) {
-                        button.disabled = false;
-                    });
+                    return App.dataManager.downloadProjectContainers(source.language_id, source.project_id, source.resource_id);
+                })
+                .then(function () {
+                    mythis.set('master.' + index + '.exists', true);
+                    mythis.set('master.' + index + '.selected', true);
                 })
                 .catch(function (err) {
                     console.log(err);
-                    mythis.set('available.' + index + '.updating', false);
-                    mythis.searchfilter();
-                    buttons.forEach(function (button) {
-                        button.disabled = false;
-                    });
+                })
+                .then(function () {
+                    mythis.set('master.' + index + '.updating', false);
+                    return mythis.organizeSources();
+                })
+                .then(function () {
+                    mythis.enableButtons();
+                    mythis.$.body.scrollTop = 0;
                 });
         },
 
-        downloadselect: function (event) {
-            var mythis = this;
-            var source = event.model.source;
-            var index = 0;
-            var buttons = mythis.querySelectorAll('paper-button');
-            var selected = _.cloneDeep(this.selected);
+        disableButtons: function () {
+            var buttons = this.querySelectorAll('paper-button, paper-icon-button, paper-checkbox');
 
             buttons.forEach(function (button) {
                 button.disabled = true;
             });
+        },
 
-            for (var i = 0; i < selected.length; i++) {
-                if (selected[i].unique_id === source.unique_id) {
+        enableButtons: function () {
+            var buttons = this.querySelectorAll('paper-button, paper-icon-button, paper-checkbox');
+
+            buttons.forEach(function (button) {
+                button.disabled = false;
+            });
+        },
+
+        findIndex: function (source) {
+            var master = this.master;
+            var index = 0;
+
+            for (var i = 0; i < master.length; i++) {
+                if (master[i].unique_id === source.unique_id) {
                     index = i;
                 }
             }
-
-            selected[index].updating = true;
-            mythis.set('selected', []);
-            mythis.set('selected', selected);
-
-            App.dataManager.downloadProjectContainers(source.language_id, source.project_id, source.resource_id)
-                .then(function () {
-                    selected[index].status = "current";
-                    selected[index].updating = false;
-                    mythis.set('selected', []);
-                    mythis.set('selected', selected);
-                    buttons.forEach(function (button) {
-                        button.disabled = false;
-                    });
-                })
-                .catch(function (err) {
-                    console.log(err);
-                    mythis.set('selected.' + index + '.updating', false);
-                    buttons.forEach(function (button) {
-                        button.disabled = false;
-                    });
-                });
+            return index;
         },
 
         cancel: function () {

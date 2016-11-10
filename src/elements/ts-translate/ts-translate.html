@@ -509,8 +509,6 @@
             var mythis = this;
             var projectmeta = this.currentproject.projectmeta;
             var modal = this.$.modal;
-            var selected = [];
-            var available = [];
 
             mythis.set('options', {});
             mythis.set('options.body', "Loading source options. Please wait...");
@@ -532,16 +530,11 @@
                                 inarray = true;
                             }
                         });
-                        if (inarray) {
-                            selected.push(source);
-                        } else {
-                            available.push(source);
-                        }
+                        source.selected = inarray;
                     });
 
-                    modal.set('selected', modal.sortlist(selected));
-                    modal.set('available', modal.sortlist(available));
-                    modal.searchfilter();
+                    modal.set('master', sources);
+                    modal.organizeSources();
                     mythis.fire('iron-signal', {name: 'closeloading'});
                     setTimeout(function() {
                         mythis.$.sourcepopup.open();

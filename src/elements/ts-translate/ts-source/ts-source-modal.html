@@ -3,6 +3,8 @@
 <link rel="import" href="../../../components/paper-button/paper-button.html">
 <link rel="import" href="../../../components/paper-checkbox/paper-checkbox.html">
 <link rel="import" href="../../../components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../../components/iron-icons/notification-icons.html">
 
 <dom-module id="ts-source-modal">
 
@@ -58,7 +60,7 @@
             align-items: center;
             margin: 0;
             padding: 10px 15px;
-            min-height: 50px;
+            min-height: 40px;
             border-bottom: 1px solid var(--border-color);
         }
 
@@ -73,6 +75,7 @@
         .buttons {
             display: flex;
             justify-content: flex-end;
+            padding: 0 0 0 20px;
         }
 
         .row-header {
@@ -83,6 +86,12 @@
             font-size: 80%;
             font-weight: 500;
             color: var(--secondary-text-color);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        iron-icon {
+            margin: 0 10px;
         }
 
         .footer {
@@ -101,12 +110,8 @@
             color: var(--accent-color);
         }
 
-        #body paper-button {
-            background: var(--accent-color);
-            color: var(--reverse-text-color);
-            text-transform: uppercase;
-            font-size: 75%;
-            padding: 5px 10px;
+        .buttons paper-icon-button {
+            color: var(--accent-color);
         }
 
         paper-spinner {
@@ -115,6 +120,11 @@
             --paper-spinner-layer-2-color: var(--primary-color);
             --paper-spinner-layer-3-color: var(--accent-color);
             --paper-spinner-layer-4-color: var(--primary-color);
+        }
+
+        paper-checkbox {
+            --paper-checkbox-checked-color: var(--accent-color-dark);
+            --paper-checkbox-unchecked-color: var(--accent-color-dark);
         }
 
         .hide {
@@ -132,7 +142,10 @@
             </div>
 
             <div id="body">
-                <div class="row-header">Selected</div>
+                <div class="row-header">
+                    <span>Selected</span>
+                    <span><iron-icon icon="refresh"></iron-icon>Requires an Internet Connection<iron-icon icon="notification:wifi"></iron-icon></span>
+                </div>
                 <template is="dom-repeat" items="[[selected]]" as="source">
                     <div class$="[[rowclass(source.direction)]]">
                         <template is="dom-if" if="{{!source.updating}}">
@@ -141,7 +154,7 @@
                             </div>
                             <div class="buttons">
                                 <paper-button raised class$="[[checkupdate(source.status)]]" on-tap="downloadselect">Update</paper-button>
-                                <paper-button raised on-tap="removesource">Remove</paper-button>
+                                <paper-checkbox checked></paper-checkbox>
                             </div>
                         </template>
                         <template is="dom-if" if="{{source.updating}}">
@@ -156,16 +169,39 @@
                 </template>
 
                 <div class="row-header">Available</div>
-                <template is="dom-repeat" items="[[filtered]]" as="source">
+                <template is="dom-repeat" items="[[available]]" as="source">
                     <div class$="[[rowclass(source.direction)]]">
                         <template is="dom-if" if="{{!source.updating}}">
                             <div>
                                 <span>[[source.language_name]]</span> (<span>[[source.language_id]]</span>) - <span>[[source.resource_name]]</span>
                             </div>
                             <div class="buttons">
-                                <paper-button raised class$="[[checkupdate(source.status)]]" on-tap="downloadavail">Update</paper-button>
-                                <paper-button raised class$="[[checkdownload(source.status)]]" on-tap="downloadavail">Download</paper-button>
-                                <paper-button raised class$="[[checkavailable(source.status)]]" on-tap="addsource">Select</paper-button>
+                                <paper-checkbox></paper-checkbox>
+                            </div>
+                        </template>
+                        <template is="dom-if" if="{{source.updating}}">
+                            <div>
+                                <span>Downloading source data. Please wait...</span>
+                            </div>
+                            <div>
+                                <paper-spinner active></paper-spinner>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <div class="row-header">
+                    <span>Available Online</span>
+                    <span>Requires an Internet Connection<iron-icon icon="notification:wifi"></iron-icon></span>
+                </div>
+                <template is="dom-repeat" items="[[download]]" as="source">
+                    <div class$="[[rowclass(source.direction)]]">
+                        <template is="dom-if" if="{{!source.updating}}">
+                            <div>
+                                <span>[[source.language_name]]</span> (<span>[[source.language_id]]</span>) - <span>[[source.resource_name]]</span>
+                            </div>
+                            <div class="buttons">
+                                <paper-icon-button icon="file-download" title="download" on-tap="downloadavail"></paper-icon-button>
                             </div>
                         </template>
                         <template is="dom-if" if="{{source.updating}}">
@@ -202,6 +238,10 @@
         ],
 
         properties: {
+            master: {
+                type: Array,
+                value: []
+            },
             selected: {
                 type: Array,
                 value: []
@@ -210,14 +250,9 @@
                 type: Array,
                 value: []
             },
-            filtered: {
+            download: {
                 type: Array,
                 value: []
-            },
-            options: {
-                type: Object,
-                value: {},
-                notify: true
             },
             query: {
                 type: String,
@@ -278,6 +313,29 @@
             }
             this.set('filtered', []);
             this.set('filtered', filtered);
+        },
+
+        organizeSources: function () {
+            var mythis = this;
+            var master = _.cloneDeep(this.master);
+            var selected = [];
+            var available = [];
+            var download = [];
+
+            master.forEach(function (source) {
+                if (source.selected) {
+                    selected.push(source);
+                } else if (!source.exists) {
+                    download.push(source);
+                } else {
+                    available.push(source);
+                }
+            });
+
+            this.set('selected', this.sortlist(selected));
+            this.set('available', this.sortlist(available));
+            this.set('download', this.sortlist(download));
+
         },
 
         downloadavail: function (event) {
@@ -397,8 +455,6 @@
             var source = event.model.source;
             var index = event.model.index;
             var available = _.cloneDeep(this.available);
-
-            console.log(source, index);
 
             available.push(source);
             this.set('available', this.sortlist(available));

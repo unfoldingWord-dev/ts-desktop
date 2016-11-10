@@ -534,7 +534,10 @@
                     });
 
                     modal.set('master', sources);
-                    modal.organizeSources();
+
+                    return modal.organizeSources();
+                })
+                .then(function () {
                     mythis.fire('iron-signal', {name: 'closeloading'});
                     setTimeout(function() {
                         mythis.$.sourcepopup.open();

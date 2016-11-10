@@ -75,7 +75,8 @@
         .buttons {
             display: flex;
             justify-content: flex-end;
-            padding: 0 0 0 20px;
+            align-items: center;
+            padding: 0;
         }
 
         .row-header {
@@ -112,6 +113,7 @@
 
         .buttons paper-icon-button {
             color: var(--accent-color);
+            margin-left: 15px;
         }
 
         paper-spinner {
@@ -125,6 +127,7 @@
         paper-checkbox {
             --paper-checkbox-checked-color: var(--accent-color-dark);
             --paper-checkbox-unchecked-color: var(--accent-color-dark);
+            margin-left: 15px;
         }
 
         .hide {
@@ -153,7 +156,7 @@
                                 <span>[[source.language_name]]</span> (<span>[[source.language_id]]</span>) - <span>[[source.resource_name]]</span>
                             </div>
                             <div class="buttons">
-                                <paper-button raised class$="[[checkupdate(source.status)]]" on-tap="downloadselect">Update</paper-button>
+                                <paper-icon-button icon="refresh" title="update" class$="[[checkupdate(source.current)]]" on-tap="downloadselect"></paper-icon-button>
                                 <paper-checkbox checked></paper-checkbox>
                             </div>
                         </template>
@@ -268,16 +271,8 @@
             return direction === "ltr" ? 'row left' : 'row right';
         },
 
-        checkavailable: function (status) {
-            return status !== "download" ? '' : 'hide';
-        },
-
-        checkdownload: function (status) {
-            return status === "download" ? '' : 'hide';
-        },
-
-        checkupdate: function (status) {
-            return status === "update" ? '' : 'hide';
+        checkupdate: function (current) {
+            return current ? 'hide' : '';
         },
 
         sortlist: function (list) {
@@ -328,10 +323,12 @@
                 }
             });
 
-            this.set('selected', this.sortlist(selected));
-            this.set('available', this.sortlist(this.filterlist(available)));
-            this.set('download', this.sortlist(this.filterlist(download)));
-
+            return App.utils.chain(App.dataManager.validateCurrent.bind(App.dataManager))(selected)
+                .then(function (results) {
+                    mythis.set('selected', mythis.sortlist(results));
+                    mythis.set('available', mythis.sortlist(mythis.filterlist(available)));
+                    mythis.set('download', mythis.sortlist(mythis.filterlist(download)));
+                });
         },
 
         downloadavail: function (event) {

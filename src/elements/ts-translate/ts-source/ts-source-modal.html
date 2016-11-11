@@ -157,7 +157,7 @@
                             </div>
                             <div class="buttons">
                                 <paper-icon-button icon="refresh" title="update" class$="[[checkupdate(source.current)]]" on-tap="downloadSource"></paper-icon-button>
-                                <paper-checkbox checked></paper-checkbox>
+                                <paper-checkbox checked="[[source.selected]]" on-change="removeSource"></paper-checkbox>
                             </div>
                         </template>
                         <template is="dom-if" if="{{source.updating}}">
@@ -178,7 +178,7 @@
                             <span>[[source.language_name]]</span> (<span>[[source.language_id]]</span>) - <span>[[source.resource_name]]</span>
                         </div>
                         <div class="buttons">
-                            <paper-checkbox></paper-checkbox>
+                            <paper-checkbox checked="[[source.selected]]" on-change="addSource"></paper-checkbox>
                         </div>
                     </div>
                 </template>
@@ -335,7 +335,9 @@
                 })
                 .then(function () {
                     mythis.set('master.' + index + '.exists', true);
-                    mythis.set('master.' + index + '.selected', true);
+                    if (mythis.selected.length < 3) {
+                        mythis.set('master.' + index + '.selected', true);
+                    }
                 })
                 .catch(function (err) {
                     console.log(err);
@@ -392,35 +394,22 @@
             this.fire('close');
         },
 
-        addsource: function (event) {
+        addSource: function (event) {
             var source = event.model.source;
-            var available = this.available;
-            var index = 0;
-            var selected = _.cloneDeep(this.selected);
+            var index = this.findIndex(source);
 
-            for (var i = 0; i < available.length; i++) {
-                if (available[i].unique_id === source.unique_id) {
-                    index = i;
-                }
+            if (this.selected.length < 3) {
+                this.set('master.' + index + '.selected', true);
             }
-
-            if (selected.length < 3) {
-                selected.push(source);
-                this.set('selected', this.sortlist(selected));
-                this.splice('available', index, 1);
-                this.searchfilter();
-            }
+            return this.organizeSources();
         },
 
-        removesource: function (event) {
+        removeSource: function (event) {
             var source = event.model.source;
-            var index = event.model.index;
-            var available = _.cloneDeep(this.available);
+            var index = this.findIndex(source);
 
-            available.push(source);
-            this.set('available', this.sortlist(available));
-            this.searchfilter();
-            this.splice('selected', index, 1);
+            this.set('master.' + index + '.selected', false);
+            return this.organizeSources();
         },
 
         ready: function () {

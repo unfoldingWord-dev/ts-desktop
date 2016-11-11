@@ -70,6 +70,11 @@
                 type: Object,
                 value: {}
             },
+            importdata: {
+                type: Object,
+                value: {},
+                notify: true
+            },
             currentuser: {
                 type: Object,
                 value: {}
@@ -81,7 +86,8 @@
 
             return App.userManager.retrieveRepos(this.currentuser.username, this.exportdata.unique_id)
                 .then(function (repos) {
-                    mythis.fire('iron-signal', {name: 'importfromrepo', data: {repo: repos[0], restore: false}});
+                    mythis.set('importdata', {repo: repos[0], force: true});
+                    mythis.fire('startrepoimport');
                 });
         },
 

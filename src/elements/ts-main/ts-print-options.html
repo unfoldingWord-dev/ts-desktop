@@ -89,6 +89,11 @@
                 type: Object,
                 value: {},
                 notify: true
+            },
+            options: {
+                type: Object,
+                value: {},
+                notify: true
             }
         },
 
@@ -117,7 +122,8 @@
                 newpage: this.$.pagebox.checked
             };
 
-            this.fire('iron-signal', {name: 'openpreview', data: {options: options}});
+            this.set('options', options);
+            this.fire('openpreview');
         },
 
         ready: function () {

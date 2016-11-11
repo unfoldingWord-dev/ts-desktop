@@ -312,7 +312,7 @@
                         <p>{{locale.home_welcome1}}</p>
                         <p>{{locale.home_welcome2}}</p>
                     </div>
-                    <paper-button raised id="start" on-tap="start">{{locale.start_new_project}}</paper-button>
+                    <paper-button raised id="start" on-tap="startnew">{{locale.start_new_project}}</paper-button>
                 </div>
             </template>
             <template is="dom-if" if="{{projectlist.length}}">
@@ -418,7 +418,7 @@
             <ts-resource-options currentinfo="[[currentinfo]]" changedata="{{changedata}}" on-confirm="openconfirm" on-change="firechange" on-cancel="cancelresource"></ts-resource-options>
         </paper-dialog>
 
-        <ts-new-project-button route="{{route}}"></ts-new-project-button>
+        <ts-new-project-button route="{{route}}" on-startnew="startnew"></ts-new-project-button>
 
     </template>
 
@@ -447,6 +447,11 @@
             projectlist: {
                 type: Array,
                 value: []
+            },
+            importdata: {
+                type: Object,
+                value: {},
+                notify: true
             },
             changedata: {
                 type: Object,
@@ -594,6 +599,7 @@
 
         openproject: function (e) {
             var projectmeta = e.model.project;
+            this.fire('iron-signal', {name: 'translateright'});
             this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: "translate"}});
         },
 
@@ -623,8 +629,9 @@
             this.fire('iron-signal', {name: 'deleteproject', data: {projectmeta: projectmeta}});
         },
 
-        start: function () {
-            this.route = "new";
+        startnew: function () {
+            this.set('importdata', {importing: false});
+            this.set('route', "new");
         },
 
         setsortfields: function () {

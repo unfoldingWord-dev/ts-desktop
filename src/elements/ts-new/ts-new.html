@@ -225,10 +225,8 @@
         load: function (route) {
             var lang = this.$.languages;
             if (route === "new") {
+                lang.updateList();
                 this.set('selected', 0);
-                setTimeout(function() {
-                    lang.updateList();
-                }, 500);
             }
         },
 
@@ -329,6 +327,7 @@
                 App.projectsManager.createTargetTranslation([], newprojectmeta, this.currentuser)
                     .then(function() {
                         mythis.fire('iron-signal', {name: 'updatelist'});
+                        mythis.fire('iron-signal', {name: 'translateright'});
                         mythis.fire('iron-signal', {name: 'loadproject', data: {projectmeta: newprojectmeta, nav: "translate"}});
                     })
                     .catch(function (err) {
@@ -342,7 +341,7 @@
         startimport: function () {
             this.$.confirmimport.close();
             this.set('route', "home");
-            this.fire('iron-signal', {name: 'finishusfm'});
+            this.fire('finishusfm');
             this.set('selected', 0);
             this.set('importdata', {importing: false});
         },

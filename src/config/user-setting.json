@@ -1,8 +1,17 @@
 [
     {
         "name": "glmode",
-        "mainText": "GL Mode",
+        "mainText": "Gateway Language Mode",
         "helpText": "Display additional translation options for gateway languages",
+        "value": false,
+        "group": "general",
+        "enabled": true,
+        "visible": true
+    },
+    {
+        "name": "bemode",
+        "mainText": "Blind Edit Mode",
+        "helpText": "Display translation mode option that allows for blind drafting (Project will re-load if changed)",
         "value": false,
         "group": "general",
         "enabled": true,

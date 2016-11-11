@@ -154,7 +154,7 @@
 
     <template>
 
-        <ts-translate-sidebar selected="{{selected}}" currentproject="[[currentproject]]" on-gohome="gohome" on-goreview="goreview" on-goexport="goexport" on-goprint="goprint" on-gosettings="gosettings"></ts-translate-sidebar>
+        <ts-translate-sidebar selected="{{selected}}" currentproject="[[currentproject]]" on-gohome="gohome" on-goreview="goreview" on-goexport="goexport" on-goprint="goprint" on-gosearch="gosearch" on-gosettings="gosettings"></ts-translate-sidebar>
 
         <div id="pages">
             <ts-read-mode id="readmode" chapters="[[currentproject.chapters]]" modestatus="{{modestatus}}"></ts-read-mode>
@@ -626,6 +626,7 @@
             var nav = data.nav;
             var projectmeta = data.projectmeta;
             var list = this.projectlist;
+            var review = this.$.reviewmode;
 
             var loadsource = function () {
                 if (projectmeta.project_type_class === "extant") {
@@ -647,7 +648,7 @@
                     } else if (nav === "print") {
                         mythis.fire('openprint');
                     } else if (nav === "export") {
-                        mythis.fire('saveusfm');
+                        mythis.fire('exportusfm');
                     }
                 }, 500);
             };
@@ -705,11 +706,11 @@
                 }
             };
 
-            this.setrightanimation();
             mythis.set('currentproject.projectmeta', projectmeta);
             mythis.set('currentproject.statedata', {});
             mythis.set('currentproject.rawdata', {});
             mythis.set('currentproject.conflicts', 0);
+            review.closesearch();
             mythis.retrievesource();
             if (nav === "translate") {
                 mythis.route = "translate";
@@ -763,6 +764,7 @@
             var mythis = this;
             var projectmeta = mythis.currentproject.projectmeta;
             var source = projectmeta.source_translations[projectmeta.currentsource];
+            var review = this.$.reviewmode;
 
             var open = function () {
                 return App.dataManager.activateProjectContainers(source.language_id, projectmeta.project.id, source.resource_id)
@@ -781,6 +783,7 @@
                     mythis.fire('iron-signal', {name: 'closeloading'});
                     mythis.forceResize();
                     mythis.setlocation();
+                    review.passivesearch();
                     if (full) {
                         mythis.checksources();
                     }
@@ -816,8 +819,8 @@
             var source = projectmeta.source_translations[selected];
             var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;
             var frames = App.dataManager.getContainerData(container);
-            var notes = App.dataManager.getSourceHelps(source, "tn");
-            var questions = App.dataManager.getSourceHelps(source, "tq");
+            var notes = App.dataManager.getSourceNotes(source);
+            var questions = App.dataManager.getSourceQuestions(source);
             var udb = App.dataManager.getSourceUdb(source);
             var wordlist = App.dataManager.getSourceWords(source);
             var chunkarray = [];
@@ -838,6 +841,7 @@
                 chunk.wordcontent = "";
                 chunk.resources = resources;
                 chunk.index = i;
+                chunk.search = {text: ""};
                 chunkarray.push(chunk);
             }
             this.set('currentproject.chunks', chunkarray);
@@ -877,7 +881,7 @@
                 });
                 var statedata = mythis.currentproject.statedata[chaptermeta.chapterid];
                 if (!statedata) {
-                    statedata = {read: true};
+                    statedata = {read: App.configurator.getUserSetting('bemode')};
                     mythis.currentproject.statedata[chaptermeta.chapterid] = statedata;
                 }
                 if (chaptermeta.chapter > 0) {
@@ -932,10 +936,6 @@
             var framewords = [];
             var udbtext = null;
 
-            if (frame.chapter === "front") {
-                return resources;
-            }
-
             var framenotes = notes.filter(function (note) {
                 return note.chapter === frame.chapter && note.chunk === frame.chunk;
             });
@@ -986,7 +986,7 @@
             var frameudb = udb.filter(function (chunk) {
                 return chunk.chapter === frame.chapter && chunk.chunk === frame.chunk;
             });
-            if (frameudb.length) {
+            if (frameudb.length && frame.chunk !== "title") {
                 udbtext = frameudb[0].content;
             }
             if (udbtext) {
@@ -1034,6 +1034,10 @@
                 if (chapterid === "front" && frameid === "title") {
                     chapterref = "Project Title";
                     chunkref = "Project Title";
+                    framenum = 0;
+                } else if (frameid === "title") {
+                    chapterref = name + " " + chapternum + " Title";
+                    chunkref = name + " " + chapternum + " Title";
                     framenum = 0;
                 } else {
                     chapterref = name + " " + chapternum;
@@ -1182,7 +1186,12 @@
             var index = App.configurator.getValue(key + "-index");
             var chapter = App.configurator.getValue(key + "-chapter");
             var selected = App.configurator.getValue(key + "-selected");
+            var bemode = App.configurator.getUserSetting('bemode');
             var typeclass = projectmeta.project_type_class;
+
+            if (selected === 2 && !bemode) {
+                selected = 3;
+            }
 
             if (chapter > 0) {
                 mythis.set('modestatus.chapter', chapter);
@@ -1190,7 +1199,7 @@
             if (index >= 0) {
                 mythis.set('modestatus.index', index);
             }
-            if (typeclass === "standard") {
+            if (typeclass === "standard" && bemode) {
                 mythis.set('modestatus.lastmode', 1);
             } else {
                 mythis.set('modestatus.lastmode', 3);
@@ -1365,6 +1374,11 @@
             this.route = "settings";
         },
 
+        gosearch: function () {
+            var review = this.$.reviewmode;
+            review.opensearch();
+        },
+
         setrightanimation: function () {
             this.animationConfig.exit.name = 'slide-right-animation';
             this.animationConfig.entry.name = 'slide-from-right-animation';
@@ -1382,6 +1396,11 @@
                 mythis.getlocation();
                 mythis.setlocation();
                 mythis.setheights();
+            });
+            window.addEventListener("keyup", function (e) {
+                if (e.ctrlKey && e.keyCode == 70 && mythis.route === "translate" && mythis.selected === 3 && mythis.currentproject.projectmeta.project_type_class === "standard") {
+                    mythis.gosearch();
+                }
             });
         }
 

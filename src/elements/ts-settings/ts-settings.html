@@ -170,6 +170,14 @@
             settingsObj: {
                 type: Object,
                 value: {}
+            },
+            currentproject: {
+                type: Object,
+                value: {}
+            },
+            reload: {
+                type: Boolean,
+                value: false
             }
         },
 
@@ -195,7 +203,17 @@
         },
 
         back: function () {
-            this.route = App.configurator.getValue("backto");
+            var backto = App.configurator.getValue("backto");
+            var projectmeta = this.currentproject.projectmeta;
+
+            this.fire('iron-signal', {name: 'translateleft'});
+
+            if (this.reload && backto === "translate") {
+                this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: "translate"}});
+            } else {
+                this.set('route', backto);
+            }
+            this.set('reload', false);
         },
 
         _isEnabled: function (bool) {
@@ -254,6 +272,10 @@
                 var path = 'settings.' + event.target.dataGroup + '.list.' + event.target.dataList + '.value';
                 this.set(path, !value);
                 this.saveSettings();
+                if (name === "bemode") {
+                    this.set('reload', true);
+                    this.fire('iron-signal', {name: 'updatebemode'});
+                }
             } else {
                 this.openSettingModal(event);
             }

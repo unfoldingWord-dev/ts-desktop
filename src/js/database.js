@@ -12,6 +12,10 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
 
     return {
 
+        getResourceDir: function () {
+            return resourceDir;
+        },
+
         updateLanguages: function () {
             return db.updateCatalogs();
         },
@@ -22,6 +26,34 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
 
         updateChunks: function () {
             return db.updateChunks();
+        },
+
+        importContainer: function (filePath) {
+            return db.importResourceContainer(filePath);
+        },
+
+        checkForContainer: function (filePath) {
+            var resourcePath;
+            var sourcePath;
+
+            return db.loadResourceContainer(filePath)
+                .then(function (container) {
+                    var containername = container.slug;
+                    resourcePath = path.join(resourceDir, containername);
+                    sourcePath = path.join(sourceDir, containername + ".tsrc");
+                })
+                .then(function () {
+                    return utils.fs.stat(resourcePath).then(utils.ret(true)).catch(utils.ret(false));
+                })
+                .then(function (resexists) {
+                    if (!resexists) {
+                        return utils.fs.stat(sourcePath).then(utils.ret(true)).catch(utils.ret(false))
+                            .then(function (srcexists) {
+                                return srcexists;
+                            });
+                    }
+                    return true;
+                });
         },
 
         getMetrics: function () {
@@ -44,7 +76,7 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             var mythis = this;
             var allres = db.indexSync.getResources(null, project);
             var filterres = allres.filter(function (item) {
-                return item.type === 'book' && item.status.checking_level === "3";
+                return item.type === 'book' && (item.status.checking_level === "3" || item.imported);
             });
 
             var mapped = filterres.map(function (res) {
@@ -85,11 +117,15 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                         return utils.fs.readFile(manifest)
                             .then(function (contents) {
                                 var json = JSON.parse(contents);
-                                source.uptodate = json.resource.status.pub_date === source.date_modified;
+                                if (json.resource.status.pub_date === source.date_modified) {
+                                    source.status = "current";
+                                } else {
+                                    source.status = "update";
+                                }
                                 return source;
                             });
                     }
-                    source.uptodate = false;
+                    source.status = "download";
                     return source;
                 });
         },
@@ -265,10 +301,47 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             }
         },
 
-        getSourceHelps: function (source, type) {
+        getSourceNotes: function (source) {
             var mythis = this;
-            var container = source.language_id + "_" + source.project_id + "_" + type;
+            var container = source.language_id + "_" + source.project_id + "_tn";
             var frames = this.extractContainer(container);
+
+            frames.forEach(function (item) {
+                if (item.content) {
+                    item.content = mythis.parseHelps(item.content);
+                }
+            });
+
+            return frames;
+        },
+
+        getSourceQuestions: function (source) {
+            var mythis = this;
+            var container = source.language_id + "_" + source.project_id + "_tq";
+            var markers = this.getChunkMarkers(source.project_id);
+            var frames = this.extractContainer(container);
+
+            frames.forEach(function (frame) {
+                var lastverse = "01";
+                var stop = false;
+
+                markers.forEach(function (marker) {
+                    if (stop || frame.chapter < marker.chapter || (frame.chapter === marker.chapter && frame.chunk < marker.verse)) {
+                        stop = true;
+                    } else {
+                        lastverse = marker.verse;
+                    }
+                });
+                frame.chunk = lastverse;
+            });
+
+            for (var i = 1; i < frames.length; i++) {
+                if (frames[i].chapter === frames[i-1].chapter && frames[i].chunk === frames[i-1].chunk) {
+                    frames[i-1].content = frames[i-1].content + "\n\n" + frames[i].content;
+                    frames.splice(i, 1);
+                    i--;
+                }
+            }
 
             frames.forEach(function (item) {
                 if (item.content) {

@@ -21,7 +21,7 @@
 
     <template>
 
-        <paper-fab icon="add" title="New Project" on-tap="new"></paper-fab>
+        <paper-fab icon="add" title="New Project" on-tap="startnew"></paper-fab>
 
     </template>
 
@@ -41,8 +41,8 @@
             }
         },
 
-        new: function () {
-            this.route = "new";
+        startnew: function () {
+            this.fire('startnew');
         },
 
         ready: function() {

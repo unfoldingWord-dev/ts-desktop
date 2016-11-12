@@ -706,6 +706,7 @@
             mythis.set('currentproject.statedata', {});
             mythis.set('currentproject.rawdata', {});
             mythis.set('currentproject.conflicts', 0);
+            mythis.fire('iron-signal', {name: 'updatebemode'});
             review.closesearch();
             mythis.retrievesource();
             if (nav === "translate") {

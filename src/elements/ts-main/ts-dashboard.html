@@ -1161,6 +1161,14 @@
               .then(function () {
                   App.ipc.send('loading-done');
                   mythis.$.home.setsortfields();
+
+                  var appData = App.configurator.getAppData();
+                  var libraryBuild = App.configurator.getValue("libraryBuild");
+
+                  if (libraryBuild && appData.version === "11.0.0" && libraryBuild != appData.build) {
+                      App.configurator.setUserSetting("bemode", true);
+                  }
+                  App.configurator.setValue("libraryBuild", appData.build);
               });
       }
 

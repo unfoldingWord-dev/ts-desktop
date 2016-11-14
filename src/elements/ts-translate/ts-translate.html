@@ -1207,7 +1207,7 @@
                     if (selected > 0) {
                         mythis.set('selected', selected);
                     } else {
-                        if (typeclass === "standard") {
+                        if (typeclass === "standard" && bemode) {
                             mythis.set('selected', 1);
                         } else {
                             mythis.set('selected', 3);
@@ -1304,10 +1304,12 @@
 
         gohome: function () {
             var mythis = this;
+
             mythis.$.reviewmode.closeresource();
             mythis.$.conflictmode.closeresource();
             mythis.savestate();
             mythis.stoptimers();
+
             return mythis.saveAll()
                 .then(function () {
                     setTimeout(function() {
@@ -1365,10 +1367,18 @@
         },
 
         gosettings: function () {
-            this.savestate();
-            this.setleftanimation();
+            var mythis = this;
+
+            mythis.savestate();
+            mythis.setleftanimation();
             App.configurator.setValue("backto", this.route);
-            this.route = "settings";
+
+            return mythis.saveAll()
+                .then(function () {
+                    setTimeout(function() {
+                        mythis.set('route', "settings");
+                    }, 500);
+                });
         },
 
         gosearch: function () {

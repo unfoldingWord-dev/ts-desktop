@@ -84,7 +84,7 @@
                 <span class="optiontitle">Export to Text Files</span>
                 <span>Creates a .zip file of your project</span>
             </div>
-            <div class$="[[checkprintclass(exportdata.project_type_class)]]" on-tap="checkprint">
+            <div class$="[[checkprintclass(exportdata.project_type_class, exportdata.source_translations)]]" on-tap="checkprint">
                 <span class="optiontitle">Export to PDF File</span>
                 <span>Creates a .pdf file of your project</span>
             </div>
@@ -114,8 +114,8 @@
             }
         },
 
-        checkprintclass: function (typeclass) {
-            return typeclass === "standard" ? 'option' : 'hide';
+        checkprintclass: function (typeclass, sources) {
+            return typeclass === "standard" && sources.length ? 'option' : 'hide';
         },
 
         checkusfmclass: function (typeclass, format) {

@@ -382,7 +382,7 @@
                     <paper-icon-button on-tap="opendelete" class="smallicon" icon="delete" title="delete"></paper-icon-button>
                 </div>
                 <div id="righticons" class$="[[checksize(currentinfo.project_type_class)]]">
-                    <paper-icon-button on-tap="goprint" class$="[[checkclass(currentinfo.project_type_class)]]" icon="print" title="print"></paper-icon-button>
+                    <paper-icon-button on-tap="goprint" class$="[[printclass(currentinfo.project_type_class, currentinfo.source_translations)]]" icon="print" title="print"></paper-icon-button>
                     <paper-icon-button on-tap="goreview" class="smallicon" icon="done-all" title="review"></paper-icon-button>
                     <paper-icon-button on-tap="goexport" class="smallicon" icon="file-upload" title="upload/export"></paper-icon-button>
                 </div>
@@ -477,8 +477,8 @@
             }
         },
 
-        checkclass: function (typeclass) {
-            return typeclass === "standard" ? 'smallicon' : 'hide';
+        printclass: function (typeclass, sources) {
+            return typeclass === "standard" && sources.length ? 'smallicon' : 'hide';
         },
 
         checksize: function (typeclass) {

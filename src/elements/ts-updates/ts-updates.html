@@ -6,6 +6,8 @@
 <link rel="import" href="../../components/paper-button/paper-button.html">
 <link rel="import" href="../../components/iron-signals/iron-signals.html">
 
+<link rel="import" href="./ts-lang.html">
+
 <dom-module id="ts-updates">
 
     <style>
@@ -57,7 +59,7 @@
         </div>
 
         <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
-
+            <ts-lang id="lang" selected="{{selected}}"></ts-lang>
         </neon-animated-pages>
 
     </template>
@@ -107,17 +109,16 @@
         },
 
         load: function (route) {
-            //var lang = this.$.languages;
-            if (route === "new") {
-                //lang.updateList();
+            var lang = this.$.lang;
+            if (route === "updates") {
+                lang.updateList();
+                lang.reset();
                 this.set('selected', 0);
             }
         },
 
         back: function () {
-
             this.set('selected', 0);
-
             this.set('route', "home");
         },
 

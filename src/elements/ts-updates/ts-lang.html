@@ -1,0 +1,177 @@
+
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../components/iron-list/iron-list.html">
+<link rel="import" href="../../components/iron-input/iron-input.html">
+
+<dom-module id="ts-lang">
+
+    <style>
+
+        :host {
+            display: flex;
+            justify-content: center;
+        }
+
+        #main {
+            flex: 0 0 450px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #header {
+            color: var(--secondary-text-color);
+            font-size: 110%;
+            flex: 0 0 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--card-background-color);
+        }
+
+        #list {
+            font-size: 110%;
+            max-height: calc(100vh - 175px);
+            color: var(--primary-text-color);
+            background: var(--card-background-color);
+        }
+
+        .row {
+            display: block;
+            margin: 0;
+            padding: 1em;
+            border-bottom: 1px solid var(--border-color);
+            transition: background .3s, color .3s;
+            cursor: pointer;
+        }
+
+        .row:hover {
+            background: var(--accent-color-light);
+        }
+
+        .right {
+            float: right;
+            color: var(--secondary-text-color);
+            font-style: italic;
+            font-size: 80%
+        }
+
+        input {
+            border: none;
+            font-size: 110%;
+            font-style: italic;
+            font-family: sans-serif;
+            width: 75%;
+            padding: 0.25em 5px;
+            margin-left: -5px;
+        }
+
+    </style>
+
+  <template>
+
+      <div id="main">
+          <div id="header">
+              <input is="iron-input" id="input" bind-value="{{query}}" on-input="updateList" placeholder="Choose a language">
+              <paper-icon-button class="right" icon="search" on-tap="focussearch"></paper-icon-button>
+          </div>
+          <iron-list id="list" items="[[languages]]" as="language">
+              <template>
+                  <div class="row" on-tap="store">
+                      <div>
+                          <span>[[language.name]]</span>
+                          <span class="right">[[language.slug]]</span>
+                      </div>
+                  </div>
+              </template>
+          </iron-list>
+      </div>
+
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+
+      is: 'ts-lang',
+
+      properties: {
+          selected: {
+              type: Number,
+              value: 0,
+              notify: true
+          },
+          languages: {
+              type: Array,
+              value: []
+          },
+          query: {
+              type: String,
+              value: ""
+          }
+      },
+
+      behaviors: [
+          Polymer.IronResizableBehavior
+      ],
+
+      focussearch: function () {
+          this.$.input.focus();
+      },
+
+      filterList: function (list) {
+          var query = this.query;
+          var search = App.utils.startsWithBase.bind(null, query);
+
+          if (query) {
+              return list.filter(function (language) {
+                  return search(language.slug) || search(language.name);
+              });
+          } else {
+              return list;
+          }
+      },
+
+      store: function (e) {
+          this.set('newdata.language', e.model.language);
+
+          if (this.changedata.changing) {
+              if (this.newdata.language.id !== this.changedata.oldmeta.target_language.id) {
+                  this.change();
+              }
+          } else if (this.importdata.importing && this.importdata.project.slug) {
+              this.set('newdata.project', this.importdata.project);
+              if (App.configurator.getUserSetting('glmode')) {
+                  this.fire('iron-signal', {name: 'createtypes'});
+                  this.set('selected', 3);
+              } else {
+                  this.set('newdata.typedata', {type: {id: "text", name: "Text"}, resource: {id: "reg", name: "Regular"}, format: "usfm", allowed: true});
+                  this.fire('create');
+              }
+              this.reset();
+          } else {
+              this.fire('iron-signal', {name: 'createprojects'});
+              this.set('selected', 1);
+              this.reset();
+          }
+      },
+
+      reset: function () {
+          this.set('query', "");
+          this.$.list.scrollTop = 0;
+      },
+
+      updateList: function () {
+          this.set('languages', this.filterList(App.dataManager.getSourceLanguages()));
+      },
+
+      ready: function () {
+
+      }
+
+  });
+
+</script>

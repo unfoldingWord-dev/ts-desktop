@@ -1,0 +1,130 @@
+
+<link rel="import" href="../../components/iron-resizable-behavior/iron-resizable-behavior.html">
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/iron-signals/iron-signals.html">
+
+<dom-module id="ts-updates">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+            color: var(--primary-text-color);
+        }
+
+        neon-animated-pages {
+            flex: none;
+            display: flex;
+            transform: translateY(-60px);
+            height: calc(100% - 45px);
+        }
+
+        neon-animated-pages > * {
+            flex: auto;
+        }
+
+        #header {
+            background-color: var(--primary-color);
+            min-height: 105px;
+        }
+
+        #title {
+            font-size: 125%;
+            color: var(--reverse-text-color);
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 45px;
+        }
+
+        [icon="arrow-back"] {
+            margin: 0 1em 0 .2em;
+        }
+
+    </style>
+
+    <template>
+
+        <div id="header">
+            <div id="title">
+                <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
+                <span>Source Texts</span>
+            </div>
+        </div>
+
+        <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
+
+        </neon-animated-pages>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+        is: 'ts-updates',
+
+        behaviors: [
+            Polymer.IronResizableBehavior,
+            Polymer.NeonAnimatableBehavior
+        ],
+
+        properties: {
+            selected: {
+                type: Number,
+                value: 0
+            },
+            route: {
+                type: String,
+                value: '',
+                notify: true,
+                observer: 'load'
+            },
+            options: {
+                type: Object,
+                value: {},
+                notify: true
+            },
+            animationConfig: {
+                value: function () {
+                    return {
+                        'entry': {
+                            name: 'slide-from-right-animation',
+                            node: this
+                        },
+                        'exit': {
+                            name: 'slide-right-animation',
+                            node: this
+                        }
+                    }
+                }
+            }
+        },
+
+        load: function (route) {
+            //var lang = this.$.languages;
+            if (route === "new") {
+                //lang.updateList();
+                this.set('selected', 0);
+            }
+        },
+
+        back: function () {
+
+            this.set('selected', 0);
+
+            this.set('route', "home");
+        },
+
+        ready: function() {
+
+        }
+
+    });
+
+</script>

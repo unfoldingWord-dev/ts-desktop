@@ -104,6 +104,11 @@
               value: 0,
               notify: true
           },
+          choices: {
+              type: Object,
+              value: {},
+              notify: true
+          },
           languages: {
               type: Array,
               value: []
@@ -136,27 +141,9 @@
       },
 
       store: function (e) {
-          this.set('newdata.language', e.model.language);
-
-          if (this.changedata.changing) {
-              if (this.newdata.language.id !== this.changedata.oldmeta.target_language.id) {
-                  this.change();
-              }
-          } else if (this.importdata.importing && this.importdata.project.slug) {
-              this.set('newdata.project', this.importdata.project);
-              if (App.configurator.getUserSetting('glmode')) {
-                  this.fire('iron-signal', {name: 'createtypes'});
-                  this.set('selected', 3);
-              } else {
-                  this.set('newdata.typedata', {type: {id: "text", name: "Text"}, resource: {id: "reg", name: "Regular"}, format: "usfm", allowed: true});
-                  this.fire('create');
-              }
-              this.reset();
-          } else {
-              this.fire('iron-signal', {name: 'createprojects'});
-              this.set('selected', 1);
-              this.reset();
-          }
+          this.set('choices.language', e.model.language);
+          this.set('selected', 1);
+          this.reset();
       },
 
       reset: function () {

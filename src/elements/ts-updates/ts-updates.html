@@ -7,6 +7,7 @@
 <link rel="import" href="../../components/iron-signals/iron-signals.html">
 
 <link rel="import" href="./ts-lang.html">
+<link rel="import" href="./ts-lang-cat.html">
 
 <dom-module id="ts-updates">
 
@@ -59,7 +60,8 @@
         </div>
 
         <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
-            <ts-lang id="lang" selected="{{selected}}"></ts-lang>
+            <ts-lang id="lang" selected="{{selected}}" choices="{{choices}}"></ts-lang>
+            <ts-lang-cat selected="{{selected}}" choices="{{choices}}"></ts-lang-cat>
         </neon-animated-pages>
 
     </template>
@@ -80,6 +82,10 @@
             selected: {
                 type: Number,
                 value: 0
+            },
+            choices: {
+                type: Object,
+                value: {}
             },
             route: {
                 type: String,

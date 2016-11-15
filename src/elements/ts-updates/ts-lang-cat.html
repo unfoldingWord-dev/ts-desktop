@@ -1,0 +1,166 @@
+
+<link rel="import" href="../../components/iron-list/iron-list.html">
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../ts-icons/ts-icons.html">
+
+<dom-module id="ts-lang-cat">
+
+    <style>
+
+        :host {
+            display: flex;
+            justify-content: center;
+        }
+
+        #main {
+            flex: 0 0 450px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #header {
+            color: var(--secondary-text-color);
+            font-size: 110%;
+            flex: 0 0 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--card-background-color);
+        }
+
+        #list {
+            font-size: 110%;
+            max-height: calc(100vh - 175px);
+            color: var(--primary-text-color);
+            background: var(--card-background-color);
+        }
+
+        .row {
+            display: block;
+            margin: 0;
+            padding: 1em;
+            border-bottom: 1px solid var(--border-color);
+            transition: background .3s, color .3s;
+            cursor: pointer;
+        }
+
+        .row:hover {
+            background: var(--accent-color-light);
+        }
+
+        .right {
+            float: right;
+        }
+
+        .small {
+            --iron-icon-height: 18px;
+            --iron-icon-width: 18px;
+            color: var(--secondary-text-color);
+        }
+
+        .row span {
+            padding-left: 15px;
+        }
+
+    </style>
+
+  <template>
+
+      <div id="main">
+          <div id="header">
+              <em>Choose a category</em>
+          </div>
+          <iron-list id="list" items="[[categories]]" as="category">
+              <template>
+                  <div class="row" on-tap="store">
+                      <div>
+                          <iron-icon class="small" icon$="[[checkicon(category.name)]]"></iron-icon>
+                          <span>[[category.name]]</span>
+                          <iron-icon class="right" icon="chevron-right"></iron-icon>
+                      </div>
+                  </div>
+              </template>
+          </iron-list>
+      </div>
+
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+
+      is: 'ts-lang-cat',
+
+      properties: {
+          selected: {
+              type: Number,
+              value: 0,
+              notify: true,
+              observer: 'createCategories'
+          },
+          choices: {
+              type: Object,
+              value: {},
+              notify: true
+          },
+          categories: {
+              type: Array,
+              value: []
+          }
+      },
+
+      behaviors: [
+          Polymer.IronResizableBehavior
+      ],
+
+      checkicon: function (name) {
+          return name === "Other" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
+      },
+
+      store: function (e) {
+          var category = e.model.category;
+          this.set('choices.category', category);
+          this.set('selected', 2);
+      },
+
+      createCategories: function () {
+          var mythis = this;
+
+          if (mythis.selected === 1) {
+              var lang = this.choices.language.slug;
+              var projects = App.dataManager.getTranslations(lang);
+              var temparray = [];
+              var otherdata = [];
+
+              projects = projects.filter(function (project) {
+                  return project.resource.status.checking_level === "3";
+              });
+
+              _.forEach(_.groupBy(projects, 'project.category_id'), function (data, category) {
+                  if (category === "1") {
+                      temparray.push({"name": "Old Testament", "data": data});
+                  } else if (category === "6") {
+                      temparray.push({"name": "New Testament", "data": data});
+                  } else {
+                      otherdata = otherdata.concat(data);
+                  }
+              });
+              if (otherdata.length) {
+                  temparray.push({"name": "Other", "data": otherdata});
+              }
+              mythis.set('categories', temparray);
+          }
+      },
+
+      ready: function () {
+
+      }
+
+  });
+
+</script>

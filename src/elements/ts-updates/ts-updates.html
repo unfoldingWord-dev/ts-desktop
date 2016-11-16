@@ -1,6 +1,8 @@
 
 <link rel="import" href="../../components/iron-resizable-behavior/iron-resizable-behavior.html">
+<link rel="import" href="../../components/paper-radio-button/paper-radio-button.html">
 <link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../components/paper-radio-group/paper-radio-group.html">
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
 <link rel="import" href="../../components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../components/paper-button/paper-button.html">
@@ -8,6 +10,7 @@
 
 <link rel="import" href="./ts-lang.html">
 <link rel="import" href="./ts-lang-cat.html">
+<link rel="import" href="./ts-update-results.html">
 
 <dom-module id="ts-updates">
 
@@ -39,9 +42,20 @@
             font-size: 125%;
             color: var(--reverse-text-color);
             display: flex;
-            justify-content: flex-start;
+            justify-content: space-between;
             align-items: center;
             min-height: 45px;
+        }
+
+        paper-radio-button {
+            --paper-radio-button-checked-color: black;
+            --paper-radio-button-unchecked-color: black;
+            --paper-radio-button-label-color: var(--reverse-text-color);
+            --paper-radio-button-unchecked-background-color: var(--reverse-text-color);
+        }
+
+        .spacer {
+            width: 200px;
         }
 
         [icon="arrow-back"] {
@@ -54,14 +68,25 @@
 
         <div id="header">
             <div id="title">
-                <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
-                <span>Source Texts</span>
+                <div class="spacer">
+                    <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
+                    <span>Source Texts</span>
+                </div>
+                <div>
+                    <paper-radio-group selected="{{choices.radio}}" on-iron-select="onRadioSet">
+                        <paper-radio-button name="bylang">By Language</paper-radio-button>
+                        <paper-radio-button name="bybook">By Book</paper-radio-button>
+                    </paper-radio-group>
+                </div>
+                <div class="spacer">
+                </div>
             </div>
         </div>
 
         <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
-            <ts-lang id="lang" selected="{{selected}}" choices="{{choices}}"></ts-lang>
-            <ts-lang-cat selected="{{selected}}" choices="{{choices}}"></ts-lang-cat>
+            <ts-lang id="lang" selected="{{selected}}" choices="{{choices}}" translations="[[translations]]"></ts-lang>
+            <ts-lang-cat selected="{{selected}}" choices="{{choices}}" translations="[[translations]]"></ts-lang-cat>
+            <ts-update-results selected="{{selected}}" choices="{{choices}}" translations="[[translations]]"></ts-update-results>
         </neon-animated-pages>
 
     </template>
@@ -86,6 +111,10 @@
             choices: {
                 type: Object,
                 value: {}
+            },
+            translations: {
+                type: Array,
+                value: []
             },
             route: {
                 type: String,
@@ -115,12 +144,25 @@
         },
 
         load: function (route) {
-            var lang = this.$.lang;
             if (route === "updates") {
-                lang.updateList();
-                lang.reset();
-                this.set('selected', 0);
+                var translations = App.dataManager.getTranslations();
+
+                translations = translations.filter(function (item) {
+                    return item.resource.status.checking_level === "3";
+                });
+
+                this.set('translations', translations);
+                this.set('choices', {radio: "bylang"});
+                this.onRadioSet();
             }
+        },
+
+        onRadioSet: function () {
+            var lang = this.$.lang;
+
+            lang.updateList();
+            lang.reset();
+            this.set('selected', 0);
         },
 
         back: function () {

@@ -24,11 +24,15 @@
             font-size: 110%;
             flex: 0 0 60px;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
             padding: 0 20px;
             border-bottom: 1px solid var(--border-color);
             background: var(--card-background-color);
+        }
+
+        #header iron-icon {
+            padding: 0 10px;
         }
 
         #list {
@@ -41,7 +45,7 @@
         .row {
             display: block;
             margin: 0;
-            padding: 1em;
+            padding: 15px 25px;
             border-bottom: 1px solid var(--border-color);
             transition: background .3s, color .3s;
             cursor: pointer;
@@ -59,27 +63,39 @@
             --iron-icon-height: 18px;
             --iron-icon-width: 18px;
             color: var(--secondary-text-color);
+            margin-right: 15px;
         }
 
-        .row span {
-            padding-left: 15px;
+        .click {
+            cursor: pointer;
+        }
+
+        .bylang .book {
+            display: none;
+        }
+
+        .bybook .lang {
+            display: none;
         }
 
     </style>
 
   <template>
 
-      <div id="main">
+      <div id="main" class$="[[choices.radio]]">
           <div id="header">
-              <em>Choose a category</em>
+              <span class="click" on-tap="tolevelone">[[choices.levelone.name]]</span>
+              <iron-icon icon="chevron-right"></iron-icon>
+              <span class="lang"><em>Choose a Category</em></span>
+              <span class="book"><em>Choose a Book</em></span>
           </div>
-          <iron-list id="list" items="[[categories]]" as="category">
+          <iron-list id="list" items="[[leveltwolist]]" as="item">
               <template>
                   <div class="row" on-tap="store">
                       <div>
-                          <iron-icon class="small" icon$="[[checkicon(category.name)]]"></iron-icon>
-                          <span>[[category.name]]</span>
-                          <iron-icon class="right" icon="chevron-right"></iron-icon>
+                          <iron-icon class="small lang" icon$="[[checkicon(item.name)]]"></iron-icon>
+                          <span>[[item.name]]</span>
+                          <iron-icon class="right lang" icon="chevron-right"></iron-icon>
                       </div>
                   </div>
               </template>
@@ -101,7 +117,7 @@
               type: Number,
               value: 0,
               notify: true,
-              observer: 'createCategories'
+              observer: 'updateList'
           },
           choices: {
               type: Object,
@@ -112,7 +128,7 @@
               type: Array,
               value: []
           },
-          categories: {
+          leveltwolist: {
               type: Array,
               value: []
           }
@@ -126,38 +142,71 @@
           return name === "Other" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
       },
 
-      store: function (e) {
-          var category = e.model.category;
-          this.set('choices.category', category);
-          this.set('selected', 2);
+      tolevelone: function () {
+          this.set('selected', 0);
+          this.$.list.scrollTop = 0;
       },
 
-      createCategories: function () {
+      sortList: function (list) {
+          return list.sort(function (a, b) {
+              if (a.sort > b.sort) {
+                  return 1;
+              } else if (a.sort < b.sort) {
+                  return -1;
+              } else {
+                  return 0;
+              }
+          });
+      },
+
+      store: function (e) {
+          this.set('choices.leveltwo', e.model.item);
+          this.set('selected', 2);
+          this.$.list.scrollTop = 0;
+      },
+
+      updateList: function () {
           var mythis = this;
 
-          if (mythis.selected === 1) {
-              var lang = this.choices.language.slug;
-              var projects = App.dataManager.getTranslations(lang);
+          if (this.selected === 1) {
+              var translations = _.cloneDeep(this.translations);
               var temparray = [];
-              var otherdata = [];
+              var otherdata = false;
 
-              projects = projects.filter(function (project) {
-                  return project.resource.status.checking_level === "3";
-              });
+              if (this.choices.radio === "bylang") {
+                  translations = translations.filter(function (item) {
+                      return item.language.slug === mythis.choices.levelone.slug;
+                  });
 
-              _.forEach(_.groupBy(projects, 'project.category_id'), function (data, category) {
-                  if (category === "1") {
-                      temparray.push({"name": "Old Testament", "data": data});
-                  } else if (category === "6") {
-                      temparray.push({"name": "New Testament", "data": data});
-                  } else {
-                      otherdata = otherdata.concat(data);
+                  _.forEach(_.groupBy(translations, 'project.category_id'), function (data, category) {
+                      if (category === "1") {
+                          temparray.push({name: "Old Testament", slug: "old"});
+                      } else if (category === "6") {
+                          temparray.push({name: "New Testament", slug: "new"});
+                      } else {
+                          otherdata = true;
+                      }
+                  });
+                  if (otherdata) {
+                      temparray.push({name: "Other", slug: "oth"});
                   }
-              });
-              if (otherdata.length) {
-                  temparray.push({"name": "Other", "data": otherdata});
+                  this.set('leveltwolist', temparray);
+              } else {
+                  translations = translations.filter(function (item) {
+                      if (mythis.choices.levelone.slug === "old") {
+                          return item.project.category_id == "1" && item.language.slug === "en";
+                      } else if (mythis.choices.levelone.slug === "new") {
+                          return item.project.category_id == "6" && item.language.slug === "en";
+                      } else {
+                          return item.project.category_id != "1" && item.project.category_id != "6" && item.language.slug === "en";
+                      }
+                  });
+
+                  _.forEach(_.groupBy(translations, 'project.slug'), function (data, category) {
+                      temparray.push(data[0].project);
+                  });
+                  this.set('leveltwolist', this.sortList(temparray));
               }
-              mythis.set('categories', temparray);
           }
       },
 

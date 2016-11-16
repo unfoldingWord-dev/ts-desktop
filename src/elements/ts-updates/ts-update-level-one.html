@@ -96,7 +96,7 @@
           <div id="header">
               <input is="iron-input" id="input" class="lang" bind-value="{{query}}" on-input="updateList" placeholder="Choose a language">
               <paper-icon-button class="right lang" icon="search" on-tap="focussearch"></paper-icon-button>
-              <span class="book"><em>Choose a category</em></span>
+              <span class="book"><em>Choose a Category</em></span>
           </div>
           <iron-list id="list" items="[[levelonelist]]" as="item">
               <template>
@@ -196,7 +196,7 @@
       },
 
       updateList: function () {
-          var translations = this.translations;
+          var translations = _.cloneDeep(this.translations);
           var temparray = [];
           var otherdata = false;
 
@@ -208,15 +208,15 @@
           } else {
               _.forEach(_.groupBy(translations, 'project.category_id'), function (data, category) {
                   if (category === "1") {
-                      temparray.push({"name": "Old Testament"});
+                      temparray.push({name: "Old Testament", slug: "old"});
                   } else if (category === "6") {
-                      temparray.push({"name": "New Testament"});
+                      temparray.push({name: "New Testament", slug: "new"});
                   } else {
                       otherdata = true;
                   }
               });
               if (otherdata) {
-                  temparray.push({"name": "Other"});
+                  temparray.push({name: "Other", slug: "oth"});
               }
               this.set('levelonelist', temparray);
           }

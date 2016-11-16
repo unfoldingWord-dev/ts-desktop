@@ -8,8 +8,8 @@
 <link rel="import" href="../../components/paper-button/paper-button.html">
 <link rel="import" href="../../components/iron-signals/iron-signals.html">
 
-<link rel="import" href="./ts-lang.html">
-<link rel="import" href="./ts-lang-cat.html">
+<link rel="import" href="./ts-update-level-one.html">
+<link rel="import" href="./ts-update-level-two.html">
 <link rel="import" href="./ts-update-results.html">
 
 <dom-module id="ts-updates">
@@ -36,15 +36,19 @@
         #header {
             background-color: var(--primary-color);
             min-height: 105px;
-        }
-
-        #title {
-            font-size: 125%;
-            color: var(--reverse-text-color);
             display: flex;
             justify-content: space-between;
+            align-items: flex-start;
+            font-size: 125%;
+        }
+
+        .title {
+            color: var(--reverse-text-color);
+            display: flex;
+            justify-content: flex-start;
             align-items: center;
             min-height: 45px;
+            width: 200px;
         }
 
         paper-radio-button {
@@ -52,10 +56,6 @@
             --paper-radio-button-unchecked-color: black;
             --paper-radio-button-label-color: var(--reverse-text-color);
             --paper-radio-button-unchecked-background-color: var(--reverse-text-color);
-        }
-
-        .spacer {
-            width: 200px;
         }
 
         [icon="arrow-back"] {
@@ -67,25 +67,23 @@
     <template>
 
         <div id="header">
-            <div id="title">
-                <div class="spacer">
-                    <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
-                    <span>Source Texts</span>
-                </div>
-                <div>
-                    <paper-radio-group selected="{{choices.radio}}" on-iron-select="onRadioSet">
-                        <paper-radio-button name="bylang">By Language</paper-radio-button>
-                        <paper-radio-button name="bybook">By Book</paper-radio-button>
-                    </paper-radio-group>
-                </div>
-                <div class="spacer">
-                </div>
+            <div class="title">
+                <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
+                <span>Source Texts</span>
+            </div>
+            <div>
+                <paper-radio-group selected="{{choices.radio}}" on-iron-select="onRadioSet">
+                    <paper-radio-button name="bylang">By Language</paper-radio-button>
+                    <paper-radio-button name="bybook">By Book</paper-radio-button>
+                </paper-radio-group>
+            </div>
+            <div class="title">
             </div>
         </div>
 
         <neon-animated-pages selected="{{selected}}" exit-animation="scale-down-animation" entry-animation="scale-up-animation">
-            <ts-lang id="lang" selected="{{selected}}" choices="{{choices}}" translations="[[translations]]"></ts-lang>
-            <ts-lang-cat selected="{{selected}}" choices="{{choices}}" translations="[[translations]]"></ts-lang-cat>
+            <ts-update-level-one id="levelone" selected="{{selected}}" choices="{{choices}}" translations="[[translations]]"></ts-update-level-one>
+            <ts-update-level-two selected="{{selected}}" choices="{{choices}}" translations="[[translations]]"></ts-update-level-two>
             <ts-update-results selected="{{selected}}" choices="{{choices}}" translations="[[translations]]"></ts-update-results>
         </neon-animated-pages>
 
@@ -148,7 +146,7 @@
                 var translations = App.dataManager.getTranslations();
 
                 translations = translations.filter(function (item) {
-                    return item.resource.status.checking_level === "3";
+                    return item.resource.status.checking_level === "3" && item.resource.type !== "help";
                 });
 
                 this.set('translations', translations);
@@ -158,10 +156,10 @@
         },
 
         onRadioSet: function () {
-            var lang = this.$.lang;
+            var levelone = this.$.levelone;
 
-            lang.updateList();
-            lang.reset();
+            levelone.updateList();
+            levelone.reset();
             this.set('selected', 0);
         },
 

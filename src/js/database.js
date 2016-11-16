@@ -62,8 +62,8 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             return db.indexSync.getSourceLanguages();
         },
 
-        getTranslations: function (lang) {
-            return db.indexSync.findTranslations(lang);
+        getTranslations: function () {
+            return db.indexSync.findTranslations();
         },
 
         getTargetLanguages: function () {

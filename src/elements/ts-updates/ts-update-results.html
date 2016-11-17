@@ -2,6 +2,7 @@
 <link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../components/iron-icons/iron-icons.html">
 <link rel="import" href="../../components/iron-list/iron-list.html">
+<link rel="import" href="../../components/paper-checkbox/paper-checkbox.html">
 
 <dom-module id="ts-update-results">
 
@@ -13,7 +14,7 @@
         }
 
         #main {
-            flex: 0 0 450px;
+            flex: 0 0 550px;
             display: flex;
             flex-direction: column;
         }
@@ -30,6 +31,10 @@
             background: var(--card-background-color);
         }
 
+        #header iron-icon {
+            padding: 0 10px;
+        }
+
         #list {
             font-size: 110%;
             max-height: calc(100vh - 175px);
@@ -40,49 +45,57 @@
         .row {
             display: block;
             margin: 0;
-            padding: 1em;
+            padding: 15px 25px;
             border-bottom: 1px solid var(--border-color);
-            transition: background .3s, color .3s;
-            cursor: pointer;
-        }
-
-        .row:hover {
-            background: var(--accent-color-light);
-        }
-
-        #header iron-icon {
-            padding: 0 10px;
         }
 
         .click {
             cursor: pointer;
         }
 
-        .small {
-            --iron-icon-height: 18px;
-            --iron-icon-width: 18px;
+        .code {
             color: var(--secondary-text-color);
+            font-style: italic;
+            font-size: 80%;
+            margin: 0 15px;
         }
 
-        .row span {
-            padding-left: 15px;
+        paper-checkbox {
+            --paper-checkbox-checked-color: var(--accent-color-dark);
+            --paper-checkbox-unchecked-color: var(--accent-color-dark);
+            margin-right: 15px;
+        }
+
+        .bylang .book {
+            display: none;
+        }
+
+        .bybook .lang {
+            display: none;
         }
 
     </style>
 
   <template>
 
-      <div id="main">
+      <div id="main" class$="[[choices.radio]]">
           <div id="header">
-              <span class="click" on-tap="togroup">[[choices.category.name]]</span>
+              <span class="click" on-tap="tolevelone">[[choices.levelone.name]]</span>
               <iron-icon icon="chevron-right"></iron-icon>
-              <em>Choose Source(s)</em>
+              <span class="click" on-tap="toleveltwo">[[choices.leveltwo.name]]</span>
+              <iron-icon icon="chevron-right"></iron-icon>
+              <span><em>Choose Source(s)</em></span>
           </div>
-          <iron-list id="list" items="[[choices.category.data]]" as="choice">
+          <iron-list id="list" items="[[resultslist]]" as="item">
               <template>
                   <div class="row" on-tap="store">
                       <div>
-                          <span>[[choice.project.name]]</span> - <span>[[choice.resource.name]]</span>
+                          <paper-checkbox checked="{{item.selected}}"></paper-checkbox>
+                          <span class="lang">[[item.project.name]]</span>
+                          <span class="book">[[item.language.name]]</span>
+                          <span class="code book">(<span>[[item.language.slug]]</span>)</span>
+                          <span> - </span>
+                          <span>[[item.resource.name]]</span>
                       </div>
                   </div>
               </template>
@@ -102,7 +115,8 @@
           selected: {
               type: Number,
               value: 0,
-              notify: true
+              notify: true,
+              observer: 'updateList'
           },
           choices: {
               type: Object,
@@ -112,6 +126,10 @@
           translations: {
               type: Array,
               value: []
+          },
+          resultslist: {
+              type: Array,
+              value: []
           }
       },
 
@@ -119,8 +137,71 @@
           Polymer.IronResizableBehavior
       ],
 
-      togroup: function () {
+      tolevelone: function () {
+          this.set('selected', 0);
+          this.$.list.scrollTop = 0;
+      },
+
+      toleveltwo: function () {
           this.set('selected', 1);
+          this.$.list.scrollTop = 0;
+      },
+
+      sortList: function (list) {
+          if (this.choices.radio === "bylang") {
+              return list.sort(function (a, b) {
+                  if (a.project.sort > b.project.sort) {
+                      return 1;
+                  } else if (a.project.sort < b.project.sort) {
+                      return -1;
+                  } else {
+                      return 0;
+                  }
+              });
+          } else {
+              return list.sort(function (a, b) {
+                  if (a.language.slug.toLowerCase() > b.language.slug.toLowerCase()) {
+                      return 1;
+                  } else if (a.language.slug.toLowerCase() < b.language.slug.toLowerCase()) {
+                      return -1;
+                  } else {
+                      return 0;
+                  }
+              });
+          }
+      },
+
+      updateList: function () {
+          var mythis = this;
+
+          if (this.selected === 2) {
+              var translations = _.cloneDeep(this.translations);
+
+              if (this.choices.radio === "bylang") {
+                  translations = translations.filter(function (item) {
+                      return item.language.slug === mythis.choices.levelone.slug;
+                  });
+
+                  translations = translations.filter(function (item) {
+                      if (mythis.choices.leveltwo.slug === "old") {
+                          return item.project.category_id == "1";
+                      } else if (mythis.choices.leveltwo.slug === "new") {
+                          return item.project.category_id == "6";
+                      } else {
+                          return item.project.category_id != "1" && item.project.category_id != "6";
+                      }
+                  });
+              } else {
+                  translations = translations.filter(function (item) {
+                      return item.project.slug === mythis.choices.leveltwo.slug;
+                  });
+              }
+              translations.forEach(function (item) {
+                  item.selected = false;
+              });
+
+              this.set('resultslist', this.sortList(translations));
+          }
       },
 
       ready: function() {

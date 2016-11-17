@@ -3,6 +3,7 @@
 <link rel="import" href="../../components/iron-icons/iron-icons.html">
 <link rel="import" href="../../components/iron-list/iron-list.html">
 <link rel="import" href="../../components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
 
 <dom-module id="ts-update-results">
 
@@ -26,7 +27,7 @@
             display: flex;
             justify-content: flex-start;
             align-items: center;
-            padding: 0 20px;
+            padding: 0 10px;
             border-bottom: 1px solid var(--border-color);
             background: var(--card-background-color);
         }
@@ -35,9 +36,23 @@
             padding: 0 10px;
         }
 
+        #header paper-icon-button {
+            margin-right: 20px;
+        }
+
+        #toolbar {
+            flex: 0 0 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 25px;
+            border: 1px solid black;
+            background: var(--card-background-color);
+        }
+
         #list {
             font-size: 110%;
-            max-height: calc(100vh - 175px);
+            max-height: calc(100vh - 225px);
             color: var(--primary-text-color);
             background: var(--card-background-color);
         }
@@ -66,6 +81,14 @@
             margin-right: 15px;
         }
 
+        paper-button {
+            color: var(--secondary-text-color);
+        }
+
+        paper-button:hover {
+            color: var(--accent-color);
+        }
+
         .bylang .book {
             display: none;
         }
@@ -80,17 +103,23 @@
 
       <div id="main" class$="[[choices.radio]]">
           <div id="header">
+              <paper-icon-button icon="arrow-back" on-tap="toleveltwo"></paper-icon-button>
               <span class="click" on-tap="tolevelone">[[choices.levelone.name]]</span>
               <iron-icon icon="chevron-right"></iron-icon>
               <span class="click" on-tap="toleveltwo">[[choices.leveltwo.name]]</span>
               <iron-icon icon="chevron-right"></iron-icon>
               <span><em>Choose Source(s)</em></span>
           </div>
+          <div id="toolbar">
+              <paper-checkbox id="select" on-change="selectAll">Select All</paper-checkbox>
+              <paper-checkbox id="unselect" on-change="unselectAll">Unselect All</paper-checkbox>
+              <paper-button id="confirm" on-tap="download">Confirm</paper-button>
+          </div>
           <iron-list id="list" items="[[resultslist]]" as="item">
               <template>
-                  <div class="row" on-tap="store">
+                  <div class="row">
                       <div>
-                          <paper-checkbox checked="{{item.selected}}"></paper-checkbox>
+                          <paper-checkbox checked="{{item.selected}}" on-change="setBoxes"></paper-checkbox>
                           <span class="lang">[[item.project.name]]</span>
                           <span class="book">[[item.language.name]]</span>
                           <span class="code book">(<span>[[item.language.slug]]</span>)</span>
@@ -136,6 +165,55 @@
       behaviors: [
           Polymer.IronResizableBehavior
       ],
+
+      download: function () {
+          console.log("downloading");
+      },
+
+      setBoxes: function () {
+          var list = this.resultslist;
+          var select = this.$.select;
+          var unselect = this.$.unselect;
+          var confirm = this.$.confirm;
+          var checked = false;
+          var unchecked = false;
+
+          list.forEach(function (item) {
+              if (item.selected) {
+                  checked = true;
+              } else {
+                  unchecked = true;
+              }
+          });
+
+          select.checked = !unchecked;
+          select.disabled = !unchecked;
+          unselect.checked = false;
+          unselect.disabled = !checked;
+          confirm.disabled = !checked;
+      },
+
+      selectAll: function () {
+          var list = _.cloneDeep(this.resultslist);
+
+          list.forEach(function (item) {
+              item.selected = true;
+          });
+
+          this.set('resultslist', list);
+          this.setBoxes();
+      },
+
+      unselectAll: function () {
+          var list = _.cloneDeep(this.resultslist);
+
+          list.forEach(function (item) {
+              item.selected = false;
+          });
+
+          this.set('resultslist', list);
+          this.setBoxes();
+      },
 
       tolevelone: function () {
           this.set('selected', 0);
@@ -201,6 +279,7 @@
               });
 
               this.set('resultslist', this.sortList(translations));
+              this.setBoxes();
           }
       },
 

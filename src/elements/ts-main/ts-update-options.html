@@ -69,6 +69,14 @@
             font-weight: bold;
         }
 
+        .nooption {
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
     </style>
 
     <template>
@@ -91,8 +99,8 @@
             <div class="option" on-tap="language">
                 <span class="optiontitle">Get New Target Languages</span>
             </div>
-            <div class="option" on-tap="update">
-                <span class="optiontitle">Check for Update to translationStudio</span>
+            <div class="nooption">
+                <span class="optiontitle"><a href="https://github.com/unfoldingWord-dev/ts-desktop/releases">Check for Update to translationStudio</a></span>
             </div>
         </div>
         <div id="footer">
@@ -125,12 +133,15 @@
             this.fire('view');
         },
 
-        update: function () {
-            this.fire('update');
-        },
-
         ready: function () {
-
+            var shell = require('electron').shell;
+            var links = this.getElementsByTagName('a');
+            for (var i = 0; i < links.length; i++) {
+                links[i].addEventListener('click', function (event) {
+                    event.preventDefault();
+                    shell.openExternal(this.href);
+                });
+            }
         }
 
     });

@@ -42,13 +42,17 @@
             font-size: 125%;
         }
 
+        #header iron-icon {
+            margin: 0 15px;
+        }
+
         .title {
             color: var(--reverse-text-color);
             display: flex;
             justify-content: flex-start;
             align-items: center;
             min-height: 45px;
-            width: 200px;
+            width: 300px;
         }
 
         paper-radio-button {
@@ -58,8 +62,8 @@
             --paper-radio-button-unchecked-background-color: var(--reverse-text-color);
         }
 
-        [icon="arrow-back"] {
-            margin: 0 1em 0 .2em;
+        .click {
+            cursor: pointer;
         }
 
     </style>
@@ -68,7 +72,9 @@
 
         <div id="header">
             <div class="title">
-                <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
+                <iron-icon class="click" icon="arrow-back" on-tap="gohome"></iron-icon>
+                <span class="click" on-tap="gohome">Home</span>
+                <iron-icon icon="chevron-right"></iron-icon>
                 <span>Source Texts</span>
             </div>
             <div>
@@ -163,7 +169,7 @@
             this.set('selected', 0);
         },
 
-        back: function () {
+        gohome: function () {
             this.set('selected', 0);
             this.set('route', "home");
         },

@@ -27,17 +27,13 @@
             display: flex;
             justify-content: flex-start;
             align-items: center;
-            padding: 0 10px;
+            padding: 0 5px;
             border-bottom: 1px solid var(--border-color);
             background: var(--card-background-color);
         }
 
         #header iron-icon {
-            padding: 0 10px;
-        }
-
-        #header paper-icon-button {
-            margin-right: 20px;
+            margin: 0 15px;
         }
 
         #toolbar {
@@ -82,11 +78,11 @@
         }
 
         paper-button {
-            color: var(--secondary-text-color);
-        }
-
-        paper-button:hover {
-            color: var(--accent-color);
+            background: var(--accent-color);
+            color: var(--reverse-text-color);
+            text-transform: uppercase;
+            margin: 0;
+            padding: 5px 10px;
         }
 
         .bylang .book {
@@ -103,7 +99,7 @@
 
       <div id="main" class$="[[choices.radio]]">
           <div id="header">
-              <paper-icon-button icon="arrow-back" on-tap="toleveltwo"></paper-icon-button>
+              <iron-icon class="click" icon="arrow-back" on-tap="toleveltwo"></iron-icon>
               <span class="click" on-tap="tolevelone">[[choices.levelone.name]]</span>
               <iron-icon icon="chevron-right"></iron-icon>
               <span class="click" on-tap="toleveltwo">[[choices.leveltwo.name]]</span>
@@ -113,7 +109,7 @@
           <div id="toolbar">
               <paper-checkbox id="select" on-change="selectAll">Select All</paper-checkbox>
               <paper-checkbox id="unselect" on-change="unselectAll">Unselect All</paper-checkbox>
-              <paper-button id="confirm" on-tap="download">Confirm</paper-button>
+              <paper-button raised id="confirm" on-tap="download">Download</paper-button>
           </div>
           <iron-list id="list" items="[[resultslist]]" as="item">
               <template>

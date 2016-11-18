@@ -26,17 +26,13 @@
             display: flex;
             justify-content: flex-start;
             align-items: center;
-            padding: 0 10px;
+            padding: 0 5px;
             border-bottom: 1px solid var(--border-color);
             background: var(--card-background-color);
         }
 
         #header iron-icon {
-            padding: 0 10px;
-        }
-
-        #header paper-icon-button {
-            margin-right: 20px;
+            margin: 0 15px;
         }
 
         #list {
@@ -88,7 +84,7 @@
 
       <div id="main" class$="[[choices.radio]]">
           <div id="header">
-              <paper-icon-button icon="arrow-back" on-tap="tolevelone"></paper-icon-button>
+              <iron-icon class="click" icon="arrow-back" on-tap="tolevelone"></iron-icon>
               <span class="click" on-tap="tolevelone">[[choices.levelone.name]]</span>
               <iron-icon icon="chevron-right"></iron-icon>
               <span class="lang"><em>Choose a Category</em></span>

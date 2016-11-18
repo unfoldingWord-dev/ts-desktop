@@ -102,7 +102,7 @@
               <template>
                   <div class="row" on-tap="store">
                       <div>
-                          <iron-icon class="small book" icon$="[[checkicon(item.name)]]"></iron-icon>
+                          <iron-icon class="small book" icon$="[[checkicon(item.slug)]]"></iron-icon>
                           <span>[[item.name]]</span>
                           <span class="code lang">(<span>[[item.slug]]</span>)</span>
                           <iron-icon class="right book" icon="chevron-right"></iron-icon>
@@ -155,8 +155,8 @@
           this.$.input.focus();
       },
 
-      checkicon: function (name) {
-          return name === "Other" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
+      checkicon: function (id) {
+          return id === "old" || id === "new" ? 'uw-project-icon:uw-project-icon' : 'uw-obs-icon:uw-obs-icon';
       },
 
       sortList: function (list) {
@@ -211,6 +211,8 @@
                       temparray.push({name: "Old Testament", slug: "old"});
                   } else if (category === "6") {
                       temparray.push({name: "New Testament", slug: "new"});
+                  } else if (category === "15367") {
+                      temparray.push({name: "translationAcademy", slug: "ta"});
                   } else {
                       otherdata = true;
                   }

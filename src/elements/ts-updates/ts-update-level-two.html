@@ -101,7 +101,7 @@
               <template>
                   <div class="row" on-tap="store">
                       <div>
-                          <iron-icon class="small lang" icon$="[[checkicon(item.name)]]"></iron-icon>
+                          <iron-icon class="small lang" icon$="[[checkicon(item.slug)]]"></iron-icon>
                           <span><span>[[item.name]]</span><span class="code book">(<span>[[item.slug]]</span>)</span></span>
                           <iron-icon class="right lang" icon="chevron-right"></iron-icon>
                       </div>
@@ -146,8 +146,8 @@
           Polymer.IronResizableBehavior
       ],
 
-      checkicon: function (name) {
-          return name === "Other" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
+      checkicon: function (id) {
+          return id === "old" || id === "new" ? 'uw-project-icon:uw-project-icon' : 'uw-obs-icon:uw-obs-icon';
       },
 
       tolevelone: function () {
@@ -191,6 +191,8 @@
                           temparray.push({name: "Old Testament", slug: "old"});
                       } else if (category === "6") {
                           temparray.push({name: "New Testament", slug: "new"});
+                      } else if (category === "15367") {
+                          temparray.push({name: "translationAcademy", slug: "ta"});
                       } else {
                           otherdata = true;
                       }
@@ -205,8 +207,10 @@
                           return item.project.category_id == "1" && item.language.slug === "en";
                       } else if (mythis.choices.levelone.slug === "new") {
                           return item.project.category_id == "6" && item.language.slug === "en";
+                      } else if (mythis.choices.levelone.slug === "ta") {
+                          return item.project.category_id == "15367" && item.language.slug === "en";
                       } else {
-                          return item.project.category_id != "1" && item.project.category_id != "6" && item.language.slug === "en";
+                          return item.project.category_id != "1" && item.project.category_id != "6" && item.project.category_id != "15367" && item.language.slug === "en";
                       }
                   });
 

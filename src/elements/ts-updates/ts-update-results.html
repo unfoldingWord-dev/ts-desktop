@@ -89,6 +89,10 @@
             padding: 8px 10px;
         }
 
+        paper-button[disabled] {
+            background: var(--border-color);
+        }
+
         .bylang .book {
             display: none;
         }
@@ -308,8 +312,10 @@
                           return item.project.category_id == "1";
                       } else if (mythis.choices.leveltwo.slug === "new") {
                           return item.project.category_id == "6";
+                      } else if (mythis.choices.leveltwo.slug === "ta") {
+                          return item.project.category_id == "15367";
                       } else {
-                          return item.project.category_id != "1" && item.project.category_id != "6";
+                          return item.project.category_id != "1" && item.project.category_id != "6" && item.project.category_id != "15367";
                       }
                   });
               } else {

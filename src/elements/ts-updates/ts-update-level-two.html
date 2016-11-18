@@ -26,13 +26,13 @@
             display: flex;
             justify-content: flex-start;
             align-items: center;
-            padding: 0 5px;
+            padding: 0 10px;
             border-bottom: 1px solid var(--border-color);
             background: var(--card-background-color);
         }
 
         #header iron-icon {
-            margin: 0 15px;
+            margin: 0 10px;
         }
 
         #list {
@@ -66,6 +66,13 @@
             margin-right: 15px;
         }
 
+        .code {
+            color: var(--secondary-text-color);
+            font-style: italic;
+            font-size: 80%;
+            margin-left: 10px;
+        }
+
         .click {
             cursor: pointer;
         }
@@ -85,7 +92,7 @@
       <div id="main" class$="[[choices.radio]]">
           <div id="header">
               <iron-icon class="click" icon="arrow-back" on-tap="tolevelone"></iron-icon>
-              <span class="click" on-tap="tolevelone">[[choices.levelone.name]]</span>
+              <span class="click" on-tap="tolevelone"><span>[[choices.levelone.name]]</span><span class="code lang">(<span>[[choices.levelone.slug]]</span>)</span></span>
               <iron-icon icon="chevron-right"></iron-icon>
               <span class="lang"><em>Choose a Category</em></span>
               <span class="book"><em>Choose a Book</em></span>
@@ -95,7 +102,7 @@
                   <div class="row" on-tap="store">
                       <div>
                           <iron-icon class="small lang" icon$="[[checkicon(item.name)]]"></iron-icon>
-                          <span>[[item.name]]</span>
+                          <span><span>[[item.name]]</span><span class="code book">(<span>[[item.slug]]</span>)</span></span>
                           <iron-icon class="right lang" icon="chevron-right"></iron-icon>
                       </div>
                   </div>

@@ -15,7 +15,7 @@
         }
 
         #main {
-            flex: 0 0 550px;
+            flex: 0 0 600px;
             display: flex;
             flex-direction: column;
         }
@@ -27,13 +27,13 @@
             display: flex;
             justify-content: flex-start;
             align-items: center;
-            padding: 0 5px;
+            padding: 0 10px;
             border-bottom: 1px solid var(--border-color);
             background: var(--card-background-color);
         }
 
         #header iron-icon {
-            margin: 0 15px;
+            margin: 0 10px;
         }
 
         #toolbar {
@@ -68,7 +68,11 @@
             color: var(--secondary-text-color);
             font-style: italic;
             font-size: 80%;
-            margin: 0 15px;
+            margin-left: 10px;
+        }
+
+        .right {
+            float: right;
         }
 
         paper-checkbox {
@@ -82,7 +86,7 @@
             color: var(--reverse-text-color);
             text-transform: uppercase;
             margin: 0;
-            padding: 5px 10px;
+            padding: 8px 10px;
         }
 
         .bylang .book {
@@ -100,9 +104,9 @@
       <div id="main" class$="[[choices.radio]]">
           <div id="header">
               <iron-icon class="click" icon="arrow-back" on-tap="toleveltwo"></iron-icon>
-              <span class="click" on-tap="tolevelone">[[choices.levelone.name]]</span>
+              <span class="click" on-tap="tolevelone"><span>[[choices.levelone.name]]</span><span class="code lang">(<span>[[choices.levelone.slug]]</span>)</span></span>
               <iron-icon icon="chevron-right"></iron-icon>
-              <span class="click" on-tap="toleveltwo">[[choices.leveltwo.name]]</span>
+              <span class="click" on-tap="toleveltwo"><span>[[choices.leveltwo.name]]</span><span class="code book">(<span>[[choices.leveltwo.slug]]</span>)</span></span>
               <iron-icon icon="chevron-right"></iron-icon>
               <span><em>Choose Source(s)</em></span>
           </div>
@@ -117,10 +121,10 @@
                       <div>
                           <paper-checkbox checked="{{item.selected}}" on-change="setBoxes"></paper-checkbox>
                           <span class="lang">[[item.project.name]]</span>
+                          <span class="code lang">(<span>[[item.project.slug]]</span>)</span>
                           <span class="book">[[item.language.name]]</span>
                           <span class="code book">(<span>[[item.language.slug]]</span>)</span>
-                          <span> - </span>
-                          <span>[[item.resource.name]]</span>
+                          <span class="right"><span>[[item.resource.name]]</span><span class="code">(<span>[[item.resource.slug]]</span>)</span></span>
                       </div>
                   </div>
               </template>

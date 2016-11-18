@@ -264,7 +264,13 @@
                   } else if (a.project.sort < b.project.sort) {
                       return -1;
                   } else {
-                      return 0;
+                      if (a.resource.slug > b.resource.slug) {
+                          return -1;
+                      } else if (a.resource.slug < b.resource.slug) {
+                          return 1;
+                      } else {
+                          return 0;
+                      }
                   }
               });
           } else {
@@ -274,7 +280,13 @@
                   } else if (a.language.slug.toLowerCase() < b.language.slug.toLowerCase()) {
                       return -1;
                   } else {
-                      return 0;
+                      if (a.resource.slug > b.resource.slug) {
+                          return -1;
+                      } else if (a.resource.slug < b.resource.slug) {
+                          return 1;
+                      } else {
+                          return 0;
+                      }
                   }
               });
           }

@@ -1405,7 +1405,7 @@
                 mythis.setheights();
             });
             window.addEventListener("keyup", function (e) {
-                if (e.ctrlKey && e.keyCode == 70 && mythis.route === "translate" && mythis.selected === 3 && mythis.currentproject.projectmeta.project_type_class === "standard") {
+                if ((e.ctrlKey || e.metaKey) && e.keyCode == 70 && mythis.route === "translate" && mythis.selected === 3 && mythis.currentproject.projectmeta.project_type_class === "standard") {
                     mythis.gosearch();
                 }
             });

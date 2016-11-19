@@ -33,31 +33,37 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
         },
 
         checkForContainer: function (filePath) {
-            var resourcePath;
-            var sourcePath;
+            var mythis = this;
 
             return db.loadResourceContainer(filePath)
                 .then(function (container) {
-                    var containername = container.slug;
-                    resourcePath = path.join(resourceDir, containername);
-                    sourcePath = path.join(sourceDir, containername + ".tsrc");
-                })
-                .then(function () {
-                    return utils.fs.stat(resourcePath).then(utils.ret(true)).catch(utils.ret(false));
-                })
+                    return mythis.containerExists(container.slug);
+                });
+        },
+
+        containerExists: function (container) {
+            var resourcePath = path.join(resourceDir, container);
+            var sourcePath = path.join(sourceDir, container + ".tsrc");
+
+            return utils.fs.stat(resourcePath).then(utils.ret(true)).catch(utils.ret(false))
                 .then(function (resexists) {
-                    if (!resexists) {
-                        return utils.fs.stat(sourcePath).then(utils.ret(true)).catch(utils.ret(false))
-                            .then(function (srcexists) {
-                                return srcexists;
-                            });
-                    }
-                    return true;
+                    return utils.fs.stat(sourcePath).then(utils.ret(true)).catch(utils.ret(false))
+                        .then(function (srcexists) {
+                            return resexists || srcexists;
+                        });
                 });
         },
 
         getMetrics: function () {
             return db.indexSync.getMetrics();
+        },
+
+        getSourceLanguages: function () {
+            return db.indexSync.getSourceLanguages();
+        },
+
+        getTranslations: function () {
+            return db.indexSync.findTranslations();
         },
 
         getTargetLanguages: function () {
@@ -83,50 +89,37 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                 return mythis.getSourceDetails(res.project_slug, res.source_language_slug, res.slug);
             });
 
-            return utils.chain(this.validateSource.bind(this))(mapped);
+            return utils.chain(this.validateExistence.bind(this))(mapped);
         },
 
-        validateSource: function (source) {
+        validateExistence: function (source) {
+            var mythis = this;
+            var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;
+
+            return mythis.containerExists(container)
+                .then(function (exists) {
+                    source.updating = false;
+                    source.exists = exists;
+                    return source;
+                });
+        },
+
+        validateCurrent: function (source) {
             var mythis = this;
             var lang = source.language_id;
             var proj = source.project_id;
             var res = source.resource_id;
             var container = lang + "_" + proj + "_" + res;
-            var sourcePath = path.join(sourceDir, container + ".tsrc");
-            var resourcePath = path.join(resourceDir, container);
+            var manifest = path.join(resourceDir, container, "package.json");
 
-            return utils.fs.stat(resourcePath).then(utils.ret(true)).catch(utils.ret(false))
-                .then(function (resexists) {
-                    if (resexists) {
-                        return resourcePath;
-                    }
-                    return utils.fs.stat(sourcePath).then(utils.ret(true)).catch(utils.ret(false))
-                        .then(function (srcexists) {
-                            if (srcexists) {
-                                return mythis.activateContainer(lang, proj, res)
-                                    .then(function () {
-                                        return resourcePath;
-                                    });
-                            }
-                            return false;
+            return mythis.activateContainer(lang, proj, res)
+                .then(function () {
+                    return utils.fs.readFile(manifest)
+                        .then(function (contents) {
+                            var json = JSON.parse(contents);
+                            source.current = json.resource.status.pub_date === source.date_modified;
+                            return source;
                         });
-                })
-                .then(function (containerpath) {
-                    if (containerpath) {
-                        var manifest = path.join(containerpath, "package.json");
-                        return utils.fs.readFile(manifest)
-                            .then(function (contents) {
-                                var json = JSON.parse(contents);
-                                if (json.resource.status.pub_date === source.date_modified) {
-                                    source.status = "current";
-                                } else {
-                                    source.status = "update";
-                                }
-                                return source;
-                            });
-                    }
-                    source.status = "download";
-                    return source;
                 });
         },
 
@@ -142,22 +135,20 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
 
             return mythis.downloadContainer(language, project, resource)
                 .then(function () {
-                    return mythis.downloadContainer(language, project, "tn")
-                        .catch(function () {
-                            return true;
-                        });
+                    if (resource === "ulb") {
+                        return mythis.downloadContainer(language, project, "tn")
+                            .catch(function () {
+                                return true;
+                            });
+                    }
                 })
                 .then(function () {
-                    return mythis.downloadContainer(language, project, "tq")
-                        .catch(function () {
-                            return true;
-                        });
-                })
-                .then(function () {
-                    return mythis.downloadContainer(language, project, "udb")
-                        .catch(function () {
-                            return true;
-                        });
+                    if (resource === "ulb") {
+                        return mythis.downloadContainer(language, project, "tq")
+                            .catch(function () {
+                                return true;
+                            });
+                    }
                 });
         },
 

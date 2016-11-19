@@ -509,8 +509,6 @@
             var mythis = this;
             var projectmeta = this.currentproject.projectmeta;
             var modal = this.$.modal;
-            var selected = [];
-            var available = [];
 
             mythis.set('options', {});
             mythis.set('options.body', "Loading source options. Please wait...");
@@ -532,16 +530,14 @@
                                 inarray = true;
                             }
                         });
-                        if (inarray) {
-                            selected.push(source);
-                        } else {
-                            available.push(source);
-                        }
+                        source.selected = inarray;
                     });
 
-                    modal.set('selected', modal.sortlist(selected));
-                    modal.set('available', modal.sortlist(available));
-                    modal.searchfilter();
+                    modal.set('master', sources);
+
+                    return modal.organizeSources();
+                })
+                .then(function () {
                     mythis.fire('iron-signal', {name: 'closeloading'});
                     setTimeout(function() {
                         mythis.$.sourcepopup.open();
@@ -710,6 +706,7 @@
             mythis.set('currentproject.statedata', {});
             mythis.set('currentproject.rawdata', {});
             mythis.set('currentproject.conflicts', 0);
+            mythis.fire('iron-signal', {name: 'updatebemode'});
             review.closesearch();
             mythis.retrievesource();
             if (nav === "translate") {
@@ -1210,7 +1207,7 @@
                     if (selected > 0) {
                         mythis.set('selected', selected);
                     } else {
-                        if (typeclass === "standard") {
+                        if (typeclass === "standard" && bemode) {
                             mythis.set('selected', 1);
                         } else {
                             mythis.set('selected', 3);
@@ -1307,10 +1304,12 @@
 
         gohome: function () {
             var mythis = this;
+
             mythis.$.reviewmode.closeresource();
             mythis.$.conflictmode.closeresource();
             mythis.savestate();
             mythis.stoptimers();
+
             return mythis.saveAll()
                 .then(function () {
                     setTimeout(function() {
@@ -1368,10 +1367,18 @@
         },
 
         gosettings: function () {
-            this.savestate();
-            this.setleftanimation();
+            var mythis = this;
+
+            mythis.savestate();
+            mythis.setleftanimation();
             App.configurator.setValue("backto", this.route);
-            this.route = "settings";
+
+            return mythis.saveAll()
+                .then(function () {
+                    setTimeout(function() {
+                        mythis.set('route', "settings");
+                    }, 500);
+                });
         },
 
         gosearch: function () {
@@ -1398,7 +1405,7 @@
                 mythis.setheights();
             });
             window.addEventListener("keyup", function (e) {
-                if (e.ctrlKey && e.keyCode == 70 && mythis.route === "translate" && mythis.selected === 3 && mythis.currentproject.projectmeta.project_type_class === "standard") {
+                if ((e.ctrlKey || e.metaKey) && e.keyCode == 70 && mythis.route === "translate" && mythis.selected === 3 && mythis.currentproject.projectmeta.project_type_class === "standard") {
                     mythis.gosearch();
                 }
             });

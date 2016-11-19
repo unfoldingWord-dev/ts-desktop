@@ -10,6 +10,7 @@
 <link rel="import" href="../ts-review/ts-review.html">
 <link rel="import" href="../ts-translate/ts-translate.html">
 <link rel="import" href="../ts-settings/ts-settings.html">
+<link rel="import" href="../ts-updates/ts-updates.html">
 <link rel="import" href="./ts-terms.html">
 <link rel="import" href="./ts-repo-search.html">
 <link rel="import" href="./ts-import-options.html">
@@ -162,6 +163,7 @@
           <ts-settings data-route="settings" route="{{route}}" currentproject="[[currentproject]]" options="{{options}}"></ts-settings>
           <ts-profile data-route="profile" currentuser="[[currentuser]]" options="{{options}}"></ts-profile>
           <ts-print data-route="preview" route="{{route}}" currentproject="[[currentproject]]" options="{{options}}" id="preview"></ts-print>
+          <ts-updates data-route="updates" route="{{route}}" options="{{options}}"></ts-updates>
           <ts-terms data-route="terms"></ts-terms>
       </neon-animated-pages>
       <div id="statusbar">
@@ -197,7 +199,7 @@
       </paper-dialog>
 
       <paper-dialog id="update" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-          <ts-update-options on-language="updateLanguages" on-source="updateSources"></ts-update-options>
+          <ts-update-options on-language="updateLanguages" on-source="updateSources" on-view="goToUpdates"></ts-update-options>
       </paper-dialog>
 
       <paper-dialog id="license" class="popup legal" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -433,7 +435,7 @@
           var before = App.dataManager.getMetrics();
 
           mythis.$.update.close();
-          mythis.showLoadingMessage('Updating list of Source Texts. Please remember, this process will only update the list of Source Texts. This may take some time. Please wait...');
+          mythis.showLoadingMessage('Checking for New and Updated Source Texts. This may take a while. Please wait...');
 
           setTimeout(function () {
               return App.dataManager.updateSources()
@@ -460,6 +462,11 @@
                       mythis.showErrorMessage('Update Failed', errmessage, err);
                   });
           }, 500);
+      },
+
+      goToUpdates: function () {
+          this.$.update.close();
+          this.set('route', 'updates');
       },
 
       deleteProject: function (event, data) {
@@ -1161,6 +1168,14 @@
               .then(function () {
                   App.ipc.send('loading-done');
                   mythis.$.home.setsortfields();
+
+                  var appData = App.configurator.getAppData();
+                  var libraryBuild = App.configurator.getValue("libraryBuild");
+
+                  if (libraryBuild && appData.version === "11.0.0" && libraryBuild != appData.build) {
+                      App.configurator.setUserSetting("bemode", true);
+                  }
+                  App.configurator.setValue("libraryBuild", appData.build);
               });
       }
 

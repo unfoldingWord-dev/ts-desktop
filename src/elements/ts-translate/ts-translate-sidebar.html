@@ -94,9 +94,9 @@
                 <paper-icon-button class="current dropdown-trigger" icon="more-vert"></paper-icon-button>
                 <paper-menu class="dropdown-content">
                     <paper-item on-tap="gohome"><iron-icon class="smallicon" icon="project:project"></iron-icon>Home</paper-item>
-                    <paper-item on-tap="goreview"><iron-icon class="smallicon" icon="cloud-done"></iron-icon>Project Review</paper-item>
+                    <paper-item on-tap="goreview"><iron-icon class="smallicon" icon="done-all"></iron-icon>Project Review</paper-item>
                     <paper-item on-tap="goexport"><iron-icon class="smallicon" icon="file-upload"></iron-icon>Upload/Export</paper-item>
-                    <paper-item on-tap="goprint" class$="[[printclass(currentproject.projectmeta.project_type_class)]]"><iron-icon class="smallicon" icon="print"></iron-icon>Print</paper-item>
+                    <paper-item on-tap="goprint" class$="[[printclass(currentproject.projectmeta.project_type_class, currentproject.projectmeta.source_translations)]]"><iron-icon class="smallicon" icon="print"></iron-icon>Print</paper-item>
                     <paper-item on-tap="goacademy"><iron-icon class="smallicon" icon="book"></iron-icon>translationAcademy</paper-item>
                     <paper-item on-tap="gofeedback"><iron-icon class="smallicon" icon="announcement"></iron-icon>Feedback</paper-item>
                     <paper-item on-tap="gosearch" class$="[[searchclass(currentproject.projectmeta.project_type_class, selected)]]"><iron-icon class="smallicon" icon="search"></iron-icon>Search</paper-item>
@@ -137,8 +137,8 @@
             this.set('bemode', App.configurator.getUserSetting('bemode'));
         },
 
-        printclass: function (typeclass) {
-            return typeclass === "standard" ? '' : 'hide';
+        printclass: function (typeclass, sources) {
+            return typeclass === "standard" && sources.length ? '' : 'hide';
         },
 
         searchclass: function (typeclass, selected) {
@@ -262,7 +262,7 @@
         },
 
         ready: function() {
-            this.updatemode();
+
         }
     });
 

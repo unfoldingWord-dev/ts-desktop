@@ -120,10 +120,6 @@ process.stdout.write = console.log.bind(console);
         var libraryBuild = configurator.getValue("libraryBuild");
         var indexstat;
 
-        if (libraryBuild && appData.version === "11.0.0" && libraryBuild != appData.build) {
-            configurator.setUserSetting("bemode", true);
-        }
-
         try {
             indexstat = fs.statSync(libraryPath);
         } catch(e) {}
@@ -135,8 +131,6 @@ process.stdout.write = console.log.bind(console);
             fs.writeFileSync(libraryPath, content);
         }
         mkdirp.sync(resourceDir);
-
-        configurator.setValue("libraryBuild", appData.build);
 
         var db = new Db(libraryPath, resourceDir);
 

@@ -1,0 +1,233 @@
+
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../ts-icons/ts-icons.html">
+<link rel="import" href="../../components/iron-list/iron-list.html">
+<link rel="import" href="../../components/iron-input/iron-input.html">
+
+<dom-module id="ts-update-level-one">
+
+    <style>
+
+        :host {
+            display: flex;
+            justify-content: center;
+        }
+
+        #main {
+            flex: 0 0 450px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #header {
+            color: var(--secondary-text-color);
+            font-size: 110%;
+            flex: 0 0 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--card-background-color);
+        }
+
+        #list {
+            font-size: 110%;
+            max-height: calc(100vh - 175px);
+            color: var(--primary-text-color);
+            background: var(--card-background-color);
+        }
+
+        .row {
+            display: block;
+            margin: 0;
+            padding: 15px 25px;
+            border-bottom: 1px solid var(--border-color);
+            transition: background .3s, color .3s;
+            cursor: pointer;
+        }
+
+        .row:hover {
+            background: var(--accent-color-light);
+        }
+
+        .right {
+            float: right;
+        }
+
+        .small {
+            --iron-icon-height: 18px;
+            --iron-icon-width: 18px;
+            color: var(--secondary-text-color);
+            margin-right: 15px;
+        }
+
+        input {
+            border: none;
+            font-size: 110%;
+            font-style: italic;
+            font-family: sans-serif;
+            width: 75%;
+            padding: 0.25em 5px;
+            margin-left: -5px;
+        }
+
+        .code {
+            color: var(--secondary-text-color);
+            font-style: italic;
+            font-size: 80%;
+            margin-left: 10px;
+        }
+
+        .bylang .book {
+            display: none;
+        }
+
+        .bybook .lang {
+            display: none;
+        }
+
+    </style>
+
+  <template>
+
+      <div id="main" class$="[[choices.radio]]">
+          <div id="header">
+              <input is="iron-input" id="input" class="lang" bind-value="{{query}}" on-input="updateList" placeholder="Choose a language">
+              <paper-icon-button class="right lang" icon="search" on-tap="focussearch"></paper-icon-button>
+              <span class="book"><em>Choose a Category</em></span>
+          </div>
+          <iron-list id="list" items="[[levelonelist]]" as="item">
+              <template>
+                  <div class="row" on-tap="store">
+                      <div>
+                          <iron-icon class="small book" icon$="[[checkicon(item.slug)]]"></iron-icon>
+                          <span>[[item.name]]</span>
+                          <span class="code lang">(<span>[[item.slug]]</span>)</span>
+                          <iron-icon class="right book" icon="chevron-right"></iron-icon>
+                      </div>
+                  </div>
+              </template>
+          </iron-list>
+      </div>
+
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+
+      is: 'ts-update-level-one',
+
+      properties: {
+          selected: {
+              type: Number,
+              value: 0,
+              notify: true
+          },
+          choices: {
+              type: Object,
+              value: {},
+              notify: true
+          },
+          translations: {
+              type: Array,
+              value: []
+          },
+          levelonelist: {
+              type: Array,
+              value: []
+          },
+          query: {
+              type: String,
+              value: ""
+          }
+      },
+
+      behaviors: [
+          Polymer.IronResizableBehavior
+      ],
+
+      focussearch: function () {
+          this.$.input.focus();
+      },
+
+      checkicon: function (id) {
+          return id === "old" || id === "new" ? 'uw-project-icon:uw-project-icon' : 'uw-obs-icon:uw-obs-icon';
+      },
+
+      sortList: function (list) {
+          return list.sort(function (a, b) {
+              if (a.slug.toLowerCase() > b.slug.toLowerCase()) {
+                  return 1;
+              } else if (a.slug.toLowerCase() < b.slug.toLowerCase()) {
+                  return -1;
+              } else {
+                  return 0;
+              }
+          });
+      },
+
+      filterList: function (list) {
+          var query = this.query;
+          var search = App.utils.startsWithBase.bind(null, query);
+
+          if (query) {
+              return list.filter(function (item) {
+                  return search(item.slug) || search(item.name);
+              });
+          } else {
+              return list;
+          }
+      },
+
+      store: function (e) {
+          this.set('choices.levelone', e.model.item);
+          this.set('selected', 1);
+          this.reset();
+      },
+
+      reset: function () {
+          this.set('query', "");
+          this.$.list.scrollTop = 0;
+      },
+
+      updateList: function () {
+          var translations = _.cloneDeep(this.translations);
+          var temparray = [];
+          var otherdata = false;
+
+          if (this.choices.radio === "bylang") {
+              _.forEach(_.groupBy(translations, 'language.slug'), function (data, category) {
+                  temparray.push(data[0].language);
+              });
+              this.set('levelonelist', this.sortList(this.filterList(temparray)));
+          } else {
+              _.forEach(_.groupBy(translations, 'project.category_id'), function (data, category) {
+                  if (category === "1") {
+                      temparray.push({name: "Old Testament", slug: "old"});
+                  } else if (category === "6") {
+                      temparray.push({name: "New Testament", slug: "new"});
+                  } else if (category === "15367") {
+                      temparray.push({name: "translationAcademy", slug: "ta"});
+                  } else {
+                      otherdata = true;
+                  }
+              });
+              if (otherdata) {
+                  temparray.push({name: "Other", slug: "oth"});
+              }
+              this.set('levelonelist', temparray);
+          }
+      },
+
+      ready: function () {
+
+      }
+
+  });
+
+</script>

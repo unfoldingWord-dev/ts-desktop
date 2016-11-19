@@ -1,0 +1,231 @@
+
+<link rel="import" href="../../components/iron-list/iron-list.html">
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../ts-icons/ts-icons.html">
+
+<dom-module id="ts-update-level-two">
+
+    <style>
+
+        :host {
+            display: flex;
+            justify-content: center;
+        }
+
+        #main {
+            flex: 0 0 450px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #header {
+            color: var(--secondary-text-color);
+            font-size: 110%;
+            flex: 0 0 60px;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 0 10px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--card-background-color);
+        }
+
+        #header iron-icon {
+            margin: 0 10px;
+        }
+
+        #list {
+            font-size: 110%;
+            max-height: calc(100vh - 175px);
+            color: var(--primary-text-color);
+            background: var(--card-background-color);
+        }
+
+        .row {
+            display: block;
+            margin: 0;
+            padding: 15px 25px;
+            border-bottom: 1px solid var(--border-color);
+            transition: background .3s, color .3s;
+            cursor: pointer;
+        }
+
+        .row:hover {
+            background: var(--accent-color-light);
+        }
+
+        .right {
+            float: right;
+        }
+
+        .small {
+            --iron-icon-height: 18px;
+            --iron-icon-width: 18px;
+            color: var(--secondary-text-color);
+            margin-right: 15px;
+        }
+
+        .code {
+            color: var(--secondary-text-color);
+            font-style: italic;
+            font-size: 80%;
+            margin-left: 10px;
+        }
+
+        .click {
+            cursor: pointer;
+        }
+
+        .bylang .book {
+            display: none;
+        }
+
+        .bybook .lang {
+            display: none;
+        }
+
+    </style>
+
+  <template>
+
+      <div id="main" class$="[[choices.radio]]">
+          <div id="header">
+              <iron-icon class="click" icon="arrow-back" on-tap="tolevelone"></iron-icon>
+              <span class="click" on-tap="tolevelone"><span>[[choices.levelone.name]]</span><span class="code lang">(<span>[[choices.levelone.slug]]</span>)</span></span>
+              <iron-icon icon="chevron-right"></iron-icon>
+              <span class="lang"><em>Choose a Category</em></span>
+              <span class="book"><em>Choose a Book</em></span>
+          </div>
+          <iron-list id="list" items="[[leveltwolist]]" as="item">
+              <template>
+                  <div class="row" on-tap="store">
+                      <div>
+                          <iron-icon class="small lang" icon$="[[checkicon(item.slug)]]"></iron-icon>
+                          <span><span>[[item.name]]</span><span class="code book">(<span>[[item.slug]]</span>)</span></span>
+                          <iron-icon class="right lang" icon="chevron-right"></iron-icon>
+                      </div>
+                  </div>
+              </template>
+          </iron-list>
+      </div>
+
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+
+      is: 'ts-update-level-two',
+
+      properties: {
+          selected: {
+              type: Number,
+              value: 0,
+              notify: true,
+              observer: 'updateList'
+          },
+          choices: {
+              type: Object,
+              value: {},
+              notify: true
+          },
+          translations: {
+              type: Array,
+              value: []
+          },
+          leveltwolist: {
+              type: Array,
+              value: []
+          }
+      },
+
+      behaviors: [
+          Polymer.IronResizableBehavior
+      ],
+
+      checkicon: function (id) {
+          return id === "old" || id === "new" ? 'uw-project-icon:uw-project-icon' : 'uw-obs-icon:uw-obs-icon';
+      },
+
+      tolevelone: function () {
+          this.set('selected', 0);
+          this.$.list.scrollTop = 0;
+      },
+
+      sortList: function (list) {
+          return list.sort(function (a, b) {
+              if (a.sort > b.sort) {
+                  return 1;
+              } else if (a.sort < b.sort) {
+                  return -1;
+              } else {
+                  return 0;
+              }
+          });
+      },
+
+      store: function (e) {
+          this.set('choices.leveltwo', e.model.item);
+          this.set('selected', 2);
+          this.$.list.scrollTop = 0;
+      },
+
+      updateList: function () {
+          var mythis = this;
+
+          if (this.selected === 1) {
+              var translations = _.cloneDeep(this.translations);
+              var temparray = [];
+              var otherdata = false;
+
+              if (this.choices.radio === "bylang") {
+                  translations = translations.filter(function (item) {
+                      return item.language.slug === mythis.choices.levelone.slug;
+                  });
+
+                  _.forEach(_.groupBy(translations, 'project.category_id'), function (data, category) {
+                      if (category === "1") {
+                          temparray.push({name: "Old Testament", slug: "old"});
+                      } else if (category === "6") {
+                          temparray.push({name: "New Testament", slug: "new"});
+                      } else if (category === "15367") {
+                          temparray.push({name: "translationAcademy", slug: "ta"});
+                      } else {
+                          otherdata = true;
+                      }
+                  });
+                  if (otherdata) {
+                      temparray.push({name: "Other", slug: "oth"});
+                  }
+                  this.set('leveltwolist', temparray);
+              } else {
+                  translations = translations.filter(function (item) {
+                      if (mythis.choices.levelone.slug === "old") {
+                          return item.project.category_id == "1" && item.language.slug === "en";
+                      } else if (mythis.choices.levelone.slug === "new") {
+                          return item.project.category_id == "6" && item.language.slug === "en";
+                      } else if (mythis.choices.levelone.slug === "ta") {
+                          return item.project.category_id == "15367" && item.language.slug === "en";
+                      } else {
+                          return item.project.category_id != "1" && item.project.category_id != "6" && item.project.category_id != "15367" && item.language.slug === "en";
+                      }
+                  });
+
+                  _.forEach(_.groupBy(translations, 'project.slug'), function (data, category) {
+                      temparray.push(data[0].project);
+                  });
+                  this.set('leveltwolist', this.sortList(temparray));
+              }
+          }
+      },
+
+      ready: function () {
+
+      }
+
+  });
+
+</script>

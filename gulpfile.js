@@ -287,6 +287,7 @@ gulp.task('release', function(done) {
                 console.error(e);
             });
             releaseNotes.write('<link rel="stylesheet" href="style.css">');
+            releaseNotes.write('<meta name="viewport" content="width=device-width, initial-scale=1.0">');
             fs.createReadStream('scripts/release/style.css').pipe(fs.createWriteStream('release/style.css'));
             releaseNotes.write(`<h1>tS Desktop build #<span id="build-num">${p.build}</span></h1><ul>`);
             if(process.env.TRAVIS_COMMIT) {

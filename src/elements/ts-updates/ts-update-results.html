@@ -179,6 +179,7 @@
           var mythis = this;
           var list = _.cloneDeep(this.resultslist);
           var promises = [];
+          var english = false;
 
           mythis.set('options', {});
           mythis.set('options.body', "Downloading Source Texts. Please wait...");
@@ -193,7 +194,14 @@
               list.forEach(function (item) {
                   var download = App.dataManager.downloadProjectContainers(item.language.slug, item.project.slug, item.resource.slug);
                   promises.push(download);
+                  if (item.language.slug === "en" && item.resource.slug !== "tw") {
+                      english = true;
+                  }
               });
+
+              if (english) {
+                  promises.push(App.dataManager.downloadContainer('en', 'bible', 'tw'));
+              }
 
               return Promise.all(promises)
                   .then(function () {

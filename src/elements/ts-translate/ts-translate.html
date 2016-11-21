@@ -920,6 +920,7 @@
                 chunk.wordcontent = frames[i].title;
                 chunk.resources = [];
                 chunk.index = i;
+                chunk.search = {text: ""};
                 chunkarray.push(chunk);
             }
             this.set('currentproject.chunks', chunkarray);

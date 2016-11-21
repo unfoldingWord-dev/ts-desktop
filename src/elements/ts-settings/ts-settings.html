@@ -30,6 +30,10 @@
             min-height: 50px;
         }
 
+        .header iron-icon {
+            margin: 0 15px;
+        }
+
         .heading {
             font-size: 125%;
             color: var(--reverse-text-color);
@@ -37,10 +41,6 @@
             justify-content: flex-start;
             align-items: center;
             min-height: 45px;
-        }
-
-        [icon="arrow-back"] {
-            margin: 0 1em 0 .2em;
         }
 
         .body {
@@ -92,13 +92,19 @@
             display: none;
         }
 
+        .click {
+            cursor: pointer;
+        }
+
     </style>
 
     <template>
 
         <div class="header">
             <div class="heading">
-                <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
+                <iron-icon class="click" icon="arrow-back" on-tap="goback"></iron-icon>
+                <span class="click" on-tap="goback">[[createtitle(backto)]]</span>
+                <iron-icon icon="chevron-right"></iron-icon>
                 <span>Settings</span>
             </div>
         </div>
@@ -142,7 +148,12 @@
         properties: {
             route: {
                 type: String,
-                notify: true
+                notify: true,
+                observer: 'load'
+            },
+            backto: {
+                type: String,
+                value: ''
             },
             options: {
                 type: Object,
@@ -202,8 +213,18 @@
             }.bind(this));
         },
 
-        back: function () {
-            var backto = App.configurator.getValue("backto");
+        createtitle: function (backto) {
+            return backto === "translate" ? "Project" : "Home";
+        },
+
+        load: function () {
+            if (this.route === "settings") {
+                this.set('backto', App.configurator.getValue("backto"));
+            }
+        },
+
+        goback: function () {
+            var backto = this.backto;
             var projectmeta = this.currentproject.projectmeta;
 
             this.fire('iron-signal', {name: 'translateleft'});

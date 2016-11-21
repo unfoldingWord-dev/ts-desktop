@@ -40,7 +40,7 @@
         .row {
             display: block;
             margin: 0;
-            padding: 1em;
+            padding: 15px 25px;
             border-bottom: 1px solid var(--border-color);
             transition: background .3s, color .3s;
             cursor: pointer;
@@ -62,9 +62,12 @@
 
         .right {
             float: right;
+        }
+
+        .code {
             color: var(--secondary-text-color);
             font-style: italic;
-            font-size: 80%
+            font-size: 80%;
         }
 
         input {
@@ -91,7 +94,7 @@
                   <div class$="[[checkclass(language.id)]]" on-tap="store">
                       <div>
                           <span>[[language.name]]</span>
-                          <span class="right">[[language.id]]</span>
+                          <span class="right code">[[language.id]]</span>
                       </div>
                   </div>
               </template>

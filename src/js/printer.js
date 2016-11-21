@@ -50,16 +50,26 @@ function PrintManager(configurator) {
             });
         },
 
-        savePdf: function (data, filePath) {
+        savePdf: function (title, license, body, filePath) {
+            var fontSizeMap = {
+                'small': '50%',
+                'normal': '100%',
+                'large': '150%'
+            };
             var tempPath = configurator.getValue('tempDir');
             var input = path.join(tempPath, 'print.html');
             var cssPath = path.join(srcDir, 'css', 'print.css');
             var font = configurator.getUserSetting('targetfont').name;
-            var header = '\<!DOCTYPE html\>\<html\>\<head\>\<link rel="stylesheet" href="' + cssPath + '"\>\<\/head\>\<body style="font-family: ' + font + ';"\>';
-            var footer = '\<\/body\>\<\/html\>';
+            var sizeValue = configurator.getUserSetting('targetsize').name.toLowerCase();
+            var size = fontSizeMap[sizeValue];
+            var mainheader = '\<!DOCTYPE html\>\<html\>\<head\>\<link rel="stylesheet" href="' + cssPath + '"\>\<\/head\>\<body\>';
+            var mainfooter = '\<\/body\>\<\/html\>';
+            var titlegroup = '\<h1 id="title" class="break titles" style="font-family: ' + font + ';"\>' + title + '\<\/h1\>';
+            var licensegroup = '\<div id="license" class="break"\>' + license + '\<\/div\>';
+            var bodygroup = '\<div id="textholder" style="font-family: ' + font + '; font-size: ' + size + ';"\>' + body + '\<\/div\>';
 
             mkdirp.sync(tempPath);
-            fs.writeFileSync(input, header + data + footer);
+            fs.writeFileSync(input, mainheader + titlegroup + licensegroup + bodygroup + mainfooter);
 
             return Prince().inputs(input)
                 .output(filePath)

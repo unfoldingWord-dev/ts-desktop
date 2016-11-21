@@ -102,12 +102,12 @@
         </div>
         <div id="content">
             <h1 id="title" class="break titles targetfont"></h1>
-            <div class="break">
+            <div id="license" class="break">
                 <marked-element id="licenseholder">
                     <div class="markdown-html"></div>
                 </marked-element>
             </div>
-            <div id="textholder" class="targetfont"></div>
+            <div id="textholder" class="targetfont targetsize"></div>
         </div>
 
     </template>
@@ -201,8 +201,12 @@
             mythis.set('options.loading', true);
             mythis.fire('iron-signal', {name: 'openloading'});
 
+            var title = mythis.$.title.innerHTML;
+            var license = mythis.$.license.innerHTML;
+            var body = mythis.$.textholder.innerHTML;
+
             setTimeout(function() {
-                return App.printManager.savePdf(mythis.$.content.innerHTML, filePath)
+                return App.printManager.savePdf(title, license, body, filePath)
                     .then(function () {
                         mythis.set('options.title', "PDF Created");
                         mythis.set('options.body', "Your project has been successfully saved to a PDF.");

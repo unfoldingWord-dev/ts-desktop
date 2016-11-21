@@ -234,7 +234,7 @@
         load: function (route) {
             var lang = this.$.languages;
             if (route === "new") {
-                lang.updateList();
+                lang.load();
                 this.set('selected', 0);
             }
         },

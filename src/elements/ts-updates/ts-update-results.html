@@ -205,9 +205,21 @@
 
               return Promise.all(promises)
                   .then(function () {
-                      mythis.unselectAll();
+                      mythis.tolevelone();
                       mythis.set('options.title', "Download Complete");
                       mythis.set('options.body', list.length + " Source Texts have been downloaded.");
+                      mythis.set('options.loading', false);
+                  })
+                  .catch(function (err) {
+                      var errmessage = 'An error occurred while downloading';
+                      if (err.syscall === "getaddrinfo") {
+                          errmessage = "Unable to connect to server";
+                      }
+                      if (err.syscall === "read") {
+                          errmessage = "Lost connection to server";
+                      }
+                      mythis.set('options.title', "Download Failed");
+                      mythis.set('options.body', errmessage);
                       mythis.set('options.loading', false);
                   });
           }, 500);

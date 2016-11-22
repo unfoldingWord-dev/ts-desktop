@@ -42,6 +42,13 @@
             color: var(--accent-color);
         }
 
+        #progress {
+            display: flex;
+            flex-direction: column;
+            font-size: 90%;
+            align-items: center;
+        }
+
         paper-progress {
             --paper-progress-active-color: var(--accent-color);
             width: 250px;
@@ -72,10 +79,17 @@
         </div>
         <div id="footer">
             <template is="dom-if" if="{{options.loading}}">
-                <paper-progress indeterminate="true"></paper-progress>
+                <template is="dom-if" if="{{!options.progress}}">
+                    <paper-progress indeterminate="true"></paper-progress>
+                </template>
+                <template is="dom-if" if="{{options.progress}}">
+                    <div id="progress">
+                        <paper-progress value="{{options.value}}"></paper-progress>
+                        <span><span>{{options.value}}</span>% of <span>{{options.type}}</span></span>
+                    </div>
+                </template>
             </template>
             <template is="dom-if" if="{{!options.loading}}">
-                <paper-button class$="[[homeclass(options.showhome)]]" dialog-confirm on-tap="gohome">Return Home</paper-button>
                 <paper-button dialog-dismiss>Close</paper-button>
             </template>
         </div>
@@ -99,14 +113,6 @@
 
         linkclass: function (showlink) {
             return showlink ? 'url' : 'hide';
-        },
-
-        homeclass: function (showhome) {
-            return showhome ? '' : 'hide';
-        },
-
-        gohome: function () {
-            this.fire('gohome');
         },
 
         ready: function () {

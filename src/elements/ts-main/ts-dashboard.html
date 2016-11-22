@@ -401,21 +401,21 @@
           var before = App.dataManager.getMetrics();
 
           mythis.$.update.close();
-          mythis.showLoadingMessage('Updating list of Target Languages. This may take some time. Please wait...');
+          mythis.showLoadingMessage('Checking for new Target Languages. This may take a while. Please wait...');
 
           setTimeout(function () {
               return App.dataManager.updateLanguages()
                   .then(function () {
                       var after = App.dataManager.getMetrics();
                       var diff = after.target_language_count - before.target_language_count;
-                      var msg = diff + ' new Target Languages have been added.';
+                      var msg = diff + ' Target Languages have been added.';
                       if (diff < 1) {
-                          msg = 'No new Target Languages have been added.';
+                          msg = 'No Target Languages have been added.';
                       }
                       if (diff === 1) {
-                          msg = '1 new Target Language has been added.';
+                          msg = '1 Target Language has been added.';
                       }
-                      mythis.showMessage('Update Complete', 'The Target Language list has been updated. ' + msg);
+                      mythis.showMessage('Update Complete', msg);
                   })
                   .catch(function (err) {
                       var errmessage = 'An error occurred while updating';
@@ -434,22 +434,28 @@
           var mythis = this;
           var before = App.dataManager.getMetrics();
 
+          var onProgress = function (type, total, complete) {
+              mythis.set('options.progress', true);
+              mythis.set('options.value', Math.round(complete / total * 100));
+              mythis.set('options.type', type);
+          };
+
           mythis.$.update.close();
           mythis.showLoadingMessage('Checking for New and Updated Source Texts. This may take a while. Please wait...');
 
           setTimeout(function () {
-              return App.dataManager.updateSources()
+              return App.dataManager.updateSources(onProgress)
                   .then(function () {
                       var after = App.dataManager.getMetrics();
                       var diff = after.resource_count_level3 - before.resource_count_level3;
-                      var msg = diff + ' new Source Texts have been added.';
+                      var msg = diff + ' new Source Texts are available to be downloaded.';
                       if (diff < 1) {
                           msg = 'No new Source Texts have been added.';
                       }
                       if (diff === 1) {
-                          msg = '1 new Source Text has been added.';
+                          msg = '1 new Source Text is available to be downloaded.';
                       }
-                      mythis.showMessage('Update Complete', 'The list of Source Texts has been updated. ' + msg);
+                      mythis.showMessage('Update Complete', msg);
                   })
                   .catch(function (err) {
                       var errmessage = 'An error occurred while updating';

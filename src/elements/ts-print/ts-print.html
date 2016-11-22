@@ -18,6 +18,10 @@
             min-height: 50px;
         }
 
+        #header iron-icon {
+            margin: 0 15px;
+        }
+
         #heading {
             font-size: 125%;
             color: var(--reverse-text-color);
@@ -27,8 +31,8 @@
             min-height: 45px;
         }
 
-        [icon="arrow-back"] {
-            margin: 0 1em 0 .2em;
+        .click {
+            cursor: pointer;
         }
 
         #content {
@@ -95,19 +99,21 @@
 
         <div id="header">
             <div id="heading">
-                <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
+                <iron-icon class="click" icon="arrow-back" on-tap="goback"></iron-icon>
+                <span class="click" on-tap="goback">[[createtitle(backto)]]</span>
+                <iron-icon icon="chevron-right"></iron-icon>
                 <span>Print Preview</span>
                 <paper-button raised class="button" on-tap="print">Save to PDF</paper-button>
             </div>
         </div>
         <div id="content">
             <h1 id="title" class="break titles targetfont"></h1>
-            <div class="break">
+            <div id="license" class="break">
                 <marked-element id="licenseholder">
                     <div class="markdown-html"></div>
                 </marked-element>
             </div>
-            <div id="textholder" class="targetfont"></div>
+            <div id="textholder" class="targetfont targetsize"></div>
         </div>
 
     </template>
@@ -127,7 +133,12 @@
         properties: {
             route: {
                 type: String,
-                notify: true
+                notify: true,
+                observer: 'load'
+            },
+            backto: {
+                type: String,
+                value: ''
             },
             options: {
                 type: Object,
@@ -171,9 +182,25 @@
             }
         },
 
-        back: function () {
+        createtitle: function (backto) {
+            if (backto === "translate") {
+                return "Project";
+            } else if (backto === "review") {
+                return "Review";
+            } else {
+                return "Home";
+            }
+        },
+
+        load: function () {
+            if (this.route === "preview") {
+                this.set('backto', App.configurator.getValue("backto"));
+            }
+        },
+
+        goback: function () {
             var mythis = this;
-            var backto = App.configurator.getValue("backto");
+            var backto = this.backto;
 
             mythis.$.content.scrollTop = 0;
             mythis.set('route', backto);
@@ -201,8 +228,12 @@
             mythis.set('options.loading', true);
             mythis.fire('iron-signal', {name: 'openloading'});
 
+            var title = mythis.$.title.innerHTML;
+            var license = mythis.$.license.innerHTML;
+            var body = mythis.$.textholder.innerHTML;
+
             setTimeout(function() {
-                return App.printManager.savePdf(mythis.$.content.innerHTML, filePath)
+                return App.printManager.savePdf(title, license, body, filePath)
                     .then(function () {
                         mythis.set('options.title', "PDF Created");
                         mythis.set('options.body', "Your project has been successfully saved to a PDF.");

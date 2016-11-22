@@ -20,8 +20,8 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             return db.updateCatalogs();
         },
 
-        updateSources: function () {
-            return db.updateSources(apiURL);
+        updateSources: function (onProgress) {
+            return db.updateSources(apiURL, onProgress);
         },
 
         updateChunks: function () {

@@ -46,7 +46,16 @@
     },
     {
         "name": "targetsize",
-        "mainText": "Font Size",
+        "mainText": "Target Translation Font Size",
+        "value": {"name": "Normal"},
+        "options": [{"name": "Small"}, {"name": "Normal"}, {"name": "Large"}],
+        "group": "general",
+        "enabled": true,
+        "visible": true
+    },
+    {
+        "name": "sourcesize",
+        "mainText": "Source Translation Font Size",
         "value": {"name": "Normal"},
         "options": [{"name": "Small"}, {"name": "Normal"}, {"name": "Large"}],
         "group": "general",

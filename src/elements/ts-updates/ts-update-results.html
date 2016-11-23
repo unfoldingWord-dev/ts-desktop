@@ -215,10 +215,33 @@
 
               return promises
                   .then(function () {
-                      console.log("results", results);
+                      var title = "Download Complete";
+                      var passmessage = "";
+                      var failmessage = "";
+                      var passed = results.filter(function (item) {
+                          return item.success;
+                      });
+                      var failed = results.filter(function (item) {
+                          return !item.success;
+                      });
+
+                      if (failed.length === results.length) {
+                          title = "Download Failed";
+                      }
+                      if (passed.length === 1) {
+                          passmessage = "1 Source Text has been downloaded.";
+                      } else if (passed.length > 1) {
+                          passmessage = passed.length + " Source Texts have been downloaded.";
+                      }
+                      if (failed.length === 1) {
+                          failmessage = "1 download has failed.";
+                      } else if (failed.length > 1) {
+                          failmessage = failed.length + " downloads have failed.";
+                      }
+
                       mythis.unselectAll();
-                      mythis.set('options.title', "Download Complete");
-                      mythis.set('options.body', list.length + " Source Texts have been downloaded.");
+                      mythis.set('options.title', title);
+                      mythis.set('options.body', passmessage + "\n" + failmessage);
                       mythis.set('options.loading', false);
                   })
                   .catch(function (err) {
@@ -232,9 +255,6 @@
                       if (err.status === 404) {
                           errmessage = "Source not found."
                       }
-                      mythis.set('options.title', "Download Failed");
-                      mythis.set('options.body', errmessage);
-                      mythis.set('options.loading', false);
                   });
           }, 500);
       },

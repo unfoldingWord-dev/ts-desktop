@@ -702,21 +702,22 @@
                 }
             };
 
-            mythis.set('currentproject.projectmeta', projectmeta);
-            mythis.set('currentproject.statedata', {});
-            mythis.set('currentproject.rawdata', {});
-            mythis.set('currentproject.conflicts', 0);
-            mythis.fire('iron-signal', {name: 'updatebemode'});
-            review.closesearch();
-            mythis.retrievesource();
-            if (nav === "translate") {
-                mythis.route = "translate";
-            }
+            mythis.set('options', {});
+            mythis.set('options.body', "Loading project. Please wait...");
+            mythis.set('options.loading', true);
+            mythis.fire('iron-signal', {name: 'openloading'});
+
             setTimeout(function() {
-                mythis.set('options', {});
-                mythis.set('options.body', "Loading project. Please wait...");
-                mythis.set('options.loading', true);
-                mythis.fire('iron-signal', {name: 'openloading'});
+                mythis.set('currentproject.projectmeta', projectmeta);
+                mythis.set('currentproject.statedata', {});
+                mythis.set('currentproject.rawdata', {});
+                mythis.set('currentproject.conflicts', 0);
+                mythis.fire('iron-signal', {name: 'updatebemode'});
+                review.closesearch();
+                mythis.retrievesource();
+                if (nav === "translate") {
+                    mythis.route = "translate";
+                }
                 setTimeout(function() {
                     return App.projectsManager.loadTargetTranslation(projectmeta)
                         .then(function (translation) {
@@ -737,7 +738,7 @@
                             mythis.set('options.body', errmessage);
                             mythis.set('options.loading', false);
                         });
-                }, 250);
+                }, 500);
             }, 500);
         },
 

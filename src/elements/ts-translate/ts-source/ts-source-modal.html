@@ -331,7 +331,7 @@
 
             return mythis.organizeSources()
                 .then(function () {
-                    return App.dataManager.downloadProjectContainers(source.language_id, source.project_id, source.resource_id);
+                    return App.dataManager.downloadProjectContainers(source);
                 })
                 .then(function () {
                     mythis.set('master.' + index + '.exists', true);

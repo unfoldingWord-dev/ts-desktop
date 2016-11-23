@@ -130,8 +130,11 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                 });
         },
 
-        downloadProjectContainers: function (language, project, resource) {
+        downloadProjectContainers: function (item) {
             var mythis = this;
+            var language = item.language_id || item.language.slug;
+            var project = item.project_id || item.project.slug;
+            var resource = item.resource_id || item.resource.slug;
 
             return mythis.downloadContainer(language, project, resource)
                 .then(function () {

@@ -192,7 +192,7 @@
               });
 
               list.forEach(function (item) {
-                  var download = App.dataManager.downloadProjectContainers(item.language.slug, item.project.slug, item.resource.slug);
+                  var download = App.dataManager.downloadProjectContainers(item);
                   promises.push(download);
                   if (item.language.slug === "en" && item.resource.slug !== "tw") {
                       english = true;

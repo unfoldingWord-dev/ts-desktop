@@ -218,6 +218,9 @@
                       if (err.syscall === "read") {
                           errmessage = "Lost connection to server";
                       }
+                      if (err.status === 404) {
+                          errmessage = "Source not found."
+                      }
                       mythis.set('options.title', "Download Failed");
                       mythis.set('options.body', errmessage);
                       mythis.set('options.loading', false);

@@ -241,20 +241,8 @@
 
                       mythis.unselectAll();
                       mythis.set('options.title', title);
-                      mythis.set('options.body', passmessage + "\n" + failmessage);
+                      mythis.set('options.body', passmessage + "  " + failmessage);
                       mythis.set('options.loading', false);
-                  })
-                  .catch(function (err) {
-                      var errmessage = 'An error occurred while downloading';
-                      if (err.syscall === "getaddrinfo") {
-                          errmessage = "Unable to connect to server";
-                      }
-                      if (err.syscall === "read") {
-                          errmessage = "Lost connection to server";
-                      }
-                      if (err.status === 404) {
-                          errmessage = "Source not found."
-                      }
                   });
           }, 500);
       },

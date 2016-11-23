@@ -141,8 +141,18 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                     item.success = true;
                 })
                 .catch(function (err) {
+                    var errmessage = 'Unknown Error while downloading';
+                    if (err.syscall === "getaddrinfo") {
+                        errmessage = "Unable to connect to server";
+                    }
+                    if (err.syscall === "read") {
+                        errmessage = "Lost connection to server";
+                    }
+                    if (err.status === 404) {
+                        errmessage = "Source not found on server";
+                    }
                     item.success = false;
-                    item.error = err;
+                    item.error = errmessage;
                 })
                 .then(function () {
                     if (resource === "ulb") {

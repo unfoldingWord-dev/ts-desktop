@@ -138,6 +138,13 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
 
             return mythis.downloadContainer(language, project, resource)
                 .then(function () {
+                    item.success = true;
+                })
+                .catch(function (err) {
+                    item.success = false;
+                    item.error = err;
+                })
+                .then(function () {
                     if (resource === "ulb") {
                         return mythis.downloadContainer(language, project, "tn")
                             .catch(function () {
@@ -152,6 +159,9 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                                 return true;
                             });
                     }
+                })
+                .then(function () {
+                    return item;
                 });
         },
 

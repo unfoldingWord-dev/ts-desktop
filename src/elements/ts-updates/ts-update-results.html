@@ -178,8 +178,9 @@
       download: function () {
           var mythis = this;
           var list = _.cloneDeep(this.resultslist);
-          var promises = [];
           var english = false;
+          var promises = Promise.resolve(false);
+          var results = [];
 
           mythis.set('options', {});
           mythis.set('options.body', "Downloading Source Texts. Please wait...");
@@ -192,20 +193,30 @@
               });
 
               list.forEach(function (item) {
-                  var download = App.dataManager.downloadProjectContainers(item);
-                  promises.push(download);
+                  promises = promises.then(function () {
+                          return App.dataManager.downloadProjectContainers(item);
+                      })
+                      .then(function (result) {
+                          results.push(result);
+                      });
                   if (item.language.slug === "en" && item.resource.slug !== "tw") {
                       english = true;
                   }
               });
 
               if (english) {
-                  promises.push(App.dataManager.downloadContainer('en', 'bible', 'tw'));
+                  promises = promises.then(function () {
+                          return App.dataManager.downloadContainer('en', 'bible', 'tw')
+                              .catch(function () {
+                                  return true;
+                              });
+                      });
               }
 
-              return Promise.all(promises)
+              return promises
                   .then(function () {
-                      mythis.tolevelone();
+                      console.log("results", results);
+                      mythis.unselectAll();
                       mythis.set('options.title', "Download Complete");
                       mythis.set('options.body', list.length + " Source Texts have been downloaded.");
                       mythis.set('options.loading', false);

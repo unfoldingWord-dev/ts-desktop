@@ -395,21 +395,33 @@
         },
 
         addSource: function (event) {
+            var mythis = this;
             var source = event.model.source;
             var index = this.findIndex(source);
+
+            this.disableButtons();
 
             if (this.selected.length < 3) {
                 this.set('master.' + index + '.selected', true);
             }
-            return this.organizeSources();
+            return this.organizeSources()
+                .then(function () {
+                    mythis.enableButtons();
+                });
         },
 
         removeSource: function (event) {
+            var mythis = this;
             var source = event.model.source;
             var index = this.findIndex(source);
 
+            this.disableButtons();
+
             this.set('master.' + index + '.selected', false);
-            return this.organizeSources();
+            return this.organizeSources()
+                .then(function () {
+                    mythis.enableButtons();
+                });
         },
 
         ready: function () {

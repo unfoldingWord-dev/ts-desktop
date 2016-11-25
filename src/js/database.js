@@ -151,8 +151,8 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                     if (err.status === 404) {
                         errmessage = "Source not found on server";
                     }
-                    item.success = false;
-                    item.error = errmessage;
+                    item.failure = true;
+                    item.errmsg = errmessage;
                 })
                 .then(function () {
                     if (resource === "ulb") {

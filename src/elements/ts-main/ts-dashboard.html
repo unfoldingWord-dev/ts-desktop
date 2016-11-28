@@ -446,13 +446,13 @@
               } else if (end) {
                   value = 100;
               }
-
-              mythis.set('options.progress', true);
               mythis.set('options.value', value);
           };
 
           mythis.$.update.close();
           mythis.showLoadingMessage('Updating List of Source Texts. This may take a while. Please wait...');
+          mythis.set('options.progress', true);
+          mythis.set('options.value', 0);
 
           setTimeout(function () {
               return App.dataManager.updateSources(onProgress)

@@ -215,6 +215,8 @@
           mythis.set('options', {});
           mythis.set('options.body', "Downloading Source Texts. Please wait...");
           mythis.set('options.loading', true);
+          mythis.set('options.progress', true);
+          mythis.set('options.value', 0);
           mythis.fire('iron-signal', {name: 'openloading'});
 
           setTimeout(function() {
@@ -230,7 +232,6 @@
                           completed++;
                           var total = english ? list.length + 1 : list.length;
                           var value = Math.round(completed / total * 100);
-                          mythis.set('options.progress', true);
                           mythis.set('options.value', value);
                           results.push(result);
                       });

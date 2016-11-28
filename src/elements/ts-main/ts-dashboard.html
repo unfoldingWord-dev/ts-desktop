@@ -401,7 +401,7 @@
           var before = App.dataManager.getMetrics();
 
           mythis.$.update.close();
-          mythis.showLoadingMessage('Checking for new Target Languages. This may take a while. Please wait...');
+          mythis.showLoadingMessage('Updating List of Target Languages. This may take a while. Please wait...');
 
           setTimeout(function () {
               return App.dataManager.updateLanguages()
@@ -433,15 +433,26 @@
       updateSources: function () {
           var mythis = this;
           var before = App.dataManager.getMetrics();
+          var end = false;
 
           var onProgress = function (type, total, complete) {
+              var value = 0;
+
+              if (type === "projects") {
+                  value = Math.round(complete / total * 10);
+              } else if (type === "resources") {
+                  value = Math.round(complete / total * 89) + 10;
+                  end = true;
+              } else if (end) {
+                  value = 100;
+              }
+
               mythis.set('options.progress', true);
-              mythis.set('options.value', Math.round(complete / total * 100));
-              mythis.set('options.type', type);
+              mythis.set('options.value', value);
           };
 
           mythis.$.update.close();
-          mythis.showLoadingMessage('Checking for New and Updated Source Texts. This may take a while. Please wait...');
+          mythis.showLoadingMessage('Updating List of Source Texts. This may take a while. Please wait...');
 
           setTimeout(function () {
               return App.dataManager.updateSources(onProgress)
@@ -455,6 +466,7 @@
                       if (diff === 1) {
                           msg = '1 new Source Text is available to be downloaded.';
                       }
+                      mythis.set('route', 'updates');
                       mythis.showMessage('Update Complete', msg);
                   })
                   .catch(function (err) {
@@ -471,8 +483,14 @@
       },
 
       goToUpdates: function () {
-          this.$.update.close();
-          this.set('route', 'updates');
+          var mythis = this;
+
+          mythis.$.update.close();
+          mythis.showLoadingMessage('Loading source texts. Please wait...');
+
+          setTimeout(function() {
+              mythis.set('route', 'updates');
+          }, 500);
       },
 
       deleteProject: function (event, data) {

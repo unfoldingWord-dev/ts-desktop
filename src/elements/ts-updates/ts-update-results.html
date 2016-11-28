@@ -101,6 +101,20 @@
             display: none;
         }
 
+        .done {
+            color: var(--completed-color);
+            margin-right: 15px;
+        }
+
+        .warning {
+            color: var(--warning-color);
+            margin-right: 10px;
+        }
+
+        .hide {
+            display: none;
+        }
+
     </style>
 
   <template>
@@ -123,7 +137,9 @@
               <template>
                   <div class="row">
                       <div>
-                          <paper-checkbox checked="{{item.selected}}" on-change="setBoxes"></paper-checkbox>
+                          <paper-checkbox class$="[[checkboxclass(item.success)]]" checked="{{item.selected}}" on-change="setBoxes"></paper-checkbox>
+                          <iron-icon class$="[[doneclass(item.success)]]" icon="done"></iron-icon>
+                          <iron-icon class$="[[warningclass(item.failure)]]" icon="report" on-tap="displayError"></iron-icon>
                           <span class="lang">[[item.project.name]]</span>
                           <span class="code lang">(<span>[[item.project.slug]]</span>)</span>
                           <span class="book">[[item.language.name]]</span>
@@ -158,7 +174,8 @@
           },
           translations: {
               type: Array,
-              value: []
+              value: [],
+              notify: true
           },
           options: {
               type: Object,
@@ -175,11 +192,25 @@
           Polymer.IronResizableBehavior
       ],
 
+      warningclass: function (failure) {
+          return failure ? 'warning click' : 'hide';
+      },
+
+      doneclass: function (success) {
+          return success ? 'done' : 'hide';
+      },
+
+      checkboxclass: function (success) {
+          return success ? 'hide' : '';
+      },
+
       download: function () {
           var mythis = this;
           var list = _.cloneDeep(this.resultslist);
-          var promises = [];
           var english = false;
+          var promises = Promise.resolve(false);
+          var results = [];
+          var completed = 0;
 
           mythis.set('options', {});
           mythis.set('options.body', "Downloading Source Texts. Please wait...");
@@ -192,37 +223,90 @@
               });
 
               list.forEach(function (item) {
-                  var download = App.dataManager.downloadProjectContainers(item.language.slug, item.project.slug, item.resource.slug);
-                  promises.push(download);
+                  promises = promises.then(function () {
+                          return App.dataManager.downloadProjectContainers(item);
+                      })
+                      .then(function (result) {
+                          completed++;
+                          var total = english ? list.length + 1 : list.length;
+                          var value = Math.round(completed / total * 100);
+                          mythis.set('options.progress', true);
+                          mythis.set('options.value', value);
+                          results.push(result);
+                      });
                   if (item.language.slug === "en" && item.resource.slug !== "tw") {
                       english = true;
                   }
               });
 
               if (english) {
-                  promises.push(App.dataManager.downloadContainer('en', 'bible', 'tw'));
+                  promises = promises.then(function () {
+                          return App.dataManager.downloadContainer('en', 'bible', 'tw')
+                              .catch(function () {
+                                  return true;
+                              });
+                      });
               }
 
-              return Promise.all(promises)
+              return promises
                   .then(function () {
-                      mythis.tolevelone();
-                      mythis.set('options.title', "Download Complete");
-                      mythis.set('options.body', list.length + " Source Texts have been downloaded.");
-                      mythis.set('options.loading', false);
-                  })
-                  .catch(function (err) {
-                      var errmessage = 'An error occurred while downloading';
-                      if (err.syscall === "getaddrinfo") {
-                          errmessage = "Unable to connect to server";
+                      var title = "Download Complete";
+                      var passmessage = "";
+                      var failmessage = "";
+                      var passed = results.filter(function (item) {
+                          return item.success;
+                      });
+                      var failed = results.filter(function (item) {
+                          return item.failure;
+                      });
+
+                      if (failed.length === results.length) {
+                          title = "Download Failed";
                       }
-                      if (err.syscall === "read") {
-                          errmessage = "Lost connection to server";
+                      if (passed.length === 1) {
+                          passmessage = "1 Source Text has been successfully downloaded.";
+                      } else if (passed.length > 1) {
+                          passmessage = passed.length + " Source Texts have been successfully downloaded.";
                       }
-                      mythis.set('options.title', "Download Failed");
-                      mythis.set('options.body', errmessage);
+                      if (failed.length === 1) {
+                          failmessage = "1 download attempt has failed.";
+                      } else if (failed.length > 1) {
+                          failmessage = failed.length + " download attempts have failed.";
+                      }
+
+                      results.forEach(function (item) {
+                          var index = mythis.findIndex(item);
+                          mythis.set('translations.' + index, item);
+                      });
+
+                      mythis.updateList();
+                      mythis.set('options.title', title);
+                      mythis.set('options.body', passmessage + "  " + failmessage);
                       mythis.set('options.loading', false);
                   });
           }, 500);
+      },
+
+      findIndex: function (item) {
+          var master = this.translations;
+          var index = 0;
+
+          for (var i = 0; i < master.length; i++) {
+              if (master[i].language.slug === item.language.slug && master[i].project.slug === item.project.slug && master[i].resource.slug === item.resource.slug) {
+                  index = i;
+              }
+          }
+          return index;
+      },
+
+      displayError: function (event) {
+          var errmsg = event.model.item.errmsg;
+
+          this.set('options', {});
+          this.set('options.title', "Download Failed");
+          this.set('options.body', errmsg);
+          this.set('options.loading', false);
+          this.fire('iron-signal', {name: 'openloading'});
       },
 
       setBoxes: function () {
@@ -252,7 +336,9 @@
           var list = _.cloneDeep(this.resultslist);
 
           list.forEach(function (item) {
-              item.selected = true;
+              if (!item.success) {
+                  item.selected = true;
+              }
           });
 
           this.set('resultslist', list);

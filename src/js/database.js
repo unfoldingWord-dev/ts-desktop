@@ -130,10 +130,30 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                 });
         },
 
-        downloadProjectContainers: function (language, project, resource) {
+        downloadProjectContainers: function (item) {
             var mythis = this;
+            var language = item.language_id || item.language.slug;
+            var project = item.project_id || item.project.slug;
+            var resource = item.resource_id || item.resource.slug;
 
             return mythis.downloadContainer(language, project, resource)
+                .then(function () {
+                    item.success = true;
+                })
+                .catch(function (err) {
+                    var errmessage = 'Unknown Error while downloading';
+                    if (err.syscall === "getaddrinfo") {
+                        errmessage = "Unable to connect to server";
+                    }
+                    if (err.syscall === "read") {
+                        errmessage = "Lost connection to server";
+                    }
+                    if (err.status === 404) {
+                        errmessage = "Source not found on server";
+                    }
+                    item.failure = true;
+                    item.errmsg = errmessage;
+                })
                 .then(function () {
                     if (resource === "ulb") {
                         return mythis.downloadContainer(language, project, "tn")
@@ -149,6 +169,9 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                                 return true;
                             });
                     }
+                })
+                .then(function () {
+                    return item;
                 });
         },
 

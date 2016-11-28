@@ -210,6 +210,7 @@
           var english = false;
           var promises = Promise.resolve(false);
           var results = [];
+          var completed = 0;
 
           mythis.set('options', {});
           mythis.set('options.body', "Downloading Source Texts. Please wait...");
@@ -226,6 +227,11 @@
                           return App.dataManager.downloadProjectContainers(item);
                       })
                       .then(function (result) {
+                          completed++;
+                          var total = english ? list.length + 1 : list.length;
+                          var value = Math.round(completed / total * 100);
+                          mythis.set('options.progress', true);
+                          mythis.set('options.value', value);
                           results.push(result);
                       });
                   if (item.language.slug === "en" && item.resource.slug !== "tw") {

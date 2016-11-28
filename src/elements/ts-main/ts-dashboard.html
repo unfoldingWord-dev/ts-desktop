@@ -466,6 +466,7 @@
                       if (diff === 1) {
                           msg = '1 new Source Text is available to be downloaded.';
                       }
+                      mythis.set('route', 'updates');
                       mythis.showMessage('Update Complete', msg);
                   })
                   .catch(function (err) {

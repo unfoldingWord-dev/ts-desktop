@@ -149,15 +149,17 @@
 
         load: function (route) {
             if (route === "updates") {
+                var mythis = this;
                 var translations = App.dataManager.getTranslations();
 
                 translations = translations.filter(function (item) {
                     return item.resource.status.checking_level === "3" && item.resource.type !== "help";
                 });
 
-                this.set('translations', translations);
-                this.set('choices', {radio: "bylang"});
-                this.onRadioSet();
+                mythis.set('translations', translations);
+                mythis.set('choices', {radio: "bylang"});
+                mythis.onRadioSet();
+                mythis.fire('iron-signal', {name: 'closeloading'});
             }
         },
 

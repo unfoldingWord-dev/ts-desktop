@@ -482,8 +482,14 @@
       },
 
       goToUpdates: function () {
-          this.$.update.close();
-          this.set('route', 'updates');
+          var mythis = this;
+
+          mythis.$.update.close();
+          mythis.showLoadingMessage('Loading source texts. Please wait...');
+
+          setTimeout(function() {
+              mythis.set('route', 'updates');
+          }, 500);
       },
 
       deleteProject: function (event, data) {

@@ -147,7 +147,7 @@
             <div id="body">
                 <div class="row-header">
                     <span>Selected</span>
-                    <span><iron-icon icon="refresh"></iron-icon>Requires an Internet Connection<iron-icon icon="notification:wifi"></iron-icon></span>
+                    <span class$="[[updateclass(selected)]]"><iron-icon icon="refresh"></iron-icon>Requires an Internet Connection<iron-icon icon="notification:wifi"></iron-icon></span>
                 </div>
                 <template is="dom-repeat" items="[[selected]]" as="source">
                     <div class$="[[rowclass(source.direction)]]">
@@ -259,6 +259,18 @@
 
         rowclass: function (direction) {
             return direction === "ltr" ? 'row left' : 'row right';
+        },
+
+        updateclass: function (selected) {
+            var updates = false;
+
+            selected.forEach(function (item) {
+                if (!item.current) {
+                    updates = true;
+                }
+            });
+
+            return updates ? '' : 'hide';
         },
 
         checkupdate: function (current) {

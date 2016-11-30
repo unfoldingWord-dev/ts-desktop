@@ -219,7 +219,7 @@
         </paper-dialog>
 
         <paper-dialog id="sourcepopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <ts-source-modal id="modal" on-close="closesource" options="{{options}}"></ts-source-modal>
+            <ts-source-modal id="modal" on-close="closesource" on-gohome="gohome" options="{{options}}"></ts-source-modal>
         </paper-dialog>
 
         <iron-signals on-iron-signal-fromreview="fromreview"></iron-signals>

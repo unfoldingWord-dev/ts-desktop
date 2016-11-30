@@ -30,7 +30,7 @@
             padding: 0;
         }
 
-        .header {
+        #header {
             flex: 0 0 50px;
             color: var(--secondary-text-color);
             display: flex;
@@ -95,19 +95,19 @@
             margin: 0 10px;
         }
 
-        .footer {
+        #footer {
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
             align-items: center;
             flex: 0 0 50px;
             border-top: 1px solid var(--border-color);
         }
 
-        .footer paper-button {
+        #footer paper-button {
             color: var(--secondary-text-color);
         }
 
-        .footer paper-button:hover {
+        #footer paper-button:hover {
             color: var(--accent-color);
         }
 
@@ -139,7 +139,7 @@
     <template>
 
         <div id="contain">
-            <div class="header">
+            <div id="header">
                 <input is="iron-input" id="input" bind-value="{{query}}" on-input="organizeSources" placeholder="Choose source translations">
                 <paper-icon-button icon="search" on-tap="focussearch"></paper-icon-button>
             </div>
@@ -209,9 +209,12 @@
                 </template>
             </div>
 
-            <div class="footer">
-                <paper-button on-tap="cancel">Cancel</paper-button>
-                <paper-button on-tap="confirm">Confirm</paper-button>
+            <div id="footer">
+                <paper-button on-tap="gotoupdate">Exit to Update Source Text List</paper-button>
+                <div>
+                    <paper-button on-tap="cancel">Cancel</paper-button>
+                    <paper-button on-tap="confirm">Confirm</paper-button>
+                </div>
             </div>
 
         </div>
@@ -275,6 +278,17 @@
 
         checkupdate: function (current) {
             return current ? 'hide' : '';
+        },
+
+        gotoupdate: function () {
+            var mythis = this;
+
+            mythis.cancel();
+            mythis.fire('gohome');
+
+            setTimeout(function() {
+                mythis.fire('iron-signal', {name: 'updatesources'});
+            }, 2000);
         },
 
         sortlist: function (list) {

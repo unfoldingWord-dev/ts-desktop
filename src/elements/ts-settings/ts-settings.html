@@ -200,7 +200,9 @@
             this.settings = App.configurator.setUserSetting('mediaserver', "https://api.unfoldingword.org/");
             var untildify = require('untildify');
             var location = App.configurator.getUserSetting('datalocation');
-            this.settings = App.configurator.setUserSetting('datalocation', untildify(location));
+            location = untildify(location);
+            location = location.replace(/\\/g, "\/");
+            this.settings = App.configurator.setUserSetting('datalocation', location);
 
             App.gitManager.getVersion().then(function (version) {
                 return version ? version.toString() : 'N/A';
@@ -320,8 +322,9 @@
             if (!newPath) {
                 return;
             }
-            this.settings = App.configurator.setUserSetting('datalocation', newPath[0]);
-            App.projectsManager.moveBackups(oldPath, newPath[0]);
+            newPath = newPath[0].replace(/\\/g, "\/");
+            this.settings = App.configurator.setUserSetting('datalocation', newPath);
+            App.projectsManager.moveBackups(oldPath, newPath);
         },
 
         openSettingModal: function (event) {

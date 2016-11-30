@@ -43,32 +43,39 @@ function ExportManager(configurator, git) {
                 });
         },
 
-        backupAllTranslations: function (list, dirPath) {
+        backupAllTranslations: function (list) {
             var mythis = this;
+            var autoBackupDir = configurator.getUserPath('datalocation', 'automatic_backups');
+            var backupDir = configurator.getUserPath('datalocation', 'backups');
             var promises = _.map(list, function(projectmeta) {
-                var filepath = path.join(dirPath, projectmeta.unique_id + ".tstudio");
+                var filepath = path.join(autoBackupDir, projectmeta.unique_id + ".tstudio");
                 return mythis.backupTranslation(projectmeta, filepath);
             });
 
-            return utils.fs.mkdirs(configurator.getUserPath('datalocation', 'automatic_backups'))                
+            return utils.fs.mkdirs(autoBackupDir)
+                .then(function () {
+                    return utils.fs.mkdirs(backupDir);
+                })
                 .catch(function () {
                     throw "Backup location not found. Attach external drive or change backup location in settings.";
                 })
                 .then(function () {
                     return Promise.all(promises);
-                });            
+                });
         },
-        
-        autoBackupTranslation: function (meta, filePath) {
+
+        autoBackupTranslation: function (meta) {
             var mythis = this;
-            
-            return utils.fs.mkdirs(configurator.getUserPath('datalocation', 'automatic_backups'))                
+            var autoBackupDir = configurator.getUserPath('datalocation', 'automatic_backups');
+            var filePath = path.join(autoBackupDir, meta.unique_id + ".tstudio");
+
+            return utils.fs.mkdirs(autoBackupDir)
                 .catch(function () {
                     throw "Backup location not found. Attach external drive or change backup location in settings.";
                 })
                 .then(function () {
                     return mythis.backupTranslation(meta, filePath);
-                });            
+                });
         },
 
         exportTranslation: function (translation, meta, filePath, mediaServer) {

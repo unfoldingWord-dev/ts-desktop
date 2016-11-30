@@ -370,7 +370,6 @@
             var mythis = this;
             var projectmeta = mythis.currentproject.projectmeta;
             var allchunks = mythis.currentproject.chunks;
-            var filePath = App.configurator.getUserPath('datalocation', 'automatic_backups', projectmeta.unique_id + ".tstudio");
             var changes = false;
             var savechunks = mythis.saveoptions.chunks;
 
@@ -421,7 +420,7 @@
                 })
                 .then(function () {
                     if (mythis.saveoptions.backup) {
-                        return App.exportManager.autoBackupTranslation(projectmeta, filePath)
+                        return App.exportManager.autoBackupTranslation(projectmeta)
                             .then(function () {
                                 mythis.set('saveoptions.backup', false);
                             })

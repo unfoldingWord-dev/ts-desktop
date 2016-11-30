@@ -1159,7 +1159,6 @@
 
       ready: function() {
           var mythis = this;
-          var autobackupdir = App.configurator.getUserPath('datalocation', 'automatic_backups');
 
           App.gitManager.verifyGit()
               .then(function (version) {
@@ -1180,7 +1179,7 @@
               })
               .then(function () {
                   App.ipc.send('loading-status', 'Creating Auto Backups...');
-                  return App.exportManager.backupAllTranslations(mythis.projectlist, autobackupdir)
+                  return App.exportManager.backupAllTranslations(mythis.projectlist);
               })
               .catch(function (err) {
                   err && err.stack && App.reporter.logError(err.stack, 'Error on startup');

@@ -2,7 +2,7 @@
 # License
 ## Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
 
-This is a human-readable summary of (and not a substitute for) the [license](http://creativecommons.org/licenses/by-sa/4.0/).
+This is a human-readable summary of (and not a substitute for) the full license found at http://creativecommons.org/licenses/by-sa/4.0/.
 
 ### You are free to:
 

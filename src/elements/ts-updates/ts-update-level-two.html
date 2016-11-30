@@ -191,7 +191,7 @@
                           temparray.push({name: "Old Testament", slug: "old"});
                       } else if (category === "6") {
                           temparray.push({name: "New Testament", slug: "new"});
-                      } else if (category === "15367") {
+                      } else if (category === "592") {
                           temparray.push({name: "translationAcademy", slug: "ta"});
                       } else {
                           otherdata = true;
@@ -208,9 +208,9 @@
                       } else if (mythis.choices.levelone.slug === "new") {
                           return item.project.category_id == "6" && item.language.slug === "en";
                       } else if (mythis.choices.levelone.slug === "ta") {
-                          return item.project.category_id == "15367" && item.language.slug === "en";
+                          return item.project.category_id == "592" && item.language.slug === "en";
                       } else {
-                          return item.project.category_id != "1" && item.project.category_id != "6" && item.project.category_id != "15367" && item.language.slug === "en";
+                          return item.project.category_id != "1" && item.project.category_id != "6" && item.project.category_id != "592" && item.language.slug === "en";
                       }
                   });
 

@@ -16,8 +16,8 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             return resourceDir;
         },
 
-        updateLanguages: function () {
-            return db.updateCatalogs();
+        updateLanguages: function (onProgress) {
+            return db.updateCatalogs(onProgress);
         },
 
         updateSources: function (onProgress) {

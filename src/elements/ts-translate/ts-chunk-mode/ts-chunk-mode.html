@@ -87,7 +87,7 @@
     <template>
 
         <div id="contain">
-            <iron-list id="chunklist" items="{{chunks}}" as="chunk" on-scroll="displayposition">
+            <iron-list id="chunklist" items="{{chunks}}" as="chunk">
                 <template>
                     <ts-chunk-card id="{{createid(index)}}" chunk="{{chunk}}" on-updateheight="updateheight"></ts-chunk-card>
                 </template>
@@ -126,6 +126,9 @@
             modename: {
                 type: String,
                 value: "chunk"
+            },
+            timer: {
+                type: Number
             }
         },
 
@@ -146,12 +149,12 @@
             if (chapter) {
                 display.innerHTML = chapter;
                 marker.classList.remove("hide");
+                clearTimeout(mythis.timer);
+                mythis.timer = setTimeout(function() {
+                    marker.classList.add("hide");
+                }, 1000);
             }
-
-            setTimeout(function() {
-                marker.classList.add("hide");
-                mythis.setheights();
-            }, 2000);
+            mythis.setheights();
         },
 
         setheights: function () {
@@ -234,7 +237,12 @@
         },
 
 		ready: function() {
+            var mythis = this;
+            var list = this.$.chunklist;
 
+            list.addEventListener("scroll", _.throttle(function () {
+                mythis.displayposition();
+            }, 200));
 		}
 
 	});

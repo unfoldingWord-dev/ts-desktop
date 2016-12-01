@@ -244,6 +244,7 @@
       <iron-signals on-iron-signal-openupdate="openUpdate"></iron-signals>
       <iron-signals on-iron-signal-openloading="openLoading"></iron-signals>
       <iron-signals on-iron-signal-closeloading="closeLoading"></iron-signals>
+      <iron-signals on-iron-signal-updatesources="updateSources"></iron-signals>
 
   </template>
 
@@ -400,11 +401,19 @@
           var mythis = this;
           var before = App.dataManager.getMetrics();
 
+          var onProgress = function (type, total, complete) {
+              if (complete === 7000) {
+                  mythis.set('options.value', 66);
+              }
+          };
+
           mythis.$.update.close();
           mythis.showLoadingMessage('Updating List of Target Languages. This may take a while. Please wait...');
+          mythis.set('options.progress', true);
+          mythis.set('options.value', 33);
 
           setTimeout(function () {
-              return App.dataManager.updateLanguages()
+              return App.dataManager.updateLanguages(onProgress)
                   .then(function () {
                       var after = App.dataManager.getMetrics();
                       var diff = after.target_language_count - before.target_language_count;
@@ -441,18 +450,18 @@
               if (type === "projects") {
                   value = Math.round(complete / total * 10);
               } else if (type === "resources") {
-                  value = Math.round(complete / total * 89) + 10;
+                  value = Math.round(complete / total * 88) + 10;
                   end = true;
               } else if (end) {
-                  value = 100;
+                  value = 99;
               }
-
-              mythis.set('options.progress', true);
               mythis.set('options.value', value);
           };
 
           mythis.$.update.close();
           mythis.showLoadingMessage('Updating List of Source Texts. This may take a while. Please wait...');
+          mythis.set('options.progress', true);
+          mythis.set('options.value', 0);
 
           setTimeout(function () {
               return App.dataManager.updateSources(onProgress)
@@ -1151,7 +1160,6 @@
 
       ready: function() {
           var mythis = this;
-          var autobackupdir = App.configurator.getUserPath('datalocation', 'automatic_backups');
 
           App.gitManager.verifyGit()
               .then(function (version) {
@@ -1172,7 +1180,7 @@
               })
               .then(function () {
                   App.ipc.send('loading-status', 'Creating Auto Backups...');
-                  return App.exportManager.backupAllTranslations(mythis.projectlist, autobackupdir)
+                  return App.exportManager.backupAllTranslations(mythis.projectlist);
               })
               .catch(function (err) {
                   err && err.stack && App.reporter.logError(err.stack, 'Error on startup');

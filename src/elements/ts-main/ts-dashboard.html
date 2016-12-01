@@ -199,7 +199,7 @@
       </paper-dialog>
 
       <paper-dialog id="update" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-          <ts-update-options on-language="updateLanguages" on-source="updateSources" on-view="goToUpdates"></ts-update-options>
+          <ts-update-options on-language="updateLanguageList" on-source="updateSourceList" on-download="downloadSources"></ts-update-options>
       </paper-dialog>
 
       <paper-dialog id="license" class="popup legal" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -244,7 +244,7 @@
       <iron-signals on-iron-signal-openupdate="openUpdate"></iron-signals>
       <iron-signals on-iron-signal-openloading="openLoading"></iron-signals>
       <iron-signals on-iron-signal-closeloading="closeLoading"></iron-signals>
-      <iron-signals on-iron-signal-updatesources="updateSources"></iron-signals>
+      <iron-signals on-iron-signal-updatesourcelist="updateSourceList"></iron-signals>
 
   </template>
 
@@ -397,7 +397,7 @@
           this.$.update.open();
       },
 
-      updateLanguages: function () {
+      updateLanguageList: function () {
           var mythis = this;
           var before = App.dataManager.getMetrics();
 
@@ -439,7 +439,7 @@
           }, 500);
       },
 
-      updateSources: function () {
+      updateSourceList: function () {
           var mythis = this;
           var before = App.dataManager.getMetrics();
           var end = false;
@@ -491,7 +491,7 @@
           }, 500);
       },
 
-      goToUpdates: function () {
+      downloadSources: function () {
           var mythis = this;
 
           mythis.$.update.close();

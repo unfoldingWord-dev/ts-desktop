@@ -188,6 +188,18 @@ ipcMain.on('openacademy', function (event, arg) {
     }
 });
 
+ipcMain.on('opensplash', function (event, arg) {
+    if (mainWindow) {
+        mainWindow.hide();
+    }
+    if (splashScreen) {
+        splashScreen.show();
+        splashScreen.focus();
+    } else {
+        createSplashScreen();
+    }
+});
+
 ipcMain.on('save-as', function (event, arg) {
     var input = dialog.showSaveDialog(mainWindow, arg.options);
     event.returnValue = input || false;

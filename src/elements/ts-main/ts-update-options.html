@@ -93,7 +93,7 @@
             <div class="option" on-tap="source">
                 <span class="optiontitle">Update List of Available Source Texts</span>
             </div>
-            <div class="option" on-tap="view">
+            <div class="option" on-tap="download">
                 <span class="optiontitle">Download Available Source Texts</span>
             </div>
             <div class="option" on-tap="language">
@@ -129,8 +129,8 @@
             this.fire('source');
         },
 
-        view: function () {
-            this.fire('view');
+        download: function () {
+            this.fire('download');
         },
 
         ready: function () {

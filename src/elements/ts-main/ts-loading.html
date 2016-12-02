@@ -122,7 +122,10 @@
 
         reload: function () {
             var remote = require('electron').remote;
-            remote.getCurrentWindow().reload();
+            var main = remote.getCurrentWindow();
+
+            App.ipc.send('opensplash');
+            main.reload();
         },
 
         ready: function () {

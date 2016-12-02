@@ -3,85 +3,25 @@
 <head>
     <title>translationStudio</title>
 
+    <script src="../components/webcomponentsjs/webcomponents-lite.min.js"></script>
+
     <link rel="stylesheet" href="../css/main.css">
 
-    <style>
-    * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-    }
-    html {
-        height: 100%;
-        width: 100%;
-    }
-    body {
-        background: #efefef;
-    }
-    img {
-        display: block;
-        text-align: center;
-        margin: 0 auto;
-        width: 60px;
-        position: absolute;
-        top: 44px;
-        left: 36px;
-    }
-    #text {
-        position: absolute;
-        right: 36px;
-        color: #444;
-        top: 56px;
-        font-weight: 300;
-        letter-spacing: 2px;
-        font-family: Roboto, sans-serif;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-    #title {
-        font-size: 29px;
-    }
-    #version {
-        font-size: 12px;
-    }
-    #status {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        padding: 1px 6px 5px 36px;
-        background: #009688;
-        padding-left: 36px;
-    }
-    #status-text {
-        font-family: 'Noto Sans', sans-serif;
-        color: white;
-        font-size: 12px;
-    }
-    </style>
+    <link rel="import" href="../components/polymer/polymer.html">
+    <link rel="import" href="../elements/ts-main/ts-splash.html">
+    <link rel="import" href="../elements/ts-main/app-theme.html">
 
 </head>
 <body>
-    <img src="../../icons/icon-big.png">
-    <div id="text">
-        <p id="title">translationStudio</p>
-        <p id="version"></p>
-    </div>
-    <div id="status"><span id="status-text">Loading...</span></div>
+    <ts-splash id="splash"></ts-splash>
 
     <script>
     (function () {
         var ipcRenderer = require('electron').ipcRenderer;
-        var version = document.getElementById('version');
-        var statusText = document.getElementById('status-text');
-        var p = require('../../package');
-        var v = p.version.split('.').slice(0,-1).join('.');
-
-        version.innerHTML = "Version " + v + " Build " + p.build;
+        var splash = document.getElementById('splash');
 
         ipcRenderer.on('loading-status', function (event, status) {
-            statusText.innerHTML = status;
+            splash.updateMessage(status);
         });
     })();
     </script>

@@ -1,0 +1,105 @@
+
+<dom-module id="ts-splash">
+
+    <style>
+
+        :host {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #main {
+            flex: auto;
+            display: flex;
+            align-items: center;
+        }
+
+        img {
+            width: 60px;
+            margin: 0 30px;
+        }
+
+        #text {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: var(--primary-text-color);
+            font-family: 'Roboto', sans-serif;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        #title {
+            font-size: 29px;
+        }
+
+        #version {
+            font-size: 14px;
+        }
+
+        #statusbar {
+            flex: 0 0 30px;
+            display: flex;
+            align-items: center;
+            padding: 0 30px;
+            background: var(--primary-color);
+            color: var(--reverse-text-color);
+            font-size: 13px;
+        }
+
+        .hide {
+            display: none;
+        }
+
+    </style>
+
+    <template>
+
+        <div id="main">
+            <img src="../../../icons/icon-big.png">
+            <div id="text">
+                <span id="title">translationStudio</span>
+                <span id="version"></span>
+            </div>
+        </div>
+        <div id="statusbar">
+            <span id="msg">[[message]]</span>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-splash',
+
+        properties: {
+            message: {
+                type: String,
+                value: "Loading..."
+            }
+        },
+
+        updateMessage: function (message) {
+            this.set('message', message);
+        },
+
+        ready: function () {
+
+            var version = document.getElementById('version');
+
+            var pack = require('../../package');
+            var vers = pack.version.split('.').slice(0,-1).join('.');
+
+            version.innerHTML = "Version " + vers + " Build " + pack.build;
+
+        }
+
+    });
+
+</script>

@@ -34,6 +34,8 @@ function createSplashScreen() {
         title: 'translationStudio'
     });
 
+    //splashScreen.webContents.openDevTools();
+
     splashScreen.loadURL('file://' + __dirname + '/../views/splash-screen.html');
 
     splashScreen.on('closed', function() {

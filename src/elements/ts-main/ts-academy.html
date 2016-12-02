@@ -103,7 +103,9 @@
             mythis.set('options', {});
             mythis.set('options.body', "Loading translationAcademy...");
             mythis.set('options.loading', true);
-            mythis.$.loading.open();
+            //mythis.$.loading.open();
+
+            App.ipc.send('ta-show');
 
             setTimeout(function() {
                 mythis.set('academy', App.dataManager.getAllTa());
@@ -127,7 +129,8 @@
                             });
                         }
                     }
-                    mythis.$.loading.close();
+                    //mythis.$.loading.close();
+                    App.ipc.send('ta-loading-done');
                 }, 3000);
             }, 500);
         }

@@ -97,6 +97,8 @@ function createAcademyWindow () {
         frame: false
     });
 
+    academyWindow.hide();
+
     //academyWindow.webContents.openDevTools();
 
     academyWindow.loadURL('file://' + __dirname + '/../views/academy.html');
@@ -113,7 +115,8 @@ function createAcademyWindow () {
         academyWindow.webContents.send('unmaximize');
     });
 
-    academyWindow.focus();
+    //academyWindow.show();
+    //academyWindow.focus();
 }
 
 function createAppMenus() {
@@ -184,6 +187,7 @@ ipcMain.on('openacademy', function (event, arg) {
         academyWindow.show();
         academyWindow.focus();
     } else {
+        createSplashScreen();
         createAcademyWindow();
     }
 });
@@ -219,6 +223,23 @@ ipcMain.on('loading-done', function (event) {
         splashScreen.close();
         mainWindow.show();
         mainWindow.focus();
+    }
+});
+
+ipcMain.on('ta-show', function (event) {
+    if (splashScreen && academyWindow) {
+        //splashScreen.close();
+        academyWindow.show();
+        splashScreen.show();
+        //academyWindow.focus();
+    }
+});
+
+ipcMain.on('ta-loading-done', function (event) {
+    if (splashScreen && academyWindow) {
+        splashScreen.close();
+        //academyWindow.show();
+        academyWindow.focus();
     }
 });
 

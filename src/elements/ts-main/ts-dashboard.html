@@ -1198,7 +1198,7 @@
                   mythis.showErrorMessage('Error on startup', msg, err);
               })
               .then(function () {
-                  App.ipc.send('loading-done');
+                  App.ipc.send('main-loading-done');
                   mythis.$.home.setsortfields();
 
                   var appData = App.configurator.getAppData();

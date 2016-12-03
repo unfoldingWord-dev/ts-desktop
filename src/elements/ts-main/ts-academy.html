@@ -100,39 +100,30 @@
             var shell = require('electron').shell;
             var path = require('path');
 
-            mythis.set('options', {});
-            mythis.set('options.body', "Loading translationAcademy...");
-            mythis.set('options.loading', true);
-            //mythis.$.loading.open();
-
-            App.ipc.send('ta-show');
+            App.ipc.send('loading-status', 'Loading Academy data...');
+            mythis.set('academy', App.dataManager.getAllTa());
 
             setTimeout(function() {
-                mythis.set('academy', App.dataManager.getAllTa());
+                var links = mythis.$.body.getElementsByTagName("a");
+                var images = mythis.$.body.getElementsByTagName("img");
+                var imageDir = path.resolve(path.join(__dirname, '..', 'views', 'assets', 'img', 'ta'));
 
-                setTimeout(function() {
-                    var links = mythis.$.body.getElementsByTagName("A");
-                    var images = mythis.$.body.getElementsByTagName("IMG");
-                    var imageDir = path.resolve(path.join(__dirname, '..', 'views', 'assets', 'img', 'ta'));
+                for (var j = 0; j < images.length; j++) {
+                    images[j].src = images[j].src.replace("http://cdn.door43.org/ta/jpg", imageDir);
+                }
 
-                    for (var j = 0; j < images.length; j++) {
-                        images[j].src = images[j].src.replace("http://cdn.door43.org/ta/jpg", imageDir);
+                for (var i = 0; i < links.length; i++) {
+                    if (links[i].href.includes("git.door43.org/Door43/en-ta")) {
+                        links[i].href = "#" + links[i].href.split("/").pop().split(".")[0].replace(/_/g, "-");
+                    } else {
+                        links[i].addEventListener('click', function (event) {
+                            event.preventDefault();
+                            shell.openExternal(this.href);
+                        });
                     }
-
-                    for (var i = 0; i < links.length; i++) {
-                        if (links[i].href.includes("git.door43.org/Door43/en-ta")) {
-                            links[i].href = "#" + links[i].href.split("/").pop().split(".")[0].replace(/_/g, "-");
-                        } else {
-                            links[i].addEventListener('click', function (event) {
-                                event.preventDefault();
-                                shell.openExternal(this.href);
-                            });
-                        }
-                    }
-                    //mythis.$.loading.close();
-                    App.ipc.send('ta-loading-done');
-                }, 3000);
-            }, 500);
+                }
+                App.ipc.send('ta-loading-done');
+            }, 3000);
         }
 
     });

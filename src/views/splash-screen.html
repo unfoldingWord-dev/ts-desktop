@@ -23,6 +23,12 @@
         ipcRenderer.on('loading-status', function (event, status) {
             splash.updateMessage(status);
         });
+        ipcRenderer.on('load-main', function () {
+            splash.loadMain();
+        });
+        ipcRenderer.on('load-academy', function () {
+            splash.loadAcademy();
+        });
     })();
     </script>
 </body>

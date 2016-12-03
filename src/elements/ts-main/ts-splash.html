@@ -12,12 +12,13 @@
         #main {
             flex: auto;
             display: flex;
+            justify-content: center;
             align-items: center;
         }
 
         img {
             width: 60px;
-            margin: 0 30px;
+            margin-right: 30px;
         }
 
         #text {
@@ -58,14 +59,14 @@
     <template>
 
         <div id="main">
-            <img src="../../../icons/icon-big.png">
+            <img class$="[[iconclass(title)]]" src="../../../icons/icon-big.png">
             <div id="text">
-                <span id="title">translationStudio</span>
-                <span id="version"></span>
+                <span id="title">[[title]]</span>
+                <span id="version">[[version]]</span>
             </div>
         </div>
         <div id="statusbar">
-            <span id="msg">[[message]]</span>
+            <span>[[message]]</span>
         </div>
 
     </template>
@@ -79,24 +80,45 @@
         is: 'ts-splash',
 
         properties: {
+            title: {
+                type: String,
+                value: ""
+            },
+            version: {
+                type: String,
+                value: ""
+            },
             message: {
                 type: String,
-                value: "Loading..."
+                value: ""
             }
+        },
+
+        iconclass: function (title) {
+            return title === "translationStudio" ? '' : 'hide';
         },
 
         updateMessage: function (message) {
             this.set('message', message);
         },
 
-        ready: function () {
-
-            var version = document.getElementById('version');
-
+        loadMain: function () {
             var pack = require('../../package');
-            var vers = pack.version.split('.').slice(0,-1).join('.');
+            var version = pack.version.split('.').slice(0,-1).join('.');
+            var versiontext = "Version " + version + " Build " + pack.build;
 
-            version.innerHTML = "Version " + vers + " Build " + pack.build;
+            this.set('title', "translationStudio");
+            this.set('version', versiontext);
+            this.set('message', "Loading main window...");
+        },
+
+        loadAcademy: function () {
+            this.set('title', "translationAcademy");
+            this.set('version', "");
+            this.set('message', "Creating Academy window...");
+        },
+
+        ready: function () {
 
         }
 

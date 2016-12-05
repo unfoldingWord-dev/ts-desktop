@@ -513,10 +513,11 @@
                   .then(function() {
                       App.projectsManager.unsetValues(projectmeta.unique_id);
 
-                      mythis.showMessage('Project Deleted', 'Your project has been successfully deleted.');
-
                       setTimeout(function() {
-                          mythis.updateList();
+                          return mythis.updateList()
+                              .then(function () {
+                                  mythis.showMessage('Project Deleted', 'Your project has been successfully deleted.');
+                              });
                       }, 250);
                   })
                   .catch(function(err) {
@@ -557,10 +558,11 @@
                   .then(function () {
                       App.projectsManager.unsetValues(changedata.oldmeta.unique_id);
 
-                      mythis.showConflictsMessage('Change Complete', 'Your project has been changed.', conflicts);
-
                       setTimeout(function () {
-                          mythis.updateList();
+                          return mythis.updateList()
+                              .then(function () {
+                                  mythis.showConflictsMessage('Change Complete', 'Your project has been changed.', conflicts);
+                              });
                       }, 250);
                   })
                   .catch(function(err) {
@@ -708,10 +710,11 @@
                       return mythis.clearTempDir();
                   })
                   .then(function() {
-                      mythis.showConflictsMessage("Import Complete", "Your project has been successfully imported.", conflicts);
-
                       setTimeout(function() {
-                          mythis.updateList();
+                          return mythis.updateList()
+                              .then(function () {
+                                  mythis.showConflictsMessage("Import Complete", "Your project has been successfully imported.", conflicts);
+                              });
                       }, 250);
                   })
                   .catch(function(err) {
@@ -781,10 +784,11 @@
                       return App.projectsManager.createTargetTranslation(chunks, projectmeta, user);
                   })
                   .then(function () {
-                      mythis.showMessage('Import Complete', 'Your file has been imported. Please review it carefully. If it was not formatted properly, text may not appear as desired.');
-
                       setTimeout(function() {
-                          mythis.updateList();
+                          return mythis.updateList()
+                              .then(function () {
+                                  mythis.showMessage('Import Complete', 'Your file has been imported. Please review it carefully. If it was not formatted properly, text may not appear as desired.');
+                              });
                       }, 250);
                   }).catch(function (err) {
                       mythis.showErrorMessage('Import Failed', 'Error occurred importing project', err);

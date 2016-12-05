@@ -103,7 +103,7 @@
         },
 
         statusclass: function (title) {
-            return title === "Canceling Operation" ? 'hide' : '';
+            return title === "Canceling" ? 'hide' : '';
         },
 
         updateMessage: function (message) {
@@ -127,7 +127,7 @@
         },
 
         reload: function () {
-            this.set('title', "Canceling Operation");
+            this.set('title', "Canceling");
             this.set('version', "Please wait...");
             this.set('message', "");
         },

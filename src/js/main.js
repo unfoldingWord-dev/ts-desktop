@@ -198,14 +198,11 @@ ipcMain.on('openacademy', function () {
         setTimeout(function () {
             setAcademySplash();
             createAcademyWindow();
-        }, 500);
+        }, 200);
     }
 });
 
-ipcMain.on('opensplash', function () {
-    if (mainWindow) {
-        mainWindow.hide();
-    }
+ipcMain.on('fire-reload', function () {
     if (splashScreen) {
         splashScreen.show();
     } else {
@@ -213,7 +210,13 @@ ipcMain.on('opensplash', function () {
     }
     setTimeout(function () {
         setReloadSplash();
-    }, 500);
+        setTimeout(function () {
+            if (mainWindow) {
+                mainWindow.hide();
+                mainWindow.reload();
+            }
+        }, 500);
+    }, 200);
 });
 
 ipcMain.on('save-as', function (event, arg) {
@@ -232,15 +235,15 @@ ipcMain.on('loading-status', function (event, status) {
 
 ipcMain.on('main-loading-done', function () {
     if (splashScreen && mainWindow) {
-        splashScreen.close();
         mainWindow.show();
+        splashScreen.close();
     }
 });
 
 ipcMain.on('ta-loading-done', function () {
     if (splashScreen && academyWindow) {
-        splashScreen.close();
         academyWindow.show();
+        splashScreen.close();
     }
 });
 
@@ -250,7 +253,7 @@ app.on('ready', function () {
     setTimeout(function () {
         setMainSplash();
         createWindow();
-    }, 500);
+    }, 200);
 });
 
 app.on('window-all-closed', function () {

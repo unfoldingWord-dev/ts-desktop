@@ -511,7 +511,7 @@
           setTimeout(function() {
               return App.projectsManager.deleteTargetTranslation(projectmeta)
                   .then(function() {
-                      App.projectsManager.unsetValues(projectmeta);
+                      App.projectsManager.unsetValues(projectmeta.unique_id);
 
                       mythis.showMessage('Project Deleted', 'Your project has been successfully deleted.');
 
@@ -555,7 +555,7 @@
                       }
                   })
                   .then(function () {
-                      App.projectsManager.unsetValues(changedata.oldmeta);
+                      App.projectsManager.unsetValues(changedata.oldmeta.unique_id);
 
                       mythis.showConflictsMessage('Change Complete', 'Your project has been changed.', conflicts);
 
@@ -682,10 +682,12 @@
 
       finishImport: function () {
           var mythis = this;
+          var path = require('path');
           var conflicts = [];
           var overwrite = this.importdata.overwrite;
           var targetPath = this.importdata.targetpath;
           var tmpPath = this.importdata.tmppath;
+          var key = targetPath.split(path.sep).pop();
 
           mythis.showLoadingMessage("Importing. Please wait...");
 
@@ -693,6 +695,7 @@
               return Promise.resolve(true)
                   .then(function () {
                       if (overwrite) {
+                          App.projectsManager.unsetValues(key);
                           return App.utils.fs.mover(tmpPath, targetPath);
                       } else {
                           return App.gitManager.merge(mythis.currentuser, targetPath, tmpPath)

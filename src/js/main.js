@@ -54,6 +54,11 @@ function setAcademySplash() {
     splashScreen.show();
 }
 
+function setReloadSplash() {
+    splashScreen.webContents.send('reload');
+    splashScreen.show();
+}
+
 function createWindow () {
 
     mainWindow = new BrowserWindow({
@@ -207,7 +212,7 @@ ipcMain.on('opensplash', function () {
         createSplashScreen();
     }
     setTimeout(function () {
-        setMainSplash();
+        setReloadSplash();
     }, 500);
 });
 

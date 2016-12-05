@@ -50,6 +50,10 @@
             font-size: 13px;
         }
 
+        #statusbar.hide {
+            display: none;
+        }
+
         .hide {
             display: none;
         }
@@ -65,7 +69,7 @@
                 <span id="version">[[version]]</span>
             </div>
         </div>
-        <div id="statusbar">
+        <div id="statusbar" class$="[[statusclass(title)]]">
             <span>[[message]]</span>
         </div>
 
@@ -98,6 +102,10 @@
             return title === "translationStudio" ? '' : 'hide';
         },
 
+        statusclass: function (title) {
+            return title === "Canceling Operation" ? 'hide' : '';
+        },
+
         updateMessage: function (message) {
             this.set('message', message);
         },
@@ -116,6 +124,12 @@
             this.set('title', "translationAcademy");
             this.set('version', "");
             this.set('message', "Creating Academy window...");
+        },
+
+        reload: function () {
+            this.set('title', "Canceling Operation");
+            this.set('version', "please wait...");
+            this.set('message', "");
         },
 
         ready: function () {

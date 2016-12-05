@@ -29,6 +29,9 @@
         ipcRenderer.on('load-academy', function () {
             splash.loadAcademy();
         });
+        ipcRenderer.on('reload', function () {
+            splash.reload();
+        });
     })();
     </script>
 </body>

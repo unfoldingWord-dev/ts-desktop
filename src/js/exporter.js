@@ -167,9 +167,9 @@ function ExportManager(configurator, git) {
                                         var end = text.indexOf("\\v", start + 2);
                                         if (end === -1) {
                                             keepsearching = false;
-                                            content += text.substring(start) + "\n";
+                                            content += text.substring(start).trim() + "\n";
                                         } else {
-                                            content += text.substring(start, end) + "\n";
+                                            content += text.substring(start, end).trim() + "\n";
                                             start = end;
                                         }
                                     }

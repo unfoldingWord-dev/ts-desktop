@@ -12,20 +12,58 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
 
     return {
 
-        updateLanguages: function () {
-            return db.updateCatalogs();
+        getResourceDir: function () {
+            return resourceDir;
         },
 
-        updateSources: function () {
-            return db.updateSources(apiURL);
+        updateLanguages: function (onProgress) {
+            return db.updateCatalogs(onProgress);
+        },
+
+        updateSources: function (onProgress) {
+            return db.updateSources(apiURL, onProgress);
         },
 
         updateChunks: function () {
             return db.updateChunks();
         },
 
+        importContainer: function (filePath) {
+            return db.importResourceContainer(filePath);
+        },
+
+        checkForContainer: function (filePath) {
+            var mythis = this;
+
+            return db.loadResourceContainer(filePath)
+                .then(function (container) {
+                    return mythis.containerExists(container.slug);
+                });
+        },
+
+        containerExists: function (container) {
+            var resourcePath = path.join(resourceDir, container);
+            var sourcePath = path.join(sourceDir, container + ".tsrc");
+
+            return utils.fs.stat(resourcePath).then(utils.ret(true)).catch(utils.ret(false))
+                .then(function (resexists) {
+                    return utils.fs.stat(sourcePath).then(utils.ret(true)).catch(utils.ret(false))
+                        .then(function (srcexists) {
+                            return resexists || srcexists;
+                        });
+                });
+        },
+
         getMetrics: function () {
             return db.indexSync.getMetrics();
+        },
+
+        getSourceLanguages: function () {
+            return db.indexSync.getSourceLanguages();
+        },
+
+        getTranslations: function () {
+            return db.indexSync.findTranslations();
         },
 
         getTargetLanguages: function () {
@@ -44,53 +82,44 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             var mythis = this;
             var allres = db.indexSync.getResources(null, project);
             var filterres = allres.filter(function (item) {
-                return item.type === 'book' && item.status.checking_level === "3";
+                return item.type === 'book' && (item.status.checking_level === "3" || item.imported);
             });
 
             var mapped = filterres.map(function (res) {
                 return mythis.getSourceDetails(res.project_slug, res.source_language_slug, res.slug);
             });
 
-            return utils.chain(this.validateSource.bind(this))(mapped);
+            return utils.chain(this.validateExistence.bind(this))(mapped);
         },
 
-        validateSource: function (source) {
+        validateExistence: function (source) {
+            var mythis = this;
+            var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;
+
+            return mythis.containerExists(container)
+                .then(function (exists) {
+                    source.updating = false;
+                    source.exists = exists;
+                    return source;
+                });
+        },
+
+        validateCurrent: function (source) {
             var mythis = this;
             var lang = source.language_id;
             var proj = source.project_id;
             var res = source.resource_id;
             var container = lang + "_" + proj + "_" + res;
-            var sourcePath = path.join(sourceDir, container + ".tsrc");
-            var resourcePath = path.join(resourceDir, container);
+            var manifest = path.join(resourceDir, container, "package.json");
 
-            return utils.fs.stat(resourcePath).then(utils.ret(true)).catch(utils.ret(false))
-                .then(function (resexists) {
-                    if (resexists) {
-                        return resourcePath;
-                    }
-                    return utils.fs.stat(sourcePath).then(utils.ret(true)).catch(utils.ret(false))
-                        .then(function (srcexists) {
-                            if (srcexists) {
-                                return mythis.activateContainer(lang, proj, res)
-                                    .then(function () {
-                                        return resourcePath;
-                                    });
-                            }
-                            return false;
+            return mythis.activateContainer(lang, proj, res)
+                .then(function () {
+                    return utils.fs.readFile(manifest)
+                        .then(function (contents) {
+                            var json = JSON.parse(contents);
+                            source.current = json.resource.status.pub_date === source.date_modified;
+                            return source;
                         });
-                })
-                .then(function (containerpath) {
-                    if (containerpath) {
-                        var manifest = path.join(containerpath, "package.json");
-                        return utils.fs.readFile(manifest)
-                            .then(function (contents) {
-                                var json = JSON.parse(contents);
-                                source.uptodate = json.resource.status.pub_date === source.date_modified;
-                                return source;
-                            });
-                    }
-                    source.uptodate = false;
-                    return source;
                 });
         },
 
@@ -101,27 +130,48 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                 });
         },
 
-        downloadProjectContainers: function (language, project, resource) {
+        downloadProjectContainers: function (item) {
             var mythis = this;
+            var language = item.language_id || item.language.slug;
+            var project = item.project_id || item.project.slug;
+            var resource = item.resource_id || item.resource.slug;
 
             return mythis.downloadContainer(language, project, resource)
                 .then(function () {
-                    return mythis.downloadContainer(language, project, "tn")
-                        .catch(function () {
-                            return true;
-                        });
+                    item.success = true;
+                })
+                .catch(function (err) {
+                    var errmessage = 'Unknown Error while downloading';
+                    if (err.syscall === "getaddrinfo") {
+                        errmessage = "Unable to connect to server";
+                    }
+                    if (err.syscall === "read") {
+                        errmessage = "Lost connection to server";
+                    }
+                    if (err.status === 404) {
+                        errmessage = "Source not found on server";
+                    }
+                    item.failure = true;
+                    item.errmsg = errmessage;
                 })
                 .then(function () {
-                    return mythis.downloadContainer(language, project, "tq")
-                        .catch(function () {
-                            return true;
-                        });
+                    if (resource === "ulb") {
+                        return mythis.downloadContainer(language, project, "tn")
+                            .catch(function () {
+                                return true;
+                            });
+                    }
                 })
                 .then(function () {
-                    return mythis.downloadContainer(language, project, "udb")
-                        .catch(function () {
-                            return true;
-                        });
+                    if (resource === "ulb") {
+                        return mythis.downloadContainer(language, project, "tq")
+                            .catch(function () {
+                                return true;
+                            });
+                    }
+                })
+                .then(function () {
+                    return item;
                 });
         },
 
@@ -265,10 +315,47 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             }
         },
 
-        getSourceHelps: function (source, type) {
+        getSourceNotes: function (source) {
             var mythis = this;
-            var container = source.language_id + "_" + source.project_id + "_" + type;
+            var container = source.language_id + "_" + source.project_id + "_tn";
             var frames = this.extractContainer(container);
+
+            frames.forEach(function (item) {
+                if (item.content) {
+                    item.content = mythis.parseHelps(item.content);
+                }
+            });
+
+            return frames;
+        },
+
+        getSourceQuestions: function (source) {
+            var mythis = this;
+            var container = source.language_id + "_" + source.project_id + "_tq";
+            var markers = this.getChunkMarkers(source.project_id);
+            var frames = this.extractContainer(container);
+
+            frames.forEach(function (frame) {
+                var lastverse = "01";
+                var stop = false;
+
+                markers.forEach(function (marker) {
+                    if (stop || frame.chapter < marker.chapter || (frame.chapter === marker.chapter && frame.chunk < marker.verse)) {
+                        stop = true;
+                    } else {
+                        lastverse = marker.verse;
+                    }
+                });
+                frame.chunk = lastverse;
+            });
+
+            for (var i = 1; i < frames.length; i++) {
+                if (frames[i].chapter === frames[i-1].chapter && frames[i].chunk === frames[i-1].chunk) {
+                    frames[i-1].content = frames[i-1].content + "\n\n" + frames[i].content;
+                    frames.splice(i, 1);
+                    i--;
+                }
+            }
 
             frames.forEach(function (item) {
                 if (item.content) {

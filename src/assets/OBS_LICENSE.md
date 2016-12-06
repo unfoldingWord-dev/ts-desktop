@@ -11,7 +11,7 @@ Created by Distant Shores Media (http://distantshores.org) and the Door43 world 
 # License
 ## Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
 
-This is a human-readable summary of (and not a substitute for) the [license](http://creativecommons.org/licenses/by-sa/4.0/).
+This is a human-readable summary of (and not a substitute for) the full license found at http://creativecommons.org/licenses/by-sa/4.0/.
 
 ### You are free to:
 
@@ -38,3 +38,5 @@ No warranties are given. The license may not give you all of the permissions nec
 Use of trademarks: unfoldingWord is a trademark of Distant Shores Media and may not be included on any derivative works created from this content. Unaltered content from http://unfoldingword.org must include the unfoldingWord logo when distributed to others. But if you alter the content in any way, you must remove the unfoldingWord logo before distributing your work.
 
 Attribution of artwork: All images used in these stories are © Sweet Publishing (www.sweetpublishing.com) and are made available under a Creative Commons Attribution-Share Alike License (http://creativecommons.org/licenses/by-sa/3.0).
+
+This PDF was generated using Prince (https://www.princexml.com/).

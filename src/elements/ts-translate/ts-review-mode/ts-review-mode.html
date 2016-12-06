@@ -5,6 +5,9 @@
 <link rel="import" href="../../../components/neon-animation/neon-animation.html">
 <link rel="import" href="../../../components/paper-material/paper-material.html">
 <link rel="import" href="../../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../../components/paper-radio-button/paper-radio-button.html">
+<link rel="import" href="../../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../../components/paper-radio-group/paper-radio-group.html">
 
 <link rel="import" href="./ts-review-card.html">
 <link rel="import" href="./ts-text-holder.html">
@@ -26,8 +29,62 @@
             flex: auto;
         }
 
-        iron-list {
+        #searchbar {
+            height: 49px;
+            border-bottom: 1px solid var(--primary-text-color);
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            color: var(--secondary-text-color);
+        }
+
+        #searchbar.hide {
+            display: none;
+        }
+
+        #searchinfo {
+            flex: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #searchclose {
+            flex: 0 0 40px;
+        }
+
+        #searchresults {
+            min-width: 240px;
+            display: flex;
+            align-items: center;
+        }
+
+        #searchresults.hide * {
+            display: none;
+        }
+
+        #input {
+            height: 30px;
+            width: 130px;
+            margin: 0 10px;
+            font-size: 110%;
+            font-style: italic;
+            padding: 0 5px;
+            color: var(--secondary-text-color);
+        }
+
+        paper-radio-button {
+            --paper-radio-button-checked-color: var(--primary-color);
+            --paper-radio-button-unchecked-color: var(--primary-color);
+            --paper-radio-button-label-color: var(--secondary-text-color);
+        }
+
+        #reviewlist {
             max-height: calc(100vh - 70px);
+        }
+
+        #reviewlist.searchmode {
+            max-height: calc(100vh - 120px);
         }
 
         :host(.hide) iron-list {
@@ -186,7 +243,25 @@
 	<template>
 
         <div id="contain">
-            <iron-list id="reviewlist" items="{{chunks}}" as="chunk" on-scroll="displayposition">
+            <div id="searchbar" class="hide">
+                <div id="searchinfo">
+                    <span>Search in: </span>
+                    <paper-radio-group selected="{{selected}}" on-iron-select="activesearch">
+                        <paper-radio-button name="source">Source</paper-radio-button>
+                        <paper-radio-button name="target">Target</paper-radio-button>
+                    </paper-radio-group>
+                    <input is="iron-input" id="input" bind-value="{{query}}" on-input="activesearch" placeholder="Search for text">
+                    <div id="searchresults" class$="[[resultsclass(query)]]">
+                        <paper-icon-button icon="arrow-downward" on-tap="next"></paper-icon-button>
+                        <paper-icon-button icon="arrow-upward" on-tap="previous"></paper-icon-button>
+                        <span><span>Found in <span>[[results.forward.length]]</span> chunks.</span></span>
+                    </div>
+                </div>
+                <div id="searchclose">
+                    <paper-icon-button icon="close" on-tap="closesearch"></paper-icon-button>
+                </div>
+            </div>
+            <iron-list id="reviewlist" items="{{chunks}}" as="chunk">
                 <template>
                     <ts-review-card chunk="{{chunk}}" on-updateheight="updateheight"></ts-review-card>
                 </template>
@@ -200,7 +275,7 @@
                 <div class="buttons">
                     <paper-button on-tap="closeresource"><iron-icon icon="clear"></iron-icon>Close</paper-button>
                 </div>
-                <div id="resourcecontent" class="sourcefont targetsize">
+                <div id="resourcecontent" class="sourcefont sourcesize">
                     <div id="textholder"></div>
                     <template is="dom-if" if="{{related.length}}">
                         <h3>See Also:</h3>
@@ -230,6 +305,7 @@
         </div>
 
         <iron-signals on-iron-signal-openresource="openresource"></iron-signals>
+        <iron-signals on-iron-signal-passivesearch="passivesearch"></iron-signals>
 
 	</template>
 
@@ -267,7 +343,97 @@
             allwords: {
                 type: Array,
                 value: []
+            },
+            selected: {
+                type: String,
+                value: 'target'
+            },
+            query: {
+                type: String,
+                value: ""
+            },
+            results: {
+                type: Object,
+                value: {}
+            },
+            timer: {
+                type: Number
             }
+        },
+
+        resultsclass: function (query) {
+            return query ? '' : 'hide';
+        },
+
+        opensearch: function () {
+            this.$.reviewlist.classList.add('searchmode');
+            this.$.searchbar.classList.remove('hide');
+        },
+
+        closesearch: function () {
+            this.$.reviewlist.classList.remove('searchmode');
+            this.$.searchbar.classList.add('hide');
+            this.query = "";
+            this.passivesearch();
+        },
+
+        activesearch: function () {
+            if (this.selected === 'target') {
+                this.search(false);
+            } else {
+                this.search(true);
+            }
+        },
+
+        passivesearch: function () {
+            this.search(true);
+        },
+
+        search: function (passive) {
+            var mythis = this;
+            var query = this.query;
+            var chunks = this.chunks;
+            var type = this.selected;
+            var forward = [];
+            var backward = [];
+
+            if (chunks && chunks.length) {
+                for (var i = 0; i < chunks.length; i++) {
+                    if (query && ((type === 'source' && chunks[i].srccontent.includes(query)) || (type === 'target' && chunks[i].transcontent.includes(query)))) {
+                        forward.push(i);
+                        backward.push(i);
+                    }
+                    var string = "chunks." + i + ".search";
+                    mythis.set(string, {text: query, type: type, passive: passive, on: true});
+                }
+
+                backward.reverse();
+                this.set('results', {forward: forward, backward: backward});
+            }
+        },
+
+        next: function () {
+            var list = this.$.reviewlist;
+            var index = list.firstVisibleIndex || 0;
+            var order = this.results.forward;
+
+            var next = order.find(function (num) {
+                return num > index;
+            });
+
+            list.scrollToIndex(next);
+        },
+
+        previous: function () {
+            var list = this.$.reviewlist;
+            var index = list.firstVisibleIndex || 0;
+            var order = this.results.backward;
+
+            var previous = order.find(function (num) {
+                return num < index;
+            });
+
+            list.scrollToIndex(previous);
         },
 
         displayposition: function () {
@@ -282,13 +448,12 @@
             if (chapter && type !== "extant") {
                 display.innerHTML = chapter;
                 marker.classList.remove("hide");
-                setTimeout(function() {
+                clearTimeout(mythis.timer);
+                mythis.timer = setTimeout(function() {
                     marker.classList.add("hide");
-                }, 2000);
-                setTimeout(function() {
-                    mythis.setheights();
-                }, 500);
+                }, 1000);
             }
+            mythis.setheights();
         },
 
         setheights: function () {
@@ -462,7 +627,12 @@
         },
 
 		ready: function() {
+            var mythis = this;
+            var list = this.$.reviewlist;
 
+            list.addEventListener("scroll", _.throttle(function () {
+                mythis.displayposition();
+            }, 200));
 		}
 
 	});

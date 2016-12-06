@@ -2,7 +2,7 @@
 # License
 ## Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
 
-This is a human-readable summary of (and not a substitute for) the [license](http://creativecommons.org/licenses/by-sa/4.0/).
+This is a human-readable summary of (and not a substitute for) the full license found at http://creativecommons.org/licenses/by-sa/4.0/.
 
 ### You are free to:
 
@@ -25,3 +25,5 @@ The licensor cannot revoke these freedoms as long as you follow the license term
 You do not have to comply with the license for elements of the material in the public domain or where your use is permitted by an applicable exception or limitation.
 
 No warranties are given. The license may not give you all of the permissions necessary for your intended use. For example, other rights such as publicity, privacy, or moral rights may limit how you use the material.
+
+This PDF was generated using Prince (https://www.princexml.com/).

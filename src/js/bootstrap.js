@@ -117,21 +117,20 @@ process.stdout.write = console.log.bind(console);
         var srcResource = path.join(srcDir, 'index', 'resource_containers');
         var appData = configurator.getAppData();
         var apiURL = configurator.getValue('apiUrl');
+        var libraryBuild = configurator.getValue("libraryBuild");
         var indexstat;
 
         try {
             indexstat = fs.statSync(libraryPath);
         } catch(e) {}
 
-        if (!indexstat || configurator.getValue("libraryBuild") != appData.build) {
+        if (!indexstat || libraryBuild != appData.build) {
             setMsg('Setting up index file...');
             mkdirp.sync(libraryDir);
             var content = fs.readFileSync(srcDB);
             fs.writeFileSync(libraryPath, content);
         }
         mkdirp.sync(resourceDir);
-
-        configurator.setValue("libraryBuild", appData.build);
 
         var db = new Db(libraryPath, resourceDir);
 
@@ -142,7 +141,7 @@ process.stdout.write = console.log.bind(console);
 
     let gitManager = new GitManager();
 
-    let migrateManager = new MigrateManager(configurator, gitManager, reporter);
+    let migrateManager = new MigrateManager(configurator, gitManager, reporter, dataManager);
 
     // TODO: where should this be?
     mkdirp.sync(configurator.getValue('targetTranslationsDir'));

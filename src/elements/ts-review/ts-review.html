@@ -32,6 +32,10 @@
             flex-direction: column;
         }
 
+        #header iron-icon {
+            margin: 0 15px;
+        }
+
         #title {
             color: var(--reverse-text-color);
             display: flex;
@@ -39,10 +43,6 @@
             align-items: center;
             min-height: 45px;
             font-size: 125%;
-        }
-
-        [icon="arrow-back"] {
-            margin: 0 1em 0 .2em;
         }
 
         #steps {
@@ -71,13 +71,19 @@
             padding: 3px;
         }
 
+        .click {
+            cursor: pointer;
+        }
+
     </style>
 
     <template>
 
         <div id="header">
             <div id="title">
-                <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
+                <iron-icon class="click" icon="arrow-back" on-tap="goback"></iron-icon>
+                <span class="click" on-tap="goback">Project</span>
+                <iron-icon icon="chevron-right"></iron-icon>
                 <span>Review Project</span>
             </div>
             <div id="steps">
@@ -170,7 +176,7 @@
             this.fire('iron-signal', {name: 'openexport', data: {projectmeta: projectmeta}});
         },
 
-        back: function () {
+        goback: function () {
             this.set('selected', 0);
             this.fire('iron-signal', {name: 'fromreview', data: {index: null}});
         },

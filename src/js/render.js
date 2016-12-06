@@ -56,20 +56,15 @@ function Renderer() {
         },
 
         migrateMarkers: function (text) {
-            var vtest1 = new RegExp(/\\v/g);
-            var vtest2 = new RegExp(/\/v/g);
-            var ctest = new RegExp(/\\c/g);
-            var stest = new RegExp(/  /g);
-            var vreplace = "\\v ";
+            var vtest = new RegExp(/ ?[\\\/]v ?(?=\d)/g);
+            var ctest = new RegExp(/ ?[\\\/]c ?(?=\d)/g);
+            var vreplace = " \\v ";
             var creplace = "\\c ";
-            var sreplace = " ";
 
-            text = text.replace(vtest1, vreplace);
-            text = text.replace(vtest2, vreplace);
+            text = text.replace(vtest, vreplace);
             text = text.replace(ctest, creplace);
-            text = text.replace(stest, sreplace);
 
-            return text;
+            return text.trim();
         },
 
         removeChapterMarkers: function (text) {
@@ -160,8 +155,12 @@ function Renderer() {
                 return chunk.chunkmeta.chapter;
             }), function (data, chap) {
                 var content = "";
+                var title = "";
 
                 _.forEach(data, function (chunk) {
+                    if (chunk.chunkmeta.frameid === "title") {
+                        title = chunk.transcontent || chunk.srccontent;
+                    }
                     if (chunk.chunkmeta.frame > 0 && chunk.transcontent) {
                         if (options.includeIncompleteFrames || chunk.completed) {
                             content += chunk.transcontent + " ";
@@ -170,13 +169,13 @@ function Renderer() {
                 });
 
                 if (chap > 0) {
-                    chapters.push({chapter: chap, content: content.trim()});
+                    chapters.push({title: title, content: content.trim()});
                 }
             });
 
             chapters.forEach(function (chapter) {
                 if (chapter.content) {
-                    text += startheader + chapter.chapter + endheader;
+                    text += startheader + chapter.title + endheader;
                     text += startdiv + mythis.renderTargetWithVerses(chapter.content, module) + enddiv;
                 }
             });

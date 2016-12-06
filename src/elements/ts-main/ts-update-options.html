@@ -19,6 +19,20 @@
             margin: 20px;
         }
 
+        #title {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #icon {
+            margin-left: 20px;
+        }
+
+        .icon {
+            color: var(--icon-color);
+        }
+
         #body {
             display: flex;
             flex-direction: column;
@@ -38,9 +52,9 @@
 
         .option {
             border-bottom: 1px solid var(--border-color);
-            padding: 15px 30px 0;
+            padding: 15px 30px;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
             transition: background .3s, color .3s;
             cursor: pointer;
@@ -55,22 +69,38 @@
             font-weight: bold;
         }
 
+        .nooption {
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
     </style>
 
     <template>
 
         <div id="header">
-            <h2>Update Options</h2>
-            <span><iron-icon icon="notification:wifi"></iron-icon> This will use your internet connection</span>
+            <div id="title">
+                <h2>Update Options</h2>
+                <span id="icon"><a href="http://help.door43.org/en/knowledgebase/9-translationstudio/docs/5-update-options"><iron-icon class="icon" icon="info"></iron-icon></a></span>
+            </div>
+            <span><iron-icon icon="notification:wifi"></iron-icon> Requires Internet Connection</span>
+            <span>These updates may take a while.</span>
         </div>
         <div id="body">
-            <div class="option" on-tap="language">
-                <span class="optiontitle">Download List of Target Languages</span>
-                <p>Will update the list of target languages available for translation projects. This process may take some time.</p>
-            </div>
             <div class="option" on-tap="source">
-                <span class="optiontitle">Download List of New and Updated Source Texts</span>
-                <p>This only updates the list of available source texts. After the download, an Internet connection will be required to update the content of the source text used in a Project. This process may take some time.</p>
+                <span class="optiontitle">Update List of Available Source Texts</span>
+            </div>
+            <div class="option" on-tap="download">
+                <span class="optiontitle">Download Available Source Texts</span>
+            </div>
+            <div class="option" on-tap="language">
+                <span class="optiontitle">Update List of Available Target Languages</span>
+            </div>
+            <div class="nooption">
+                <span class="optiontitle"><a href="https://github.com/unfoldingWord-dev/ts-desktop/releases">Check for Updates to translationStudio</a></span>
             </div>
         </div>
         <div id="footer">
@@ -99,8 +129,19 @@
             this.fire('source');
         },
 
-        ready: function () {
+        download: function () {
+            this.fire('download');
+        },
 
+        ready: function () {
+            var shell = require('electron').shell;
+            var links = this.getElementsByTagName('a');
+            for (var i = 0; i < links.length; i++) {
+                links[i].addEventListener('click', function (event) {
+                    event.preventDefault();
+                    shell.openExternal(this.href);
+                });
+            }
         }
 
     });

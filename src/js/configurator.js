@@ -252,21 +252,24 @@
             applyPrefAppearance: function() {
                 var targetfont = this.getUserSetting('targetfont').name;
                 var sourcefont = this.getUserSetting('sourcefont').name;
-                var fontSizeVal = this.getUserSetting('targetsize').name.toLowerCase();
-                var fontSize = fontSizeMap[fontSizeVal];
+                var targetsizeValue = this.getUserSetting('targetsize').name.toLowerCase();
+                var targetsize = fontSizeMap[targetsizeValue];
+                var sourcesizeValue = this.getUserSetting('sourcesize').name.toLowerCase();
+                var sourcesize = fontSizeMap[sourcesizeValue];
                 var sheet = document.styleSheets[0];
                 var rules = sheet.cssRules;
 
                 for (var i = 0; i < rules.length; i++) {
-                    if (rules[i].selectorText.toLowerCase() === ".targetfont" || rules[i].selectorText.toLowerCase() === ".sourcefont" || rules[i].selectorText.toLowerCase() === ".targetsize") {
+                    if (rules[i].selectorText.toLowerCase() === ".targetfont" || rules[i].selectorText.toLowerCase() === ".sourcefont" || rules[i].selectorText.toLowerCase() === ".targetsize" || rules[i].selectorText.toLowerCase() === ".sourcesize") {
                         sheet.deleteRule(i);
                         i--;
                     }
                 }
 
                 sheet.insertRule(".targetfont {font-family: " + targetfont + "}", 0);
-                sheet.insertRule(".targetsize {font-size: " + fontSize + "}", 1);
+                sheet.insertRule(".targetsize {font-size: " + targetsize + "}", 1);
                 sheet.insertRule(".sourcefont {font-family: " + sourcefont + "}", 2);
+                sheet.insertRule(".sourcesize {font-size: " + sourcesize + "}", 3);
             },
 
             getAppData: function() {

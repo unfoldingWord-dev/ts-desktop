@@ -35,19 +35,22 @@
         #header {
             background-color: var(--primary-color);
             min-height: 105px;
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-start;
+            font-size: 125%;
+        }
+
+        #header iron-icon {
+            margin: 0 15px;
         }
 
         #title {
-            font-size: 125%;
             color: var(--reverse-text-color);
             display: flex;
             justify-content: flex-start;
             align-items: center;
             min-height: 45px;
-        }
-
-        [icon="arrow-back"] {
-            margin: 0 1em 0 .2em;
         }
 
         .popup {
@@ -109,13 +112,19 @@
             flex-direction: column;
         }
 
+        .click {
+            cursor: pointer;
+        }
+
     </style>
 
     <template>
 
         <div id="header">
             <div id="title">
-                <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
+                <iron-icon class="click" icon="arrow-back" on-tap="gohome"></iron-icon>
+                <span class="click" on-tap="gohome">Home</span>
+                <iron-icon icon="chevron-right"></iron-icon>
                 <span>[[createtitle(route)]]</span>
             </div>
         </div>
@@ -225,10 +234,8 @@
         load: function (route) {
             var lang = this.$.languages;
             if (route === "new") {
+                lang.load();
                 this.set('selected', 0);
-                setTimeout(function() {
-                    lang.updateList();
-                }, 500);
             }
         },
 
@@ -329,6 +336,7 @@
                 App.projectsManager.createTargetTranslation([], newprojectmeta, this.currentuser)
                     .then(function() {
                         mythis.fire('iron-signal', {name: 'updatelist'});
+                        mythis.fire('iron-signal', {name: 'translateright'});
                         mythis.fire('iron-signal', {name: 'loadproject', data: {projectmeta: newprojectmeta, nav: "translate"}});
                     })
                     .catch(function (err) {
@@ -342,12 +350,12 @@
         startimport: function () {
             this.$.confirmimport.close();
             this.set('route', "home");
-            this.fire('iron-signal', {name: 'finishusfm'});
+            this.fire('finishusfm');
             this.set('selected', 0);
             this.set('importdata', {importing: false});
         },
 
-        back: function () {
+        gohome: function () {
             this.animationConfig.exit.name = 'slide-right-animation';
             this.set('selected', 0);
             this.set('importdata', {importing: false});

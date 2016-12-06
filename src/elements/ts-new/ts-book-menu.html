@@ -13,7 +13,7 @@
         }
 
         #main {
-            flex: 0 0 450px;
+            flex: 0 0 550px;
             display: flex;
             flex-direction: column;
         }
@@ -25,9 +25,13 @@
             display: flex;
             justify-content: flex-start;
             align-items: center;
-            padding: 0 20px;
+            padding: 0 10px;
             border-bottom: 1px solid var(--border-color);
             background: var(--card-background-color);
+        }
+
+        #header iron-icon {
+            margin: 0 10px;
         }
 
         #list {
@@ -40,7 +44,7 @@
         .row {
             display: block;
             margin: 0;
-            padding: 1em;
+            padding: 15px 25px;
             border-bottom: 1px solid var(--border-color);
             transition: background .3s, color .3s;
             cursor: pointer;
@@ -50,22 +54,22 @@
             background: var(--accent-color-light);
         }
 
-        #header iron-icon {
-            padding: 0 10px;
-        }
-
-        .click {
-            cursor: pointer;
-        }
-
         .small {
             --iron-icon-height: 18px;
             --iron-icon-width: 18px;
             color: var(--secondary-text-color);
+            margin-right: 15px;
         }
 
-        .row span {
-            padding-left: 15px;
+        .code {
+            color: var(--secondary-text-color);
+            font-style: italic;
+            font-size: 80%;
+            margin-left: 10px;
+        }
+
+        .click {
+            cursor: pointer;
         }
 
     </style>
@@ -74,9 +78,12 @@
 
       <div id="main">
           <div id="header">
+              <iron-icon class="click" icon="arrow-back" on-tap="togroup"></iron-icon>
+              <span class="click" on-tap="tolang"><span>[[newdata.language.name]]</span><span class="code">(<span>[[newdata.language.id]]</span>)</span></span>
+              <iron-icon icon="chevron-right"></iron-icon>
               <span class="click" on-tap="togroup">[[newdata.category.name]]</span>
               <iron-icon icon="chevron-right"></iron-icon>
-              <em>Choose a project</em>
+              <span><em>Choose a project</em></span>
           </div>
           <iron-list id="list" items="[[newdata.category.data]]" as="project">
               <template>
@@ -143,6 +150,10 @@
 
       togroup: function () {
           this.set('selected', 1);
+      },
+
+      tolang: function () {
+          this.set('selected', 0);
       },
 
       ready: function() {

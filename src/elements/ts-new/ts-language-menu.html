@@ -40,7 +40,7 @@
         .row {
             display: block;
             margin: 0;
-            padding: 1em;
+            padding: 15px 25px;
             border-bottom: 1px solid var(--border-color);
             transition: background .3s, color .3s;
             cursor: pointer;
@@ -62,9 +62,12 @@
 
         .right {
             float: right;
+        }
+
+        .code {
             color: var(--secondary-text-color);
             font-style: italic;
-            font-size: 80%
+            font-size: 80%;
         }
 
         input {
@@ -83,7 +86,7 @@
 
       <div id="main">
           <div id="header">
-              <input is="iron-input" id="input" bind-value="{{query}}" on-input="searchfilter" placeholder="Choose target language">
+              <input is="iron-input" id="input" bind-value="{{query}}" on-input="updateList" placeholder="Choose target language">
               <paper-icon-button class="right" icon="search" on-tap="focussearch"></paper-icon-button>
           </div>
           <iron-list id="list" items="[[filtered]]" as="language">
@@ -91,7 +94,7 @@
                   <div class$="[[checkclass(language.id)]]" on-tap="store">
                       <div>
                           <span>[[language.name]]</span>
-                          <span class="right">[[language.id]]</span>
+                          <span class="right code">[[language.id]]</span>
                       </div>
                   </div>
               </template>
@@ -124,7 +127,7 @@
               value: {},
               notify: true
           },
-          languagelist: {
+          languages: {
               type: Array,
               value: []
           },
@@ -154,29 +157,25 @@
           return this.changedata.changing && this.changedata.oldmeta.target_language.id === id ? 'row unavailable' : 'row';
       },
 
-      searchfilter: function () {
+      filterList: function (list) {
           var query = this.query;
-          var languagelist = _.cloneDeep(this.languagelist);
-          var filtered = [];
+          var search = App.utils.startsWithBase.bind(null, query);
 
           if (query) {
-              var search = App.utils.startsWithBase.bind(null, query);
-
-              var bycode = languagelist.filter(function (language) {
-                  return search(language.id);
+              var bycode = list.filter(function (item) {
+                  return search(item.id);
               });
-              var byname = languagelist.filter(function (language) {
-                  return search(language.name);
+              var byname = list.filter(function (item) {
+                  return search(item.name);
               });
               var combined = bycode.concat(byname);
 
-              filtered = combined.filter(function(item, index) {
+              return combined.filter(function(item, index) {
                   return combined.indexOf(item) === index;
               });
           } else {
-              filtered = languagelist;
+              return list;
           }
-          this.set('filtered', filtered);
       },
 
       change: function () {
@@ -233,14 +232,19 @@
 
       reset: function () {
           this.set('query', "");
+          this.updateList();
           this.$.list.scrollTop = 0;
       },
 
       updateList: function () {
-          this.set('languagelist', App.dataManager.getTargetLanguages());
+          var list = _.cloneDeep(this.languages);
+
+          this.set('filtered', this.filterList(list));
+      },
+
+      load: function () {
+          this.set('languages', App.dataManager.getTargetLanguages());
           this.reset();
-          this.searchfilter();
-          this.notifyResize();
       },
 
       ready: function () {

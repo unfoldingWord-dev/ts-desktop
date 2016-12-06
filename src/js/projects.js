@@ -318,10 +318,6 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
         saveTargetChunk: function (chunk, meta) {
             var mythis = this;
 
-            if (chunk.chunkmeta.chapterid === "front") {
-                chunk.chunkmeta.chapterid = "00";
-            }
-
             return mythis.makeChapterDir(meta, chunk)
                 .then(function () {
                     return mythis.updateChunk(meta, chunk);
@@ -399,7 +395,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
 
             return mythis.deleteTargetTranslation(meta).then(utils.ret(true)).catch(utils.ret(false))
                 .then(function () {
-                    mythis.unsetValues(meta);
+                    mythis.unsetValues(meta.unique_id);
                     return mkdirp(paths.projectDir)
                 })
                 .then(setLicense())
@@ -487,9 +483,6 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 var p = path.parse(f);
                 var ch = p.dir.split(path.sep).slice(-1)[0];
 
-                if (ch === "00") {
-                    ch = "front";
-                }
                 return ch + '-' + p.name;
             };
 
@@ -550,9 +543,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 .then(utils.lodash.indexBy('name'));
         },
 
-        unsetValues: function (meta) {
-            var key = meta.unique_id;
-
+        unsetValues: function (key) {
             configurator.unsetValue(key + "-chapter");
             configurator.unsetValue(key + "-index");
             configurator.unsetValue(key + "-selected");

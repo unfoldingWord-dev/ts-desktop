@@ -91,7 +91,7 @@
         <div id="footer">
             <template is="dom-if" if="{{options.loading}}">
                 <template is="dom-if" if="{{options.progress}}">
-                    <paper-button dialog-dismiss on-tap="reload">Cancel</paper-button>
+                    <paper-button on-tap="reload">Cancel</paper-button>
                 </template>
             </template>
             <template is="dom-if" if="{{!options.loading}}">
@@ -121,11 +121,7 @@
         },
 
         reload: function () {
-            var remote = require('electron').remote;
-            var main = remote.getCurrentWindow();
-
-            App.ipc.send('opensplash');
-            main.reload();
+            App.ipc.send('fire-reload');
         },
 
         ready: function () {

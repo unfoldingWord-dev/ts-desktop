@@ -1405,11 +1405,13 @@
                 mythis.setlocation();
                 mythis.setheights();
             });
+            //turning hotkey listener off to see if it is causing speed issue
+            /*
             window.addEventListener("keyup", function (e) {
                 if ((e.ctrlKey || e.metaKey) && e.keyCode == 70 && mythis.route === "translate" && mythis.selected === 3 && mythis.currentproject.projectmeta.project_type_class === "standard") {
                     mythis.gosearch();
                 }
-            });
+            });*/
         }
 
     });

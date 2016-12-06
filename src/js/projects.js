@@ -395,7 +395,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
 
             return mythis.deleteTargetTranslation(meta).then(utils.ret(true)).catch(utils.ret(false))
                 .then(function () {
-                    mythis.unsetValues(meta);
+                    mythis.unsetValues(meta.unique_id);
                     return mkdirp(paths.projectDir)
                 })
                 .then(setLicense())
@@ -543,9 +543,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 .then(utils.lodash.indexBy('name'));
         },
 
-        unsetValues: function (meta) {
-            var key = meta.unique_id;
-
+        unsetValues: function (key) {
             configurator.unsetValue(key + "-chapter");
             configurator.unsetValue(key + "-index");
             configurator.unsetValue(key + "-selected");

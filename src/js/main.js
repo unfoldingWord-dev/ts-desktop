@@ -31,8 +31,11 @@ function createSplashScreen() {
         autoHideMenuBar: true,
         frame: false,
         center: true,
+        show: false,
         title: 'translationStudio'
     });
+
+    //splashScreen.webContents.openDevTools();
 
     splashScreen.loadURL('file://' + __dirname + '/../views/splash-screen.html');
 
@@ -41,12 +44,27 @@ function createSplashScreen() {
     });
 }
 
+function setMainSplash() {
+    splashScreen.webContents.send('load-main');
+    splashScreen.show();
+}
+
+function setAcademySplash() {
+    splashScreen.webContents.send('load-academy');
+    splashScreen.show();
+}
+
+function setReloadSplash() {
+    splashScreen.webContents.send('reload');
+    splashScreen.show();
+}
+
 function createWindow () {
-    // Create the browser window.
+
     mainWindow = new BrowserWindow({
         width: 980,
         height: 580,
-        minWidth: 800,
+        minWidth: 980,
         minHeight: 580,
         useContentSize: true,
         center: true,
@@ -61,13 +79,9 @@ function createWindow () {
 
     // mainWindow.webContents.openDevTools();
 
-    // and load the index.html of the app.
     mainWindow.loadURL('file://' + __dirname + '/../views/index.html');
 
     mainWindow.on('closed', function() {
-        // Dereference the window object, usually you would store windows
-        // in an array if your app supports multi windows, this is the time
-        // when you should delete the corresponding element.
         mainWindow = null;
     });
 
@@ -78,8 +92,6 @@ function createWindow () {
     mainWindow.on('unmaximize', function () {
         mainWindow.webContents.send('unmaximize');
     });
-
-    mainWindow.focus();
 }
 
 function createAcademyWindow () {
@@ -94,6 +106,7 @@ function createAcademyWindow () {
         title: app.getName(),
         backgroundColor: '#00796B',
         autoHideMenuBar: true,
+        show: false,
         frame: false
     });
 
@@ -112,8 +125,6 @@ function createAcademyWindow () {
     academyWindow.on('unmaximize', function () {
         academyWindow.webContents.send('unmaximize');
     });
-
-    academyWindow.focus();
 }
 
 function createAppMenus() {
@@ -179,13 +190,33 @@ ipcMain.on('academy-window', function (event, arg) {
     }
 });
 
-ipcMain.on('openacademy', function (event, arg) {
+ipcMain.on('openacademy', function () {
     if (academyWindow) {
         academyWindow.show();
-        academyWindow.focus();
     } else {
-        createAcademyWindow();
+        createSplashScreen();
+        setTimeout(function () {
+            setAcademySplash();
+            createAcademyWindow();
+        }, 200);
     }
+});
+
+ipcMain.on('fire-reload', function () {
+    if (splashScreen) {
+        splashScreen.show();
+    } else {
+        createSplashScreen();
+    }
+    setTimeout(function () {
+        setReloadSplash();
+        setTimeout(function () {
+            if (mainWindow) {
+                mainWindow.hide();
+                mainWindow.reload();
+            }
+        }, 500);
+    }, 200);
 });
 
 ipcMain.on('save-as', function (event, arg) {
@@ -202,11 +233,17 @@ ipcMain.on('loading-status', function (event, status) {
     splashScreen && splashScreen.webContents.send('loading-status', status);
 });
 
-ipcMain.on('loading-done', function (event) {
+ipcMain.on('main-loading-done', function () {
     if (splashScreen && mainWindow) {
-        splashScreen.close();
         mainWindow.show();
-        mainWindow.focus();
+        splashScreen.close();
+    }
+});
+
+ipcMain.on('ta-loading-done', function () {
+    if (splashScreen && academyWindow) {
+        academyWindow.show();
+        splashScreen.close();
     }
 });
 
@@ -214,8 +251,9 @@ app.on('ready', function () {
     createAppMenus();
     createSplashScreen();
     setTimeout(function () {
+        setMainSplash();
         createWindow();
-    }, 500);
+    }, 200);
 });
 
 app.on('window-all-closed', function () {

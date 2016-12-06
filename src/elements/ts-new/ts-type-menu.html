@@ -13,7 +13,7 @@
         }
 
         #main {
-            flex: 0 0 450px;
+            flex: 0 0 550px;
             display: flex;
             flex-direction: column;
         }
@@ -25,9 +25,13 @@
             display: flex;
             justify-content: flex-start;
             align-items: center;
-            padding: 0 20px;
+            padding: 0 10px;
             border-bottom: 1px solid var(--border-color);
             background: var(--card-background-color);
+        }
+
+        #header iron-icon {
+            margin: 0 10px;
         }
 
         #list {
@@ -40,7 +44,7 @@
         .row {
             display: block;
             margin: 0;
-            padding: 1em;
+            padding: 15px 25px;
             background: var(--card-background-color);
             border-bottom: 1px solid var(--border-color);
             transition: background .3s, color .3s;
@@ -61,10 +65,6 @@
             border-bottom: 1px solid var(--card-background-color);
         }
 
-        #header iron-icon {
-            padding: 0 10px;
-        }
-
         .click {
             cursor: pointer;
         }
@@ -76,14 +76,13 @@
       <div id="main">
           <div id="header">
               <template is="dom-if" if="{{!importdata.importing}}">
+                  <iron-icon class="click" icon="arrow-back" on-tap="tobook"></iron-icon>
                   <span class="click" on-tap="togroup">[[newdata.category.name]]</span>
                   <iron-icon icon="chevron-right"></iron-icon>
-                  <template is="dom-if" if="{{!obs}}">
-                      <span class="click" on-tap="tobook">[[newdata.project.name]]</span>
-                      <iron-icon icon="chevron-right"></iron-icon>
-                  </template>
+                  <span class="click" on-tap="tobook">[[newdata.project.name]]</span>
+                  <iron-icon icon="chevron-right"></iron-icon>
               </template>
-              <em>Choose a type</em>
+              <span><em>Choose a type</em></span>
           </div>
           <iron-list id="list" items="[[newdata.typelist]]" as="typedata">
               <template>
@@ -126,19 +125,11 @@
           projectlist: {
               type: Array,
               value: []
-          },
-          obs: {
-              type: Boolean,
-              value: false
           }
       },
 
       behaviors: [
           Polymer.IronResizableBehavior
-      ],
-
-      observers: [
-          'checkobs(newdata.category.name)'
       ],
 
       createtypes: function () {
@@ -180,10 +171,6 @@
 
       checkclass: function (allowed) {
           return allowed ? 'row' : 'row unavailable';
-      },
-
-      checkobs: function (name) {
-          this.obs = name === "Open Bible Stories";
       },
 
       store: function(e) {

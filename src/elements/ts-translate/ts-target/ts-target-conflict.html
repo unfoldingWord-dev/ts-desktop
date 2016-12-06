@@ -48,6 +48,10 @@
             margin: 4px 0;
 		}
 
+        .content > div {
+            white-space: pre-wrap;
+        }
+
         .green {
             background: var(--primary-color-light);
         }
@@ -155,7 +159,7 @@
         },
 
         conflictclass: function (index) {
-            return index % 2 === 0 ? 'targetfont content green' : 'targetfont content blue';
+            return index % 2 === 0 ? 'targetfont targetsize content green' : 'targetfont targetsize content blue';
         },
 
         select: function (e) {

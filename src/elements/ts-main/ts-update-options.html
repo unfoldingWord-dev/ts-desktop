@@ -1,5 +1,7 @@
 
 <link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../components/iron-icons/notification-icons.html">
 
 <dom-module id="ts-update-options">
 
@@ -15,6 +17,20 @@
             flex-direction: column;
             align-items: center;
             margin: 20px;
+        }
+
+        #title {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #icon {
+            margin-left: 20px;
+        }
+
+        .icon {
+            color: var(--icon-color);
         }
 
         #body {
@@ -36,9 +52,9 @@
 
         .option {
             border-bottom: 1px solid var(--border-color);
-            padding: 15px 30px 0;
+            padding: 15px 30px;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
             transition: background .3s, color .3s;
             cursor: pointer;
@@ -53,25 +69,38 @@
             font-weight: bold;
         }
 
+        .nooption {
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
     </style>
 
     <template>
 
         <div id="header">
-            <h2>Update Options</h2>
+            <div id="title">
+                <h2>Update Options</h2>
+                <span id="icon"><a href="http://help.door43.org/en/knowledgebase/9-translationstudio/docs/5-update-options"><iron-icon class="icon" icon="info"></iron-icon></a></span>
+            </div>
+            <span><iron-icon icon="notification:wifi"></iron-icon> Requires Internet Connection</span>
+            <span>These updates may take a while.</span>
         </div>
         <div id="body">
-            <div class="option" on-tap="language">
-                <span class="optiontitle">Update Target Languages</span>
-                <p>Adds any new approved languages to list.  Fairly quick.</p>
-            </div>
             <div class="option" on-tap="source">
-                <span class="optiontitle">Update Sources</span>
-                <p>Adds new Level 3 source languages.  Takes forever!</p>
+                <span class="optiontitle">Update List of Available Source Texts</span>
             </div>
-            <div class="option" on-tap="both">
-                <span class="optiontitle">Update All</span>
-                <p>Does both from above</p>
+            <div class="option" on-tap="download">
+                <span class="optiontitle">Download Available Source Texts</span>
+            </div>
+            <div class="option" on-tap="language">
+                <span class="optiontitle">Update List of Available Target Languages</span>
+            </div>
+            <div class="nooption">
+                <span class="optiontitle"><a href="https://github.com/unfoldingWord-dev/ts-desktop/releases">Check for Updates to translationStudio</a></span>
             </div>
         </div>
         <div id="footer">
@@ -100,12 +129,19 @@
             this.fire('source');
         },
 
-        both: function () {
-            this.fire('both');
+        download: function () {
+            this.fire('download');
         },
 
         ready: function () {
-
+            var shell = require('electron').shell;
+            var links = this.getElementsByTagName('a');
+            for (var i = 0; i < links.length; i++) {
+                links[i].addEventListener('click', function (event) {
+                    event.preventDefault();
+                    shell.openExternal(this.href);
+                });
+            }
         }
 
     });

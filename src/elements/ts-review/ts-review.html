@@ -3,6 +3,7 @@
 <link rel="import" href="../../components/paper-button/paper-button.html">
 <link rel="import" href="../../components/iron-icons/iron-icons.html">
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../components/iron-signals/iron-signals.html">
 
 <link rel="import" href="./ts-review-project.html">
 <link rel="import" href="./ts-review-contrib.html">
@@ -31,6 +32,10 @@
             flex-direction: column;
         }
 
+        #header iron-icon {
+            margin: 0 15px;
+        }
+
         #title {
             color: var(--reverse-text-color);
             display: flex;
@@ -38,10 +43,6 @@
             align-items: center;
             min-height: 45px;
             font-size: 125%;
-        }
-
-        [icon="arrow-back"] {
-            margin: 0 1em 0 .2em;
         }
 
         #steps {
@@ -70,13 +71,19 @@
             padding: 3px;
         }
 
+        .click {
+            cursor: pointer;
+        }
+
     </style>
 
     <template>
 
         <div id="header">
             <div id="title">
-                <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
+                <iron-icon class="click" icon="arrow-back" on-tap="goback"></iron-icon>
+                <span class="click" on-tap="goback">Project</span>
+                <iron-icon icon="chevron-right"></iron-icon>
                 <span>Review Project</span>
             </div>
             <div id="steps">
@@ -90,6 +97,9 @@
             <ts-review-project selected="{{selected}}" currentproject="[[currentproject]]" on-next="gocontrib"></ts-review-project>
             <ts-review-contrib selected="{{selected}}" currentproject="{{currentproject}}" options="{{options}}" on-next="goexport"></ts-review-contrib>
         </neon-animated-pages>
+
+        <iron-signals on-iron-signal-reviewright="setrightanimation"></iron-signals>
+        <iron-signals on-iron-signal-reviewleft="setleftanimation"></iron-signals>
 
     </template>
 
@@ -166,9 +176,19 @@
             this.fire('iron-signal', {name: 'openexport', data: {projectmeta: projectmeta}});
         },
 
-        back: function () {
+        goback: function () {
             this.set('selected', 0);
             this.fire('iron-signal', {name: 'fromreview', data: {index: null}});
+        },
+
+        setrightanimation: function () {
+            this.animationConfig.exit.name = 'slide-right-animation';
+            this.animationConfig.entry.name = 'slide-from-right-animation';
+        },
+
+        setleftanimation: function () {
+            this.animationConfig.exit.name = 'slide-left-animation';
+            this.animationConfig.entry.name = 'slide-from-left-animation';
         },
 
         ready: function() {

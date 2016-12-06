@@ -30,24 +30,26 @@ before_install:
   -iv $encrypted_54b2df9dba46_iv -in private.json.enc -out src/config/private.json
   -d; fi
 # install git lfs
-- mkdir -p $HOME/bin
-- wget https://github.com/github/git-lfs/releases/download/v1.3.1/git-lfs-linux-amd64-1.3.1.tar.gz
-- tar xvfz git-lfs-linux-amd64-1.3.1.tar.gz
-- mv git-lfs-1.3.1/git-lfs $HOME/bin/git-lfs
-- export PATH=$PATH:$HOME/bin/
-- rm git-lfs-linux-amd64-1.3.1.tar.gz
+#- mkdir -p $HOME/bin
+#- wget https://github.com/github/git-lfs/releases/download/v1.3.1/git-lfs-linux-amd64-1.3.1.tar.gz
+#- tar xvfz git-lfs-linux-amd64-1.3.1.tar.gz
+#- mv git-lfs-1.3.1/git-lfs $HOME/bin/git-lfs
+#- export PATH=$PATH:$HOME/bin/
+#- rm git-lfs-linux-amd64-1.3.1.tar.gz
 before_script:
 - git config --global url."https://".insteadOf git://
 - npm install
 - npm install gulp -g
 - npm install bower -g
+#- npm install door43-client -g
 script: npm test
 after_success:
 - test $TRAVIS_TEST_RESULT == 0 && $TRAVIS_PULL_REQUEST == "false"
 - test -z $TRAVIS_TAG && ./scripts/bump.sh
-#- curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
-#- git lfs install
-- git lfs pull
+#- door43-client index -i src/index/index.sqlite -f
+- test -f src/index/index.sqlite
+#- door43-client download -i src/index/index.sqlite -d src/index/resource_containers -f -c
+- test -d src/index/resource_containers
 - bower install
 # ensure bower installed correctly
 - test -d src/components

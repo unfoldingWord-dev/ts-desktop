@@ -117,42 +117,31 @@ process.stdout.write = console.log.bind(console);
         var srcResource = path.join(srcDir, 'index', 'resource_containers');
         var appData = configurator.getAppData();
         var apiURL = configurator.getValue('apiUrl');
+        var libraryBuild = configurator.getValue("libraryBuild");
         var indexstat;
-        var resourcestat;
 
         try {
             indexstat = fs.statSync(libraryPath);
         } catch(e) {}
 
-        try {
-            resourcestat = fs.statSync(resourceDir);
-        } catch(e) {}
-
-        if (!indexstat || configurator.getValue("libraryBuild") != appData.build) {
+        if (!indexstat || libraryBuild != appData.build) {
             setMsg('Setting up index file...');
             mkdirp.sync(libraryDir);
             var content = fs.readFileSync(srcDB);
             fs.writeFileSync(libraryPath, content);
         }
-
-        if (!resourcestat || configurator.getValue("libraryBuild") != appData.build) {
-            setMsg('Setting up resource containers...');
-            mkdirp.sync(resourceDir);
-            fse.copySync(srcResource, resourceDir, {clobber: true});
-        }
-
-        configurator.setValue("libraryBuild", appData.build);
+        mkdirp.sync(resourceDir);
 
         var db = new Db(libraryPath, resourceDir);
 
-        return new DataManager(db, resourceDir, apiURL);
+        return new DataManager(db, resourceDir, apiURL, srcResource);
     })();
 
     setMsg('Initializing modules...');
 
     let gitManager = new GitManager();
 
-    let migrateManager = new MigrateManager(configurator, gitManager, reporter);
+    let migrateManager = new MigrateManager(configurator, gitManager, reporter, dataManager);
 
     // TODO: where should this be?
     mkdirp.sync(configurator.getValue('targetTranslationsDir'));

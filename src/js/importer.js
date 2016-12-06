@@ -254,32 +254,47 @@ function UsfmParser () {
             }
         },
 
-        buildChapters: function(){
+        buildChapters: function () {
             mythis.chapters = {};
             var chap;
-            for (var m in mythis.markers) {
-                var marker = mythis.markers[m];
-                if (marker.type === "chapter") {
-                    chap = String("00" + marker.options).slice(-2);
-                    var chapter =
-                        mythis.chapters[chap] = {
-                            id: chap,
-                            verses: {}
-                        };
-                    //mythis.chapters.push(chapter);
+            var chapnum = 0;
+            var lastverse = 100;
+
+            var createchapter = function (chapnum) {
+                chap = chapnum.toString();
+                if (chap.length === 1) {
+                    chap = "0" + chap;
+                }
+                mythis.chapters[chap] = {
+                    id: chap,
+                    verses: {}
+                };
+            };
+
+            mythis.markers.forEach(function (marker) {
+                if (marker.type === "heading" && chapnum === 0) {
+                    createchapter(chapnum);
+                    mythis.chapters[chap].contents = marker.contents;
+                } else if (marker.type === "chapter") {
+                    chapnum = parseInt(marker.options);
+                    createchapter(chapnum);
+                    lastverse = 0;
                 } else if (marker.type === "verse") {
+                    var thisverse = parseInt(marker.options);
+
+                    if (thisverse < lastverse) {
+                        chapnum++;
+                        createchapter(chapnum);
+                    }
+                    lastverse = thisverse;
+
                     mythis.chapters[chap].verses[marker.options] = {
                         id: marker.options,
                         contents: marker.contents
-                    }
-                } else if (marker.type === "heading") {
-                    mythis.chapters['00'] = {
-                        id: '00',
-                        verses: {},
-                        contents: marker.contents
                     };
                 }
-            }
+            });
+
             return mythis.chapters;
         }
     }

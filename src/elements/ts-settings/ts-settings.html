@@ -30,6 +30,10 @@
             min-height: 50px;
         }
 
+        .header iron-icon {
+            margin: 0 15px;
+        }
+
         .heading {
             font-size: 125%;
             color: var(--reverse-text-color);
@@ -37,10 +41,6 @@
             justify-content: flex-start;
             align-items: center;
             min-height: 45px;
-        }
-
-        [icon="arrow-back"] {
-            margin: 0 1em 0 .2em;
         }
 
         .body {
@@ -92,13 +92,19 @@
             display: none;
         }
 
+        .click {
+            cursor: pointer;
+        }
+
     </style>
 
     <template>
 
         <div class="header">
             <div class="heading">
-                <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
+                <iron-icon class="click" icon="arrow-back" on-tap="goback"></iron-icon>
+                <span class="click" on-tap="goback">[[createtitle(backto)]]</span>
+                <iron-icon icon="chevron-right"></iron-icon>
                 <span>Settings</span>
             </div>
         </div>
@@ -142,7 +148,12 @@
         properties: {
             route: {
                 type: String,
-                notify: true
+                notify: true,
+                observer: 'load'
+            },
+            backto: {
+                type: String,
+                value: ''
             },
             options: {
                 type: Object,
@@ -170,6 +181,14 @@
             settingsObj: {
                 type: Object,
                 value: {}
+            },
+            currentproject: {
+                type: Object,
+                value: {}
+            },
+            reload: {
+                type: Boolean,
+                value: false
             }
         },
 
@@ -181,7 +200,9 @@
             this.settings = App.configurator.setUserSetting('mediaserver', "https://api.unfoldingword.org/");
             var untildify = require('untildify');
             var location = App.configurator.getUserSetting('datalocation');
-            this.settings = App.configurator.setUserSetting('datalocation', untildify(location));
+            location = untildify(location);
+            location = location.replace(/\\/g, "\/");
+            this.settings = App.configurator.setUserSetting('datalocation', location);
 
             App.gitManager.getVersion().then(function (version) {
                 return version ? version.toString() : 'N/A';
@@ -194,8 +215,28 @@
             }.bind(this));
         },
 
-        back: function () {
-            this.route = App.configurator.getValue("backto");
+        createtitle: function (backto) {
+            return backto === "translate" ? "Project" : "Home";
+        },
+
+        load: function () {
+            if (this.route === "settings") {
+                this.set('backto', App.configurator.getValue("backto"));
+            }
+        },
+
+        goback: function () {
+            var backto = this.backto;
+            var projectmeta = this.currentproject.projectmeta;
+
+            this.fire('iron-signal', {name: 'translateleft'});
+
+            if (this.reload && backto === "translate") {
+                this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: "translate"}});
+            } else {
+                this.set('route', backto);
+            }
+            this.set('reload', false);
         },
 
         _isEnabled: function (bool) {
@@ -254,6 +295,10 @@
                 var path = 'settings.' + event.target.dataGroup + '.list.' + event.target.dataList + '.value';
                 this.set(path, !value);
                 this.saveSettings();
+                if (name === "bemode") {
+                    this.set('reload', true);
+                    this.fire('iron-signal', {name: 'updatebemode'});
+                }
             } else {
                 this.openSettingModal(event);
             }
@@ -265,7 +310,6 @@
             this.closeSettingModal();
             this.saveSettings();
             App.configurator.applyPrefAppearance();
-            App.configurator.applyPrefBehavior();
         },
 
         _onSettingCancel: function () {
@@ -278,8 +322,9 @@
             if (!newPath) {
                 return;
             }
-            this.settings = App.configurator.setUserSetting('datalocation', newPath[0]);
-            App.projectsManager.moveBackups(oldPath, newPath[0]);
+            newPath = newPath[0].replace(/\\/g, "\/");
+            this.settings = App.configurator.setUserSetting('datalocation', newPath);
+            App.projectsManager.moveBackups(oldPath, newPath);
         },
 
         openSettingModal: function (event) {

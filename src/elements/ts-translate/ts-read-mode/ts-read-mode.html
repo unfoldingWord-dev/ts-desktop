@@ -87,7 +87,7 @@
     <template>
 
         <div id="contain">
-            <iron-list id="readlist" items="{{chapters}}" as="chunk" on-scroll="scroll">
+            <iron-list id="readlist" items="{{chapters}}" as="chunk">
                 <template>
                     <ts-read-card id="{{createid(index)}}" chunk="[[chunk]]" on-updateheight="updateheight"></ts-read-card>
                 </template>
@@ -125,6 +125,9 @@
             modename: {
                 type: String,
                 value: "read"
+            },
+            timer: {
+                type: Number
             }
         },
 
@@ -134,12 +137,8 @@
             list.updateSizeForItem(index);
         },
 
-        scroll: function () {
-            this.displayposition();
-            this.setheights();
-        },
-
         displayposition: function () {
+            var mythis = this;
             var list = this.$.readlist;
             var index = list.firstVisibleIndex || 0;
             var chapter = this.chapters[index].chaptermeta.chapter;
@@ -148,17 +147,19 @@
 
             display.innerHTML = chapter;
             marker.classList.remove("hide");
-            setTimeout(function() {
+            clearTimeout(mythis.timer);
+            mythis.timer = setTimeout(function() {
                 marker.classList.add("hide");
-            }, 2000);
+            }, 1000);
+            mythis.setheights();
         },
 
         setheights: function () {
-            for (var i = 0; i < this.chapters.length; i++) {
+            var list = this.$.readlist;
+
+            for (var i = list.firstVisibleIndex; i <= list.lastVisibleIndex; i++) {
                 var card = document.getElementById(this.modename + i);
-                if (card !== null) {
-                    card.setheight();
-                }
+                card.setheight();
             }
         },
 
@@ -223,7 +224,12 @@
         },
 
         ready: function() {
+            var mythis = this;
+            var list = this.$.readlist;
 
+            list.addEventListener("scroll", _.throttle(function () {
+                mythis.displayposition();
+            }, 200));
         }
 
     });

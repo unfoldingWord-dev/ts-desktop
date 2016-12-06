@@ -269,16 +269,14 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             if (meta.type.id === "tw") {
                 var dict = meta.project.id;
                 frames = dataManager.getAllWords(dict);
-                return frames.length;
             } else if (meta.type.id === "ta") {
                 //frames = dataManager.getTa(meta.project.id);
-                return frames.length;
             } else if (meta.source_translations.length) {
-                frames = dataManager.getSourceFrames(meta.source_translations[0]);
-                return frames.length;
-            } else {
-                return 0;
+                var source = meta.source_translations[0];
+                var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;
+                frames = dataManager.getContainerData(container);
             }
+            return frames.length;
         },
 
         makeUniqueId: function (manifest) {
@@ -319,6 +317,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
 
         saveTargetChunk: function (chunk, meta) {
             var mythis = this;
+
             return mythis.makeChapterDir(meta, chunk)
                 .then(function () {
                     return mythis.updateChunk(meta, chunk);
@@ -394,7 +393,11 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                     });
             };
 
-            return mkdirp(paths.projectDir)
+            return mythis.deleteTargetTranslation(meta).then(utils.ret(true)).catch(utils.ret(false))
+                .then(function () {
+                    mythis.unsetValues(meta.unique_id);
+                    return mkdirp(paths.projectDir)
+                })
                 .then(setLicense())
                 .then(function () {
                     return mythis.saveTargetManifest(meta);
@@ -477,8 +480,9 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             var paths = utils.makeProjectPaths(targetDir, meta);
 
             var parseChunkName = function (f) {
-                var p = path.parse(f),
-                    ch = p.dir.split(path.sep).slice(-1);
+                var p = path.parse(f);
+                var ch = p.dir.split(path.sep).slice(-1)[0];
+
                 return ch + '-' + p.name;
             };
 
@@ -539,9 +543,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 .then(utils.lodash.indexBy('name'));
         },
 
-        unsetValues: function (meta) {
-            var key = meta.unique_id;
-
+        unsetValues: function (key) {
             configurator.unsetValue(key + "-chapter");
             configurator.unsetValue(key + "-index");
             configurator.unsetValue(key + "-selected");
@@ -560,8 +562,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                     }
                 })
                 .catch(function (err) {
-                    reporter.logError(err);
-                    throw "Unable to delete file at this time. You may need to restart the app first.";
+                    throw err || "Unable to delete file at this time.";
                 });
         }
     };

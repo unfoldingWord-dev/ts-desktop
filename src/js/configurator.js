@@ -252,37 +252,26 @@
             applyPrefAppearance: function() {
                 var targetfont = this.getUserSetting('targetfont').name;
                 var sourcefont = this.getUserSetting('sourcefont').name;
-                var fontSizeVal = this.getUserSetting('targetsize').name.toLowerCase();
-                var fontSize = fontSizeMap[fontSizeVal];
+                var targetsizeValue = this.getUserSetting('targetsize').name.toLowerCase();
+                var targetsize = fontSizeMap[targetsizeValue];
+                var sourcesizeValue = this.getUserSetting('sourcesize').name.toLowerCase();
+                var sourcesize = fontSizeMap[sourcesizeValue];
                 var sheet = document.styleSheets[0];
                 var rules = sheet.cssRules;
 
                 for (var i = 0; i < rules.length; i++) {
-                    if (rules[i].selectorText.toLowerCase() === ".targetfont" || rules[i].selectorText.toLowerCase() === ".sourcefont") {
+                    if (rules[i].selectorText.toLowerCase() === ".targetfont" || rules[i].selectorText.toLowerCase() === ".sourcefont" || rules[i].selectorText.toLowerCase() === ".targetsize" || rules[i].selectorText.toLowerCase() === ".sourcesize") {
                         sheet.deleteRule(i);
                         i--;
                     }
                 }
 
                 sheet.insertRule(".targetfont {font-family: " + targetfont + "}", 0);
-                sheet.insertRule(".targetfont {font-size: " + fontSize + "}", 1);
+                sheet.insertRule(".targetsize {font-size: " + targetsize + "}", 1);
                 sheet.insertRule(".sourcefont {font-family: " + sourcefont + "}", 2);
-                sheet.insertRule(".sourcefont {font-size: " + fontSize + "}", 3);
-
+                sheet.insertRule(".sourcesize {font-size: " + sourcesize + "}", 3);
             },
 
-            /**
-             *
-             */
-            applyPrefBehavior: function() {
-                // We may not need this as settings that affects behavior is most likely called
-                //    using the App.configurator.getUserSetting(key) API.
-                // console.log('Pretend to apply behavior');
-            },
-
-            /**
-             *
-             */
             getAppData: function() {
                 try {
                     let p = require('../../package');

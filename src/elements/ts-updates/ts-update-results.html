@@ -1,0 +1,448 @@
+
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../components/iron-list/iron-list.html">
+<link rel="import" href="../../components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
+
+<dom-module id="ts-update-results">
+
+    <style>
+
+        :host {
+            display: flex;
+            justify-content: center;
+        }
+
+        #main {
+            flex: 0 0 600px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #header {
+            color: var(--secondary-text-color);
+            font-size: 110%;
+            flex: 0 0 60px;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 0 10px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--card-background-color);
+        }
+
+        #header iron-icon {
+            margin: 0 10px;
+        }
+
+        #toolbar {
+            flex: 0 0 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 25px;
+            border: 1px solid black;
+            background: var(--card-background-color);
+        }
+
+        #list {
+            font-size: 110%;
+            max-height: calc(100vh - 225px);
+            color: var(--primary-text-color);
+            background: var(--card-background-color);
+        }
+
+        .row {
+            display: block;
+            margin: 0;
+            padding: 15px 25px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .click {
+            cursor: pointer;
+        }
+
+        .code {
+            color: var(--secondary-text-color);
+            font-style: italic;
+            font-size: 80%;
+            margin-left: 10px;
+        }
+
+        .right {
+            float: right;
+        }
+
+        paper-checkbox {
+            --paper-checkbox-checked-color: var(--accent-color-dark);
+            --paper-checkbox-unchecked-color: var(--accent-color-dark);
+            margin-right: 15px;
+        }
+
+        paper-button {
+            background: var(--accent-color);
+            color: var(--reverse-text-color);
+            text-transform: uppercase;
+            margin: 0;
+            padding: 8px 10px;
+        }
+
+        paper-button[disabled] {
+            background: var(--border-color);
+        }
+
+        .bylang .book {
+            display: none;
+        }
+
+        .bybook .lang {
+            display: none;
+        }
+
+        .done {
+            color: var(--completed-color);
+            margin-right: 15px;
+        }
+
+        .warning {
+            color: var(--warning-color);
+            margin-right: 10px;
+        }
+
+        .hide {
+            display: none;
+        }
+
+    </style>
+
+  <template>
+
+      <div id="main" class$="[[choices.radio]]">
+          <div id="header">
+              <iron-icon class="click" icon="arrow-back" on-tap="toleveltwo"></iron-icon>
+              <span class="click" on-tap="tolevelone"><span>[[choices.levelone.name]]</span><span class="code lang">(<span>[[choices.levelone.slug]]</span>)</span></span>
+              <iron-icon icon="chevron-right"></iron-icon>
+              <span class="click" on-tap="toleveltwo"><span>[[choices.leveltwo.name]]</span><span class="code book">(<span>[[choices.leveltwo.slug]]</span>)</span></span>
+              <iron-icon icon="chevron-right"></iron-icon>
+              <span><em>Choose Source(s)</em></span>
+          </div>
+          <div id="toolbar">
+              <paper-checkbox id="select" on-change="selectAll">Select All</paper-checkbox>
+              <paper-checkbox id="unselect" on-change="unselectAll">Unselect All</paper-checkbox>
+              <paper-button raised id="confirm" on-tap="download">Download</paper-button>
+          </div>
+          <iron-list id="list" items="[[resultslist]]" as="item">
+              <template>
+                  <div class="row">
+                      <div>
+                          <paper-checkbox class$="[[checkboxclass(item.success)]]" checked="{{item.selected}}" on-change="setBoxes"></paper-checkbox>
+                          <iron-icon class$="[[doneclass(item.success)]]" icon="done"></iron-icon>
+                          <iron-icon class$="[[warningclass(item.failure)]]" icon="report" on-tap="displayError"></iron-icon>
+                          <span class="lang">[[item.project.name]]</span>
+                          <span class="code lang">(<span>[[item.project.slug]]</span>)</span>
+                          <span class="book">[[item.language.name]]</span>
+                          <span class="code book">(<span>[[item.language.slug]]</span>)</span>
+                          <span class="right"><span>[[item.resource.name]]</span><span class="code">(<span>[[item.resource.slug]]</span>)</span></span>
+                      </div>
+                  </div>
+              </template>
+          </iron-list>
+      </div>
+
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+    is: 'ts-update-results',
+
+      properties: {
+          selected: {
+              type: Number,
+              value: 0,
+              notify: true,
+              observer: 'updateList'
+          },
+          choices: {
+              type: Object,
+              value: {},
+              notify: true
+          },
+          translations: {
+              type: Array,
+              value: [],
+              notify: true
+          },
+          options: {
+              type: Object,
+              value: {},
+              notify: true
+          },
+          resultslist: {
+              type: Array,
+              value: []
+          }
+      },
+
+      behaviors: [
+          Polymer.IronResizableBehavior
+      ],
+
+      warningclass: function (failure) {
+          return failure ? 'warning click' : 'hide';
+      },
+
+      doneclass: function (success) {
+          return success ? 'done' : 'hide';
+      },
+
+      checkboxclass: function (success) {
+          return success ? 'hide' : '';
+      },
+
+      download: function () {
+          var mythis = this;
+          var list = _.cloneDeep(this.resultslist);
+          var english = false;
+          var promises = Promise.resolve(false);
+          var results = [];
+          var completed = 0;
+
+          mythis.set('options', {});
+          mythis.set('options.body', "Downloading Source Texts. Please wait...");
+          mythis.set('options.loading', true);
+          mythis.set('options.progress', true);
+          mythis.set('options.value', 0);
+          mythis.fire('iron-signal', {name: 'openloading'});
+
+          setTimeout(function() {
+              list = list.filter(function (item) {
+                  return item.selected;
+              });
+
+              list.forEach(function (item) {
+                  promises = promises.then(function () {
+                          return App.dataManager.downloadProjectContainers(item);
+                      })
+                      .then(function (result) {
+                          completed++;
+                          var total = english ? list.length + 1 : list.length;
+                          var value = Math.round(completed / total * 100);
+                          mythis.set('options.value', value);
+                          results.push(result);
+                      });
+                  if (item.language.slug === "en" && item.resource.slug !== "tw") {
+                      english = true;
+                  }
+              });
+
+              if (english) {
+                  promises = promises.then(function () {
+                          return App.dataManager.downloadContainer('en', 'bible', 'tw')
+                              .catch(function () {
+                                  return true;
+                              });
+                      });
+              }
+
+              return promises
+                  .then(function () {
+                      var title = "Download Complete";
+                      var passmessage = "";
+                      var failmessage = "";
+                      var passed = results.filter(function (item) {
+                          return item.success;
+                      });
+                      var failed = results.filter(function (item) {
+                          return item.failure;
+                      });
+
+                      if (failed.length === results.length) {
+                          title = "Download Failed";
+                      }
+                      if (passed.length === 1) {
+                          passmessage = "1 Source Text has been successfully downloaded.";
+                      } else if (passed.length > 1) {
+                          passmessage = passed.length + " Source Texts have been successfully downloaded.";
+                      }
+                      if (failed.length === 1) {
+                          failmessage = "1 download attempt has failed.";
+                      } else if (failed.length > 1) {
+                          failmessage = failed.length + " download attempts have failed.";
+                      }
+
+                      results.forEach(function (item) {
+                          var index = mythis.findIndex(item);
+                          mythis.set('translations.' + index, item);
+                      });
+
+                      mythis.updateList();
+                      mythis.set('options.title', title);
+                      mythis.set('options.body', passmessage + "  " + failmessage);
+                      mythis.set('options.loading', false);
+                  });
+          }, 500);
+      },
+
+      findIndex: function (item) {
+          var master = this.translations;
+          var index = 0;
+
+          for (var i = 0; i < master.length; i++) {
+              if (master[i].language.slug === item.language.slug && master[i].project.slug === item.project.slug && master[i].resource.slug === item.resource.slug) {
+                  index = i;
+              }
+          }
+          return index;
+      },
+
+      displayError: function (event) {
+          var errmsg = event.model.item.errmsg;
+
+          this.set('options', {});
+          this.set('options.title', "Download Failed");
+          this.set('options.body', errmsg);
+          this.set('options.loading', false);
+          this.fire('iron-signal', {name: 'openloading'});
+      },
+
+      setBoxes: function () {
+          var list = this.resultslist;
+          var select = this.$.select;
+          var unselect = this.$.unselect;
+          var confirm = this.$.confirm;
+          var checked = false;
+          var unchecked = false;
+
+          list.forEach(function (item) {
+              if (item.selected) {
+                  checked = true;
+              } else {
+                  unchecked = true;
+              }
+          });
+
+          select.checked = !unchecked;
+          select.disabled = !unchecked;
+          unselect.checked = false;
+          unselect.disabled = !checked;
+          confirm.disabled = !checked;
+      },
+
+      selectAll: function () {
+          var list = _.cloneDeep(this.resultslist);
+
+          list.forEach(function (item) {
+              if (!item.success) {
+                  item.selected = true;
+              }
+          });
+
+          this.set('resultslist', list);
+          this.setBoxes();
+      },
+
+      unselectAll: function () {
+          var list = _.cloneDeep(this.resultslist);
+
+          list.forEach(function (item) {
+              item.selected = false;
+          });
+
+          this.set('resultslist', list);
+          this.setBoxes();
+      },
+
+      tolevelone: function () {
+          this.set('selected', 0);
+          this.$.list.scrollTop = 0;
+      },
+
+      toleveltwo: function () {
+          this.set('selected', 1);
+          this.$.list.scrollTop = 0;
+      },
+
+      sortList: function (list) {
+          if (this.choices.radio === "bylang") {
+              return list.sort(function (a, b) {
+                  if (a.project.sort > b.project.sort) {
+                      return 1;
+                  } else if (a.project.sort < b.project.sort) {
+                      return -1;
+                  } else {
+                      if (a.resource.slug > b.resource.slug) {
+                          return -1;
+                      } else if (a.resource.slug < b.resource.slug) {
+                          return 1;
+                      } else {
+                          return 0;
+                      }
+                  }
+              });
+          } else {
+              return list.sort(function (a, b) {
+                  if (a.language.slug.toLowerCase() > b.language.slug.toLowerCase()) {
+                      return 1;
+                  } else if (a.language.slug.toLowerCase() < b.language.slug.toLowerCase()) {
+                      return -1;
+                  } else {
+                      if (a.resource.slug > b.resource.slug) {
+                          return -1;
+                      } else if (a.resource.slug < b.resource.slug) {
+                          return 1;
+                      } else {
+                          return 0;
+                      }
+                  }
+              });
+          }
+      },
+
+      updateList: function () {
+          var mythis = this;
+
+          if (this.selected === 2) {
+              var translations = _.cloneDeep(this.translations);
+
+              if (this.choices.radio === "bylang") {
+                  translations = translations.filter(function (item) {
+                      return item.language.slug === mythis.choices.levelone.slug;
+                  });
+
+                  translations = translations.filter(function (item) {
+                      if (mythis.choices.leveltwo.slug === "old") {
+                          return item.project.category_id == "1";
+                      } else if (mythis.choices.leveltwo.slug === "new") {
+                          return item.project.category_id == "6";
+                      } else if (mythis.choices.leveltwo.slug === "ta") {
+                          return item.project.category_id == "592";
+                      } else {
+                          return item.project.category_id != "1" && item.project.category_id != "6" && item.project.category_id != "592";
+                      }
+                  });
+              } else {
+                  translations = translations.filter(function (item) {
+                      return item.project.slug === mythis.choices.leveltwo.slug;
+                  });
+              }
+              translations.forEach(function (item) {
+                  item.selected = false;
+              });
+
+              this.set('resultslist', this.sortList(translations));
+              this.setBoxes();
+          }
+      },
+
+      ready: function() {
+
+      }
+
+  });
+
+</script>

@@ -1,0 +1,100 @@
+
+<link rel="import" href="../../components/paper-button/paper-button.html">
+
+<dom-module id="ts-conflict">
+
+    <style>
+
+        :host {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #header {
+            flex: 0 0 50px;
+            color: var(--accent-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #body {
+            color: var(--primary-text-color);
+            flex: auto;
+            padding: 0 20px;
+            text-align: center;
+            font-size: 120%;
+        }
+
+        #footer {
+            flex: 0 0 50px;
+            color: var(--secondary-text-color);
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            font-size: 120%;
+        }
+
+        #footer paper-button:hover {
+            color: var(--accent-color);
+        }
+
+    </style>
+
+    <template>
+
+        <div id="header">
+            <h2>Project Change Detected</h2>
+        </div>
+        <div id="body">
+            <p>There are changes to your translation of <span>[[exportdata.project.name]]</span> in <span>[[exportdata.target_language.name]]</span> on your Door43 account. Would you like to import those changes now?</p>
+        </div>
+        <div id="footer">
+            <paper-button dialog-dismiss>No</paper-button>
+            <paper-button dialog-confirm on-tap="importchanges">Yes</paper-button>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-conflict',
+
+        properties: {
+            exportdata: {
+                type: Object,
+                value: {}
+            },
+            importdata: {
+                type: Object,
+                value: {},
+                notify: true
+            },
+            currentuser: {
+                type: Object,
+                value: {}
+            }
+        },
+
+        importchanges: function () {
+            var mythis = this;
+
+            return App.userManager.retrieveRepos(this.currentuser.username, this.exportdata.unique_id)
+                .then(function (repos) {
+                    mythis.set('importdata', {repo: repos[0], force: true});
+                    mythis.fire('startrepoimport');
+                });
+        },
+
+        ready: function () {
+
+        }
+
+    });
+
+</script>

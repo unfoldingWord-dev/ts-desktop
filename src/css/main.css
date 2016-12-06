@@ -5,11 +5,18 @@
 html, body {
     height: 100%;
     margin: 0;
-    background-color: #E5E5E5;
+    background-color: #EFEFEF;
     font-family: 'Noto Sans', sans-serif;
     font-weight: 400;
     overflow: hidden;
     font-size: 100%;
     display: flex;
     flex-direction: column;
+}
+
+@media print {
+    * {
+        overflow: visible !important;
+        float: none !important;
+    }
 }

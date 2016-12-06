@@ -1,0 +1,141 @@
+
+<dom-module id="ts-splash">
+
+    <style>
+
+        :host {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #main {
+            flex: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        img {
+            width: 60px;
+            margin-right: 30px;
+        }
+
+        #text {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: var(--primary-text-color);
+            font-family: 'Roboto', sans-serif;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        #title {
+            font-size: 29px;
+        }
+
+        #version {
+            font-size: 14px;
+        }
+
+        #statusbar {
+            flex: 0 0 30px;
+            display: flex;
+            align-items: center;
+            padding: 0 30px;
+            background: var(--primary-color);
+            color: var(--reverse-text-color);
+            font-size: 13px;
+        }
+
+        #statusbar.hide {
+            display: none;
+        }
+
+        .hide {
+            display: none;
+        }
+
+    </style>
+
+    <template>
+
+        <div id="main">
+            <img class$="[[iconclass(title)]]" src="../../../icons/icon-big.png">
+            <div id="text">
+                <span id="title">[[title]]</span>
+                <span id="version">[[version]]</span>
+            </div>
+        </div>
+        <div id="statusbar" class$="[[statusclass(title)]]">
+            <span>[[message]]</span>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-splash',
+
+        properties: {
+            title: {
+                type: String,
+                value: ""
+            },
+            version: {
+                type: String,
+                value: ""
+            },
+            message: {
+                type: String,
+                value: ""
+            }
+        },
+
+        iconclass: function (title) {
+            return title === "translationStudio" ? '' : 'hide';
+        },
+
+        statusclass: function (title) {
+            return title === "Canceling" ? 'hide' : '';
+        },
+
+        updateMessage: function (message) {
+            this.set('message', message);
+        },
+
+        loadMain: function () {
+            var pack = require('../../package');
+            var version = pack.version.split('.').slice(0,-1).join('.');
+            var versiontext = "Version " + version + " Build " + pack.build;
+
+            this.set('title', "translationStudio");
+            this.set('version', versiontext);
+            this.set('message', "Loading main window...");
+        },
+
+        loadAcademy: function () {
+            this.set('title', "translationAcademy");
+            this.set('version', "");
+            this.set('message', "Creating Academy window...");
+        },
+
+        reload: function () {
+            this.set('title', "Canceling");
+            this.set('version', "Please wait...");
+            this.set('message', "");
+        },
+
+        ready: function () {
+
+        }
+
+    });
+
+</script>

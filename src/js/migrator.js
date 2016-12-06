@@ -5,7 +5,7 @@ var _ = require('lodash'),
     path = require('path'),
     utils = require('../js/lib/utils');
 
-function MigrateManager(configurator, git, reporter) {
+function MigrateManager(configurator, git, reporter, dataManager) {
 
     var write = utils.fs.outputFile,
         read = utils.fs.readFile,
@@ -323,14 +323,103 @@ function MigrateManager(configurator, git, reporter) {
                 let paths = project.paths;
 
                 if (manifest.package_version <= 6) {
-                    //add code here to migrate to v7
+                    var targetPath;
+                    var lastChapter = "00";
+                    var lastChunk = "01";
+                    var titleexists = false;
+
+                    return utils.fs.readdir(paths.projectDir)
+                        .then(function (all) {
+                            all.forEach(function (item) {
+                                if (item === "00") {
+                                    titleexists = true;
+                                }
+                                if (parseInt(item) && parseInt(item) > parseInt(lastChapter)) {
+                                    lastChapter = item;
+                                }
+                            });
+                            targetPath = path.join(paths.projectDir, lastChapter, "00.txt");
+
+                            return utils.fs.stat(targetPath).then(utils.ret(true)).catch(utils.ret(false));
+                        })
+                        .then(function (exists) {
+                            if (exists) {
+                                var resourceDir = dataManager.getResourceDir();
+                                var container = "en_" + manifest.project.id + "_ulb";
+
+                                return dataManager.activateContainer("en", manifest.project.id, "ulb")
+                                    .then(function () {
+                                        return utils.fs.readdir(path.join(resourceDir, container, "content", lastChapter));
+                                    })
+                                    .then(function (files) {
+                                        files.forEach(function (file) {
+                                            var item = file.split(".")[0];
+                                            if (parseInt(item) && parseInt(item) > parseInt(lastChunk)) {
+                                                lastChunk = item;
+                                            }
+                                        });
+
+                                        return utils.fs.copy(targetPath, path.join(paths.projectDir, lastChapter, lastChunk + ".txt"), {clobber: true});
+                                    })
+                                    .then(function () {
+                                        return utils.fs.remove(targetPath);
+                                    })
+                                    .then(function () {
+                                        var oldid = lastChapter + "-00";
+                                        var newid = lastChapter + "-" + lastChunk;
+                                        var index = manifest.finished_chunks.indexOf(oldid);
+
+                                        if (index > -1) {
+                                            manifest.finished_chunks.splice(index, 1);
+                                            manifest.finished_chunks.push(newid);
+                                        }
+                                    });
+                            }
+                        })
+                        .then(function () {
+                            if (titleexists) {
+                                var oldPath = path.join(paths.projectDir, "00");
+                                var newPath = path.join(paths.projectDir, "front");
+
+                                return utils.fs.copy(oldPath, newPath, {clobber: true})
+                                    .then(function () {
+                                        return utils.fs.remove(oldPath);
+                                    })
+                                    .then(function () {
+                                        var oldid = "00-title";
+                                        var newid = "front-title";
+                                        var index = manifest.finished_chunks.indexOf(oldid);
+
+                                        if (index > -1) {
+                                            manifest.finished_chunks.splice(index, 1);
+                                            manifest.finished_chunks.unshift(newid);
+                                        }
+                                    });
+                            }
+                        })
+                        .then(function () {
+                            manifest.package_version = 7;
+
+                            return {manifest: manifest, paths: paths};
+                        });
+                }
+
+                return {manifest: manifest, paths: paths};
+            };
+
+            var migrateV7 = function (project) {
+                let manifest = project.manifest;
+                let paths = project.paths;
+
+                if (manifest.package_version <= 7) {
+                    //add code here to migrate to v8
                 }
 
                 return {manifest: manifest, paths: paths};
             };
 
             var checkVersion = function (project) {
-                if (project.manifest.package_version !== 6) {
+                if (project.manifest.package_version !== 7) {
                     throw new Error("Failed to migrate project");
                 }
                 return project;
@@ -341,8 +430,7 @@ function MigrateManager(configurator, git, reporter) {
                 let paths = project.paths;
 
                 manifest.generator.name = 'ts-desktop';
-                manifest.generator.build = "";
-                // TODO: update build number
+                manifest.generator.build = configurator.getAppData().build;
 
                 return write(paths.manifest, toJSON(manifest)).then(utils.ret({
                     manifest: manifest,
@@ -356,9 +444,10 @@ function MigrateManager(configurator, git, reporter) {
                 .then(migrateV4)
                 .then(migrateV5)
                 .then(migrateV6)
+                .then(migrateV7)
                 .then(checkVersion)
                 .then(saveManifest)
-                .then(function (project) {                    
+                .then(function (project) {
                     return git.commitAll(user, project.paths.projectDir).then(utils.ret(project));
                 })
 

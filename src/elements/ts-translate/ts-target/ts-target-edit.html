@@ -85,6 +85,10 @@
             font-size: 90%;
         }
 
+        .highlight {
+            background: var(--primary-color-light);
+        }
+
         .rtl {
             direction: rtl;
         }
@@ -154,7 +158,7 @@
         },
 
         noconflictclass: function (exists) {
-            return exists ? 'hide' : 'flex editmode targetfont';
+            return exists ? 'hide' : 'flex editmode targetfont targetsize';
         },
 
         rendertext: function () {
@@ -167,9 +171,16 @@
                     var textholder = this.$.textholder;
                     var text = this.chunk.transcontent;
                     var module = "ts-target-edit";
+                    var startp = "\<p class='style-scope highlight " + module + "'\>";
+                    var endp = "\<\/p\>";
+                    var msg = "There is a conflict that should be resolved before translating or creating notes for these verses. You might want to go to the related project to review and resolve the conflict.";
 
                     if (completed || typeclass !== "standard") {
-                        textholder.innerHTML = App.renderer.renderTargetWithVerses(text, module);
+                        if (text.includes("<<<<<")) {
+                            textholder.innerHTML = startp + msg + endp;
+                        } else {
+                            textholder.innerHTML = App.renderer.renderTargetWithVerses(text, module);
+                        }
                         textholder.classList.remove("hide");
                         textbox.classList.add("hide");
                         contentbox.classList.remove("editmode");
@@ -205,6 +216,7 @@
             this.set('chunk.transcontent', text);
             this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
             this.fire('setheight');
+            this.fire('iron-signal', {name: 'passivesearch'});
         },
 
 		ready: function() {

@@ -6,24 +6,64 @@ var utils = require('../js/lib/utils');
 var fs = require('fs-extra');
 var path = require('path');
 var yaml = require('js-yaml');
+var mkdirp = require('mkdirp');
 
-function DataManager(db, resourceDir, apiURL) {
+function DataManager(db, resourceDir, apiURL, sourceDir) {
 
     return {
 
-        updateLanguages: function () {
-            var catalogs = db.indexSync.getCatalogs();
-
-            return utils.chain(function (item) {
-                return db.updateCatalogIndex(item.slug);
-            }, function (err, item) {
-                console.log("Cannot find catalog: " + item.slug);
-                return false;
-            })(catalogs);
+        getResourceDir: function () {
+            return resourceDir;
         },
 
-        updateSources: function () {
-            return db.updatePrimaryIndex(apiURL);
+        updateLanguages: function (onProgress) {
+            return db.updateCatalogs(onProgress);
+        },
+
+        updateSources: function (onProgress) {
+            return db.updateSources(apiURL, onProgress);
+        },
+
+        updateChunks: function () {
+            return db.updateChunks();
+        },
+
+        importContainer: function (filePath) {
+            return db.importResourceContainer(filePath);
+        },
+
+        checkForContainer: function (filePath) {
+            var mythis = this;
+
+            return db.loadResourceContainer(filePath)
+                .then(function (container) {
+                    return mythis.containerExists(container.slug);
+                });
+        },
+
+        containerExists: function (container) {
+            var resourcePath = path.join(resourceDir, container);
+            var sourcePath = path.join(sourceDir, container + ".tsrc");
+
+            return utils.fs.stat(resourcePath).then(utils.ret(true)).catch(utils.ret(false))
+                .then(function (resexists) {
+                    return utils.fs.stat(sourcePath).then(utils.ret(true)).catch(utils.ret(false))
+                        .then(function (srcexists) {
+                            return resexists || srcexists;
+                        });
+                });
+        },
+
+        getMetrics: function () {
+            return db.indexSync.getMetrics();
+        },
+
+        getSourceLanguages: function () {
+            return db.indexSync.getSourceLanguages();
+        },
+
+        getTranslations: function () {
+            return db.indexSync.findTranslations();
         },
 
         getTargetLanguages: function () {
@@ -42,41 +82,44 @@ function DataManager(db, resourceDir, apiURL) {
             var mythis = this;
             var allres = db.indexSync.getResources(null, project);
             var filterres = allres.filter(function (item) {
-                return item.type === 'book' && item.status.checking_level === "3";
+                return item.type === 'book' && (item.status.checking_level === "3" || item.imported);
             });
 
             var mapped = filterres.map(function (res) {
                 return mythis.getSourceDetails(res.project_slug, res.source_language_slug, res.slug);
             });
 
-            return utils.chain(this.validateSource.bind(this))(mapped);
+            return utils.chain(this.validateExistence.bind(this))(mapped);
         },
 
-        validateSource: function (source) {
+        validateExistence: function (source) {
+            var mythis = this;
+            var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;
+
+            return mythis.containerExists(container)
+                .then(function (exists) {
+                    source.updating = false;
+                    source.exists = exists;
+                    return source;
+                });
+        },
+
+        validateCurrent: function (source) {
             var mythis = this;
             var lang = source.language_id;
             var proj = source.project_id;
             var res = source.resource_id;
             var container = lang + "_" + proj + "_" + res;
-            var zipname = container + ".tsrc";
             var manifest = path.join(resourceDir, container, "package.json");
 
-            return utils.fs.stat(path.join(resourceDir, zipname)).then(utils.ret(true)).catch(utils.ret(false))
-                .then(function (exists) {
-                    if (exists) {
-                        return mythis.openContainer(lang, proj, res)
-                            .then(function () {
-                                return utils.fs.readFile(manifest);
-                            })
-                            .then(function (contents) {
-                                var json = JSON.parse(contents);
-                                source.uptodate = json.resource.status.pub_date === source.date_modified;
-                                return source;
-                            });
-                    }
-
-                    source.uptodate = false;
-                    return source;
+            return mythis.activateContainer(lang, proj, res)
+                .then(function () {
+                    return utils.fs.readFile(manifest)
+                        .then(function (contents) {
+                            var json = JSON.parse(contents);
+                            source.current = json.resource.status.pub_date === source.date_modified;
+                            return source;
+                        });
                 });
         },
 
@@ -87,76 +130,100 @@ function DataManager(db, resourceDir, apiURL) {
                 });
         },
 
-        downloadProjectContainers: function (language, project, resource) {
+        downloadProjectContainers: function (item) {
             var mythis = this;
+            var language = item.language_id || item.language.slug;
+            var project = item.project_id || item.project.slug;
+            var resource = item.resource_id || item.resource.slug;
 
             return mythis.downloadContainer(language, project, resource)
                 .then(function () {
-                    return mythis.downloadContainer(language, project, "tn")
-                        .catch(function () {
-                            return true;
-                        });
+                    item.success = true;
                 })
-                .then(function () {
-                    return mythis.downloadContainer(language, project, "tq")
-                        .catch(function () {
-                            return true;
-                        });
-                })
-                .then(function () {
-                    return mythis.downloadContainer(language, project, "udb")
-                        .catch(function () {
-                            return true;
-                        });
-                });
-        },
-
-        openContainer: function (language, project, resource) {
-            return db.openResourceContainer(language, project, resource)
                 .catch(function (err) {
-                    throw err;
+                    var errmessage = 'Unknown Error while downloading';
+                    if (err.syscall === "getaddrinfo") {
+                        errmessage = "Unable to connect to server";
+                    }
+                    if (err.syscall === "read") {
+                        errmessage = "Lost connection to server";
+                    }
+                    if (err.status === 404) {
+                        errmessage = "Source not found on server";
+                    }
+                    item.failure = true;
+                    item.errmsg = errmessage;
+                })
+                .then(function () {
+                    if (resource === "ulb") {
+                        return mythis.downloadContainer(language, project, "tn")
+                            .catch(function () {
+                                return true;
+                            });
+                    }
+                })
+                .then(function () {
+                    if (resource === "ulb") {
+                        return mythis.downloadContainer(language, project, "tq")
+                            .catch(function () {
+                                return true;
+                            });
+                    }
+                })
+                .then(function () {
+                    return item;
                 });
         },
 
-        openProjectContainers: function (language, project, resource) {
+        activateContainer: function (language, project, resource) {
+            var container = language + "_" + project + "_" + resource;
+            var resourcePath = path.join(resourceDir, container);
+            var tempPath = path.join(resourceDir, container + ".tsrc");
+            var sourcePath = path.join(sourceDir, container + ".tsrc");
+
+            return utils.fs.stat(resourcePath).then(utils.ret(true)).catch(utils.ret(false))
+                .then(function (resexists) {
+                    if (!resexists) {
+                        return utils.fs.stat(sourcePath).then(utils.ret(true)).catch(utils.ret(false))
+                            .then(function (srcexists) {
+                                if (srcexists) {
+                                    return utils.fs.copy(sourcePath, tempPath, {clobber: true})
+                                        .then(function () {
+                                            return db.openResourceContainer(language, project, resource);
+                                        })
+                                        .then(function () {
+                                            return utils.fs.remove(tempPath);
+                                        });
+                                }
+                                throw "Resource container does not exist";
+                            });
+                    }
+                    return true;
+                });
+        },
+
+        activateProjectContainers: function (language, project, resource) {
             var mythis = this;
 
-            return mythis.openContainer(language, project, resource)
+            return mythis.activateContainer(language, project, resource)
                 .then(function () {
-                    return mythis.openContainer(language, project, "tn")
+                    return mythis.activateContainer(language, project, "tn")
                         .catch(function () {
                             return true;
                         });
                 })
                 .then(function () {
-                    return mythis.openContainer(language, project, "tq")
+                    return mythis.activateContainer(language, project, "tq")
                         .catch(function () {
                             return true;
                         });
                 })
                 .then(function () {
-                    return mythis.openContainer(language, project, "udb")
+                    return mythis.activateContainer(language, project, "udb")
                         .catch(function () {
                             return true;
                         });
                 });
-        },
-
-        closeAllContainers: function () {
-            var allfiles = fs.readdirSync(resourceDir);
-            var alldirs = allfiles.filter(function (file) {
-                var stat = fs.statSync(path.join(resourceDir, file));
-                return stat.isDirectory();
-            });
-            var promises = [];
-
-            alldirs.forEach(function (dir) {
-                var name = dir.split("_");
-                var close = db.closeResourceContainer(name[0], name[1], name[2]);
-                promises.push(close);
-            });
-
-            return Promise.all(promises);
         },
 
         extractContainer: function (container) {
@@ -177,11 +244,7 @@ function DataManager(db, resourceDir, apiURL) {
                         var filename = file.split(".")[0];
                         var content = fs.readFileSync(path.join(contentpath, dir, file), 'utf8');
 
-                        if (dir === "front") {
-                            dir = "00";
-                        }
-
-                        data.push({dir: dir, filename: filename, content: content});
+                        data.push({chapter: dir, chunk: filename, content: content});
                     });
                 });
 
@@ -191,10 +254,33 @@ function DataManager(db, resourceDir, apiURL) {
             }
         },
 
-        getProjectName: function (id) {
-            var proj = db.indexSync.getProject('en', id);
+        getContainerData: function (container) {
+            var frames = this.extractContainer(container);
+            var toc = this.parseYaml(container, "toc.yml");
+            var sorted = [];
 
-            return proj.name;
+            toc.forEach (function (chapter) {
+                var chunks = frames.filter(function (item) {
+                    return item.chapter === chapter.chapter;
+                });
+                chapter.chunks.forEach (function (chunk) {
+                    sorted.push(chunks.filter(function (item) {
+                        return item.chunk === chunk;
+                    })[0]);
+                });
+            });
+
+            return sorted;
+        },
+
+        getProjectName: function (id) {
+            var project = db.indexSync.getProject('en', id);
+
+            if (project) {
+                return project.name;
+            } else {
+                return "";
+            }
         },
 
 		getChunkMarkers: function (id) {
@@ -220,51 +306,64 @@ function DataManager(db, resourceDir, apiURL) {
             }
         },
 
-        getSourceFrames: function (source) {
-            var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;
-            var frames = this.extractContainer(container);
-            var toc = this.parseYaml(container, "toc.yml");
-            var sorted = [];
-
-            var mapped = frames.map(function (item) {
-                return {chapter: item.dir, verse: item.filename, chunk: item.content};
-            });
-
-            toc.forEach (function (chapter) {
-                var chunks = mapped.filter(function (item) {
-                    return item.chapter === chapter.chapter;
-                });
-                chapter.chunks.forEach (function (chunk) {
-                    sorted.push(chunks.filter(function (item) {
-                        return item.verse === chunk;
-                    })[0]);
-                });
-            });
-
-            return sorted;
-        },
-
         getSourceUdb: function (source) {
             var container = source.language_id + "_" + source.project_id + "_udb";
             if (source.resource_id === "ulb") {
-                var frames = this.extractContainer(container);
-
-                return frames.map(function (item) {
-                    return {chapter: item.dir, verse: item.filename, chunk: item.content};
-                });
+                return this.extractContainer(container);
             } else {
                 return [];
             }
         },
 
-        getSourceHelps: function (source, type) {
+        getSourceNotes: function (source) {
             var mythis = this;
-            var container = source.language_id + "_" + source.project_id + "_" + type;
+            var container = source.language_id + "_" + source.project_id + "_tn";
             var frames = this.extractContainer(container);
 
-            return frames.map(function (item) {
-                return {chapter: item.dir, verse: item.filename, data: mythis.parseHelps(item.content)};
+            frames.forEach(function (item) {
+                if (item.content) {
+                    item.content = mythis.parseHelps(item.content);
+                }
             });
+
+            return frames;
+        },
+
+        getSourceQuestions: function (source) {
+            var mythis = this;
+            var container = source.language_id + "_" + source.project_id + "_tq";
+            var markers = this.getChunkMarkers(source.project_id);
+            var frames = this.extractContainer(container);
+
+            frames.forEach(function (frame) {
+                var lastverse = "01";
+                var stop = false;
+
+                markers.forEach(function (marker) {
+                    if (stop || frame.chapter < marker.chapter || (frame.chapter === marker.chapter && frame.chunk < marker.verse)) {
+                        stop = true;
+                    } else {
+                        lastverse = marker.verse;
+                    }
+                });
+                frame.chunk = lastverse;
+            });
+
+            for (var i = 1; i < frames.length; i++) {
+                if (frames[i].chapter === frames[i-1].chapter && frames[i].chunk === frames[i-1].chunk) {
+                    frames[i-1].content = frames[i-1].content + "\n\n" + frames[i].content;
+                    frames.splice(i, 1);
+                    i--;
+                }
+            }
+
+            frames.forEach(function (item) {
+                if (item.content) {
+                    item.content = mythis.parseHelps(item.content);
+                }
+            });
+
+            return frames;
         },
 
         getSourceWords: function (source) {
@@ -288,13 +387,7 @@ function DataManager(db, resourceDir, apiURL) {
         parseYaml: function (container, filename) {
             var filepath = path.join(resourceDir, container, "content", filename);
             var file = fs.readFileSync(filepath, "utf8");
-            var parsed = yaml.load(file);
-
-            if (filename === "toc.yml" && parsed[0].chapter === "front") {
-                parsed[0].chapter = "00";
-            }
-
-            return parsed;
+            return yaml.load(file);
         },
 
         getRelatedWords: function (source, slug) {
@@ -337,7 +430,7 @@ function DataManager(db, resourceDir, apiURL) {
 
             return frames.map(function (item) {
                 var data = mythis.parseHelps(item.content)[0];
-                data.slug = item.dir;
+                data.slug = item.chapter;
                 return data;
             });
         },
@@ -360,6 +453,38 @@ function DataManager(db, resourceDir, apiURL) {
             } else {
                 return [];
             }
+        },
+
+        getAllTa: function () {
+            var mythis = this;
+            var containers = [
+                "en_ta-intro_vol1",
+                "en_ta-process_vol1",
+                "en_ta-translate_vol1",
+                "en_ta-translate_vol2",
+                "en_ta-checking_vol1",
+                "en_ta-checking_vol2",
+                "en_ta-audio_vol2",
+                "en_ta-gateway_vol3"
+            ];
+            var allchunks = [];
+
+            containers.forEach(function (container) {
+                allchunks.push(mythis.getContainerData(container));
+            });
+
+            allchunks = _.flatten(allchunks);
+
+            allchunks.forEach(function (item) {
+                if (item.chunk === "title") {
+                    item.content = "# " + item.content;
+                }
+                if (item.chunk === "sub-title") {
+                    item.content = "## " + item.content;
+                }
+            });
+
+            return allchunks;
         },
 
         getTa: function (volume) {

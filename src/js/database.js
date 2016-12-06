@@ -123,7 +123,7 @@ function DataManager(db) {
         getFrameUdb: function (source, chapterid, verseid) {
             var sources = this.getSources();
             var udbsource = _.filter(sources, {'language_id': source.language_id, 'project_id': source.project_id, 'checking_level': 3, 'resource_id': 'udb'});
-            var s = udbsource[0].id,
+            var s = udbsource[0] ? udbsource[0].id : "",
                 r = query([
                     "select f.id, f.slug 'verse', f.body 'chunk', c.slug 'chapter', c.title, c.reference, f.format from frame f",
                     "join chapter c on c.id=f.chapter_id",

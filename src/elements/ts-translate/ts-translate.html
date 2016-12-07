@@ -1307,6 +1307,7 @@
         goreview: function () {
             var mythis = this;
             var typeclass = mythis.currentproject.projectmeta.project_type_class;
+
             if (mythis.currentproject.projectmeta.source_translations.length || typeclass === "extant") {
                 mythis.set('options', {});
                 mythis.set('options.body', "Loading review page. Please wait...");
@@ -1376,6 +1377,7 @@
 
         gosearch: function () {
             var review = this.$.reviewmode;
+
             review.opensearch();
         },
 
@@ -1391,7 +1393,8 @@
 
         ready: function() {
             var mythis = this;
-            this.reset();
+
+            mythis.reset();
             window.addEventListener("resize", function () {
                 mythis.getlocation();
                 mythis.setlocation();

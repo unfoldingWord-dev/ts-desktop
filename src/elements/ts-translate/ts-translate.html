@@ -763,13 +763,12 @@
             var source = projectmeta.source_translations[projectmeta.currentsource];
             var review = this.$.reviewmode;
 
-            var open = function () {
-                return App.dataManager.activateProjectContainers(source.language_id, projectmeta.project.id, source.resource_id)
-            };
-
-            var checkOpen = source ? open() : Promise.resolve(true);
-
-            checkOpen
+            return mythis.saveAll()
+                .then(function () {
+                    if (source) {
+                        return App.dataManager.activateProjectContainers(source.language_id, projectmeta.project.id, source.resource_id);
+                    }
+                })
                 .then(function () {
                     return App.projectsManager.loadTargetTranslation(projectmeta);
                 })
@@ -1336,12 +1335,21 @@
         },
 
         goprint: function () {
-            this.fire('openprint');
+            var mythis = this;
+
+            mythis.stoptimers();
+            return mythis.saveAll()
+                .then(function () {
+                    mythis.fire('iron-signal', {name: 'closeloading'});
+                    mythis.fire('openprint');
+                    mythis.starttimers();
+                });
         },
 
         goexport: function () {
             var mythis = this;
             var projectmeta = mythis.currentproject.projectmeta;
+
             mythis.stoptimers();
             return mythis.saveAll()
                 .then(function () {
@@ -1389,13 +1397,11 @@
                 mythis.setlocation();
                 mythis.setheights();
             });
-            //turning hotkey listener off to see if it is causing speed issue
-            /*
             window.addEventListener("keyup", function (e) {
                 if ((e.ctrlKey || e.metaKey) && e.keyCode == 70 && mythis.route === "translate" && mythis.selected === 3 && mythis.currentproject.projectmeta.project_type_class === "standard") {
                     mythis.gosearch();
                 }
-            });*/
+            });
         }
 
     });

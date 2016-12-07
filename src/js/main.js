@@ -230,7 +230,7 @@ ipcMain.on('open-file', function (event, arg) {
 });
 
 ipcMain.on('loading-status', function (event, status) {
-    splashScreen.webContents.send('loading-status', status);
+    splashScreen && splashScreen.webContents.send('loading-status', status);
 });
 
 ipcMain.on('main-loading-done', function () {

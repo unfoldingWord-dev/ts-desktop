@@ -147,6 +147,23 @@ function Renderer() {
             }
         },
 
+        replaceConflictCode: function (content) {
+            var conflicts = this.checkForConflicts(content);
+            var text = "";
+
+            if (conflicts.exists) {
+                text += "\n***Start of Conflict***\n";
+                for (var i = 0; i < conflicts.array.length; i++) {
+                    text += "***Option " + (i +1) + "***\n";
+                    text += this.removeChapterMarkers(conflicts.array[i]) + "\n";
+                }
+                text += "***End of Conflict***\n";
+                return text;
+            } else {
+                return content;
+            }
+        },
+
         renderPrintPreview: function (chunks, options) {
             var mythis = this;
             var module = "ts-print";
@@ -179,7 +196,7 @@ function Renderer() {
                     }
                     if (chunk.chunkmeta.frame > 0 && chunk.transcontent) {
                         if (options.includeIncompleteFrames || chunk.completed) {
-                            content += chunk.transcontent + " ";
+                            content += mythis.replaceConflictCode(chunk.transcontent) + " ";
                         }
                     }
                 });

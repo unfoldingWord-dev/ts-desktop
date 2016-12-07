@@ -59,7 +59,7 @@ function setReloadSplash() {
     splashScreen.show();
 }
 
-function createWindow () {
+function createMainWindow () {
 
     mainWindow = new BrowserWindow({
         width: 980,
@@ -190,7 +190,7 @@ ipcMain.on('academy-window', function (event, arg) {
     }
 });
 
-ipcMain.on('openacademy', function () {
+ipcMain.on('open-academy', function () {
     if (academyWindow) {
         academyWindow.show();
     } else {
@@ -198,7 +198,7 @@ ipcMain.on('openacademy', function () {
         setTimeout(function () {
             setAcademySplash();
             createAcademyWindow();
-        }, 200);
+        }, 1000);
     }
 });
 
@@ -216,7 +216,7 @@ ipcMain.on('fire-reload', function () {
                 mainWindow.reload();
             }
         }, 500);
-    }, 200);
+    }, 1000);
 });
 
 ipcMain.on('save-as', function (event, arg) {
@@ -230,7 +230,7 @@ ipcMain.on('open-file', function (event, arg) {
 });
 
 ipcMain.on('loading-status', function (event, status) {
-    splashScreen && splashScreen.webContents.send('loading-status', status);
+    splashScreen.webContents.send('loading-status', status);
 });
 
 ipcMain.on('main-loading-done', function () {
@@ -252,8 +252,8 @@ app.on('ready', function () {
     createSplashScreen();
     setTimeout(function () {
         setMainSplash();
-        createWindow();
-    }, 200);
+        createMainWindow();
+    }, 1000);
 });
 
 app.on('window-all-closed', function () {
@@ -268,6 +268,6 @@ app.on('activate', function () {
     // On OS X it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (mainWindow === null) {
-        createWindow();
+        createMainWindow();
     }
 });

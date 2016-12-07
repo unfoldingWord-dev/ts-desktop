@@ -228,6 +228,9 @@
                 });
                 index = filtered[0].index;
             }
+            if (index === 1) {
+                index = 0;
+            }
 
             list.scrollToIndex(index);
         },

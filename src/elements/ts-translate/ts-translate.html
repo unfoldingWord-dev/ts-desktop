@@ -1074,8 +1074,9 @@
             if (maindata) {
                 if (typeclass === "standard") {
                     transcontent = maindata.transcontent;
-                    conflicts = this.checkForConflicts(transcontent);
+                    conflicts = App.renderer.checkForConflicts(transcontent);
                     if (conflicts.exists) {
+                        this.set('currentproject.conflicts', this.currentproject.conflicts + 1);
                         for (var i = 0; i < conflicts.array.length; i++) {
                             conflicts.array[i] = App.renderer.convertVerseMarkers(conflicts.array[i]).text;
                             conflicts.array[i] = App.renderer.migrateMarkers(conflicts.array[i]);
@@ -1090,7 +1091,7 @@
                     }
                 } else {
                     helpscontent = maindata.helpscontent;
-                    conflicts = this.checkForConflicts(helpscontent);
+                    conflicts = App.renderer.checkForConflicts(helpscontent);
                 }
             }
             if (seconddata && typeclass === "helps") {
@@ -1103,23 +1104,6 @@
                 this.currentproject.statedata[complexid] = statedata;
             }
             return {projectmeta: _.cloneDeep(projectmeta), chunkmeta: chunkmeta, transcontent: transcontent, helpscontent: helpscontent, conflicts: conflicts, completed: completed, state: statedata};
-        },
-
-        checkForConflicts: function (content) {
-            var conflicttest = new RegExp(/(<{7} HEAD\n|={7}\n)([^<=>]+)(\n>{7} [\w]{40}|\n={7})/);
-            var conarray = [];
-
-            if (conflicttest.test(content)) {
-                while (conflicttest.test(content)) {
-                    var subcontent = conflicttest.exec(content)[2];
-                    conarray.push(subcontent);
-                    content = content.replace(subcontent, "");
-                }
-            } else {
-                return {exists: false, array: conarray};
-            }
-            this.set('currentproject.conflicts', this.currentproject.conflicts + 1);
-            return {exists: true, array: conarray};
         },
 
         modechange: function (tomode, frommode) {

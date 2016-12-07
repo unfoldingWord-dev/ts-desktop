@@ -131,6 +131,22 @@ function Renderer() {
             return returnstr;
         },
 
+        checkForConflicts: function (content) {
+            var conflicttest = new RegExp(/(<{7} HEAD\n|={7}\n)([^<=>]+)(\n>{7} [\w]{40}|\n={7})/);
+            var conarray = [];
+
+            if (conflicttest.test(content)) {
+                while (conflicttest.test(content)) {
+                    var subcontent = conflicttest.exec(content)[2];
+                    conarray.push(subcontent);
+                    content = content.replace(subcontent, "");
+                }
+                return {exists: true, array: conarray};
+            } else {
+                return {exists: false, array: conarray};
+            }
+        },
+
         renderPrintPreview: function (chunks, options) {
             var mythis = this;
             var module = "ts-print";

@@ -397,9 +397,9 @@
             var forward = [];
             var backward = [];
 
-            if (query && chunks && chunks.length) {
+            if (chunks && chunks.length) {
                 for (var i = 0; i < chunks.length; i++) {
-                    if ((type === 'source' && chunks[i].srccontent.includes(query)) || (type === 'target' && chunks[i].transcontent.includes(query))) {
+                    if (query && ((type === 'source' && chunks[i].srccontent.includes(query)) || (type === 'target' && chunks[i].transcontent.includes(query)))) {
                         forward.push(i);
                         backward.push(i);
                     }
@@ -640,7 +640,7 @@
 
             input.addEventListener("input", _.throttle(function () {
                 mythis.activesearch();
-            }, 1000, {leading: false}));
+            }, 500, {leading: false}));
 		}
 
 	});

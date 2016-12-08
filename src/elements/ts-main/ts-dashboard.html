@@ -1044,9 +1044,15 @@
           var mythis = this;
           var projectmeta = this.currentproject.projectmeta;
           var translation = this.currentproject.chunks;
+          var conflicts = this.currentproject.conflicts;
           var mediaServer = "https://api.unfoldingword.org/";
           var name = projectmeta.unique_id;
           var filePath;
+
+          if (conflicts) {
+              mythis.showMessage("Conflicts Exist", "You must resolve all conflicts before exporting to USFM.");
+              return;
+          }
 
           if (projectmeta.format === 'markdown') {
               filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'Zip Files', extensions: ['zip']}]}});

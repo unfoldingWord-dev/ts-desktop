@@ -72,8 +72,10 @@
         },
 
         updatereview: function () {
-            this.createchapters();
             var mythis = this;
+
+            mythis.createchapters();
+
             setTimeout(function() {
                 mythis.$.contain.scrollTop = 0;
             }, 250);
@@ -117,12 +119,12 @@
             }
 
             _.forEach(_.groupBy(transdata, function(chunks) {
-                return chunks.chunkmeta.chapter;
+                return chunks.chunkmeta.chapterid;
             }), function (data, chap) {
                 var chapcomplete = true;
-                var chapter = parseInt(chap);
+                var chapter = parseInt(chap) || 0;
                 var reference;
-                if (chapter === 0) {
+                if (chap === "front") {
                     reference = "Project Details";
                 } else if (typeclass === "extant") {
                     reference = name;

@@ -397,9 +397,9 @@
             var forward = [];
             var backward = [];
 
-            if (chunks && chunks.length) {
+            if (query && chunks && chunks.length) {
                 for (var i = 0; i < chunks.length; i++) {
-                    if (query && ((type === 'source' && chunks[i].srccontent.includes(query)) || (type === 'target' && chunks[i].transcontent.includes(query)))) {
+                    if ((type === 'source' && chunks[i].srccontent.includes(query)) || (type === 'target' && chunks[i].transcontent.includes(query))) {
                         forward.push(i);
                         backward.push(i);
                     }

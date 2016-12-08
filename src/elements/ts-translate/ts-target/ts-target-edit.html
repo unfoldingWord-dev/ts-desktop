@@ -201,6 +201,7 @@
             this.set('chunk.transcontent', result);
             this.$.textbox.value = result;
             this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
+            this.fire('iron-signal', {name: 'passivesearch'});
         },
 
         review: function () {
@@ -216,7 +217,6 @@
             this.set('chunk.transcontent', text);
             this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
             this.fire('setheight');
-            this.fire('iron-signal', {name: 'passivesearch'});
         },
 
 		ready: function() {

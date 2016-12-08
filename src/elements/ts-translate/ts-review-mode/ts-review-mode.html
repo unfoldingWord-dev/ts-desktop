@@ -250,7 +250,7 @@
                         <paper-radio-button name="source">Source</paper-radio-button>
                         <paper-radio-button name="target">Target</paper-radio-button>
                     </paper-radio-group>
-                    <input is="iron-input" id="input" bind-value="{{query}}" on-input="activesearch" placeholder="Search for text">
+                    <input is="iron-input" id="input" bind-value="{{query}}" placeholder="Search for text">
                     <div id="searchresults" class$="[[resultsclass(query)]]">
                         <paper-icon-button icon="arrow-downward" on-tap="next"></paper-icon-button>
                         <paper-icon-button icon="arrow-upward" on-tap="previous"></paper-icon-button>
@@ -632,10 +632,15 @@
 		ready: function() {
             var mythis = this;
             var list = this.$.reviewlist;
+            var input = this.$.input;
 
             list.addEventListener("scroll", _.throttle(function () {
                 mythis.displayposition();
             }, 200));
+
+            input.addEventListener("input", _.throttle(function () {
+                mythis.activesearch();
+            }, 1000, {leading: false}));
 		}
 
 	});

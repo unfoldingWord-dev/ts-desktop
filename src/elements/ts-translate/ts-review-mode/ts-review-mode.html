@@ -448,17 +448,18 @@
             if (chapter && type !== "extant") {
                 display.innerHTML = chapter;
                 marker.classList.remove("hide");
-                clearTimeout(mythis.timer);
-                mythis.timer = setTimeout(function() {
-                    marker.classList.add("hide");
-                    list.fire('iron-resize');
-                }, 1000);
             }
-            mythis.setheights();
+            clearTimeout(mythis.timer);
+            mythis.timer = setTimeout(function() {
+                marker.classList.add("hide");
+                mythis.setheights();
+            }, 500);
         },
 
         setheights: function () {
             var list = this.$.reviewlist;
+
+            list.fire('iron-resize');
 
             for (var i = list.firstVisibleIndex; i <= list.lastVisibleIndex; i++) {
                 list.updateSizeForItem(i);

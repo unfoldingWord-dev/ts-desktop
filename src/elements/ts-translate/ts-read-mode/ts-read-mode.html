@@ -150,12 +150,14 @@
             clearTimeout(mythis.timer);
             mythis.timer = setTimeout(function() {
                 marker.classList.add("hide");
-            }, 1000);
-            mythis.setheights();
+                mythis.setheights();
+            }, 500);
         },
 
         setheights: function () {
             var list = this.$.readlist;
+
+            list.fire('iron-resize');
 
             for (var i = list.firstVisibleIndex; i <= list.lastVisibleIndex; i++) {
                 var card = document.getElementById(this.modename + i);

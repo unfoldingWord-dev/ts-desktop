@@ -31,12 +31,11 @@
         <div id="content">
             <h2>Software Licenses</h2>
             <p>The following licenses apply to code packages and libraries used in this app.</p>
-            <h2>Under the following terms:</h2>
-            <p><strong>Attribution</strong> - You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use;</p>
-            <p><strong>ShareAlike</strong> - If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original;</p>
-            <p><strong>No additional restrictions</strong> - You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.</p>
-            <h2>Notices:</h2>
-            <p>You do not have to comply with the license for elements of the material in the public domain or where your use is permitted by an applicable exception or limitation; No warranties are given. The license may not give you all of the permissions necessary for your intended use. For example, other rights such as publicity, privacy, or moral rights may limit how you use the material.</p>
+            <template is="dom-repeat" items="[[packages]]" as="package">
+                <h2>[[package.name]]</h2>
+                <p><a href="[[package.link]]">[[package.link]]</a></p>
+                <p>License Type: <span>[[package.type]]</span></p>
+            </template>
         </div>
         <div id="buttons">
             <paper-button dialog-dismiss>Close</paper-button>
@@ -52,11 +51,54 @@
         is: 'ts-software',
 
         properties: {
-
+            packages: {
+                type: Array,
+                value: []
+            }
         },
 
         ready: function() {
+            var mythis = this;
+            var shell = require('electron').shell;
+            var packages = [
+                {name: 'adm-zip', link: 'https://www.npmjs.com/package/adm-zip', type: 'MIT'},
+                {name: 'archiver', link: 'https://www.npmjs.com/package/archiver', type: ''},
+                {name: 'async', link: 'https://www.npmjs.com/package/async', type: ''},
+                {name: 'chmodr', link: 'https://www.npmjs.com/package/chmodr', type: ''},
+                {name: 'door43-client', link: 'https://www.npmjs.com/package/door43-client', type: ''},
+                {name: 'fontkit', link: 'https://www.npmjs.com/package/fontkit', type: ''},
+                {name: 'fs-extra', link: '', type: ''},
+                {name: 'getmac', link: 'https://www.npmjs.com/package/getmac', type: ''},
+                {name: 'gogs-client', link: 'https://www.npmjs.com/package/gogs-client', type: ''},
+                {name: 'js-yaml', link: 'https://www.npmjs.com/package/js-yaml', type: ''},
+                {name: 'jsonfile', link: '', type: ''},
+                {name: 'keypair', link: '', type: ''},
+                {name: 'locale', link: '', type: ''},
+                {name: 'lodash', link: '', type: ''},
+                {name: 'md5', link: '', type: ''},
+                {name: 'mkdirp', link: '', type: ''},
+                {name: 'moment', link: '', type: ''},
+                {name: 'node-forge', link: '', type: ''},
+                {name: 'prince', link: '', type: ''},
+                {name: 'request', link: '', type: ''},
+                {name: 'rimraf', link: '', type: ''},
+                {name: 'sql.js', link: '', type: ''},
+                {name: 'trash', link: '', type: ''},
+                {name: 'untildify', link: '', type: ''}
+            ];
 
+            mythis.set('packages', packages);
+
+            setTimeout(function() {
+                var links = mythis.$.content.getElementsByTagName('a');
+
+                for (var i = 0; i < links.length; i++) {
+                    links[i].addEventListener('click', function (event) {
+                        event.preventDefault();
+                        shell.openExternal(this.href);
+                    });
+                }
+            }, 3000);
         }
 
     });

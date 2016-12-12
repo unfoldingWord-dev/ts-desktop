@@ -114,11 +114,16 @@
             chunk: {
                 type: Object,
                 value: {}
+            },
+            searchoptions: {
+                type: Object,
+                value: {},
+                notify: true
             }
 		},
 
         observers: [
-            'rendertext(chunk.srccontent, chunk.search.*)'
+            'rendertext(chunk.srccontent, searchoptions.*)'
         ],
 
         noextantclass: function (typeclass) {
@@ -131,9 +136,8 @@
 
         rendertext: function () {
             if(this.chunk && this.chunk.srccontent) {
-                var search = this.chunk.search;
+                var search = this.searchoptions;
                 var text = _.cloneDeep(this.chunk.srccontent);
-                var regex = new RegExp(search.text.trim() + "(?![^<]*>)", "g");
                 var startspan = "\<span class='style-scope ts-source-chunk highlight'\>";
                 var endspan = "\<\/span\>";
                 var direction = "ltr";
@@ -142,6 +146,7 @@
                     direction = this.chunk.projectmeta.source_translations[this.chunk.projectmeta.currentsource].direction;
                 }
                 if (search.text && search.type === "source") {
+                    var regex = new RegExp(search.text.trim() + "(?![^<]*>)", "g");
                     text = text.replace(regex, startspan + search.text.trim() + endspan);
                 }
                 this.$.textholder.innerHTML = text;

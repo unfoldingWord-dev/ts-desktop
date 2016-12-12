@@ -119,6 +119,14 @@
         "visible": true
     },
     {
+        "name": "software",
+        "mainText": "Software Licenses",
+        "value": "",
+        "group": "legal",
+        "enabled": true,
+        "visible": true
+    },
+    {
         "name": "attribution",
         "mainText": "Attribution",
         "value": "",

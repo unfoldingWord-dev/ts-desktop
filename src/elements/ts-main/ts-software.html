@@ -1,0 +1,64 @@
+
+<link rel="import" href="../../components/paper-button/paper-button.html">
+
+<dom-module id="ts-software">
+
+    <style>
+
+        :host {
+        }
+
+        #content {
+            margin: 20px 35px;
+            color: var(--primary-text-color);
+        }
+
+        #buttons {
+            display: flex;
+            justify-content: center;
+            margin: 25px;
+            color: var(--secondary-text-color);
+        }
+
+        #buttons paper-button:hover {
+            color: var(--accent-color);
+        }
+
+    </style>
+
+    <template>
+
+        <div id="content">
+            <h2>Software Licenses</h2>
+            <p>The following licenses apply to code packages and libraries used in this app.</p>
+            <h2>Under the following terms:</h2>
+            <p><strong>Attribution</strong> - You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use;</p>
+            <p><strong>ShareAlike</strong> - If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original;</p>
+            <p><strong>No additional restrictions</strong> - You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.</p>
+            <h2>Notices:</h2>
+            <p>You do not have to comply with the license for elements of the material in the public domain or where your use is permitted by an applicable exception or limitation; No warranties are given. The license may not give you all of the permissions necessary for your intended use. For example, other rights such as publicity, privacy, or moral rights may limit how you use the material.</p>
+        </div>
+        <div id="buttons">
+            <paper-button dialog-dismiss>Close</paper-button>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+        is: 'ts-software',
+
+        properties: {
+
+        },
+
+        ready: function() {
+
+        }
+
+    });
+
+</script>

@@ -263,7 +263,7 @@
             </div>
             <iron-list id="reviewlist" items="{{chunks}}" as="chunk">
                 <template>
-                    <ts-review-card chunk="{{chunk}}" on-updateheight="updateheight"></ts-review-card>
+                    <ts-review-card chunk="{{chunk}}" searchoptions="{{searchoptions}}" on-updateheight="updateheight"></ts-review-card>
                 </template>
             </iron-list>
 
@@ -326,6 +326,10 @@
                 type: Array,
                 value: [],
                 notify: true
+            },
+            searchoptions: {
+                type: Object,
+                value: {}
             },
             modestatus: {
                 type: Object,
@@ -392,24 +396,21 @@
         search: function (passive) {
             var mythis = this;
             var query = this.query;
-            var chunks = this.chunks;
+            var chunks = this.chunks || [];
             var type = this.selected;
             var forward = [];
             var backward = [];
 
-            if (chunks && chunks.length) {
-                for (var i = 0; i < chunks.length; i++) {
-                    if (query && ((type === 'source' && chunks[i].srccontent.includes(query)) || (type === 'target' && chunks[i].transcontent.includes(query)))) {
-                        forward.push(i);
-                        backward.push(i);
-                    }
-                    var string = "chunks." + i + ".search";
-                    mythis.set(string, {text: query, type: type, passive: passive, on: true});
+            chunks.forEach(function (chunk) {
+                if (query && ((type === 'source' && chunk.srccontent.includes(query)) || (type === 'target' && chunk.transcontent.includes(query)))) {
+                    forward.push(chunk.index);
+                    backward.push(chunk.index);
                 }
+            });
 
-                backward.reverse();
-                this.set('results', {forward: forward, backward: backward});
-            }
+            mythis.set('searchoptions', {text: query, type: type, passive: passive, on: true});
+            backward.reverse();
+            mythis.set('results', {forward: forward, backward: backward});
         },
 
         next: function () {
@@ -448,16 +449,18 @@
             if (chapter && type !== "extant") {
                 display.innerHTML = chapter;
                 marker.classList.remove("hide");
-                clearTimeout(mythis.timer);
-                mythis.timer = setTimeout(function() {
-                    marker.classList.add("hide");
-                }, 1000);
             }
-            mythis.setheights();
+            clearTimeout(mythis.timer);
+            mythis.timer = setTimeout(function() {
+                marker.classList.add("hide");
+                mythis.setheights();
+            }, 500);
         },
 
         setheights: function () {
             var list = this.$.reviewlist;
+
+            list.fire('iron-resize');
 
             for (var i = list.firstVisibleIndex; i <= list.lastVisibleIndex; i++) {
                 list.updateSizeForItem(i);
@@ -593,6 +596,7 @@
                 contain.classList.add("movein");
                 setTimeout(function() {
                     contain.classList.remove("movein");
+                    mythis.setheights();
                 }, 500);
             }, 500);
         },
@@ -621,6 +625,9 @@
                     return chunk.chunkmeta.chapter === chapter;
                 });
                 index = filtered[0].index;
+            }
+            if (index === 1) {
+                index = 0;
             }
 
             list.scrollToIndex(index);

@@ -50,10 +50,10 @@
 	<template>
 
         <div class$="[[standardclass(chunk.projectmeta.project_type_class)]]">
-            <ts-source-chunk class="left" reviewmode chunk="[[chunk]]"></ts-source-chunk>
+            <ts-source-chunk class="left" reviewmode chunk="[[chunk]]" searchoptions="{{searchoptions}}"></ts-source-chunk>
             <div class="middle">
-                <ts-target-review class$="[[reviewclass(chunk.state.review, chunk.conflicts.exists)]]" chunk="{{chunk}}" on-setheight="setheight" on-edit="focustextbox"></ts-target-review>
-                <ts-target-edit id="targetedit" class$="[[editclass(chunk.state.review, chunk.conflicts.exists)]]" chunk="{{chunk}}" on-setheight="setheight"></ts-target-edit>
+                <ts-target-review class$="[[reviewclass(chunk.state.review, chunk.conflicts.exists)]]" chunk="{{chunk}}" searchoptions="{{searchoptions}}" on-setheight="setheight" on-edit="focustextbox"></ts-target-review>
+                <ts-target-edit id="targetedit" class$="[[editclass(chunk.state.review, chunk.conflicts.exists)]]" chunk="{{chunk}}" searchoptions="{{searchoptions}}" on-setheight="setheight"></ts-target-edit>
                 <ts-target-conflict class$="[[conflictclass(chunk.conflicts.exists)]]" chunk="{{chunk}}" on-setheight="setheight"></ts-target-conflict>
             </div>
             <ts-resource-card class="right" chunk="[[chunk]]" on-setheight="setheight"></ts-resource-card>
@@ -89,6 +89,11 @@
 
 		properties: {
             chunk: {
+                type: Object,
+                value: {},
+                notify: true
+            },
+            searchoptions: {
                 type: Object,
                 value: {},
                 notify: true

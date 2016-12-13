@@ -136,6 +136,11 @@
                 type: Object,
                 value: function () { return {}; },
                 notify: true
+            },
+            searchoptions: {
+                type: Object,
+                value: {},
+                notify: true
             }
 		},
 
@@ -201,6 +206,9 @@
             this.set('chunk.transcontent', result);
             this.$.textbox.value = result;
             this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
+            if (this.searchoptions.text && this.searchoptions.type === "target") {
+                this.fire('iron-signal', {name: 'passivesearch'});
+            }
         },
 
         review: function () {
@@ -216,7 +224,6 @@
             this.set('chunk.transcontent', text);
             this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
             this.fire('setheight');
-            this.fire('iron-signal', {name: 'passivesearch'});
         },
 
 		ready: function() {

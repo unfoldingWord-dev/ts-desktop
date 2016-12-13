@@ -149,16 +149,18 @@
             if (chapter) {
                 display.innerHTML = chapter;
                 marker.classList.remove("hide");
-                clearTimeout(mythis.timer);
-                mythis.timer = setTimeout(function() {
-                    marker.classList.add("hide");
-                }, 1000);
             }
-            mythis.setheights();
+            clearTimeout(mythis.timer);
+            mythis.timer = setTimeout(function() {
+                marker.classList.add("hide");
+                mythis.setheights();
+            }, 500);
         },
 
         setheights: function () {
             var list = this.$.chunklist;
+
+            list.fire('iron-resize');
 
             for (var i = list.firstVisibleIndex; i <= list.lastVisibleIndex; i++) {
                 var card = document.getElementById(this.modename + i);
@@ -199,6 +201,7 @@
                 contain.classList.add("movein");
                 setTimeout(function() {
                     contain.classList.remove("movein");
+                    mythis.setheights();
                 }, 500);
             }, 500);
         },
@@ -227,6 +230,9 @@
                     return chunk.chunkmeta.chapter === chapter;
                 });
                 index = filtered[0].index;
+            }
+            if (index === 1) {
+                index = 0;
             }
 
             list.scrollToIndex(index);

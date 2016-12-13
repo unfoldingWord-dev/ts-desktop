@@ -323,7 +323,8 @@
                 }
             },
             cmdKeyDown: {
-                type: Boolean
+                type: Boolean,
+                value: false
             }
         },
 
@@ -1402,20 +1403,18 @@
                 mythis.setheights();
             });
             window.addEventListener("keyup", function (e) {
-                if(e.key == "Meta") {
-                    mythis.cmdKeyDown = false;
-                }
-                if ((e.ctrlKey || e.metaKey || e.key == "Meta") && e.keyCode == 70 && mythis.route === "translate" && mythis.selected === 3 && mythis.currentproject.projectmeta.project_type_class === "standard") {
-                    mythis.gosearch();
+                if (e.key == "Meta") {
+                    mythis.set('cmdKeyDown', false);
                 }
             });
             window.addEventListener("keydown", function(e) {
-                // TRICKY: Mac/Apple key is not considered a modifier key. So we must manually watch up/down.
-                if(e.key == "Meta") {
-                    mythis.cmdKeyDown = true;
-                }
-                if (mythis.cmdKeyDown && e.keyCode == 70 && mythis.route === "translate" && mythis.selected === 3 && mythis.currentproject.projectmeta.project_type_class === "standard") {
-                    mythis.gosearch();
+                if (mythis.route === "translate" && mythis.selected === 3 && mythis.currentproject.projectmeta.project_type_class === "standard") {
+                    if (e.key == "Meta") {
+                        mythis.set('cmdKeyDown', true);
+                    }
+                    if ((mythis.cmdKeyDown || e.ctrlKey) && e.keyCode == 70) {
+                        mythis.gosearch();
+                    }
                 }
             });
         }

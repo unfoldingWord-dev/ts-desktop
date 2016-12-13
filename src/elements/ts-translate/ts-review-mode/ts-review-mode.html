@@ -370,8 +370,14 @@
         },
 
         opensearch: function () {
+            var mythis = this;
+
             this.$.reviewlist.classList.add('searchmode');
             this.$.searchbar.classList.remove('hide');
+
+            setTimeout(function() {
+                mythis.$.input.focus();
+            }, 500);
         },
 
         closesearch: function () {

@@ -395,7 +395,7 @@
 
         search: function (passive) {
             var mythis = this;
-            var query = this.query;
+            var query = this.query.trim();
             var chunks = this.chunks || [];
             var type = this.selected;
             var forward = [];
@@ -408,7 +408,11 @@
                 }
             });
 
-            mythis.set('searchoptions', {text: query, type: type, passive: passive, on: true});
+            var escaped = query.replace(/\\/g, "\\\\").replace(/\[/g, "\\[").replace(/\]/g, "\\]").replace(/\^/g, "\\^").replace(/\$/g, "\\$");
+            escaped = escaped.replace(/\(/g, "\\(").replace(/\)/g, "\\)").replace(/\?/g, "\\?").replace(/\./g, "\\.").replace(/\//g, "\\/");
+            escaped = escaped.replace(/\+/g, "\\+").replace(/\*/g, "\\*").replace(/\{/g, "\\{").replace(/\}/g, "\\}").replace(/\|/g, "\\|");
+
+            mythis.set('searchoptions', {text: query, escaped: escaped, type: type, passive: passive, on: true});
             backward.reverse();
             mythis.set('results', {forward: forward, backward: backward});
         },

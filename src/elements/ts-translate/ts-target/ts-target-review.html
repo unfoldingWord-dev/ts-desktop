@@ -162,7 +162,7 @@
                     var search = this.searchoptions;
                     var startspan = "\<span class='style-scope ts-target-review searchhighlight'\>";
                     var endspan = "\<\/span\>";
-                    var searcharray = search.text.trim().split(" ");
+                    var searcharray = search.escaped.split(" ");
                     var regexstr = "(\<span[^>]*>[^<]*)(" + searcharray[0] + ")";
 
                     for (var i = 1; i < searcharray.length; i++) {
@@ -183,8 +183,8 @@
                         }
 
                         if (completed || searcharray.length === 1) {
-                            var regex2 = new RegExp(search.text.trim() + "(?![^<]*>)", "g");
-                            returnstr = returnstr.replace(regex2, startspan + search.text.trim() + endspan);
+                            var regex2 = new RegExp(search.escaped + "(?![^<]*>)", "g");
+                            returnstr = returnstr.replace(regex2, startspan + search.text + endspan);
                         } else {
                             while (regex.test(returnstr)) {
                                 var replace = startspan + regex.exec(returnstr)[0] + endspan;

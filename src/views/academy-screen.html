@@ -19,11 +19,8 @@
     (function () {
         var ipcRenderer = require('electron').ipcRenderer;
         var splash = document.getElementById('splash');
-        var pack = require('../../package');
-        var version = pack.version.split('.').slice(0,-1).join('.');
-        var versiontext = "Version " + version + " Build " + pack.build;
 
-        splash.content = {title: "translationStudio", subtitle: versiontext, message: "Loading main window..."};
+        splash.content = {title: "translationAcademy", subtitle: "", message: "Creating Academy window..."};
 
         ipcRenderer.on('loading-status', function (event, status) {
             splash.updateMessage(status);

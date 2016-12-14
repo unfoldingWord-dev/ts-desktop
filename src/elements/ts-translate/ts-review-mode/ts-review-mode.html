@@ -408,17 +408,13 @@
             var backward = [];
 
             chunks.forEach(function (chunk) {
-                if (query && ((type === 'source' && chunk.srccontent.includes(query)) || (type === 'target' && chunk.transcontent.includes(query)))) {
+                if (query && ((type === 'source' && chunk.srccontent.toLowerCase().includes(query.toLowerCase())) || (type === 'target' && chunk.transcontent.toLowerCase().includes(query.toLowerCase())))) {
                     forward.push(chunk.index);
                     backward.push(chunk.index);
                 }
             });
 
-            var escaped = query.replace(/\\/g, "\\\\").replace(/\[/g, "\\[").replace(/\]/g, "\\]").replace(/\^/g, "\\^").replace(/\$/g, "\\$");
-            escaped = escaped.replace(/\(/g, "\\(").replace(/\)/g, "\\)").replace(/\?/g, "\\?").replace(/\./g, "\\.").replace(/\//g, "\\/");
-            escaped = escaped.replace(/\+/g, "\\+").replace(/\*/g, "\\*").replace(/\{/g, "\\{").replace(/\}/g, "\\}").replace(/\|/g, "\\|");
-
-            mythis.set('searchoptions', {text: query, escaped: escaped, type: type, passive: passive, on: true});
+            mythis.set('searchoptions', {text: query, type: type, passive: passive, on: true});
             backward.reverse();
             mythis.set('results', {forward: forward, backward: backward});
         },

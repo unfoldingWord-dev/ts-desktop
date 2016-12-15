@@ -460,7 +460,8 @@
             mythis.timer = setTimeout(function() {
                 marker.classList.add("hide");
                 mythis.setheights();
-            }, 500);
+                mythis.passivesearch();
+            }, 300);
         },
 
         setheights: function () {
@@ -645,7 +646,6 @@
 
             list.addEventListener("scroll", _.throttle(function () {
                 mythis.displayposition();
-                mythis.passivesearch();
             }, 200));
 		}
 

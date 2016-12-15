@@ -201,7 +201,6 @@
 
                     mythis.$.textholder.innerHTML = returnstr;
                     mythis.$.toggle.checked = completed;
-                    mythis.fire('setheight');
                     mythis.addDragListeners();
                 }
             }.bind(this), 1);
@@ -244,6 +243,7 @@
                     targetelement.classList.remove("highlight");
                     parentelement.insertBefore(dragelement, targetelement);
                     mythis.savemarkers();
+                    mythis.fire('setheight');
                 });
             }
         },

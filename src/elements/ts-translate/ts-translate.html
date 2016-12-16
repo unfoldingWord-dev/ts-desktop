@@ -154,7 +154,7 @@
 
     <template>
 
-        <ts-translate-sidebar selected="{{selected}}" currentproject="[[currentproject]]" on-gohome="gohome" on-goreview="goreview" on-goexport="goexport" on-goprint="goprint" on-gosearch="gosearch" on-gosettings="gosettings"></ts-translate-sidebar>
+        <ts-translate-sidebar selected="{{selected}}" currentproject="[[currentproject]]" modestatus="{{modestatus}}" on-navigate="navigate" on-gohome="gohome" on-goreview="goreview" on-goexport="goexport" on-goprint="goprint" on-gosearch="gosearch" on-gosettings="gosettings"></ts-translate-sidebar>
 
         <div id="pages">
             <ts-read-mode id="readmode" chapters="[[currentproject.chapters]]" modestatus="{{modestatus}}"></ts-read-mode>
@@ -1105,6 +1105,16 @@
                 this.currentproject.statedata[complexid] = statedata;
             }
             return {projectmeta: _.cloneDeep(projectmeta), chunkmeta: chunkmeta, transcontent: transcontent, helpscontent: helpscontent, conflicts: conflicts, completed: completed, state: statedata};
+        },
+
+        navigate: function () {
+            var read = this.$.readmode;
+            var chunk = this.$.chunkmode;
+            var review = this.$.reviewmode;
+
+            if (this.selected === 3) {
+                review.navigate();
+            }
         },
 
         modechange: function (tomode, frommode) {

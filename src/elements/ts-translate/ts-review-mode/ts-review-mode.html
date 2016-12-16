@@ -453,15 +453,16 @@
             var marker = this.$.marker;
 
             if (chapter && type !== "extant") {
-                display.innerHTML = chapter;
-                marker.classList.remove("hide");
+                //display.innerHTML = chapter;
+                //marker.classList.remove("hide");
             }
             clearTimeout(mythis.timer);
             mythis.timer = setTimeout(function() {
-                marker.classList.add("hide");
+                //marker.classList.add("hide");
                 mythis.setheights();
                 mythis.passivesearch();
-            }, 300);
+                mythis.getlocation();
+            }, 200);
         },
 
         setheights: function () {
@@ -577,10 +578,15 @@
 
         tomode: function () {
             this.setpreview();
-            this.setlocation();
-            this.setheights();
-            this.setlocation();
+            this.navigate();
             this.movein();
+        },
+
+        navigate: function () {
+            this.setlocation();
+            //this.passivesearch();
+            //this.setheights();
+            //this.setlocation();
         },
 
         moveout: function () {
@@ -646,7 +652,7 @@
 
             list.addEventListener("scroll", _.throttle(function () {
                 mythis.displayposition();
-            }, 200));
+            }, 100));
 		}
 
 	});

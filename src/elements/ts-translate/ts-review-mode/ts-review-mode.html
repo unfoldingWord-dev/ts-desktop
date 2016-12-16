@@ -216,28 +216,6 @@
             display: none;
         }
 
-        #marker {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--accent-color-dark);
-            color: var(--reverse-text-color);
-            font-size: 150%;
-            border-radius: 10px;
-            box-shadow: 1px 1px 2px 2px var(--shadow-color);
-            position: fixed;
-            top: 0;
-            bottom: 0;
-            right: 50px;
-            margin: auto 0;
-            width: 50px;
-            height: 50px;
-        }
-
-        #marker.hide {
-            display: none;
-        }
-
 	</style>
 
 	<template>
@@ -261,15 +239,11 @@
                     <paper-icon-button icon="close" on-tap="closesearch"></paper-icon-button>
                 </div>
             </div>
-            <iron-list id="reviewlist" items="{{chunks}}" as="chunk">
+            <iron-list id="reviewlist" items="{{chunks}}" as="chunk" on-scroll="refresh">
                 <template>
                     <ts-review-card chunk="{{chunk}}" searchoptions="{{searchoptions}}" on-updateheight="updateheight"></ts-review-card>
                 </template>
             </iron-list>
-
-            <paper-material id="marker" class="hide">
-                <div id="display"></div>
-            </paper-material>
 
             <paper-material id="resourcepopup" class="hide">
                 <div class="buttons">
@@ -443,26 +417,16 @@
             list.scrollToIndex(previous);
         },
 
-        displayposition: function () {
+        refresh: function () {
             var mythis = this;
-            var list = this.$.reviewlist;
-            var index = list.firstVisibleIndex || 0;
-            var chapter = this.chunks[index].chunkmeta.chapter;
-            var type = this.chunks[index].projectmeta.project_type_class;
-            var display = this.$.display;
-            var marker = this.$.marker;
 
-            if (chapter && type !== "extant") {
-                //display.innerHTML = chapter;
-                //marker.classList.remove("hide");
-            }
+            mythis.getlocation();
             clearTimeout(mythis.timer);
+
             mythis.timer = setTimeout(function() {
-                //marker.classList.add("hide");
                 mythis.setheights();
                 mythis.passivesearch();
-                mythis.getlocation();
-            }, 200);
+            }, 100);
         },
 
         setheights: function () {
@@ -578,15 +542,8 @@
 
         tomode: function () {
             this.setpreview();
-            this.navigate();
-            this.movein();
-        },
-
-        navigate: function () {
             this.setlocation();
-            //this.passivesearch();
-            //this.setheights();
-            //this.setlocation();
+            this.movein();
         },
 
         moveout: function () {
@@ -645,15 +602,11 @@
             }
 
             list.scrollToIndex(index);
+            this.getlocation();
         },
 
 		ready: function() {
-            var mythis = this;
-            var list = this.$.reviewlist;
 
-            list.addEventListener("scroll", _.throttle(function () {
-                mythis.displayposition();
-            }, 100));
 		}
 
 	});

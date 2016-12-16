@@ -68,9 +68,9 @@
 
         #input {
             height: 20px;
-            width: 24px;
+            width: 30px;
             margin: 5px 0;
-            padding: 0 5px;
+            text-align: center;
             color: var(--primary-text-color);
         }
 
@@ -129,7 +129,7 @@
                 <iron-icon class="rotate" icon="first-page" title="top" on-tap="gotop"></iron-icon>
                 <iron-icon class="chapter" icon="expand-less" title="previous chapter" on-tap="prevchap"></iron-icon>
                 <iron-icon icon="arrow-drop-up" title="previous chunk" on-tap="prevchunk"></iron-icon>
-                <input is="iron-input" id="input" bind-value="{{modestatus.chapter}}" placeholder="">
+                <input is="iron-input" id="input" bind-value="{{modestatus.chapter}}" placeholder="" maxlength="3" on-change="tochapter">
                 <iron-icon icon="arrow-drop-down" title="next chunk" on-tap="nextchunk"></iron-icon>
                 <iron-icon class="chapter" icon="expand-more" title="next chapter" on-tap="nextchap"></iron-icon>
                 <iron-icon class="rotate" icon="last-page" title="bottom" on-tap="gobottom"></iron-icon>
@@ -233,6 +233,21 @@
 
             this.set('modestatus.index', next);
             this.navigate();
+        },
+
+        tochapter: function () {
+            var input = this.modestatus.chapter;
+            var length = this.currentproject.chunks.length;
+            var max = this.currentproject.chunks[length - 1].chunkmeta.chapter;
+
+            if (input > 0 && input <= max) {
+                this.set('modestatus.chapter', parseInt(input));
+                this.set('modestatus.index', -1);
+                this.navigate();
+            } else {
+                this.set('modestatus.index', length - 1);
+                this.navigate();
+            }
         },
 
         navigate: function () {

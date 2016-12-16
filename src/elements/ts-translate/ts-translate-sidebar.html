@@ -29,18 +29,53 @@
             align-items: center;
         }
 
-        #top {
+        #modes {
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        paper-icon-button {
-            margin-top: 15px;
+        #modes iron-icon {
+            margin-top: 20px;
             color: var(--primary-color-light);
+            cursor: pointer;
         }
 
-        .current {
+        #modes iron-icon.current {
+            color: var(--reverse-text-color);
+        }
+
+        #nav {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #nav iron-icon {
+            cursor: pointer;
+        }
+
+        .chapter {
+            --iron-icon-height: 30px;
+            --iron-icon-width: 30px;
+        }
+
+        .rotate {
+            --iron-icon-height: 35px;
+            --iron-icon-width: 35px;
+            transform: rotate(90deg);
+        }
+
+        #input {
+            height: 20px;
+            width: 24px;
+            margin: 5px 0;
+            padding: 0 5px;
+            color: var(--primary-text-color);
+        }
+
+        #menuicon {
+            padding: 8px;
             color: var(--reverse-text-color);
         }
 
@@ -83,15 +118,24 @@
     <template>
 
         <div id="content">
-            <div id="top">
-                <paper-icon-button class$="[[readclass(currentproject.projectmeta.project_type_class, selected, bemode)]]" icon="subject" on-tap="readmode"></paper-icon-button>
-                <paper-icon-button class$="[[chunkclass(currentproject.projectmeta.project_type_class, selected, bemode)]]" icon="content-copy" on-tap="chunkmode"></paper-icon-button>
-                <paper-icon-button class$="[[reviewclass(currentproject.projectmeta.project_type_class, selected)]]" icon="view-week" on-tap="reviewmode"></paper-icon-button>
-                <paper-icon-button class$="[[simpleclass(currentproject.projectmeta.project_type_class, selected, bemode)]]" icon="subject" on-tap="readmode"></paper-icon-button>
-                <paper-icon-button class$="[[conflictclass(currentproject.projectmeta.project_type_class, currentproject.conflicts, selected)]]" icon="warning" on-tap="conflictmode"></paper-icon-button>
+            <div id="modes">
+                <iron-icon class$="[[readclass(currentproject.projectmeta.project_type_class, selected, bemode)]]" icon="subject" on-tap="readmode"></iron-icon>
+                <iron-icon class$="[[chunkclass(currentproject.projectmeta.project_type_class, selected, bemode)]]" icon="content-copy" on-tap="chunkmode"></iron-icon>
+                <iron-icon class$="[[reviewclass(currentproject.projectmeta.project_type_class, selected)]]" icon="view-week" on-tap="reviewmode"></iron-icon>
+                <iron-icon class$="[[simpleclass(currentproject.projectmeta.project_type_class, selected, bemode)]]" icon="subject" on-tap="readmode"></iron-icon>
+                <iron-icon class$="[[conflictclass(currentproject.projectmeta.project_type_class, currentproject.conflicts, selected)]]" icon="warning" on-tap="conflictmode"></iron-icon>
+            </div>
+            <div id="nav">
+                <iron-icon class="rotate" icon="first-page" title="top"></iron-icon>
+                <iron-icon class="chapter" icon="expand-less" title="previous chapter"></iron-icon>
+                <iron-icon icon="arrow-drop-up" title="previous chunk"></iron-icon>
+                <input is="iron-input" id="input">
+                <iron-icon icon="arrow-drop-down" title="next chunk"></iron-icon>
+                <iron-icon class="chapter" icon="expand-more" title="next chapter"></iron-icon>
+                <iron-icon class="rotate" icon="last-page" title="bottom"></iron-icon>
             </div>
             <paper-menu-button id="menu" horizontal-offset="10" vertical-offset="10" vertical-align="bottom">
-                <paper-icon-button class="current dropdown-trigger" icon="more-vert"></paper-icon-button>
+                <iron-icon id="menuicon" class="dropdown-trigger" icon="more-vert"></iron-icon>
                 <paper-menu class="dropdown-content">
                     <paper-item on-tap="gohome"><iron-icon class="smallicon" icon="project:project"></iron-icon>Home</paper-item>
                     <paper-item on-tap="goreview"><iron-icon class="smallicon" icon="done-all"></iron-icon>Project Review</paper-item>

@@ -1107,7 +1107,11 @@
             var chunk = this.$.chunkmode;
             var review = this.$.reviewmode;
 
-            if (this.selected === 3) {
+            if (this.selected === 1) {
+                read.setlocation();
+            } else if (this.selected === 2) {
+                chunk.setlocation();
+            } else if (this.selected === 3) {
                 review.setlocation();
             }
         },

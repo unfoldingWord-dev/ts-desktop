@@ -21,13 +21,12 @@
             overflow: hidden !important;
         }
 
-        iron-list {
+        #chunklist {
             max-height: calc(100vh - 70px);
-            overflow-x: hidden !important;
         }
 
-        :host(.hide) iron-list {
-            overflow: hidden !important;
+        ::-webkit-scrollbar {
+            display: none;
         }
 
         :host(.preview) {
@@ -60,42 +59,16 @@
             margin-bottom: 300px;
         }
 
-        #marker {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--accent-color-dark);
-            color: var(--reverse-text-color);
-            font-size: 150%;
-            border-radius: 10px;
-            box-shadow: 1px 1px 2px 2px var(--shadow-color);
-            position: fixed;
-            top: 0;
-            bottom: 0;
-            right: 50px;
-            margin: auto 0;
-            width: 50px;
-            height: 50px;
-        }
-
-        #marker.hide {
-            display: none;
-        }
-
     </style>
 
     <template>
 
         <div id="contain">
-            <iron-list id="chunklist" items="{{chunks}}" as="chunk">
+            <iron-list id="chunklist" items="{{chunks}}" as="chunk" on-scroll="refresh">
                 <template>
                     <ts-chunk-card id="{{createid(index)}}" chunk="{{chunk}}" on-updateheight="updateheight"></ts-chunk-card>
                 </template>
             </iron-list>
-
-            <paper-material id="marker" class="hide">
-                <div id="display"></div>
-            </paper-material>
         </div>
 
     </template>
@@ -138,23 +111,15 @@
             list.updateSizeForItem(index);
         },
 
-        displayposition: function () {
+        refresh: function () {
             var mythis = this;
-            var list = this.$.chunklist;
-            var index = list.firstVisibleIndex || 0;
-            var chapter = this.chunks[index].chunkmeta.chapter;
-            var display = this.$.display;
-            var marker = this.$.marker;
 
-            if (chapter) {
-                display.innerHTML = chapter;
-                marker.classList.remove("hide");
-            }
+            mythis.getlocation();
             clearTimeout(mythis.timer);
+
             mythis.timer = setTimeout(function() {
-                marker.classList.add("hide");
                 mythis.setheights();
-            }, 500);
+            }, 100);
         },
 
         setheights: function () {
@@ -175,8 +140,6 @@
 
         tomode: function () {
             this.setpreview();
-            this.setlocation();
-            this.setheights();
             this.setlocation();
             this.movein();
         },
@@ -229,13 +192,15 @@
                 var filtered = chunks.filter(function (chunk) {
                     return chunk.chunkmeta.chapter === chapter;
                 });
-                index = filtered[0].index;
-            }
-            if (index === 1) {
-                index = 0;
+                if (filtered.length) {
+                    index = filtered[0].index;
+                } else {
+                    index = chunks.length - 1;
+                }
             }
 
             list.scrollToIndex(index);
+            this.getlocation();
         },
 
         createid: function (index) {
@@ -243,12 +208,7 @@
         },
 
 		ready: function() {
-            var mythis = this;
-            var list = this.$.chunklist;
 
-            list.addEventListener("scroll", _.throttle(function () {
-                mythis.displayposition();
-            }, 200));
 		}
 
 	});

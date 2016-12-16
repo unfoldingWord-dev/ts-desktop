@@ -128,9 +128,9 @@
             <div id="nav">
                 <iron-icon class="rotate" icon="first-page" title="top" on-tap="gotop"></iron-icon>
                 <iron-icon class="chapter" icon="expand-less" title="previous chapter" on-tap="prevchap"></iron-icon>
-                <iron-icon icon="arrow-drop-up" title="previous chunk" on-tap="prevchunk"></iron-icon>
+                <iron-icon class$="[[navclass(selected)]]" icon="arrow-drop-up" title="previous chunk" on-tap="prevchunk"></iron-icon>
                 <input is="iron-input" id="input" bind-value="{{modestatus.chapter}}" placeholder="" maxlength="3" on-change="tochapter">
-                <iron-icon icon="arrow-drop-down" title="next chunk" on-tap="nextchunk"></iron-icon>
+                <iron-icon class$="[[navclass(selected)]]" icon="arrow-drop-down" title="next chunk" on-tap="nextchunk"></iron-icon>
                 <iron-icon class="chapter" icon="expand-more" title="next chapter" on-tap="nextchap"></iron-icon>
                 <iron-icon class="rotate" icon="last-page" title="bottom" on-tap="gobottom"></iron-icon>
             </div>
@@ -184,11 +184,16 @@
 
         gotop: function () {
             this.set('modestatus.index', 0);
+            this.set('modestatus.chapter', 1);
             this.navigate();
         },
 
         gobottom: function () {
+            var length = this.currentproject.chunks.length;
+            var last = this.currentproject.chunks[length - 1].chunkmeta.chapter;
+
             this.set('modestatus.index', this.currentproject.chunks.length - 1);
+            this.set('modestatus.chapter', last);
             this.navigate();
         },
 
@@ -243,11 +248,11 @@
             if (input > 0 && input <= max) {
                 this.set('modestatus.chapter', parseInt(input));
                 this.set('modestatus.index', -1);
-                this.navigate();
             } else {
                 this.set('modestatus.index', length - 1);
-                this.navigate();
+                this.set('modestatus.chapter', max);
             }
+            this.navigate();
         },
 
         navigate: function () {
@@ -256,6 +261,10 @@
 
         updatemode: function () {
             this.set('bemode', App.configurator.getUserSetting('bemode'));
+        },
+
+        navclass: function (selected) {
+            return selected === 1 ? 'hide' : '';
         },
 
         printclass: function (typeclass, sources) {

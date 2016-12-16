@@ -87,8 +87,8 @@
             max-height: calc(100vh - 120px);
         }
 
-        :host(.hide) iron-list {
-            overflow: hidden !important;
+        ::-webkit-scrollbar {
+            display: none;
         }
 
         :host(.preview) {
@@ -637,10 +637,11 @@
                 var filtered = chunks.filter(function (chunk) {
                     return chunk.chunkmeta.chapter === chapter;
                 });
-                index = filtered[0].index;
-            }
-            if (index === 1) {
-                index = 0;
+                if (filtered.length) {
+                    index = filtered[0].index;
+                } else {
+                    index = chunks.length - 1;
+                }
             }
 
             list.scrollToIndex(index);

@@ -1002,9 +1002,9 @@
             var resource = projectmeta.resource.id;
             var name = projectmeta.project.name;
             var chapterid = frame.chapter;
-            var chapternum = parseInt(chapterid);
+            var chapternum = parseInt(chapterid) || 1;
             var frameid = frame.chunk;
-            var framenum = parseInt(frameid);
+            var framenum = parseInt(frameid) || 0;
             var chapterref;
             var chunkref;
 
@@ -1016,15 +1016,12 @@
                 if (chapterid === "front" && frameid === "title") {
                     chapterref = "Project Title";
                     chunkref = "Project Title";
-                    framenum = 0;
                 } else if (frameid === "title") {
                     chapterref = "Story Title";
                     chunkref = "Story Title";
-                    framenum = 0;
                 } else if (frameid === "reference") {
                     chapterref = "Story Reference";
                     chunkref = "Story Reference";
-                    framenum = 0;
                 } else {
                     chapterref = title;
                     chunkref = title + ":" + framenum;
@@ -1033,11 +1030,9 @@
                 if (chapterid === "front" && frameid === "title") {
                     chapterref = "Project Title";
                     chunkref = "Project Title";
-                    framenum = 0;
                 } else if (frameid === "title") {
                     chapterref = name + " " + chapternum + " Title";
                     chunkref = name + " " + chapternum + " Title";
-                    framenum = 0;
                 } else {
                     chapterref = name + " " + chapternum;
                     chunkref = name + " " + chapternum + ":" + verses[0] + "–" + verses[verses.length-1];

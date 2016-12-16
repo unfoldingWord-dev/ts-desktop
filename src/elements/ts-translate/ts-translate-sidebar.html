@@ -183,38 +183,59 @@
         },
 
         gotop: function () {
-            this.set('modestatus.chapter', 1);
             this.set('modestatus.index', 0);
-            this.fire('navigate');
+            this.navigate();
         },
 
         gobottom: function () {
-            this.set('modestatus.chapter', 1);
             this.set('modestatus.index', this.currentproject.chunks.length - 1);
-            this.fire('navigate');
+            this.navigate();
         },
 
         prevchap: function () {
-            this.set('modestatus.chapter', this.modestatus.chapter - 1);
+            var previous = this.modestatus.chapter - 1 || 1;
+
+            this.set('modestatus.chapter', previous);
             this.set('modestatus.index', -1);
-            this.fire('navigate');
+            this.navigate();
         },
 
         nextchap: function () {
-            this.set('modestatus.chapter', this.modestatus.chapter + 1);
-            this.set('modestatus.index', -1);
-            this.fire('navigate');
+            var next = this.modestatus.chapter + 1;
+            var length = this.currentproject.chunks.length;
+            var max = this.currentproject.chunks[length - 1].chunkmeta.chapter;
+            var index = -1;
+
+            if (next > max) {
+                next = max;
+                index = length - 1;
+            }
+
+            this.set('modestatus.chapter', next);
+            this.set('modestatus.index', index);
+            this.navigate();
         },
 
         prevchunk: function () {
-            //this.set('modestatus.chapter', 1);
-            this.set('modestatus.index', this.modestatus.index - 1);
-            this.fire('navigate');
+            var previous = this.modestatus.index - 1 || 0;
+
+            this.set('modestatus.index', previous);
+            this.navigate();
         },
 
         nextchunk: function () {
-            //this.set('modestatus.chapter', 1);
-            this.set('modestatus.index', this.modestatus.index + 1);
+            var next = this.modestatus.index + 1;
+            var max = this.currentproject.chunks.length -1;
+
+            if (next > max) {
+                next = max;
+            }
+
+            this.set('modestatus.index', next);
+            this.navigate();
+        },
+
+        navigate: function () {
             this.fire('navigate');
         },
 

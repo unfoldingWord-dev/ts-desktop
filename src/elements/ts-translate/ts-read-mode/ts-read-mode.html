@@ -18,16 +18,14 @@
 
         #contain {
             flex: auto;
-            overflow: hidden !important;
         }
 
-        iron-list {
+        #readlist {
             max-height: calc(100vh - 70px);
-            overflow-x: hidden !important;
         }
 
-        :host(.hide) iron-list {
-            overflow: hidden !important;
+        ::-webkit-scrollbar {
+            display: none;
         }
 
         :host(.preview) {
@@ -60,42 +58,16 @@
             margin-bottom: 300px;
         }
 
-        #marker {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--accent-color-dark);
-            color: var(--reverse-text-color);
-            font-size: 150%;
-            border-radius: 10px;
-            box-shadow: 1px 1px 2px 2px var(--shadow-color);
-            position: fixed;
-            top: 0;
-            bottom: 0;
-            right: 50px;
-            margin: auto 0;
-            width: 50px;
-            height: 50px;
-        }
-
-        #marker.hide {
-            display: none;
-        }
-
     </style>
 
     <template>
 
         <div id="contain">
-            <iron-list id="readlist" items="{{chapters}}" as="chunk">
+            <iron-list id="readlist" items="{{chapters}}" as="chunk" on-scroll="refresh">
                 <template>
                     <ts-read-card id="{{createid(index)}}" chunk="[[chunk]]" on-updateheight="updateheight"></ts-read-card>
                 </template>
             </iron-list>
-
-            <paper-material id="marker" class="hide">
-                <div id="display"></div>
-            </paper-material>
         </div>
 
     </template>
@@ -137,21 +109,15 @@
             list.updateSizeForItem(index);
         },
 
-        displayposition: function () {
+        refresh: function () {
             var mythis = this;
-            var list = this.$.readlist;
-            var index = list.firstVisibleIndex || 0;
-            var chapter = this.chapters[index].chaptermeta.chapter;
-            var display = this.$.display;
-            var marker = this.$.marker;
 
-            display.innerHTML = chapter;
-            marker.classList.remove("hide");
+            mythis.getlocation();
             clearTimeout(mythis.timer);
+
             mythis.timer = setTimeout(function() {
-                marker.classList.add("hide");
                 mythis.setheights();
-            }, 500);
+            }, 100);
         },
 
         setheights: function () {
@@ -172,8 +138,6 @@
 
         tomode: function () {
             this.setpreview();
-            this.setlocation();
-            this.setheights();
             this.setlocation();
             this.movein();
         },
@@ -219,7 +183,9 @@
         setlocation: function () {
             var list = this.$.readlist;
             var index = parseInt(this.modestatus.chapter) - 1;
+
             list.scrollToIndex(index);
+            this.getlocation();
         },
 
         createid: function (index) {
@@ -227,12 +193,7 @@
         },
 
         ready: function() {
-            var mythis = this;
-            var list = this.$.readlist;
 
-            list.addEventListener("scroll", _.throttle(function () {
-                mythis.displayposition();
-            }, 200));
         }
 
     });

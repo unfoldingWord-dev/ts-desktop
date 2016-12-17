@@ -23,7 +23,7 @@ let splashScreen;
 let mainWindow;
 let academyWindow;
 
-function createSplashScreen() {
+function createMainSplash() {
     splashScreen = new BrowserWindow({
         width: 400,
         height: 170,
@@ -44,19 +44,46 @@ function createSplashScreen() {
     });
 }
 
-function setMainSplash() {
-    splashScreen.webContents.send('load-main');
-    splashScreen.show();
+function createAcademySplash() {
+    splashScreen = new BrowserWindow({
+        width: 400,
+        height: 170,
+        resizable: false,
+        autoHideMenuBar: true,
+        frame: false,
+        center: true,
+        show: false,
+        title: 'translationStudio'
+    });
+
+    //splashScreen.webContents.openDevTools();
+
+    splashScreen.loadURL('file://' + __dirname + '/../views/academy-screen.html');
+
+    splashScreen.on('closed', function() {
+        splashScreen = null;
+    });
 }
 
-function setAcademySplash() {
-    splashScreen.webContents.send('load-academy');
-    splashScreen.show();
-}
+function createReloadSplash() {
+    splashScreen = new BrowserWindow({
+        width: 400,
+        height: 170,
+        resizable: false,
+        autoHideMenuBar: true,
+        frame: false,
+        center: true,
+        show: false,
+        title: 'translationStudio'
+    });
 
-function setReloadSplash() {
-    splashScreen.webContents.send('reload');
-    splashScreen.show();
+    //splashScreen.webContents.openDevTools();
+
+    splashScreen.loadURL('file://' + __dirname + '/../views/reload-screen.html');
+
+    splashScreen.on('closed', function() {
+        splashScreen = null;
+    });
 }
 
 function createMainWindow () {
@@ -194,11 +221,11 @@ ipcMain.on('open-academy', function () {
     if (academyWindow) {
         academyWindow.show();
     } else {
-        createSplashScreen();
+        createAcademySplash();
         setTimeout(function () {
-            setAcademySplash();
+            splashScreen.show();
             createAcademyWindow();
-        }, 1000);
+        }, 500);
     }
 });
 
@@ -206,17 +233,17 @@ ipcMain.on('fire-reload', function () {
     if (splashScreen) {
         splashScreen.show();
     } else {
-        createSplashScreen();
+        createReloadSplash();
     }
     setTimeout(function () {
-        setReloadSplash();
+        splashScreen.show();
         setTimeout(function () {
             if (mainWindow) {
                 mainWindow.hide();
                 mainWindow.reload();
             }
         }, 500);
-    }, 1000);
+    }, 500);
 });
 
 ipcMain.on('save-as', function (event, arg) {
@@ -249,11 +276,11 @@ ipcMain.on('ta-loading-done', function () {
 
 app.on('ready', function () {
     createAppMenus();
-    createSplashScreen();
+    createMainSplash();
     setTimeout(function () {
-        setMainSplash();
+        splashScreen.show();
         createMainWindow();
-    }, 1000);
+    }, 500);
 });
 
 app.on('window-all-closed', function () {

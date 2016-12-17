@@ -36,7 +36,7 @@
             font-size: 29px;
         }
 
-        #version {
+        #subtitle {
             font-size: 14px;
         }
 
@@ -63,14 +63,14 @@
     <template>
 
         <div id="main">
-            <img class$="[[iconclass(title)]]" src="../../../icons/icon-big.png">
+            <img class$="[[iconclass(content.title)]]" src="../../../icons/icon-big.png">
             <div id="text">
-                <span id="title">[[title]]</span>
-                <span id="version">[[version]]</span>
+                <span id="title">[[content.title]]</span>
+                <span id="subtitle">[[content.subtitle]]</span>
             </div>
         </div>
-        <div id="statusbar" class$="[[statusclass(title)]]">
-            <span>[[message]]</span>
+        <div id="statusbar" class$="[[statusclass(content.title)]]">
+            <span>[[content.message]]</span>
         </div>
 
     </template>
@@ -84,17 +84,9 @@
         is: 'ts-splash',
 
         properties: {
-            title: {
-                type: String,
-                value: ""
-            },
-            version: {
-                type: String,
-                value: ""
-            },
-            message: {
-                type: String,
-                value: ""
+            content: {
+                type: Object,
+                value: {}
             }
         },
 
@@ -107,29 +99,7 @@
         },
 
         updateMessage: function (message) {
-            this.set('message', message);
-        },
-
-        loadMain: function () {
-            var pack = require('../../package');
-            var version = pack.version.split('.').slice(0,-1).join('.');
-            var versiontext = "Version " + version + " Build " + pack.build;
-
-            this.set('title', "translationStudio");
-            this.set('version', versiontext);
-            this.set('message', "Loading main window...");
-        },
-
-        loadAcademy: function () {
-            this.set('title', "translationAcademy");
-            this.set('version', "");
-            this.set('message', "Creating Academy window...");
-        },
-
-        reload: function () {
-            this.set('title', "Canceling");
-            this.set('version', "Please wait...");
-            this.set('message', "");
+            this.set('content.message', message);
         },
 
         ready: function () {

@@ -154,7 +154,7 @@
 
     <template>
 
-        <ts-translate-sidebar selected="{{selected}}" currentproject="[[currentproject]]" on-gohome="gohome" on-goreview="goreview" on-goexport="goexport" on-goprint="goprint" on-gosearch="gosearch" on-gosettings="gosettings"></ts-translate-sidebar>
+        <ts-translate-sidebar selected="{{selected}}" currentproject="[[currentproject]]" modestatus="{{modestatus}}" on-navigate="navigate" on-gohome="gohome" on-goreview="goreview" on-goexport="goexport" on-goprint="goprint" on-gosearch="gosearch" on-gosettings="gosettings"></ts-translate-sidebar>
 
         <div id="pages">
             <ts-read-mode id="readmode" chapters="[[currentproject.chapters]]" modestatus="{{modestatus}}"></ts-read-mode>
@@ -323,7 +323,8 @@
                 }
             },
             cmdKeyDown: {
-                type: Boolean
+                type: Boolean,
+                value: false
             }
         },
 
@@ -1001,9 +1002,9 @@
             var resource = projectmeta.resource.id;
             var name = projectmeta.project.name;
             var chapterid = frame.chapter;
-            var chapternum = parseInt(chapterid);
+            var chapternum = parseInt(chapterid) || 1;
             var frameid = frame.chunk;
-            var framenum = parseInt(frameid);
+            var framenum = parseInt(frameid) || 0;
             var chapterref;
             var chunkref;
 
@@ -1015,15 +1016,12 @@
                 if (chapterid === "front" && frameid === "title") {
                     chapterref = "Project Title";
                     chunkref = "Project Title";
-                    framenum = 0;
                 } else if (frameid === "title") {
                     chapterref = "Story Title";
                     chunkref = "Story Title";
-                    framenum = 0;
                 } else if (frameid === "reference") {
                     chapterref = "Story Reference";
                     chunkref = "Story Reference";
-                    framenum = 0;
                 } else {
                     chapterref = title;
                     chunkref = title + ":" + framenum;
@@ -1032,11 +1030,9 @@
                 if (chapterid === "front" && frameid === "title") {
                     chapterref = "Project Title";
                     chunkref = "Project Title";
-                    framenum = 0;
                 } else if (frameid === "title") {
                     chapterref = name + " " + chapternum + " Title";
                     chunkref = name + " " + chapternum + " Title";
-                    framenum = 0;
                 } else {
                     chapterref = name + " " + chapternum;
                     chunkref = name + " " + chapternum + ":" + verses[0] + "–" + verses[verses.length-1];
@@ -1104,6 +1100,20 @@
                 this.currentproject.statedata[complexid] = statedata;
             }
             return {projectmeta: _.cloneDeep(projectmeta), chunkmeta: chunkmeta, transcontent: transcontent, helpscontent: helpscontent, conflicts: conflicts, completed: completed, state: statedata};
+        },
+
+        navigate: function () {
+            var read = this.$.readmode;
+            var chunk = this.$.chunkmode;
+            var review = this.$.reviewmode;
+
+            if (this.selected === 1) {
+                read.setlocation();
+            } else if (this.selected === 2) {
+                chunk.setlocation();
+            } else if (this.selected === 3) {
+                review.setlocation();
+            }
         },
 
         modechange: function (tomode, frommode) {
@@ -1402,20 +1412,18 @@
                 mythis.setheights();
             });
             window.addEventListener("keyup", function (e) {
-                if(e.key == "Meta") {
-                    mythis.cmdKeyDown = false;
-                }
-                if ((e.ctrlKey || e.metaKey || e.key == "Meta") && e.keyCode == 70 && mythis.route === "translate" && mythis.selected === 3 && mythis.currentproject.projectmeta.project_type_class === "standard") {
-                    mythis.gosearch();
+                if (e.key == "Meta") {
+                    mythis.set('cmdKeyDown', false);
                 }
             });
             window.addEventListener("keydown", function(e) {
-                // TRICKY: Mac/Apple key is not considered a modifier key. So we must manually watch up/down.
-                if(e.key == "Meta") {
-                    mythis.cmdKeyDown = true;
-                }
-                if (mythis.cmdKeyDown && e.keyCode == 70 && mythis.route === "translate" && mythis.selected === 3 && mythis.currentproject.projectmeta.project_type_class === "standard") {
-                    mythis.gosearch();
+                if (mythis.route === "translate" && mythis.selected === 3 && mythis.currentproject.projectmeta.project_type_class === "standard") {
+                    if (e.key == "Meta") {
+                        mythis.set('cmdKeyDown', true);
+                    }
+                    if ((mythis.cmdKeyDown || e.ctrlKey) && e.keyCode == 70) {
+                        mythis.gosearch();
+                    }
                 }
             });
         }

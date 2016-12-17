@@ -1,0 +1,136 @@
+
+<link rel="import" href="../../components/paper-button/paper-button.html">
+
+<dom-module id="ts-software">
+
+    <style>
+
+        :host {
+        }
+
+        #content {
+            margin: 25px 35px 0;
+            color: var(--primary-text-color);
+        }
+
+        .entry {
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 15px;
+        }
+
+        .name {
+            width: 150px;
+        }
+
+        .link {
+            width: 375px;
+        }
+
+        .type {
+            font-weight: bold;
+            margin: 0 15px;
+        }
+
+        #buttons {
+            display: flex;
+            justify-content: center;
+            margin: 0 35px;
+            padding: 20px;
+            color: var(--secondary-text-color);
+            border-top: 1px solid var(--border-color);
+        }
+
+        #buttons paper-button:hover {
+            color: var(--accent-color);
+        }
+
+    </style>
+
+    <template>
+
+        <div id="content">
+            <h1>Software Licenses</h1>
+            <p>The following licenses apply to code packages and libraries used in this app.</p>
+            <template is="dom-repeat" items="[[packages]]" as="package">
+                <div class="entry">
+                    <div class="name">
+                        <h2>[[package.name]]</h2>
+                    </div>
+                    <div class="link">
+                        <span><a href="[[package.link]]">[[package.link]]</a></span>
+                    </div>
+                    <div>
+                        <span>License Type:<span class="type">[[package.type]]</span></span>
+                    </div>
+                </div>
+            </template>
+        </div>
+        <div id="buttons">
+            <paper-button dialog-dismiss>Close</paper-button>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+        is: 'ts-software',
+
+        properties: {
+            packages: {
+                type: Array,
+                value: []
+            }
+        },
+
+        ready: function() {
+            var mythis = this;
+            var shell = require('electron').shell;
+            var packages = [
+                {name: 'adm-zip', link: 'https://www.npmjs.com/package/adm-zip', type: 'MIT'},
+                {name: 'archiver', link: 'https://www.npmjs.com/package/archiver', type: 'MIT'},
+                {name: 'async', link: 'https://www.npmjs.com/package/async', type: 'MIT'},
+                {name: 'chmodr', link: 'https://www.npmjs.com/package/chmodr', type: 'ISC'},
+                {name: 'door43-client', link: 'https://www.npmjs.com/package/door43-client', type: 'MIT'},
+                {name: 'fontkit', link: 'https://www.npmjs.com/package/fontkit', type: 'MIT'},
+                {name: 'fs-extra', link: 'https://www.npmjs.com/package/node-fs-extra', type: 'MIT'},
+                {name: 'getmac', link: 'https://www.npmjs.com/package/getmac', type: 'MIT'},
+                {name: 'gogs-client', link: 'https://www.npmjs.com/package/gogs-client', type: 'MIT'},
+                {name: 'js-yaml', link: 'https://www.npmjs.com/package/js-yaml', type: 'MIT'},
+                {name: 'jsonfile', link: 'https://www.npmjs.com/package/jsonfile', type: 'MIT'},
+                {name: 'keypair', link: 'https://www.npmjs.com/package/keypair', type: 'MIT'},
+                {name: 'locale', link: 'https://www.npmjs.com/package/locale', type: 'Custom'},
+                {name: 'lodash', link: 'https://www.npmjs.com/package/lodash', type: 'MIT'},
+                {name: 'md5', link: 'https://www.npmjs.com/package/MD5', type: 'BSD-3-Clause'},
+                {name: 'mkdirp', link: 'https://www.npmjs.com/package/mkdirp', type: 'MIT'},
+                {name: 'moment', link: 'https://www.npmjs.com/package/moment', type: 'MIT'},
+                {name: 'node-forge', link: 'https://www.npmjs.com/package/node-forge', type: 'BSD-3-Clause or GPL-2.0'},
+                {name: 'prince', link: 'https://www.npmjs.com/package/prince', type: 'MIT'},
+                {name: 'request', link: 'https://www.npmjs.com/package/request', type: 'Apache-2.0'},
+                {name: 'rimraf', link: 'https://www.npmjs.com/package/rimraf', type: 'ISC'},
+                {name: 'sql.js', link: 'https://www.versioneye.com/nodejs/sql.js/0.3.2', type: 'MIT'},
+                {name: 'trash', link: 'https://www.npmjs.com/package/trash', type: 'MIT'},
+                {name: 'untildify', link: 'https://www.npmjs.com/package/untildify', type: 'MIT'}
+            ];
+
+            mythis.set('packages', packages);
+
+            setTimeout(function() {
+                var links = mythis.$.content.getElementsByTagName('a');
+
+                for (var i = 0; i < links.length; i++) {
+                    links[i].addEventListener('click', function (event) {
+                        event.preventDefault();
+                        shell.openExternal(this.href);
+                    });
+                }
+            }, 3000);
+        }
+
+    });
+
+</script>

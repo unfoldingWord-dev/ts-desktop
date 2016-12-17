@@ -147,6 +147,14 @@ function Renderer() {
             }
         },
 
+        replaceEscapes: function (text) {
+            text = text.replace(/\\/g, "\\\\").replace(/\[/g, "\\[").replace(/\]/g, "\\]").replace(/\^/g, "\\^").replace(/\$/g, "\\$");
+            text = text.replace(/\(/g, "\\(").replace(/\)/g, "\\)").replace(/\?/g, "\\?").replace(/\./g, "\\.").replace(/\//g, "\\/");
+            text = text.replace(/\+/g, "\\+").replace(/\*/g, "\\*").replace(/\{/g, "\\{").replace(/\}/g, "\\}").replace(/\|/g, "\\|");
+
+            return text;
+        },
+
         replaceConflictCode: function (content) {
             var conflicts = this.checkForConflicts(content);
             var text = "";

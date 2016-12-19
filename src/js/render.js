@@ -141,6 +141,7 @@ function Renderer() {
                     conarray.push(subcontent);
                     content = content.replace(subcontent, "");
                 }
+                conarray = _.uniq(conarray);
                 return {exists: true, array: conarray};
             } else {
                 return {exists: false, array: conarray};

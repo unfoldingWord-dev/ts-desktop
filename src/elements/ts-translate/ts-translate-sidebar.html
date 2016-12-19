@@ -248,7 +248,7 @@
             if (input > 0 && input <= max) {
                 this.set('modestatus.chapter', parseInt(input));
                 this.set('modestatus.index', -1);
-            } else {
+            } else if (input > max) {
                 this.set('modestatus.index', length - 1);
                 this.set('modestatus.chapter', max);
             }

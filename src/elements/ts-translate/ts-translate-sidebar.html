@@ -51,6 +51,10 @@
             align-items: center;
         }
 
+        #nav.hide {
+            display: none;
+        }
+
         #nav iron-icon {
             cursor: pointer;
         }
@@ -125,13 +129,13 @@
                 <iron-icon class$="[[simpleclass(currentproject.projectmeta.project_type_class, selected, bemode)]]" icon="subject" on-tap="readmode"></iron-icon>
                 <iron-icon class$="[[conflictclass(currentproject.projectmeta.project_type_class, currentproject.conflicts, selected)]]" icon="warning" on-tap="conflictmode"></iron-icon>
             </div>
-            <div id="nav">
+            <div id="nav" class$="[[nosourceclass(selected)]]">
                 <iron-icon class="rotate" icon="first-page" title="top" on-tap="gotop"></iron-icon>
-                <iron-icon class="chapter" icon="expand-less" title="previous chapter" on-tap="prevchap"></iron-icon>
-                <iron-icon class$="[[navclass(selected)]]" icon="arrow-drop-up" title="previous chunk" on-tap="prevchunk"></iron-icon>
+                <iron-icon class="chapter" icon="expand-less" title$="[[prevchaptitle(currentproject.projectmeta.type.id)]]" on-tap="prevchap"></iron-icon>
+                <iron-icon class$="[[navclass(selected)]]" icon="arrow-drop-up" title$="[[prevchunktitle(currentproject.projectmeta.type.id)]]" on-tap="prevchunk"></iron-icon>
                 <input is="iron-input" id="input" bind-value="{{modestatus.chapter}}" placeholder="" maxlength="3" on-change="tochapter">
-                <iron-icon class$="[[navclass(selected)]]" icon="arrow-drop-down" title="next chunk" on-tap="nextchunk"></iron-icon>
-                <iron-icon class="chapter" icon="expand-more" title="next chapter" on-tap="nextchap"></iron-icon>
+                <iron-icon class$="[[navclass(selected)]]" icon="arrow-drop-down" title$="[[nextchunktitle(currentproject.projectmeta.type.id)]]" on-tap="nextchunk"></iron-icon>
+                <iron-icon class="chapter" icon="expand-more" title$="[[nextchaptitle(currentproject.projectmeta.type.id)]]" on-tap="nextchap"></iron-icon>
                 <iron-icon class="rotate" icon="last-page" title="bottom" on-tap="gobottom"></iron-icon>
             </div>
             <paper-menu-button id="menu" horizontal-offset="10" vertical-offset="10" vertical-align="bottom">
@@ -180,6 +184,22 @@
                 type: Boolean,
                 value: false
             }
+        },
+
+        prevchaptitle: function (id) {
+            return id === "tw" ? "previous letter" : "previous chapter";
+        },
+
+        nextchaptitle: function (id) {
+            return id === "tw" ? "next letter" : "next chapter";
+        },
+
+        prevchunktitle: function (id) {
+            return id === "tw" ? "previous word" : "previous chunk";
+        },
+
+        nextchunktitle: function (id) {
+            return id === "tw" ? "next word" : "next chunk";
         },
 
         gotop: function () {
@@ -278,6 +298,10 @@
 
         navclass: function (selected) {
             return selected === 1 ? 'hide' : '';
+        },
+
+        nosourceclass: function (selected) {
+            return selected === 4 ? 'hide' : '';
         },
 
         printclass: function (typeclass, sources) {

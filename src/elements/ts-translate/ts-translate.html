@@ -187,7 +187,7 @@
             <ts-conflict-mode id="conflictmode" chunks="{{currentproject.chunks}}" modestatus="{{modestatus}}"></ts-conflict-mode>
         </div>
 
-        <ts-resource-display id="resourcedisplay" class="hide" chunks="[[currentproject.chunks]]" on-closeresource="closeresource"></ts-resource-display>
+        <ts-resource-display id="resourcedisplay" class="hide" chunks="[[currentproject.chunks]]" modestatus="{{modestatus}}" on-navigate="navigate" on-closeresource="closeresource"></ts-resource-display>
 
         <paper-dialog id="checklistpopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <h2>Chunk Checklist</h2>

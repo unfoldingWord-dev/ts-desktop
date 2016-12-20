@@ -135,6 +135,11 @@
                 type: Object,
                 value: {}
             },
+            modestatus: {
+                type: Object,
+                value: {},
+                notify: true
+            },
             related: {
                 type: Array,
                 value: []
@@ -209,15 +214,16 @@
             var example = e.model.example;
             var chapter = example.chapter;
             var frame = example.frame;
-            var list = this.$.reviewlist;
             var chunks = this.chunks;
 
             var filtered = chunks.filter(function (chunk) {
                 return chunk.chunkmeta.chapter === chapter && chunk.chunkmeta.frame === frame;
             });
-            var index = filtered[0].index;
+            if (filtered.length) {
+                this.set('modestatus.index', filtered[0].index);
+            }
 
-            list.scrollToIndex(index);
+            this.fire('navigate');
         },
 
         closeresource: function () {

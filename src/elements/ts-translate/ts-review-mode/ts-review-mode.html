@@ -321,9 +321,11 @@
 
             contain.classList.add("moveout");
             setTimeout(function() {
-                contain.classList.remove("moveout");
                 mythis.classList.add("hide");
-            }, 500);
+                setTimeout(function() {
+                    contain.classList.remove("moveout");
+                }, 300);
+            }, 300);
         },
 
         movein: function () {

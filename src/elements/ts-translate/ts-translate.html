@@ -592,11 +592,15 @@
         closeresource: function () {
             var display = this.$.resourcedisplay;
 
-            display.classList.add("slideout");
-            setTimeout(function() {
-                display.classList.remove("slideout");
-                display.classList.add("hide");
-            }, 500);
+            if (!display.classList.contains("hide")) {
+                display.classList.add("slideout");
+                setTimeout(function() {
+                    display.classList.add("hide");
+                    setTimeout(function() {
+                        display.classList.remove("slideout");
+                    }, 300);
+                }, 300);
+            }
         },
 
         load: function (route) {
@@ -1170,6 +1174,8 @@
             var nosource = this.$.nosourcemode;
             var conflict = this.$.conflictmode;
 
+            this.closeresource();
+
             if (frommode > 0) {
                 this.set('modestatus.lastmode', frommode);
             }
@@ -1347,8 +1353,7 @@
         gohome: function () {
             var mythis = this;
 
-            mythis.$.reviewmode.closeresource();
-            mythis.$.conflictmode.closeresource();
+            mythis.closeresource();
             mythis.savestate();
             mythis.stoptimers();
 
@@ -1372,8 +1377,7 @@
                 mythis.set('options.loading', true);
                 mythis.fire('iron-signal', {name: 'openloading'});
                 setTimeout(function() {
-                    mythis.$.reviewmode.closeresource();
-                    mythis.$.conflictmode.closeresource();
+                    mythis.closeresource();
                     mythis.savestate();
                     mythis.setleftanimation();
                     mythis.stoptimers();

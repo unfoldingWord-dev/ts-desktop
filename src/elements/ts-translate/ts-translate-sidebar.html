@@ -198,27 +198,31 @@
         },
 
         prevchap: function () {
-            var previous = this.modestatus.chapter - 1 || 1;
+            var chapter = this.modestatus.chapter;
+            var type = this.currentproject.projectmeta.type.id;
 
-            this.set('modestatus.chapter', previous);
-            this.set('modestatus.index', -1);
-            this.navigate();
+            if (type === "tw") {
+                chapter = String.fromCharCode(chapter.charCodeAt(0) - 1);
+            } else {
+                chapter--;
+            }
+
+            this.set('modestatus.chapter', chapter);
+            this.tochapter();
         },
 
         nextchap: function () {
-            var next = this.modestatus.chapter + 1;
-            var length = this.currentproject.chunks.length;
-            var max = this.currentproject.chunks[length - 1].chunkmeta.chapter;
-            var index = -1;
+            var chapter = this.modestatus.chapter;
+            var type = this.currentproject.projectmeta.type.id;
 
-            if (next > max) {
-                next = max;
-                index = length - 1;
+            if (type === "tw") {
+                chapter = String.fromCharCode(chapter.charCodeAt(0) + 1);
+            } else {
+                chapter++;
             }
 
-            this.set('modestatus.chapter', next);
-            this.set('modestatus.index', index);
-            this.navigate();
+            this.set('modestatus.chapter', chapter);
+            this.tochapter();
         },
 
         prevchunk: function () {
@@ -242,10 +246,19 @@
 
         tochapter: function () {
             var input = this.modestatus.chapter;
-            var length = this.currentproject.chunks.length;
+            var chunks = this.currentproject.chunks;
+            var length = chunks.length;
             var max = this.currentproject.chunks[length - 1].chunkmeta.chapter;
+            var type = this.currentproject.projectmeta.type.id;
 
-            if (input > 0 && input <= max) {
+            if (type === "tw") {
+                var filtered = chunks.filter(function (chunk) {
+                    return chunk.chunkmeta.frameid.toLowerCase().startsWith(input.toLowerCase());
+                });
+                if (filtered.length) {
+                    this.set('modestatus.index', filtered[0].index);
+                }
+            } else if (input > 0 && input <= max) {
                 this.set('modestatus.chapter', parseInt(input));
                 this.set('modestatus.index', -1);
             } else if (input > max) {

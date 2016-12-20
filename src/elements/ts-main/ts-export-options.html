@@ -76,11 +76,11 @@
                 <span>Uploads project to your Door43 Account</span>
                 <span>By uploading the project to your Door43 account, the content is available to be downloaded by other translators, merged with other projects, or used as an online backup.</span>
             </div>
-            <div class$="[[checkusfmclass(exportdata.project_type_class, exportdata.format)]]" on-tap="checkusfm">
+            <div class$="[[checkusfmclass(exportdata.project_type_class, exportdata.format, exportdata.source_translations)]]" on-tap="checkusfm">
                 <span class="optiontitle">Export to USFM File</span>
                 <span>Creates a .usfm file of your project</span>
             </div>
-            <div class$="[[checkmarkdownclass(exportdata.project_type_class, exportdata.format)]]" on-tap="checkusfm">
+            <div class$="[[checkmarkdownclass(exportdata.project_type_class, exportdata.format, exportdata.source_translations)]]" on-tap="checkusfm">
                 <span class="optiontitle">Export to Text Files</span>
                 <span>Creates a .zip file of your project</span>
             </div>
@@ -118,12 +118,12 @@
             return typeclass === "standard" && sources.length ? 'option' : 'hide';
         },
 
-        checkusfmclass: function (typeclass, format) {
-            return typeclass === "standard" && format === "usfm" ? 'option' : 'hide';
+        checkusfmclass: function (typeclass, format, sources) {
+            return typeclass === "standard" && format === "usfm" && sources.length ? 'option' : 'hide';
         },
 
-        checkmarkdownclass: function (typeclass, format) {
-            return typeclass === "standard" && format === "markdown" ? 'option' : 'hide';
+        checkmarkdownclass: function (typeclass, format, sources) {
+            return typeclass === "standard" && format === "markdown" && sources.length ? 'option' : 'hide';
         },
 
         project: function () {

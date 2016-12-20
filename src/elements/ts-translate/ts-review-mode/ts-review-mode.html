@@ -579,8 +579,17 @@
         getlocation: function () {
             var list = this.$.reviewlist;
             var index = list.firstVisibleIndex || 0;
+            var chunk = this.chunks[index];
+            var type = chunk.projectmeta.type.id;
+            var chapter;
 
-            this.set('modestatus.chapter', this.chunks[index].chunkmeta.chapter);
+            if (type === "tw") {
+                chapter = chunk.chunkmeta.frameid.charAt(0).toUpperCase();
+            } else {
+                chapter = chunk.chunkmeta.chapter;
+            }
+
+            this.set('modestatus.chapter', chapter);
             this.set('modestatus.index', index);
         },
 

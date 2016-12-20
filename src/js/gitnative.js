@@ -192,7 +192,7 @@ function GitManager() {
         },
 
         consolidateConflicts: function (targetPath, conflicts) {
-            var conflicttest = new RegExp(/^([^<=>]*)(<{7} HEAD\n)([^<=>]+)(\n={7}\n)([^<=>]+)(\n>{7} \w{40})([^<=>]*)$/);
+            var conflicttest = new RegExp(/^([^<=>]*)(<{7} HEAD\n)([^<=>]*)(={7}\n)([^<=>]*)(>{7} \w{40}\n?)([^<=>]*)$/);
 
             conflicts.forEach(function (conflict) {
                 var split = conflict.split("-");

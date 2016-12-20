@@ -10,11 +10,15 @@
         :host {
             position: fixed;
             top: 40px;
-            right: 17px;
+            right: 0;
             background: var(--card-background-color);
             color: var(--primary-text-color);
             width: 416px;
-            height: calc(100% - 70px);
+            height: calc(100vh - 70px);
+        }
+
+        #content {
+            height: 100%;
             display: flex;
             flex-direction: column;
         }
@@ -84,7 +88,7 @@
 
 	<template>
 
-        <paper-material>
+        <paper-material id="content">
             <div id="header">
                 <paper-button on-tap="closeresource"><iron-icon icon="clear"></iron-icon>Close</paper-button>
             </div>
@@ -127,11 +131,98 @@
 		is: 'ts-resource-display',
 
 		properties: {
-            chunk: {
+            chunks: {
                 type: Object,
                 value: {}
+            },
+            related: {
+                type: Array,
+                value: []
+            },
+            examples: {
+                type: Array,
+                value: []
+            },
+            allwords: {
+                type: Array,
+                value: []
             }
 		},
+
+        fillresource: function (data) {
+            var textholder = this.$.textholder;
+            var content = "";
+            var clear = [];
+            var footer = this.$.footer;
+            var projectmeta = this.chunks[0].projectmeta;
+            var current = projectmeta.currentsource;
+            var currentsource = projectmeta.source_translations[current];
+            var dict = "bible";
+            if (currentsource.resource_id === "obs") {
+                dict = "bible-obs";
+            }
+
+            if (data.type === "Notes") {
+                this.set('related', clear);
+                this.set('examples', clear);
+                this.set('allwords', clear);
+                footer.classList.add("hide");
+                content = "\<h2 class='style-scope ts-review-mode'\>" + data.title + "\<\/h2\>\<p class='style-scope ts-review-mode'\>" + data.body + "\<\/p\>";
+            }
+            if (data.type === "Words") {
+                this.set('examples', App.dataManager.getWordExamples(currentsource, data.slug));
+                this.set('related', App.dataManager.getRelatedWords(currentsource, data.slug));
+                this.set('allwords', clear);
+                footer.classList.remove("hide");
+                content = "\<h2 class='style-scope ts-review-mode'\>" + data.title + "\<\/h2\>" + data.body;
+            }
+            if (data.type === "Questions") {
+                this.set('related', clear);
+                this.set('examples', clear);
+                this.set('allwords', clear);
+                footer.classList.add("hide");
+                content = "\<h2 class='style-scope ts-review-mode'\>" + data.title + "\<\/h2\>\<p class='style-scope ts-review-mode'\>" + data.body + "\<\/p\>";
+            }
+            if (data.type === "allwords") {
+                this.set('related', clear);
+                this.set('examples', clear);
+                this.set('allwords', App.dataManager.getAllWords(dict));
+                footer.classList.add("hide");
+                content = "";
+            }
+            textholder.innerHTML = content;
+            this.$.body.scrollTop = 0;
+        },
+
+        openindex: function () {
+            var data = {type: "allwords"};
+            this.fillresource(data);
+        },
+
+        newword: function (e) {
+            var word = e.model.word;
+            word.type = "Words";
+            this.fillresource(word);
+        },
+
+        examplescroll: function (e) {
+            var example = e.model.example;
+            var chapter = example.chapter;
+            var frame = example.frame;
+            var list = this.$.reviewlist;
+            var chunks = this.chunks;
+
+            var filtered = chunks.filter(function (chunk) {
+                return chunk.chunkmeta.chapter === chapter && chunk.chunkmeta.frame === frame;
+            });
+            var index = filtered[0].index;
+
+            list.scrollToIndex(index);
+        },
+
+        closeresource: function () {
+            this.fire('closeresource');
+        },
 
 		ready: function() {
 

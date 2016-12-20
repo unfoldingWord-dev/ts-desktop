@@ -12,6 +12,7 @@
 <link rel="import" href="./ts-translate-sidebar.html">
 <link rel="import" href="./ts-nosource-mode.html">
 <link rel="import" href="./ts-source/ts-source-modal.html">
+<link rel="import" href="./ts-resource/ts-resource-display.html">
 
 <dom-module id="ts-translate">
 
@@ -146,6 +147,28 @@
             color: var(--accent-color);
         }
 
+        #resourcedisplay.hide {
+            visibility: hidden;
+        }
+
+        .slidein {
+            -webkit-animation: slidein .5s;
+        }
+
+        .slideout {
+            -webkit-animation: slideout .5s;
+        }
+
+        @-webkit-keyframes slidein {
+            0% {transform: translateX(450px)}
+            100% {transform: translateX(0)}
+        }
+
+        @-webkit-keyframes slideout {
+            0% {transform: translateX(0)}
+            100% {transform: translateX(450px)}
+        }
+
         .nodisplay {
             display: none;
         }
@@ -163,6 +186,8 @@
             <ts-nosource-mode id="nosourcemode" projectmeta="[[currentproject.projectmeta]]"></ts-nosource-mode>
             <ts-conflict-mode id="conflictmode" chunks="{{currentproject.chunks}}" modestatus="{{modestatus}}"></ts-conflict-mode>
         </div>
+
+        <ts-resource-display id="resourcedisplay" class="hide" chunks="[[currentproject.chunks]]" on-closeresource="closeresource"></ts-resource-display>
 
         <paper-dialog id="checklistpopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <h2>Chunk Checklist</h2>
@@ -243,6 +268,7 @@
         <iron-signals on-iron-signal-resolveconflict="resolveConflict"></iron-signals>
         <iron-signals on-iron-signal-translateright="setrightanimation"></iron-signals>
         <iron-signals on-iron-signal-translateleft="setleftanimation"></iron-signals>
+        <iron-signals on-iron-signal-openresource="openresource"></iron-signals>
 
     </template>
 
@@ -550,6 +576,27 @@
 
         closesource: function () {
             this.$.sourcepopup.close();
+        },
+
+        openresource: function (event, data) {
+            var display = this.$.resourcedisplay;
+
+            display.fillresource(data.content);
+            display.classList.remove("hide");
+            display.classList.add("slidein");
+            setTimeout(function() {
+                display.classList.remove("slidein");
+            }, 500);
+        },
+
+        closeresource: function () {
+            var display = this.$.resourcedisplay;
+
+            display.classList.add("slideout");
+            setTimeout(function() {
+                display.classList.remove("slideout");
+                display.classList.add("hide");
+            }, 500);
         },
 
         load: function (route) {

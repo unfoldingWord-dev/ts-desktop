@@ -29,8 +29,8 @@
             max-height: calc(100vh - 70px);
         }
 
-        :host(.hide) iron-list {
-            overflow: hidden !important;
+        ::-webkit-scrollbar {
+            display: none;
         }
 
         :host(.preview) {
@@ -72,7 +72,7 @@
 	<template>
 
         <div id="contain">
-            <iron-list id="conflictlist" items="{{chunks}}" as="chunk">
+            <iron-list id="conflictlist" items="{{chunks}}" as="chunk" on-scroll="refresh">
                 <template>
                     <ts-conflict-card class$="[[conflictclass(chunk.conflicts.exists)]]" chunk="{{chunk}}" on-updateheight="updateheight"></ts-conflict-card>
                 </template>
@@ -110,6 +110,27 @@
             return conflicts ? '' : 'hide';
         },
 
+        refresh: function () {
+            var mythis = this;
+
+            mythis.getlocation();
+            clearTimeout(mythis.timer);
+
+            mythis.timer = setTimeout(function() {
+                mythis.setheights();
+            }, 100);
+        },
+
+        setheights: function () {
+            var list = this.$.conflictlist;
+
+            list.fire('iron-resize');
+
+            for (var i = list.firstVisibleIndex; i <= list.lastVisibleIndex; i++) {
+                list.updateSizeForItem(i);
+            }
+        },
+
         updateheight: function (e) {
             var list = this.$.conflictlist;
             var index = e.model.index;
@@ -117,6 +138,7 @@
         },
 
         frommode: function () {
+            this.getlocation();
             this.moveout();
         },
 
@@ -148,6 +170,7 @@
                 contain.classList.add("movein");
                 setTimeout(function() {
                     contain.classList.remove("movein");
+                    mythis.setheights();
                 }, 500);
             }, 500);
         },
@@ -157,9 +180,35 @@
             this.classList.remove("hide");
         },
 
+        getlocation: function () {
+            var list = this.$.conflictlist;
+            var index = list.firstVisibleIndex || 0;
+            var chunk = this.chunks[index];
+            var chapter = chunk.chunkmeta.chapter;
+
+            this.set('modestatus.chapter', chapter);
+            this.set('modestatus.index', index);
+        },
+
         setlocation: function () {
             var list = this.$.conflictlist;
-            list.scrollToIndex(0);
+            var index = this.modestatus.index;
+            var chunks = this.chunks;
+            var chapter = this.modestatus.chapter;
+
+            if (index < 0) {
+                var filtered = chunks.filter(function (chunk) {
+                    return chunk.chunkmeta.chapter === chapter;
+                });
+                if (filtered.length) {
+                    index = filtered[0].index;
+                } else {
+                    index = chunks.length - 1;
+                }
+            }
+
+            list.scrollToIndex(index);
+            this.getlocation();
         },
 
 		ready: function() {

@@ -1157,6 +1157,7 @@
             var read = this.$.readmode;
             var chunk = this.$.chunkmode;
             var review = this.$.reviewmode;
+            var conflict = this.$.conflictmode;
 
             if (this.selected === 1) {
                 read.setlocation();
@@ -1164,6 +1165,8 @@
                 chunk.setlocation();
             } else if (this.selected === 3) {
                 review.setlocation();
+            } else if (this.selected === 5) {
+                conflict.setlocation();
             }
         },
 

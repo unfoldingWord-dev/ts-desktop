@@ -37,7 +37,7 @@
         }
 
         #body {
-            padding: 0 40px 40px 40px;
+            padding: 20px 40px;
             overflow-y: auto;
             flex: auto;
         }
@@ -50,12 +50,8 @@
             margin: 10px 0;
         }
 
-        #body p {
-            margin: 0;
-        }
-
-        #textholder p {
-            font-size: 120%;
+        p {
+            margin: 5px 0;
         }
 
         #footer {
@@ -67,25 +63,13 @@
             padding-left: 40px;
         }
 
-        #examples {
-            margin-top: 10px;
+        #footer.hide {
+            display: none;
         }
 
         .link {
             color: var(--accent-color);
             cursor: pointer;
-        }
-
-        .words {
-            padding: 5px 0;
-        }
-
-        #footer.hide {
-            display: none;
-        }
-
-        .hide {
-            display: none;
         }
 
 	</style>
@@ -107,15 +91,13 @@
                 <template is="dom-if" if="{{examples.length}}">
                     <h3>Examples:</h3>
                     <template is="dom-repeat" items="{{examples}}" as="example">
-                        <div id="examples">
-                            <p class="link" on-tap="examplescroll"><span>{{chunks.0.projectmeta.project.name}}</span> <span>{{example.chapter}}</span>:<span>{{example.frame}}</span></p>
-                        </div>
+                        <p class="link" on-tap="examplescroll"><span>{{chunks.0.projectmeta.project.name}}</span> <span>{{example.chapter}}</span>:<span>{{example.frame}}</span></p>
                     </template>
                 </template>
                 <template is="dom-if" if="{{allwords.length}}">
                     <h3>Words Index</h3>
                     <template is="dom-repeat" items="{{allwords}}" as="word">
-                        <p class="link words" on-tap="newword">{{word.title}}</p>
+                        <p class="link" on-tap="newword">{{word.title}}</p>
                     </template>
                 </template>
             </div>

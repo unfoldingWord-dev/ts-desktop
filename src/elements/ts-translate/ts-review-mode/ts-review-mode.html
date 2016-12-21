@@ -87,8 +87,8 @@
             max-height: calc(100vh - 120px);
         }
 
-        :host(.hide) iron-list {
-            overflow: hidden !important;
+        ::-webkit-scrollbar {
+            display: none;
         }
 
         :host(.preview) {
@@ -216,28 +216,6 @@
             display: none;
         }
 
-        #marker {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--accent-color-dark);
-            color: var(--reverse-text-color);
-            font-size: 150%;
-            border-radius: 10px;
-            box-shadow: 1px 1px 2px 2px var(--shadow-color);
-            position: fixed;
-            top: 0;
-            bottom: 0;
-            right: 50px;
-            margin: auto 0;
-            width: 50px;
-            height: 50px;
-        }
-
-        #marker.hide {
-            display: none;
-        }
-
 	</style>
 
 	<template>
@@ -261,15 +239,11 @@
                     <paper-icon-button icon="close" on-tap="closesearch"></paper-icon-button>
                 </div>
             </div>
-            <iron-list id="reviewlist" items="{{chunks}}" as="chunk">
+            <iron-list id="reviewlist" items="{{chunks}}" as="chunk" on-scroll="refresh">
                 <template>
                     <ts-review-card chunk="{{chunk}}" searchoptions="{{searchoptions}}" on-updateheight="updateheight"></ts-review-card>
                 </template>
             </iron-list>
-
-            <paper-material id="marker" class="hide">
-                <div id="display"></div>
-            </paper-material>
 
             <paper-material id="resourcepopup" class="hide">
                 <div class="buttons">
@@ -370,8 +344,14 @@
         },
 
         opensearch: function () {
+            var mythis = this;
+
             this.$.reviewlist.classList.add('searchmode');
             this.$.searchbar.classList.remove('hide');
+
+            setTimeout(function() {
+                mythis.$.input.focus();
+            }, 500);
         },
 
         closesearch: function () {
@@ -395,14 +375,14 @@
 
         search: function (passive) {
             var mythis = this;
-            var query = this.query;
+            var query = this.query.trim();
             var chunks = this.chunks || [];
             var type = this.selected;
             var forward = [];
             var backward = [];
 
             chunks.forEach(function (chunk) {
-                if (query && ((type === 'source' && chunk.srccontent.includes(query)) || (type === 'target' && chunk.transcontent.includes(query)))) {
+                if (query && ((type === 'source' && chunk.srccontent.toLowerCase().includes(query.toLowerCase())) || (type === 'target' && chunk.transcontent.toLowerCase().includes(query.toLowerCase())))) {
                     forward.push(chunk.index);
                     backward.push(chunk.index);
                 }
@@ -437,24 +417,16 @@
             list.scrollToIndex(previous);
         },
 
-        displayposition: function () {
+        refresh: function () {
             var mythis = this;
-            var list = this.$.reviewlist;
-            var index = list.firstVisibleIndex || 0;
-            var chapter = this.chunks[index].chunkmeta.chapter;
-            var type = this.chunks[index].projectmeta.project_type_class;
-            var display = this.$.display;
-            var marker = this.$.marker;
 
-            if (chapter && type !== "extant") {
-                display.innerHTML = chapter;
-                marker.classList.remove("hide");
-            }
+            mythis.getlocation();
             clearTimeout(mythis.timer);
+
             mythis.timer = setTimeout(function() {
-                marker.classList.add("hide");
                 mythis.setheights();
-            }, 500);
+                mythis.passivesearch();
+            }, 100);
         },
 
         setheights: function () {
@@ -571,8 +543,6 @@
         tomode: function () {
             this.setpreview();
             this.setlocation();
-            this.setheights();
-            this.setlocation();
             this.movein();
         },
 
@@ -609,8 +579,17 @@
         getlocation: function () {
             var list = this.$.reviewlist;
             var index = list.firstVisibleIndex || 0;
+            var chunk = this.chunks[index];
+            var type = chunk.projectmeta.type.id;
+            var chapter;
 
-            this.set('modestatus.chapter', this.chunks[index].chunkmeta.chapter);
+            if (type === "tw") {
+                chapter = chunk.chunkmeta.frameid.charAt(0).toUpperCase();
+            } else {
+                chapter = chunk.chunkmeta.chapter;
+            }
+
+            this.set('modestatus.chapter', chapter);
             this.set('modestatus.index', index);
         },
 
@@ -624,22 +603,19 @@
                 var filtered = chunks.filter(function (chunk) {
                     return chunk.chunkmeta.chapter === chapter;
                 });
-                index = filtered[0].index;
-            }
-            if (index === 1) {
-                index = 0;
+                if (filtered.length) {
+                    index = filtered[0].index;
+                } else {
+                    index = chunks.length - 1;
+                }
             }
 
             list.scrollToIndex(index);
+            this.getlocation();
         },
 
 		ready: function() {
-            var mythis = this;
-            var list = this.$.reviewlist;
 
-            list.addEventListener("scroll", _.throttle(function () {
-                mythis.displayposition();
-            }, 200));
 		}
 
 	});

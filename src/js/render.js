@@ -132,7 +132,7 @@ function Renderer() {
         },
 
         checkForConflicts: function (content) {
-            var conflicttest = new RegExp(/(<{7} HEAD\n|={7}\n)([^<=>]+)(\n>{7} [\w]{40}|\n={7})/);
+            var conflicttest = new RegExp(/(<{7} HEAD\n|={7}\n)([^<=>]+)(>{7} [\w]{40}|={7})/);
             var conarray = [];
 
             if (conflicttest.test(content)) {
@@ -141,10 +141,19 @@ function Renderer() {
                     conarray.push(subcontent);
                     content = content.replace(subcontent, "");
                 }
+                conarray = _.uniq(conarray);
                 return {exists: true, array: conarray};
             } else {
                 return {exists: false, array: conarray};
             }
+        },
+
+        replaceEscapes: function (text) {
+            text = text.replace(/\\/g, "\\\\").replace(/\[/g, "\\[").replace(/\]/g, "\\]").replace(/\^/g, "\\^").replace(/\$/g, "\\$");
+            text = text.replace(/\(/g, "\\(").replace(/\)/g, "\\)").replace(/\?/g, "\\?").replace(/\./g, "\\.").replace(/\//g, "\\/");
+            text = text.replace(/\+/g, "\\+").replace(/\*/g, "\\*").replace(/\{/g, "\\{").replace(/\}/g, "\\}").replace(/\|/g, "\\|");
+
+            return text;
         },
 
         replaceConflictCode: function (content) {

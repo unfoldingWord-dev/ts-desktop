@@ -102,7 +102,7 @@ function ImportManager(configurator, migrator, dataManager) {
                             var transcontent = _.chain(parsedData[chapter].verses).filter(function (verse) {
                                 var id = parseInt(verse.id);
                                 return id <= last && id >= first;
-                            }).map("contents").value().join("");
+                            }).map("contents").value().join(" ");
 
                             chunks.push({
                                 chunkmeta: {
@@ -274,7 +274,7 @@ function UsfmParser () {
             mythis.markers.forEach(function (marker) {
                 if (marker.type === "heading" && chapnum === 0) {
                     createchapter(chapnum);
-                    mythis.chapters[chap].contents = marker.contents;
+                    mythis.chapters[chap].contents = marker.contents.trim();
                 } else if (marker.type === "chapter") {
                     chapnum = parseInt(marker.options);
                     createchapter(chapnum);
@@ -290,7 +290,7 @@ function UsfmParser () {
 
                     mythis.chapters[chap].verses[marker.options] = {
                         id: marker.options,
-                        contents: marker.contents
+                        contents: marker.contents.trim()
                     };
                 }
             });

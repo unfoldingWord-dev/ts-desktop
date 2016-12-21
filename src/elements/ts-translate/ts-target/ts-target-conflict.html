@@ -184,14 +184,18 @@
         },
 
         savechoice: function () {
+            var mythis = this;
             var choice = this.chunk.conflicts.choice;
 
             this.set('chunk.transcontent', this.chunk.conflicts.array[choice]);
             this.cancel();
             this.set('chunk.conflicts', {exists: false});
             this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
-            this.fire('setheight');
             this.fire('iron-signal', {name: 'resolveconflict'});
+
+            setTimeout(function() {
+                mythis.fire('setheight');
+            }, 200);
         },
 
         cancel: function () {

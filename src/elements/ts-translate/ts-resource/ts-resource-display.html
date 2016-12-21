@@ -42,6 +42,10 @@
             flex: auto;
         }
 
+        h2 {
+            color: var(--accent-color);
+        }
+
         h3 {
             margin: 10px 0;
         }
@@ -156,6 +160,7 @@
 
         fillresource: function (data) {
             var textholder = this.$.textholder;
+            var module = "ts-resource-display";
             var content = "";
             var clear = [];
             var footer = this.$.footer;
@@ -167,34 +172,24 @@
                 dict = "bible-obs";
             }
 
-            if (data.type === "Notes") {
-                this.set('related', clear);
-                this.set('examples', clear);
-                this.set('allwords', clear);
-                footer.classList.add("hide");
-                content = "\<h2 class='style-scope ts-review-mode'\>" + data.title + "\<\/h2\>\<p class='style-scope ts-review-mode'\>" + data.body + "\<\/p\>";
-            }
             if (data.type === "Words") {
-                this.set('examples', App.dataManager.getWordExamples(currentsource, data.slug));
                 this.set('related', App.dataManager.getRelatedWords(currentsource, data.slug));
-                this.set('allwords', clear);
+                this.set('examples', App.dataManager.getWordExamples(currentsource, data.slug));
                 footer.classList.remove("hide");
-                content = "\<h2 class='style-scope ts-review-mode'\>" + data.title + "\<\/h2\>" + data.body;
-            }
-            if (data.type === "Questions") {
+            } else {
                 this.set('related', clear);
                 this.set('examples', clear);
-                this.set('allwords', clear);
                 footer.classList.add("hide");
-                content = "\<h2 class='style-scope ts-review-mode'\>" + data.title + "\<\/h2\>\<p class='style-scope ts-review-mode'\>" + data.body + "\<\/p\>";
             }
+
             if (data.type === "allwords") {
-                this.set('related', clear);
-                this.set('examples', clear);
                 this.set('allwords', App.dataManager.getAllWords(dict));
-                footer.classList.add("hide");
                 content = "";
+            } else {
+                this.set('allwords', clear);
+                content = App.renderer.renderResource(data, module);
             }
+
             textholder.innerHTML = content;
             this.$.body.scrollTop = 0;
         },

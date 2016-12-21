@@ -296,6 +296,15 @@ function Renderer() {
             return toc + text + enddiv;
         },
 
+        renderResource: function (data, module) {
+            var starth2 = "\<h2 class='style-scope " + module + "'\>";
+            var endh2 = "\<\/h2\>";
+            var startdiv = "\<div class='style-scope " + module + "'\>";
+            var enddiv = "\<\/div\>";
+
+            return starth2 + data.title + endh2 + startdiv + data.body + enddiv;
+        },
+
         validateVerseMarkers: function (text, verses) {
             var linearray = text.trim().split("\n");
             var returnstr = "";

@@ -307,15 +307,14 @@ function Renderer() {
 
         renderResourceLinks: function (text, module) {
             var linktest = new RegExp(/(\[\[:en:ta)(:[^:]*:[^:]*:)([^:\]]*)(\]\])/);
-            var starta = "\<a class='style-scope " + module + "' href='#figs-metaphor'\>";
-            var enda = "\<\/a\>";
 
             while (linktest.test(text)) {
                 var linkname = linktest.exec(text)[3];
+                var starta = "\<a class='style-scope " + module + "' href='#" + linkname + "'\>";
+                var enda = "\<\/a\>";
 
-                text = text.replace(linktest, "MyLink: " + linkname);
+                text = text.replace(linktest, starta + linkname + enda);
             }
-
 
             return text;
         },

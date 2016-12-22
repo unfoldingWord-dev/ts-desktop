@@ -156,6 +156,12 @@
                     return item.resource.status.checking_level === "3" && item.resource.type !== "help";
                 });
 
+                translations.forEach(function (item) {
+                    if (!item.category_slug) {
+                        item.category_slug = "other";
+                    }
+                });
+
                 mythis.set('translations', translations);
                 mythis.set('choices', {radio: "bylang"});
                 mythis.onRadioSet();

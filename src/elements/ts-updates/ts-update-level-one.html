@@ -155,8 +155,8 @@
           this.$.input.focus();
       },
 
-      checkicon: function (id) {
-          return id === "old" || id === "new" ? 'uw-project-icon:uw-project-icon' : 'uw-obs-icon:uw-obs-icon';
+      checkicon: function (slug) {
+          return slug === "bible-ot" || slug === "bible-nt" ? 'uw-project-icon:uw-project-icon' : 'uw-obs-icon:uw-obs-icon';
       },
 
       sortList: function (list) {
@@ -199,28 +199,25 @@
       updateList: function () {
           var translations = _.cloneDeep(this.translations);
           var temparray = [];
-          var otherdata = false;
 
           if (this.choices.radio === "bylang") {
-              _.forEach(_.groupBy(translations, 'language.slug'), function (data, category) {
+              _.forEach(_.groupBy(translations, 'language.slug'), function (data) {
                   temparray.push(data[0].language);
               });
               this.set('levelonelist', this.sortList(this.filterList(temparray)));
           } else {
-              _.forEach(_.groupBy(translations, 'project.category_id'), function (data, category) {
-                  if (category === "1") {
-                      temparray.push({name: "Old Testament", slug: "old"});
-                  } else if (category === "6") {
-                      temparray.push({name: "New Testament", slug: "new"});
-                  } else if (category === "592") {
-                      temparray.push({name: "translationAcademy", slug: "ta"});
-                  } else {
-                      otherdata = true;
+              temparray = [{}, {}, {}, {}];
+              _.forEach(_.groupBy(translations, 'project.category_slug'), function (data, category) {
+                  if (category === "bible-ot") {
+                      temparray.splice(0, 1, {name: "Old Testament", slug: category});
+                  } else if (category === "bible-nt") {
+                      temparray.splice(1, 1, {name: "New Testament", slug: category});
+                  } else if (category === "ta") {
+                      temparray.splice(2, 1, {name: "translationAcademy", slug: category});
+                  } else if (category === "other") {
+                      temparray.splice(3, 1, {name: "Other", slug: category});
                   }
               });
-              if (otherdata) {
-                  temparray.push({name: "Other", slug: "oth"});
-              }
               this.set('levelonelist', temparray);
           }
       },

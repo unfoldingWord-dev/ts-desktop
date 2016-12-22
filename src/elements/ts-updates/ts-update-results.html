@@ -415,15 +415,7 @@
                   });
 
                   translations = translations.filter(function (item) {
-                      if (mythis.choices.leveltwo.slug === "old") {
-                          return item.project.category_id == "1";
-                      } else if (mythis.choices.leveltwo.slug === "new") {
-                          return item.project.category_id == "6";
-                      } else if (mythis.choices.leveltwo.slug === "ta") {
-                          return item.project.category_id == "592";
-                      } else {
-                          return item.project.category_id != "1" && item.project.category_id != "6" && item.project.category_id != "592";
-                      }
+                      return item.project.category_slug === mythis.choices.leveltwo.slug;
                   });
               } else {
                   translations = translations.filter(function (item) {

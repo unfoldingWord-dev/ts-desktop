@@ -302,7 +302,22 @@ function Renderer() {
             var startdiv = "\<div class='style-scope " + module + "'\>";
             var enddiv = "\<\/div\>";
 
-            return starth2 + data.title + endh2 + startdiv + data.body + enddiv;
+            return starth2 + data.title + endh2 + startdiv + this.renderResourceLinks(data.body, module) + enddiv;
+        },
+
+        renderResourceLinks: function (text, module) {
+            var linktest = new RegExp(/(\[\[:en:ta)(:[^:]*:[^:]*:)([^:\]]*)(\]\])/);
+            var starta = "\<a class='style-scope " + module + "' href='#figs-metaphor'\>";
+            var enda = "\<\/a\>";
+
+            while (linktest.test(text)) {
+                var linkname = linktest.exec(text)[3];
+
+                text = text.replace(linktest, "MyLink: " + linkname);
+            }
+
+
+            return text;
         },
 
         validateVerseMarkers: function (text, verses) {

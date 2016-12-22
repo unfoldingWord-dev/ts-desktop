@@ -152,15 +152,21 @@
       createprojects: function () {
           var mythis = this;
           var projects = App.dataManager.getProjects();
-          var temparray = [];
+          var temparray = [{}, {}, {}];
 
-          _.forEach(_.groupBy(projects, 'category_id'), function (data, category) {
-              if (category === "1") {
-                  temparray.push({"name": "Old Testament", "data": data});
-              } else if (category === "6") {
-                  temparray.push({"name": "New Testament", "data": data});
-              } else if (category === "0" && !mythis.importdata.importing) {
-                  temparray.push({"name": "Other", "data": data});
+          projects.forEach(function (item) {
+              if (!item.category_slug) {
+                  item.category_slug = "other";
+              }
+          });
+
+          _.forEach(_.groupBy(projects, 'category_slug'), function (data, category) {
+              if (category === "bible-ot") {
+                  temparray.splice(0, 1, {"name": "Old Testament", "data": data});
+              } else if (category === "bible-nt") {
+                  temparray.splice(1, 1, {"name": "New Testament", "data": data});
+              } else if (category === "other" && !mythis.importdata.importing) {
+                  temparray.splice(2, 1, {"name": "Other", "data": data});
               }
           });
           mythis.set('newdata.categorylist', temparray);

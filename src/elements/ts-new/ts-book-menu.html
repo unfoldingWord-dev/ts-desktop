@@ -89,7 +89,7 @@
               <template>
                   <div class="row" on-tap="store">
                       <div>
-                          <iron-icon class="small" icon$="[[checkicon(project.category_id)]]"></iron-icon>
+                          <iron-icon class="small" icon$="[[checkicon(project.category_slug)]]"></iron-icon>
                           <span>[[project.name]]</span>
                       </div>
                   </div>
@@ -124,7 +124,7 @@
       ],
 
       checkicon: function (category) {
-          return category === 0 ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
+          return category === "other" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
       },
 
       store: function(e) {

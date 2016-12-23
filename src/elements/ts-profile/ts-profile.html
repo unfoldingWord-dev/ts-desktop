@@ -1,7 +1,6 @@
 
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../components/iron-icons/notification-icons.html">
+<link rel="import" href="../../components/iron-icon/iron-icon.html">
 
 <link rel="import" href="./ts-options-menu.html">
 <link rel="import" href="./ts-login-option.html">
@@ -42,6 +41,10 @@
             justify-content: center;
         }
 
+        .click {
+            cursor: pointer;
+        }
+
         .hide {
             display: none;
         }
@@ -53,7 +56,7 @@
         <div id="header">
             <div id="heading">
                 <span id="backbutton">
-                    <paper-icon-button class$="[[backclass(selected)]]" icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
+                    <iron-icon class$="[[backclass(selected)]]" icon="arrow-back" on-tap="back"></iron-icon>
                 </span>
                 <span>User Profile</span>
             </div>
@@ -111,7 +114,7 @@
         },
 
         backclass: function (selected) {
-            return selected === 0 ? "hide" : "";
+            return selected === 0 ? "hide" : "click";
         },
 
         back: function () {

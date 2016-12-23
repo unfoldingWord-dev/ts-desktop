@@ -13,6 +13,7 @@ const gulp = require('gulp'),
     path = require('path'),
     mkdirp = require('mkdirp'),
     fs = require('fs'),
+    util = require('./src/js/lib/utils');
     princePackager = require('./scripts/prince-packager');
 
 const APP_NAME = 'translationStudio',
@@ -47,8 +48,8 @@ gulp.task('bump', function () {
 
 gulp.task('prince', function(done) {
     let tempDir = 'tmp/prince-packager';
-    // TODO: chain download for win and osx too
-    princePackager.install('win', tempDir)
+
+    util.chain(princePackager.install.bind(null, tempDir))(['win', 'linux', 'osx'])
         .then(function() {
             done();
         })

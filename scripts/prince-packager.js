@@ -17,7 +17,7 @@ let path = require('path'),
  * @param dir string the installation directory
  * @returns {Promise}
  */
-function install(os, dir) {
+function install(dir, os) {
     if(typeof dir === 'undefined') return Promise.reject('Missing dir parameter');
 
     let destdir = path.join(dir, os);
@@ -59,6 +59,7 @@ function install(os, dir) {
         })
         .then(function() {
             console.log('Prince has been installed for ' + os);
+            fs.unlinkSync(tempfile);
             return Promise.resolve();
         })
         .catch(function(err) {

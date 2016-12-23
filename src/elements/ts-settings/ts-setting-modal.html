@@ -30,7 +30,7 @@
 
         #header {
             flex: 0 0 56px;
-            padding: 0 1rem;
+            padding: 0 15px;
             border-bottom: 1px solid var(--border-color);
             color: var(--secondary-text-color);
             font-size: 110%;
@@ -43,10 +43,14 @@
             overflow-y: auto;
         }
 
+        paper-radio-group {
+            width: 100%;
+        }
+
         .row {
-            display: block;
-            margin: 0;
-            padding: 1em;
+            display: flex;
+            align-items: center;
+            padding: 15px;
             border-bottom: 1px solid var(--border-color);
             transition: background .3s, color .3s;
             cursor: pointer;
@@ -71,7 +75,7 @@
         }
 
         paper-input {
-            padding: 1rem 1.5rem;
+            padding: 15px;
         }
 
         paper-radio-button {

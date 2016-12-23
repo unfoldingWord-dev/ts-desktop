@@ -1,6 +1,6 @@
 
 <link rel="import" href="../../components/paper-material/paper-material.html">
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../components/iron-icon/iron-icon.html">
 
 <link rel="import" href="../ts-icons/ts-icons.html">
 
@@ -49,37 +49,27 @@
             100% {transform: scale(0,0); opacity: 0}
         }
 
-        paper-material {
-            background: var(--card-background-color);
-        }
-
-        #heading {
-            padding: 5px 1em;
-            color: var(--secondary-text-color);
-            display: flex;
-            justify-content: space-between;
-            min-height: 75px;
-            align-items: center;
-            font-size: 125%;
-        }
-
-        #topbox {
+        #header {
             margin: 15px 40px 15px 15px;
             position: relative;
         }
 
-        #bottombox {
-            flex: auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: var(--secondary-text-color);
-            font-style: italic;
-            font-size: 110%;
+        paper-material {
+            background: var(--card-background-color);
         }
 
-        #bottomcard {
+        #top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 85px;
+            padding: 0 25px;
+            color: var(--secondary-text-color);
+            font-size: 125%;
+            z-index: 2;
+        }
+
+        #bottom {
             position: absolute;
             width: 100%;
             height: 100%;
@@ -90,22 +80,24 @@
             background-image: -webkit-linear-gradient(var(--card-background-color) 27px, var(--border-color) 27px, var(--border-color) 28px, var(--card-background-color) 28px);
         }
 
-        #topcard {
-            z-index: 2;
+        #body {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--secondary-text-color);
+            font-style: italic;
+            font-size: 120%;
         }
 
-        #bottombox paper-icon-button {
+        #body iron-icon {
             height: 100px;
             width: 100px;
         }
 
-        .iconbutton {
-            display: flex;
-            flex: 0 0 48px;
-            justify-content: center;
-            align-items: center;
+        .click {
             cursor: pointer;
-            color: var(--border-color);
         }
 
     </style>
@@ -113,23 +105,17 @@
     <template>
 
         <div id="contain">
-            <div id="topbox">
-                <paper-material id="topcard" elevation="1">
-                    <div id="heading">
-                        <div>
-                            Project: <span>[[projectmeta.project.name]]</span> - <span>[[projectmeta.target_language.name]]</span>
-                        </div>
-                        <div class="iconbutton">
-                            <paper-icon-button icon="uw-tab-small:uw-tab-small" on-tap="openmodal"></paper-icon-button>
-                        </div>
-                    </div>
+            <div id="header">
+                <paper-material id="top" elevation="1">
+                    <span>Project: <span>[[projectmeta.project.name]]</span> - <span>[[projectmeta.target_language.name]]</span></span>
+                    <iron-icon class="click" icon="uw-tab-small:uw-tab-small" on-tap="openmodal"></iron-icon>
                 </paper-material>
-                <paper-material id="bottomcard" elevation="1">
+                <paper-material id="bottom" elevation="1">
                 </paper-material>
             </div>
-            <div id="bottombox">
+            <div id="body">
                 <p>Choose source translation(s) to begin reading and translating</p>
-                <paper-icon-button icon="uw-tab-large:uw-tab-large" on-tap="openmodal"></paper-icon-button>
+                <iron-icon class="click" icon="uw-tab-large:uw-tab-large" on-tap="openmodal"></iron-icon>
             </div>
         </div>
 

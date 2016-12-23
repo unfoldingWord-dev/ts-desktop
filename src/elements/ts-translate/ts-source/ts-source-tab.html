@@ -1,7 +1,5 @@
 
-<link rel="import" href="../../../components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../../components/iron-signals/iron-signals.html">
-<link rel="import" href="../../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../../components/iron-icon/iron-icon.html">
 
 <link rel="import" href="../../ts-icons/ts-icons.html">
 
@@ -90,6 +88,10 @@
             padding-left: 5px;
         }
 
+        .click {
+            cursor: pointer;
+        }
+
 	</style>
 
 	<template>
@@ -105,7 +107,7 @@
             <div class="fillspace"></div>
 		</div>
 		<div class="iconbutton">
-            <paper-icon-button icon="uw-tab-small:uw-tab-small" on-tap="openmodal"></paper-icon-button>
+            <iron-icon class="click" icon="uw-tab-small:uw-tab-small" on-tap="openmodal"></iron-icon>
 		</div>
 
 	</template>

@@ -1,0 +1,236 @@
+
+<link rel="import" href="../../../components/iron-list/iron-list.html">
+<link rel="import" href="../../../components/iron-signals/iron-signals.html">
+<link rel="import" href="../../../components/paper-button/paper-button.html">
+<link rel="import" href="../../../components/neon-animation/neon-animation.html">
+<link rel="import" href="../../../components/paper-material/paper-material.html">
+<link rel="import" href="../../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../../components/paper-radio-button/paper-radio-button.html">
+<link rel="import" href="../../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../../components/paper-radio-group/paper-radio-group.html">
+
+<dom-module id="ts-search-bar">
+
+	<style>
+
+		:host {
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            display: flex;
+        }
+
+        #contain {
+            flex: auto;
+        }
+
+        #searchbar {
+            height: 49px;
+            border-bottom: 1px solid var(--primary-text-color);
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            color: var(--secondary-text-color);
+        }
+
+        #searchbar.hide {
+            display: none;
+        }
+
+        #searchinfo {
+            flex: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #searchclose {
+            flex: 0 0 40px;
+        }
+
+        #searchresults {
+            min-width: 240px;
+            display: flex;
+            align-items: center;
+        }
+
+        #searchresults.hide * {
+            display: none;
+        }
+
+        #input {
+            height: 30px;
+            width: 130px;
+            margin: 0 10px;
+            font-size: 110%;
+            font-style: italic;
+            padding: 0 5px;
+            color: var(--secondary-text-color);
+        }
+
+        paper-radio-button {
+            --paper-radio-button-checked-color: var(--primary-color);
+            --paper-radio-button-unchecked-color: var(--primary-color);
+            --paper-radio-button-label-color: var(--secondary-text-color);
+        }
+
+	</style>
+
+	<template>
+
+        <div id="contain">
+            <div id="searchbar" class="hide">
+                <div id="searchinfo">
+                    <span>Search in: </span>
+                    <paper-radio-group selected="{{selected}}" on-iron-select="activesearch">
+                        <paper-radio-button name="source">Source</paper-radio-button>
+                        <paper-radio-button name="target">Target</paper-radio-button>
+                    </paper-radio-group>
+                    <input is="iron-input" id="input" bind-value="{{query}}" on-input="activesearch" placeholder="Search for text">
+                    <div id="searchresults" class$="[[resultsclass(query)]]">
+                        <paper-icon-button icon="arrow-downward" on-tap="next"></paper-icon-button>
+                        <paper-icon-button icon="arrow-upward" on-tap="previous"></paper-icon-button>
+                        <span><span>Found in <span>[[results.forward.length]]</span> chunks.</span></span>
+                    </div>
+                </div>
+                <div id="searchclose">
+                    <paper-icon-button icon="close" on-tap="closesearch"></paper-icon-button>
+                </div>
+            </div>
+        </div>
+
+        <iron-signals on-iron-signal-passivesearch="passivesearch"></iron-signals>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+		is: 'ts-search-bar',
+
+        behaviors: [
+            Polymer.IronResizableBehavior
+        ],
+
+        properties: {
+            chunks: {
+                type: Array,
+                value: [],
+                notify: true
+            },
+            searchoptions: {
+                type: Object,
+                value: {}
+            },
+            modestatus: {
+                type: Object,
+                value: {},
+                notify: true
+            },
+            selected: {
+                type: String,
+                value: 'target'
+            },
+            query: {
+                type: String,
+                value: ""
+            },
+            results: {
+                type: Object,
+                value: {}
+            },
+            timer: {
+                type: Number
+            }
+        },
+
+        resultsclass: function (query) {
+            return query ? '' : 'hide';
+        },
+
+        opensearch: function () {
+            var mythis = this;
+
+            this.$.reviewlist.classList.add('searchmode');
+            this.$.searchbar.classList.remove('hide');
+
+            setTimeout(function() {
+                mythis.$.input.focus();
+            }, 500);
+        },
+
+        closesearch: function () {
+            this.$.reviewlist.classList.remove('searchmode');
+            this.$.searchbar.classList.add('hide');
+            this.query = "";
+            this.passivesearch();
+        },
+
+        activesearch: function () {
+            if (this.selected === 'target') {
+                this.search(false);
+            } else {
+                this.search(true);
+            }
+        },
+
+        passivesearch: function () {
+            this.search(true);
+        },
+
+        search: function (passive) {
+            var mythis = this;
+            var query = this.query.trim();
+            var chunks = this.chunks || [];
+            var type = this.selected;
+            var forward = [];
+            var backward = [];
+
+            chunks.forEach(function (chunk) {
+                if (query && ((type === 'source' && chunk.srccontent.toLowerCase().includes(query.toLowerCase())) || (type === 'target' && chunk.transcontent.toLowerCase().includes(query.toLowerCase())))) {
+                    forward.push(chunk.index);
+                    backward.push(chunk.index);
+                }
+            });
+
+            mythis.set('searchoptions', {text: query, type: type, passive: passive, on: true});
+            backward.reverse();
+            mythis.set('results', {forward: forward, backward: backward});
+        },
+
+        next: function () {
+            var list = this.$.reviewlist;
+            var index = list.firstVisibleIndex || 0;
+            var order = this.results.forward;
+
+            var next = order.find(function (num) {
+                return num > index;
+            });
+
+            list.scrollToIndex(next);
+        },
+
+        previous: function () {
+            var list = this.$.reviewlist;
+            var index = list.firstVisibleIndex || 0;
+            var order = this.results.backward;
+
+            var previous = order.find(function (num) {
+                return num < index;
+            });
+
+            list.scrollToIndex(previous);
+        },
+
+		ready: function() {
+
+		}
+
+	});
+
+</script>

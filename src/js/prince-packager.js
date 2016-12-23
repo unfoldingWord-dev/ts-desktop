@@ -71,7 +71,15 @@ function install(dir, os) {
                         });
                         promises.push(p);
                     }
-                    return Promise.all(promises);
+                    return Promise.all(promises)
+                        .then(function() {
+                            try {
+                                fs.removeSync(parentDir);
+                            } catch (err) {
+                                return Promise.reject(err);
+                            }
+                            return Promise.resolve();
+                        });
                 }
             } catch (err) {
                 console.log(err);
@@ -191,18 +199,35 @@ function download(url) {
 }
 
 /**
- * Checks if a file exists.
+ * Returns relative paths to prince files for the given os.
+ * These paths are relative to the install directory.
  *
- * @param file {string}
- * @returns {boolean}
+ * @param os {string} the operating system for whom prince info will be returned
+ * @returns {array}
  */
-function fileExists(file) {
-    try {
-        fs.statSync(file);
-        return true;
-    } catch(err) {
-        return false;
+function info(os) {
+    let princeDir = '';
+    let princePrefix = '';
+    let princeBinary = '';
+    if(/win/.test(os)) {
+        princeDir = 'win';
+        princePrefix = princeDir;
+        princeBinary = path.join(princePrefix, 'bin', 'prince.exe');
+    } else if(/(darwin)|(osx)|(macos)/.test(os)) {
+        princeDir = 'osx';
+        princePrefix = path.join(princeDir, 'lib', 'prince');
+        princeBinary = path.join(princePrefix, 'bin', 'prince');
+    } else if(/linux/.test(os)) {
+        princeDir = 'linux';
+        princePrefix = path.join(princeDir, 'lib', 'prince');
+        princeBinary = path.join(princePrefix, 'bin', 'prince');
+    }
+    return {
+        dir: princeDir,
+        prefix: princePrefix,
+        binary: princeBinary
     }
 }
 
 module.exports.install = install;
+module.exports.info = info;

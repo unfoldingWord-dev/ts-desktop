@@ -7,6 +7,8 @@ var _ = require('lodash'),
     AdmZip = require('adm-zip'),
     https = require('https'),
     mkdirp = require('mkdirp'),
+    os = require('os'),
+    princePackager = require('../js/prince-packager'),
     Prince = require('prince');
 
 function PrintManager(configurator) {
@@ -67,16 +69,15 @@ function PrintManager(configurator) {
             var titlegroup = '\<h1 id="title" class="break titles" style="font-family: ' + font + ';"\>' + title + '\<\/h1\>';
             var licensegroup = '\<div id="license" class="break"\>' + license + '\<\/div\>';
             var bodygroup = '\<div id="textholder" style="font-family: ' + font + '; font-size: ' + size + ';"\>' + body + '\<\/div\>';
-            // var princeDir = path.join(srcDir, '..', 'node_modules', 'prince');
-            // var princePrefix = path.join(princeDir, 'prince', 'program files', 'Prince', 'engine');
-            // var princeBinary = path.join(princePrefix, 'bin', 'prince.exe');
+
+            var princeInfo = princePackager.info(os.platform());
 
             mkdirp.sync(tempPath);
             fs.writeFileSync(input, mainheader + titlegroup + licensegroup + bodygroup + mainfooter);
 
             return Prince()
-                // .binary(princeBinary)
-                // .prefix(princePrefix)
+                .binary(path.join(srcDir, 'prince', princeInfo.binary))
+                .prefix(path.join(srcDir, 'prince', princeInfo.prefix))
                 .inputs(input)
                 .output(filePath)
                 .execute()

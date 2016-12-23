@@ -23,3 +23,4 @@ src/config/private.json
 src/logs/
 
 /unit_tests/migration/temp/
+/src/prince/

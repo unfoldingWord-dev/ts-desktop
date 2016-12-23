@@ -3,7 +3,7 @@
 'use strict';
 let path = require('path'),
     mkdirp = require('mkdirp'),
-    fs = require('fs'),
+    fs = require('fs-extra'),
     zlib = require("zlib"),
     child_process = require("child_process"),
     request = require('request'),
@@ -23,7 +23,6 @@ function install(dir, os) {
     let destdir = path.join(dir, os);
     mkdirp.sync(dir);
     let tempfile = path.join(dir, 'prince-'+ os +'.download');
-    let destfile = '';
     let url = '';
 
     if(os === 'win') {
@@ -39,13 +38,7 @@ function install(dir, os) {
         return Promise.reject('Missing or invalid os parameter');
     }
 
-    let prom = Promise.resolve();
-    if(!fileExists(tempfile)) {
-        prom = download(url);
-    } else {
-        console.log('Using cached download');
-    }
-    return prom
+    return download(url)
         .then(function(data) {
             fs.writeFileSync(tempfile, data, { encoding: null });
 
@@ -58,11 +51,41 @@ function install(dir, os) {
             }
         })
         .then(function() {
+            try {
+                let dirs = fs.readdirSync(destdir);
+                if (dirs.length === 1) {
+                    // strip parent directory
+                    console.log('Removing parent dir ' + dirs[0]);
+                    console.log(dirs[0]);
+                    let parentDir = path.join(destdir, dirs[0]);
+                    let promises = [];
+                    for(let file of fs.readdirSync(parentDir)) {
+                        let p = new Promise(function(resolve, reject) {
+                            fs.move(path.join(parentDir, file), path.join(destdir, file), {clobber: true}, function(err) {
+                                if(err) {
+                                    reject(err);
+                                } else {
+                                    resolve();
+                                }
+                            });
+                        });
+                        promises.push(p);
+                    }
+                    return Promise.all(promises);
+                }
+            } catch (err) {
+                console.log(err);
+                return Promise.reject(err);
+            }
+        })
+        .then(function() {
+            // cleanup
             console.log('Prince has been installed for ' + os);
             fs.unlinkSync(tempfile);
             return Promise.resolve();
         })
         .catch(function(err) {
+            console.log(err);
             console.log('Failed to install prince for ' + os);
             fs.unlinkSync(tempfile);
             return Promise.reject(err);
@@ -103,77 +126,6 @@ function extractTarball (tarball, destdir, stripdirs) {
             .on("end", function () { resolve(); });
     });
 }
-//
-// function installExe(exe, destdir) {
-//     if(/win/.test(process.platform)) {
-//         return new Promise(function(resolve, reject) {
-//             console.log('Installing natively...');
-//             let args = ["/s", "/a", "/vTARGETDIR=\"" + path.resolve(destdir) + "\" /qn"];
-//             child_process.execFile(exe, args, function (error, stdout, stderr) {
-//                 if (error !== null) {
-//                     console.log("** ERROR: failed to extract: " + error);
-//                     stdout = stdout.toString();
-//                     stderr = stderr.toString();
-//                     // if (stdout !== "")
-//                     //     console.log("** STDOUT: " + stdout);
-//                     // if (stderr !== "")
-//                     //     console.log("** STDERR: " + stderr);
-//                     reject(stderr + '; ' + stdout);
-//                 }
-//                 else {
-//                     // fs.unlinkSync(destfile);
-//                     console.log("-- OK: local PrinceXML installation now available");
-//                     resolve();
-//                 }
-//             });
-//         });
-//     } else if(/linux/.test(process.platform)) {
-//         return new Promise(function(resolve, reject) {
-//             console.log('Testing for wine...');
-//             child_process.exec('wine --version', function(error, stdout, stderr) {
-//                 if(error !== null) {
-//                     installWine()
-//                         .then(resolve)
-//                         .catch(reject);
-//                 } else {
-//                     resolve();
-//                 }
-//             });
-//         }).then(function() {
-//             return installExeWithWine(exe, destdir);
-//         });
-//     } else {
-//         return Promise.reject('You are on your own. Sorry! Try running this on linux.');
-//     }
-// }
-//
-// function installExeWithWine(exe, destdir) {
-//     return new Promise(function(resolve, reject) {
-//         console.log('installing exe with wine...');
-//         // TODO: this should work... but it's not
-//         let cmd = 'wine ' + path.resolve(exe) + ' /s /a /vTARGETDIR="C:\\Prince" /qn';
-//         child_process.exec(cmd, function(error, stdout, stderr) {
-//             if(error !== null) {
-//                 reject(error);
-//             } else {
-//                 resolve();
-//             }
-//         });
-//     });
-// }
-//
-// function installWine() {
-//     return new Promise(function(resolve, reject) {
-//         console.log('Installing wine');
-//         child_process.exec('sudo add-apt-repository --yes ppa:ubuntu-wine/ppa && sudo apt-get install -y -q wine ', function(error, stdout, stderr) {
-//             if(error !== null) {
-//                 reject(stdout);
-//             } else {
-//                 resolve();
-//             }
-//         });
-//     });
-// }
 
 /**
  * Downloads a file

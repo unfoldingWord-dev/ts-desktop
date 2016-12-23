@@ -186,25 +186,11 @@
         },
 
         checktitle: function (type) {
-            var text = "";
-            if (type === "tw") {
-                text = "Translate word here";
-            }
-            if (type === "ta") {
-                text = "Translate title here";
-            }
-            return text;
+            return type === "tw" ? "Translate word here" : "Translate title here";
         },
 
         checkbody: function (type) {
-            var text = "";
-            if (type === "tw") {
-                text = "Translate definition here";
-            }
-            if (type === "ta") {
-                text = "Translate text here";
-            }
-            return text;
+            return type === "tw" ? "Translate definition here" : "Translate text here";
         },
 
         rendertext: function () {

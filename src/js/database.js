@@ -486,10 +486,6 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             });
 
             return allchunks;
-        },
-
-        getTa: function (volume) {
-
         }
     };
 }

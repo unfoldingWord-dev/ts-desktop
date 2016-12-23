@@ -945,18 +945,12 @@
             var projectmeta = this.currentproject.projectmeta;
             var type = projectmeta.type.id;
             var language = projectmeta.target_language.name;
-            var frames;
-            var volume = "vol1";
+            var frames = [];
             var chunkarray = [];
 
             if (type === "tw") {
                 var dict = projectmeta.project.id;
                 frames = App.dataManager.getAllWords(dict);
-            } else if (type === "ta") {
-                if (projectmeta.project.id !== "ta") {
-                    volume = projectmeta.project.id;
-                }
-                //frames = App.dataManager.getTa(volume);
             }
 
             for (var i = 0; i < frames.length; i++) {

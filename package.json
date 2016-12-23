@@ -44,7 +44,9 @@
     "request": "2.74.0",
     "rimraf": "2.5.4",
     "sql.js": "0.3.2",
+    "tar": "2.2.1",
     "trash": "3.4.1",
+    "progress": "1.1.8",
     "untildify": "2.1.0"
   },
   "devDependencies": {
@@ -56,8 +58,6 @@
     "gulp-replace": "0.5.4",
     "jest": "14.1.0",
     "mocha": "3.0.2",
-    "progress": "1.1.8",
-    "tar": "2.2.1",
     "yargs": "4.8.1"
   },
   "engines": {

@@ -1,5 +1,4 @@
 
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../components/iron-icons/iron-icons.html">
 <link rel="import" href="../../components/iron-list/iron-list.html">
 
@@ -42,8 +41,7 @@
         }
 
         .row {
-            display: block;
-            margin: 0;
+            display: flex;
             padding: 15px 25px;
             border-bottom: 1px solid var(--border-color);
             transition: background .3s, color .3s;
@@ -88,10 +86,8 @@
           <iron-list id="list" items="[[newdata.category.data]]" as="project">
               <template>
                   <div class="row" on-tap="store">
-                      <div>
-                          <iron-icon class="small" icon$="[[checkicon(project.category_slug)]]"></iron-icon>
-                          <span>[[project.name]]</span>
-                      </div>
+                      <iron-icon class="small" icon$="[[checkicon(project.category_slug)]]"></iron-icon>
+                      <span>[[project.name]]</span>
                   </div>
               </template>
           </iron-list>

@@ -1,5 +1,5 @@
 
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../components/iron-icon/iron-icon.html">
 <link rel="import" href="../../components/iron-list/iron-list.html">
 <link rel="import" href="../../components/iron-input/iron-input.html">
 
@@ -38,8 +38,8 @@
         }
 
         .row {
-            display: block;
-            margin: 0;
+            display: flex;
+            justify-content: space-between;
             padding: 15px 25px;
             border-bottom: 1px solid var(--border-color);
             transition: background .3s, color .3s;
@@ -60,10 +60,6 @@
             background: var(--accent-color-light);
         }
 
-        .right {
-            float: right;
-        }
-
         .code {
             color: var(--secondary-text-color);
             font-style: italic;
@@ -80,6 +76,10 @@
             margin-left: -5px;
         }
 
+        .click {
+            cursor: pointer;
+        }
+
     </style>
 
   <template>
@@ -87,15 +87,13 @@
       <div id="main">
           <div id="header">
               <input is="iron-input" id="input" bind-value="{{query}}" on-input="updateList" placeholder="Choose target language">
-              <paper-icon-button class="right" icon="search" on-tap="focussearch"></paper-icon-button>
+              <iron-icon class="click" icon="search" on-tap="focussearch"></iron-icon>
           </div>
           <iron-list id="list" items="[[filtered]]" as="language">
               <template>
                   <div class$="[[checkclass(language.id)]]" on-tap="store">
-                      <div>
-                          <span>[[language.name]]</span>
-                          <span class="right code">[[language.id]]</span>
-                      </div>
+                      <span>[[language.name]]</span>
+                      <span class="code">[[language.id]]</span>
                   </div>
               </template>
           </iron-list>

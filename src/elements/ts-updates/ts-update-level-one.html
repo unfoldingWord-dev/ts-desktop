@@ -1,9 +1,9 @@
 
 <link rel="import" href="../../components/iron-icons/iron-icons.html">
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../ts-icons/ts-icons.html">
 <link rel="import" href="../../components/iron-list/iron-list.html">
 <link rel="import" href="../../components/iron-input/iron-input.html">
+
+<link rel="import" href="../ts-icons/ts-icons.html">
 
 <dom-module id="ts-update-level-one">
 
@@ -40,8 +40,8 @@
         }
 
         .row {
-            display: block;
-            margin: 0;
+            display: flex;
+            justify-content: space-between;
             padding: 15px 25px;
             border-bottom: 1px solid var(--border-color);
             transition: background .3s, color .3s;
@@ -50,10 +50,6 @@
 
         .row:hover {
             background: var(--accent-color-light);
-        }
-
-        .right {
-            float: right;
         }
 
         .small {
@@ -80,6 +76,10 @@
             margin-left: 10px;
         }
 
+        .click {
+            cursor: pointer;
+        }
+
         .bylang .book {
             display: none;
         }
@@ -95,7 +95,7 @@
       <div id="main" class$="[[choices.radio]]">
           <div id="header">
               <input is="iron-input" id="input" class="lang" bind-value="{{query}}" on-input="updateList" placeholder="Choose a language">
-              <paper-icon-button class="right lang" icon="search" on-tap="focussearch"></paper-icon-button>
+              <iron-icon class="lang click" icon="search" on-tap="focussearch"></iron-icon>
               <span class="book"><em>Choose a Category</em></span>
           </div>
           <iron-list id="list" items="[[levelonelist]]" as="item">
@@ -104,9 +104,9 @@
                       <div>
                           <iron-icon class="small book" icon$="[[checkicon(item.slug)]]"></iron-icon>
                           <span>[[item.name]]</span>
-                          <span class="code lang">(<span>[[item.slug]]</span>)</span>
-                          <iron-icon class="right book" icon="chevron-right"></iron-icon>
                       </div>
+                      <span class="code lang">(<span>[[item.slug]]</span>)</span>
+                      <iron-icon class="book" icon="chevron-right"></iron-icon>
                   </div>
               </template>
           </iron-list>

@@ -1,5 +1,4 @@
 
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../components/iron-icons/iron-icons.html">
 <link rel="import" href="../../components/iron-list/iron-list.html">
 <link rel="import" href="../../components/paper-checkbox/paper-checkbox.html">
@@ -54,8 +53,8 @@
         }
 
         .row {
-            display: block;
-            margin: 0;
+            display: flex;
+            justify-content: space-between;
             padding: 15px 25px;
             border-bottom: 1px solid var(--border-color);
         }
@@ -69,10 +68,6 @@
             font-style: italic;
             font-size: 80%;
             margin-left: 10px;
-        }
-
-        .right {
-            float: right;
         }
 
         paper-checkbox {
@@ -144,7 +139,10 @@
                           <span class="code lang">(<span>[[item.project.slug]]</span>)</span>
                           <span class="book">[[item.language.name]]</span>
                           <span class="code book">(<span>[[item.language.slug]]</span>)</span>
-                          <span class="right"><span>[[item.resource.name]]</span><span class="code">(<span>[[item.resource.slug]]</span>)</span></span>
+                      </div>
+                      <div>
+                          <span>[[item.resource.name]]</span>
+                          <span class="code">(<span>[[item.resource.slug]]</span>)</span>
                       </div>
                   </div>
               </template>

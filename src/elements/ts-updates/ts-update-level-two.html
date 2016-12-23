@@ -1,7 +1,7 @@
 
 <link rel="import" href="../../components/iron-list/iron-list.html">
 <link rel="import" href="../../components/iron-icons/iron-icons.html">
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+
 <link rel="import" href="../ts-icons/ts-icons.html">
 
 <dom-module id="ts-update-level-two">
@@ -43,8 +43,8 @@
         }
 
         .row {
-            display: block;
-            margin: 0;
+            display: flex;
+            justify-content: space-between;
             padding: 15px 25px;
             border-bottom: 1px solid var(--border-color);
             transition: background .3s, color .3s;
@@ -53,10 +53,6 @@
 
         .row:hover {
             background: var(--accent-color-light);
-        }
-
-        .right {
-            float: right;
         }
 
         .small {
@@ -102,9 +98,10 @@
                   <div class="row" on-tap="store">
                       <div>
                           <iron-icon class="small lang" icon$="[[checkicon(item.slug)]]"></iron-icon>
-                          <span><span>[[item.name]]</span><span class="code book">(<span>[[item.slug]]</span>)</span></span>
-                          <iron-icon class="right lang" icon="chevron-right"></iron-icon>
+                          <span>[[item.name]]</span>
                       </div>
+                      <span class="code book">(<span>[[item.slug]]</span>)</span>
+                      <iron-icon class="lang" icon="chevron-right"></iron-icon>
                   </div>
               </template>
           </iron-list>

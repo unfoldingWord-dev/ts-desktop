@@ -22,3 +22,4 @@ acceptance_tests/report.txt
 src/config/private.json
 src/logs/
 
+/unit_tests/migration/temp/

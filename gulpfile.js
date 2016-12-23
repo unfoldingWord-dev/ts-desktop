@@ -12,7 +12,8 @@ const gulp = require('gulp'),
     replace = require('gulp-replace'),
     path = require('path'),
     mkdirp = require('mkdirp'),
-    fs = require('fs');
+    fs = require('fs'),
+    princePackager = require('./scripts/prince-packager');
 
 const APP_NAME = 'translationStudio',
     JS_FILES = './src/js/**/*.js',
@@ -42,6 +43,16 @@ gulp.task('bump', function () {
     return gulp.src(['package.json'])
         .pipe(replace(/("build"\s*:\s*)"\d+"(.*)/, replaceString))
         .pipe(gulp.dest('./'));
+});
+
+gulp.task('prince', function(done) {
+    let tempDir = 'tmp/prince-packager';
+    // TODO: chain download for win and osx too
+    princePackager.install('win', tempDir)
+        .then(function() {
+            done();
+        })
+        .catch(done);
 });
 
 // pass parameters like: gulp build --win --osx --linux

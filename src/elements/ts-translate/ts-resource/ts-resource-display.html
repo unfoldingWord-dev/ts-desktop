@@ -174,6 +174,21 @@
 
             textholder.innerHTML = content;
             this.$.body.scrollTop = 0;
+            this.setLinks();
+        },
+
+        setLinks: function () {
+            var links = this.$.body.getElementsByTagName("a");
+
+            for (var i = 0; i < links.length; i++) {
+                links[i].addEventListener('click', function (event) {
+                    event.preventDefault();
+                    var id = this.id.replace(/_/g, "-");
+
+                    App.ipc.send('set-scroll-id', id);
+                    App.ipc.send('open-academy');
+                });
+            }
         },
 
         openindex: function () {

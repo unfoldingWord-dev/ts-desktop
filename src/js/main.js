@@ -22,6 +22,7 @@ app.setPath('userData', (function (dataDir) {
 let splashScreen;
 let mainWindow;
 let academyWindow;
+let scrollToId;
 
 function createMainSplash() {
     splashScreen = new BrowserWindow({
@@ -154,6 +155,10 @@ function createAcademyWindow () {
     });
 }
 
+function scrollAcademyWindow () {
+    academyWindow.webContents.send('academy-scroll', scrollToId);
+}
+
 function createAppMenus() {
     // Create the Application's main menu
     var template = [
@@ -220,6 +225,7 @@ ipcMain.on('academy-window', function (event, arg) {
 ipcMain.on('open-academy', function () {
     if (academyWindow) {
         academyWindow.show();
+        scrollAcademyWindow();
     } else {
         createAcademySplash();
         setTimeout(function () {
@@ -256,6 +262,10 @@ ipcMain.on('open-file', function (event, arg) {
     event.returnValue = input || false;
 });
 
+ipcMain.on('set-scroll-id', function (event, id) {
+    scrollToId = id;
+});
+
 ipcMain.on('loading-status', function (event, status) {
     splashScreen && splashScreen.webContents.send('loading-status', status);
 });
@@ -271,6 +281,7 @@ ipcMain.on('ta-loading-done', function () {
     if (splashScreen && academyWindow) {
         academyWindow.show();
         splashScreen.close();
+        scrollAcademyWindow();
     }
 });
 

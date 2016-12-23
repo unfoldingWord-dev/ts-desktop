@@ -310,7 +310,7 @@ function Renderer() {
 
             while (linktest.test(text)) {
                 var linkname = linktest.exec(text)[3];
-                var starta = "\<a class='style-scope " + module + "' href='#" + linkname + "'\>";
+                var starta = "\<a href='" + linkname + "' class='style-scope " + module + "' id='" + linkname + "'\>";
                 var enda = "\<\/a\>";
 
                 text = text.replace(linktest, starta + linkname + enda);

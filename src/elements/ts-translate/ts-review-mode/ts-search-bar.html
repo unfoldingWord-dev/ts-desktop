@@ -1,12 +1,8 @@
 
-<link rel="import" href="../../../components/iron-list/iron-list.html">
+<link rel="import" href="../../../components/iron-input/iron-input.html">
 <link rel="import" href="../../../components/iron-signals/iron-signals.html">
-<link rel="import" href="../../../components/paper-button/paper-button.html">
-<link rel="import" href="../../../components/neon-animation/neon-animation.html">
-<link rel="import" href="../../../components/paper-material/paper-material.html">
 <link rel="import" href="../../../components/iron-icons/iron-icons.html">
 <link rel="import" href="../../../components/paper-radio-button/paper-radio-button.html">
-<link rel="import" href="../../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../../components/paper-radio-group/paper-radio-group.html">
 
 <dom-module id="ts-search-bar">
@@ -14,19 +10,6 @@
 	<style>
 
 		:host {
-            position: absolute;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            right: 0;
-            display: flex;
-        }
-
-        #contain {
-            flex: auto;
-        }
-
-        #searchbar {
             height: 49px;
             border-bottom: 1px solid var(--primary-text-color);
             display: flex;
@@ -35,29 +18,17 @@
             color: var(--secondary-text-color);
         }
 
-        #searchbar.hide {
-            display: none;
-        }
-
-        #searchinfo {
+        #body {
             flex: auto;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        #searchclose {
-            flex: 0 0 40px;
-        }
-
-        #searchresults {
-            min-width: 240px;
-            display: flex;
-            align-items: center;
-        }
-
-        #searchresults.hide * {
-            display: none;
+        paper-radio-button {
+            --paper-radio-button-checked-color: var(--primary-color);
+            --paper-radio-button-unchecked-color: var(--primary-color);
+            --paper-radio-button-label-color: var(--secondary-text-color);
         }
 
         #input {
@@ -70,35 +41,43 @@
             color: var(--secondary-text-color);
         }
 
-        paper-radio-button {
-            --paper-radio-button-checked-color: var(--primary-color);
-            --paper-radio-button-unchecked-color: var(--primary-color);
-            --paper-radio-button-label-color: var(--secondary-text-color);
+        #results {
+            min-width: 240px;
+            display: flex;
+            align-items: center;
+        }
+
+        #results.hide * {
+            display: none;
+        }
+
+        #footer {
+            flex: 0 0 40px;
+        }
+
+        .click {
+            cursor: pointer;
         }
 
 	</style>
 
 	<template>
 
-        <div id="contain">
-            <div id="searchbar" class="hide">
-                <div id="searchinfo">
-                    <span>Search in: </span>
-                    <paper-radio-group selected="{{selected}}" on-iron-select="activesearch">
-                        <paper-radio-button name="source">Source</paper-radio-button>
-                        <paper-radio-button name="target">Target</paper-radio-button>
-                    </paper-radio-group>
-                    <input is="iron-input" id="input" bind-value="{{query}}" on-input="activesearch" placeholder="Search for text">
-                    <div id="searchresults" class$="[[resultsclass(query)]]">
-                        <paper-icon-button icon="arrow-downward" on-tap="next"></paper-icon-button>
-                        <paper-icon-button icon="arrow-upward" on-tap="previous"></paper-icon-button>
-                        <span><span>Found in <span>[[results.forward.length]]</span> chunks.</span></span>
-                    </div>
-                </div>
-                <div id="searchclose">
-                    <paper-icon-button icon="close" on-tap="closesearch"></paper-icon-button>
-                </div>
+        <div id="body">
+            <span>Search in: </span>
+            <paper-radio-group selected="{{selected}}" on-iron-select="activesearch">
+                <paper-radio-button name="source">Source</paper-radio-button>
+                <paper-radio-button name="target">Target</paper-radio-button>
+            </paper-radio-group>
+            <input is="iron-input" id="input" bind-value="{{query}}" on-input="activesearch" placeholder="Search for text">
+            <div id="results" class$="[[resultsclass(query)]]">
+                <iron-icon class="click" icon="arrow-downward" on-tap="next"></iron-icon>
+                <iron-icon class="click" icon="arrow-upward" on-tap="previous"></iron-icon>
+                <span><span>Found in <span>[[results.forward.length]]</span> chunks.</span></span>
             </div>
+        </div>
+        <div id="footer">
+            <iron-icon class="click" icon="close" on-tap="closesearch"></iron-icon>
         </div>
 
         <iron-signals on-iron-signal-passivesearch="passivesearch"></iron-signals>

@@ -55,6 +55,10 @@
             flex: 0 0 40px;
         }
 
+        iron-icon {
+            margin: 0 10px 0 5px;
+        }
+
         .click {
             cursor: pointer;
         }
@@ -119,6 +123,10 @@
 
         resultsclass: function (query) {
             return query ? '' : 'hide';
+        },
+
+        focussearch: function () {
+            this.$.input.focus();
         },
 
         closesearch: function () {

@@ -1,15 +1,9 @@
 
 <link rel="import" href="../../../components/iron-list/iron-list.html">
 <link rel="import" href="../../../components/iron-signals/iron-signals.html">
-<link rel="import" href="../../../components/paper-button/paper-button.html">
-<link rel="import" href="../../../components/neon-animation/neon-animation.html">
-<link rel="import" href="../../../components/paper-material/paper-material.html">
-<link rel="import" href="../../../components/iron-icons/iron-icons.html">
-<link rel="import" href="../../../components/paper-radio-button/paper-radio-button.html">
-<link rel="import" href="../../../components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../../components/paper-radio-group/paper-radio-group.html">
 
 <link rel="import" href="./ts-review-card.html">
+<link rel="import" href="./ts-search-bar.html">
 
 <dom-module id="ts-review-mode">
 
@@ -28,54 +22,8 @@
             flex: auto;
         }
 
-        #searchbar {
-            height: 49px;
-            border-bottom: 1px solid var(--primary-text-color);
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            color: var(--secondary-text-color);
-        }
-
         #searchbar.hide {
             display: none;
-        }
-
-        #searchinfo {
-            flex: auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #searchclose {
-            flex: 0 0 40px;
-        }
-
-        #searchresults {
-            min-width: 240px;
-            display: flex;
-            align-items: center;
-        }
-
-        #searchresults.hide * {
-            display: none;
-        }
-
-        #input {
-            height: 30px;
-            width: 130px;
-            margin: 0 10px;
-            font-size: 110%;
-            font-style: italic;
-            padding: 0 5px;
-            color: var(--secondary-text-color);
-        }
-
-        paper-radio-button {
-            --paper-radio-button-checked-color: var(--primary-color);
-            --paper-radio-button-unchecked-color: var(--primary-color);
-            --paper-radio-button-label-color: var(--secondary-text-color);
         }
 
         #reviewlist {
@@ -125,24 +73,7 @@
 	<template>
 
         <div id="contain">
-            <div id="searchbar" class="hide">
-                <div id="searchinfo">
-                    <span>Search in: </span>
-                    <paper-radio-group selected="{{selected}}" on-iron-select="activesearch">
-                        <paper-radio-button name="source">Source</paper-radio-button>
-                        <paper-radio-button name="target">Target</paper-radio-button>
-                    </paper-radio-group>
-                    <input is="iron-input" id="input" bind-value="{{query}}" on-input="activesearch" placeholder="Search for text">
-                    <div id="searchresults" class$="[[resultsclass(query)]]">
-                        <paper-icon-button icon="arrow-downward" on-tap="next"></paper-icon-button>
-                        <paper-icon-button icon="arrow-upward" on-tap="previous"></paper-icon-button>
-                        <span><span>Found in <span>[[results.forward.length]]</span> chunks.</span></span>
-                    </div>
-                </div>
-                <div id="searchclose">
-                    <paper-icon-button icon="close" on-tap="closesearch"></paper-icon-button>
-                </div>
-            </div>
+            <ts-search-bar id="searchbar" class="hide"></ts-search-bar>
             <iron-list id="reviewlist" items="{{chunks}}" as="chunk" on-scroll="refresh">
                 <template>
                     <ts-review-card chunk="{{chunk}}" searchoptions="{{searchoptions}}" on-updateheight="updateheight"></ts-review-card>
@@ -209,7 +140,7 @@
             this.$.searchbar.classList.remove('hide');
 
             setTimeout(function() {
-                mythis.$.input.focus();
+                //mythis.$.input.focus();
             }, 500);
         },
 

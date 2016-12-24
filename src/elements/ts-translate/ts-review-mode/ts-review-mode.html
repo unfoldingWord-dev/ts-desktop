@@ -1,6 +1,5 @@
 
 <link rel="import" href="../../../components/iron-list/iron-list.html">
-<link rel="import" href="../../../components/iron-signals/iron-signals.html">
 
 <link rel="import" href="./ts-review-card.html">
 <link rel="import" href="./ts-search-bar.html">
@@ -73,15 +72,13 @@
 	<template>
 
         <div id="contain">
-            <ts-search-bar id="searchbar" class="hide"></ts-search-bar>
+            <ts-search-bar id="searchbar" class="hide" chunks="[[chunks]]" searchoptions="{{searchoptions}}" results="{{results}}" on-closesearch="closesearch" on-next="next" on-previous="previous"></ts-search-bar>
             <iron-list id="reviewlist" items="{{chunks}}" as="chunk" on-scroll="refresh">
                 <template>
                     <ts-review-card chunk="{{chunk}}" searchoptions="{{searchoptions}}" on-updateheight="updateheight"></ts-review-card>
                 </template>
             </iron-list>
         </div>
-
-        <iron-signals on-iron-signal-passivesearch="passivesearch"></iron-signals>
 
 	</template>
 
@@ -112,14 +109,6 @@
                 value: {},
                 notify: true
             },
-            selected: {
-                type: String,
-                value: 'target'
-            },
-            query: {
-                type: String,
-                value: ""
-            },
             results: {
                 type: Object,
                 value: {}
@@ -127,10 +116,6 @@
             timer: {
                 type: Number
             }
-        },
-
-        resultsclass: function (query) {
-            return query ? '' : 'hide';
         },
 
         opensearch: function () {
@@ -147,40 +132,6 @@
         closesearch: function () {
             this.$.reviewlist.classList.remove('searchmode');
             this.$.searchbar.classList.add('hide');
-            this.query = "";
-            this.passivesearch();
-        },
-
-        activesearch: function () {
-            if (this.selected === 'target') {
-                this.search(false);
-            } else {
-                this.search(true);
-            }
-        },
-
-        passivesearch: function () {
-            this.search(true);
-        },
-
-        search: function (passive) {
-            var mythis = this;
-            var query = this.query.trim();
-            var chunks = this.chunks || [];
-            var type = this.selected;
-            var forward = [];
-            var backward = [];
-
-            chunks.forEach(function (chunk) {
-                if (query && ((type === 'source' && chunk.srccontent.toLowerCase().includes(query.toLowerCase())) || (type === 'target' && chunk.transcontent.toLowerCase().includes(query.toLowerCase())))) {
-                    forward.push(chunk.index);
-                    backward.push(chunk.index);
-                }
-            });
-
-            mythis.set('searchoptions', {text: query, type: type, passive: passive, on: true});
-            backward.reverse();
-            mythis.set('results', {forward: forward, backward: backward});
         },
 
         next: function () {
@@ -215,7 +166,7 @@
             mythis.timer = setTimeout(function() {
                 mythis.getlocation();
                 mythis.setheights();
-                mythis.passivesearch();
+                mythis.fire('iron-signal', {name: 'passivesearch'});
             }, 500);
         },
 

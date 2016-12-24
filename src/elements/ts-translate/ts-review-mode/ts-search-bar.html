@@ -92,21 +92,12 @@
 
 		is: 'ts-search-bar',
 
-        behaviors: [
-            Polymer.IronResizableBehavior
-        ],
-
         properties: {
             chunks: {
                 type: Array,
-                value: [],
-                notify: true
+                value: []
             },
             searchoptions: {
-                type: Object,
-                value: {}
-            },
-            modestatus: {
                 type: Object,
                 value: {},
                 notify: true
@@ -121,10 +112,8 @@
             },
             results: {
                 type: Object,
-                value: {}
-            },
-            timer: {
-                type: Number
+                value: {},
+                notify: true
             }
         },
 
@@ -132,20 +121,8 @@
             return query ? '' : 'hide';
         },
 
-        opensearch: function () {
-            var mythis = this;
-
-            this.$.reviewlist.classList.add('searchmode');
-            this.$.searchbar.classList.remove('hide');
-
-            setTimeout(function() {
-                mythis.$.input.focus();
-            }, 500);
-        },
-
         closesearch: function () {
-            this.$.reviewlist.classList.remove('searchmode');
-            this.$.searchbar.classList.add('hide');
+            this.fire('closesearch');
             this.query = "";
             this.passivesearch();
         },
@@ -183,27 +160,11 @@
         },
 
         next: function () {
-            var list = this.$.reviewlist;
-            var index = list.firstVisibleIndex || 0;
-            var order = this.results.forward;
-
-            var next = order.find(function (num) {
-                return num > index;
-            });
-
-            list.scrollToIndex(next);
+            this.fire('next');
         },
 
         previous: function () {
-            var list = this.$.reviewlist;
-            var index = list.firstVisibleIndex || 0;
-            var order = this.results.backward;
-
-            var previous = order.find(function (num) {
-                return num < index;
-            });
-
-            list.scrollToIndex(previous);
+            this.fire('previous');
         },
 
 		ready: function() {

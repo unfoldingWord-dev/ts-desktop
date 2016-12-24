@@ -234,7 +234,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                     meta.currentsource = null;
                 }
 
-                if (manifest.type.id === "tw" || manifest.type.id === "ta") {
+                if (manifest.type.id === "tw") {
                     meta.project_type_class = "extant";
                 } else if (manifest.type.id === "tn" || manifest.type.id === "tq") {
                     meta.project_type_class = "helps";
@@ -269,8 +269,6 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             if (meta.type.id === "tw") {
                 var dict = meta.project.id;
                 frames = dataManager.getAllWords(dict);
-            } else if (meta.type.id === "ta") {
-                //frames = dataManager.getTa(meta.project.id);
             } else if (meta.source_translations.length) {
                 var source = meta.source_translations[0];
                 var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;

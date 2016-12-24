@@ -112,12 +112,12 @@
         refresh: function () {
             var mythis = this;
 
-            mythis.getlocation();
             clearTimeout(mythis.timer);
 
             mythis.timer = setTimeout(function() {
+                mythis.getlocation();
                 mythis.setheights();
-            }, 100);
+            }, 500);
         },
 
         setheights: function () {
@@ -148,9 +148,11 @@
 
             contain.classList.add("moveout");
             setTimeout(function() {
-                contain.classList.remove("moveout");
                 mythis.classList.add("hide");
-            }, 500);
+                setTimeout(function() {
+                    contain.classList.remove("moveout");
+                }, 300);
+            }, 300);
         },
 
         movein: function () {

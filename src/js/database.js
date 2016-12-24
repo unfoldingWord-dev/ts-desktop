@@ -260,13 +260,14 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             var sorted = [];
 
             toc.forEach (function (chapter) {
-                var chunks = frames.filter(function (item) {
-                    return item.chapter === chapter.chapter;
-                });
                 chapter.chunks.forEach (function (chunk) {
-                    sorted.push(chunks.filter(function (item) {
-                        return item.chunk === chunk;
-                    })[0]);
+                    var results = frames.filter(function (item) {
+                        return item.chapter === chapter.chapter && item.chunk === chunk;
+                    });
+
+                    if (results.length) {
+                        sorted.push(results[0]);
+                    }
                 });
             });
 
@@ -485,10 +486,6 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             });
 
             return allchunks;
-        },
-
-        getTa: function (volume) {
-
         }
     };
 }

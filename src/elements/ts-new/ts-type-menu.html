@@ -1,5 +1,4 @@
 
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../components/iron-icons/iron-icons.html">
 <link rel="import" href="../../components/iron-list/iron-list.html">
 
@@ -42,8 +41,8 @@
         }
 
         .row {
-            display: block;
-            margin: 0;
+            display: flex;
+            justify-content: space-between;
             padding: 15px 25px;
             background: var(--card-background-color);
             border-bottom: 1px solid var(--border-color);
@@ -87,9 +86,8 @@
           <iron-list id="list" items="[[newdata.typelist]]" as="typedata">
               <template>
                   <div class$="[[checkclass(typedata.allowed)]]" on-tap="store">
-                      <div>
-                          <span>[[typedata.type.name]]</span> - <span>[[typedata.resource.name]]</span>
-                      </div>
+                      <span>[[typedata.type.name]]</span>
+                      <span>[[typedata.resource.name]]</span>
                   </div>
               </template>
           </iron-list>

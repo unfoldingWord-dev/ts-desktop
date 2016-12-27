@@ -299,7 +299,7 @@
         </div>
 
         <paper-dialog id="info" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <ts-project-info currentinfo="{{currentinfo}}"></ts-project-info>
+            <ts-project-info currentproject="[[currentproject]]"></ts-project-info>
         </paper-dialog>
 
         <paper-dialog id="delete" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -325,7 +325,7 @@
         </paper-dialog>
 
         <paper-dialog id="resource" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <ts-resource-options currentinfo="[[currentinfo]]" changedata="{{changedata}}" on-confirm="openconfirm" on-change="firechange" on-cancel="cancelresource"></ts-resource-options>
+            <ts-resource-options currentproject="[[currentproject]]" changedata="{{changedata}}" on-confirm="openconfirm" on-change="firechange" on-cancel="cancelresource"></ts-resource-options>
         </paper-dialog>
 
         <ts-new-project-button route="{{route}}" on-startnew="startnew"></ts-new-project-button>
@@ -350,9 +350,10 @@
                 value: '',
                 notify: true
             },
-            currentinfo: {
+            currentproject: {
                 type: Object,
-                value: {}
+                value: {},
+                notify: true
             },
             projectlist: {
                 type: Array,
@@ -458,7 +459,7 @@
         },
 
         changelanguage: function () {
-            var projectmeta = this.currentinfo;
+            var projectmeta = this.currentproject.projectmeta;
             this.closeinfo();
             this.fire('iron-signal', {name: 'gotolanguage', data: {projectmeta: projectmeta}});
         },
@@ -490,19 +491,19 @@
         },
 
         goprint: function () {
-            var projectmeta = this.currentinfo;
+            var projectmeta = this.currentproject.projectmeta;
             this.closeinfo();
             this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: "print"}});
         },
 
         goexport: function () {
-            var projectmeta = this.currentinfo;
+            var projectmeta = this.currentproject.projectmeta;
             this.closeinfo();
             this.fire('iron-signal', {name: 'openexport', data: {projectmeta: projectmeta}});
         },
 
         goreview: function () {
-            var projectmeta = this.currentinfo;
+            var projectmeta = this.currentproject.projectmeta;
             this.closeinfo();
             this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: "review"}});
         },
@@ -514,7 +515,7 @@
         },
 
         openinfo: function (e) {
-            this.set('currentinfo', e.model.project);
+            this.set('currentproject', {projectmeta: e.model.project});
             this.$.info.open();
         },
 
@@ -533,7 +534,7 @@
         },
 
         deleteproject: function () {
-            var projectmeta = this.currentinfo;
+            var projectmeta = this.currentproject.projectmeta;
 
             this.$.delete.close();
             this.fire('iron-signal', {name: 'deleteproject', data: {projectmeta: projectmeta}});

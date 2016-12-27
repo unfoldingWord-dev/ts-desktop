@@ -96,17 +96,17 @@
     <template>
 
         <div id="header">
-            <h2><span>[[currentinfo.project.name]]</span> — <span>[[currentinfo.target_language.name]]</span></h2>
+            <h2><span>[[currentproject.projectmeta.project.name]]</span> — <span>[[currentproject.projectmeta.target_language.name]]</span></h2>
         </div>
         <div id="info">
-            <p>{{locale.project}}: <strong><span>[[currentinfo.project.name]]</span> (<span>[[currentinfo.project.id]]</span>)</strong></p>
-            <p>{{locale.target_language}}: <strong><span>[[currentinfo.target_language.name]]</span> (<span>[[currentinfo.target_language.id]]</span>)</strong><span class="link" on-tap="changelanguage">Change</span></p>
-            <p class$="[[idclass(currentinfo.resource.id)]]">Resource type: <strong><span>[[currentinfo.resource.id]]</span></strong><span class="link" on-tap="openresource">Change</span></p>
-            <p>{{locale.progress}}: <strong><span>[[currentinfo.completion]]</span>%</strong></p>
+            <p>{{locale.project}}: <strong><span>[[currentproject.projectmeta.project.name]]</span> (<span>[[currentproject.projectmeta.project.id]]</span>)</strong></p>
+            <p>{{locale.target_language}}: <strong><span>[[currentproject.projectmeta.target_language.name]]</span> (<span>[[currentproject.projectmeta.target_language.id]]</span>)</strong><span class="link" on-tap="changelanguage">Change</span></p>
+            <p class$="[[idclass(currentproject.projectmeta.resource.id)]]">Resource type: <strong><span>[[currentproject.projectmeta.resource.id]]</span></strong><span class="link" on-tap="openresource">Change</span></p>
+            <p>{{locale.progress}}: <strong><span>[[currentproject.projectmeta.completion]]</span>%</strong></p>
             <p>{{locale.translators}}:</p>
-            <template is="dom-if" if="{{currentinfo.translators.length}}">
+            <template is="dom-if" if="{{currentproject.projectmeta.translators.length}}">
                 <div id="namebox">
-                    <template is="dom-repeat" items="{{currentinfo.translators}}" as="user">
+                    <template is="dom-repeat" items="{{currentproject.projectmeta.translators}}" as="user">
                         <p><strong>{{user}}</strong></p>
                     </template>
                 </div>
@@ -117,7 +117,7 @@
                 <iron-icon on-tap="opendelete" icon="delete" title="delete"></iron-icon>
             </div>
             <div id="righticons">
-                <iron-icon on-tap="goprint" class$="[[printclass(currentinfo.project_type_class, currentinfo.source_translations)]]" icon="print" title="print"></iron-icon>
+                <iron-icon on-tap="goprint" class$="[[printclass(currentproject.projectmeta.project_type_class, currentproject.projectmeta.source_translations)]]" icon="print" title="print"></iron-icon>
                 <iron-icon on-tap="goreview" icon="done-all" title="review"></iron-icon>
                 <iron-icon on-tap="goexport" icon="file-upload" title="upload/export"></iron-icon>
             </div>
@@ -141,7 +141,7 @@
                 value: '',
                 notify: true
             },
-            currentinfo: {
+            currentproject: {
                 type: Object,
                 value: {}
             },
@@ -173,7 +173,7 @@
         },
 
         changelanguage: function () {
-            var projectmeta = this.currentinfo;
+            var projectmeta = this.currentproject.projectmeta;
             this.closeinfo();
             this.fire('iron-signal', {name: 'gotolanguage', data: {projectmeta: projectmeta}});
         },
@@ -205,19 +205,19 @@
         },
 
         goprint: function () {
-            var projectmeta = this.currentinfo;
+            var projectmeta = this.currentproject.projectmeta;
             this.closeinfo();
             this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: "print"}});
         },
 
         goexport: function () {
-            var projectmeta = this.currentinfo;
+            var projectmeta = this.currentproject.projectmeta;
             this.closeinfo();
             this.fire('iron-signal', {name: 'openexport', data: {projectmeta: projectmeta}});
         },
 
         goreview: function () {
-            var projectmeta = this.currentinfo;
+            var projectmeta = this.currentproject.projectmeta;
             this.closeinfo();
             this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: "review"}});
         },
@@ -226,11 +226,6 @@
             var projectmeta = e.model.project;
             this.fire('iron-signal', {name: 'translateright'});
             this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: "translate"}});
-        },
-
-        openinfo: function (e) {
-            this.set('currentinfo', e.model.project);
-            this.$.info.open();
         },
 
         closeinfo: function () {
@@ -248,7 +243,7 @@
         },
 
         deleteproject: function () {
-            var projectmeta = this.currentinfo;
+            var projectmeta = this.currentproject.projectmeta;
 
             this.$.delete.close();
             this.fire('iron-signal', {name: 'deleteproject', data: {projectmeta: projectmeta}});

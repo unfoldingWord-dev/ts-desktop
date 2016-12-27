@@ -1,7 +1,6 @@
 
 <link rel="import" href="../../components/iron-list/iron-list.html">
 <link rel="import" href="../../components/iron-icons/iron-icons.html">
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../ts-icons/ts-icons.html">
 
 <dom-module id="ts-project-menu">
@@ -43,8 +42,8 @@
         }
 
         .row {
-            display: block;
-            margin: 0;
+            display: flex;
+            justify-content: space-between;
             padding: 15px 25px;
             border-bottom: 1px solid var(--border-color);
             transition: background .3s, color .3s;
@@ -53,10 +52,6 @@
 
         .row:hover {
             background: var(--accent-color-light);
-        }
-
-        .right {
-            float: right;
         }
 
         .small {
@@ -94,8 +89,8 @@
                       <div>
                           <iron-icon class="small" icon$="[[checkicon(category.name)]]"></iron-icon>
                           <span>[[category.name]]</span>
-                          <iron-icon class="right" icon="chevron-right"></iron-icon>
                       </div>
+                      <iron-icon icon="chevron-right"></iron-icon>
                   </div>
               </template>
           </iron-list>
@@ -152,15 +147,21 @@
       createprojects: function () {
           var mythis = this;
           var projects = App.dataManager.getProjects();
-          var temparray = [];
+          var temparray = [{}, {}, {}];
 
-          _.forEach(_.groupBy(projects, 'category_id'), function (data, category) {
-              if (category === "1") {
-                  temparray.push({"name": "Old Testament", "data": data});
-              } else if (category === "6") {
-                  temparray.push({"name": "New Testament", "data": data});
-              } else if (category === "0" && !mythis.importdata.importing) {
-                  temparray.push({"name": "Other", "data": data});
+          projects.forEach(function (item) {
+              if (!item.category_slug) {
+                  item.category_slug = "other";
+              }
+          });
+
+          _.forEach(_.groupBy(projects, 'category_slug'), function (data, category) {
+              if (category === "bible-ot") {
+                  temparray.splice(0, 1, {"name": "Old Testament", "data": data});
+              } else if (category === "bible-nt") {
+                  temparray.splice(1, 1, {"name": "New Testament", "data": data});
+              } else if (category === "other" && !mythis.importdata.importing) {
+                  temparray.splice(2, 1, {"name": "Other", "data": data});
               }
           });
           mythis.set('newdata.categorylist', temparray);

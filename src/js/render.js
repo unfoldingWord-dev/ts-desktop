@@ -296,6 +296,29 @@ function Renderer() {
             return toc + text + enddiv;
         },
 
+        renderResource: function (data, module) {
+            var starth2 = "\<h2 class='style-scope " + module + "'\>";
+            var endh2 = "\<\/h2\>";
+            var startdiv = "\<div class='style-scope " + module + "'\>";
+            var enddiv = "\<\/div\>";
+
+            return starth2 + data.title + endh2 + startdiv + this.renderResourceLinks(data.body, module) + enddiv;
+        },
+
+        renderResourceLinks: function (text, module) {
+            var linktest = new RegExp(/(\[\[:en:ta)(:[^:]*:[^:]*:)([^:\]]*)(\]\])/);
+
+            while (linktest.test(text)) {
+                var linkname = linktest.exec(text)[3];
+                var starta = "\<a href='" + linkname + "' class='style-scope " + module + "' id='" + linkname + "'\>";
+                var enda = "\<\/a\>";
+
+                text = text.replace(linktest, starta + linkname + enda);
+            }
+
+            return text;
+        },
+
         validateVerseMarkers: function (text, verses) {
             var linearray = text.trim().split("\n");
             var returnstr = "";

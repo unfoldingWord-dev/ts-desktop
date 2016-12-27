@@ -1,16 +1,8 @@
 
 <link rel="import" href="../../../components/iron-list/iron-list.html">
-<link rel="import" href="../../../components/iron-signals/iron-signals.html">
-<link rel="import" href="../../../components/paper-button/paper-button.html">
-<link rel="import" href="../../../components/neon-animation/neon-animation.html">
-<link rel="import" href="../../../components/paper-material/paper-material.html">
-<link rel="import" href="../../../components/iron-icons/iron-icons.html">
-<link rel="import" href="../../../components/paper-radio-button/paper-radio-button.html">
-<link rel="import" href="../../../components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../../components/paper-radio-group/paper-radio-group.html">
 
 <link rel="import" href="./ts-review-card.html">
-<link rel="import" href="./ts-text-holder.html">
+<link rel="import" href="./ts-search-bar.html">
 
 <dom-module id="ts-review-mode">
 
@@ -29,54 +21,8 @@
             flex: auto;
         }
 
-        #searchbar {
-            height: 49px;
-            border-bottom: 1px solid var(--primary-text-color);
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            color: var(--secondary-text-color);
-        }
-
         #searchbar.hide {
             display: none;
-        }
-
-        #searchinfo {
-            flex: auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #searchclose {
-            flex: 0 0 40px;
-        }
-
-        #searchresults {
-            min-width: 240px;
-            display: flex;
-            align-items: center;
-        }
-
-        #searchresults.hide * {
-            display: none;
-        }
-
-        #input {
-            height: 30px;
-            width: 130px;
-            margin: 0 10px;
-            font-size: 110%;
-            font-style: italic;
-            padding: 0 5px;
-            color: var(--secondary-text-color);
-        }
-
-        paper-radio-button {
-            --paper-radio-button-checked-color: var(--primary-color);
-            --paper-radio-button-unchecked-color: var(--primary-color);
-            --paper-radio-button-label-color: var(--secondary-text-color);
         }
 
         #reviewlist {
@@ -88,7 +34,7 @@
         }
 
         ::-webkit-scrollbar {
-            display: none;
+            width: 0;
         }
 
         :host(.preview) {
@@ -121,165 +67,18 @@
             margin-bottom: 300px;
         }
 
-        #resourcepopup {
-            position: fixed;
-            top: 40px;
-            right: 17px;
-            background: var(--card-background-color);
-            color: var(--primary-text-color);
-            width: 416px;
-            height: calc(100% - 70px);
-            display: flex;
-            flex-direction: column;
-        }
-
-        #resourcepopup.hide {
-            visibility: hidden;
-        }
-
-        .slidein {
-            -webkit-animation: slidein .5s;
-        }
-
-        .slideout {
-            -webkit-animation: slideout .5s;
-        }
-
-        @-webkit-keyframes slidein {
-            0% {transform: translateX(450px)}
-            100% {transform: translateX(0)}
-        }
-
-        @-webkit-keyframes slideout {
-            0% {transform: translateX(0)}
-            100% {transform: translateX(450px)}
-        }
-
-        #resourcepopup .buttons {
-            flex: 0 0 50px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: var(--secondary-text-color);
-            border-bottom: 1px solid var(--secondary-text-color);
-        }
-
-        #resourcepopup .buttons paper-button:hover {
-            color: var(--accent-color);
-        }
-
-        #resourcecontent {
-            padding: 0 40px 40px 40px;
-            overflow-y: auto;
-            flex: auto;
-        }
-
-        #resourcecontent h2 {
-            color: var(--accent-color);
-        }
-
-        #resourcecontent h3 {
-            margin: 10px 0;
-        }
-
-        #resourcecontent p {
-            margin: 0;
-        }
-
-        #resourcecontent #textholder p {
-            font-size: 120%;
-        }
-
-        #resourcepopup #footer {
-            flex: 0 0 50px;
-            display: flex;
-            align-items: center;
-            border-top: 1px solid var(--border-color);
-            text-transform: uppercase;
-            padding-left: 40px;
-        }
-
-        #examples {
-            margin-top: 10px;
-        }
-
-        .link {
-            color: var(--accent-color);
-            cursor: pointer;
-        }
-
-        .words {
-            padding: 5px 0;
-        }
-
-        #resourcepopup #footer.hide {
-            display: none;
-        }
-
 	</style>
 
 	<template>
 
         <div id="contain">
-            <div id="searchbar" class="hide">
-                <div id="searchinfo">
-                    <span>Search in: </span>
-                    <paper-radio-group selected="{{selected}}" on-iron-select="activesearch">
-                        <paper-radio-button name="source">Source</paper-radio-button>
-                        <paper-radio-button name="target">Target</paper-radio-button>
-                    </paper-radio-group>
-                    <input is="iron-input" id="input" bind-value="{{query}}" on-input="activesearch" placeholder="Search for text">
-                    <div id="searchresults" class$="[[resultsclass(query)]]">
-                        <paper-icon-button icon="arrow-downward" on-tap="next"></paper-icon-button>
-                        <paper-icon-button icon="arrow-upward" on-tap="previous"></paper-icon-button>
-                        <span><span>Found in <span>[[results.forward.length]]</span> chunks.</span></span>
-                    </div>
-                </div>
-                <div id="searchclose">
-                    <paper-icon-button icon="close" on-tap="closesearch"></paper-icon-button>
-                </div>
-            </div>
+            <ts-search-bar id="searchbar" class="hide" chunks="[[chunks]]" searchoptions="{{searchoptions}}" results="{{results}}" on-closesearch="closesearch" on-next="next" on-previous="previous"></ts-search-bar>
             <iron-list id="reviewlist" items="{{chunks}}" as="chunk" on-scroll="refresh">
                 <template>
                     <ts-review-card chunk="{{chunk}}" searchoptions="{{searchoptions}}" on-updateheight="updateheight"></ts-review-card>
                 </template>
             </iron-list>
-
-            <paper-material id="resourcepopup" class="hide">
-                <div class="buttons">
-                    <paper-button on-tap="closeresource"><iron-icon icon="clear"></iron-icon>Close</paper-button>
-                </div>
-                <div id="resourcecontent" class="sourcefont sourcesize">
-                    <div id="textholder"></div>
-                    <template is="dom-if" if="{{related.length}}">
-                        <h3>See Also:</h3>
-                        <template is="dom-repeat" items="{{related}}" as="word">
-                            <p class="link" on-tap="newword">{{word.title}}</p>
-                        </template>
-                    </template>
-                    <template is="dom-if" if="{{examples.length}}">
-                        <h3>Examples:</h3>
-                        <template is="dom-repeat" items="{{examples}}" as="example">
-                            <div id="examples">
-                                <p class="link" on-tap="examplescroll"><span>{{chunks.0.projectmeta.project.name}}</span> <span>{{example.chapter}}</span>:<span>{{example.frame}}</span></p>
-                            </div>
-                        </template>
-                    </template>
-                    <template is="dom-if" if="{{allwords.length}}">
-                        <h3>Words Index</h3>
-                        <template is="dom-repeat" items="{{allwords}}" as="word">
-                            <p class="link words" on-tap="newword">{{word.title}}</p>
-                        </template>
-                    </template>
-                </div>
-                <div id="footer">
-                    <p class="link" on-tap="openindex">Words Index</p>
-                </div>
-            </paper-material>
         </div>
-
-        <iron-signals on-iron-signal-openresource="openresource"></iron-signals>
-        <iron-signals on-iron-signal-passivesearch="passivesearch"></iron-signals>
 
 	</template>
 
@@ -310,26 +109,6 @@
                 value: {},
                 notify: true
             },
-            related: {
-                type: Array,
-                value: []
-            },
-            examples: {
-                type: Array,
-                value: []
-            },
-            allwords: {
-                type: Array,
-                value: []
-            },
-            selected: {
-                type: String,
-                value: 'target'
-            },
-            query: {
-                type: String,
-                value: ""
-            },
             results: {
                 type: Object,
                 value: {}
@@ -339,10 +118,6 @@
             }
         },
 
-        resultsclass: function (query) {
-            return query ? '' : 'hide';
-        },
-
         opensearch: function () {
             var mythis = this;
 
@@ -350,47 +125,13 @@
             this.$.searchbar.classList.remove('hide');
 
             setTimeout(function() {
-                mythis.$.input.focus();
+                mythis.$.searchbar.focussearch();
             }, 500);
         },
 
         closesearch: function () {
             this.$.reviewlist.classList.remove('searchmode');
             this.$.searchbar.classList.add('hide');
-            this.query = "";
-            this.passivesearch();
-        },
-
-        activesearch: function () {
-            if (this.selected === 'target') {
-                this.search(false);
-            } else {
-                this.search(true);
-            }
-        },
-
-        passivesearch: function () {
-            this.search(true);
-        },
-
-        search: function (passive) {
-            var mythis = this;
-            var query = this.query.trim();
-            var chunks = this.chunks || [];
-            var type = this.selected;
-            var forward = [];
-            var backward = [];
-
-            chunks.forEach(function (chunk) {
-                if (query && ((type === 'source' && chunk.srccontent.toLowerCase().includes(query.toLowerCase())) || (type === 'target' && chunk.transcontent.toLowerCase().includes(query.toLowerCase())))) {
-                    forward.push(chunk.index);
-                    backward.push(chunk.index);
-                }
-            });
-
-            mythis.set('searchoptions', {text: query, type: type, passive: passive, on: true});
-            backward.reverse();
-            mythis.set('results', {forward: forward, backward: backward});
         },
 
         next: function () {
@@ -420,13 +161,13 @@
         refresh: function () {
             var mythis = this;
 
-            mythis.getlocation();
             clearTimeout(mythis.timer);
 
             mythis.timer = setTimeout(function() {
+                mythis.getlocation();
                 mythis.setheights();
-                mythis.passivesearch();
-            }, 100);
+                mythis.fire('iron-signal', {name: 'passivesearch'});
+            }, 500);
         },
 
         setheights: function () {
@@ -443,96 +184,6 @@
             var list = this.$.reviewlist;
             var index = e.model.index;
             list.updateSizeForItem(index);
-        },
-
-        openresource: function (event, data) {
-            var popup = this.$.resourcepopup;
-            this.fillresource(data.content);
-            popup.classList.remove("hide");
-            popup.classList.add("slidein");
-            setTimeout(function() {
-                popup.classList.remove("slidein");
-            }, 500);
-        },
-
-        fillresource: function (data) {
-            var textholder = this.$.textholder;
-            var content = "";
-            var clear = [];
-            var footer = this.$.footer;
-            var projectmeta = this.chunks[0].projectmeta;
-            var current = projectmeta.currentsource;
-            var currentsource = projectmeta.source_translations[current];
-            var dict = "bible";
-            if (currentsource.resource_id === "obs") {
-                dict = "bible-obs";
-            }
-
-            if (data.type === "Notes") {
-                this.set('related', clear);
-                this.set('examples', clear);
-                this.set('allwords', clear);
-                footer.classList.add("hide");
-                content = "\<h2 class='style-scope ts-review-mode'\>" + data.title + "\<\/h2\>\<p class='style-scope ts-review-mode'\>" + data.body + "\<\/p\>";
-            }
-            if (data.type === "Words") {
-                this.set('examples', App.dataManager.getWordExamples(currentsource, data.slug));
-                this.set('related', App.dataManager.getRelatedWords(currentsource, data.slug));
-                this.set('allwords', clear);
-                footer.classList.remove("hide");
-                content = "\<h2 class='style-scope ts-review-mode'\>" + data.title + "\<\/h2\>" + data.body;
-            }
-            if (data.type === "Questions") {
-                this.set('related', clear);
-                this.set('examples', clear);
-                this.set('allwords', clear);
-                footer.classList.add("hide");
-                content = "\<h2 class='style-scope ts-review-mode'\>" + data.title + "\<\/h2\>\<p class='style-scope ts-review-mode'\>" + data.body + "\<\/p\>";
-            }
-            if (data.type === "allwords") {
-                this.set('related', clear);
-                this.set('examples', clear);
-                this.set('allwords', App.dataManager.getAllWords(dict));
-                footer.classList.add("hide");
-                content = "";
-            }
-            textholder.innerHTML = content;
-            this.$.resourcecontent.scrollTop = 0;
-        },
-
-        openindex: function () {
-            var data = {type: "allwords"};
-            this.fillresource(data);
-        },
-
-        newword: function (e) {
-            var word = e.model.word;
-            word.type = "Words";
-            this.fillresource(word);
-        },
-
-        examplescroll: function (e) {
-            var example = e.model.example;
-            var chapter = example.chapter;
-            var frame = example.frame;
-            var list = this.$.reviewlist;
-            var chunks = this.chunks;
-
-            var filtered = chunks.filter(function (chunk) {
-                return chunk.chunkmeta.chapter === chapter && chunk.chunkmeta.frame === frame;
-            });
-            var index = filtered[0].index;
-
-            list.scrollToIndex(index);
-        },
-
-        closeresource: function () {
-            var popup = this.$.resourcepopup;
-            popup.classList.add("slideout");
-            setTimeout(function() {
-                popup.classList.remove("slideout");
-                popup.classList.add("hide");
-            }, 500);
         },
 
         frommode: function () {
@@ -552,9 +203,11 @@
 
             contain.classList.add("moveout");
             setTimeout(function() {
-                contain.classList.remove("moveout");
                 mythis.classList.add("hide");
-            }, 500);
+                setTimeout(function() {
+                    contain.classList.remove("moveout");
+                }, 300);
+            }, 300);
         },
 
         movein: function () {

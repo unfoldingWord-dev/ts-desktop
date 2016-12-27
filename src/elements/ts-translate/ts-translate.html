@@ -12,6 +12,7 @@
 <link rel="import" href="./ts-translate-sidebar.html">
 <link rel="import" href="./ts-nosource-mode.html">
 <link rel="import" href="./ts-source/ts-source-modal.html">
+<link rel="import" href="./ts-resource/ts-resource-display.html">
 
 <dom-module id="ts-translate">
 
@@ -146,6 +147,28 @@
             color: var(--accent-color);
         }
 
+        #resourcedisplay.hide {
+            visibility: hidden;
+        }
+
+        .slidein {
+            -webkit-animation: slidein .5s;
+        }
+
+        .slideout {
+            -webkit-animation: slideout .5s;
+        }
+
+        @-webkit-keyframes slidein {
+            0% {transform: translateX(450px)}
+            100% {transform: translateX(0)}
+        }
+
+        @-webkit-keyframes slideout {
+            0% {transform: translateX(0)}
+            100% {transform: translateX(450px)}
+        }
+
         .nodisplay {
             display: none;
         }
@@ -163,6 +186,8 @@
             <ts-nosource-mode id="nosourcemode" projectmeta="[[currentproject.projectmeta]]"></ts-nosource-mode>
             <ts-conflict-mode id="conflictmode" chunks="{{currentproject.chunks}}" modestatus="{{modestatus}}"></ts-conflict-mode>
         </div>
+
+        <ts-resource-display id="resourcedisplay" class="hide" chunks="[[currentproject.chunks]]" modestatus="{{modestatus}}" on-navigate="navigate" on-closeresource="closeresource"></ts-resource-display>
 
         <paper-dialog id="checklistpopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <h2>Chunk Checklist</h2>
@@ -243,6 +268,7 @@
         <iron-signals on-iron-signal-resolveconflict="resolveConflict"></iron-signals>
         <iron-signals on-iron-signal-translateright="setrightanimation"></iron-signals>
         <iron-signals on-iron-signal-translateleft="setleftanimation"></iron-signals>
+        <iron-signals on-iron-signal-openresource="openresource"></iron-signals>
 
     </template>
 
@@ -552,6 +578,31 @@
             this.$.sourcepopup.close();
         },
 
+        openresource: function (event, data) {
+            var display = this.$.resourcedisplay;
+
+            display.fillresource(data.content);
+            display.classList.remove("hide");
+            display.classList.add("slidein");
+            setTimeout(function() {
+                display.classList.remove("slidein");
+            }, 500);
+        },
+
+        closeresource: function () {
+            var display = this.$.resourcedisplay;
+
+            if (!display.classList.contains("hide")) {
+                display.classList.add("slideout");
+                setTimeout(function() {
+                    display.classList.add("hide");
+                    setTimeout(function() {
+                        display.classList.remove("slideout");
+                    }, 300);
+                }, 300);
+            }
+        },
+
         load: function (route) {
             if (route === "translate") {
                 this.forceResize();
@@ -783,7 +834,7 @@
                     mythis.fire('iron-signal', {name: 'closeloading'});
                     mythis.forceResize();
                     mythis.setlocation();
-                    review.passivesearch();
+                    mythis.fire('iron-signal', {name: 'passivesearch'});
                     if (full) {
                         mythis.checksources();
                     }
@@ -894,18 +945,12 @@
             var projectmeta = this.currentproject.projectmeta;
             var type = projectmeta.type.id;
             var language = projectmeta.target_language.name;
-            var frames;
-            var volume = "vol1";
+            var frames = [];
             var chunkarray = [];
 
             if (type === "tw") {
                 var dict = projectmeta.project.id;
                 frames = App.dataManager.getAllWords(dict);
-            } else if (type === "ta") {
-                if (projectmeta.project.id !== "ta") {
-                    volume = projectmeta.project.id;
-                }
-                //frames = App.dataManager.getTa(volume);
             }
 
             for (var i = 0; i < frames.length; i++) {
@@ -1106,6 +1151,7 @@
             var read = this.$.readmode;
             var chunk = this.$.chunkmode;
             var review = this.$.reviewmode;
+            var conflict = this.$.conflictmode;
 
             if (this.selected === 1) {
                 read.setlocation();
@@ -1113,6 +1159,8 @@
                 chunk.setlocation();
             } else if (this.selected === 3) {
                 review.setlocation();
+            } else if (this.selected === 5) {
+                conflict.setlocation();
             }
         },
 
@@ -1122,6 +1170,8 @@
             var review = this.$.reviewmode;
             var nosource = this.$.nosourcemode;
             var conflict = this.$.conflictmode;
+
+            this.closeresource();
 
             if (frommode > 0) {
                 this.set('modestatus.lastmode', frommode);
@@ -1300,8 +1350,7 @@
         gohome: function () {
             var mythis = this;
 
-            mythis.$.reviewmode.closeresource();
-            mythis.$.conflictmode.closeresource();
+            mythis.closeresource();
             mythis.savestate();
             mythis.stoptimers();
 
@@ -1325,8 +1374,7 @@
                 mythis.set('options.loading', true);
                 mythis.fire('iron-signal', {name: 'openloading'});
                 setTimeout(function() {
-                    mythis.$.reviewmode.closeresource();
-                    mythis.$.conflictmode.closeresource();
+                    mythis.closeresource();
                     mythis.savestate();
                     mythis.setleftanimation();
                     mythis.stoptimers();

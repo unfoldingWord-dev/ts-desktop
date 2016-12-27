@@ -1,7 +1,7 @@
 
 <link rel="import" href="../../components/iron-list/iron-list.html">
 <link rel="import" href="../../components/iron-icons/iron-icons.html">
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+
 <link rel="import" href="../ts-icons/ts-icons.html">
 
 <dom-module id="ts-update-level-two">
@@ -43,8 +43,8 @@
         }
 
         .row {
-            display: block;
-            margin: 0;
+            display: flex;
+            justify-content: space-between;
             padding: 15px 25px;
             border-bottom: 1px solid var(--border-color);
             transition: background .3s, color .3s;
@@ -53,10 +53,6 @@
 
         .row:hover {
             background: var(--accent-color-light);
-        }
-
-        .right {
-            float: right;
         }
 
         .small {
@@ -102,9 +98,10 @@
                   <div class="row" on-tap="store">
                       <div>
                           <iron-icon class="small lang" icon$="[[checkicon(item.slug)]]"></iron-icon>
-                          <span><span>[[item.name]]</span><span class="code book">(<span>[[item.slug]]</span>)</span></span>
-                          <iron-icon class="right lang" icon="chevron-right"></iron-icon>
+                          <span>[[item.name]]</span>
                       </div>
+                      <span class="code book">(<span>[[item.slug]]</span>)</span>
+                      <iron-icon class="lang" icon="chevron-right"></iron-icon>
                   </div>
               </template>
           </iron-list>
@@ -146,8 +143,8 @@
           Polymer.IronResizableBehavior
       ],
 
-      checkicon: function (id) {
-          return id === "old" || id === "new" ? 'uw-project-icon:uw-project-icon' : 'uw-obs-icon:uw-obs-icon';
+      checkicon: function (slug) {
+          return slug === "bible-ot" || slug === "bible-nt" ? 'uw-project-icon:uw-project-icon' : 'uw-obs-icon:uw-obs-icon';
       },
 
       tolevelone: function () {
@@ -179,42 +176,31 @@
           if (this.selected === 1) {
               var translations = _.cloneDeep(this.translations);
               var temparray = [];
-              var otherdata = false;
 
               if (this.choices.radio === "bylang") {
                   translations = translations.filter(function (item) {
                       return item.language.slug === mythis.choices.levelone.slug;
                   });
+                  temparray = [{}, {}, {}, {}];
 
-                  _.forEach(_.groupBy(translations, 'project.category_id'), function (data, category) {
-                      if (category === "1") {
-                          temparray.push({name: "Old Testament", slug: "old"});
-                      } else if (category === "6") {
-                          temparray.push({name: "New Testament", slug: "new"});
-                      } else if (category === "592") {
-                          temparray.push({name: "translationAcademy", slug: "ta"});
-                      } else {
-                          otherdata = true;
+                  _.forEach(_.groupBy(translations, 'project.category_slug'), function (data, category) {
+                      if (category === "bible-ot") {
+                          temparray.splice(0, 1, {name: "Old Testament", slug: category});
+                      } else if (category === "bible-nt") {
+                          temparray.splice(1, 1, {name: "New Testament", slug: category});
+                      } else if (category === "ta") {
+                          temparray.splice(2, 1, {name: "translationAcademy", slug: category});
+                      } else if (category === "other") {
+                          temparray.splice(3, 1, {name: "Other", slug: category});
                       }
                   });
-                  if (otherdata) {
-                      temparray.push({name: "Other", slug: "oth"});
-                  }
                   this.set('leveltwolist', temparray);
               } else {
                   translations = translations.filter(function (item) {
-                      if (mythis.choices.levelone.slug === "old") {
-                          return item.project.category_id == "1" && item.language.slug === "en";
-                      } else if (mythis.choices.levelone.slug === "new") {
-                          return item.project.category_id == "6" && item.language.slug === "en";
-                      } else if (mythis.choices.levelone.slug === "ta") {
-                          return item.project.category_id == "592" && item.language.slug === "en";
-                      } else {
-                          return item.project.category_id != "1" && item.project.category_id != "6" && item.project.category_id != "592" && item.language.slug === "en";
-                      }
+                      return item.project.category_slug === mythis.choices.levelone.slug && item.language.slug === "en";
                   });
 
-                  _.forEach(_.groupBy(translations, 'project.slug'), function (data, category) {
+                  _.forEach(_.groupBy(translations, 'project.slug'), function (data) {
                       temparray.push(data[0].project);
                   });
                   this.set('leveltwolist', this.sortList(temparray));

@@ -1,0 +1,255 @@
+
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../components/iron-icon/iron-icon.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
+
+<dom-module id="ts-project-info">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+            color: var(--primary-text-color);
+        }
+
+        #header {
+            flex: 0 0 30px;
+        }
+
+        #info {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #info p {
+            margin: 0;
+            font-size: 110%;
+        }
+
+        .link {
+            cursor: pointer;
+            color: var(--accent-color);
+            padding-left: 20px;
+        }
+
+        #namebox {
+            flex: 0 0 100px;
+            padding-left: 30px;
+            border: 1px solid var(--border-color);
+            overflow-y: auto;
+        }
+
+        #iconbox {
+            border-bottom: 1px solid var(--border-color);
+            border-top: 1px solid var(--border-color);
+            flex: 0 0 60px;
+            align-self: stretch;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        #righticons {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        iron-icon {
+            --iron-icon-height: 24px;
+            --iron-icon-width: 24px;
+            color: var(--secondary-text-color);
+            cursor: pointer;
+        }
+
+        iron-icon:hover {
+            color: var(--accent-color);
+        }
+
+        #footer {
+            flex: 0 0 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        paper-button:hover {
+            color: var(--accent-color);
+        }
+
+        .hide {
+            display: none;
+        }
+
+    </style>
+
+    <template>
+
+        <div id="header">
+            <h2><span>[[currentinfo.project.name]]</span> — <span>[[currentinfo.target_language.name]]</span></h2>
+        </div>
+        <div id="info">
+            <p>{{locale.project}}: <strong><span>[[currentinfo.project.name]]</span> (<span>[[currentinfo.project.id]]</span>)</strong></p>
+            <p>{{locale.target_language}}: <strong><span>[[currentinfo.target_language.name]]</span> (<span>[[currentinfo.target_language.id]]</span>)</strong><span class="link" on-tap="changelanguage">Change</span></p>
+            <p class$="[[idclass(currentinfo.resource.id)]]">Resource type: <strong><span>[[currentinfo.resource.id]]</span></strong><span class="link" on-tap="openresource">Change</span></p>
+            <p>{{locale.progress}}: <strong><span>[[currentinfo.completion]]</span>%</strong></p>
+            <p>{{locale.translators}}:</p>
+            <template is="dom-if" if="{{currentinfo.translators.length}}">
+                <div id="namebox">
+                    <template is="dom-repeat" items="{{currentinfo.translators}}" as="user">
+                        <p><strong>{{user}}</strong></p>
+                    </template>
+                </div>
+            </template>
+        </div>
+        <div id="iconbox">
+            <div>
+                <iron-icon on-tap="opendelete" icon="delete" title="delete"></iron-icon>
+            </div>
+            <div id="righticons">
+                <iron-icon on-tap="goprint" class$="[[printclass(currentinfo.project_type_class, currentinfo.source_translations)]]" icon="print" title="print"></iron-icon>
+                <iron-icon on-tap="goreview" icon="done-all" title="review"></iron-icon>
+                <iron-icon on-tap="goexport" icon="file-upload" title="upload/export"></iron-icon>
+            </div>
+        </div>
+        <div id="footer">
+            <paper-button on-tap="closeinfo">{{locale.dismiss}}</paper-button>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+        is: 'ts-project-info',
+
+        properties: {
+            route: {
+                type: String,
+                value: '',
+                notify: true
+            },
+            currentinfo: {
+                type: Object,
+                value: {}
+            },
+            projectlist: {
+                type: Array,
+                value: []
+            },
+            importdata: {
+                type: Object,
+                value: {},
+                notify: true
+            },
+            changedata: {
+                type: Object,
+                value: {}
+            },
+            locale: {
+                type: Object,
+                value: {}
+            }
+        },
+
+        printclass: function (typeclass, sources) {
+            return typeclass === "standard" && sources.length ? '' : 'hide';
+        },
+
+        idclass: function (id) {
+            return id === "" || id === "obs" ? 'hide' : '';
+        },
+
+        changelanguage: function () {
+            var projectmeta = this.currentinfo;
+            this.closeinfo();
+            this.fire('iron-signal', {name: 'gotolanguage', data: {projectmeta: projectmeta}});
+        },
+
+        openresource: function () {
+            this.closeinfo();
+            this.$.resource.open();
+        },
+
+        cancelresource: function () {
+            this.$.resource.close();
+            this.$.info.open();
+        },
+
+        cancelconfirm: function () {
+            this.$.confirmchange.close();
+            this.$.resource.open();
+        },
+
+        openconfirm: function () {
+            this.$.resource.close();
+            this.$.confirmchange.open();
+        },
+
+        firechange: function () {
+            this.$.confirmchange.close();
+            this.$.resource.close();
+            this.fire('iron-signal', {name: 'changeproject', data: this.changedata});
+        },
+
+        goprint: function () {
+            var projectmeta = this.currentinfo;
+            this.closeinfo();
+            this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: "print"}});
+        },
+
+        goexport: function () {
+            var projectmeta = this.currentinfo;
+            this.closeinfo();
+            this.fire('iron-signal', {name: 'openexport', data: {projectmeta: projectmeta}});
+        },
+
+        goreview: function () {
+            var projectmeta = this.currentinfo;
+            this.closeinfo();
+            this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: "review"}});
+        },
+
+        openproject: function (e) {
+            var projectmeta = e.model.project;
+            this.fire('iron-signal', {name: 'translateright'});
+            this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: "translate"}});
+        },
+
+        openinfo: function (e) {
+            this.set('currentinfo', e.model.project);
+            this.$.info.open();
+        },
+
+        closeinfo: function () {
+            this.$.info.close();
+        },
+
+        opendelete: function () {
+            this.closeinfo();
+            this.$.delete.open();
+        },
+
+        closedelete: function () {
+            this.$.delete.close();
+            this.$.info.open();
+        },
+
+        deleteproject: function () {
+            var projectmeta = this.currentinfo;
+
+            this.$.delete.close();
+            this.fire('iron-signal', {name: 'deleteproject', data: {projectmeta: projectmeta}});
+        },
+
+        ready: function() {
+            this.locale = App.locale.dictionary;
+        }
+
+    });
+
+</script>

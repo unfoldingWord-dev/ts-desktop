@@ -2,14 +2,10 @@
 <link rel="import" href="../../components/iron-resizable-behavior/iron-resizable-behavior.html">
 <link rel="import" href="../../components/iron-icons/iron-icons.html">
 <link rel="import" href="../../components/paper-button/paper-button.html">
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../components/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../../components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
-<link rel="import" href="../../components/iron-list/iron-list.html">
-<link rel="import" href="../../components/paper-progress/paper-progress.html">
-<link rel="import" href="../../components/iron-signals/iron-signals.html">
 
 <link rel="import" href="../ts-icons/ts-icons.html">
 <link rel="import" href="./ts-new-project-button.html">
@@ -75,7 +71,7 @@
 
         #main p {
             font-size: 110%;
-            padding: 0 1.5em;
+            padding: 0 25px;
         }
 
         #headings {
@@ -139,15 +135,18 @@
         }
 
         .smallicon {
-            --iron-icon-height: 18px;
-            --iron-icon-width: 18px;
+            --iron-icon-height: 24px;
+            --iron-icon-width: 24px;
             color: var(--secondary-text-color);
+            cursor: pointer;
         }
 
         .info {
-            --iron-icon-height: 22px;
-            --iron-icon-width: 22px;
+            --iron-icon-height: 24px;
+            --iron-icon-width: 24px;
             color: var(--icon-color);
+            padding: 8px;
+            cursor: pointer;
         }
 
         .smalltext {
@@ -179,7 +178,7 @@
             color: var(--accent-color);
         }
 
-        .popup paper-icon-button:hover {
+        .popup iron-icon:hover {
             color: var(--accent-color);
         }
 
@@ -350,7 +349,7 @@
                                     <span class="smallspan"><ts-completion-icon percent="[[project.completion]]"></ts-completion-icon></span>
                                 </div>
                                 <div>
-                                    <span><paper-icon-button class="info" icon="info" on-tap="openinfo" title="details"></paper-icon-button></span>
+                                    <span><iron-icon class="info" icon="info" on-tap="openinfo" title="details"></iron-icon></span>
                                 </div>
                             </div>
                         </template>
@@ -379,12 +378,12 @@
             </div>
             <div id="infoicons">
                 <div id="lefticon">
-                    <paper-icon-button on-tap="opendelete" class="smallicon" icon="delete" title="delete"></paper-icon-button>
+                    <iron-icon on-tap="opendelete" class="smallicon" icon="delete" title="delete"></iron-icon>
                 </div>
                 <div id="righticons" class$="[[checksize(currentinfo.project_type_class)]]">
-                    <paper-icon-button on-tap="goprint" class$="[[printclass(currentinfo.project_type_class, currentinfo.source_translations)]]" icon="print" title="print"></paper-icon-button>
-                    <paper-icon-button on-tap="goreview" class="smallicon" icon="done-all" title="review"></paper-icon-button>
-                    <paper-icon-button on-tap="goexport" class="smallicon" icon="file-upload" title="upload/export"></paper-icon-button>
+                    <iron-icon on-tap="goprint" class$="[[printclass(currentinfo.project_type_class, currentinfo.source_translations)]]" icon="print" title="print"></iron-icon>
+                    <iron-icon on-tap="goreview" class="smallicon" icon="done-all" title="review"></iron-icon>
+                    <iron-icon on-tap="goexport" class="smallicon" icon="file-upload" title="upload/export"></iron-icon>
                 </div>
             </div>
             <div id="infobuttons">

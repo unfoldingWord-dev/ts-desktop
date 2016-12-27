@@ -10,17 +10,20 @@
         :host {
             display: flex;
             flex-direction: column;
+            padding: 0;
             color: var(--primary-text-color);
         }
 
         #header {
-            flex: 0 0 30px;
+            flex: 0 0 50px;
+            padding: 0 25px;
         }
 
         #info {
             flex: auto;
             display: flex;
             flex-direction: column;
+            padding: 0 25px;
         }
 
         #info p {
@@ -49,12 +52,17 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 20px;
+            padding: 0 30px;
+            margin: 15px 0;
         }
 
         #righticons {
             display: flex;
             justify-content: flex-end;
+        }
+
+        #righticons iron-icon {
+            margin-left: 50px;
         }
 
         iron-icon {
@@ -69,7 +77,7 @@
         }
 
         #footer {
-            flex: 0 0 20px;
+            flex: 0 0 30px;
             display: flex;
             justify-content: center;
             align-items: center;

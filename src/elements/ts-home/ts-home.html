@@ -12,6 +12,7 @@
 <link rel="import" href="./ts-home-sidebar.html">
 <link rel="import" href="./ts-completion-icon.html">
 <link rel="import" href="./ts-resource-options.html">
+<link rel="import" href="./ts-project-info.html">
 
 <dom-module id="ts-home">
 
@@ -183,63 +184,8 @@
         }
 
         #info {
-            display: flex;
-            flex-direction: column;
             width: 400px;
             height: 420px;
-        }
-
-        #info p {
-            margin: 0;
-            font-size: 110%;
-        }
-
-        #infoheader {
-            flex: 0 0 30px;
-        }
-
-        #infodata {
-            flex: auto;
-            display: flex;
-            flex-direction: column;
-        }
-
-        #namebox {
-            flex: 0 0 100px;
-            padding-left: 30px;
-            border: 1px solid var(--border-color);
-            overflow-y: auto;
-        }
-
-        #infoicons {
-            border-bottom: 1px solid var(--border-color);
-            border-top: 1px solid var(--border-color);
-            flex: 0 0 60px;
-            align-self: stretch;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-        }
-
-        #righticons {
-            display: flex;
-            justify-content: space-between;
-        }
-
-        #righticons.big {
-            width: 50%;
-        }
-
-        #righticons.small {
-            width: 30%;
-        }
-
-        #infobuttons {
-            flex: 0 0 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
 
         #delete {
@@ -282,12 +228,6 @@
 
         .space {
             padding-left: 5px;
-        }
-
-        .link {
-            cursor: pointer;
-            color: var(--accent-color);
-            padding-left: 20px;
         }
 
         .hide {
@@ -359,36 +299,7 @@
         </div>
 
         <paper-dialog id="info" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <div id="infoheader">
-                <h2><span>[[currentinfo.project.name]]</span> — <span>[[currentinfo.target_language.name]]</span></h2>
-            </div>
-            <div id="infodata">
-                <p>{{locale.project}}: <strong><span>[[currentinfo.project.name]]</span> (<span>[[currentinfo.project.id]]</span>)</strong></p>
-                <p>{{locale.target_language}}: <strong><span>[[currentinfo.target_language.name]]</span> (<span>[[currentinfo.target_language.id]]</span>)</strong><span class="link" on-tap="changelanguage">Change</span></p>
-                <p class$="[[idclass(currentinfo.resource.id)]]">Resource type: <strong><span>[[currentinfo.resource.id]]</span></strong><span class="link" on-tap="openresource">Change</span></p>
-                <p>{{locale.progress}}: <strong><span>[[currentinfo.completion]]</span>%</strong></p>
-                <p>{{locale.translators}}:</p>
-                <template is="dom-if" if="{{currentinfo.translators.length}}">
-                    <div id="namebox">
-                        <template is="dom-repeat" items="{{currentinfo.translators}}" as="user">
-                            <p><strong>{{user}}</strong></p>
-                        </template>
-                    </div>
-                </template>
-            </div>
-            <div id="infoicons">
-                <div id="lefticon">
-                    <iron-icon on-tap="opendelete" class="smallicon" icon="delete" title="delete"></iron-icon>
-                </div>
-                <div id="righticons" class$="[[checksize(currentinfo.project_type_class)]]">
-                    <iron-icon on-tap="goprint" class$="[[printclass(currentinfo.project_type_class, currentinfo.source_translations)]]" icon="print" title="print"></iron-icon>
-                    <iron-icon on-tap="goreview" class="smallicon" icon="done-all" title="review"></iron-icon>
-                    <iron-icon on-tap="goexport" class="smallicon" icon="file-upload" title="upload/export"></iron-icon>
-                </div>
-            </div>
-            <div id="infobuttons">
-                <paper-button on-tap="closeinfo">{{locale.dismiss}}</paper-button>
-            </div>
+            <ts-project-info currentinfo="{{currentinfo}}"></ts-project-info>
         </paper-dialog>
 
         <paper-dialog id="delete" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">

@@ -76,15 +76,15 @@
                 <span>Uploads project to your Door43 Account</span>
                 <span>By uploading the project to your Door43 account, the content is available to be downloaded by other translators, merged with other projects, or used as an online backup.</span>
             </div>
-            <div class$="[[checkusfmclass(exportdata.project_type_class, exportdata.format, exportdata.source_translations)]]" on-tap="checkusfm">
+            <div class$="[[checkusfmclass(currentproject.projectmeta.project_type_class, currentproject.projectmeta.format, currentproject.projectmeta.source_translations)]]" on-tap="checkusfm">
                 <span class="optiontitle">Export to USFM File</span>
                 <span>Creates a .usfm file of your project</span>
             </div>
-            <div class$="[[checkmarkdownclass(exportdata.project_type_class, exportdata.format, exportdata.source_translations)]]" on-tap="checkusfm">
+            <div class$="[[checkmarkdownclass(currentproject.projectmeta.project_type_class, currentproject.projectmeta.format, currentproject.projectmeta.source_translations)]]" on-tap="checkusfm">
                 <span class="optiontitle">Export to Text Files</span>
                 <span>Creates a .zip file of your project</span>
             </div>
-            <div class$="[[checkprintclass(exportdata.project_type_class, exportdata.source_translations)]]" on-tap="checkprint">
+            <div class$="[[checkprintclass(currentproject.projectmeta.project_type_class, currentproject.projectmeta.source_translations)]]" on-tap="checkprint">
                 <span class="optiontitle">Export to PDF File</span>
                 <span>Creates a .pdf file of your project</span>
             </div>
@@ -108,7 +108,7 @@
         is: 'ts-export-options',
 
         properties: {
-            exportdata: {
+            currentproject: {
                 type: Object,
                 value: {}
             }

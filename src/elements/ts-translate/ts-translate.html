@@ -1408,13 +1408,12 @@
 
         goexport: function () {
             var mythis = this;
-            var projectmeta = mythis.currentproject.projectmeta;
 
             mythis.stoptimers();
             return mythis.saveAll()
                 .then(function () {
                     mythis.fire('iron-signal', {name: 'closeloading'});
-                    mythis.fire('iron-signal', {name: 'openexport', data: {projectmeta: projectmeta}});
+                    mythis.fire('iron-signal', {name: 'openexport'});
                     mythis.starttimers();
                 });
         },

@@ -170,9 +170,7 @@
         },
 
         goexport: function () {
-            var projectmeta = this.currentproject.projectmeta;
-
-            this.fire('iron-signal', {name: 'openexport', data: {projectmeta: projectmeta}});
+            this.fire('iron-signal', {name: 'openexport'});
         },
 
         goback: function () {

@@ -267,6 +267,8 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
 
                     if (results.length) {
                         sorted.push(results[0]);
+                    } else {
+                        console.log("Cannot find data for:", container, chapter, chunk);
                     }
                 });
             });

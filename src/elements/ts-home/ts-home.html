@@ -23,6 +23,12 @@
             color: var(--primary-text-color);
         }
 
+        ts-new-project-button {
+            position: absolute;
+            right: 15px;
+            top: 20px;
+        }
+
         #main {
             flex: auto;
             display: flex;
@@ -35,23 +41,12 @@
             flex: 0 0 50px;
             display: flex;
             align-items: center;
-            justify-content: flex-start;
             box-shadow: 0 1px 5px -2px var(--secondary-text-color);
-        }
-
-        #title {
-            flex: auto;
             font-size: 125%;
-            padding-left: 20px;
+            padding: 0 30px;
         }
 
-        ts-new-project-button {
-            position: absolute;
-            right: 15px;
-            top: 20px;
-        }
-
-        .contain {
+        #body {
             flex: auto;
             display: flex;
             flex-direction: column;
@@ -63,6 +58,7 @@
             box-shadow: 0 2px 3px 2px var(--border-color);
             width: 450px;
             margin: 30px 0;
+            padding: 0 25px;
         }
 
         #start {
@@ -70,24 +66,19 @@
             color: var(--reverse-text-color);
         }
 
-        #main p {
-            font-size: 110%;
-            padding: 0 25px;
+        #sort {
+            flex: 0 0 50px;
+            display: flex;
+            width: 630px;
+            justify-content: space-around;
         }
 
         #headings {
             flex: 0 0 40px;
-            width: 620px;
+            width: 630px;
             display: flex;
             align-items: flex-end;
             padding-bottom: 10px;
-        }
-
-        #sort {
-            flex: 0 0 50px;
-            display: flex;
-            width: 620px;
-            justify-content: space-around;
         }
 
         #list {
@@ -95,19 +86,18 @@
             display: flex;
             flex-direction: column;
             font-size: 110%;
-            width: 620px;
+            width: 630px;
             overflow-y: auto;
         }
 
         .row {
+            flex: 0 0 60px;
             display: flex;
+            justify-content: space-between;
+            align-items: center;
             background: var(--card-background-color);
             border-bottom: 1px solid var(--border-color);
             transition: background .3s, color .3s;
-            cursor: pointer;
-            flex: 0 0 60px;
-            justify-content: flex-start;
-            align-items: center;
         }
 
         .row:hover {
@@ -117,6 +107,16 @@
         .left {
             display: flex;
             align-items: center;
+            cursor: pointer;
+        }
+
+        .info {
+            --iron-icon-height: 24px;
+            --iron-icon-width: 24px;
+            color: var(--icon-color);
+            margin-right: 10px;
+            padding: 8px;
+            cursor: pointer;
         }
 
         .smallspan {
@@ -135,19 +135,10 @@
             display: inline-block;
         }
 
-        .smallicon {
+        .icon {
             --iron-icon-height: 24px;
             --iron-icon-width: 24px;
             color: var(--secondary-text-color);
-            cursor: pointer;
-        }
-
-        .info {
-            --iron-icon-height: 24px;
-            --iron-icon-width: 24px;
-            color: var(--icon-color);
-            padding: 8px;
-            cursor: pointer;
         }
 
         .smalltext {
@@ -175,14 +166,6 @@
             color: var(--accent-color);
         }
 
-        .popup paper-button:hover {
-            color: var(--accent-color);
-        }
-
-        .popup iron-icon:hover {
-            color: var(--accent-color);
-        }
-
         #info {
             width: 400px;
             height: 420px;
@@ -197,14 +180,8 @@
             padding-right: 10px;
         }
 
-        #delete p {
+        p {
             font-size: 110%;
-        }
-
-        #deletebuttons {
-            display: flex;
-            justify-content: flex-end;
-            padding: 0 50px;
         }
 
         #resource {
@@ -220,10 +197,6 @@
         #confirmchange {
             width: 450px;
             height: 200px;
-        }
-
-        #confirmchange p {
-            font-size: 110%;
         }
 
         .space {
@@ -242,20 +215,18 @@
 
         <div id="main">
             <div id="header">
-                <div id="title">{{locale.home_title}}</div>
+                <span>{{locale.home_title}}</span>
             </div>
-            <template is="dom-if" if="{{!projectlist.length}}">
-                <div class="contain">
+            <div id="body">
+                <template is="dom-if" if="{{!projectlist.length}}">
                     <div id="welcome">
                         <p>{{locale.welcome}}</p>
                         <p>{{locale.home_welcome1}}</p>
                         <p>{{locale.home_welcome2}}</p>
                     </div>
                     <paper-button raised id="start" on-tap="startnew">{{locale.start_new_project}}</paper-button>
-                </div>
-            </template>
-            <template is="dom-if" if="{{projectlist.length}}">
-                <div class="contain">
+                </template>
+                <template is="dom-if" if="{{projectlist.length}}">
                     <div id="sort">
                         <paper-dropdown-menu id="sortorder" label="Columns To Sort By">
                             <paper-listbox id="sort1" class="dropdown-content">
@@ -282,20 +253,18 @@
                         <template is="dom-repeat" items="[[projectlist]]" as="project">
                             <div class="row">
                                 <div class="left" on-tap="openproject">
-                                    <span class="smallspan"><iron-icon class="smallicon" icon$="[[checkicon(project)]]"></iron-icon></span>
+                                    <span class="smallspan"><iron-icon class="icon" icon$="[[checkicon(project)]]"></iron-icon></span>
                                     <span class="bigspan">[[project.project.name]]</span>
                                     <span class="medspan smalltext"><span>[[project.type.name]]</span><span class$="[[typeclass(project.resource.id)]]">[[project.resource.id]]</span></span>
                                     <span class="smalltext bigspan">[[project.target_language.name]]</span>
                                     <span class="smallspan"><ts-completion-icon percent="[[project.completion]]"></ts-completion-icon></span>
                                 </div>
-                                <div>
-                                    <span><iron-icon class="info" icon="info" on-tap="openinfo" title="details"></iron-icon></span>
-                                </div>
+                                <iron-icon class="info" icon="info" on-tap="openinfo" title="details"></iron-icon>
                             </div>
                         </template>
                     </div>
-                </div>
-            </template>
+                </template>
+            </div>
         </div>
 
         <paper-dialog id="info" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -307,7 +276,7 @@
             <div>
                 <p>{{locale.confirm_delete_translation}}</p>
             </div>
-            <div id="deletebuttons">
+            <div class="buttons">
                 <paper-button on-tap="closedelete">Cancel</paper-button>
                 <paper-button on-tap="deleteproject">{{locale.confirm}}</paper-button>
             </div>

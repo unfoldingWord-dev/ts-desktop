@@ -136,25 +136,7 @@
         is: 'ts-project-info',
 
         properties: {
-            route: {
-                type: String,
-                value: '',
-                notify: true
-            },
             currentproject: {
-                type: Object,
-                value: {}
-            },
-            projectlist: {
-                type: Array,
-                value: []
-            },
-            importdata: {
-                type: Object,
-                value: {},
-                notify: true
-            },
-            changedata: {
                 type: Object,
                 value: {}
             },
@@ -164,8 +146,8 @@
             }
         },
 
-        printclass: function (typeclass, sources) {
-            return typeclass === "standard" && sources.length ? '' : 'hide';
+        printclass: function (type, sources) {
+            return type === "standard" && sources.length ? '' : 'hide';
         },
 
         idclass: function (id) {
@@ -179,29 +161,7 @@
         },
 
         openresource: function () {
-            this.closeinfo();
-            this.$.resource.open();
-        },
-
-        cancelresource: function () {
-            this.$.resource.close();
-            this.$.info.open();
-        },
-
-        cancelconfirm: function () {
-            this.$.confirmchange.close();
-            this.$.resource.open();
-        },
-
-        openconfirm: function () {
-            this.$.resource.close();
-            this.$.confirmchange.open();
-        },
-
-        firechange: function () {
-            this.$.confirmchange.close();
-            this.$.resource.close();
-            this.fire('iron-signal', {name: 'changeproject', data: this.changedata});
+            this.fire('openresource');
         },
 
         goprint: function () {
@@ -222,35 +182,16 @@
             this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: "review"}});
         },
 
-        openproject: function (e) {
-            var projectmeta = e.model.project;
-            this.fire('iron-signal', {name: 'translateright'});
-            this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: "translate"}});
-        },
-
         closeinfo: function () {
-            this.$.info.close();
+            this.fire('closeinfo');
         },
 
         opendelete: function () {
-            this.closeinfo();
-            this.$.delete.open();
-        },
-
-        closedelete: function () {
-            this.$.delete.close();
-            this.$.info.open();
-        },
-
-        deleteproject: function () {
-            var projectmeta = this.currentproject.projectmeta;
-
-            this.$.delete.close();
-            this.fire('iron-signal', {name: 'deleteproject', data: {projectmeta: projectmeta}});
+            this.fire('opendelete');
         },
 
         ready: function() {
-            this.locale = App.locale.dictionary;
+
         }
 
     });

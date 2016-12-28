@@ -122,11 +122,11 @@
 
         <div id="content">
             <div id="modes">
-                <iron-icon class$="[[readclass(currentproject.projectmeta.project_type_class, selected, bemode)]]" icon="subject" on-tap="readmode"></iron-icon>
-                <iron-icon class$="[[chunkclass(currentproject.projectmeta.project_type_class, selected, bemode)]]" icon="content-copy" on-tap="chunkmode"></iron-icon>
-                <iron-icon class$="[[reviewclass(currentproject.projectmeta.project_type_class, selected)]]" icon="view-week" on-tap="reviewmode"></iron-icon>
-                <iron-icon class$="[[simpleclass(currentproject.projectmeta.project_type_class, selected, bemode)]]" icon="subject" on-tap="readmode"></iron-icon>
-                <iron-icon class$="[[conflictclass(currentproject.projectmeta.project_type_class, currentproject.conflicts, selected)]]" icon="warning" on-tap="conflictmode"></iron-icon>
+                <iron-icon class$="[[readclass(currentproject.projectmeta.project_type_class, selected, bemode)]]" icon="subject" title="Read" on-tap="readmode"></iron-icon>
+                <iron-icon class$="[[chunkclass(currentproject.projectmeta.project_type_class, selected, bemode)]]" icon="content-copy" title="Blind Edit" on-tap="chunkmode"></iron-icon>
+                <iron-icon class$="[[reviewclass(currentproject.projectmeta.project_type_class, selected)]]" icon="view-week" title="Edit-Review" on-tap="reviewmode"></iron-icon>
+                <iron-icon class$="[[simpleclass(currentproject.projectmeta.project_type_class, selected, bemode)]]" icon="subject" title="Read" on-tap="readmode"></iron-icon>
+                <iron-icon class$="[[conflictclass(currentproject.projectmeta.project_type_class, currentproject.conflicts, selected)]]" icon="warning" title="Conflicts" on-tap="conflictmode"></iron-icon>
             </div>
             <div id="nav" class$="[[nosourceclass(selected)]]">
                 <iron-icon class="rotate" icon="first-page" title="top" on-tap="gotop"></iron-icon>

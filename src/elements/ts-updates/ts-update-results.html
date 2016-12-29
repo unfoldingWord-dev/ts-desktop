@@ -206,6 +206,7 @@
           var mythis = this;
           var list = _.cloneDeep(this.resultslist);
           var english = false;
+          var obs = false;
           var promises = Promise.resolve(false);
           var results = [];
           var completed = 0;
@@ -228,13 +229,16 @@
                       })
                       .then(function (result) {
                           completed++;
-                          var total = english ? list.length + 1 : list.length;
+                          var total = english || obs ? list.length + 1 : list.length;
                           var value = Math.round(completed / total * 100);
                           mythis.set('options.value', value);
                           results.push(result);
                       });
-                  if (item.language.slug === "en" && item.resource.slug !== "tw") {
+                  if (item.language.slug === "en" && item.resource.slug === "ulb") {
                       english = true;
+                  }
+                  if (item.language.slug === "en" && item.resource.slug === "obs") {
+                      obs = true;
                   }
               });
 
@@ -245,6 +249,15 @@
                                   return true;
                               });
                       });
+              }
+
+              if (obs) {
+                  promises = promises.then(function () {
+                      return App.dataManager.downloadContainer('en', 'bible-obs', 'tw')
+                          .catch(function () {
+                              return true;
+                          });
+                  });
               }
 
               return promises

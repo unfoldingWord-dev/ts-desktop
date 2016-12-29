@@ -209,15 +209,15 @@ function info(os) {
     let princeDir = '';
     let princePrefix = '';
     let princeBinary = '';
-    if(/win/.test(os)) {
+    if(/^win/.test(os)) {
         princeDir = 'win';
         princePrefix = princeDir;
         princeBinary = path.join(princePrefix, 'bin', 'prince.exe');
-    } else if(/(darwin)|(osx)|(macos)/.test(os)) {
+    } else if(/^darwin/.test(os)) {
         princeDir = 'osx';
         princePrefix = path.join(princeDir, 'lib', 'prince');
         princeBinary = path.join(princePrefix, 'bin', 'prince');
-    } else if(/linux/.test(os)) {
+    } else if(/^linux/.test(os)) {
         princeDir = 'linux';
         princePrefix = path.join(princeDir, 'lib', 'prince');
         princeBinary = path.join(princePrefix, 'bin', 'prince');

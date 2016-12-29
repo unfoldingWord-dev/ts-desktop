@@ -155,7 +155,7 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                     item.errmsg = errmessage;
                 })
                 .then(function () {
-                    if (resource === "ulb") {
+                    if (resource === "ulb" || resource === "obs") {
                         return mythis.downloadContainer(language, project, "tn")
                             .catch(function () {
                                 return true;
@@ -163,8 +163,16 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                     }
                 })
                 .then(function () {
-                    if (resource === "ulb") {
+                    if (resource === "ulb" || resource === "obs") {
                         return mythis.downloadContainer(language, project, "tq")
+                            .catch(function () {
+                                return true;
+                            });
+                    }
+                })
+                .then(function () {
+                    if (resource === "ulb") {
+                        return mythis.downloadContainer(language, project, "udb")
                             .catch(function () {
                                 return true;
                             });
@@ -207,22 +215,28 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
 
             return mythis.activateContainer(language, project, resource)
                 .then(function () {
-                    return mythis.activateContainer(language, project, "tn")
-                        .catch(function () {
-                            return true;
-                        });
+                    if (resource === "ulb" || resource === "obs") {
+                        return mythis.activateContainer(language, project, "tn")
+                            .catch(function () {
+                                return true;
+                            });
+                    }
                 })
                 .then(function () {
-                    return mythis.activateContainer(language, project, "tq")
-                        .catch(function () {
-                            return true;
-                        });
+                    if (resource === "ulb" || resource === "obs") {
+                        return mythis.activateContainer(language, project, "tq")
+                            .catch(function () {
+                                return true;
+                            });
+                    }
                 })
                 .then(function () {
-                    return mythis.activateContainer(language, project, "udb")
-                        .catch(function () {
-                            return true;
-                        });
+                    if (resource === "ulb") {
+                        return mythis.activateContainer(language, project, "udb")
+                            .catch(function () {
+                                return true;
+                            });
+                    }
                 });
         },
 
@@ -267,6 +281,8 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
 
                     if (results.length) {
                         sorted.push(results[0]);
+                    } else {
+                        console.log("Cannot find data for:", container, chapter, chunk);
                     }
                 });
             });
@@ -309,6 +325,7 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
 
         getSourceUdb: function (source) {
             var container = source.language_id + "_" + source.project_id + "_udb";
+
             if (source.resource_id === "ulb") {
                 return this.extractContainer(container);
             } else {
@@ -319,52 +336,64 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
         getSourceNotes: function (source) {
             var mythis = this;
             var container = source.language_id + "_" + source.project_id + "_tn";
-            var frames = this.extractContainer(container);
 
-            frames.forEach(function (item) {
-                if (item.content) {
-                    item.content = mythis.parseHelps(item.content);
-                }
-            });
+            if (source.resource_id === "ulb" || source.resource_id === "obs") {
+                var frames = this.extractContainer(container);
 
-            return frames;
+                frames.forEach(function (item) {
+                    if (item.content) {
+                        item.content = mythis.parseHelps(item.content);
+                    }
+                });
+
+                return frames;
+            } else {
+                return [];
+            }
         },
 
         getSourceQuestions: function (source) {
             var mythis = this;
             var container = source.language_id + "_" + source.project_id + "_tq";
-            var markers = this.getChunkMarkers(source.project_id);
-            var frames = this.extractContainer(container);
 
-            frames.forEach(function (frame) {
-                var lastverse = "01";
-                var stop = false;
+            if (source.resource_id === "ulb" || source.resource_id === "obs") {
+                var markers = this.getChunkMarkers(source.project_id);
+                var frames = this.extractContainer(container);
 
-                markers.forEach(function (marker) {
-                    if (stop || frame.chapter < marker.chapter || (frame.chapter === marker.chapter && frame.chunk < marker.verse)) {
-                        stop = true;
-                    } else {
-                        lastverse = marker.verse;
+                if (source.resource_id === "ulb") {
+                    frames.forEach(function (frame) {
+                        var lastverse = "01";
+                        var stop = false;
+
+                        markers.forEach(function (marker) {
+                            if (stop || frame.chapter < marker.chapter || (frame.chapter === marker.chapter && frame.chunk < marker.verse)) {
+                                stop = true;
+                            } else {
+                                lastverse = marker.verse;
+                            }
+                        });
+                        frame.chunk = lastverse;
+                    });
+
+                    for (var i = 1; i < frames.length; i++) {
+                        if (frames[i].chapter === frames[i-1].chapter && frames[i].chunk === frames[i-1].chunk) {
+                            frames[i-1].content = frames[i-1].content + "\n\n" + frames[i].content;
+                            frames.splice(i, 1);
+                            i--;
+                        }
+                    }
+                }
+
+                frames.forEach(function (item) {
+                    if (item.content) {
+                        item.content = mythis.parseHelps(item.content);
                     }
                 });
-                frame.chunk = lastverse;
-            });
 
-            for (var i = 1; i < frames.length; i++) {
-                if (frames[i].chapter === frames[i-1].chapter && frames[i].chunk === frames[i-1].chunk) {
-                    frames[i-1].content = frames[i-1].content + "\n\n" + frames[i].content;
-                    frames.splice(i, 1);
-                    i--;
-                }
+                return frames;
+            } else {
+                return [];
             }
-
-            frames.forEach(function (item) {
-                if (item.content) {
-                    item.content = mythis.parseHelps(item.content);
-                }
-            });
-
-            return frames;
         },
 
         getSourceWords: function (source) {

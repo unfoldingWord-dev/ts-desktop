@@ -48,7 +48,7 @@
             <h2>Project Change Detected</h2>
         </div>
         <div id="body">
-            <p>There are changes to your translation of <span>[[exportdata.project.name]]</span> in <span>[[exportdata.target_language.name]]</span> on your Door43 account. Would you like to import those changes now?</p>
+            <p>There are changes to your translation of <span>[[currentproject.projectmeta.project.name]]</span> in <span>[[currentproject.projectmeta.target_language.name]]</span> on your Door43 account. Would you like to import those changes now?</p>
         </div>
         <div id="footer">
             <paper-button dialog-dismiss>No</paper-button>
@@ -66,7 +66,7 @@
         is: 'ts-conflict',
 
         properties: {
-            exportdata: {
+            currentproject: {
                 type: Object,
                 value: {}
             },
@@ -84,7 +84,7 @@
         importchanges: function () {
             var mythis = this;
 
-            return App.userManager.retrieveRepos(this.currentuser.username, this.exportdata.unique_id)
+            return App.userManager.retrieveRepos(this.currentuser.username, this.currentproject.projectmeta.unique_id)
                 .then(function (repos) {
                     mythis.set('importdata', {repo: repos[0], force: true});
                     mythis.fire('startrepoimport');

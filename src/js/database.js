@@ -171,6 +171,14 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                     }
                 })
                 .then(function () {
+                    if (resource === "ulb") {
+                        return mythis.downloadContainer(language, project, "udb")
+                            .catch(function () {
+                                return true;
+                            });
+                    }
+                })
+                .then(function () {
                     return item;
                 });
         },

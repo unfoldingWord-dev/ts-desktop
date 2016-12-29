@@ -215,22 +215,28 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
 
             return mythis.activateContainer(language, project, resource)
                 .then(function () {
-                    return mythis.activateContainer(language, project, "tn")
-                        .catch(function () {
-                            return true;
-                        });
+                    if (resource === "ulb") {
+                        return mythis.activateContainer(language, project, "tn")
+                            .catch(function () {
+                                return true;
+                            });
+                    }
                 })
                 .then(function () {
-                    return mythis.activateContainer(language, project, "tq")
-                        .catch(function () {
-                            return true;
-                        });
+                    if (resource === "ulb") {
+                        return mythis.activateContainer(language, project, "tq")
+                            .catch(function () {
+                                return true;
+                            });
+                    }
                 })
                 .then(function () {
-                    return mythis.activateContainer(language, project, "udb")
-                        .catch(function () {
-                            return true;
-                        });
+                    if (resource === "ulb") {
+                        return mythis.activateContainer(language, project, "udb")
+                            .catch(function () {
+                                return true;
+                            });
+                    }
                 });
         },
 

@@ -155,7 +155,7 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                     item.errmsg = errmessage;
                 })
                 .then(function () {
-                    if (resource === "ulb") {
+                    if (resource === "ulb" || resource === "obs") {
                         return mythis.downloadContainer(language, project, "tn")
                             .catch(function () {
                                 return true;
@@ -163,7 +163,7 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                     }
                 })
                 .then(function () {
-                    if (resource === "ulb") {
+                    if (resource === "ulb" || resource === "obs") {
                         return mythis.downloadContainer(language, project, "tq")
                             .catch(function () {
                                 return true;
@@ -215,7 +215,7 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
 
             return mythis.activateContainer(language, project, resource)
                 .then(function () {
-                    if (resource === "ulb") {
+                    if (resource === "ulb" || resource === "obs") {
                         return mythis.activateContainer(language, project, "tn")
                             .catch(function () {
                                 return true;
@@ -223,7 +223,7 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                     }
                 })
                 .then(function () {
-                    if (resource === "ulb") {
+                    if (resource === "ulb" || resource === "obs") {
                         return mythis.activateContainer(language, project, "tq")
                             .catch(function () {
                                 return true;

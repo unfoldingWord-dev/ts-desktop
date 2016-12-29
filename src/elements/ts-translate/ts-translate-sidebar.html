@@ -274,7 +274,11 @@
                 var filtered = chunks.filter(function (chunk) {
                     return chunk.chunkmeta.frameid.toLowerCase() >= input.toLowerCase();
                 });
-                if (filtered.length) {
+                if (input === "@") {
+                    this.set('modestatus.index', 0);
+                } else if (input === "[") {
+                    this.set('modestatus.index', length - 1);
+                } else if (filtered.length) {
                     this.set('modestatus.index', filtered[0].index);
                 }
             } else if (input > 0 && input <= max) {

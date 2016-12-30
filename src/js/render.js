@@ -57,7 +57,7 @@ function Renderer() {
             return text.replace(expression, "");
         },
 
-        renderSourceWithVerses: function (text) {
+        renderSuperscriptVerses: function (text) {
             var expression = new RegExp(/(\\v )(\d+-?\d*)(\s+)/);
 
             while (expression.test(text)) {
@@ -69,34 +69,31 @@ function Renderer() {
             return text;
         },
 
-        renderTargetWithVerses: function (text, module) {
-            var linearray = text.split("\n");
-            var numstr1 = "\<sup\>";
-            var numstr2 = "\<\/sup\>";
+        renderParagraphs: function (text, module) {
+            var expression = new RegExp(/([^>\n]*)([\n])/);
             var startp = "\<p class='style-scope " + module + "'\>";
             var endp = "\<\/p\>";
-            var returnstr = "";
 
-            for (var j = 0; j < linearray.length; j++) {
-                returnstr += startp;
-                if (linearray[j] === "") {
-                    returnstr += "&nbsp";
-                } else {
-                    var wordarray = linearray[j].split(" ");
-                    for (var i = 0; i < wordarray.length; i++) {
-                        if (wordarray[i] === "\\v") {
-                            var verse = wordarray[i+1];
-                            returnstr += numstr1 + verse + numstr2;
-                            i++;
-                        } else {
-                            returnstr += wordarray[i] + " ";
-                        }
-                    }
-                    returnstr = returnstr.trim();
+            text = text + "\n";
+
+            while (expression.test(text)) {
+                var paragraph = expression.exec(text)[1];
+
+                if (!paragraph) {
+                    paragraph = "&nbsp";
                 }
-                returnstr += endp;
+
+                text = text.replace(expression, startp + paragraph + endp);
             }
-            return returnstr;
+
+            return text;
+        },
+
+        renderTargetWithVerses: function (text, module) {
+            text = this.renderParagraphs(text, module);
+            text = this.renderSuperscriptVerses(text);
+
+            return text;
         },
 
         checkForConflicts: function (content) {

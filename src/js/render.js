@@ -7,13 +7,12 @@ function Renderer() {
     return {
 
         convertVerseMarkers: function (text) {
-            var startstr = '<verse number="';
-            var endstr = '" style="v" />';
-            var expression = new RegExp(startstr);
+            var expression = new RegExp(/(\s*<verse[^<>\"]*\")(\d+-?\d*)(\"[^<>]*>)/);
             var verses = [];
 
             while (expression.test(text)) {
-                var versestr = text.substring(text.search(startstr) + 15, text.search(endstr));
+                var versestr = expression.exec(text)[2];
+
                 if (versestr.indexOf("-") < 0) {
                     verses.push(parseInt(versestr));
                 } else {
@@ -23,8 +22,7 @@ function Renderer() {
                         verses.push(j);
                     }
                 }
-                text = text.replace(startstr, " \\v ");
-                text = text.replace(endstr, " ");
+                text = text.replace(expression, " \\v " + versestr + " ");
             }
             return {text: text, verses: verses};
         },
@@ -69,22 +67,15 @@ function Renderer() {
         },
 
         renderSourceWithVerses: function (text) {
-            var textarray = text.split(" ");
-            var numstr1 = "\<sup\>";
-            var numstr2 = "\<\/sup\>";
-            var returnstr = "";
-            var verse = 0;
+            var expression = new RegExp(/(\\v )(\d+-?\d*)(\s+)/);
 
-            for (var i = 0; i < textarray.length; i++) {
-                if (textarray[i] === "\\v") {
-                    verse = textarray[i+1];
-                    returnstr += numstr1 + verse + numstr2;
-                    i++;
-                } else {
-                    returnstr += textarray[i] + " ";
-                }
+            while (expression.test(text)) {
+                var versestr = expression.exec(text)[2];
+
+                text = text.replace(expression, "\<sup\>" + versestr + "\<\/sup\>");
             }
-            return returnstr.trim();
+
+            return text;
         },
 
         renderTargetWithVerses: function (text, module) {

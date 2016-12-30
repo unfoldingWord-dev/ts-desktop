@@ -161,10 +161,10 @@
         refresh: function () {
             var mythis = this;
 
+            mythis.getlocation();
             clearTimeout(mythis.timer);
 
             mythis.timer = setTimeout(function() {
-                mythis.getlocation();
                 mythis.setheights();
                 mythis.fire('iron-signal', {name: 'passivesearch'});
             }, 500);

@@ -112,10 +112,10 @@
         refresh: function () {
             var mythis = this;
 
+            mythis.getlocation();
             clearTimeout(mythis.timer);
 
             mythis.timer = setTimeout(function() {
-                mythis.getlocation();
                 mythis.setheights();
             }, 500);
         },

@@ -816,7 +816,6 @@
             var mythis = this;
             var projectmeta = mythis.currentproject.projectmeta;
             var source = projectmeta.source_translations[projectmeta.currentsource];
-            var review = this.$.reviewmode;
 
             return mythis.saveAll()
                 .then(function () {
@@ -1001,7 +1000,7 @@
                 if (word) {
                     words.push(word);
                 } else {
-                    console.log("Cannot find data for: " + frameword);
+                    console.log("Cannot find data for:", frame.chapter, frame.chunk, frameword);
                 }
             });
 
@@ -1408,13 +1407,12 @@
 
         goexport: function () {
             var mythis = this;
-            var projectmeta = mythis.currentproject.projectmeta;
 
             mythis.stoptimers();
             return mythis.saveAll()
                 .then(function () {
                     mythis.fire('iron-signal', {name: 'closeloading'});
-                    mythis.fire('iron-signal', {name: 'openexport', data: {projectmeta: projectmeta}});
+                    mythis.fire('iron-signal', {name: 'openexport'});
                     mythis.starttimers();
                 });
         },

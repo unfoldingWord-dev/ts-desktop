@@ -11,23 +11,23 @@
 <link rel="import" href="../ts-translate/ts-translate.html">
 <link rel="import" href="../ts-settings/ts-settings.html">
 <link rel="import" href="../ts-updates/ts-updates.html">
-<link rel="import" href="./ts-terms.html">
-<link rel="import" href="./ts-repo-search.html">
-<link rel="import" href="./ts-import-options.html">
-<link rel="import" href="./ts-feedback.html">
-<link rel="import" href="./ts-loading.html">
-<link rel="import" href="./ts-export-options.html">
-<link rel="import" href="./ts-update-options.html">
-<link rel="import" href="./ts-print-options.html">
-<link rel="import" href="./ts-license.html">
-<link rel="import" href="./ts-statement.html">
-<link rel="import" href="./ts-guidelines.html">
-<link rel="import" href="./ts-software.html">
-<link rel="import" href="./ts-attribution.html">
-<link rel="import" href="./ts-conflict.html">
-<link rel="import" href="./ts-import-confirm.html">
-<link rel="import" href="./ts-container-confirm.html">
 <link rel="import" href="../ts-print/ts-print.html">
+<link rel="import" href="../ts-dialogs/ts-repo-search.html">
+<link rel="import" href="../ts-dialogs/ts-import-options.html">
+<link rel="import" href="../ts-dialogs/ts-feedback.html">
+<link rel="import" href="../ts-dialogs/ts-loading.html">
+<link rel="import" href="../ts-dialogs/ts-export-options.html">
+<link rel="import" href="../ts-dialogs/ts-update-options.html">
+<link rel="import" href="../ts-dialogs/ts-print-options.html">
+<link rel="import" href="../ts-dialogs/ts-conflict.html">
+<link rel="import" href="../ts-dialogs/ts-import-confirm.html">
+<link rel="import" href="../ts-dialogs/ts-container-confirm.html">
+<link rel="import" href="../ts-legal/ts-terms.html">
+<link rel="import" href="../ts-legal/ts-license.html">
+<link rel="import" href="../ts-legal/ts-statement.html">
+<link rel="import" href="../ts-legal/ts-guidelines.html">
+<link rel="import" href="../ts-legal/ts-software.html">
+<link rel="import" href="../ts-legal/ts-attribution.html">
 
 <dom-module id="ts-dashboard">
 
@@ -157,7 +157,7 @@
 
       <ts-app-titlebar currentuser="[[currentuser]]"></ts-app-titlebar>
       <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
-          <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]" importdata="{{importdata}}" id="home"></ts-home>
+          <ts-home data-route="home" route="{{route}}" currentproject="{{currentproject}}" projectlist="[[projectlist]]" importdata="{{importdata}}" id="home"></ts-home>
           <ts-new data-route="new" route="{{route}}" importdata="{{importdata}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]" options="{{options}}" on-finishusfm="finishUsfmImport"></ts-new>
           <ts-translate data-route="translate" route="{{route}}" message="{{message}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}" id="translate" on-exportusfm="exportUsfm" on-openprint="openPrint"></ts-translate>
           <ts-review data-route="review" route="{{route}}" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}"></ts-review>
@@ -196,7 +196,7 @@
       </paper-dialog>
 
       <paper-dialog id="export" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-          <ts-export-options on-project="exportProject" on-upload="uploadProject" on-checkprint="checkPrint" on-checkusfm="checkUsfm" exportdata="[[exportdata]]"></ts-export-options>
+          <ts-export-options on-project="exportProject" on-upload="uploadProject" on-checkprint="checkPrint" on-checkusfm="checkUsfm" currentproject="[[currentproject]]"></ts-export-options>
       </paper-dialog>
 
       <paper-dialog id="update" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -224,7 +224,7 @@
       </paper-dialog>
 
       <paper-dialog id="conflict" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-          <ts-conflict exportdata="[[exportdata]]" importdata="{{importdata}}" currentuser="[[currentuser]]" on-startrepoimport="startRepoImport"></ts-conflict>
+          <ts-conflict currentproject="[[currentproject]]" importdata="{{importdata}}" currentuser="[[currentuser]]" on-startrepoimport="startRepoImport"></ts-conflict>
       </paper-dialog>
 
       <paper-dialog id="importconfirm" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -283,10 +283,6 @@
               value: {}
           },
           importdata: {
-              type: Object,
-              value: {}
-          },
-          exportdata: {
               type: Object,
               value: {}
           },
@@ -875,14 +871,13 @@
           }, 500);
       },
 
-      openExport: function (event, data) {
-          this.set('exportdata', data.projectmeta);
+      openExport: function () {
           this.$.export.open();
       },
 
       uploadProject: function () {
           var mythis = this;
-          var projectmeta = this.exportdata;
+          var projectmeta = this.currentproject.projectmeta;
           var loading = this.$.wideloading;
           var target = App.configurator.getValue('targetTranslationsDir');
           var paths = App.utils.makeProjectPaths(target, projectmeta);
@@ -958,8 +953,8 @@
 
       exportProject: function () {
           var mythis = this;
-          var meta = this.exportdata;
-          var defaultPath = App.configurator.getUserPath('datalocation', 'backups', meta.unique_id);
+          var projectmeta = this.currentproject.projectmeta;
+          var defaultPath = App.configurator.getUserPath('datalocation', 'backups', projectmeta.unique_id);
           var filePath = App.ipc.sendSync('save-as', {options: {defaultPath: defaultPath, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}]}});
           if (!filePath) {
               return;
@@ -969,7 +964,7 @@
           mythis.showLoadingMessage('Creating Project File.  Please wait...');
 
           setTimeout(function() {
-              return App.exportManager.backupTranslation(meta, filePath)
+              return App.exportManager.backupTranslation(projectmeta, filePath)
                   .then(function () {
                       mythis.showMessage('Project File Complete', 'Your project has been successfully saved.');
                   })
@@ -980,7 +975,7 @@
       },
 
       checkPrint: function () {
-          var projectmeta = this.exportdata;
+          var projectmeta = this.currentproject.projectmeta;
 
           this.$.export.close();
 
@@ -1043,7 +1038,7 @@
       },
 
       checkUsfm: function () {
-          var projectmeta = this.exportdata;
+          var projectmeta = this.currentproject.projectmeta;
 
           this.$.export.close();
 

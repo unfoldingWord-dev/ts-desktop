@@ -2,20 +2,17 @@
 <link rel="import" href="../../components/iron-resizable-behavior/iron-resizable-behavior.html">
 <link rel="import" href="../../components/iron-icons/iron-icons.html">
 <link rel="import" href="../../components/paper-button/paper-button.html">
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../components/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../../components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
-<link rel="import" href="../../components/iron-list/iron-list.html">
-<link rel="import" href="../../components/paper-progress/paper-progress.html">
-<link rel="import" href="../../components/iron-signals/iron-signals.html">
 
 <link rel="import" href="../ts-icons/ts-icons.html">
 <link rel="import" href="./ts-new-project-button.html">
 <link rel="import" href="./ts-home-sidebar.html">
 <link rel="import" href="./ts-completion-icon.html">
 <link rel="import" href="./ts-resource-options.html">
+<link rel="import" href="./ts-project-info.html">
 
 <dom-module id="ts-home">
 
@@ -24,6 +21,12 @@
         :host {
             display: flex;
             color: var(--primary-text-color);
+        }
+
+        ts-new-project-button {
+            position: absolute;
+            right: 15px;
+            top: 20px;
         }
 
         #main {
@@ -38,23 +41,12 @@
             flex: 0 0 50px;
             display: flex;
             align-items: center;
-            justify-content: flex-start;
             box-shadow: 0 1px 5px -2px var(--secondary-text-color);
-        }
-
-        #title {
-            flex: auto;
             font-size: 125%;
-            padding-left: 20px;
+            padding: 0 30px;
         }
 
-        ts-new-project-button {
-            position: absolute;
-            right: 15px;
-            top: 20px;
-        }
-
-        .contain {
+        #body {
             flex: auto;
             display: flex;
             flex-direction: column;
@@ -66,6 +58,7 @@
             box-shadow: 0 2px 3px 2px var(--border-color);
             width: 450px;
             margin: 30px 0;
+            padding: 0 25px;
         }
 
         #start {
@@ -73,24 +66,19 @@
             color: var(--reverse-text-color);
         }
 
-        #main p {
-            font-size: 110%;
-            padding: 0 1.5em;
+        #sort {
+            flex: 0 0 50px;
+            display: flex;
+            width: 630px;
+            justify-content: space-around;
         }
 
         #headings {
             flex: 0 0 40px;
-            width: 620px;
+            width: 630px;
             display: flex;
             align-items: flex-end;
             padding-bottom: 10px;
-        }
-
-        #sort {
-            flex: 0 0 50px;
-            display: flex;
-            width: 620px;
-            justify-content: space-around;
         }
 
         #list {
@@ -98,19 +86,18 @@
             display: flex;
             flex-direction: column;
             font-size: 110%;
-            width: 620px;
+            width: 630px;
             overflow-y: auto;
         }
 
         .row {
+            flex: 0 0 60px;
             display: flex;
+            justify-content: space-between;
+            align-items: center;
             background: var(--card-background-color);
             border-bottom: 1px solid var(--border-color);
             transition: background .3s, color .3s;
-            cursor: pointer;
-            flex: 0 0 60px;
-            justify-content: flex-start;
-            align-items: center;
         }
 
         .row:hover {
@@ -120,6 +107,16 @@
         .left {
             display: flex;
             align-items: center;
+            cursor: pointer;
+        }
+
+        .info {
+            --iron-icon-height: 24px;
+            --iron-icon-width: 24px;
+            color: var(--icon-color);
+            margin-right: 10px;
+            padding: 8px;
+            cursor: pointer;
         }
 
         .smallspan {
@@ -138,16 +135,10 @@
             display: inline-block;
         }
 
-        .smallicon {
-            --iron-icon-height: 18px;
-            --iron-icon-width: 18px;
+        .icon {
+            --iron-icon-height: 24px;
+            --iron-icon-width: 24px;
             color: var(--secondary-text-color);
-        }
-
-        .info {
-            --iron-icon-height: 22px;
-            --iron-icon-width: 22px;
-            color: var(--icon-color);
         }
 
         .smalltext {
@@ -175,72 +166,9 @@
             color: var(--accent-color);
         }
 
-        .popup paper-button:hover {
-            color: var(--accent-color);
-        }
-
-        .popup paper-icon-button:hover {
-            color: var(--accent-color);
-        }
-
         #info {
-            display: flex;
-            flex-direction: column;
             width: 400px;
             height: 420px;
-        }
-
-        #info p {
-            margin: 0;
-            font-size: 110%;
-        }
-
-        #infoheader {
-            flex: 0 0 30px;
-        }
-
-        #infodata {
-            flex: auto;
-            display: flex;
-            flex-direction: column;
-        }
-
-        #namebox {
-            flex: 0 0 100px;
-            padding-left: 30px;
-            border: 1px solid var(--border-color);
-            overflow-y: auto;
-        }
-
-        #infoicons {
-            border-bottom: 1px solid var(--border-color);
-            border-top: 1px solid var(--border-color);
-            flex: 0 0 60px;
-            align-self: stretch;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-        }
-
-        #righticons {
-            display: flex;
-            justify-content: space-between;
-        }
-
-        #righticons.big {
-            width: 50%;
-        }
-
-        #righticons.small {
-            width: 30%;
-        }
-
-        #infobuttons {
-            flex: 0 0 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
 
         #delete {
@@ -252,14 +180,8 @@
             padding-right: 10px;
         }
 
-        #delete p {
+        p {
             font-size: 110%;
-        }
-
-        #deletebuttons {
-            display: flex;
-            justify-content: flex-end;
-            padding: 0 50px;
         }
 
         #resource {
@@ -277,18 +199,8 @@
             height: 200px;
         }
 
-        #confirmchange p {
-            font-size: 110%;
-        }
-
         .space {
             padding-left: 5px;
-        }
-
-        .link {
-            cursor: pointer;
-            color: var(--accent-color);
-            padding-left: 20px;
         }
 
         .hide {
@@ -303,20 +215,18 @@
 
         <div id="main">
             <div id="header">
-                <div id="title">{{locale.home_title}}</div>
+                <span>{{locale.home_title}}</span>
             </div>
-            <template is="dom-if" if="{{!projectlist.length}}">
-                <div class="contain">
+            <div id="body">
+                <template is="dom-if" if="{{!projectlist.length}}">
                     <div id="welcome">
                         <p>{{locale.welcome}}</p>
                         <p>{{locale.home_welcome1}}</p>
                         <p>{{locale.home_welcome2}}</p>
                     </div>
                     <paper-button raised id="start" on-tap="startnew">{{locale.start_new_project}}</paper-button>
-                </div>
-            </template>
-            <template is="dom-if" if="{{projectlist.length}}">
-                <div class="contain">
+                </template>
+                <template is="dom-if" if="{{projectlist.length}}">
                     <div id="sort">
                         <paper-dropdown-menu id="sortorder" label="Columns To Sort By">
                             <paper-listbox id="sort1" class="dropdown-content">
@@ -343,53 +253,22 @@
                         <template is="dom-repeat" items="[[projectlist]]" as="project">
                             <div class="row">
                                 <div class="left" on-tap="openproject">
-                                    <span class="smallspan"><iron-icon class="smallicon" icon$="[[checkicon(project)]]"></iron-icon></span>
+                                    <span class="smallspan"><iron-icon class="icon" icon$="[[checkicon(project)]]"></iron-icon></span>
                                     <span class="bigspan">[[project.project.name]]</span>
                                     <span class="medspan smalltext"><span>[[project.type.name]]</span><span class$="[[typeclass(project.resource.id)]]">[[project.resource.id]]</span></span>
                                     <span class="smalltext bigspan">[[project.target_language.name]]</span>
                                     <span class="smallspan"><ts-completion-icon percent="[[project.completion]]"></ts-completion-icon></span>
                                 </div>
-                                <div>
-                                    <span><paper-icon-button class="info" icon="info" on-tap="openinfo" title="details"></paper-icon-button></span>
-                                </div>
+                                <iron-icon class="info" icon="info" on-tap="openinfo" title="details"></iron-icon>
                             </div>
-                        </template>
-                    </div>
-                </div>
-            </template>
-        </div>
-
-        <paper-dialog id="info" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <div id="infoheader">
-                <h2><span>[[currentinfo.project.name]]</span> — <span>[[currentinfo.target_language.name]]</span></h2>
-            </div>
-            <div id="infodata">
-                <p>{{locale.project}}: <strong><span>[[currentinfo.project.name]]</span> (<span>[[currentinfo.project.id]]</span>)</strong></p>
-                <p>{{locale.target_language}}: <strong><span>[[currentinfo.target_language.name]]</span> (<span>[[currentinfo.target_language.id]]</span>)</strong><span class="link" on-tap="changelanguage">Change</span></p>
-                <p class$="[[idclass(currentinfo.resource.id)]]">Resource type: <strong><span>[[currentinfo.resource.id]]</span></strong><span class="link" on-tap="openresource">Change</span></p>
-                <p>{{locale.progress}}: <strong><span>[[currentinfo.completion]]</span>%</strong></p>
-                <p>{{locale.translators}}:</p>
-                <template is="dom-if" if="{{currentinfo.translators.length}}">
-                    <div id="namebox">
-                        <template is="dom-repeat" items="{{currentinfo.translators}}" as="user">
-                            <p><strong>{{user}}</strong></p>
                         </template>
                     </div>
                 </template>
             </div>
-            <div id="infoicons">
-                <div id="lefticon">
-                    <paper-icon-button on-tap="opendelete" class="smallicon" icon="delete" title="delete"></paper-icon-button>
-                </div>
-                <div id="righticons" class$="[[checksize(currentinfo.project_type_class)]]">
-                    <paper-icon-button on-tap="goprint" class$="[[printclass(currentinfo.project_type_class, currentinfo.source_translations)]]" icon="print" title="print"></paper-icon-button>
-                    <paper-icon-button on-tap="goreview" class="smallicon" icon="done-all" title="review"></paper-icon-button>
-                    <paper-icon-button on-tap="goexport" class="smallicon" icon="file-upload" title="upload/export"></paper-icon-button>
-                </div>
-            </div>
-            <div id="infobuttons">
-                <paper-button on-tap="closeinfo">{{locale.dismiss}}</paper-button>
-            </div>
+        </div>
+
+        <paper-dialog id="info" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+            <ts-project-info currentproject="[[currentproject]]" locale="[[locale]]" on-closeinfo="closeinfo" on-opendelete="opendelete" on-openresource="openresource"></ts-project-info>
         </paper-dialog>
 
         <paper-dialog id="delete" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -397,7 +276,7 @@
             <div>
                 <p>{{locale.confirm_delete_translation}}</p>
             </div>
-            <div id="deletebuttons">
+            <div class="buttons">
                 <paper-button on-tap="closedelete">Cancel</paper-button>
                 <paper-button on-tap="deleteproject">{{locale.confirm}}</paper-button>
             </div>
@@ -415,7 +294,7 @@
         </paper-dialog>
 
         <paper-dialog id="resource" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <ts-resource-options currentinfo="[[currentinfo]]" changedata="{{changedata}}" on-confirm="openconfirm" on-change="firechange" on-cancel="cancelresource"></ts-resource-options>
+            <ts-resource-options currentproject="[[currentproject]]" changedata="{{changedata}}" on-confirm="openconfirm" on-change="firechange" on-cancel="cancelresource"></ts-resource-options>
         </paper-dialog>
 
         <ts-new-project-button route="{{route}}" on-startnew="startnew"></ts-new-project-button>
@@ -440,9 +319,10 @@
                 value: '',
                 notify: true
             },
-            currentinfo: {
+            currentproject: {
                 type: Object,
-                value: {}
+                value: {},
+                notify: true
             },
             projectlist: {
                 type: Array,
@@ -477,20 +357,8 @@
             }
         },
 
-        printclass: function (typeclass, sources) {
-            return typeclass === "standard" && sources.length ? 'smallicon' : 'hide';
-        },
-
-        checksize: function (typeclass) {
-            return typeclass === "standard" ? 'big' : 'small';
-        },
-
         typeclass: function (id) {
             return id === "ulb" || id === "udb" ? 'space' : 'hide';
-        },
-
-        idclass: function (id) {
-            return id === "" || id === "obs" ? 'hide' : '';
         },
 
         checkicon: function (projectmeta) {
@@ -547,12 +415,6 @@
             dropdown.close();
         },
 
-        changelanguage: function () {
-            var projectmeta = this.currentinfo;
-            this.closeinfo();
-            this.fire('iron-signal', {name: 'gotolanguage', data: {projectmeta: projectmeta}});
-        },
-
         openresource: function () {
             this.closeinfo();
             this.$.resource.open();
@@ -579,24 +441,6 @@
             this.fire('iron-signal', {name: 'changeproject', data: this.changedata});
         },
 
-        goprint: function () {
-            var projectmeta = this.currentinfo;
-            this.closeinfo();
-            this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: "print"}});
-        },
-
-        goexport: function () {
-            var projectmeta = this.currentinfo;
-            this.closeinfo();
-            this.fire('iron-signal', {name: 'openexport', data: {projectmeta: projectmeta}});
-        },
-
-        goreview: function () {
-            var projectmeta = this.currentinfo;
-            this.closeinfo();
-            this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: "review"}});
-        },
-
         openproject: function (e) {
             var projectmeta = e.model.project;
             this.fire('iron-signal', {name: 'translateright'});
@@ -604,7 +448,7 @@
         },
 
         openinfo: function (e) {
-            this.set('currentinfo', e.model.project);
+            this.set('currentproject', {projectmeta: e.model.project});
             this.$.info.open();
         },
 
@@ -623,7 +467,7 @@
         },
 
         deleteproject: function () {
-            var projectmeta = this.currentinfo;
+            var projectmeta = this.currentproject.projectmeta;
 
             this.$.delete.close();
             this.fire('iron-signal', {name: 'deleteproject', data: {projectmeta: projectmeta}});
@@ -657,7 +501,7 @@
         },
 
         ready: function() {
-            this.locale = App.locale.dictionary;
+            this.set('locale', App.locale.dictionary);
         }
 
     });

@@ -30,29 +30,15 @@ function Renderer() {
         },
 
         convertNoteMarkers: function (text) {
-            var startstr = '<note';
-            var endstr = '<\/note>';
-            var expression = new RegExp(startstr);
+            var expression = new RegExp(/(<note[^<>]*>)([^]*)(<\/note>)/);
 
             while (expression.test(text)) {
-                var notestr = this.removeUsxMarkers(text.substring(text.search(startstr), text.search(endstr)));
+                var notestr = expression.exec(text)[2];
                 var marker = "\<ts-note-marker text='" + notestr + "'\>\<\/ts-note-marker\>";
 
-                text = text.replace(/<note[^]*note>/, marker);
+                text = text.replace(expression, marker);
             }
             return text;
-        },
-
-        removeUsxMarkers: function (text) {
-            var mtest = new RegExp(/<[^<>]*>/g);
-            var stest = new RegExp(/  /g);
-            var mreplace = " ";
-            var sreplace = " ";
-
-            text = text.replace(mtest, mreplace);
-            text = text.replace(stest, sreplace);
-
-            return text.trim();
         },
 
         migrateMarkers: function (text) {

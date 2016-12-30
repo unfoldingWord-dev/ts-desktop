@@ -52,18 +52,9 @@ function Renderer() {
         },
 
         removeChapterMarkers: function (text) {
-            var textarray = text.split(" ");
-            var returnstr = "";
+            var expression = new RegExp(/\\c \d+\s+/g);
 
-            for (var i = 0; i < textarray.length; i++) {
-                if (textarray[i] === "\\c") {
-                    i++;
-                } else {
-                    returnstr += textarray[i] + " ";
-                }
-            }
-
-            return returnstr.trim();
+            return text.replace(expression, "");
         },
 
         renderSourceWithVerses: function (text) {

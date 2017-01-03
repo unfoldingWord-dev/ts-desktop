@@ -887,7 +887,7 @@
                 var chunkmeta = this.createFrameMeta(frames[i], projectmeta, sourcedata.verses, title);
                 var chunk = this.getFrameData(chunkmeta, projectmeta);
                 var sourcecontent = App.renderer.convertNoteMarkers(sourcedata.text);
-                chunk.srccontent = App.renderer.renderSourceWithVerses(sourcecontent);
+                chunk.srccontent = App.renderer.renderSuperscriptVerses(sourcecontent);
                 chunk.wordcontent = "";
                 chunk.resources = resources;
                 chunk.index = i;
@@ -1034,7 +1034,7 @@
             }
             if (udbtext) {
                 udbtext = App.renderer.convertVerseMarkers(udbtext).text;
-                udbtext = App.renderer.renderSourceWithVerses(udbtext);
+                udbtext = App.renderer.renderSuperscriptVerses(udbtext);
                 resources.push({title: "UDB", array: false, data: [udbtext]});
             }
 

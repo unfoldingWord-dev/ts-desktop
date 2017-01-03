@@ -181,20 +181,19 @@
                   translations = translations.filter(function (item) {
                       return item.language.slug === mythis.choices.levelone.slug;
                   });
-                  temparray = [{}, {}, {}, {}];
 
                   _.forEach(_.groupBy(translations, 'project.category_slug'), function (data, category) {
                       if (category === "bible-ot") {
-                          temparray.splice(0, 1, {name: "Old Testament", slug: category});
+                          temparray.push({name: "Old Testament", slug: category, sort: 1});
                       } else if (category === "bible-nt") {
-                          temparray.splice(1, 1, {name: "New Testament", slug: category});
+                          temparray.push({name: "New Testament", slug: category, sort: 2});
                       } else if (category === "ta") {
-                          temparray.splice(2, 1, {name: "translationAcademy", slug: category});
+                          temparray.push({name: "translationAcademy", slug: category, sort: 3});
                       } else if (category === "other") {
-                          temparray.splice(3, 1, {name: "Other", slug: category});
+                          temparray.push({name: "Other", slug: category, sort: 4});
                       }
                   });
-                  this.set('leveltwolist', temparray);
+                  this.set('leveltwolist', this.sortList(temparray));
               } else {
                   translations = translations.filter(function (item) {
                       return item.project.category_slug === mythis.choices.levelone.slug && item.language.slug === "en";

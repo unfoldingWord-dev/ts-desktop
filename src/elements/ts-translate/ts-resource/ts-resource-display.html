@@ -178,6 +178,7 @@
         },
 
         setLinks: function () {
+            var mythis = this;
             var talinks = this.$.body.getElementsByClassName("talink");
             var biblelinks = this.$.body.getElementsByClassName("biblelink");
 
@@ -191,7 +192,7 @@
             for (i = 0; i < biblelinks.length; i++) {
                 biblelinks[i].addEventListener('click', function (event) {
                     event.preventDefault();
-                    console.log("clicked link");
+                    mythis.notescroll(this.id, mythis);
                 });
             }
         },
@@ -205,6 +206,22 @@
             var word = e.model.word;
             word.type = "Words";
             this.fillresource(word);
+        },
+
+        notescroll: function (id, mythis) {
+            var chapter = parseInt(id.split(":")[0]);
+            var verse = parseInt(id.split(":")[1]);
+            var chunks = mythis.chunks;
+
+            var filtered = chunks.filter(function (chunk) {
+                return chunk.chunkmeta.chapter === chapter && chunk.chunkmeta.frame <= verse;
+            });
+
+            if (filtered.length) {
+                mythis.set('modestatus.index', filtered[filtered.length - 1].index);
+            }
+
+            mythis.fire('navigate');
         },
 
         examplescroll: function (e) {

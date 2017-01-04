@@ -183,10 +183,7 @@
             for (var i = 0; i < links.length; i++) {
                 links[i].addEventListener('click', function (event) {
                     event.preventDefault();
-                    var id = this.id.replace(/_/g, "-");
-
-                    App.ipc.send('set-scroll-id', id);
-                    App.ipc.send('open-academy');
+                    App.ipc.send('open-academy', this.id);
                 });
             }
         },

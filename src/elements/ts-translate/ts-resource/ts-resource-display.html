@@ -178,12 +178,20 @@
         },
 
         setLinks: function () {
-            var links = this.$.body.getElementsByTagName("a");
+            var talinks = this.$.body.getElementsByClassName("talink");
+            var biblelinks = this.$.body.getElementsByClassName("biblelink");
 
-            for (var i = 0; i < links.length; i++) {
-                links[i].addEventListener('click', function (event) {
+            for (var i = 0; i < talinks.length; i++) {
+                talinks[i].addEventListener('click', function (event) {
                     event.preventDefault();
                     App.ipc.send('open-academy', this.id);
+                });
+            }
+
+            for (i = 0; i < biblelinks.length; i++) {
+                biblelinks[i].addEventListener('click', function (event) {
+                    event.preventDefault();
+                    console.log("clicked link");
                 });
             }
         },

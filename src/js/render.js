@@ -7,13 +7,12 @@ function Renderer() {
     return {
 
         convertVerseMarkers: function (text) {
-            var startstr = '<verse number="';
-            var endstr = '" style="v" />';
-            var expression = new RegExp(startstr);
+            var expression = new RegExp(/(\s*<verse[^<>\"]*\")(\d+-?\d*)(\"[^<>]*>)/);
             var verses = [];
 
             while (expression.test(text)) {
-                var versestr = text.substring(text.search(startstr) + 15, text.search(endstr));
+                var versestr = expression.exec(text)[2];
+
                 if (versestr.indexOf("-") < 0) {
                     verses.push(parseInt(versestr));
                 } else {
@@ -23,36 +22,21 @@ function Renderer() {
                         verses.push(j);
                     }
                 }
-                text = text.replace(startstr, " \\v ");
-                text = text.replace(endstr, " ");
+                text = text.replace(expression, " \\v " + versestr + " ");
             }
             return {text: text, verses: verses};
         },
 
         convertNoteMarkers: function (text) {
-            var startstr = '<note';
-            var endstr = '<\/note>';
-            var expression = new RegExp(startstr);
+            var expression = new RegExp(/(<note[^<>]*>)([^]*)(<\/note>)/);
 
             while (expression.test(text)) {
-                var notestr = this.removeUsxMarkers(text.substring(text.search(startstr), text.search(endstr)));
+                var notestr = expression.exec(text)[2];
                 var marker = "\<ts-note-marker text='" + notestr + "'\>\<\/ts-note-marker\>";
 
-                text = text.replace(/<note[^]*note>/, marker);
+                text = text.replace(expression, marker);
             }
             return text;
-        },
-
-        removeUsxMarkers: function (text) {
-            var mtest = new RegExp(/<[^<>]*>/g);
-            var stest = new RegExp(/  /g);
-            var mreplace = " ";
-            var sreplace = " ";
-
-            text = text.replace(mtest, mreplace);
-            text = text.replace(stest, sreplace);
-
-            return text.trim();
         },
 
         migrateMarkers: function (text) {
@@ -68,67 +52,48 @@ function Renderer() {
         },
 
         removeChapterMarkers: function (text) {
-            var textarray = text.split(" ");
-            var returnstr = "";
+            var expression = new RegExp(/\\c \d+\s+/g);
 
-            for (var i = 0; i < textarray.length; i++) {
-                if (textarray[i] === "\\c") {
-                    i++;
-                } else {
-                    returnstr += textarray[i] + " ";
-                }
-            }
-
-            return returnstr.trim();
+            return text.replace(expression, "");
         },
 
-        renderSourceWithVerses: function (text) {
-            var textarray = text.split(" ");
-            var numstr1 = "\<sup\>";
-            var numstr2 = "\<\/sup\>";
-            var returnstr = "";
-            var verse = 0;
+        renderSuperscriptVerses: function (text) {
+            var expression = new RegExp(/(\\v )(\d+-?\d*)(\s+)/);
 
-            for (var i = 0; i < textarray.length; i++) {
-                if (textarray[i] === "\\v") {
-                    verse = textarray[i+1];
-                    returnstr += numstr1 + verse + numstr2;
-                    i++;
-                } else {
-                    returnstr += textarray[i] + " ";
-                }
+            while (expression.test(text)) {
+                var versestr = expression.exec(text)[2];
+
+                text = text.replace(expression, "\<sup\>" + versestr + "\<\/sup\>");
             }
-            return returnstr.trim();
+
+            return text;
+        },
+
+        renderParagraphs: function (text, module) {
+            var expression = new RegExp(/([^>\n]*)([\n])/);
+            var startp = "\<p class='style-scope " + module + "'\>";
+            var endp = "\<\/p\>";
+
+            text = text + "\n";
+
+            while (expression.test(text)) {
+                var paragraph = expression.exec(text)[1];
+
+                if (!paragraph) {
+                    paragraph = "&nbsp";
+                }
+
+                text = text.replace(expression, startp + paragraph + endp);
+            }
+
+            return text;
         },
 
         renderTargetWithVerses: function (text, module) {
-            var linearray = text.split("\n");
-            var numstr1 = "\<sup\>";
-            var numstr2 = "\<\/sup\>";
-            var startp = "\<p class='style-scope " + module + "'\>";
-            var endp = "\<\/p\>";
-            var returnstr = "";
+            text = this.renderParagraphs(text, module);
+            text = this.renderSuperscriptVerses(text);
 
-            for (var j = 0; j < linearray.length; j++) {
-                returnstr += startp;
-                if (linearray[j] === "") {
-                    returnstr += "&nbsp";
-                } else {
-                    var wordarray = linearray[j].split(" ");
-                    for (var i = 0; i < wordarray.length; i++) {
-                        if (wordarray[i] === "\\v") {
-                            var verse = wordarray[i+1];
-                            returnstr += numstr1 + verse + numstr2;
-                            i++;
-                        } else {
-                            returnstr += wordarray[i] + " ";
-                        }
-                    }
-                    returnstr = returnstr.trim();
-                }
-                returnstr += endp;
-            }
-            return returnstr;
+            return text;
         },
 
         checkForConflicts: function (content) {

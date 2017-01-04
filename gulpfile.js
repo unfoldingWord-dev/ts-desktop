@@ -50,7 +50,7 @@ gulp.task('bump', function () {
  * This will download and install prince binaries for all os'
  */
 gulp.task('prince', function(done) {
-    let tempDir = 'src/prince';
+    var tempDir = 'src/prince';
 
     util.chain(princePackager.install.bind(null, tempDir))(['win', 'linux', 'osx'])
         .then(function() {

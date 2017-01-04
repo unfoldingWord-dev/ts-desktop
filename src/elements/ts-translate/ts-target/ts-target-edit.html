@@ -141,6 +141,9 @@
                 type: Object,
                 value: {},
                 notify: true
+            },
+            timer: {
+                type: Number
             }
 		},
 
@@ -218,12 +221,17 @@
             this.fire('iron-signal', {name: 'updatestate', data: {id: id, mode: "review", value: true}});
         },
 
-        input: function () {
+        input: function (event) {
+            var mythis = this;
             var text = event.target.value;
 
-            this.set('chunk.transcontent', text);
-            this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
-            this.fire('setheight');
+            mythis.fire('setheight');
+            clearTimeout(mythis.timer);
+
+            mythis.timer = setTimeout(function() {
+                mythis.set('chunk.transcontent', text);
+                mythis.fire('iron-signal', {name: 'savechunk', data: {chunk: mythis.chunk}});
+            }, 300);
         },
 
 		ready: function() {

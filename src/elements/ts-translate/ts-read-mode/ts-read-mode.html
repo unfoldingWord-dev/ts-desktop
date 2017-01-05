@@ -65,7 +65,7 @@
         <div id="contain">
             <iron-list id="readlist" items="{{chapters}}" as="chunk" on-scroll="refresh">
                 <template>
-                    <ts-read-card id="{{createid(index)}}" chunk="[[chunk]]" on-updateheight="updateheight"></ts-read-card>
+                    <ts-read-card id="{{createid(index)}}" chunk="[[chunk]]"></ts-read-card>
                 </template>
             </iron-list>
         </div>
@@ -103,12 +103,6 @@
             }
         },
 
-        updateheight: function (e) {
-            var list = this.$.readlist;
-            var index = e.model.index;
-            list.updateSizeForItem(index);
-        },
-
         refresh: function () {
             var mythis = this;
 
@@ -127,7 +121,10 @@
 
             for (var i = list.firstVisibleIndex; i <= list.lastVisibleIndex; i++) {
                 var card = document.getElementById(this.modename + i);
-                card.setheight();
+                if (card && i < this.chapters.length) {
+                    card.setheight();
+                    list.updateSizeForItem(i);
+                }
             }
         },
 

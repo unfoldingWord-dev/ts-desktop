@@ -74,7 +74,7 @@
         <div id="contain">
             <iron-list id="conflictlist" items="{{chunks}}" as="chunk" on-scroll="refresh">
                 <template>
-                    <ts-conflict-card class$="[[conflictclass(chunk.conflicts.exists)]]" chunk="{{chunk}}" on-updateheight="updateheight"></ts-conflict-card>
+                    <ts-conflict-card class$="[[conflictclass(chunk.conflicts.exists)]]" chunk="{{chunk}}" on-setheights="setheights"></ts-conflict-card>
                 </template>
             </iron-list>
         </div>
@@ -129,12 +129,6 @@
             for (var i = list.firstVisibleIndex; i <= list.lastVisibleIndex; i++) {
                 list.updateSizeForItem(i);
             }
-        },
-
-        updateheight: function (e) {
-            var list = this.$.conflictlist;
-            var index = e.model.index;
-            list.updateSizeForItem(index);
         },
 
         frommode: function () {

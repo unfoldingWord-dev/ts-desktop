@@ -75,7 +75,7 @@
             <ts-search-bar id="searchbar" class="hide" chunks="[[chunks]]" searchoptions="{{searchoptions}}" results="{{results}}" on-closesearch="closesearch" on-next="next" on-previous="previous"></ts-search-bar>
             <iron-list id="reviewlist" items="{{chunks}}" as="chunk" on-scroll="refresh">
                 <template>
-                    <ts-review-card chunk="{{chunk}}" searchoptions="{{searchoptions}}" on-updateheight="updateheight"></ts-review-card>
+                    <ts-review-card chunk="{{chunk}}" searchoptions="{{searchoptions}}" on-setheights="setheights"></ts-review-card>
                 </template>
             </iron-list>
         </div>
@@ -178,12 +178,6 @@
             for (var i = list.firstVisibleIndex; i <= list.lastVisibleIndex; i++) {
                 list.updateSizeForItem(i);
             }
-        },
-
-        updateheight: function (e) {
-            var list = this.$.reviewlist;
-            var index = e.model.index;
-            list.updateSizeForItem(index);
         },
 
         frommode: function () {

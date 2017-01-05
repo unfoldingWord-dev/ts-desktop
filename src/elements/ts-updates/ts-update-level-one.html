@@ -159,11 +159,23 @@
           return slug === "bible-ot" || slug === "bible-nt" ? 'uw-project-icon:uw-project-icon' : 'uw-obs-icon:uw-obs-icon';
       },
 
-      sortList: function (list) {
+      sortByLang: function (list) {
           return list.sort(function (a, b) {
               if (a.slug.toLowerCase() > b.slug.toLowerCase()) {
                   return 1;
               } else if (a.slug.toLowerCase() < b.slug.toLowerCase()) {
+                  return -1;
+              } else {
+                  return 0;
+              }
+          });
+      },
+
+      sortByCat: function (list) {
+          return list.sort(function (a, b) {
+              if (a.sort > b.sort) {
+                  return 1;
+              } else if (a.sort < b.sort) {
                   return -1;
               } else {
                   return 0;
@@ -204,21 +216,18 @@
               _.forEach(_.groupBy(translations, 'language.slug'), function (data) {
                   temparray.push(data[0].language);
               });
-              this.set('levelonelist', this.sortList(this.filterList(temparray)));
+              this.set('levelonelist', this.sortByLang(this.filterList(temparray)));
           } else {
-              temparray = [{}, {}, {}, {}];
               _.forEach(_.groupBy(translations, 'project.category_slug'), function (data, category) {
                   if (category === "bible-ot") {
-                      temparray.splice(0, 1, {name: "Old Testament", slug: category});
+                      temparray.push({name: "Old Testament", slug: category, sort: 1});
                   } else if (category === "bible-nt") {
-                      temparray.splice(1, 1, {name: "New Testament", slug: category});
-                  } else if (category === "ta") {
-                      temparray.splice(2, 1, {name: "translationAcademy", slug: category});
+                      temparray.push({name: "New Testament", slug: category, sort: 2});
                   } else if (category === "other") {
-                      temparray.splice(3, 1, {name: "Other", slug: category});
+                      temparray.push({name: "Other", slug: category, sort: 3});
                   }
               });
-              this.set('levelonelist', temparray);
+              this.set('levelonelist', this.sortByCat(temparray));
           }
       },
 

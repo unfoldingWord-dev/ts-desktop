@@ -150,7 +150,7 @@
                 var translations = App.dataManager.getTranslations();
 
                 translations = translations.filter(function (item) {
-                    return item.resource.status.checking_level === "3" && item.resource.type !== "help";
+                    return item.resource.status.checking_level === "3" && item.resource.type !== "help" && item.project.category_slug !== "ta";
                 });
 
                 translations.forEach(function (item) {

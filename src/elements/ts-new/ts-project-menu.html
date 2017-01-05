@@ -144,10 +144,22 @@
           this.set('selected', 2);
       },
 
+      sortByCat: function (list) {
+          return list.sort(function (a, b) {
+              if (a.sort > b.sort) {
+                  return 1;
+              } else if (a.sort < b.sort) {
+                  return -1;
+              } else {
+                  return 0;
+              }
+          });
+      },
+
       createprojects: function () {
           var mythis = this;
           var projects = App.dataManager.getProjects();
-          var temparray = [{}, {}, {}];
+          var temparray = [];
 
           projects.forEach(function (item) {
               if (!item.category_slug) {
@@ -157,14 +169,14 @@
 
           _.forEach(_.groupBy(projects, 'category_slug'), function (data, category) {
               if (category === "bible-ot") {
-                  temparray.splice(0, 1, {"name": "Old Testament", "data": data});
+                  temparray.push({name: "Old Testament", sort: 1, data: data});
               } else if (category === "bible-nt") {
-                  temparray.splice(1, 1, {"name": "New Testament", "data": data});
+                  temparray.push({name: "New Testament", sort: 2, data: data});
               } else if (category === "other" && !mythis.importdata.importing) {
-                  temparray.splice(2, 1, {"name": "Other", "data": data});
+                  temparray.push({name: "Other", sort: 3, data: data});
               }
           });
-          mythis.set('newdata.categorylist', temparray);
+          mythis.set('newdata.categorylist', this.sortByCat(temparray));
       },
 
       ready: function () {

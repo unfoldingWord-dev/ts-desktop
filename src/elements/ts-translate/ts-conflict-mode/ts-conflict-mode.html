@@ -183,11 +183,15 @@
         getlocation: function () {
             var list = this.$.conflictlist;
             var index = list.firstVisibleIndex || 0;
-            var chunk = this.chunks[index];
-            var chapter = chunk.chunkmeta.chapter;
+            var chunks = this.chunks;
 
-            this.set('modestatus.chapter', chapter);
-            this.set('modestatus.index', index);
+            if (chunks) {
+                var chunk = chunks[index];
+                var chapter = chunk.chunkmeta.chapter;
+
+                this.set('modestatus.chapter', chapter);
+                this.set('modestatus.index', index);
+            }
         },
 
         setlocation: function () {

@@ -177,9 +177,12 @@
         getlocation: function () {
             var list = this.$.readlist;
             var index = list.firstVisibleIndex;
+            var chapters = this.chapters;
 
-            this.set('modestatus.chapter', this.chapters[index].chaptermeta.chapter);
-            this.set('modestatus.index', -1);
+            if (chapters) {
+                this.set('modestatus.chapter', chapters[index].chaptermeta.chapter);
+                this.set('modestatus.index', -1);
+            }
         },
 
         setlocation: function () {

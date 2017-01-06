@@ -161,7 +161,7 @@
           <ts-new data-route="new" route="{{route}}" importdata="{{importdata}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]" options="{{options}}" on-finishusfm="finishUsfmImport"></ts-new>
           <ts-translate data-route="translate" route="{{route}}" message="{{message}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}" id="translate" on-exportusfm="exportUsfm" on-openprint="openPrint"></ts-translate>
           <ts-review data-route="review" route="{{route}}" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}"></ts-review>
-          <ts-settings data-route="settings" route="{{route}}" currentproject="[[currentproject]]" options="{{options}}"></ts-settings>
+          <ts-settings data-route="settings" route="{{route}}" currentproject="[[currentproject]]" options="{{options}}" id="settings"></ts-settings>
           <ts-profile data-route="profile" currentuser="[[currentuser]]" options="{{options}}"></ts-profile>
           <ts-print data-route="preview" route="{{route}}" currentproject="[[currentproject]]" options="{{options}}" id="preview"></ts-print>
           <ts-updates data-route="updates" route="{{route}}" options="{{options}}"></ts-updates>
@@ -1170,6 +1170,8 @@
                   promises.push(App.dataManager.activateContainer('en', 'ta-translate', 'vol1'));
                   promises.push(App.dataManager.activateContainer('en', 'ta-translate', 'vol2'));
 
+                  App.ipc.send('loading-status', 'Opening resource containers...');
+
                   return Promise.all(promises)
                       .then(function () {
                           return list;
@@ -1197,6 +1199,9 @@
           App.gitManager.verifyGit()
               .then(function (version) {
                   App.reporter.logNotice('Git Version ' + version);
+              })
+              .then(function () {
+                  return mythis.$.settings.createInitialSettings();
               })
               .then(function () {
                   App.ipc.send('loading-status', 'Retrieving User Info...');

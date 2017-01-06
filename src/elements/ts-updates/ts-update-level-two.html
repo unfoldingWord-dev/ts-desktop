@@ -187,10 +187,8 @@
                           temparray.push({name: "Old Testament", slug: category, sort: 1});
                       } else if (category === "bible-nt") {
                           temparray.push({name: "New Testament", slug: category, sort: 2});
-                      } else if (category === "ta") {
-                          temparray.push({name: "translationAcademy", slug: category, sort: 3});
                       } else if (category === "other") {
-                          temparray.push({name: "Other", slug: category, sort: 4});
+                          temparray.push({name: "Other", slug: category, sort: 3});
                       }
                   });
                   this.set('leveltwolist', this.sortList(temparray));

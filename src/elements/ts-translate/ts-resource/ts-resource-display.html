@@ -178,15 +178,21 @@
         },
 
         setLinks: function () {
-            var links = this.$.body.getElementsByTagName("a");
+            var mythis = this;
+            var talinks = this.$.body.getElementsByClassName("talink");
+            var biblelinks = this.$.body.getElementsByClassName("biblelink");
 
-            for (var i = 0; i < links.length; i++) {
-                links[i].addEventListener('click', function (event) {
+            for (var i = 0; i < talinks.length; i++) {
+                talinks[i].addEventListener('click', function (event) {
                     event.preventDefault();
-                    var id = this.id.replace(/_/g, "-");
+                    App.ipc.send('open-academy', this.id);
+                });
+            }
 
-                    App.ipc.send('set-scroll-id', id);
-                    App.ipc.send('open-academy');
+            for (i = 0; i < biblelinks.length; i++) {
+                biblelinks[i].addEventListener('click', function (event) {
+                    event.preventDefault();
+                    mythis.notescroll(this.id, mythis);
                 });
             }
         },
@@ -200,6 +206,22 @@
             var word = e.model.word;
             word.type = "Words";
             this.fillresource(word);
+        },
+
+        notescroll: function (id, mythis) {
+            var chapter = parseInt(id.split(":")[0]);
+            var verse = parseInt(id.split(":")[1]);
+            var chunks = mythis.chunks;
+
+            var filtered = chunks.filter(function (chunk) {
+                return chunk.chunkmeta.chapter === chapter && chunk.chunkmeta.frame <= verse;
+            });
+
+            if (filtered.length) {
+                mythis.set('modestatus.index', filtered[filtered.length - 1].index);
+            }
+
+            mythis.fire('navigate');
         },
 
         examplescroll: function (e) {

@@ -288,7 +288,7 @@
             if (name === 'developertools') {
                 App.showDevTools();
             } else if (name === "refreshsettings") {
-                this.settings = App.configurator.refreshUserSetting();
+                this.set('settings', App.configurator.refreshUserSetting());
                 this.saveSettings();
             } else if (name === "datalocation") {
                 this._updateDataLocation();
@@ -334,7 +334,7 @@
                 return;
             }
             newPath = newPath[0].replace(/\\/g, "\/");
-            this.settings = App.configurator.setUserSetting('datalocation', newPath);
+            this.set('settings', App.configurator.setUserSetting('datalocation', newPath));
             App.projectsManager.moveBackups(oldPath, newPath);
         },
 

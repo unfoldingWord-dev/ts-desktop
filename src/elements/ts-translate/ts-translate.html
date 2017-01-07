@@ -1018,7 +1018,11 @@
             }
 
             var frameques = questions.filter(function (ques) {
-                return ques.chapter === frame.chapter && parseInt(ques.chunk) >= verses[0] && parseInt(ques.chunk) <= verses[verses.length - 1];
+                if (verses.length) {
+                    return ques.chapter === frame.chapter && parseInt(ques.chunk) >= verses[0] && parseInt(ques.chunk) <= verses[verses.length - 1];
+                } else {
+                    return ques.chapter === frame.chapter && ques.chunk === frame.chunk;
+                }
             });
             if (frameques.length) {
                 frameques.forEach(function (frame) {

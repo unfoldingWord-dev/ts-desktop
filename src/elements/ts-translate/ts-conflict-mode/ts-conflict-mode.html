@@ -74,7 +74,7 @@
         <div id="contain">
             <iron-list id="conflictlist" items="{{chunks}}" as="chunk" on-scroll="refresh">
                 <template>
-                    <ts-conflict-card class$="[[conflictclass(chunk.conflicts.exists)]]" chunk="{{chunk}}" on-updateheight="updateheight"></ts-conflict-card>
+                    <ts-conflict-card class$="[[conflictclass(chunk.conflicts.exists)]]" chunk="{{chunk}}" on-setheights="setheights"></ts-conflict-card>
                 </template>
             </iron-list>
         </div>
@@ -131,12 +131,6 @@
             }
         },
 
-        updateheight: function (e) {
-            var list = this.$.conflictlist;
-            var index = e.model.index;
-            list.updateSizeForItem(index);
-        },
-
         frommode: function () {
             this.getlocation();
             this.moveout();
@@ -183,11 +177,15 @@
         getlocation: function () {
             var list = this.$.conflictlist;
             var index = list.firstVisibleIndex || 0;
-            var chunk = this.chunks[index];
-            var chapter = chunk.chunkmeta.chapter;
+            var chunks = this.chunks;
 
-            this.set('modestatus.chapter', chapter);
-            this.set('modestatus.index', index);
+            if (chunks) {
+                var chunk = chunks[index];
+                var chapter = chunk.chunkmeta.chapter;
+
+                this.set('modestatus.chapter', chapter);
+                this.set('modestatus.index', index);
+            }
         },
 
         setlocation: function () {

@@ -193,26 +193,7 @@
         },
 
         ready: function () {
-            this.settings = App.configurator.refreshUserSetting();
-            this.settings = App.configurator.setUserSetting('appversion', App.configurator.getAppData().toString());
-            this.settings = App.configurator.setUserSetting('datapath', App.configurator.getValue('rootdir'));
-            this.settings = App.configurator.setUserSetting('dataserver', "git.door43.org");
-            this.settings = App.configurator.setUserSetting('mediaserver', "https://api.unfoldingword.org/");
-            var untildify = require('untildify');
-            var location = App.configurator.getUserSetting('datalocation');
-            location = untildify(location);
-            location = location.replace(/\\/g, "\/");
-            this.settings = App.configurator.setUserSetting('datalocation', location);
 
-            App.gitManager.getVersion().then(function (version) {
-                return version ? version.toString() : 'N/A';
-            })
-            .catch(function (err) {
-                return 'N/A';
-            })
-            .then(function (gitversion) {
-                this.settings = App.configurator.setUserSetting('gitversion', gitversion);
-            }.bind(this));
         },
 
         createtitle: function (backto) {
@@ -222,6 +203,26 @@
         load: function () {
             if (this.route === "settings") {
                 this.set('backto', App.configurator.getValue("backto"));
+                this.settings = App.configurator.refreshUserSetting();
+                this.settings = App.configurator.setUserSetting('appversion', App.configurator.getAppData().toString());
+                this.settings = App.configurator.setUserSetting('datapath', App.configurator.getValue('rootdir'));
+                this.settings = App.configurator.setUserSetting('dataserver', "git.door43.org");
+                this.settings = App.configurator.setUserSetting('mediaserver', "https://api.unfoldingword.org/");
+                var untildify = require('untildify');
+                var location = App.configurator.getUserSetting('datalocation');
+                location = untildify(location);
+                location = location.replace(/\\/g, "\/");
+                this.settings = App.configurator.setUserSetting('datalocation', location);
+
+                App.gitManager.getVersion().then(function (version) {
+                    return version ? version.toString() : 'N/A';
+                })
+                    .catch(function (err) {
+                        return 'N/A';
+                    })
+                    .then(function (gitversion) {
+                        this.settings = App.configurator.setUserSetting('gitversion', gitversion);
+                    }.bind(this));
             }
         },
 

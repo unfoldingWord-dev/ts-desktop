@@ -178,9 +178,12 @@
         getlocation: function () {
             var list = this.$.chunklist;
             var index = list.firstVisibleIndex || 0;
+            var chunks = this.chunks;
 
-            this.set('modestatus.chapter', this.chunks[index].chunkmeta.chapter);
-            this.set('modestatus.index', index);
+            if (chunks) {
+                this.set('modestatus.chapter', chunks[index].chunkmeta.chapter);
+                this.set('modestatus.index', index);
+            }
         },
 
         setlocation: function () {

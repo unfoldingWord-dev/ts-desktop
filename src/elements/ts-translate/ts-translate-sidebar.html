@@ -208,11 +208,11 @@
         },
 
         gobottom: function () {
-            var length = this.currentproject.chunks.length;
-            var last = this.currentproject.chunks[length - 1].chunkmeta.chapter;
+            var lastindex = this.currentproject.chunks.length - 1;
+            var lastchap = this.currentproject.chunks[lastindex].chunkmeta.chapter;
 
-            this.set('modestatus.index', this.currentproject.chunks.length - 1);
-            this.set('modestatus.chapter', last);
+            this.set('modestatus.index', lastindex);
+            this.set('modestatus.chapter', lastchap);
             this.navigate();
         },
 
@@ -245,7 +245,11 @@
         },
 
         prevchunk: function () {
-            var previous = this.modestatus.index - 1 || 0;
+            var previous = this.modestatus.index - 1;
+
+            if (previous < 0) {
+                previous = 0;
+            }
 
             this.set('modestatus.index', previous);
             this.navigate();
@@ -408,7 +412,7 @@
 
         goacademy: function () {
             this.$.menu.close();
-            App.ipc.send('open-academy');
+            App.ipc.send('open-academy', "");
         },
 
         gohome: function () {

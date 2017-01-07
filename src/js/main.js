@@ -156,7 +156,9 @@ function createAcademyWindow () {
 }
 
 function scrollAcademyWindow () {
-    academyWindow.webContents.send('academy-scroll', scrollToId);
+    if (scrollToId) {
+        academyWindow.webContents.send('academy-scroll', scrollToId);
+    }
 }
 
 function createAppMenus() {
@@ -222,7 +224,8 @@ ipcMain.on('academy-window', function (event, arg) {
     }
 });
 
-ipcMain.on('open-academy', function () {
+ipcMain.on('open-academy', function (event, id) {
+    scrollToId = id;
     if (academyWindow) {
         academyWindow.show();
         scrollAcademyWindow();
@@ -260,10 +263,6 @@ ipcMain.on('save-as', function (event, arg) {
 ipcMain.on('open-file', function (event, arg) {
     var input = dialog.showOpenDialog(mainWindow, arg.options);
     event.returnValue = input || false;
-});
-
-ipcMain.on('set-scroll-id', function (event, id) {
-    scrollToId = id;
 });
 
 ipcMain.on('loading-status', function (event, status) {

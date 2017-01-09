@@ -81,6 +81,18 @@
             }, 250);
         },
 
+        sortChapters: function (list) {
+            return list.sort(function (a, b) {
+                if (a.start > b.start) {
+                    return 1;
+                } else if (a.start < b.start) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            });
+        },
+
         createchapters: function () {
             var transchapters = [];
             var translation = _.cloneDeep(this.currentproject.chunks);
@@ -139,6 +151,8 @@
                 });
                 transchapters.push({reference: reference, completed: chapcomplete, start: chapter, end: chapter, combined: false, chunks: data});
             });
+
+            transchapters = this.sortChapters(transchapters);
 
             for (i = 0; i < transchapters.length; i++) {
                 if (transchapters[i].start > 1 && transchapters[i].completed === true && transchapters[i-1].completed === true) {

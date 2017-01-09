@@ -882,8 +882,9 @@
                 if (frames[i].chunk === "title") {
                     title = frames[i].content;
                 }
-                var resources = this.getFrameResources(frames[i], notes, questions, udb, wordlist);
+
                 var sourcedata = App.renderer.convertVerseMarkers(frames[i].content);
+                var resources = this.getFrameResources(frames[i], notes, questions, udb, wordlist, sourcedata.verses);
                 var chunkmeta = this.createFrameMeta(frames[i], projectmeta, sourcedata.verses, title);
                 var chunk = this.getFrameData(chunkmeta, projectmeta);
                 var sourcecontent = App.renderer.convertNoteMarkers(sourcedata.text);
@@ -971,7 +972,7 @@
             this.set('currentproject.chunks', chunkarray);
         },
 
-        getFrameResources: function (frame, notes, questions, udb, wordlist) {
+        getFrameResources: function (frame, notes, questions, udb, wordlist, verses) {
             var resources = [];
             var note = [];
             var question = [];
@@ -1017,10 +1018,18 @@
             }
 
             var frameques = questions.filter(function (ques) {
-                return ques.chapter === frame.chapter && ques.chunk === frame.chunk;
+                if (verses.length) {
+                    return ques.chapter === frame.chapter && parseInt(ques.chunk) >= verses[0] && parseInt(ques.chunk) <= verses[verses.length - 1];
+                } else {
+                    return ques.chapter === frame.chapter && ques.chunk === frame.chunk;
+                }
             });
             if (frameques.length) {
-                question = frameques[0].content;
+                frameques.forEach(function (frame) {
+                    question.push(frame.content);
+                });
+
+                question = _.flatten(question);
             }
             if (question.length) {
                 resources.push({title: "Questions", array: true, data: question});

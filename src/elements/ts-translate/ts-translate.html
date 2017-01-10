@@ -1339,20 +1339,29 @@
         fromreview: function (event, data) {
             var mythis = this;
 
-            if (data.index === null) {
-                mythis.set('route', "translate");
-                mythis.setmodestate();
-                mythis.checksources();
-                mythis.starttimers();
-            } else {
-                mythis.set('selected', 0);
-                mythis.set('modestatus.index', data.index);
-                mythis.set('route', "translate");
-                setTimeout(function() {
-                    mythis.set('selected', 3);
+            mythis.set('options', {});
+            mythis.set('options.body', "Loading project. Please wait...");
+            mythis.set('options.loading', true);
+            mythis.fire('iron-signal', {name: 'openloading'});
+
+            setTimeout(function() {
+                if (data.index === null) {
+                    mythis.set('route', "translate");
+                    mythis.setmodestate();
+                    mythis.checksources();
                     mythis.starttimers();
-                }, 500);
-            }
+                } else {
+                    mythis.set('selected', 0);
+                    mythis.set('modestatus.index', data.index);
+                    mythis.set('route', "translate");
+                    setTimeout(function() {
+                        mythis.set('selected', 3);
+                        mythis.starttimers();
+                    }, 500);
+                }
+
+                mythis.fire('iron-signal', {name: 'closeloading'});
+            }, 500);
         },
 
         gohome: function () {

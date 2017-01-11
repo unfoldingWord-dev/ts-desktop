@@ -492,7 +492,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                     if (meta.project_type_class === "standard") {
                         parsed['transcontent'] = c.toString();
                     } else {
-                        parsed['helpscontent'] = JSON.parse(c);
+                        parsed['helpscontent'] = c.toString();
                     }
                     return parsed;
                 });

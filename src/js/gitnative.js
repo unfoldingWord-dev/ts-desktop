@@ -192,32 +192,33 @@ function GitManager() {
         },
 
         consolidateConflicts: function (targetPath, conflicts) {
-            var conflicttest = new RegExp(/^([^<=>]*)(<{7} HEAD\n)([^<=>]*)(={7}\n)([^<=>]*)(>{7} \w{40}\n?)([^<=>]*)$/);
+            var conflicttest = new RegExp(/([^<=>]*)(<{7} HEAD\n)([^<=>]*)(={7}\n)([^<=>]*)(>{7} \w{40}\n?)([^]*)/);
 
             conflicts.forEach(function (conflict) {
                 var split = conflict.split("-");
                 var filePath = path.join(targetPath, split[0], split[1] + ".txt");
                 var contents = fs.readFileSync(filePath, "utf8");
+                var head = "";
+                var middle = "";
+                var tail = "";
+                var first = "";
+                var second = "";
 
-                if (conflicttest.test(contents)) {
+                while (conflicttest.test(contents)) {
                     var pieces = conflicttest.exec(contents);
-                    var change = false;
 
-                    if (pieces[1].trim()) {
-                        pieces[3] = pieces[1] + pieces[3];
-                        pieces[5] = pieces[1] + pieces[5];
-                        change = true;
-                    }
-                    if (pieces[7].trim()) {
-                        pieces[3] = pieces[3] + pieces[7];
-                        pieces[5] = pieces[5] + pieces[7];
-                        change = true;
-                    }
-                    if (change) {
-                        var newcontent = pieces[2] + pieces[3] + pieces[4] + pieces[5] + pieces[6];
-                        fs.writeFileSync(filePath, newcontent);
-                    }
+                    head = pieces[2];
+                    middle = pieces[4];
+                    tail = pieces[6];
+                    first += pieces[1] + pieces[3];
+                    second += pieces[1] + pieces[5];
+                    contents = pieces[7];
                 }
+
+                first += contents;
+                second += contents;
+                var newcontent = head + first + middle + second + tail;
+                fs.writeFileSync(filePath, newcontent);
             });
         },
 

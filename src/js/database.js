@@ -112,7 +112,7 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             var container = lang + "_" + proj + "_" + res;
             var manifest = path.join(resourceDir, container, "package.json");
 
-            return mythis.activateContainer(lang, proj, res)
+            return mythis.activateProjectContainers(lang, proj, res)
                 .then(function () {
                     return utils.fs.readFile(manifest)
                         .then(function (contents) {

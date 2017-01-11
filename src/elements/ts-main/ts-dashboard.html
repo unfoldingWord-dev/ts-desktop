@@ -925,9 +925,10 @@
                   mythis.set('options.showlink', true);
                   mythis.set('options.loading', false);
                   var link = loading.getElementsByClassName("url");
-                  link[0].addEventListener('click', function (event) {
+                  link[0].addEventListener('click', function clicker (event) {
                       event.preventDefault();
                       shell.openExternal(url);
+                      link[0].removeEventListener('click', clicker);
                   });
               })
               .catch(function (err) {

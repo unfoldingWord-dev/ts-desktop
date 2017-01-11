@@ -174,12 +174,22 @@
                 <div class="row-header">Available</div>
                 <template is="dom-repeat" items="[[available]]" as="source">
                     <div class$="[[rowclass(source.direction)]]">
-                        <div>
-                            <span>[[source.language_name]]</span> (<span>[[source.language_id]]</span>) - <span>[[source.resource_name]]</span>
-                        </div>
-                        <div class="buttons">
-                            <paper-checkbox checked="[[source.selected]]" on-change="addSource"></paper-checkbox>
-                        </div>
+                        <template is="dom-if" if="{{!source.updating}}">
+                            <div>
+                                <span>[[source.language_name]]</span> (<span>[[source.language_id]]</span>) - <span>[[source.resource_name]]</span>
+                            </div>
+                            <div class="buttons">
+                                <paper-checkbox checked="[[source.selected]]" on-change="addSource"></paper-checkbox>
+                            </div>
+                        </template>
+                        <template is="dom-if" if="{{source.updating}}">
+                            <div>
+                                <span>Activating this source. Please wait...</span>
+                            </div>
+                            <div>
+                                <paper-spinner active></paper-spinner>
+                            </div>
+                        </template>
                     </div>
                 </template>
 
@@ -425,15 +435,21 @@
             var source = event.model.source;
             var index = this.findIndex(source);
 
-            this.disableButtons();
+            if (mythis.selected.length < 3) {
+                mythis.disableButtons();
+                mythis.set('master.' + index + '.updating', true);
 
-            if (this.selected.length < 3) {
-                this.set('master.' + index + '.selected', true);
+                return mythis.organizeSources()
+                    .then(function () {
+                        mythis.set('master.' + index + '.selected', true);
+                        mythis.set('master.' + index + '.updating', false);
+                        return mythis.organizeSources();
+                    })
+                    .then(function () {
+                        mythis.enableButtons();
+                        mythis.$.body.scrollTop = 0;
+                    });
             }
-            return this.organizeSources()
-                .then(function () {
-                    mythis.enableButtons();
-                });
         },
 
         removeSource: function (event) {

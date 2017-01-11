@@ -948,6 +948,8 @@
             var frames = [];
             var chunkarray = [];
 
+            this.set('currentproject.conflicts', 0);
+
             if (type === "tw") {
                 var dict = projectmeta.project.id;
                 frames = App.dataManager.getAllWords(dict);
@@ -1126,6 +1128,7 @@
                     conflicts = App.renderer.checkForConflicts(transcontent);
                     if (conflicts.exists) {
                         this.set('currentproject.conflicts', this.currentproject.conflicts + 1);
+
                         for (var i = 0; i < conflicts.array.length; i++) {
                             conflicts.array[i] = App.renderer.convertVerseMarkers(conflicts.array[i]).text;
                             conflicts.array[i] = App.renderer.migrateMarkers(conflicts.array[i]);
@@ -1139,8 +1142,17 @@
                         transcontent = App.renderer.validateVerseMarkers(transcontent, verses);
                     }
                 } else {
-                    helpscontent = maindata.helpscontent;
-                    conflicts = App.renderer.checkForConflicts(helpscontent);
+                    conflicts = App.renderer.checkForConflicts(maindata.helpscontent);
+                    if (conflicts.exists) {
+                        this.set('currentproject.conflicts', this.currentproject.conflicts + 1);
+                        helpscontent = JSON.parse(conflicts.array[0]);
+
+                        for (i = 0; i < conflicts.array.length; i++) {
+                            conflicts.array[i] = JSON.parse(conflicts.array[i]);
+                        }
+                    } else {
+                        helpscontent = JSON.parse(maindata.helpscontent);
+                    }
                 }
             }
             if (seconddata && typeclass === "helps") {

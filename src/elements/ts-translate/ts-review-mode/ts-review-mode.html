@@ -176,7 +176,9 @@
             list.fire('iron-resize');
 
             for (var i = list.firstVisibleIndex; i <= list.lastVisibleIndex; i++) {
-                list.updateSizeForItem(i);
+                if (this.chunks.length && i < this.chunks.length) {
+                    list.updateSizeForItem(i);
+                }
             }
         },
 

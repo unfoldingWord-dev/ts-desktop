@@ -112,11 +112,11 @@
                 </div>
                 <iron-icon icon="done" on-tap="review"></iron-icon>
             </div>
-            <div id="content" class$="[[noconflictclass(chunk.conflicts.exists)]]">
+            <div id="content" class$="[[noconflictclass(chunk.conflicts.exists, chunk.projectmeta.project_type_class)]]">
                 <iron-autogrow-textarea id="textbox" class$="[[chunk.projectmeta.target_language.direction]]" on-change="change" value="[[chunk.transcontent]]" on-input="input"></iron-autogrow-textarea>
                 <div id="textholder" class$="[[chunk.projectmeta.target_language.direction]]"></div>
             </div>
-            <div id="conflict" class$="[[conflictclass(chunk.conflicts.exists)]]">
+            <div id="conflict" class$="[[conflictclass(chunk.conflicts.exists, chunk.projectmeta.project_type_class)]]">
                 <paper-button raised class="review" on-tap="gotoreview">Conflict Exists</paper-button>
             </div>
         </paper-material>
@@ -161,12 +161,18 @@
             this.fire('iron-signal', {name: 'gotoreview', data: {index: index, chapter: chapter}});
         },
 
-        conflictclass: function (exists) {
-            return exists ? 'flex' : 'hide';
+        conflictclass: function (exists, type) {
+            return exists && type === "standard" ? 'flex' : 'hide';
         },
 
-        noconflictclass: function (exists) {
-            return exists ? 'hide' : 'flex editmode targetfont targetsize';
+        noconflictclass: function (exists, type) {
+            if (exists && type === "standard") {
+                return 'hide';
+            } else if (type === "standard") {
+                return 'flex editmode targetfont targetsize';
+            } else {
+                return 'flex targetfont targetsize';
+            }
         },
 
         rendertext: function () {

@@ -201,7 +201,7 @@
                             </div>
                         </div>
                         <div class="rightbox">
-                            <iron-icon icon="close" on-tap="checkdelete"></iron-icon>
+                            <iron-icon icon="close" on-tap="deletehelp"></iron-icon>
                             <iron-icon icon="arrow-drop-up" on-tap="moveup"></iron-icon>
                             <iron-icon icon="arrow-drop-down" on-tap="movedown"></iron-icon>
                         </div>
@@ -297,17 +297,14 @@
             this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
         },
 
-        deletehelp: function (event, data) {
-            var chunkindex = data.index[0];
-            var noteindex = data.index[1];
+        deletehelp: function (e) {
+            var noteindex = e.model.index;
             var helps = _.cloneDeep(this.chunk.helpscontent);
 
-            if (this.chunk.index === chunkindex) {
-                helps.splice(noteindex, 1);
-                this.set('chunk.helpscontent', helps);
-                this.fire('setheight');
-                this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
-            }
+            helps.splice(noteindex, 1);
+            this.set('chunk.helpscontent', helps);
+            this.fire('setheight');
+            this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
         },
 
         checkdelete: function (e) {

@@ -280,8 +280,13 @@
         },
 
         movehelp: function (index, dir) {
-            var removed = this.splice('chunk.helpscontent', index, 1)[0];
-            this.splice('chunk.helpscontent', index + dir, 0, removed);
+            var helps = _.cloneDeep(this.chunk.helpscontent);
+            var removed = helps[index];
+
+            helps.splice(index, 1);
+            helps.splice(index + dir, 0, removed);
+
+            this.set('chunk.helpscontent', helps);
             this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
         },
 
@@ -295,9 +300,11 @@
         deletehelp: function (event, data) {
             var chunkindex = data.index[0];
             var noteindex = data.index[1];
+            var helps = _.cloneDeep(this.chunk.helpscontent);
 
             if (this.chunk.index === chunkindex) {
-                this.splice('chunk.helpscontent', noteindex, 1);
+                helps.splice(noteindex, 1);
+                this.set('chunk.helpscontent', helps);
                 this.fire('setheight');
                 this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
             }

@@ -215,7 +215,6 @@
         </div>
 
         <iron-signals on-iron-signal-completechunk="completechunk"></iron-signals>
-        <iron-signals on-iron-signal-deletehelp="deletehelp"></iron-signals>
 
 	</template>
 
@@ -305,12 +304,6 @@
             this.set('chunk.helpscontent', helps);
             this.fire('setheight');
             this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
-        },
-
-        checkdelete: function (e) {
-            var noteindex = e.model.index;
-            var chunkindex = this.chunk.index;
-            this.fire('iron-signal', {name: 'opendelete', data: {index: [chunkindex, noteindex]}});
         },
 
         input: function () {

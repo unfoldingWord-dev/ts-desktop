@@ -96,16 +96,52 @@ function Renderer() {
             return text;
         },
 
-        checkForConflicts: function (content) {
-            var conflicttest = new RegExp(/(<{7} HEAD\n|={7}\n)([^<=>]+)(>{7} [\w]{40}|={7})/);
+        checkForConflicts: function (text) {
+            var starttest = new RegExp(/<{7} HEAD\n/g);
+            var midtest = new RegExp(/={7}\n/g);
+            var endtest = new RegExp(/>{7} \w{40}\n?/g);
+            var conflicttest = new RegExp(/([^<>]*)(<S>)([^<>]*)(<M>)([^<>]*)(<E>)([^<>]*)/);
+            var optiontest = new RegExp(/(\*s\*)([^\*]*)(\*e\*)/);
+            var startmarker = "*s*";
+            var endmarker = "*e*";
+            var conflicts = false;
             var conarray = [];
 
-            if (conflicttest.test(content)) {
-                while (conflicttest.test(content)) {
-                    var subcontent = conflicttest.exec(content)[2];
-                    conarray.push(subcontent);
-                    content = content.replace(subcontent, "");
+            text = text.replace(starttest, "<S>");
+            text = text.replace(midtest, "<M>");
+            text = text.replace(endtest, "<E>");
+
+            while (conflicttest.test(text)) {
+                var pieces = conflicttest.exec(text);
+
+                if (!optiontest.test(pieces[3])) {
+                    pieces[3] = startmarker + pieces[3] + endmarker;
                 }
+                if (!optiontest.test(pieces[5])) {
+                    pieces[5] = startmarker + pieces[5] + endmarker;
+                }
+
+                var newcontent = pieces[3] + pieces[5];
+
+                if (pieces[1]) {
+                    newcontent = newcontent.replace(/\*s\*/g, startmarker + pieces[1]);
+                }
+                if (pieces[7]) {
+                    newcontent = newcontent.replace(/\*e\*/g, pieces[7] + endmarker);
+                }
+
+                text = text.replace(conflicttest, newcontent);
+                conflicts = true;
+            }
+
+            if (conflicts) {
+                while (optiontest.test(text)) {
+                    var option = optiontest.exec(text)[2];
+
+                    conarray.push(option.trim());
+                    text = text.replace(optiontest, "");
+                }
+
                 conarray = _.uniq(conarray);
                 return {exists: true, array: conarray};
             } else {

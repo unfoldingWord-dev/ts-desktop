@@ -96,7 +96,7 @@ function Renderer() {
             return text;
         },
 
-        checkForConflicts: function (text) {
+        parseConflicts: function (text) {
             var starttest = new RegExp(/<{7} HEAD\n/g);
             var midtest = new RegExp(/={7}\n/g);
             var endtest = new RegExp(/>{7} \w{40}\n?/g);
@@ -149,35 +149,34 @@ function Renderer() {
             }
         },
 
-        consolidateConflicts: function (targetPath, conflicts) {
-            var conflicttest = new RegExp(/([^<=>]*)(<{7} HEAD\n)([^<=>]*)(={7}\n)([^<=>]*)(>{7} \w{40}\n?)([^]*)/);
+        consolidateHelpsConflict: function (text) {
+            var conflicttest = new RegExp(/([^<=>]*)(<{7} HEAD\n)([^]*)(={7}\n)([^]*)(>{7} \w{40}\n?)(?=[^<=>]*<)/);
+            var conflicttest2 = new RegExp(/([^<=>]*)(<{7} HEAD\n)([^]*)(={7}\n)([^]*)(>{7} \w{40}\n?)([^<=>]*)/);
+            var head = "";
+            var middle = "";
+            var tail = "";
+            var first = "";
+            var second = "";
 
-            conflicts.forEach(function (conflict) {
-                var split = conflict.split("-");
-                var filePath = path.join(targetPath, split[0], split[1] + ".txt");
-                var contents = fs.readFileSync(filePath, "utf8");
-                var head = "";
-                var middle = "";
-                var tail = "";
-                var first = "";
-                var second = "";
+            while (conflicttest.test(text)) {
+                var pieces = conflicttest.exec(text);
 
-                while (conflicttest.test(contents)) {
-                    var pieces = conflicttest.exec(contents);
+                first += pieces[1] + pieces[3];
+                second += pieces[1] + pieces[5];
+                text = text.replace(conflicttest, "");
+            }
 
-                    head = pieces[2];
-                    middle = pieces[4];
-                    tail = pieces[6];
-                    first += pieces[1] + pieces[3];
-                    second += pieces[1] + pieces[5];
-                    contents = pieces[7];
-                }
+            while (conflicttest2.test(text)) {
+                pieces = conflicttest2.exec(text);
+                head = pieces[2];
+                middle = pieces[4];
+                tail = pieces[6];
+                first += pieces[1] + pieces[3] + pieces[7];
+                second += pieces[1] + pieces[5] + pieces[7];
+                text = text.replace(conflicttest2, "");
+            }
 
-                first += contents;
-                second += contents;
-                var newcontent = head + first + middle + second + tail;
-                fs.writeFileSync(filePath, newcontent);
-            });
+            return this.parseConflicts(head + first + middle + second + tail);
         },
 
         replaceEscapes: function (text) {
@@ -189,7 +188,7 @@ function Renderer() {
         },
 
         replaceConflictCode: function (content) {
-            var conflicts = this.checkForConflicts(content);
+            var conflicts = this.parseConflicts(content);
             var text = "";
 
             if (conflicts.exists) {

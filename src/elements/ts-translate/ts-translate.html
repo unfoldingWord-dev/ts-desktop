@@ -1074,7 +1074,7 @@
             if (maindata) {
                 if (typeclass === "standard") {
                     transcontent = maindata.transcontent;
-                    conflicts = App.renderer.checkForConflicts(transcontent);
+                    conflicts = App.renderer.parseConflicts(transcontent);
                     if (conflicts.exists) {
                         this.set('currentproject.conflicts', this.currentproject.conflicts + 1);
 
@@ -1091,16 +1091,25 @@
                         transcontent = App.renderer.validateVerseMarkers(transcontent, verses);
                     }
                 } else {
-                    conflicts = App.renderer.checkForConflicts(maindata.helpscontent);
+                    conflicts = App.renderer.consolidateHelpsConflict(maindata.helpscontent);
                     if (conflicts.exists) {
                         this.set('currentproject.conflicts', this.currentproject.conflicts + 1);
-                        helpscontent = JSON.parse(conflicts.array[0]);
+                        helpscontent = [{title: "Dummy Data", body: "Dummy Data"}];
 
                         for (i = 0; i < conflicts.array.length; i++) {
-                            conflicts.array[i] = JSON.parse(conflicts.array[i]);
+                            try {
+                                conflicts.array[i] = JSON.parse(conflicts.array[i]);
+                            } catch (e) {
+                                conflicts.array[i] = [{title: "Conflict Parsing Error", body: "Conflict Parsing Error"}];
+                            }
                         }
                     } else {
-                        helpscontent = JSON.parse(maindata.helpscontent);
+                        try {
+                            helpscontent = JSON.parse(maindata.helpscontent);
+                        } catch (e) {
+                            helpscontent = [{title: "Dummy Data", body: "Dummy Data"}];
+                            conflicts = {exists: true, array: [[{title: "Conflict Parsing Error", body: "Conflict Parsing Error"}]]};
+                        }
                     }
                 }
             }

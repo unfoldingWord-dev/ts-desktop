@@ -96,21 +96,87 @@ function Renderer() {
             return text;
         },
 
-        checkForConflicts: function (content) {
-            var conflicttest = new RegExp(/(<{7} HEAD\n|={7}\n)([^<=>]+)(>{7} [\w]{40}|={7})/);
+        parseConflicts: function (text) {
+            var starttest = new RegExp(/<{7} HEAD\n/g);
+            var midtest = new RegExp(/={7}\n/g);
+            var endtest = new RegExp(/>{7} \w{40}\n?/g);
+            var conflicttest = new RegExp(/([^<>]*)(<S>)([^<>]*)(<M>)([^<>]*)(<E>)([^<>]*)/);
+            var optiontest = new RegExp(/(\*s\*)([^\*]*)(\*e\*)/);
+            var startmarker = "*s*";
+            var endmarker = "*e*";
+            var conflicts = false;
             var conarray = [];
 
-            if (conflicttest.test(content)) {
-                while (conflicttest.test(content)) {
-                    var subcontent = conflicttest.exec(content)[2];
-                    conarray.push(subcontent);
-                    content = content.replace(subcontent, "");
+            text = text.replace(starttest, "<S>");
+            text = text.replace(midtest, "<M>");
+            text = text.replace(endtest, "<E>");
+
+            while (conflicttest.test(text)) {
+                var pieces = conflicttest.exec(text);
+
+                if (!optiontest.test(pieces[3])) {
+                    pieces[3] = startmarker + pieces[3] + endmarker;
                 }
+                if (!optiontest.test(pieces[5])) {
+                    pieces[5] = startmarker + pieces[5] + endmarker;
+                }
+
+                var newcontent = pieces[3] + pieces[5];
+
+                if (pieces[1]) {
+                    newcontent = newcontent.replace(/\*s\*/g, startmarker + pieces[1]);
+                }
+                if (pieces[7]) {
+                    newcontent = newcontent.replace(/\*e\*/g, pieces[7] + endmarker);
+                }
+
+                text = text.replace(conflicttest, newcontent);
+                conflicts = true;
+            }
+
+            if (conflicts) {
+                while (optiontest.test(text)) {
+                    var option = optiontest.exec(text)[2];
+
+                    conarray.push(option.trim());
+                    text = text.replace(optiontest, "");
+                }
+
                 conarray = _.uniq(conarray);
                 return {exists: true, array: conarray};
             } else {
                 return {exists: false, array: conarray};
             }
+        },
+
+        consolidateHelpsConflict: function (text) {
+            var conflicttest = new RegExp(/([^<=>]*)(<{7} HEAD\n)([^]*)(={7}\n)([^]*)(>{7} \w{40}\n?)(?=[^<=>]*<)/);
+            var conflicttest2 = new RegExp(/([^<=>]*)(<{7} HEAD\n)([^]*)(={7}\n)([^]*)(>{7} \w{40}\n?)([^<=>]*)/);
+            var head = "";
+            var middle = "";
+            var tail = "";
+            var first = "";
+            var second = "";
+
+            while (conflicttest.test(text)) {
+                var pieces = conflicttest.exec(text);
+
+                first += pieces[1] + pieces[3];
+                second += pieces[1] + pieces[5];
+                text = text.replace(conflicttest, "");
+            }
+
+            while (conflicttest2.test(text)) {
+                pieces = conflicttest2.exec(text);
+                head = pieces[2];
+                middle = pieces[4];
+                tail = pieces[6];
+                first += pieces[1] + pieces[3] + pieces[7];
+                second += pieces[1] + pieces[5] + pieces[7];
+                text = text.replace(conflicttest2, "");
+            }
+
+            return this.parseConflicts(head + first + middle + second + tail);
         },
 
         replaceEscapes: function (text) {
@@ -122,7 +188,7 @@ function Renderer() {
         },
 
         replaceConflictCode: function (content) {
-            var conflicts = this.checkForConflicts(content);
+            var conflicts = this.parseConflicts(content);
             var text = "";
 
             if (conflicts.exists) {
@@ -191,6 +257,7 @@ function Renderer() {
         },
 
         renderObsPrintPreview: function (chunks, options, imagePath) {
+            var mythis = this;
             var module = "ts-print";
             var startheader = "\<h2 class='style-scope " + module + "'\>";
             var endheader = "\<\/h2\>";
@@ -235,9 +302,9 @@ function Renderer() {
                             if (options.includeImages) {
                                 var image = path.join(imagePath, chunk.projectmeta.resource.id + "-en-" + chunk.chunkmeta.chapterid + "-" + chunk.chunkmeta.frameid + ".jpg");
                                 content += startnobreakdiv + "\<img src='" + image + "'\>";
-                                content += startp + chunk.transcontent + endp + enddiv;
+                                content += startp + mythis.replaceConflictCode(chunk.transcontent) + endp + enddiv;
                             } else {
-                                content += chunk.transcontent + " ";
+                                content += mythis.replaceConflictCode(chunk.transcontent) + " ";
                             }
                         }
                     }

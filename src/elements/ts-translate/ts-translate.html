@@ -107,30 +107,6 @@
             color: var(--accent-color);
         }
 
-        #delete {
-            width: 450px;
-            height: 175px;
-        }
-
-        #delete iron-icon {
-            padding-right: 10px;
-        }
-
-        #delete p {
-            font-size: 110%;
-        }
-
-        #deletebuttons {
-            display: flex;
-            justify-content: flex-end;
-            padding: 0 50px;
-            color: var(--secondary-text-color);
-        }
-
-        #deletebuttons paper-button:hover {
-            color: var(--accent-color);
-        }
-
         #note {
             width: 350px;
             height: 250px;
@@ -224,17 +200,6 @@
             </div>
         </paper-dialog>
 
-        <paper-dialog id="delete" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <h2><iron-icon icon="delete"></iron-icon>Delete</h2>
-            <div>
-                <p>This will permanently remove this note/question. Continue?</p>
-            </div>
-            <div id="deletebuttons">
-                <paper-button on-tap="closedelete">Cancel</paper-button>
-                <paper-button on-tap="deletehelp">Confirm</paper-button>
-            </div>
-        </paper-dialog>
-
         <paper-dialog id="note" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <h2>Note</h2>
             <div id="notebody"></div>
@@ -252,7 +217,6 @@
         <iron-signals on-iron-signal-loadproject="loadproject"></iron-signals>
         <iron-signals on-iron-signal-updatecompletion="updatecompletion"></iron-signals>
         <iron-signals on-iron-signal-openchecklist="openchecklist"></iron-signals>
-        <iron-signals on-iron-signal-opendelete="opendelete"></iron-signals>
         <iron-signals on-iron-signal-openedit="openedit"></iron-signals>
         <iron-signals on-iron-signal-opennodata="opennodata"></iron-signals>
         <iron-signals on-iron-signal-opennote="opennote"></iron-signals>
@@ -507,21 +471,6 @@
         closechecklist: function () {
             var index = this.modestatus.index;
             this.fire('iron-signal', {name: 'completechunk', data: {index: index}});
-        },
-
-        opendelete: function (event, data) {
-            this.modestatus.index = data.index;
-            this.$.delete.open();
-        },
-
-        closedelete: function () {
-            this.$.delete.close();
-        },
-
-        deletehelp: function () {
-            var index = this.modestatus.index;
-            this.fire('iron-signal', {name: 'deletehelp', data: {index: index}});
-            this.closedelete();
         },
 
         openedit: function (event, data) {
@@ -1125,7 +1074,7 @@
             if (maindata) {
                 if (typeclass === "standard") {
                     transcontent = maindata.transcontent;
-                    conflicts = App.renderer.checkForConflicts(transcontent);
+                    conflicts = App.renderer.parseConflicts(transcontent);
                     if (conflicts.exists) {
                         this.set('currentproject.conflicts', this.currentproject.conflicts + 1);
 
@@ -1142,16 +1091,25 @@
                         transcontent = App.renderer.validateVerseMarkers(transcontent, verses);
                     }
                 } else {
-                    conflicts = App.renderer.checkForConflicts(maindata.helpscontent);
+                    conflicts = App.renderer.consolidateHelpsConflict(maindata.helpscontent);
                     if (conflicts.exists) {
                         this.set('currentproject.conflicts', this.currentproject.conflicts + 1);
-                        helpscontent = JSON.parse(conflicts.array[0]);
+                        helpscontent = [{title: "Dummy Data", body: "Dummy Data"}];
 
                         for (i = 0; i < conflicts.array.length; i++) {
-                            conflicts.array[i] = JSON.parse(conflicts.array[i]);
+                            try {
+                                conflicts.array[i] = JSON.parse(conflicts.array[i]);
+                            } catch (e) {
+                                conflicts.array[i] = [{title: "Conflict Parsing Error", body: "Conflict Parsing Error"}];
+                            }
                         }
                     } else {
-                        helpscontent = JSON.parse(maindata.helpscontent);
+                        try {
+                            helpscontent = JSON.parse(maindata.helpscontent);
+                        } catch (e) {
+                            helpscontent = [{title: "Dummy Data", body: "Dummy Data"}];
+                            conflicts = {exists: true, array: [[{title: "Conflict Parsing Error", body: "Conflict Parsing Error"}]]};
+                        }
                     }
                 }
             }

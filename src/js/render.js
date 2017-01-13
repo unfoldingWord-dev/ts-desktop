@@ -257,6 +257,7 @@ function Renderer() {
         },
 
         renderObsPrintPreview: function (chunks, options, imagePath) {
+            var mythis = this;
             var module = "ts-print";
             var startheader = "\<h2 class='style-scope " + module + "'\>";
             var endheader = "\<\/h2\>";
@@ -301,9 +302,9 @@ function Renderer() {
                             if (options.includeImages) {
                                 var image = path.join(imagePath, chunk.projectmeta.resource.id + "-en-" + chunk.chunkmeta.chapterid + "-" + chunk.chunkmeta.frameid + ".jpg");
                                 content += startnobreakdiv + "\<img src='" + image + "'\>";
-                                content += startp + chunk.transcontent + endp + enddiv;
+                                content += startp + mythis.replaceConflictCode(chunk.transcontent) + endp + enddiv;
                             } else {
-                                content += chunk.transcontent + " ";
+                                content += mythis.replaceConflictCode(chunk.transcontent) + " ";
                             }
                         }
                     }

@@ -101,7 +101,7 @@ function Renderer() {
             var midtest = new RegExp(/={7}\n/g);
             var endtest = new RegExp(/>{7} \w{40}\n?/g);
             var conflicttest = new RegExp(/([^<>]*)(<S>)([^<>]*)(<M>)([^<>]*)(<E>)([^<>]*)/);
-            var optiontest = new RegExp(/(@s@)([^@]*)(@e@)/);
+            var optiontest = new RegExp(/(@s@)([^]+?)(@e@)/);
             var startmarker = "@s@";
             var endmarker = "@e@";
             var conflicts = false;

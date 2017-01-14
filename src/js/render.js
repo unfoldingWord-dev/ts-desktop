@@ -101,9 +101,9 @@ function Renderer() {
             var midtest = new RegExp(/={7}\n/g);
             var endtest = new RegExp(/>{7} \w{40}\n?/g);
             var conflicttest = new RegExp(/([^<>]*)(<S>)([^<>]*)(<M>)([^<>]*)(<E>)([^<>]*)/);
-            var optiontest = new RegExp(/(\*s\*)([^\*]*)(\*e\*)/);
-            var startmarker = "*s*";
-            var endmarker = "*e*";
+            var optiontest = new RegExp(/(@s@)([^]+?)(@e@)/);
+            var startmarker = "@s@";
+            var endmarker = "@e@";
             var conflicts = false;
             var conarray = [];
 
@@ -124,10 +124,10 @@ function Renderer() {
                 var newcontent = pieces[3] + pieces[5];
 
                 if (pieces[1]) {
-                    newcontent = newcontent.replace(/\*s\*/g, startmarker + pieces[1]);
+                    newcontent = newcontent.replace(/@s@/g, startmarker + pieces[1]);
                 }
                 if (pieces[7]) {
-                    newcontent = newcontent.replace(/\*e\*/g, pieces[7] + endmarker);
+                    newcontent = newcontent.replace(/@e@/g, pieces[7] + endmarker);
                 }
 
                 text = text.replace(conflicttest, newcontent);

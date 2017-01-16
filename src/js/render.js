@@ -150,8 +150,8 @@ function Renderer() {
         },
 
         consolidateHelpsConflict: function (text) {
-            var conflicttest = new RegExp(/([^<=>]*)(<{7} HEAD\n)([^]*)(={7}\n)([^]*)(>{7} \w{40}\n?)(?=[^<=>]*<)/);
-            var conflicttest2 = new RegExp(/([^<=>]*)(<{7} HEAD\n)([^]*)(={7}\n)([^]*)(>{7} \w{40}\n?)([^<=>]*)/);
+            var conflicttest = new RegExp(/([^<=>]*)(<{7} HEAD\n)([^<=>]*)(={7}\n)([^<=>]*)(>{7} \w{40}\n?)(?=[^<=>]*<)/);
+            var conflicttest2 = new RegExp(/([^<=>]*)(<{7} HEAD\n)([^<=>]*)(={7}\n)([^<=>]*)(>{7} \w{40}\n?)([^<=>]*)/);
             var head = "";
             var middle = "";
             var tail = "";

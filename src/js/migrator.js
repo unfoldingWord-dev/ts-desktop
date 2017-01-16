@@ -418,6 +418,36 @@ function MigrateManager(configurator, git, reporter, dataManager) {
                 return {manifest: manifest, paths: paths};
             };
 
+            var migrateName = function (project) {
+                let manifest = project.manifest;
+                let paths = project.paths;
+
+                let oldname = paths.projectDir.substring(paths.projectDir.lastIndexOf(path.sep) + 1);
+                let unique_id = manifest.target_language.id + "_" + manifest.project.id + "_" + manifest.type.id;
+                if (manifest.resource.id !== "") {
+                    unique_id += "_" + manifest.resource.id;
+                }
+
+                if (oldname !== unique_id) {
+                    let oldpath = path.join(paths.parentDir, oldname);
+                    let newpath = path.join(paths.parentDir, unique_id);
+
+                    paths.projectDir = newpath;
+                    paths.manifest = path.join(newpath, 'manifest.json');
+                    paths.license = path.join(newpath, 'LICENSE.md');
+
+                    return utils.fs.mkdirs(newpath)
+                        .then(function () {
+                            return utils.fs.mover(oldpath, newpath);
+                        })
+                        .then(function () {
+                            return {manifest: manifest, paths: paths};
+                        });
+                }
+
+                return {manifest: manifest, paths: paths};
+            };
+
             var checkVersion = function (project) {
                 if (project.manifest.package_version !== 7) {
                     throw new Error("Failed to migrate project");
@@ -445,6 +475,7 @@ function MigrateManager(configurator, git, reporter, dataManager) {
                 .then(migrateV5)
                 .then(migrateV6)
                 .then(migrateV7)
+                .then(migrateName)
                 .then(checkVersion)
                 .then(saveManifest)
                 .then(function (project) {

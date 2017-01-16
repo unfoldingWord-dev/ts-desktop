@@ -102,9 +102,10 @@ function Renderer() {
             var endtest = new RegExp(/>{7} \w{40}\n?/g);
             var conflicttest = new RegExp(/([^<>]*)(<S>)([^<>]*)(<M>)([^<>]*)(<E>)([^<>]*)/);
             var optiontest = new RegExp(/(@s@)([^]+?)(@e@)/);
+            var confirmtest = new RegExp(/<S>/);
             var startmarker = "@s@";
             var endmarker = "@e@";
-            var conflicts = false;
+            var exists = false;
             var conarray = [];
 
             text = text.replace(starttest, "<S>");
@@ -131,10 +132,10 @@ function Renderer() {
                 }
 
                 text = text.replace(conflicttest, newcontent);
-                conflicts = true;
+                exists = true;
             }
 
-            if (conflicts) {
+            if (exists) {
                 while (optiontest.test(text)) {
                     var option = optiontest.exec(text)[2];
 
@@ -143,10 +144,14 @@ function Renderer() {
                 }
 
                 conarray = _.uniq(conarray);
-                return {exists: true, array: conarray};
-            } else {
-                return {exists: false, array: conarray};
             }
+
+            if (confirmtest.test(text)) {
+                exists = true;
+                conarray.push("Conflict Parsing Error");
+            }
+
+            return {exists: exists, array: conarray};
         },
 
         consolidateHelpsConflict: function (text) {

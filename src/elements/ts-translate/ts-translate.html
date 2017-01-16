@@ -1074,7 +1074,7 @@
             if (maindata) {
                 if (typeclass === "standard") {
                     transcontent = maindata.transcontent;
-                    conflicts = App.renderer.parseConflicts(transcontent);
+                    conflicts = App.renderer.parseConflicts(App.renderer.replaceConflictCode(transcontent));
                     if (conflicts.exists) {
                         this.set('currentproject.conflicts', this.currentproject.conflicts + 1);
 

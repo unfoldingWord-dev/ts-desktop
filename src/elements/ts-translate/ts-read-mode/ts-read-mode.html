@@ -121,7 +121,7 @@
 
             for (var i = list.firstVisibleIndex; i <= list.lastVisibleIndex; i++) {
                 var card = document.getElementById(this.modename + i);
-                if (card && i < this.chapters.length) {
+                if (card && this.chapters && i < this.chapters.length) {
                     card.setheight();
                     list.updateSizeForItem(i);
                 }

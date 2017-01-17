@@ -96,20 +96,92 @@ function Renderer() {
             return text;
         },
 
-        checkForConflicts: function (content) {
-            var conflicttest = new RegExp(/(<{7} HEAD\n|={7}\n)([^<=>]+)(>{7} [\w]{40}|={7})/);
+        replaceConflictCode: function (text) {
+            var starttest = new RegExp(/<{7} HEAD\n/g);
+            var midtest = new RegExp(/={7}\n/g);
+            var endtest = new RegExp(/>{7} \w{40}\n?/g);
+
+            text = text.replace(starttest, "<S>");
+            text = text.replace(midtest, "<M>");
+            text = text.replace(endtest, "<E>");
+
+            return text;
+        },
+
+        parseConflicts: function (text) {
+            var conflicttest = new RegExp(/([^<>]*)(<S>)([^<>]*)(<M>)([^<>]*)(<E>)([^<>]*)/);
+            var optiontest = new RegExp(/(@s@)([^]+?)(@e@)/);
+            var confirmtest = new RegExp(/<(S|M|E)>/);
+            var startmarker = "@s@";
+            var endmarker = "@e@";
+            var exists = false;
             var conarray = [];
 
-            if (conflicttest.test(content)) {
-                while (conflicttest.test(content)) {
-                    var subcontent = conflicttest.exec(content)[2];
-                    conarray.push(subcontent);
-                    content = content.replace(subcontent, "");
+            while (conflicttest.test(text)) {
+                var pieces = conflicttest.exec(text);
+
+                if (!optiontest.test(pieces[3])) {
+                    pieces[3] = startmarker + pieces[3] + endmarker;
                 }
+                if (!optiontest.test(pieces[5])) {
+                    pieces[5] = startmarker + pieces[5] + endmarker;
+                }
+
+                var newcontent = pieces[3] + pieces[5];
+
+                if (pieces[1]) {
+                    newcontent = newcontent.replace(/@s@/g, startmarker + pieces[1]);
+                }
+                if (pieces[7]) {
+                    newcontent = newcontent.replace(/@e@/g, pieces[7] + endmarker);
+                }
+
+                text = text.replace(conflicttest, newcontent);
+                exists = true;
+            }
+
+            if (exists) {
+                while (optiontest.test(text)) {
+                    var option = optiontest.exec(text)[2];
+
+                    conarray.push(option.trim());
+                    text = text.replace(optiontest, "");
+                }
+
                 conarray = _.uniq(conarray);
-                return {exists: true, array: conarray};
+            }
+
+            if (confirmtest.test(text)) {
+                exists = true;
+                conarray.push("Conflict Parsing Error");
+            }
+
+            return {exists: exists, array: conarray};
+        },
+
+        consolidateHelpsConflict: function (text) {
+            var conflicttest = new RegExp(/^([^<>]*)(<S>)([^<>]*)(<M>)([^<>]*)(<E>)([^]*)/);
+            var start = "<S>";
+            var middle = "<M>";
+            var end = "<E>";
+            var first = "";
+            var second = "";
+
+            if (conflicttest.test(text)) {
+                while (conflicttest.test(text)) {
+                    var pieces = conflicttest.exec(text);
+
+                    first += pieces[1] + pieces[3];
+                    second += pieces[1] + pieces[5];
+                    text = pieces[7];
+                }
+
+                first += text;
+                second += text;
+
+                return start + first + middle + second + end;
             } else {
-                return {exists: false, array: conarray};
+                return text;
             }
         },
 
@@ -121,8 +193,8 @@ function Renderer() {
             return text;
         },
 
-        replaceConflictCode: function (content) {
-            var conflicts = this.checkForConflicts(content);
+        displayConflicts: function (content) {
+            var conflicts = this.parseConflicts(this.replaceConflictCode(content));
             var text = "";
 
             if (conflicts.exists) {
@@ -170,7 +242,7 @@ function Renderer() {
                     }
                     if (chunk.chunkmeta.frame > 0 && chunk.transcontent) {
                         if (options.includeIncompleteFrames || chunk.completed) {
-                            content += mythis.replaceConflictCode(chunk.transcontent) + " ";
+                            content += mythis.displayConflicts(chunk.transcontent) + " ";
                         }
                     }
                 });
@@ -191,6 +263,7 @@ function Renderer() {
         },
 
         renderObsPrintPreview: function (chunks, options, imagePath) {
+            var mythis = this;
             var module = "ts-print";
             var startheader = "\<h2 class='style-scope " + module + "'\>";
             var endheader = "\<\/h2\>";
@@ -235,9 +308,9 @@ function Renderer() {
                             if (options.includeImages) {
                                 var image = path.join(imagePath, chunk.projectmeta.resource.id + "-en-" + chunk.chunkmeta.chapterid + "-" + chunk.chunkmeta.frameid + ".jpg");
                                 content += startnobreakdiv + "\<img src='" + image + "'\>";
-                                content += startp + chunk.transcontent + endp + enddiv;
+                                content += startp + mythis.displayConflicts(chunk.transcontent) + endp + enddiv;
                             } else {
-                                content += chunk.transcontent + " ";
+                                content += mythis.displayConflicts(chunk.transcontent) + " ";
                             }
                         }
                     }

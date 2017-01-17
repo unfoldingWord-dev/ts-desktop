@@ -251,7 +251,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 var framenum = this.getProjectFrameNum(meta);
 
                 if (meta.finished_chunks && framenum) {
-                    meta.completion = Math.round((meta.finished_chunks.length / framenum) * 100);
+                    meta.completion = Math.floor((meta.finished_chunks.length / framenum) * 100);
                 } else {
                     meta.completion = 0;
                 }

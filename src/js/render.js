@@ -111,7 +111,7 @@ function Renderer() {
         parseConflicts: function (text) {
             var conflicttest = new RegExp(/([^<>]*)(<S>)([^<>]*)(<M>)([^<>]*)(<E>)([^<>]*)/);
             var optiontest = new RegExp(/(@s@)([^]+?)(@e@)/);
-            var confirmtest = new RegExp(/<S>/);
+            var confirmtest = new RegExp(/<(S|M|E)>/);
             var startmarker = "@s@";
             var endmarker = "@e@";
             var exists = false;

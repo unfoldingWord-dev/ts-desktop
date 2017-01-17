@@ -160,33 +160,29 @@ function Renderer() {
         },
 
         consolidateHelpsConflict: function (text) {
-            var conflicttest = new RegExp(/([^<=>]*)(<{7} HEAD\n)([^<=>]*)(={7}\n)([^<=>]*)(>{7} \w{40}\n?)(?=[^<=>]*<)/);
-            var conflicttest2 = new RegExp(/([^<=>]*)(<{7} HEAD\n)([^<=>]*)(={7}\n)([^<=>]*)(>{7} \w{40}\n?)([^<=>]*)/);
-            var head = "";
-            var middle = "";
-            var tail = "";
+            var conflicttest = new RegExp(/^([^<>]*)(<S>)([^<>]*)(<M>)([^<>]*)(<E>)([^]*)/);
+            var start = "<S>";
+            var middle = "<M>";
+            var end = "<E>";
             var first = "";
             var second = "";
 
-            while (conflicttest.test(text)) {
-                var pieces = conflicttest.exec(text);
+            if (conflicttest.test(text)) {
+                while (conflicttest.test(text)) {
+                    var pieces = conflicttest.exec(text);
 
-                first += pieces[1] + pieces[3];
-                second += pieces[1] + pieces[5];
-                text = text.replace(conflicttest, "");
+                    first += pieces[1] + pieces[3];
+                    second += pieces[1] + pieces[5];
+                    text = pieces[7];
+                }
+
+                first += text;
+                second += text;
+
+                return start + first + middle + second + end;
+            } else {
+                return text;
             }
-
-            while (conflicttest2.test(text)) {
-                pieces = conflicttest2.exec(text);
-                head = pieces[2];
-                middle = pieces[4];
-                tail = pieces[6];
-                first += pieces[1] + pieces[3] + pieces[7];
-                second += pieces[1] + pieces[5] + pieces[7];
-                text = text.replace(conflicttest2, "");
-            }
-
-            return this.parseConflicts(head + first + middle + second + tail);
         },
 
         replaceEscapes: function (text) {

@@ -1091,7 +1091,7 @@
                         transcontent = App.renderer.validateVerseMarkers(transcontent, verses);
                     }
                 } else {
-                    conflicts = App.renderer.consolidateHelpsConflict(maindata.helpscontent);
+                    conflicts = App.renderer.parseConflicts(App.renderer.consolidateHelpsConflict(App.renderer.replaceConflictCode(maindata.helpscontent)));
                     if (conflicts.exists) {
                         this.set('currentproject.conflicts', this.currentproject.conflicts + 1);
                         helpscontent = [{title: "Dummy Data", body: "Dummy Data"}];

@@ -42,8 +42,18 @@
 
 	<template>
 
-        <div class="contain">
+        <div class$="[[standardclass(chunk.projectmeta.project_type_class)]]">
             <ts-source-chunk class="left" reviewmode chunk="[[chunk]]"></ts-source-chunk>
+            <div class="middle">
+                <ts-target-conflict chunk="{{chunk}}" on-setheight="setheight"></ts-target-conflict>
+            </div>
+            <ts-resource-card class="right" chunk="[[chunk]]" on-setheight="setheight"></ts-resource-card>
+        </div>
+        <div class$="[[helpsclass(chunk.projectmeta.project_type_class)]]">
+            <ts-source-chunk class="left" reviewmode chunk="[[chunk]]"></ts-source-chunk>
+            <div class="middle">
+                <ts-target-edit chunkmode chunk="{{chunk}}"></ts-target-edit>
+            </div>
             <div class="middle">
                 <ts-target-conflict chunk="{{chunk}}" on-setheight="setheight"></ts-target-conflict>
             </div>
@@ -71,6 +81,14 @@
                 notify: true
             }
 		},
+
+        helpsclass: function (typeclass) {
+            return typeclass === "helps" ? 'contain' : 'hide';
+        },
+
+        standardclass: function (typeclass) {
+            return typeclass === "standard" ? 'contain' : 'hide';
+        },
 
         setheight: function () {
             this.fire('setheights');

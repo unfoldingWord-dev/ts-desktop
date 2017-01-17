@@ -1074,7 +1074,7 @@
             if (maindata) {
                 if (typeclass === "standard") {
                     transcontent = maindata.transcontent;
-                    conflicts = App.renderer.parseConflicts(transcontent);
+                    conflicts = App.renderer.parseConflicts(App.renderer.replaceConflictCode(transcontent));
                     if (conflicts.exists) {
                         this.set('currentproject.conflicts', this.currentproject.conflicts + 1);
 
@@ -1091,12 +1091,15 @@
                         transcontent = App.renderer.validateVerseMarkers(transcontent, verses);
                     }
                 } else {
-                    conflicts = App.renderer.consolidateHelpsConflict(maindata.helpscontent);
+                    conflicts = App.renderer.parseConflicts(App.renderer.consolidateHelpsConflict(App.renderer.replaceConflictCode(maindata.helpscontent)));
                     if (conflicts.exists) {
                         this.set('currentproject.conflicts', this.currentproject.conflicts + 1);
                         helpscontent = [{title: "Dummy Data", body: "Dummy Data"}];
 
                         for (i = 0; i < conflicts.array.length; i++) {
+                            if (conflicts.array[i] === "Conflict Parsing Error") {
+                                conflicts.array[i] = [{title: "Conflict Parsing Error", body: "Conflict Parsing Error"}];
+                            }
                             try {
                                 conflicts.array[i] = JSON.parse(conflicts.array[i]);
                             } catch (e) {
@@ -1107,8 +1110,7 @@
                         try {
                             helpscontent = JSON.parse(maindata.helpscontent);
                         } catch (e) {
-                            helpscontent = [{title: "Dummy Data", body: "Dummy Data"}];
-                            conflicts = {exists: true, array: [[{title: "Conflict Parsing Error", body: "Conflict Parsing Error"}]]};
+                            helpscontent = [{title: "Data Parsing Error", body: "Data Parsing Error"}];
                         }
                     }
                 }

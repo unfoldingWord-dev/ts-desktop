@@ -161,6 +161,8 @@ function Renderer() {
 
         consolidateHelpsConflict: function (text) {
             var conflicttest = new RegExp(/^([^<>]*)(<S>)([^<>]*)(<M>)([^<>]*)(<E>)([^]*)/);
+            var confirmtest = new RegExp(/<(S|M|E)>/);
+            var errormsg = [{title: "Conflict Parsing Error", body: "Conflict Parsing Error"}];
             var start = "<S>";
             var middle = "<M>";
             var end = "<E>";
@@ -180,6 +182,8 @@ function Renderer() {
                 second += text;
 
                 return start + first + middle + second + end;
+            } else if (confirmtest.test(text)) {
+                return start + errormsg + middle + errormsg + end;
             } else {
                 return text;
             }

@@ -1,0 +1,253 @@
+
+<link rel="import" href="../../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../../components/paper-button/paper-button.html">
+<link rel="import" href="../../../components/paper-material/paper-material.html">
+
+<dom-module id="ts-resource-display">
+
+	<style>
+
+        :host {
+            position: fixed;
+            top: 40px;
+            right: 0;
+            background: var(--card-background-color);
+            color: var(--primary-text-color);
+            width: 416px;
+            height: calc(100vh - 70px);
+        }
+
+        #content {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #header {
+            flex: 0 0 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--secondary-text-color);
+            border-bottom: 1px solid var(--secondary-text-color);
+        }
+
+        paper-button:hover {
+            color: var(--accent-color);
+        }
+
+        #body {
+            padding: 20px 40px;
+            overflow-y: auto;
+            flex: auto;
+        }
+
+        h2 {
+            color: var(--accent-color);
+        }
+
+        h3 {
+            margin: 10px 0;
+        }
+
+        p {
+            margin: 5px 0;
+        }
+
+        #footer {
+            flex: 0 0 50px;
+            display: flex;
+            align-items: center;
+            border-top: 1px solid var(--border-color);
+            text-transform: uppercase;
+            padding-left: 40px;
+        }
+
+        #footer.hide {
+            display: none;
+        }
+
+        .link {
+            color: var(--accent-color);
+            cursor: pointer;
+        }
+
+	</style>
+
+	<template>
+
+        <paper-material id="content">
+            <div id="header">
+                <paper-button on-tap="closeresource"><iron-icon icon="clear"></iron-icon>Close</paper-button>
+            </div>
+            <div id="body" class="sourcefont sourcesize">
+                <div id="textholder"></div>
+                <template is="dom-if" if="{{related.length}}">
+                    <h3>See Also:</h3>
+                    <template is="dom-repeat" items="{{related}}" as="word">
+                        <p class="link" on-tap="newword">{{word.title}}</p>
+                    </template>
+                </template>
+                <template is="dom-if" if="{{examples.length}}">
+                    <h3>Examples:</h3>
+                    <template is="dom-repeat" items="{{examples}}" as="example">
+                        <p class="link" on-tap="examplescroll"><span>{{chunks.0.projectmeta.project.name}}</span> <span>{{example.chapter}}</span>:<span>{{example.frame}}</span></p>
+                    </template>
+                </template>
+                <template is="dom-if" if="{{allwords.length}}">
+                    <h3>Words Index</h3>
+                    <template is="dom-repeat" items="{{allwords}}" as="word">
+                        <p class="link" on-tap="newword">{{word.title}}</p>
+                    </template>
+                </template>
+            </div>
+            <div id="footer">
+                <p class="link" on-tap="openindex">Words Index</p>
+            </div>
+        </paper-material>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+
+		is: 'ts-resource-display',
+
+		properties: {
+            chunks: {
+                type: Object,
+                value: {}
+            },
+            modestatus: {
+                type: Object,
+                value: {},
+                notify: true
+            },
+            related: {
+                type: Array,
+                value: []
+            },
+            examples: {
+                type: Array,
+                value: []
+            },
+            allwords: {
+                type: Array,
+                value: []
+            }
+		},
+
+        fillresource: function (data) {
+            var textholder = this.$.textholder;
+            var module = "ts-resource-display";
+            var content = "";
+            var clear = [];
+            var footer = this.$.footer;
+            var projectmeta = this.chunks[0].projectmeta;
+            var current = projectmeta.currentsource;
+            var currentsource = projectmeta.source_translations[current];
+            var dict = "bible";
+            if (currentsource.resource_id === "obs") {
+                dict = "bible-obs";
+            }
+
+            if (data.type === "Words") {
+                this.set('related', App.dataManager.getRelatedWords(currentsource, data.slug));
+                this.set('examples', App.dataManager.getWordExamples(currentsource, data.slug));
+                footer.classList.remove("hide");
+            } else {
+                this.set('related', clear);
+                this.set('examples', clear);
+                footer.classList.add("hide");
+            }
+
+            if (data.type === "allwords") {
+                this.set('allwords', App.dataManager.getAllWords(dict));
+                content = "";
+            } else {
+                this.set('allwords', clear);
+                content = App.renderer.renderResource(data, module);
+            }
+
+            textholder.innerHTML = content;
+            this.$.body.scrollTop = 0;
+            this.setLinks();
+        },
+
+        setLinks: function () {
+            var mythis = this;
+            var talinks = this.$.body.getElementsByClassName("talink");
+            var biblelinks = this.$.body.getElementsByClassName("biblelink");
+
+            for (var i = 0; i < talinks.length; i++) {
+                talinks[i].addEventListener('click', function (event) {
+                    event.preventDefault();
+                    App.ipc.send('open-academy', this.id);
+                });
+            }
+
+            for (i = 0; i < biblelinks.length; i++) {
+                biblelinks[i].addEventListener('click', function (event) {
+                    event.preventDefault();
+                    mythis.notescroll(this.id, mythis);
+                });
+            }
+        },
+
+        openindex: function () {
+            var data = {type: "allwords"};
+            this.fillresource(data);
+        },
+
+        newword: function (e) {
+            var word = e.model.word;
+            word.type = "Words";
+            this.fillresource(word);
+        },
+
+        notescroll: function (id, mythis) {
+            var chapter = parseInt(id.split(":")[0]);
+            var verse = parseInt(id.split(":")[1]);
+            var chunks = mythis.chunks;
+
+            var filtered = chunks.filter(function (chunk) {
+                return chunk.chunkmeta.chapter === chapter && chunk.chunkmeta.frame <= verse;
+            });
+
+            if (filtered.length) {
+                mythis.set('modestatus.index', filtered[filtered.length - 1].index);
+            }
+
+            mythis.fire('navigate');
+        },
+
+        examplescroll: function (e) {
+            var example = e.model.example;
+            var chapter = example.chapter;
+            var frame = example.frame;
+            var chunks = this.chunks;
+
+            var filtered = chunks.filter(function (chunk) {
+                return chunk.chunkmeta.chapter === chapter && chunk.chunkmeta.frame === frame;
+            });
+            if (filtered.length) {
+                this.set('modestatus.index', filtered[0].index);
+            }
+
+            this.fire('navigate');
+        },
+
+        closeresource: function () {
+            this.fire('closeresource');
+        },
+
+		ready: function() {
+
+		}
+
+	});
+
+</script>

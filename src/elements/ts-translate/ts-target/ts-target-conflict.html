@@ -48,6 +48,10 @@
             margin: 4px 0;
 		}
 
+        .content > div {
+            white-space: pre-wrap;
+        }
+
         .green {
             background: var(--primary-color-light);
         }
@@ -119,7 +123,7 @@
             <div id="middle">
                 <template is="dom-repeat" items="[[chunk.conflicts.array]]" as="conflict">
                     <div id="{{createid(index)}}" class$="[[conflictclass(index)]]" on-tap="select">
-                        <div class$="[[chunk.projectmeta.target_language.direction]]">{{conflict}}</div>
+                        <div class$="[[chunk.projectmeta.target_language.direction]]">[[displayConflict(conflict)]]</div>
                     </div>
                 </template>
             </div>
@@ -155,7 +159,24 @@
         },
 
         conflictclass: function (index) {
-            return index % 2 === 0 ? 'targetfont content green' : 'targetfont content blue';
+            return index % 2 === 0 ? 'targetfont targetsize content green' : 'targetfont targetsize content blue';
+        },
+
+        displayConflict: function (conflict) {
+            var type = this.chunk.projectmeta.project_type_class;
+
+            if (type === "standard") {
+                return conflict;
+            } else {
+                var returnstr = "";
+
+                conflict.forEach(function (item) {
+                    returnstr += "Title: " + item.title + "\n";
+                    returnstr += "Body: " + item.body + "\n\n";
+                });
+
+                return returnstr.trim();
+            }
         },
 
         select: function (e) {
@@ -180,14 +201,24 @@
         },
 
         savechoice: function () {
+            var mythis = this;
             var choice = this.chunk.conflicts.choice;
+            var type = this.chunk.projectmeta.project_type_class;
 
-            this.set('chunk.transcontent', this.chunk.conflicts.array[choice]);
+            if (type === "standard") {
+                this.set('chunk.transcontent', this.chunk.conflicts.array[choice]);
+            } else {
+                this.set('chunk.helpscontent', this.chunk.conflicts.array[choice]);
+            }
+
             this.cancel();
             this.set('chunk.conflicts', {exists: false});
             this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
-            this.fire('setheight');
             this.fire('iron-signal', {name: 'resolveconflict'});
+
+            setTimeout(function() {
+                mythis.fire('setheight');
+            }, 200);
         },
 
         cancel: function () {

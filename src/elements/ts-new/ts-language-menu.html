@@ -1,5 +1,5 @@
 
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../components/iron-icon/iron-icon.html">
 <link rel="import" href="../../components/iron-list/iron-list.html">
 <link rel="import" href="../../components/iron-input/iron-input.html">
 
@@ -38,9 +38,9 @@
         }
 
         .row {
-            display: block;
-            margin: 0;
-            padding: 1em;
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 25px;
             border-bottom: 1px solid var(--border-color);
             transition: background .3s, color .3s;
             cursor: pointer;
@@ -60,11 +60,10 @@
             background: var(--accent-color-light);
         }
 
-        .right {
-            float: right;
+        .code {
             color: var(--secondary-text-color);
             font-style: italic;
-            font-size: 80%
+            font-size: 80%;
         }
 
         input {
@@ -73,8 +72,12 @@
             font-style: italic;
             font-family: sans-serif;
             width: 75%;
-            padding: 0.25em 5px;
+            padding: 5px;
             margin-left: -5px;
+        }
+
+        .click {
+            cursor: pointer;
         }
 
     </style>
@@ -83,16 +86,14 @@
 
       <div id="main">
           <div id="header">
-              <input is="iron-input" id="input" bind-value="{{query}}" placeholder="Choose target language">
-              <paper-icon-button class="right" icon="search" on-tap="focussearch"></paper-icon-button>
+              <input is="iron-input" id="input" bind-value="{{query}}" on-input="updateList" placeholder="Choose target language">
+              <iron-icon class="click" icon="search" on-tap="focussearch"></iron-icon>
           </div>
-          <iron-list id="list" items="{{searchfilter(query,languagelist)}}" as="language">
+          <iron-list id="list" items="[[filtered]]" as="language">
               <template>
                   <div class$="[[checkclass(language.id)]]" on-tap="store">
-                      <div>
-                          <span>[[language.name]]</span>
-                          <span class="right">[[language.id]]</span>
-                      </div>
+                      <span>[[language.name]]</span>
+                      <span class="code">[[language.id]]</span>
                   </div>
               </template>
           </iron-list>
@@ -104,10 +105,8 @@
 
 <script>
 
-;(function (root) {
-  'use strict';
-
   Polymer({
+
       is: 'ts-language-menu',
 
       properties: {
@@ -126,7 +125,11 @@
               value: {},
               notify: true
           },
-          languagelist: {
+          languages: {
+              type: Array,
+              value: []
+          },
+          filtered: {
               type: Array,
               value: []
           },
@@ -152,20 +155,25 @@
           return this.changedata.changing && this.changedata.oldmeta.target_language.id === id ? 'row unavailable' : 'row';
       },
 
-      searchfilter: function (query, languagelist) {
-          let search = App.utils.startsWithBase.bind(null, query);
+      filterList: function (list) {
+          var query = this.query;
+          var search = App.utils.startsWithBase.bind(null, query);
 
-          var bycode = languagelist.filter(function (language) {
-              return search(language.id);
-          });
-          var byname = languagelist.filter(function (language) {
-              return search(language.name);
-          });
-          var combined = bycode.concat(byname);
+          if (query) {
+              var bycode = list.filter(function (item) {
+                  return search(item.id);
+              });
+              var byname = list.filter(function (item) {
+                  return search(item.name);
+              });
+              var combined = bycode.concat(byname);
 
-          return combined.filter(function(item, index) {
-              return combined.indexOf(item) === index;
-          });
+              return combined.filter(function(item, index) {
+                  return combined.indexOf(item) === index;
+              });
+          } else {
+              return list;
+          }
       },
 
       change: function () {
@@ -222,19 +230,25 @@
 
       reset: function () {
           this.set('query', "");
+          this.updateList();
           this.$.list.scrollTop = 0;
       },
 
       updateList: function () {
-          this.set('languagelist', App.dataManager.getTargetLanguages());
+          var list = _.cloneDeep(this.languages);
+
+          this.set('filtered', this.filterList(list));
+      },
+
+      load: function () {
+          this.set('languages', App.dataManager.getTargetLanguages());
+          this.reset();
       },
 
       ready: function () {
-          this.set('languagelist', App.dataManager.getTargetLanguages());
+
       }
 
   });
-
-})(window);
 
 </script>

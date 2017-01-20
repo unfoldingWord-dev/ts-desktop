@@ -1,8 +1,17 @@
 [
     {
         "name": "glmode",
-        "mainText": "GL Mode",
+        "mainText": "Gateway Language Mode",
         "helpText": "Display additional translation options for gateway languages",
+        "value": false,
+        "group": "general",
+        "enabled": true,
+        "visible": true
+    },
+    {
+        "name": "bemode",
+        "mainText": "Blind Edit Mode",
+        "helpText": "Display translation mode option that allows for blind drafting (Project will re-load if changed)",
         "value": false,
         "group": "general",
         "enabled": true,
@@ -37,7 +46,16 @@
     },
     {
         "name": "targetsize",
-        "mainText": "Font Size",
+        "mainText": "Target Translation Font Size",
+        "value": {"name": "Normal"},
+        "options": [{"name": "Small"}, {"name": "Normal"}, {"name": "Large"}],
+        "group": "general",
+        "enabled": true,
+        "visible": true
+    },
+    {
+        "name": "sourcesize",
+        "mainText": "Source Translation Font Size",
         "value": {"name": "Normal"},
         "options": [{"name": "Small"}, {"name": "Normal"}, {"name": "Large"}],
         "group": "general",
@@ -95,6 +113,14 @@
     {
         "name": "statement",
         "mainText": "Statement of Faith",
+        "value": "",
+        "group": "legal",
+        "enabled": true,
+        "visible": true
+    },
+    {
+        "name": "software",
+        "mainText": "Software Licenses",
         "value": "",
         "group": "legal",
         "enabled": true,

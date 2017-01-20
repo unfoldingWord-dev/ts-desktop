@@ -1,7 +1,6 @@
 
 <link rel="import" href="../../components/iron-list/iron-list.html">
 <link rel="import" href="../../components/iron-icons/iron-icons.html">
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../ts-icons/ts-icons.html">
 
 <dom-module id="ts-project-menu">
@@ -14,7 +13,7 @@
         }
 
         #main {
-            flex: 0 0 450px;
+            flex: 0 0 550px;
             display: flex;
             flex-direction: column;
         }
@@ -24,11 +23,15 @@
             font-size: 110%;
             flex: 0 0 60px;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
-            padding: 0 20px;
+            padding: 0 10px;
             border-bottom: 1px solid var(--border-color);
             background: var(--card-background-color);
+        }
+
+        #header iron-icon {
+            margin: 0 10px;
         }
 
         #list {
@@ -39,9 +42,9 @@
         }
 
         .row {
-            display: block;
-            margin: 0;
-            padding: 1em;
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 25px;
             border-bottom: 1px solid var(--border-color);
             transition: background .3s, color .3s;
             cursor: pointer;
@@ -51,18 +54,22 @@
             background: var(--accent-color-light);
         }
 
-        .right {
-            float: right;
-        }
-
         .small {
             --iron-icon-height: 18px;
             --iron-icon-width: 18px;
             color: var(--secondary-text-color);
+            margin-right: 15px;
         }
 
-        .row span {
-            padding-left: 15px;
+        .code {
+            color: var(--secondary-text-color);
+            font-style: italic;
+            font-size: 80%;
+            margin-left: 10px;
+        }
+
+        .click {
+            cursor: pointer;
         }
 
     </style>
@@ -71,7 +78,10 @@
 
       <div id="main">
           <div id="header">
-              <em>Choose a project</em>
+              <iron-icon class="click" icon="arrow-back" on-tap="tolang"></iron-icon>
+              <span class="click" on-tap="tolang"><span>[[newdata.language.name]]</span><span class="code">(<span>[[newdata.language.id]]</span>)</span></span>
+              <iron-icon icon="chevron-right"></iron-icon>
+              <span><em>Choose a category</em></span>
           </div>
           <iron-list id="list" items="[[newdata.categorylist]]" as="category">
               <template>
@@ -79,8 +89,8 @@
                       <div>
                           <iron-icon class="small" icon$="[[checkicon(category.name)]]"></iron-icon>
                           <span>[[category.name]]</span>
-                          <iron-icon class="right" icon$="[[checkmore(category.name)]]"></iron-icon>
                       </div>
+                      <iron-icon icon="chevron-right"></iron-icon>
                   </div>
               </template>
           </iron-list>
@@ -121,60 +131,52 @@
       ],
 
       checkicon: function (name) {
-          return name === "Open Bible Stories" || name.substring(0, 11) === "translation" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
+          return name === "Other" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
       },
 
-      checkmore: function (name) {
-          return name === "Open Bible Stories" || name.substring(0, 11) === "translation" ? '' : 'chevron-right';
+      tolang: function () {
+          this.set('selected', 0);
       },
 
       store: function (e) {
           var category = e.model.category;
           this.set('newdata.category', category);
-          if (category.name === "Open Bible Stories") {
-              this.set('newdata.project', category.data[0]);
-              if (App.configurator.getUserSetting('glmode')) {
-                  this.fire('iron-signal', {name: 'createtypes'});
-                  this.set('selected', 3);
+          this.set('selected', 2);
+      },
+
+      sortByCat: function (list) {
+          return list.sort(function (a, b) {
+              if (a.sort > b.sort) {
+                  return 1;
+              } else if (a.sort < b.sort) {
+                  return -1;
               } else {
-                  this.set('newdata.typedata', {type: {id: "text", name: "Text"}, resource: {id: "obs", name: "Open Bible Stories"}, format: "markdown", allowed: true});
-                  this.fire('create');
+                  return 0;
               }
-          } else if (category.name === "translationWords") {
-              this.set('newdata.project', category.data[0]);
-              this.set('newdata.typedata', {type: {id: "tw", name: "Words"}, resource: {id: "", name: ""}, format: "markdown", allowed: true});
-              this.fire('create');
-          } else if (category.name.substring(0, 18) === "translationAcademy") {
-              this.set('newdata.project', category.data[0]);
-              this.set('newdata.typedata', {type: {id: "ta", name: "Academy"}, resource: {id: "", name: ""}, format: "markdown", allowed: true});
-              this.fire('create');
-          } else {
-              this.set('selected', 2);
-          }
+          });
       },
 
       createprojects: function () {
           var mythis = this;
           var projects = App.dataManager.getProjects();
           var temparray = [];
-          _.forEach(_.groupBy(projects, 'category'), function (data, category) {
-              if (category === 'null' && !mythis.importdata.importing) {
-                  temparray.push({"name": "Open Bible Stories", "data": data});
-              } else if (category === 'Bible: OT') {
-                  temparray.push({"name": "Old Testament", "data": data});
-              } else if (category === 'Bible: NT') {
-                  temparray.push({"name": "New Testament", "data": data});
+
+          projects.forEach(function (item) {
+              if (!item.category_slug) {
+                  item.category_slug = "other";
               }
           });
-          if (App.configurator.getUserSetting('glmode') && !mythis.importdata.importing) {
-              temparray.push({"name": "translationWords", "data": [{name: "translationWords", slug: "bible"}]});
-              var volumes = App.dataManager.getVolumes();
-              for (var i = 0; i < volumes.length; i++) {
-                  var name = "translationAcademy " + volumes[i].title;
-                  temparray.push({"name": name, "data": [{name: name, slug: volumes[i].slug}]});
+
+          _.forEach(_.groupBy(projects, 'category_slug'), function (data, category) {
+              if (category === "bible-ot") {
+                  temparray.push({name: "Old Testament", sort: 1, data: data});
+              } else if (category === "bible-nt") {
+                  temparray.push({name: "New Testament", sort: 2, data: data});
+              } else if (category === "other" && !mythis.importdata.importing) {
+                  temparray.push({name: "Other", sort: 3, data: data});
               }
-          }
-          this.set('newdata.categorylist', temparray);
+          });
+          mythis.set('newdata.categorylist', this.sortByCat(temparray));
       },
 
       ready: function () {

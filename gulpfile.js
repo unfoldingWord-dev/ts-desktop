@@ -12,7 +12,9 @@ const gulp = require('gulp'),
     replace = require('gulp-replace'),
     path = require('path'),
     mkdirp = require('mkdirp'),
-    fs = require('fs');
+    fs = require('fs'),
+    util = require('./src/js/lib/utils');
+    princePackager = require('./src/js/prince-packager');
 
 const APP_NAME = 'translationStudio',
     JS_FILES = './src/js/**/*.js',
@@ -42,6 +44,19 @@ gulp.task('bump', function () {
     return gulp.src(['package.json'])
         .pipe(replace(/("build"\s*:\s*)"\d+"(.*)/, replaceString))
         .pipe(gulp.dest('./'));
+});
+
+/**
+ * This will download and install prince binaries for all os'
+ */
+gulp.task('prince', function(done) {
+    var tempDir = 'src/prince';
+
+    util.chain(princePackager.install.bind(null, tempDir))(['win', 'linux', 'osx'])
+        .then(function() {
+            done();
+        })
+        .catch(done);
 });
 
 // pass parameters like: gulp build --win --osx --linux
@@ -287,6 +302,7 @@ gulp.task('release', function(done) {
                 console.error(e);
             });
             releaseNotes.write('<link rel="stylesheet" href="style.css">');
+            releaseNotes.write('<meta name="viewport" content="width=device-width, initial-scale=1.0">');
             fs.createReadStream('scripts/release/style.css').pipe(fs.createWriteStream('release/style.css'));
             releaseNotes.write(`<h1>tS Desktop build #<span id="build-num">${p.build}</span></h1><ul>`);
             if(process.env.TRAVIS_COMMIT) {

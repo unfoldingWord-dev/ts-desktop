@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>translationStudio</title>
+
+    <script src="../components/webcomponentsjs/webcomponents-lite.min.js"></script>
+
+    <link rel="stylesheet" href="../css/main.css">
+
+    <link rel="import" href="../components/polymer/polymer.html">
+    <link rel="import" href="../elements/ts-main/ts-splash.html">
+    <link rel="import" href="../elements/ts-main/app-theme.html">
+
+</head>
+<body>
+    <ts-splash id="splash"></ts-splash>
+
+    <script>
+    (function () {
+        var splash = document.getElementById('splash');
+
+        splash.content = {title: "Canceling", subtitle: "Please wait...", message: ""};
+    })();
+    </script>
+</body>
+</html>

@@ -1,9 +1,7 @@
 
 <link rel="import" href="../../../components/paper-material/paper-material.html">
 <link rel="import" href="../../../components/paper-toggle-button/paper-toggle-button.html">
-<link rel="import" href="../../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../../components/iron-icons/iron-icons.html">
-<link rel="import" href="../../../components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../../components/neon-animation/neon-animation.html">
 <link rel="import" href="../../../components/iron-signals/iron-signals.html">
 
@@ -87,6 +85,10 @@
             color: var(--accent-color);
         }
 
+        .searchhighlight {
+            background: var(--highlight-color);
+        }
+
         .rtl {
             direction: rtl;
         }
@@ -106,7 +108,7 @@
                 </div>
                 <iron-icon class$="[[iconclass(chunk.completed)]]" icon="create" on-tap="edit"></iron-icon>
             </div>
-            <div id="content" class="targetfont">
+            <div id="content" class="targetfont targetsize">
                 <div id="textholder" class$="[[chunk.projectmeta.target_language.direction]]"></div>
             </div>
             <div id="togglebox">
@@ -133,11 +135,16 @@
                 type: Object,
                 value: function () { return {}; },
                 notify: true
+            },
+            searchoptions: {
+                type: Object,
+                value: {},
+                notify: true
             }
         },
 
         observers: [
-            'rendertext(chunk.transcontent, chunk.completed)'
+            'rendertext(chunk.transcontent, chunk.completed, searchoptions.*)'
         ],
 
         iconclass: function (complete) {
@@ -149,19 +156,51 @@
                 if (this.chunk && this.chunk.srccontent && this.chunk.projectmeta.project_type_class === "standard") {
                     var mythis = this;
                     var completed = this.chunk.completed;
-                    var text = this.chunk.transcontent;
+                    var text = _.cloneDeep(this.chunk.transcontent);
                     var module = "ts-target-review";
                     var returnstr = "";
+                    var search = this.searchoptions;
+                    var startspan = "\<span class='style-scope ts-target-review searchhighlight'\>";
+                    var endspan = "\<\/span\>";
+                    var searcharray = App.renderer.replaceEscapes(search.text).split(" ");
+                    var regexstr = "(\<span[^>]*>[^<]*)(" + searcharray[0] + ")";
+
+                    for (var i = 1; i < searcharray.length; i++) {
+                        regexstr += "(<\/span> *<span[^>]*>)(" + searcharray[i] + ")";
+                    }
+                    regexstr += "([^<]*<\/span>)(?! *<\/span>)";
+
+                    var regex = new RegExp(regexstr);
 
                     if (completed) {
                         returnstr = App.renderer.renderTargetWithVerses(text, module);
                     } else {
                         returnstr = App.renderer.markersToBalloons(mythis.chunk, module);
                     }
+                    if (search.text && search.on && search.type === "target") {
+                        if (!search.passive) {
+                            mythis.review();
+                        }
+
+                        if (completed || searcharray.length === 1) {
+                            var regex2 = new RegExp(App.renderer.replaceEscapes(search.text) + "(?![^<]*>)", "gi");
+                            var matches = _.unique(returnstr.match(regex2)) || [];
+
+                            matches.forEach(function (match) {
+                                var result = new RegExp(App.renderer.replaceEscapes(match) + "(?![^<]*>)", "g");
+                                returnstr = returnstr.replace(result, startspan + match + endspan);
+                            });
+
+                        } else {
+                            while (regex.test(returnstr)) {
+                                var replace = startspan + regex.exec(returnstr)[0] + endspan;
+                                returnstr = returnstr.replace(regex, replace);
+                            }
+                        }
+                    }
 
                     mythis.$.textholder.innerHTML = returnstr;
                     mythis.$.toggle.checked = completed;
-                    mythis.fire('setheight');
                     mythis.addDragListeners();
                 }
             }.bind(this), 1);
@@ -175,6 +214,10 @@
             for (var j = 0; j < markers.length; j++) {
                 markers[j].addEventListener("dragstart", function (event) {
                     event.dataTransfer.setData("text", event.target.id);
+                    mythis.set('searchoptions.on', false);
+                });
+                markers[j].addEventListener("dragend", function (event) {
+                    mythis.set('searchoptions.on', true);
                 });
             }
 
@@ -196,9 +239,11 @@
                     var dragelement = document.getElementById(dragid);
                     var targetelement = event.target;
                     var parentelement = targetelement.parentNode;
+
                     targetelement.classList.remove("highlight");
                     parentelement.insertBefore(dragelement, targetelement);
                     mythis.savemarkers();
+                    mythis.fire('setheight');
                 });
             }
         },
@@ -260,6 +305,13 @@
             if (this.chunk.index === index) {
                 this.checkdone();
             }
+        },
+
+        review: function () {
+            var id = this.chunk.chunkmeta.chapterid + "-" + this.chunk.chunkmeta.frameid;
+            this.set('chunk.state.review', true);
+            this.fire('setheight');
+            this.fire('iron-signal', {name: 'updatestate', data: {id: id, mode: "review", value: true}});
         },
 
         edit: function () {

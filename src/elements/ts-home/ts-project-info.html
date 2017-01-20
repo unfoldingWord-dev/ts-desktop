@@ -1,0 +1,198 @@
+
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../components/iron-icon/iron-icon.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
+
+<dom-module id="ts-project-info">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            color: var(--primary-text-color);
+        }
+
+        #header {
+            flex: 0 0 50px;
+            padding: 0 25px;
+        }
+
+        #info {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
+            padding: 0 25px;
+        }
+
+        #info p {
+            margin: 0;
+            font-size: 110%;
+        }
+
+        .link {
+            cursor: pointer;
+            color: var(--accent-color);
+            padding-left: 20px;
+        }
+
+        #namebox {
+            flex: 0 0 100px;
+            padding-left: 30px;
+            border: 1px solid var(--border-color);
+            overflow-y: auto;
+        }
+
+        #iconbox {
+            border-bottom: 1px solid var(--border-color);
+            border-top: 1px solid var(--border-color);
+            flex: 0 0 60px;
+            align-self: stretch;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            margin: 15px 0;
+        }
+
+        #righticons {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        #righticons iron-icon {
+            margin-left: 50px;
+        }
+
+        iron-icon {
+            --iron-icon-height: 24px;
+            --iron-icon-width: 24px;
+            color: var(--secondary-text-color);
+            cursor: pointer;
+        }
+
+        iron-icon:hover {
+            color: var(--accent-color);
+        }
+
+        #footer {
+            flex: 0 0 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        paper-button:hover {
+            color: var(--accent-color);
+        }
+
+        .hide {
+            display: none;
+        }
+
+    </style>
+
+    <template>
+
+        <div id="header">
+            <h2><span>[[currentproject.projectmeta.project.name]]</span> — <span>[[currentproject.projectmeta.target_language.name]]</span></h2>
+        </div>
+        <div id="info">
+            <p>{{locale.project}}: <strong><span>[[currentproject.projectmeta.project.name]]</span> (<span>[[currentproject.projectmeta.project.id]]</span>)</strong></p>
+            <p>{{locale.target_language}}: <strong><span>[[currentproject.projectmeta.target_language.name]]</span> (<span>[[currentproject.projectmeta.target_language.id]]</span>)</strong><span class="link" on-tap="changelanguage">Change</span></p>
+            <p class$="[[idclass(currentproject.projectmeta.resource.id)]]">Resource type: <strong><span>[[currentproject.projectmeta.resource.id]]</span></strong><span class="link" on-tap="openresource">Change</span></p>
+            <p>{{locale.progress}}: <strong><span>[[currentproject.projectmeta.completion]]</span>%</strong></p>
+            <p>{{locale.translators}}:</p>
+            <template is="dom-if" if="{{currentproject.projectmeta.translators.length}}">
+                <div id="namebox">
+                    <template is="dom-repeat" items="{{currentproject.projectmeta.translators}}" as="user">
+                        <p><strong>{{user}}</strong></p>
+                    </template>
+                </div>
+            </template>
+        </div>
+        <div id="iconbox">
+            <div>
+                <iron-icon on-tap="opendelete" icon="delete" title="delete"></iron-icon>
+            </div>
+            <div id="righticons">
+                <iron-icon on-tap="goprint" class$="[[printclass(currentproject.projectmeta.project_type_class, currentproject.projectmeta.source_translations)]]" icon="print" title="print"></iron-icon>
+                <iron-icon on-tap="goreview" icon="done-all" title="review"></iron-icon>
+                <iron-icon on-tap="goexport" icon="file-upload" title="upload/export"></iron-icon>
+            </div>
+        </div>
+        <div id="footer">
+            <paper-button on-tap="closeinfo">{{locale.dismiss}}</paper-button>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+        is: 'ts-project-info',
+
+        properties: {
+            currentproject: {
+                type: Object,
+                value: {}
+            },
+            locale: {
+                type: Object,
+                value: {}
+            }
+        },
+
+        printclass: function (type, sources) {
+            return type === "standard" && sources.length ? '' : 'hide';
+        },
+
+        idclass: function (id) {
+            return id === "" || id === "obs" ? 'hide' : '';
+        },
+
+        changelanguage: function () {
+            var projectmeta = this.currentproject.projectmeta;
+            this.closeinfo();
+            this.fire('iron-signal', {name: 'gotolanguage', data: {projectmeta: projectmeta}});
+        },
+
+        openresource: function () {
+            this.fire('openresource');
+        },
+
+        goprint: function () {
+            var projectmeta = this.currentproject.projectmeta;
+            this.closeinfo();
+            this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: "print"}});
+        },
+
+        goexport: function () {
+            this.closeinfo();
+            this.fire('iron-signal', {name: 'openexport'});
+        },
+
+        goreview: function () {
+            var projectmeta = this.currentproject.projectmeta;
+            this.closeinfo();
+            this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: "review"}});
+        },
+
+        closeinfo: function () {
+            this.fire('closeinfo');
+        },
+
+        opendelete: function () {
+            this.fire('opendelete');
+        },
+
+        ready: function() {
+
+        }
+
+    });
+
+</script>

@@ -1,10 +1,9 @@
 
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
 <link rel="import" href="../../components/paper-checkbox/paper-checkbox.html">
-<link rel="import" href="../../components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../components/iron-icon/iron-icon.html">
 
 <link rel="import" href="./ts-setting-modal.html">
-<link rel="import" href="../ts-main/ts-loading.html">
 
 <dom-module id="ts-settings">
 
@@ -31,6 +30,10 @@
             min-height: 50px;
         }
 
+        .header iron-icon {
+            margin: 0 15px;
+        }
+
         .heading {
             font-size: 125%;
             color: var(--reverse-text-color);
@@ -38,10 +41,6 @@
             justify-content: flex-start;
             align-items: center;
             min-height: 45px;
-        }
-
-        [icon="arrow-back"] {
-            margin: 0 1em 0 .2em;
         }
 
         .body {
@@ -89,27 +88,12 @@
             --paper-checkbox-unchecked-color: var(--accent-color-dark);
         }
 
-        .popup {
-            position: fixed;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            margin: auto;
-        }
-
-        .popup * {
-            margin: 0;
-            padding: 0;
-        }
-
-        #loading {
-            width: 320px;
-            height: 220px;
-        }
-
         .hide {
             display: none;
+        }
+
+        .click {
+            cursor: pointer;
         }
 
     </style>
@@ -118,7 +102,9 @@
 
         <div class="header">
             <div class="heading">
-                <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
+                <iron-icon class="click" icon="arrow-back" on-tap="goback"></iron-icon>
+                <span class="click" on-tap="goback">[[createtitle(backto)]]</span>
+                <iron-icon icon="chevron-right"></iron-icon>
                 <span>Settings</span>
             </div>
         </div>
@@ -145,10 +131,6 @@
             </template>
         </div>
 
-        <paper-dialog id="loading" class="popup" modal="true" exit-animation="scale-down-animation">
-            <ts-loading options="[[options]]"></ts-loading>
-        </paper-dialog>
-
     </template>
 
 </dom-module>
@@ -166,11 +148,17 @@
         properties: {
             route: {
                 type: String,
-                notify: true
+                notify: true,
+                observer: 'load'
+            },
+            backto: {
+                type: String,
+                value: ''
             },
             options: {
                 type: Object,
-                value: {}
+                value: {},
+                notify: true
             },
             animationConfig: {
                 value: function () {
@@ -193,32 +181,71 @@
             settingsObj: {
                 type: Object,
                 value: {}
+            },
+            currentproject: {
+                type: Object,
+                value: {}
+            },
+            reload: {
+                type: Boolean,
+                value: false
             }
         },
 
         ready: function () {
-            this.settings = App.configurator.refreshUserSetting();
-            this.settings = App.configurator.setUserSetting('appversion', App.configurator.getAppData().toString());
-            this.settings = App.configurator.setUserSetting('datapath', App.configurator.getValue('rootdir'));
-            this.settings = App.configurator.setUserSetting('dataserver', "git.door43.org");
-            this.settings = App.configurator.setUserSetting('mediaserver', "https://api.unfoldingword.org/");
-            var untildify = require('untildify');
-            var location = App.configurator.getUserSetting('datalocation');
-            this.settings = App.configurator.setUserSetting('datalocation', untildify(location));
 
-            App.gitManager.getVersion().then(function (version) {
-                return version ? version.toString() : 'N/A';
-            })
-            .catch(function (err) {
-                return 'N/A';
-            })
-            .then(function (gitversion) {
-                this.settings = App.configurator.setUserSetting('gitversion', gitversion);
-            }.bind(this));
         },
 
-        back: function () {
-            this.route = App.configurator.getValue("backto");
+        createtitle: function (backto) {
+            return backto === "translate" ? "Project" : "Home";
+        },
+
+        createInitialSettings: function () {
+            var untildify = require('untildify');
+
+            return App.gitManager.getVersion()
+                .then(function (version) {
+                    return version ? version.toString() : 'N/A';
+                })
+                .catch(function (err) {
+                    return 'N/A';
+                })
+                .then(function (gitversion) {
+                    App.configurator.refreshUserSetting();
+                    App.configurator.setUserSetting('gitversion', gitversion);
+                    App.configurator.setUserSetting('appversion', App.configurator.getAppData().toString());
+                    App.configurator.setUserSetting('datapath', App.configurator.getValue('rootdir'));
+                    App.configurator.setUserSetting('dataserver', "git.door43.org");
+                    App.configurator.setUserSetting('mediaserver', "https://api.unfoldingword.org/");
+                })
+                .then(function () {
+                    var location = App.configurator.getUserSetting('datalocation');
+
+                    location = untildify(location);
+                    location = location.replace(/\\/g, "\/");
+                    App.configurator.setUserSetting('datalocation', location);
+                });
+        },
+
+        load: function () {
+            if (this.route === "settings") {
+                this.set('backto', App.configurator.getValue("backto"));
+                this.set('settings', App.configurator.getUserSettingArr());
+            }
+        },
+
+        goback: function () {
+            var backto = this.backto;
+            var projectmeta = this.currentproject.projectmeta;
+
+            this.fire('iron-signal', {name: 'translateleft'});
+
+            if (this.reload && backto === "translate") {
+                this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: "translate"}});
+            } else {
+                this.set('route', backto);
+            }
+            this.set('reload', false);
         },
 
         _isEnabled: function (bool) {
@@ -261,7 +288,7 @@
             if (name === 'developertools') {
                 App.showDevTools();
             } else if (name === "refreshsettings") {
-                this.settings = App.configurator.refreshUserSetting();
+                this.set('settings', App.configurator.refreshUserSetting());
                 this.saveSettings();
             } else if (name === "datalocation") {
                 this._updateDataLocation();
@@ -271,12 +298,18 @@
                 this.fire('iron-signal', {name: 'openguidelines'});
             } else if (name === "statement") {
                 this.fire('iron-signal', {name: 'openstatement'});
+            } else if (name === "software") {
+                this.fire('iron-signal', {name: 'opensoftware'});
             } else if (name === "attribution") {
                 this.fire('iron-signal', {name: 'openattribution'});
             } else if (typeof value === 'boolean') {
                 var path = 'settings.' + event.target.dataGroup + '.list.' + event.target.dataList + '.value';
                 this.set(path, !value);
                 this.saveSettings();
+                if (name === "bemode") {
+                    this.set('reload', true);
+                    this.fire('iron-signal', {name: 'updatebemode'});
+                }
             } else {
                 this.openSettingModal(event);
             }
@@ -288,7 +321,6 @@
             this.closeSettingModal();
             this.saveSettings();
             App.configurator.applyPrefAppearance();
-            App.configurator.applyPrefBehavior();
         },
 
         _onSettingCancel: function () {
@@ -301,8 +333,9 @@
             if (!newPath) {
                 return;
             }
-            this.settings = App.configurator.setUserSetting('datalocation', newPath[0]);
-            App.projectsManager.moveBackups(oldPath, newPath[0]);
+            newPath = newPath[0].replace(/\\/g, "\/");
+            this.set('settings', App.configurator.setUserSetting('datalocation', newPath));
+            App.projectsManager.moveBackups(oldPath, newPath);
         },
 
         openSettingModal: function (event) {
@@ -321,10 +354,10 @@
                     mythis.set('options', {});
                     mythis.set('options.body', "Updating Font List. Please wait...");
                     mythis.set('options.loading', true);
-                    mythis.$.loading.open();
+                    mythis.fire('iron-signal', {name: 'openloading'});
                     setTimeout(function() {
                         modal.options = App.utils.getSystemFonts();
-                        mythis.$.loading.close();
+                        mythis.fire('iron-signal', {name: 'closeloading'});
                         mythis.openModal(modal, event);
                     }, 500);
                 } else {

@@ -23,7 +23,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
         "Lamentations", "Ezekial", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah",
         "Malachi", "Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians", "Colossians",
         "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter", "1 John", "2 John",
-        "3 John", "Jude", "Revelation", "Open Bible Stories", "translationWords", "translationAcademy Vol 1", "translationAcademy Vol 2"];
+        "3 John", "Jude", "Revelation", "Open Bible Stories", "translationWords", "translationWords OBS", "translationAcademy Vol 1", "translationAcademy Vol 2"];
 
     return {
 
@@ -33,7 +33,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                     return utils.fs.mkdirs(configurator.getUserPath('datalocation', 'backups'));
                 })
                 .then(function () {
-                    return utils.fs.stat(oldPath).then(App.utils.ret(true)).catch(App.utils.ret(false));
+                    return utils.fs.stat(oldPath).then(utils.ret(true)).catch(utils.ret(false));
                 })
                 .then(function (exists) {
                     if (exists) {
@@ -45,7 +45,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
 
         sortProjectList: function (list) {
             var sort = configurator.getValue("sort") || {project: "bible", order: "project"};
-            
+
             if (sort.order === "project") {
                 if (sort.project === "bible") {
                     return this.sortByBibleLang(list);
@@ -217,7 +217,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             var meta = _.cloneDeep(manifest);
             try {
                 if (manifest.project.name === "") {
-                    meta.project.name = dataManager.getProjectName(manifest.project.id)[0].name;
+                    meta.project.name = dataManager.getProjectName(manifest.project.id);
                 }
 
                 if (manifest.type.name === "" && manifest.type.id === "text") {
@@ -225,12 +225,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 }
 
                 for (var j = 0; j < manifest.source_translations.length; j++) {
-                    var details = dataManager.getSourceDetails(manifest.project.id, manifest.source_translations[j].language_id, manifest.source_translations[j].resource_id)[0];
-                    meta.source_translations[j].project_id = details.project_id;
-                    meta.source_translations[j].id = details.id;
-                    meta.source_translations[j].language_name = details.language_name;
-                    meta.source_translations[j].resource_name = details.resource_name;
-                    meta.source_translations[j].direction = details.direction;
+                    meta.source_translations[j] = dataManager.getSourceDetails(manifest.project.id, manifest.source_translations[j].language_id, manifest.source_translations[j].resource_id);
                 }
 
                 if (manifest.source_translations.length) {
@@ -239,7 +234,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                     meta.currentsource = null;
                 }
 
-                if (manifest.type.id === "tw" || manifest.type.id === "ta") {
+                if (manifest.type.id === "tw") {
                     meta.project_type_class = "extant";
                 } else if (manifest.type.id === "tn" || manifest.type.id === "tq") {
                     meta.project_type_class = "helps";
@@ -256,7 +251,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 var framenum = this.getProjectFrameNum(meta);
 
                 if (meta.finished_chunks && framenum) {
-                    meta.completion = Math.round((meta.finished_chunks.length / framenum) * 100);
+                    meta.completion = Math.floor((meta.finished_chunks.length / framenum) * 100);
                 } else {
                     meta.completion = 0;
                 }
@@ -270,29 +265,16 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
 
         getProjectFrameNum: function (meta) {
             var frames = [];
-            var sources = dataManager.getSources();
-            var filtered = _.filter(sources, {'language_id': "en", 'resource_id': "ulb", 'checking_level': 3});
 
             if (meta.type.id === "tw") {
-                frames = dataManager.getAllWords(filtered[0]);
-                return frames.length;
-            } else if (meta.type.id === "ta") {
-                frames = dataManager.getTa(meta.project.id);
-                return frames.length;
+                var dict = meta.project.id;
+                frames = dataManager.getAllWords(dict);
             } else if (meta.source_translations.length) {
-                frames = dataManager.getSourceFrames(meta.source_translations[0]);
-                if (meta.type.id === "text") {
-                    if (meta.project.id === "obs") {
-                        return frames.length + 101;
-                    } else {
-                        return frames.length + 1;
-                    }
-                } else {
-                    return frames.length;
-                }
-            } else {
-                return 0;
+                var source = meta.source_translations[0];
+                var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;
+                frames = dataManager.getContainerData(container);
             }
+            return frames.length;
         },
 
         makeUniqueId: function (manifest) {
@@ -333,6 +315,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
 
         saveTargetChunk: function (chunk, meta) {
             var mythis = this;
+
             return mythis.makeChapterDir(meta, chunk)
                 .then(function () {
                     return mythis.updateChunk(meta, chunk);
@@ -408,7 +391,11 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                     });
             };
 
-            return mkdirp(paths.projectDir)
+            return mythis.deleteTargetTranslation(meta).then(utils.ret(true)).catch(utils.ret(false))
+                .then(function () {
+                    mythis.unsetValues(meta.unique_id);
+                    return mkdirp(paths.projectDir)
+                })
                 .then(setLicense())
                 .then(function () {
                     return mythis.saveTargetManifest(meta);
@@ -491,8 +478,9 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             var paths = utils.makeProjectPaths(targetDir, meta);
 
             var parseChunkName = function (f) {
-                var p = path.parse(f),
-                    ch = p.dir.split(path.sep).slice(-1);
+                var p = path.parse(f);
+                var ch = p.dir.split(path.sep).slice(-1)[0];
+
                 return ch + '-' + p.name;
             };
 
@@ -504,7 +492,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                     if (meta.project_type_class === "standard") {
                         parsed['transcontent'] = c.toString();
                     } else {
-                        parsed['helpscontent'] = JSON.parse(c);
+                        parsed['helpscontent'] = c.toString();
                     }
                     return parsed;
                 });
@@ -553,20 +541,17 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 .then(utils.lodash.indexBy('name'));
         },
 
-        unsetValues: function (meta) {
-            var key = meta.unique_id;
-
+        unsetValues: function (key) {
             configurator.unsetValue(key + "-chapter");
             configurator.unsetValue(key + "-index");
             configurator.unsetValue(key + "-selected");
-            configurator.unsetValue(key + "-completion");
             configurator.unsetValue(key + "-source");
         },
 
         deleteTargetTranslation: function (meta) {
             var paths = utils.makeProjectPaths(targetDir, meta);
 
-            return utils.fs.stat(paths.projectDir).then(App.utils.ret(true)).catch(App.utils.ret(false))
+            return utils.fs.stat(paths.projectDir).then(utils.ret(true)).catch(utils.ret(false))
                 .then(function (exists) {
                     if (exists) {
                         return trash([paths.projectDir]);
@@ -575,8 +560,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                     }
                 })
                 .catch(function (err) {
-                    reporter.logError(err);
-                    throw "Unable to delete file at this time. You may need to restart the app first.";
+                    throw err || "Unable to delete file at this time.";
                 });
         }
     };

@@ -5,6 +5,7 @@
 
     <script src="../components/webcomponentsjs/webcomponents-lite.min.js"></script>
     <script src="../components/lodash/lodash.min.js"></script>
+    <script src="../js/academybootstrap.js"></script>
 
     <link rel="stylesheet" href="../css/main.css">
 
@@ -17,5 +18,20 @@
 <body>
     <ts-academy-titlebar></ts-academy-titlebar>
     <ts-academy></ts-academy>
+
+    <script>
+        (function () {
+            var ipcRenderer = require('electron').ipcRenderer;
+
+            ipcRenderer.on('academy-scroll', function (event, id) {
+                var element = document.getElementById(id);
+
+                if (element) {
+                    element.scrollIntoView();
+                }
+            });
+
+        })();
+    </script>
 </body>
 </html>

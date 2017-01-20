@@ -18,12 +18,14 @@
 
         #contain {
             flex: auto;
-            overflow: hidden;
         }
 
-        iron-list {
+        #readlist {
             max-height: calc(100vh - 70px);
-            overflow-x: hidden !important;
+        }
+
+        ::-webkit-scrollbar {
+            display: none;
         }
 
         :host(.preview) {
@@ -61,9 +63,9 @@
     <template>
 
         <div id="contain">
-            <iron-list id="readlist" items="{{chapters}}" as="chunk" on-scroll="setheights">
+            <iron-list id="readlist" items="{{chapters}}" as="chunk" on-scroll="refresh">
                 <template>
-                    <ts-read-card id="{{createid(index)}}" chunk="[[chunk]]" on-updateheight="updateheight"></ts-read-card>
+                    <ts-read-card id="{{createid(index)}}" chunk="[[chunk]]"></ts-read-card>
                 </template>
             </iron-list>
         </div>
@@ -95,20 +97,33 @@
             modename: {
                 type: String,
                 value: "read"
+            },
+            timer: {
+                type: Number
             }
         },
 
-        updateheight: function (e) {
-            var list = this.$.readlist;
-            var index = e.model.index;
-            list.updateSizeForItem(index);
+        refresh: function () {
+            var mythis = this;
+
+            mythis.getlocation();
+            clearTimeout(mythis.timer);
+
+            mythis.timer = setTimeout(function() {
+                mythis.setheights();
+            }, 300);
         },
 
         setheights: function () {
-            for (var i = 0; i < this.chapters.length; i++) {
+            var list = this.$.readlist;
+
+            list.fire('iron-resize');
+
+            for (var i = list.firstVisibleIndex; i <= list.lastVisibleIndex; i++) {
                 var card = document.getElementById(this.modename + i);
-                if (card !== null) {
+                if (card && this.chapters && i < this.chapters.length) {
                     card.setheight();
+                    list.updateSizeForItem(i);
                 }
             }
         },
@@ -121,8 +136,6 @@
         tomode: function () {
             this.setpreview();
             this.setlocation();
-            this.setheights();
-            this.setlocation();
             this.movein();
         },
 
@@ -132,9 +145,11 @@
 
             contain.classList.add("moveout");
             setTimeout(function() {
-                contain.classList.remove("moveout");
                 mythis.classList.add("hide");
-            }, 500);
+                setTimeout(function() {
+                    contain.classList.remove("moveout");
+                }, 300);
+            }, 300);
         },
 
         movein: function () {
@@ -146,6 +161,7 @@
                 contain.classList.add("movein");
                 setTimeout(function() {
                     contain.classList.remove("movein");
+                    mythis.setheights();
                 }, 500);
             }, 500);
         },
@@ -158,15 +174,20 @@
         getlocation: function () {
             var list = this.$.readlist;
             var index = list.firstVisibleIndex;
+            var chapters = this.chapters;
 
-            this.set('modestatus.chapter', this.chapters[index].chaptermeta.chapter);
-            this.set('modestatus.index', -1);
+            if (chapters) {
+                this.set('modestatus.chapter', chapters[index].chaptermeta.chapter);
+                this.set('modestatus.index', -1);
+            }
         },
 
         setlocation: function () {
             var list = this.$.readlist;
             var index = parseInt(this.modestatus.chapter) - 1;
+
             list.scrollToIndex(index);
+            this.getlocation();
         },
 
         createid: function (index) {

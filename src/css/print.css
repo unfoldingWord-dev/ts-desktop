@@ -1,0 +1,75 @@
+
+@import 'fonts/fonts.css';
+
+* {
+    overflow: visible !important;
+    float: none !important;
+}
+
+h1, h2 {
+    text-align: center;
+}
+
+#textholder p {
+    widows: 3;
+    orphans: 3;
+}
+
+#licenseholder * {
+    font-family: 'Noto Sans', sans-serif;
+}
+
+.titles {
+    margin-top: 400px;
+}
+
+.break {
+    page-break-after: always;
+}
+
+.nobreak {
+    page-break-inside: avoid;
+}
+
+.justify, .justify * {
+    text-align: justify;
+}
+
+.double, .double * {
+    line-height: 190%;
+}
+
+.nobreak p {
+    margin: 0 0 30px;
+}
+
+@page main {
+    margin: 50px 70px;
+    @bottom-center {
+        content: counter(page);
+    }
+}
+
+#startnum {
+    page: main;
+    counter-reset: page 1;
+}
+
+sup {
+    font-size: 60%;
+}
+
+.obs #notices- {
+    page-break-before: always;
+}
+
+.toc a::after {
+    content: leader(".") target-counter(attr(href), page);
+}
+
+a {
+    text-decoration: none;
+    color: black;
+}
+
+

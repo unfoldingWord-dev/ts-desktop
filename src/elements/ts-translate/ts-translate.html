@@ -12,7 +12,7 @@
 <link rel="import" href="./ts-translate-sidebar.html">
 <link rel="import" href="./ts-nosource-mode.html">
 <link rel="import" href="./ts-source/ts-source-modal.html">
-<link rel="import" href="../ts-main/ts-loading.html">
+<link rel="import" href="./ts-resource/ts-resource-display.html">
 
 <dom-module id="ts-translate">
 
@@ -107,30 +107,6 @@
             color: var(--accent-color);
         }
 
-        #delete {
-            width: 450px;
-            height: 175px;
-        }
-
-        #delete iron-icon {
-            padding-right: 10px;
-        }
-
-        #delete p {
-            font-size: 110%;
-        }
-
-        #deletebuttons {
-            display: flex;
-            justify-content: flex-end;
-            padding: 0 50px;
-            color: var(--secondary-text-color);
-        }
-
-        #deletebuttons paper-button:hover {
-            color: var(--accent-color);
-        }
-
         #note {
             width: 350px;
             height: 250px;
@@ -147,38 +123,26 @@
             color: var(--accent-color);
         }
 
-        #printpopup {
-            width: 450px;
-            height: 320px;
-            font-size: 110%;
+        #resourcedisplay.hide {
+            visibility: hidden;
         }
 
-        #printbuttons {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            padding: 0 10px;
-            color: var(--secondary-text-color);
-            border-top: 1px solid var(--border-color);
+        .slidein {
+            -webkit-animation: slidein .5s;
         }
 
-        #printbuttons paper-button:hover {
-            color: var(--accent-color);
+        .slideout {
+            -webkit-animation: slideout .5s;
         }
 
-        paper-checkbox {
-            --paper-checkbox-checked-color: var(--accent-color-dark);
-            --paper-checkbox-unchecked-color: var(--accent-color-dark);
+        @-webkit-keyframes slidein {
+            0% {transform: translateX(450px)}
+            100% {transform: translateX(0)}
         }
 
-        #loading {
-            width: 320px;
-            height: 220px;
-        }
-
-        #loading * {
-            margin: 0;
-            padding: 0;
+        @-webkit-keyframes slideout {
+            0% {transform: translateX(0)}
+            100% {transform: translateX(450px)}
         }
 
         .nodisplay {
@@ -189,7 +153,7 @@
 
     <template>
 
-        <ts-translate-sidebar selected="{{selected}}" currentproject="[[currentproject]]" on-gohome="gohome" on-gopublish="gopublish" on-gobackup="gobackup" on-goprint="goprint" on-gosettings="gosettings"></ts-translate-sidebar>
+        <ts-translate-sidebar selected="{{selected}}" currentproject="[[currentproject]]" modestatus="{{modestatus}}" on-navigate="navigate" on-gohome="gohome" on-goreview="goreview" on-goexport="goexport" on-goprint="goprint" on-gosearch="gosearch" on-gosettings="gosettings"></ts-translate-sidebar>
 
         <div id="pages">
             <ts-read-mode id="readmode" chapters="[[currentproject.chapters]]" modestatus="{{modestatus}}"></ts-read-mode>
@@ -198,6 +162,8 @@
             <ts-nosource-mode id="nosourcemode" projectmeta="[[currentproject.projectmeta]]"></ts-nosource-mode>
             <ts-conflict-mode id="conflictmode" chunks="{{currentproject.chunks}}" modestatus="{{modestatus}}"></ts-conflict-mode>
         </div>
+
+        <ts-resource-display id="resourcedisplay" class="hide" chunks="[[currentproject.chunks]]" modestatus="{{modestatus}}" on-navigate="navigate" on-closeresource="closeresource"></ts-resource-display>
 
         <paper-dialog id="checklistpopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <h2>Chunk Checklist</h2>
@@ -234,35 +200,6 @@
             </div>
         </paper-dialog>
 
-        <paper-dialog id="printpopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <h2>Print</h2>
-            <div>
-                <p><span>[[currentproject.projectmeta.project.name]]</span> - <span>[[currentproject.projectmeta.target_language.name]]</span></p>
-            </div>
-            <div>
-                <p><paper-checkbox id="imagebox"></paper-checkbox><span id="imagetext">Include images</span></p>
-                <p><paper-checkbox id="chunkbox" checked="true"></paper-checkbox><span>Include incomplete chunks</span></p>
-                <p><paper-checkbox id="doublespacebox"></paper-checkbox><span>Double space text</span></p>
-                <p><paper-checkbox id="justifybox"></paper-checkbox><span>Fully justify text</span></p>
-                <p><paper-checkbox id="pagebox"></paper-checkbox><span id="pagetext">New page for each chapter</span></p>
-            </div>
-            <div id="printbuttons">
-                <paper-button dialog-dismiss>Cancel</paper-button>
-                <paper-button on-tap="print">Save to PDF</paper-button>
-            </div>
-        </paper-dialog>
-
-        <paper-dialog id="delete" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <h2><iron-icon icon="delete"></iron-icon>Delete</h2>
-            <div>
-                <p>This will permanently remove this note/question. Continue?</p>
-            </div>
-            <div id="deletebuttons">
-                <paper-button on-tap="closedelete">Cancel</paper-button>
-                <paper-button on-tap="deletehelp">Confirm</paper-button>
-            </div>
-        </paper-dialog>
-
         <paper-dialog id="note" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
             <h2>Note</h2>
             <div id="notebody"></div>
@@ -272,19 +209,14 @@
         </paper-dialog>
 
         <paper-dialog id="sourcepopup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <ts-source-modal id="modal" on-close="closesource"></ts-source-modal>
+            <ts-source-modal id="modal" on-close="closesource" on-gohome="gohome" options="{{options}}"></ts-source-modal>
         </paper-dialog>
 
-        <paper-dialog id="loading" class="popup" modal="true" exit-animation="scale-down-animation">
-            <ts-loading options="[[options]]"></ts-loading>
-        </paper-dialog>
-
-        <iron-signals on-iron-signal-frompublish="frompublish"></iron-signals>
+        <iron-signals on-iron-signal-fromreview="fromreview"></iron-signals>
         <iron-signals on-iron-signal-updatesources="updatesources"></iron-signals>
         <iron-signals on-iron-signal-loadproject="loadproject"></iron-signals>
         <iron-signals on-iron-signal-updatecompletion="updatecompletion"></iron-signals>
         <iron-signals on-iron-signal-openchecklist="openchecklist"></iron-signals>
-        <iron-signals on-iron-signal-opendelete="opendelete"></iron-signals>
         <iron-signals on-iron-signal-openedit="openedit"></iron-signals>
         <iron-signals on-iron-signal-opennodata="opennodata"></iron-signals>
         <iron-signals on-iron-signal-opennote="opennote"></iron-signals>
@@ -298,6 +230,9 @@
         <iron-signals on-iron-signal-saveall="saveAll"></iron-signals>
         <iron-signals on-iron-signal-gotoreview="goToReview"></iron-signals>
         <iron-signals on-iron-signal-resolveconflict="resolveConflict"></iron-signals>
+        <iron-signals on-iron-signal-translateright="setrightanimation"></iron-signals>
+        <iron-signals on-iron-signal-translateleft="setleftanimation"></iron-signals>
+        <iron-signals on-iron-signal-openresource="openresource"></iron-signals>
 
     </template>
 
@@ -323,7 +258,8 @@
             route: {
                 type: String,
                 value: '',
-                notify: true
+                notify: true,
+                observer: 'load'
             },
             projectlist: {
                 type: Array,
@@ -344,7 +280,8 @@
             },
             options: {
                 type: Object,
-                value: {}
+                value: {},
+                notify: true
             },
             saveoptions: {
                 type: Object,
@@ -374,6 +311,10 @@
                         }
                     }
                 }
+            },
+            cmdKeyDown: {
+                type: Boolean,
+                value: false
             }
         },
 
@@ -423,7 +364,6 @@
             var mythis = this;
             var projectmeta = mythis.currentproject.projectmeta;
             var allchunks = mythis.currentproject.chunks;
-            var filePath = App.configurator.getUserPath('datalocation', 'automatic_backups', projectmeta.unique_id + ".tstudio");
             var changes = false;
             var savechunks = mythis.saveoptions.chunks;
 
@@ -474,7 +414,7 @@
                 })
                 .then(function () {
                     if (mythis.saveoptions.backup) {
-                        return App.exportManager.autoBackupTranslation(projectmeta, filePath)
+                        return App.exportManager.autoBackupTranslation(projectmeta)
                             .then(function () {
                                 mythis.set('saveoptions.backup', false);
                             })
@@ -483,7 +423,7 @@
                                 mythis.set('options.title', "Auto Backup Failed");
                                 mythis.set('options.body', err);
                                 mythis.set('options.loading', false);
-                                mythis.$.loading.open();
+                                mythis.fire('iron-signal', {name: 'openloading'});
                                 mythis.set('saveoptions.backup', false);
                                 App.reporter.logError(err, 'Error backing up translation');
                             });
@@ -533,21 +473,6 @@
             this.fire('iron-signal', {name: 'completechunk', data: {index: index}});
         },
 
-        opendelete: function (event, data) {
-            this.modestatus.index = data.index;
-            this.$.delete.open();
-        },
-
-        closedelete: function () {
-            this.$.delete.close();
-        },
-
-        deletehelp: function () {
-            var index = this.modestatus.index;
-            this.fire('iron-signal', {name: 'deletehelp', data: {index: index}});
-            this.closedelete();
-        },
-
         openedit: function (event, data) {
             this.modestatus.index = data.index;
             this.$.editpopup.open();
@@ -559,24 +484,78 @@
         },
 
         opensource: function () {
+            var mythis = this;
             var projectmeta = this.currentproject.projectmeta;
             var modal = this.$.modal;
-            var sources = App.dataManager.getSources();
-            var projectid = projectmeta.project.id;
-            if (projectmeta.resource.id === "udb") {
-                modal.allSources = _.filter(sources, {'project_id': projectid, 'checking_level': 3});
-            } else {
-                modal.allSources = _.filter(sources, function(source) {
-                    return source.project_id === projectid && source.checking_level === 3 && source.resource_id !== "udb";
+
+            mythis.set('options', {});
+            mythis.set('options.body', "Loading source options. Please wait...");
+            mythis.set('options.loading', true);
+            mythis.fire('iron-signal', {name: 'openloading'});
+
+            App.dataManager.getSourcesByProject(projectmeta.project.id)
+                .then(function (sources) {
+                    if (projectmeta.resource.id !== "udb") {
+                        sources = _.filter(sources, function(source) {
+                            return source.resource_id !== "udb";
+                        });
+                    }
+
+                    sources.forEach(function (source) {
+                        var inarray = false;
+                        projectmeta.source_translations.forEach(function (current) {
+                            if (current.unique_id === source.unique_id) {
+                                inarray = true;
+                            }
+                        });
+                        source.selected = inarray;
+                    });
+
+                    modal.set('master', sources);
+
+                    return modal.organizeSources();
+                })
+                .then(function () {
+                    mythis.fire('iron-signal', {name: 'closeloading'});
+                    setTimeout(function() {
+                        mythis.$.sourcepopup.open();
+                    }, 500);
                 });
-            }
-            modal.sources = projectmeta.source_translations;
-            modal.selectedSource = projectmeta.currentsource;
-            this.$.sourcepopup.open();
         },
 
         closesource: function () {
             this.$.sourcepopup.close();
+        },
+
+        openresource: function (event, data) {
+            var display = this.$.resourcedisplay;
+
+            display.fillresource(data.content);
+            display.classList.remove("hide");
+            display.classList.add("slidein");
+            setTimeout(function() {
+                display.classList.remove("slidein");
+            }, 500);
+        },
+
+        closeresource: function () {
+            var display = this.$.resourcedisplay;
+
+            if (!display.classList.contains("hide")) {
+                display.classList.add("slideout");
+                setTimeout(function() {
+                    display.classList.add("hide");
+                    setTimeout(function() {
+                        display.classList.remove("slideout");
+                    }, 300);
+                }, 300);
+            }
+        },
+
+        load: function (route) {
+            if (route === "translate") {
+                this.forceResize();
+            }
         },
 
         forceResize: function () {
@@ -643,9 +622,10 @@
 
         loadproject: function (event, data) {
             var mythis = this;
-            var type = data.type;
+            var nav = data.nav;
             var projectmeta = data.projectmeta;
             var list = this.projectlist;
+            var review = this.$.reviewmode;
 
             var loadsource = function () {
                 if (projectmeta.project_type_class === "extant") {
@@ -654,20 +634,22 @@
                     mythis.createchunks();
                     mythis.createchapters();
                 }
-                mythis.$.loading.close();
+                if (nav === "review") {
+                    mythis.goreview();
+                } else {
+                    mythis.fire('iron-signal', {name: 'closeloading'});
+                }
                 setTimeout(function() {
-                    mythis.setmodestate();
-                    mythis.checksources();
-                    mythis.starttimers();
-                    if (type === "publish") {
-                        setTimeout(function() {
-                            mythis.gopublish();
-                        }, 750);
+                    if (nav === "translate") {
+                        mythis.setmodestate();
+                        mythis.checksources();
+                        mythis.starttimers();
+                    } else if (nav === "print") {
+                        mythis.fire('openprint');
+                    } else if (nav === "export") {
+                        mythis.fire('exportusfm');
                     }
-                    if (type === "print") {
-                        mythis.goprint();
-                    }
-                }, 250);
+                }, 500);
             };
 
             var loadwords = function () {
@@ -723,34 +705,43 @@
                 }
             };
 
-            this.setrightanimation();
-            mythis.set('currentproject.projectmeta', projectmeta);
-            mythis.set('currentproject.statedata', {});
-            mythis.set('currentproject.rawdata', {});
-            mythis.retrievesource();
-            this.route = "translate";
+            mythis.set('options', {});
+            mythis.set('options.body', "Loading project. Please wait...");
+            mythis.set('options.loading', true);
+            mythis.fire('iron-signal', {name: 'openloading'});
+
             setTimeout(function() {
-                mythis.set('options', {});
-                mythis.set('options.body', "Loading project. Please wait...");
-                mythis.set('options.loading', true);
-                mythis.$.loading.open();
+                mythis.set('currentproject.projectmeta', projectmeta);
+                mythis.set('currentproject.statedata', {});
+                mythis.set('currentproject.rawdata', {});
+                mythis.set('currentproject.conflicts', 0);
+                mythis.fire('iron-signal', {name: 'updatebemode'});
+                review.closesearch();
+                mythis.retrievesource();
+                if (nav === "translate") {
+                    mythis.route = "translate";
+                }
                 setTimeout(function() {
                     return App.projectsManager.loadTargetTranslation(projectmeta)
                         .then(function (translation) {
                             mythis.set('currentproject.rawdata.main', translation);
+                            if (projectmeta.type.id === "ta") {
+                                throw "At this time, translationAcademy translation projects are not supported.";
+                            }
                             loaddata2();
                         })
                         .catch(function(err) {
                             App.reporter.logError(err);
                             var errmessage = "An error occurred while trying to load this project";
                             if(err !== null) {
-                                errmessage += "\n" + err;
+                                errmessage = err;
                             }
+                            mythis.set('route', 'home');
                             mythis.set('options.title', "Project Load Failed");
                             mythis.set('options.body', errmessage);
                             mythis.set('options.loading', false);
                         });
-                }, 250);
+                }, 500);
             }, 500);
         },
 
@@ -759,10 +750,10 @@
             mythis.set('options', {});
             mythis.set('options.body', "Loading source. Please wait...");
             mythis.set('options.loading', true);
-            mythis.$.loading.open();
+            mythis.fire('iron-signal', {name: 'openloading'});
             setTimeout(function() {
                 mythis.set('currentproject.projectmeta.source_translations', data.sources);
-                mythis.set('currentproject.projectmeta.currentsource', data.selected);
+                mythis.set('currentproject.projectmeta.currentsource', data.current);
                 mythis.savemanifest();
                 mythis.savesource();
                 mythis.getlocation();
@@ -773,15 +764,25 @@
         reloaddata: function (full) {
             var mythis = this;
             var projectmeta = mythis.currentproject.projectmeta;
+            var source = projectmeta.source_translations[projectmeta.currentsource];
 
-            App.projectsManager.loadTargetTranslation(projectmeta)
+            return mythis.saveAll()
+                .then(function () {
+                    if (source) {
+                        return App.dataManager.activateProjectContainers(source.language_id, projectmeta.project.id, source.resource_id);
+                    }
+                })
+                .then(function () {
+                    return App.projectsManager.loadTargetTranslation(projectmeta);
+                })
                 .then(function (translation) {
                     mythis.set('currentproject.rawdata.main', translation);
                     mythis.createchunks();
                     mythis.createchapters();
-                    mythis.$.loading.close();
+                    mythis.fire('iron-signal', {name: 'closeloading'});
                     mythis.forceResize();
                     mythis.setlocation();
+                    mythis.fire('iron-signal', {name: 'passivesearch'});
                     if (full) {
                         mythis.checksources();
                     }
@@ -810,50 +811,37 @@
 
         createchunks: function () {
             var projectmeta = this.currentproject.projectmeta;
-            var current = projectmeta.currentsource;
-            if (current === null || current === undefined) {
+            var selected = projectmeta.currentsource;
+            if (selected === null || selected === undefined) {
                 return;
             }
-            var currentsource = projectmeta.source_translations[current];
-            var frames = App.dataManager.getSourceFrames(currentsource);
+            var source = projectmeta.source_translations[selected];
+            var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;
+            var frames = App.dataManager.getContainerData(container);
+            var notes = App.dataManager.getSourceNotes(source);
+            var questions = App.dataManager.getSourceQuestions(source);
+            var udb = App.dataManager.getSourceUdb(source);
+            var wordlist = App.dataManager.getSourceWords(source);
             var chunkarray = [];
-            var index = 0;
+            var title = "";
 
             this.set('currentproject.conflicts', 0);
 
             for (var i = 0; i < frames.length; i++) {
-                if (frames[i].verse === "00") {
-                    frames.push(frames.splice(i, 1)[0]);
-                    i = frames.length;
+                if (frames[i].chunk === "title") {
+                    title = frames[i].content;
                 }
-            }
 
-            for (i = 0; i < frames.length; i++) {
-                var resources = this.getFrameResources(frames[i], currentsource);
-                var sourcedata = App.renderer.convertVerseMarkers(frames[i].chunk);
-                var chunkmeta = this.createFrameMeta(frames[i], projectmeta, sourcedata.verses);
+                var sourcedata = App.renderer.convertVerseMarkers(frames[i].content);
+                var resources = this.getFrameResources(frames[i], notes, questions, udb, wordlist, sourcedata.verses);
+                var chunkmeta = this.createFrameMeta(frames[i], projectmeta, sourcedata.verses, title);
                 var chunk = this.getFrameData(chunkmeta, projectmeta);
                 var sourcecontent = App.renderer.convertNoteMarkers(sourcedata.text);
-                chunk.srccontent = App.renderer.renderSourceWithVerses(sourcecontent);
+                chunk.srccontent = App.renderer.renderSuperscriptVerses(sourcecontent);
                 chunk.wordcontent = "";
                 chunk.resources = resources;
-                if (projectmeta.project_type_class === "standard" && chunkmeta.frameid === "01") {
-                    if (chunkmeta.chapterid === "01") {
-                        chunkarray.push(this.createProjectTitleFrame(chunkmeta, projectmeta, index));
-                        index++;
-                    }
-                    if (chunkmeta.title) {
-                        chunkarray.push(this.createChapterTitleFrame(chunkmeta, projectmeta, index));
-                        index++;
-                    }
-                    if (chunkmeta.reference) {
-                        chunkarray.push(this.createChapterRefFrame(chunkmeta, projectmeta, index));
-                        index++;
-                    }
-                }
-                chunk.index = index;
+                chunk.index = i;
                 chunkarray.push(chunk);
-                index++;
             }
             this.set('currentproject.chunks', chunkarray);
         },
@@ -892,7 +880,7 @@
                 });
                 var statedata = mythis.currentproject.statedata[chaptermeta.chapterid];
                 if (!statedata) {
-                    statedata = {read: true};
+                    statedata = {read: App.configurator.getUserSetting('bemode')};
                     mythis.currentproject.statedata[chaptermeta.chapterid] = statedata;
                 }
                 if (chaptermeta.chapter > 0) {
@@ -906,19 +894,14 @@
             var projectmeta = this.currentproject.projectmeta;
             var type = projectmeta.type.id;
             var language = projectmeta.target_language.name;
-            var frames;
-            var volume = "vol1";
+            var frames = [];
             var chunkarray = [];
-            var sources = App.dataManager.getSources();
-            var filtered = _.filter(sources, {'language_id': "en", 'resource_id': "ulb", 'checking_level': 3});
+
+            this.set('currentproject.conflicts', 0);
 
             if (type === "tw") {
-                frames = App.dataManager.getAllWords(filtered[0]);
-            } else if (type === "ta") {
-                if (projectmeta.project.id !== "ta") {
-                    volume = projectmeta.project.id;
-                }
-                frames = App.dataManager.getTa(volume);
+                var dict = projectmeta.project.id;
+                frames = App.dataManager.getAllWords(dict);
             }
 
             for (var i = 0; i < frames.length; i++) {
@@ -940,18 +923,39 @@
             this.set('currentproject.chunks', chunkarray);
         },
 
-        getFrameResources: function (frame, currentsource) {
-            var notes = App.dataManager.getFrameNotes(frame.id);
-            var words = App.dataManager.getFrameWords(frame.id);
-            var questions = App.dataManager.getFrameQuestions(frame.id);
-            var udbtext = null;
+        getFrameResources: function (frame, notes, questions, udb, wordlist, verses) {
             var resources = [];
+            var note = [];
+            var question = [];
+            var words = [];
+            var framewords = [];
+            var udbtext = null;
 
-            for (var n = 0; n < notes.length; n++) {
-                if (notes[n].title === "") {
-                    notes[n].title = notes[n].body;
-                }
+            var framenotes = notes.filter(function (note) {
+                return note.chapter === frame.chapter && note.chunk === frame.chunk;
+            });
+            if (framenotes.length) {
+                note = framenotes[0].content;
             }
+            if (note.length) {
+                resources.push({title: "Notes", array: true, data: note});
+            }
+
+            if (wordlist && wordlist[frame.chapter] && wordlist[frame.chapter][frame.chunk]) {
+                framewords = wordlist[frame.chapter][frame.chunk].words;
+            }
+
+            framewords.forEach(function (frameword) {
+                var split = _.compact(frameword.split("/"));
+                var word = App.dataManager.getWord(split[0], split[2]);
+
+                if (word) {
+                    words.push(word);
+                } else {
+                    console.log("Cannot find data for:", frame.chapter, frame.chunk, frameword);
+                }
+            });
+
             for (var w = 0; w < words.length; w++) {
                 var worddata = this.currentproject.rawdata.words["01-" + words[w].slug];
                 if (worddata && worddata.helpscontent[0].body !== "" && worddata.helpscontent[0].title !== "") {
@@ -959,62 +963,89 @@
                     words[w].body = worddata.helpscontent[0].body;
                 }
             }
-            if (notes.length) {
-                resources.push({title: "Notes", array: true, data: notes});
-            }
+
             if (words.length) {
                 resources.push({title: "Words", array: true, data: words});
             }
-            if (questions.length) {
-                resources.push({title: "Questions", array: true, data: questions});
-            }
-            if (currentsource.resource_id === "ulb") {
-                var result = App.dataManager.getFrameUdb(currentsource, frame.chapter, frame.verse)[0];
-                if (result) {
-                    udbtext = App.renderer.convertVerseMarkers(result.chunk).text;
-                    udbtext = App.renderer.renderSourceWithVerses(udbtext);
-                    resources.push({title: "UDB", array: false, data: [udbtext]});
+
+            var frameques = questions.filter(function (ques) {
+                if (verses.length) {
+                    return ques.chapter === frame.chapter && parseInt(ques.chunk) >= verses[0] && parseInt(ques.chunk) <= verses[verses.length - 1];
+                } else {
+                    return ques.chapter === frame.chapter && ques.chunk === frame.chunk;
                 }
+            });
+            if (frameques.length) {
+                frameques.forEach(function (frame) {
+                    question.push(frame.content);
+                });
+
+                question = _.flatten(question);
             }
+            if (question.length) {
+                resources.push({title: "Questions", array: true, data: question});
+            }
+
+            var frameudb = udb.filter(function (chunk) {
+                return chunk.chapter === frame.chapter && chunk.chunk === frame.chunk;
+            });
+            if (frameudb.length && frame.chunk !== "title") {
+                udbtext = frameudb[0].content;
+            }
+            if (udbtext) {
+                udbtext = App.renderer.convertVerseMarkers(udbtext).text;
+                udbtext = App.renderer.renderSuperscriptVerses(udbtext);
+                resources.push({title: "UDB", array: false, data: [udbtext]});
+            }
+
             return resources;
         },
 
-        createFrameMeta: function (frame, projectmeta, verses) {
+        createFrameMeta: function (frame, projectmeta, verses, title) {
             var refaddon = projectmeta.target_language.name;
             var resource = projectmeta.resource.id;
             var name = projectmeta.project.name;
             var chapterid = frame.chapter;
-            var chapternum = parseInt(chapterid);
-            var frameid = frame.verse;
-            var framenum = parseInt(frameid);
-            var title = frame.title;
-            var reference = frame.reference;
+            var chapternum = parseInt(chapterid) || 1;
+            var frameid = frame.chunk;
+            var framenum = parseInt(frameid) || 0;
             var chapterref;
             var chunkref;
 
             if (resource === "ulb" || resource === "udb") {
                 refaddon += " (" + resource + ")";
             }
-            if (framenum === 0) {
-                framenum = verses[0];
-                frameid = framenum.toString();
-                if (frameid.length === 1) {
-                    frameid = "0" + frameid;
-                }
-            }
+
             if (name === "Open Bible Stories") {
-                chapterref = title;
-                chunkref = title + ":" + framenum;
+                if (chapterid === "front" && frameid === "title") {
+                    chapterref = "Project Title";
+                    chunkref = "Project Title";
+                } else if (frameid === "title") {
+                    chapterref = "Story Title";
+                    chunkref = "Story Title";
+                } else if (frameid === "reference") {
+                    chapterref = "Story Reference";
+                    chunkref = "Story Reference";
+                } else {
+                    chapterref = title;
+                    chunkref = title + ":" + framenum;
+                }
             } else {
-                chapterref = name + " " + chapternum;
-                chunkref = name + " " + chapternum + ":" + verses[0] + "–" + verses[verses.length-1];
+                if (chapterid === "front" && frameid === "title") {
+                    chapterref = "Project Title";
+                    chunkref = "Project Title";
+                } else if (frameid === "title") {
+                    chapterref = name + " " + chapternum + " Title";
+                    chunkref = name + " " + chapternum + " Title";
+                } else {
+                    chapterref = name + " " + chapternum;
+                    chunkref = name + " " + chapternum + ":" + verses[0] + "–" + verses[verses.length-1];
+                }
             }
 
             return {
                 chapter: chapternum,
                 frame: framenum,
-                title: title,
-                reference: reference,
                 chapterid: chapterid,
                 frameid: frameid,
                 verses: verses,
@@ -1043,8 +1074,10 @@
             if (maindata) {
                 if (typeclass === "standard") {
                     transcontent = maindata.transcontent;
-                    conflicts = this.checkForConflicts(transcontent);
+                    conflicts = App.renderer.parseConflicts(App.renderer.replaceConflictCode(transcontent));
                     if (conflicts.exists) {
+                        this.set('currentproject.conflicts', this.currentproject.conflicts + 1);
+
                         for (var i = 0; i < conflicts.array.length; i++) {
                             conflicts.array[i] = App.renderer.convertVerseMarkers(conflicts.array[i]).text;
                             conflicts.array[i] = App.renderer.migrateMarkers(conflicts.array[i]);
@@ -1058,8 +1091,28 @@
                         transcontent = App.renderer.validateVerseMarkers(transcontent, verses);
                     }
                 } else {
-                    helpscontent = maindata.helpscontent;
-                    conflicts = this.checkForConflicts(helpscontent);
+                    conflicts = App.renderer.parseConflicts(App.renderer.consolidateHelpsConflict(App.renderer.replaceConflictCode(maindata.helpscontent)));
+                    if (conflicts.exists) {
+                        this.set('currentproject.conflicts', this.currentproject.conflicts + 1);
+                        helpscontent = [{title: "Dummy Data", body: "Dummy Data"}];
+
+                        for (i = 0; i < conflicts.array.length; i++) {
+                            if (conflicts.array[i] === "Conflict Parsing Error") {
+                                conflicts.array[i] = [{title: "Conflict Parsing Error", body: "Conflict Parsing Error"}];
+                            }
+                            try {
+                                conflicts.array[i] = JSON.parse(conflicts.array[i]);
+                            } catch (e) {
+                                conflicts.array[i] = [{title: "Conflict Parsing Error", body: "Conflict Parsing Error"}];
+                            }
+                        }
+                    } else {
+                        try {
+                            helpscontent = JSON.parse(maindata.helpscontent);
+                        } catch (e) {
+                            helpscontent = [{title: "Data Parsing Error", body: "Data Parsing Error"}];
+                        }
+                    }
                 }
             }
             if (seconddata && typeclass === "helps") {
@@ -1074,85 +1127,21 @@
             return {projectmeta: _.cloneDeep(projectmeta), chunkmeta: chunkmeta, transcontent: transcontent, helpscontent: helpscontent, conflicts: conflicts, completed: completed, state: statedata};
         },
 
-        checkForConflicts: function (content) {
-            var conflicttest = new RegExp(/(<{7} HEAD\n|={7}\n)([^<=>]+)(\n>{7} [\w]{40}|\n={7})/);
-            var conarray = [];
+        navigate: function () {
+            var read = this.$.readmode;
+            var chunk = this.$.chunkmode;
+            var review = this.$.reviewmode;
+            var conflict = this.$.conflictmode;
 
-            if (conflicttest.test(content)) {
-                while (conflicttest.test(content)) {
-                    var subcontent = conflicttest.exec(content)[2];
-                    conarray.push(subcontent);
-                    content = content.replace(subcontent, "");
-                }
-            } else {
-                return {exists: false, array: conarray};
+            if (this.selected === 1) {
+                read.setlocation();
+            } else if (this.selected === 2) {
+                chunk.setlocation();
+            } else if (this.selected === 3) {
+                review.setlocation();
+            } else if (this.selected === 5) {
+                conflict.setlocation();
             }
-            this.set('currentproject.conflicts', this.currentproject.conflicts + 1);
-            return {exists: true, array: conarray};
-        },
-
-        createProjectTitleFrame: function (chunkmeta, projectmeta, index) {
-            var titlemeta = {
-                chapter: 0,
-                frame: 0,
-                chapterid: "00",
-                frameid: "title",
-                chunkref: "Project Title",
-                refaddon: chunkmeta.refaddon,
-                verses: []
-            };
-            var chunk = this.getFrameData(titlemeta, projectmeta);
-            chunk.projectmeta = projectmeta;
-            chunk.chunkmeta = titlemeta;
-            chunk.srccontent = projectmeta.project.name;
-            chunk.wordcontent = "";
-            chunk.resources = [];
-            chunk.index = index;
-            return chunk;
-        },
-
-        createChapterTitleFrame: function (chunkmeta, projectmeta, index) {
-            var titlemeta = {
-                chapter: chunkmeta.chapter,
-                frame: 0,
-                title: chunkmeta.title,
-                reference: chunkmeta.reference,
-                chapterid: chunkmeta.chapterid,
-                frameid: "title",
-                verses: [],
-                chunkref: "Story Title",
-                refaddon: chunkmeta.refaddon
-            };
-            var chunk = this.getFrameData(titlemeta, projectmeta);
-            chunk.projectmeta = projectmeta;
-            chunk.chunkmeta = titlemeta;
-            chunk.srccontent = chunkmeta.title;
-            chunk.wordcontent = "";
-            chunk.resources = [];
-            chunk.index = index;
-            return chunk;
-        },
-
-        createChapterRefFrame: function (chunkmeta, projectmeta, index) {
-            var refmeta = {
-                chapter: chunkmeta.chapter,
-                frame: 0,
-                title: chunkmeta.title,
-                reference: chunkmeta.reference,
-                chapterid: chunkmeta.chapterid,
-                frameid: "reference",
-                verses: [],
-                chunkref: "Story Reference",
-                refaddon: chunkmeta.refaddon
-            };
-            var chunk = this.getFrameData(refmeta, projectmeta);
-            chunk.projectmeta = projectmeta;
-            chunk.chunkmeta = refmeta;
-            chunk.srccontent = chunkmeta.reference;
-            chunk.wordcontent = "";
-            chunk.resources = [];
-            chunk.index = index;
-            return chunk;
         },
 
         modechange: function (tomode, frommode) {
@@ -1161,6 +1150,8 @@
             var review = this.$.reviewmode;
             var nosource = this.$.nosourcemode;
             var conflict = this.$.conflictmode;
+
+            this.closeresource();
 
             if (frommode > 0) {
                 this.set('modestatus.lastmode', frommode);
@@ -1206,6 +1197,7 @@
             review.classList.add("hide");
             nosource.classList.add("hide");
             conflict.classList.add("hide");
+            mythis.stoptimers();
         },
 
         setmodestate: function () {
@@ -1216,7 +1208,12 @@
             var index = App.configurator.getValue(key + "-index");
             var chapter = App.configurator.getValue(key + "-chapter");
             var selected = App.configurator.getValue(key + "-selected");
+            var bemode = App.configurator.getUserSetting('bemode');
             var typeclass = projectmeta.project_type_class;
+
+            if (selected === 2 && !bemode) {
+                selected = 3;
+            }
 
             if (chapter > 0) {
                 mythis.set('modestatus.chapter', chapter);
@@ -1224,7 +1221,7 @@
             if (index >= 0) {
                 mythis.set('modestatus.index', index);
             }
-            if (typeclass === "standard") {
+            if (typeclass === "standard" && bemode) {
                 mythis.set('modestatus.lastmode', 1);
             } else {
                 mythis.set('modestatus.lastmode', 3);
@@ -1235,7 +1232,7 @@
                     if (selected > 0) {
                         mythis.set('selected', selected);
                     } else {
-                        if (typeclass === "standard") {
+                        if (typeclass === "standard" && bemode) {
                             mythis.set('selected', 1);
                         } else {
                             mythis.set('selected', 3);
@@ -1311,159 +1308,124 @@
             }
         },
 
-        frompublish: function (event, data) {
+        fromreview: function (event, data) {
             var mythis = this;
-            this.selected = 0;
-            this.set('modestatus.index', data.index);
-            this.route = "translate";
+
+            mythis.set('options', {});
+            mythis.set('options.body', "Loading project. Please wait...");
+            mythis.set('options.loading', true);
+            mythis.fire('iron-signal', {name: 'openloading'});
+
             setTimeout(function() {
-                mythis.selected = 3;
+                if (data.index === null) {
+                    mythis.set('route', "translate");
+                    mythis.setmodestate();
+                    mythis.checksources();
+                    mythis.starttimers();
+                } else {
+                    mythis.set('selected', 0);
+                    mythis.set('modestatus.index', data.index);
+                    mythis.set('route', "translate");
+                    setTimeout(function() {
+                        mythis.set('selected', 3);
+                        mythis.starttimers();
+                    }, 500);
+                }
+
+                mythis.fire('iron-signal', {name: 'closeloading'});
             }, 500);
         },
 
         gohome: function () {
             var mythis = this;
-            mythis.$.reviewmode.closeresource();
-            mythis.$.conflictmode.closeresource();
+
+            mythis.closeresource();
             mythis.savestate();
             mythis.stoptimers();
+
             return mythis.saveAll()
                 .then(function () {
                     setTimeout(function() {
-                        mythis.$.loading.close();
+                        mythis.fire('iron-signal', {name: 'closeloading'});
                         mythis.set('route', "home");
                         mythis.reset();
                     }, 500);
                 });
         },
 
-        gopublish: function () {
+        goreview: function () {
             var mythis = this;
             var typeclass = mythis.currentproject.projectmeta.project_type_class;
-            if(mythis.currentproject.projectmeta.source_translations.length || typeclass === "extant") {
+
+            if (mythis.currentproject.projectmeta.source_translations.length || typeclass === "extant") {
                 mythis.set('options', {});
-                mythis.set('options.body', "Loading upload page. Please wait...");
+                mythis.set('options.body', "Loading review page. Please wait...");
                 mythis.set('options.loading', true);
-                mythis.$.loading.open();
+                mythis.fire('iron-signal', {name: 'openloading'});
                 setTimeout(function() {
-                    mythis.$.reviewmode.closeresource();
-                    mythis.$.conflictmode.closeresource();
+                    mythis.closeresource();
                     mythis.savestate();
                     mythis.setleftanimation();
                     mythis.stoptimers();
                     return mythis.saveAll()
                         .then(function () {
-                            mythis.fire('iron-signal', {name: 'updatepublish'});
-                            mythis.$.loading.close();
-                            mythis.set('route', "publish");
+                            mythis.fire('iron-signal', {name: 'updatereview'});
+                            mythis.fire('iron-signal', {name: 'closeloading'});
+                            mythis.set('route', "review");
                         });
                 }, 250);
+            } else {
+                mythis.set('options', {});
+                mythis.set('options.title', "Project Empty");
+                mythis.set('options.body', "This project has nothing to review");
+                mythis.set('options.loading', false);
+                mythis.fire('iron-signal', {name: 'openloading'});
             }
         },
 
         goprint: function () {
-            this.$.chunkbox.checked = true;
-            this.$.imagebox.checked = false;
-            this.$.doublespacebox.checked = false;
-            this.$.justifybox.checked = false;
-            this.$.pagebox.checked = false;
-            var project = this.currentproject.projectmeta.project.id;
-            if (project === 'obs') {
-                this.$.imagebox.hidden = false;
-                this.$.imagetext.hidden = false;
-                this.$.pagebox.hidden = true;
-                this.$.pagetext.hidden = true;
-            } else {
-                this.$.imagebox.hidden = true;
-                this.$.imagetext.hidden = true;
-                this.$.pagebox.hidden = false;
-                this.$.pagetext.hidden = false;
-            }
-            this.$.printpopup.open();
-        },
-
-        gobackup: function () {
             var mythis = this;
-            var projectmeta = mythis.currentproject.projectmeta;
+
             mythis.stoptimers();
             return mythis.saveAll()
                 .then(function () {
-                    mythis.$.loading.close();
-                    mythis.fire('iron-signal', {name: 'openbackup', data: {projectmeta: projectmeta}});
+                    mythis.fire('iron-signal', {name: 'closeloading'});
+                    mythis.fire('openprint');
+                    mythis.starttimers();
+                });
+        },
+
+        goexport: function () {
+            var mythis = this;
+
+            mythis.stoptimers();
+            return mythis.saveAll()
+                .then(function () {
+                    mythis.fire('iron-signal', {name: 'closeloading'});
+                    mythis.fire('iron-signal', {name: 'openexport'});
                     mythis.starttimers();
                 });
         },
 
         gosettings: function () {
-            this.savestate();
-            this.setleftanimation();
+            var mythis = this;
+
+            mythis.savestate();
+            mythis.setleftanimation();
             App.configurator.setValue("backto", this.route);
-            this.route = "settings";
+
+            return mythis.saveAll()
+                .then(function () {
+                    setTimeout(function() {
+                        mythis.set('route', "settings");
+                    }, 500);
+                });
         },
 
-        print: function () {
-            var mythis = this;
-            var projectmeta = this.currentproject.projectmeta;
-            var translation = this.currentproject.chunks;
-            var name = this.currentproject.projectmeta.unique_id;
-            var options = {
-                includeIncompleteFrames: this.$.chunkbox.checked,
-                includeImages: this.$.imagebox.checked,
-                doubleSpace: this.$.doublespacebox.checked,
-                justify: this.$.justifybox.checked,
-                newpage: this.$.pagebox.checked
-            };
-            var filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'PDF Files', extensions: ['pdf']}]}});
-            if (!filePath) {
-                return;
-            }
-            var generatePdf = function(){
-                mythis.set('options.body', "Creating PDF. Please wait...");
-                setTimeout(function() {
-                    return App.printManager.targetTranslationToPdf(translation, projectmeta, filePath, options)
-                        .then(function () {
-                            mythis.set('options.title', "PDF Created");
-                            mythis.set('options.body', "Your project has been successfully saved to a PDF.");
-                            mythis.set('options.loading', false);
-                        })
-                        .catch(function (err) {
-                            var errmessage = "An error occurred saving your project";
-                            if(err !== null) {
-                                errmessage = err;
-                            }
-                            mythis.set('options.title', "Print Failed");
-                            mythis.set('options.body', errmessage);
-                            mythis.set('options.loading', false);
-                        });
-                }, 500);
-            };
+        gosearch: function () {
+            var review = this.$.reviewmode;
 
-            mythis.$.printpopup.close();
-            mythis.set('options', {});
-            mythis.set('options.body', "Preparing to Print. Please wait...");
-            mythis.set('options.loading', true);
-            mythis.$.loading.open();
-
-            setTimeout(function() {
-                if (options.includeImages) {
-                    mythis.set('options.body', "Downloading Images. Please wait...");
-                    App.printManager.downloadImages().then(function(){
-                        mythis.set('options.body', "Extracting Images. Please wait...");
-                        App.printManager.extractImages();
-                        generatePdf();
-                    }).catch(function(err){
-                        var errmessage = "An error occurred while downloading images";
-                        if(err !== null) {
-                            errmessage += "\n" + err;
-                        }
-                        mythis.set('options.title', "Download Failed");
-                        mythis.set('options.body', errmessage);
-                        mythis.set('options.loading', false);
-                    });
-                } else {
-                    generatePdf();
-                }
-            }, 500);
+            review.opensearch();
         },
 
         setrightanimation: function () {
@@ -1478,14 +1440,29 @@
 
         ready: function() {
             var mythis = this;
-            this.reset();
+
+            mythis.reset();
             window.addEventListener("resize", function () {
                 mythis.getlocation();
                 mythis.setlocation();
                 mythis.setheights();
             });
+            window.addEventListener("keyup", function (e) {
+                if (e.key == "Meta") {
+                    mythis.set('cmdKeyDown', false);
+                }
+            });
+            window.addEventListener("keydown", function(e) {
+                if (mythis.route === "translate" && mythis.selected === 3 && mythis.currentproject.projectmeta.project_type_class === "standard") {
+                    if (e.key == "Meta") {
+                        mythis.set('cmdKeyDown', true);
+                    }
+                    if ((mythis.cmdKeyDown || e.ctrlKey) && e.keyCode == 70) {
+                        mythis.gosearch();
+                    }
+                }
+            });
         }
-
     });
 
 </script>

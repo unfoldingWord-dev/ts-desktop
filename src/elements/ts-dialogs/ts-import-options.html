@@ -1,0 +1,142 @@
+
+<link rel="import" href="../../components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../../components/iron-signals/iron-signals.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/iron-input/iron-input.html">
+<link rel="import" href="../../components/iron-list/iron-list.html">
+
+<dom-module id="ts-import-options">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px;
+        }
+
+        #icon {
+            margin-left: 20px;
+        }
+
+        .icon {
+            color: var(--icon-color);
+        }
+
+        #body {
+            display: flex;
+            flex-direction: column;
+            border-top: 1px solid var(--border-color);
+            padding: 0;
+        }
+
+        #footer {
+            display: flex;
+            justify-content: flex-end;
+            padding: 10px 50px;
+        }
+
+        #footer paper-button:hover {
+            color: var(--accent-color);
+        }
+
+        .option {
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 30px 0;
+            min-height: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background .3s, color .3s;
+            cursor: pointer;
+        }
+
+        .option:hover {
+            background: var(--accent-color-light);
+        }
+
+        .optiontitle {
+            font-size: 130%;
+            font-weight: bold;
+        }
+
+        .option p {
+            text-align: center;
+        }
+
+    </style>
+
+    <template>
+
+        <div id="header">
+            <h2>Import Options</h2>
+            <span id="icon"><a href="http://help.door43.org/en/knowledgebase/9-translationstudio/docs/3-import-options"><iron-icon class="icon" icon="info"></iron-icon></a></span>
+        </div>
+        <div id="body">
+            <div class="option" on-tap="repo">
+                <span class="optiontitle">Import from Door43</span>
+            </div>
+            <div class="option" on-tap="project">
+                <span class="optiontitle">Import Project File</span>
+            </div>
+            <div class="option" on-tap="usfm">
+                <span class="optiontitle">Import USFM File</span>
+            </div>
+            <div class="option" on-tap="container">
+                <span class="optiontitle">Import Source Text</span>
+            </div>
+        </div>
+        <div id="footer">
+            <paper-button dialog-dismiss>Cancel</paper-button>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-import-options',
+
+        properties: {
+
+        },
+
+        project: function () {
+            this.fire('project');
+        },
+
+        usfm: function () {
+            this.fire('usfm');
+        },
+
+        repo: function () {
+            this.fire('repo');
+        },
+
+        container: function () {
+            this.fire('container');
+        },
+
+        ready: function () {
+            var shell = require('electron').shell;
+            var links = this.$.header.getElementsByTagName('a');
+            for (var i = 0; i < links.length; i++) {
+                links[i].addEventListener('click', function (event) {
+                    event.preventDefault();
+                    shell.openExternal(this.href);
+                });
+            }
+        }
+
+    });
+
+</script>

@@ -2,7 +2,6 @@
 <link rel="import" href="../../../components/paper-material/paper-material.html">
 <link rel="import" href="../../../components/paper-toggle-button/paper-toggle-button.html">
 <link rel="import" href="../../../components/iron-icons/iron-icons.html">
-<link rel="import" href="../../../components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../../components/neon-animation/neon-animation.html">
 <link rel="import" href="../../../components/iron-signals/iron-signals.html">
 
@@ -136,7 +135,7 @@
             </paper-material>
             <div id="content" class="editmode">
                 <template is="dom-repeat" items="{{chunk.helpscontent}}" as="help">
-                    <paper-material class="contentbox targetfont" elevation="1">
+                    <paper-material class="contentbox targetfont targetsize" elevation="1">
                         <div class="contentheader">
                             <p class$="[[chunk.projectmeta.target_language.direction]]">{{help.title}}</p>
                             <iron-autogrow-textarea class$="[[chunk.projectmeta.target_language.direction]]" bind-value="{{help.title}}" on-change="change" on-input="input" placeholder$="[[checktitle(chunk.projectmeta.type.id)]]"></iron-autogrow-textarea>
@@ -187,25 +186,11 @@
         },
 
         checktitle: function (type) {
-            var text = "";
-            if (type === "tw") {
-                text = "Translate word here";
-            }
-            if (type === "ta") {
-                text = "Translate title here";
-            }
-            return text;
+            return type === "tw" ? "Translate word here" : "Translate title here";
         },
 
         checkbody: function (type) {
-            var text = "";
-            if (type === "tw") {
-                text = "Translate definition here";
-            }
-            if (type === "ta") {
-                text = "Translate text here";
-            }
-            return text;
+            return type === "tw" ? "Translate definition here" : "Translate text here";
         },
 
         rendertext: function () {

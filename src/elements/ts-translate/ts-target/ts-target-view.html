@@ -30,16 +30,17 @@
             border-bottom: 1px solid var(--note-card-pink);
             margin-bottom: 4px;
             letter-spacing: 1px;
-            padding: 0 0 0.25em 1.75em;
+            padding: 5px 25px;
 		}
 
         #content {
-			padding: 0 50px;
+			padding: 0 10%;
             flex: auto;
 		}
 
         #textholder {
             width: 100%;
+            margin-top: 30px;
         }
 
         #textholder p {
@@ -133,7 +134,7 @@
         },
 
         noconflictclass: function (exists) {
-            return exists ? 'hide' : 'flex targetfont';
+            return exists ? 'hide' : 'flex targetfont targetsize';
         },
 
 		ready: function() {

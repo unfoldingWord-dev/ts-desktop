@@ -1,0 +1,179 @@
+
+<link rel="import" href="../../components/iron-signals/iron-signals.html">
+<link rel="import" href="../../components/paper-button/paper-button.html">
+
+<link rel="import" href="./ts-review-chapter.html">
+
+<dom-module id="ts-review-project">
+
+    <style>
+
+        :host {
+            display: flex;
+        }
+
+        #contain {
+            flex: auto;
+            overflow-y: auto;
+            padding-bottom: 100px;
+        }
+
+        #next {
+            background: var(--accent-color);
+            color: var(--reverse-text-color);
+            text-transform: uppercase;
+        }
+
+        #button {
+            display: flex;
+            justify-content: center;
+            margin-top: 25px;
+        }
+
+    </style>
+
+    <template>
+
+        <div id="contain">
+            <template is="dom-repeat" items="{{chapters}}" as="chapter">
+                <ts-review-chapter chapter="[[chapter]]"></ts-review-chapter>
+            </template>
+            <div id="button">
+                <paper-button raised id="next" on-tap="next">Next</paper-button>
+            </div>
+        </div>
+
+        <iron-signals on-iron-signal-updatereview="updatereview"></iron-signals>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-review-project',
+
+        properties: {
+            selected: {
+                type: Number,
+                value: 0,
+                notify: true
+            },
+            currentproject: {
+                type: Object,
+                value: {}
+            },
+            chapters: {
+                type: Array,
+                value: []
+            }
+        },
+
+        updatereview: function () {
+            var mythis = this;
+
+            mythis.createchapters();
+
+            setTimeout(function() {
+                mythis.$.contain.scrollTop = 0;
+            }, 250);
+        },
+
+        sortChapters: function (list) {
+            return list.sort(function (a, b) {
+                if (a.start > b.start) {
+                    return 1;
+                } else if (a.start < b.start) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            });
+        },
+
+        createchapters: function () {
+            var transchapters = [];
+            var translation = _.cloneDeep(this.currentproject.chunks);
+            var projectmeta = this.currentproject.projectmeta;
+            var name = projectmeta.project.name;
+            var typeclass = projectmeta.project_type_class;
+            var direction = projectmeta.target_language.direction;
+
+            var transdata = translation.map(function(chunk, index){
+                var start;
+                var end;
+                if (chunk.chunkmeta.verses.length) {
+                    start = chunk.chunkmeta.verses[0];
+                    end = chunk.chunkmeta.verses[chunk.chunkmeta.verses.length-1];
+                } else if (typeclass === "extant") {
+                    start = chunk.chunkmeta.frameid;
+                    end = chunk.chunkmeta.frameid;
+                } else {
+                    start = chunk.chunkmeta.frame;
+                    end = chunk.chunkmeta.frame;
+                }
+                return {transcontent: chunk.transcontent, helpscontent: chunk.helpscontent, completed: chunk.completed, conflicts: chunk.conflicts, chunkmeta: chunk.chunkmeta, index: index, start: start, end: end, combined: false, typeclass: typeclass, direction: direction};
+            });
+
+            for (var i = 0; i < transdata.length; i++) {
+                if (transdata[i].index > 0 && transdata[i].chunkmeta.frame !== 0 && transdata[i-1].chunkmeta.frame !== 0 && transdata[i].completed === true && transdata[i-1].completed === true && transdata[i].chunkmeta.chapter === transdata[i-1].chunkmeta.chapter) {
+                    if (typeclass === "extant") {
+                        transdata[i-1].chunkmeta.chunkref = transdata[i-1].start + " – " + transdata[i].end;
+                    } else {
+                        transdata[i-1].chunkmeta.chunkref = transdata[i].chunkmeta.chapterref + ":" + transdata[i-1].start + "–" + transdata[i].end;
+                    }
+                    transdata[i-1].combined = true;
+                    transdata.splice(i, 1);
+                    i--;
+                }
+            }
+
+            _.forEach(_.groupBy(transdata, function(chunks) {
+                return chunks.chunkmeta.chapterid;
+            }), function (data, chap) {
+                var chapcomplete = true;
+                var chapter = parseInt(chap) || 0;
+                var reference;
+                if (chap === "front") {
+                    reference = "Project Details";
+                } else if (typeclass === "extant") {
+                    reference = name;
+                } else {
+                    reference = name + " " + chapter;
+                }
+
+                _.forEach(data, function (chunk) {
+                    if (!chunk.completed) {
+                        chapcomplete = false;
+                    }
+                });
+                transchapters.push({reference: reference, completed: chapcomplete, start: chapter, end: chapter, combined: false, chunks: data});
+            });
+
+            transchapters = this.sortChapters(transchapters);
+
+            for (i = 0; i < transchapters.length; i++) {
+                if (transchapters[i].start > 1 && transchapters[i].completed === true && transchapters[i-1].completed === true) {
+                    transchapters[i-1].reference = name + " " + transchapters[i-1].start + "–" + transchapters[i].end;
+                    transchapters[i-1].combined = true;
+                    transchapters.splice(i, 1);
+                    i--;
+                }
+            }
+
+            this.set('chapters', transchapters);
+        },
+
+        next: function () {
+            this.fire('next');
+        },
+
+        ready: function() {
+
+        }
+
+    });
+
+</script>

@@ -7,19 +7,27 @@
 <link rel="import" href="../ts-profile/ts-profile.html">
 <link rel="import" href="../ts-home/ts-home.html">
 <link rel="import" href="../ts-new/ts-new.html">
-<link rel="import" href="../ts-publish/ts-publish.html">
+<link rel="import" href="../ts-review/ts-review.html">
 <link rel="import" href="../ts-translate/ts-translate.html">
 <link rel="import" href="../ts-settings/ts-settings.html">
-<link rel="import" href="./ts-terms.html">
-<link rel="import" href="./ts-repo-search.html">
-<link rel="import" href="./ts-import-options.html">
-<link rel="import" href="./ts-feedback.html">
-<link rel="import" href="./ts-loading.html">
-<link rel="import" href="./ts-backup-options.html">
-<link rel="import" href="./ts-license.html">
-<link rel="import" href="./ts-statement.html">
-<link rel="import" href="./ts-guidelines.html">
-<link rel="import" href="./ts-attribution.html">
+<link rel="import" href="../ts-updates/ts-updates.html">
+<link rel="import" href="../ts-print/ts-print.html">
+<link rel="import" href="../ts-dialogs/ts-repo-search.html">
+<link rel="import" href="../ts-dialogs/ts-import-options.html">
+<link rel="import" href="../ts-dialogs/ts-feedback.html">
+<link rel="import" href="../ts-dialogs/ts-loading.html">
+<link rel="import" href="../ts-dialogs/ts-export-options.html">
+<link rel="import" href="../ts-dialogs/ts-update-options.html">
+<link rel="import" href="../ts-dialogs/ts-print-options.html">
+<link rel="import" href="../ts-dialogs/ts-conflict.html">
+<link rel="import" href="../ts-dialogs/ts-import-confirm.html">
+<link rel="import" href="../ts-dialogs/ts-container-confirm.html">
+<link rel="import" href="../ts-legal/ts-terms.html">
+<link rel="import" href="../ts-legal/ts-license.html">
+<link rel="import" href="../ts-legal/ts-statement.html">
+<link rel="import" href="../ts-legal/ts-guidelines.html">
+<link rel="import" href="../ts-legal/ts-software.html">
+<link rel="import" href="../ts-legal/ts-attribution.html">
 
 <dom-module id="ts-dashboard">
 
@@ -81,13 +89,18 @@
       }
 
       #import {
-          width: 450px;
-          height: 550px;
+          width: 320px;
+          height: 400px;
       }
 
-      #backup {
+      #export {
           width: 450px;
-          height: 300px;
+          height: 510px;
+      }
+
+      #update {
+          width: 500px;
+          height: 400px;
       }
 
       #repo {
@@ -105,8 +118,37 @@
           height: 220px;
       }
 
+      #print {
+          width: 450px;
+          height: 330px;
+      }
+
+      #conflict {
+          width: 450px;
+          height: 200px;
+      }
+
+      #importconfirm {
+          width: 450px;
+          height: 210px;
+      }
+
+      #containerconfirm {
+          width: 450px;
+          height: 175px;
+      }
+
       .hide {
           display: none;
+      }
+
+      @media print {
+          #statusbar {
+              display: none;
+          }
+          ts-app-titlebar {
+              display: none;
+          }
       }
 
   </style>
@@ -115,28 +157,34 @@
 
       <ts-app-titlebar currentuser="[[currentuser]]"></ts-app-titlebar>
       <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
-          <ts-home data-route="home" route="{{route}}" projectlist="[[projectlist]]" id="home"></ts-home>
-          <ts-new data-route="new" route="{{route}}" importdata="{{importdata}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]"></ts-new>
-          <ts-translate data-route="translate" route="{{route}}" message="{{message}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]"></ts-translate>
-          <ts-publish data-route="publish" route="{{route}}" currentproject="{{currentproject}}" currentuser="[[currentuser]]"></ts-publish>
-          <ts-settings data-route="settings" route="{{route}}"></ts-settings>
-          <ts-profile data-route="profile" currentuser="[[currentuser]]"></ts-profile>
+          <ts-home data-route="home" route="{{route}}" currentproject="{{currentproject}}" projectlist="[[projectlist]]" importdata="{{importdata}}" id="home"></ts-home>
+          <ts-new data-route="new" route="{{route}}" importdata="{{importdata}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]" options="{{options}}" on-finishusfm="finishUsfmImport"></ts-new>
+          <ts-translate data-route="translate" route="{{route}}" message="{{message}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}" id="translate" on-exportusfm="exportUsfm" on-openprint="openPrint"></ts-translate>
+          <ts-review data-route="review" route="{{route}}" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}"></ts-review>
+          <ts-settings data-route="settings" route="{{route}}" currentproject="[[currentproject]]" options="{{options}}" id="settings"></ts-settings>
+          <ts-profile data-route="profile" currentuser="[[currentuser]]" options="{{options}}"></ts-profile>
+          <ts-print data-route="preview" route="{{route}}" currentproject="[[currentproject]]" options="{{options}}" id="preview"></ts-print>
+          <ts-updates data-route="updates" route="{{route}}" options="{{options}}"></ts-updates>
           <ts-terms data-route="terms"></ts-terms>
       </neon-animated-pages>
       <div id="statusbar">
           <span>Status: </span><span id="message">{{message}}</span>
       </div>
 
+      <paper-dialog id="print" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <ts-print-options id="printoptions" currentproject="{{currentproject}}" options="{{options}}" on-openpreview="openPreview"></ts-print-options>
+      </paper-dialog>
+
       <paper-dialog id="feedback" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
           <ts-feedback feedback="{{feedback}}" on-close="closeFeedback" on-send="sendFeedback"></ts-feedback>
       </paper-dialog>
 
       <paper-dialog id="import" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-          <ts-import-options on-restorebackup="restoreFromBackup" on-restorerepo="openRepoRestore" on-backup="importFromBackup" on-usfm="importFromUsfm" on-repo="openRepoImport"></ts-import-options>
+          <ts-import-options on-project="startProjectImport" on-usfm="startUsfmImport" on-repo="openRepoImport" on-container="startContainerImport"></ts-import-options>
       </paper-dialog>
 
       <paper-dialog id="repo" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-          <ts-repo-search id="reposearch" on-cancel="cancelRepo"></ts-repo-search>
+          <ts-repo-search id="reposearch" importdata="{{importdata}}" on-cancel="cancelRepo" on-startrepoimport="startRepoImport"></ts-repo-search>
       </paper-dialog>
 
       <paper-dialog id="loading" class="popup" modal="true" exit-animation="scale-down-animation">
@@ -147,8 +195,12 @@
           <ts-loading options="[[options]]"></ts-loading>
       </paper-dialog>
 
-      <paper-dialog id="backup" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-          <ts-backup-options on-filebackup="createFileBackup" on-repobackup="createRepoBackup"></ts-backup-options>
+      <paper-dialog id="export" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <ts-export-options on-project="exportProject" on-upload="uploadProject" on-checkprint="checkPrint" on-checkusfm="checkUsfm" currentproject="[[currentproject]]"></ts-export-options>
+      </paper-dialog>
+
+      <paper-dialog id="update" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <ts-update-options on-language="updateLanguageList" on-source="updateSourceList" on-download="downloadSources"></ts-update-options>
       </paper-dialog>
 
       <paper-dialog id="license" class="popup legal" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -163,24 +215,42 @@
           <ts-statement></ts-statement>
       </paper-dialog>
 
+      <paper-dialog id="software" class="popup legal" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <ts-software></ts-software>
+      </paper-dialog>
+
       <paper-dialog id="attribution" class="popup legal" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
           <ts-attribution></ts-attribution>
+      </paper-dialog>
+
+      <paper-dialog id="conflict" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <ts-conflict currentproject="[[currentproject]]" importdata="{{importdata}}" currentuser="[[currentuser]]" on-startrepoimport="startRepoImport"></ts-conflict>
+      </paper-dialog>
+
+      <paper-dialog id="importconfirm" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <ts-import-confirm importdata="{{importdata}}" on-cancel="clearTempDir" on-finishimport="finishImport"></ts-import-confirm>
+      </paper-dialog>
+
+      <paper-dialog id="containerconfirm" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <ts-container-confirm on-finish="finishContainerImport"></ts-container-confirm>
       </paper-dialog>
 
       <iron-signals on-iron-signal-updatelist="updateList"></iron-signals>
       <iron-signals on-iron-signal-openfeedback="openFeedback"></iron-signals>
       <iron-signals on-iron-signal-openimport="openImport"></iron-signals>
-      <iron-signals on-iron-signal-openbackup="openBackup"></iron-signals>
+      <iron-signals on-iron-signal-openexport="openExport"></iron-signals>
       <iron-signals on-iron-signal-updateuser="updateUser"></iron-signals>
-      <iron-signals on-iron-signal-finishusfm="finishUsfm"></iron-signals>
-      <iron-signals on-iron-signal-importfromrepo="importFromRepo"></iron-signals>
       <iron-signals on-iron-signal-openlicense="openLicense"></iron-signals>
       <iron-signals on-iron-signal-openguidelines="openGuidelines"></iron-signals>
       <iron-signals on-iron-signal-openstatement="openStatement"></iron-signals>
+      <iron-signals on-iron-signal-opensoftware="openSoftware"></iron-signals>
       <iron-signals on-iron-signal-openattribution="openAttribution"></iron-signals>
       <iron-signals on-iron-signal-changeproject="changeProject"></iron-signals>
       <iron-signals on-iron-signal-deleteproject="deleteProject"></iron-signals>
-      <iron-signals on-iron-signal-updatelanguages="updateLanguages"></iron-signals>
+      <iron-signals on-iron-signal-openupdate="openUpdate"></iron-signals>
+      <iron-signals on-iron-signal-openloading="openLoading"></iron-signals>
+      <iron-signals on-iron-signal-closeloading="closeLoading"></iron-signals>
+      <iron-signals on-iron-signal-updatesourcelist="updateSourceList"></iron-signals>
 
   </template>
 
@@ -194,8 +264,7 @@
       properties: {
           route: {
               type: String,
-              value: '',
-              observer: '_routeChanged'
+              value: ''
           },
           projectlist: {
               type: Array,
@@ -214,10 +283,6 @@
               value: {}
           },
           importdata: {
-              type: Object,
-              value: {importing: false}
-          },
-          backupdata: {
               type: Object,
               value: {}
           },
@@ -255,6 +320,14 @@
           }, 250);
       },
 
+      openSoftware: function () {
+          var legal = this.$.software;
+          legal.open();
+          setTimeout(function () {
+              legal.scrollTop = 0;
+          }, 250);
+      },
+
       openAttribution: function () {
           var legal = this.$.attribution;
           legal.open();
@@ -286,11 +359,19 @@
           }
       },
 
+      openLoading: function () {
+          this.$.loading.open();
+      },
+
+      closeLoading: function () {
+          this.$.loading.close();
+      },
+
       showLoadingMessage: function (msg) {
           this.set('options', {});
           this.set('options.body', msg);
           this.set('options.loading', true);
-          this.$.loading.open();
+          this.openLoading();
       },
 
       showMessage: function (title, body) {
@@ -298,13 +379,11 @@
           this.set('options.body', body);
           this.set('options.loading', false);
           this.$.wideloading.close();
-          this.$.loading.open();
+          this.openLoading();
       },
 
       showErrorMessage: function (title, defaultBody, err) {
           App.reporter.logError(err, title, 1);
-
-          //var errmessage = App.utils.convertError(err, defaultBody);
 
           this.showMessage(title, defaultBody);
       },
@@ -314,26 +393,122 @@
 
           if (conflicts && conflicts.length) {
               App.reporter.logNotice(conflicts, 'Chunk Conflicts');
-
-              msg += ' There are ' + conflicts.length + ' chunks that contain new conflicts that need your attention.';
+              if (conflicts.length === 1) {
+                  msg += ' There is ' + conflicts.length + ' chunk that contains a new conflict that needs your attention.';
+              } else {
+                  msg += ' There are ' + conflicts.length + ' chunks that contain new conflicts that need your attention.';
+              }
           }
 
           this.showMessage(title, msg);
       },
 
-      updateLanguages: function () {
-          var mythis = this;
+      openUpdate: function () {
+          this.$.update.open();
+      },
 
-          mythis.showLoadingMessage('Updating Languages. This may take several minutes. Please wait...');
+      updateLanguageList: function () {
+          var mythis = this;
+          var before = App.dataManager.getMetrics();
+
+          var onProgress = function (type, total, complete) {
+              if (complete === 7000) {
+                  mythis.set('options.value', 66);
+              }
+          };
+
+          mythis.$.update.close();
+          mythis.showLoadingMessage('Updating List of Target Languages. This may take a while. Please wait...');
+          mythis.set('options.progress', true);
+          mythis.set('options.value', 33);
 
           setTimeout(function () {
-              return App.dataManager.updateLanguageList()
-                  .then(function (added) {
-                      mythis.showMessage('Update Complete', 'The language list has been updated. ' + added + ' new languages were added.');
+              return App.dataManager.updateLanguages(onProgress)
+                  .then(function () {
+                      var after = App.dataManager.getMetrics();
+                      var diff = after.target_language_count - before.target_language_count;
+                      var msg = diff + ' Target Languages have been added.';
+                      if (diff < 1) {
+                          msg = 'No Target Languages have been added.';
+                      }
+                      if (diff === 1) {
+                          msg = '1 Target Language has been added.';
+                      }
+                      mythis.showMessage('Update Complete', msg);
                   })
                   .catch(function (err) {
-                      mythis.showErrorMessage('Update Failed', 'An error occurred while updating', err);
+                      var errmessage = 'An error occurred while updating';
+                      if (err.syscall === "getaddrinfo") {
+                          errmessage = "Unable to connect to server";
+                      }
+                      if (err.syscall === "read") {
+                          errmessage = "Lost connection to server";
+                      }
+                      mythis.showErrorMessage('Update Failed', errmessage, err);
                   });
+          }, 500);
+      },
+
+      updateSourceList: function () {
+          var mythis = this;
+          var before = App.dataManager.getMetrics();
+          var end = false;
+
+          var onProgress = function (type, total, complete) {
+              var value = 0;
+
+              if (type === "projects") {
+                  value = Math.round(complete / total * 10);
+              } else if (type === "resources") {
+                  value = Math.round(complete / total * 88) + 10;
+                  end = true;
+              } else if (end) {
+                  value = 99;
+              }
+              mythis.set('options.value', value);
+          };
+
+          mythis.$.update.close();
+          mythis.showLoadingMessage('Updating List of Source Texts. This may take a while. Please wait...');
+          mythis.set('options.progress', true);
+          mythis.set('options.value', 0);
+
+          setTimeout(function () {
+              return App.dataManager.updateSources(onProgress)
+                  .then(function () {
+                      var after = App.dataManager.getMetrics();
+                      var diff = after.resource_count_level3 - before.resource_count_level3;
+                      var msg = diff + ' new Source Texts are available to be downloaded.';
+                      if (diff < 1) {
+                          msg = 'No new Source Texts have been added.';
+                      }
+                      if (diff === 1) {
+                          msg = '1 new Source Text is available to be downloaded.';
+                      }
+                      mythis.set('route', 'updates');
+                      mythis.showMessage('Update Complete', msg);
+                  })
+                  .catch(function (err) {
+                      var errmessage = 'An error occurred while updating';
+                      if (err.syscall === "getaddrinfo") {
+                          errmessage = "Unable to connect to server";
+                      }
+                      if (err.syscall === "read") {
+                          errmessage = "Lost connection to server";
+                      }
+                      mythis.showErrorMessage('Update Failed', errmessage, err);
+                  });
+          }, 500);
+      },
+
+      downloadSources: function () {
+          var mythis = this;
+
+          mythis.$.update.close();
+          mythis.showLoadingMessage('Loading source texts. Please wait...');
+
+          setTimeout(function() {
+              mythis.set('route', 'updates');
           }, 500);
       },
 
@@ -346,12 +521,13 @@
           setTimeout(function() {
               return App.projectsManager.deleteTargetTranslation(projectmeta)
                   .then(function() {
-                      App.projectsManager.unsetValues(projectmeta);
-
-                      mythis.showMessage('Project Deleted', 'Your project has been successfully deleted.');
+                      App.projectsManager.unsetValues(projectmeta.unique_id);
 
                       setTimeout(function() {
-                          mythis.updateList();
+                          return mythis.updateList()
+                              .then(function () {
+                                  mythis.showMessage('Project Deleted', 'Your project has been successfully deleted.');
+                              });
                       }, 250);
                   })
                   .catch(function(err) {
@@ -368,35 +544,35 @@
           mythis.set('route', 'home');
           mythis.showLoadingMessage('Changing project.  Please wait...');
 
-          var choice = function () {
-              if (changedata.exists) {
-                  return App.gitManager.merge(mythis.currentuser, changedata.newpaths.projectDir, changedata.oldpaths.projectDir)
-                      .then(function (list) {
-                          conflicts = list;
-                      })
-                      .then(function () {
-                          return App.utils.fs.remove(changedata.oldpaths.projectDir);
-                      });
-              } else {
-                  return App.utils.fs.mover(changedata.oldpaths.projectDir, changedata.newpaths.projectDir)
-                      .then(function () {
-                          return App.projectsManager.saveTargetManifest(changedata.newmeta);
-                      })
-                      .then(function () {
-                          return App.projectsManager.commitProject(changedata.newmeta, mythis.currentuser);
-                      });
-              }
-          };
-
           setTimeout(function () {
-              return choice()
+              return Promise.resolve(true)
                   .then(function () {
-                      App.projectsManager.unsetValues(changedata.oldmeta);
-
-                      mythis.showConflictsMessage('Change Complete', 'Your project has been changed.', conflicts);
+                      if (changedata.exists) {
+                          return App.gitManager.merge(mythis.currentuser, changedata.newpaths.projectDir, changedata.oldpaths.projectDir)
+                              .then(function (list) {
+                                  conflicts = list;
+                              })
+                              .then(function () {
+                                  return App.utils.fs.remove(changedata.oldpaths.projectDir);
+                              });
+                      } else {
+                          return App.utils.fs.mover(changedata.oldpaths.projectDir, changedata.newpaths.projectDir)
+                              .then(function () {
+                                  return App.projectsManager.saveTargetManifest(changedata.newmeta);
+                              })
+                              .then(function () {
+                                  return App.projectsManager.commitProject(changedata.newmeta, mythis.currentuser);
+                              });
+                      }
+                  })
+                  .then(function () {
+                      App.projectsManager.unsetValues(changedata.oldmeta.unique_id);
 
                       setTimeout(function () {
-                          mythis.updateList();
+                          return mythis.updateList()
+                              .then(function () {
+                                  mythis.showConflictsMessage('Change Complete', 'Your project has been changed.', conflicts);
+                              });
                       }, 250);
                   })
                   .catch(function(err) {
@@ -409,159 +585,29 @@
           this.$.import.open();
       },
 
-      importFromBackup: function() {
-          var mythis = this;
-          var conflicts = [];
-          var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
-          var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}], properties: ['openFile']}});
-          if (!filePath) {
-              return;
-          }
-
-          mythis.$.import.close();
-          mythis.showLoadingMessage('Importing.  Please wait...');
-
-          setTimeout(function() {
-              return App.importManager.extractBackup(filePath[0])
-                  .then(function (list) {
-                      return Promise.all(list.map(function (item) {
-                          if (item.targetExists) {
-                              return App.gitManager.merge(mythis.currentuser, item.targetPath, item.tmpPath)
-                                  .then(function (list) {
-                                      conflicts = list;
-                                  });
-                          } else {
-                              return App.utils.fs.mover(item.tmpPath, item.targetPath);
-                          }
-                      }))
-                  })
-                  .then(function () {
-                      return App.utils.fs.remove(App.configurator.getValue('tempDir'));
-                  })
-                  .then(function() {
-                      mythis.showConflictsMessage('Import Complete', 'Your project has been successfully imported.', conflicts);
-
-                      setTimeout(function() {
-                          mythis.updateList();
-                      }, 250);
-                  })
-                  .catch(function(err) {
-                      mythis.showErrorMessage('Import Failed', 'An error occurred while importing your project', err);
-
-                      return App.utils.fs.remove(App.configurator.getValue('tempDir'));
-                  });
-          }, 500);
-      },
-
-      importFromUsfm: function () {
-          var mythis = this;
-          var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
-          var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, filters: [{name: 'USFM Files', extensions: ['txt', 'usfm']}], properties: ['openFile']}});
-          if (!filePath) {
-              return;
-          }
-
-          mythis.$.import.close();
-
-          return App.importManager.retrieveUSFMProjectID(filePath[0])
-              .then(function (id) {
-                  var name = "";
-                  if (id) {
-                      var data = App.dataManager.getProjectName(id);
-                      if (data.length) {
-                          name = data[0].name;
-                      } else {
-                          id = "";
-                      }
-                  }
-                  mythis.set('importdata', {importing: true, filepath: filePath[0], project: {slug: id, name: name}});
-                  mythis.set('route', 'new');
-              }).catch(function (err) {
-                  var filename = (filePath && filePath[0]) || '';
-                  mythis.showErrorMessage('Import Failed', 'Error occurred reading file: ' + filename, err);
-              });
-      },
-
-      finishUsfm: function () {
-          var mythis = this;
-          var user = this.currentuser;
-          var filepath = this.importdata.filepath;
-          var projectmeta = this.importdata.projectmeta;
-          var overwrite = this.importdata.overwrite;
-          var timeString = App.utils.getTimeStamp();
-          var backupName = projectmeta.unique_id + '.' + timeString + '.tstudio';
-          var backupPath = App.configurator.getUserPath('datalocation', 'backups', backupName);
-
-          var backupTargetTranslation = function(){
-              return App.exportManager.backupTranslation(projectmeta, backupPath);
-          };
-          var checkOverwrite = overwrite ? backupTargetTranslation() : Promise.resolve(true);
-
-          mythis.showLoadingMessage('Importing.  Please wait...');
-
-          setTimeout(function() {
-              return checkOverwrite
-                  .then(function () {
-                      return App.importManager.importFromUSFM(filepath, projectmeta);
-                  })
-                  .then(function (chunks) {
-                      return App.projectsManager.createTargetTranslation(chunks, projectmeta, user);
-                  })
-                  .then(function () {
-                      mythis.showMessage('Import Complete', 'Your file has been imported. Please review it carefully.  If it was not formatted properly, text may not appear as desired.');
-
-                      setTimeout(function() {
-                          mythis.updateList();
-                      }, 250);
-                  }).catch(function (err) {
-                      mythis.showErrorMessage('Import Failed', 'Error occurred importing project', err);
-
-                      if (overwrite) {
-                          return App.importManager.extractBackup(backupPath)
-                              .then(function (list) {
-                                  return Promise.all(list.map(function (item) {
-                                      return App.utils.fs.mover(item.tmpPath, item.targetPath);
-                                  }))
-                              })
-                              .then(function () {
-                                  return App.utils.fs.remove(App.configurator.getValue('tempDir'));
-                              })
-                              .catch(function () {
-                                  return App.utils.fs.remove(App.configurator.getValue('tempDir'));
-                              });
-                      }
-                  });
-          }, 500);
-      },
-
       openRepoImport: function () {
-          this.$.import.close();
-          this.$.reposearch.username = "";
-          this.$.reposearch.project = "";
-          this.$.reposearch.restore = false;
-          this.$.repo.open();
-      },
+          var mythis = this;
 
-      openRepoRestore: function () {
           this.$.import.close();
-          this.$.reposearch.username = this.currentuser.username;
-          this.$.reposearch.project = "";
-          this.$.reposearch.restore = true;
+          this.set('importdata', {username: this.currentuser.username, project: ""});
           this.$.repo.open();
+
+          setTimeout(function() {
+              mythis.$.reposearch.searchRepos();
+          }, 500);
       },
 
       cancelRepo: function () {
           this.$.repo.close();
-          this.$.import.open();
+          this.openImport();
       },
 
-      importFromRepo: function (event, data) {
+      startRepoImport: function () {
           var mythis = this;
-          var conflicts = [];
           var path = require('path');
-          var repo = data.repo.repo;
-          var project = data.repo.project;
-          var restore = data.restore;
+          var repo = this.importdata.repo.repo;
+          var project = this.importdata.repo.project;
+          var force = this.importdata.force || false;
           var server = "git.door43.org";
           var repourl = "https://" + server + "/" + repo;
           var targetDir = App.configurator.getValue('targetTranslationsDir');
@@ -569,15 +615,12 @@
           var targetPath = path.join(targetDir, project);
           var tmpPath = path.join(tmpDir, project);
 
-          var errmessage = restore ? "An error occurred while restoring your project" : "An error occurred while importing your project";
-          var message = restore ? "Your project has been successfully restored. " : "Your project has been successfully imported. ";
-          var loadmessage = restore ? "Restoring.  Please wait..." : "Importing.  Please wait...";
-          var title = restore ? "Restore Complete" : "Import Complete";
-          var errtitle = restore ? "Restore Failed" : "Import Failed";
-
           mythis.$.repo.close();
-
-          mythis.showLoadingMessage(loadmessage);
+          if (mythis.route !== "home") {
+              mythis.set('route', 'home');
+              mythis.$.translate.reset();
+          }
+          mythis.showLoadingMessage("Importing. Please wait...");
 
           setTimeout(function() {
               return App.utils.fs.mkdirs(tmpPath)
@@ -592,48 +635,249 @@
                       project = data.paths.projectDir.split(path.sep).pop();
                       targetPath = path.join(targetDir, project);
                       tmpPath = path.join(tmpDir, project);
+                      mythis.set('importdata.targetpath', targetPath);
+                      mythis.set('importdata.tmppath', tmpPath);
                       return App.utils.fs.stat(targetPath).then(App.utils.ret(true)).catch(App.utils.ret(false));
                   })
                   .then(function (exists) {
-                      if (exists) {
-                          if (restore) {
-                              return App.utils.fs.mover(tmpPath, targetPath);
-                          } else {
-                              return App.gitManager.merge(mythis.currentuser, targetPath, tmpPath)
-                                  .then(function (list) {
-                                      conflicts = list;
-                                  });
-                          }
+                      if (force) {
+                          mythis.set('importdata.overwrite', false);
+                          return mythis.finishImport();
+                      } else if (exists) {
+                          mythis.closeLoading();
+                          mythis.$.importconfirm.open();
                       } else {
-                          return App.utils.fs.mover(tmpPath, targetPath);
+                          mythis.set('importdata.overwrite', true);
+                          return mythis.finishImport();
                       }
                   })
-                  .then(function () {
-                      return App.utils.fs.remove(App.configurator.getValue('tempDir'));
-                  })
-                  .then(function() {
-                      mythis.showConflictsMessage(title, message, conflicts);
-
-                      setTimeout(function() {
-                          mythis.updateList();
-                      }, 250);
-                  })
                   .catch(function(err) {
-                      mythis.showErrorMessage(errtitle, errmessage, err && err.error ? err.error : err);
+                      mythis.showErrorMessage("Import Failed", "An error occurred while importing your project", err && err.error ? err.error : err);
 
-                      return App.utils.fs.remove(App.configurator.getValue('tempDir'));
+                      return mythis.clearTempDir();
                   });
           }, 500);
       },
 
-      openBackup: function (event, data) {
-          this.set('backupdata', data.projectmeta);
-          this.$.backup.open();
+      startProjectImport: function() {
+          var mythis = this;
+          var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
+          var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}], properties: ['openFile']}});
+          if (!filePath) {
+              return;
+          }
+
+          mythis.$.import.close();
+          mythis.showLoadingMessage('Importing. Please wait...');
+
+          setTimeout(function() {
+              return App.importManager.extractBackup(filePath[0])
+                  .then(function (list) {
+                      return Promise.all(list.map(function (item) {
+                          mythis.set('importdata', {targetpath: item.targetPath, tmppath: item.tmpPath});
+                          if (item.targetExists) {
+                              mythis.closeLoading();
+                              mythis.$.importconfirm.open();
+                          } else {
+                              mythis.set('importdata.overwrite', true);
+                              return mythis.finishImport();
+                          }
+                      }))
+                  })
+                  .catch(function(err) {
+                      mythis.showErrorMessage('Import Failed', 'An error occurred while importing your project', err);
+
+                      return mythis.clearTempDir();
+                  });
+          }, 500);
       },
 
-      createRepoBackup: function () {
+      finishImport: function () {
           var mythis = this;
-          var projectmeta = this.backupdata;
+          var path = require('path');
+          var conflicts = [];
+          var overwrite = this.importdata.overwrite;
+          var targetPath = this.importdata.targetpath;
+          var tmpPath = this.importdata.tmppath;
+          var key = targetPath.split(path.sep).pop();
+
+          mythis.showLoadingMessage("Importing. Please wait...");
+
+          setTimeout(function() {
+              return Promise.resolve(true)
+                  .then(function () {
+                      if (overwrite) {
+                          App.projectsManager.unsetValues(key);
+                          return App.utils.fs.mover(tmpPath, targetPath);
+                      } else {
+                          return App.gitManager.merge(mythis.currentuser, targetPath, tmpPath)
+                              .then(function (list) {
+                                  conflicts = list;
+                              });
+                      }
+                  })
+                  .then(function () {
+                      return mythis.clearTempDir();
+                  })
+                  .then(function() {
+                      setTimeout(function() {
+                          return mythis.updateList()
+                              .then(function () {
+                                  mythis.showConflictsMessage("Import Complete", "Your project has been successfully imported.", conflicts);
+                              });
+                      }, 250);
+                  })
+                  .catch(function(err) {
+                      mythis.showErrorMessage("Import Failed", "An error occurred while importing your project", err && err.error ? err.error : err);
+
+                      return mythis.clearTempDir();
+                  });
+          }, 500);
+      },
+
+      clearTempDir: function () {
+          return App.utils.fs.remove(App.configurator.getValue('tempDir'));
+      },
+
+      startUsfmImport: function () {
+          var mythis = this;
+          var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
+          var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, filters: [{name: 'USFM Files', extensions: ['txt', 'usfm']}], properties: ['openFile']}});
+          if (!filePath) {
+              return;
+          }
+
+          mythis.$.import.close();
+
+          return App.importManager.retrieveUSFMProjectID(filePath[0])
+              .then(function (id) {
+                  var name = "";
+                  if (id) {
+                      var data = App.dataManager.getProjectName(id);
+                      if (data) {
+                          name = data;
+                      } else {
+                          id = "";
+                      }
+                  }
+                  mythis.set('importdata', {importing: true, filepath: filePath[0], project: {slug: id, name: name}});
+                  mythis.set('route', 'new');
+              }).catch(function (err) {
+                  var filename = (filePath && filePath[0]) || '';
+                  mythis.showErrorMessage('Import Failed', 'Error occurred reading file: ' + filename, err);
+              });
+      },
+
+      finishUsfmImport: function () {
+          var mythis = this;
+          var user = this.currentuser;
+          var filepath = this.importdata.filepath;
+          var projectmeta = this.importdata.projectmeta;
+          var overwrite = this.importdata.overwrite;
+          var timeString = App.utils.getTimeStamp();
+          var backupName = projectmeta.unique_id + '.' + timeString + '.tstudio';
+          var backupPath = App.configurator.getUserPath('datalocation', 'backups', backupName);
+
+          mythis.showLoadingMessage('Importing.  Please wait...');
+
+          setTimeout(function() {
+              return Promise.resolve(true)
+                  .then(function () {
+                      if (overwrite) {
+                          return App.exportManager.backupTranslation(projectmeta, backupPath);
+                      }
+                  })
+                  .then(function () {
+                      return App.importManager.importFromUSFM(filepath, projectmeta);
+                  })
+                  .then(function (chunks) {
+                      return App.projectsManager.createTargetTranslation(chunks, projectmeta, user);
+                  })
+                  .then(function () {
+                      setTimeout(function() {
+                          return mythis.updateList()
+                              .then(function () {
+                                  mythis.showMessage('Import Complete', 'Your file has been imported. Please review it carefully. If it was not formatted properly, text may not appear as desired.');
+                              });
+                      }, 250);
+                  }).catch(function (err) {
+                      mythis.showErrorMessage('Import Failed', 'Error occurred importing project', err);
+
+                      if (overwrite) {
+                          return App.importManager.extractBackup(backupPath)
+                              .then(function (list) {
+                                  return Promise.all(list.map(function (item) {
+                                      return App.utils.fs.mover(item.tmpPath, item.targetPath);
+                                  }))
+                              })
+                              .then(function () {
+                                  return mythis.clearTempDir();
+                              })
+                              .catch(function () {
+                                  return mythis.clearTempDir();
+                              });
+                      }
+                  });
+          }, 500);
+      },
+
+      startContainerImport: function () {
+          var mythis = this;
+          var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
+          var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, properties: ['openDirectory']}});
+          if (!filePath) {
+              return;
+          }
+
+          mythis.set('importdata', {filepath: filePath[0]});
+          mythis.$.import.close();
+          mythis.showLoadingMessage('Importing source text. Please wait...');
+
+          setTimeout(function() {
+              return App.dataManager.checkForContainer(filePath[0])
+                  .then(function(exists) {
+                      if (exists) {
+                          mythis.closeLoading();
+                          mythis.$.containerconfirm.open();
+                      } else {
+                          return mythis.finishContainerImport();
+                      }
+                  })
+                  .catch(function(err) {
+                      mythis.showErrorMessage('Import Failed', 'An error occurred while importing your source text.', err);
+                  });
+          }, 500);
+      },
+
+      finishContainerImport: function () {
+          var mythis = this;
+          var filePath = this.importdata.filepath;
+
+          mythis.showLoadingMessage('Importing source text. Please wait...');
+
+          setTimeout(function() {
+              return App.dataManager.importContainer(filePath)
+                  .then(function() {
+                      mythis.showMessage('Import Complete', 'Your source text has been successfully imported.');
+                  })
+                  .catch(function(err) {
+                      var errmessage = 'An error occurred while importing your source text.';
+
+                      if (err.toString() && err.toString() === "Error: Unsupported project") {
+                          errmessage = "This source text is not a valid project";
+                      }
+                      mythis.showErrorMessage('Import Failed', errmessage, err);
+                  });
+          }, 500);
+      },
+
+      openExport: function () {
+          this.$.export.open();
+      },
+
+      uploadProject: function () {
+          var mythis = this;
+          var projectmeta = this.currentproject.projectmeta;
           var loading = this.$.wideloading;
           var target = App.configurator.getValue('targetTranslationsDir');
           var paths = App.utils.makeProjectPaths(target, projectmeta);
@@ -642,7 +886,7 @@
           var shell = require('electron').shell;
           var deviceId = "";
 
-          mythis.$.backup.close();
+          mythis.$.export.close();
           mythis.set('options', {});
           mythis.set('options.body', "Uploading Project.  Please wait...");
           mythis.set('options.loading', true);
@@ -670,18 +914,21 @@
                   return App.userManager.createRepo(user, repo);
               })
               .then(function (repo) {
-                  return App.gitManager.push(user, paths.projectDir, repo).then(App.utils.ret(repo.html_url));
+                  return App.gitManager.push(user, paths.projectDir, repo).then(App.utils.ret(repo.full_name));
               })
-              .then(function (url) {
-                  mythis.set('options.title', "Backup Complete");
-                  mythis.set('options.body', "Your project has been backed up to:");
+              .then(function (fullname) {
+                  var url = "https://door43.org/u/" + fullname;
+
+                  mythis.set('options.title', "Upload Complete");
+                  mythis.set('options.body', "Your project has been uploaded to:");
                   mythis.set('options.link', url);
                   mythis.set('options.showlink', true);
                   mythis.set('options.loading', false);
                   var link = loading.getElementsByClassName("url");
-                  link[0].addEventListener('click', function (event) {
+                  link[0].addEventListener('click', function clicker (event) {
                       event.preventDefault();
                       shell.openExternal(url);
+                      link[0].removeEventListener('click', clicker);
                   });
               })
               .catch(function (err) {
@@ -697,67 +944,148 @@
                   }
 
                   if (typeof errmessage === 'string' && errmessage.includes("rejected because the remote contains work")) {
-                      errmessage = "Cannot upload this project because a project already exists that has no shared history";
+                      loading.close();
+                      mythis.$.conflict.open();
+                  } else {
+                      mythis.showErrorMessage('Upload Failed', errmessage, err);
                   }
-                  mythis.showErrorMessage('Backup Failed', errmessage, err);
               });
       },
 
-      createFileBackup: function () {
+      exportProject: function () {
           var mythis = this;
-          var meta = this.backupdata;
-          var defaultPath = App.configurator.getUserPath('datalocation', 'backups', meta.unique_id);
+          var projectmeta = this.currentproject.projectmeta;
+          var defaultPath = App.configurator.getUserPath('datalocation', 'backups', projectmeta.unique_id);
           var filePath = App.ipc.sendSync('save-as', {options: {defaultPath: defaultPath, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}]}});
           if (!filePath) {
               return;
           }
 
-          mythis.$.backup.close();
-          mythis.showLoadingMessage('Creating Backup.  Please wait...');
+          mythis.$.export.close();
+          mythis.showLoadingMessage('Creating Project File.  Please wait...');
 
           setTimeout(function() {
-              return App.exportManager.backupTranslation(meta, filePath)
+              return App.exportManager.backupTranslation(projectmeta, filePath)
                   .then(function () {
-                      mythis.showMessage('Backup Complete', 'Your project has been successfully backed up.');
+                      mythis.showMessage('Project File Complete', 'Your project has been successfully saved.');
                   })
                   .catch(function (err) {
-                      mythis.showErrorMessage('Backup Failed', 'An error occurred while trying to backup your project', err);
+                      mythis.showErrorMessage('File Failed', 'An error occurred while trying to save your project', err);
                   });
           }, 500);
       },
 
-      restoreFromBackup: function() {
+      checkPrint: function () {
+          var projectmeta = this.currentproject.projectmeta;
+
+          this.$.export.close();
+
+          if (this.route === "home") {
+              this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: "print"}});
+          } else {
+              this.openPrint();
+          }
+      },
+
+      openPrint: function () {
+          this.$.print.open();
+          this.$.printoptions.reset();
+      },
+
+      openPreview: function () {
           var mythis = this;
-          var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
-          var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, filters: [{name: 'Tstudio Files', extensions: ['tstudio']}], properties: ['openFile']}});
+          var options = _.cloneDeep(this.options);
+          var current = this.route;
+
+          mythis.$.print.close();
+          mythis.showLoadingMessage("Preparing to Print. Please wait...");
+          if (current === "translate") {
+              mythis.fire('iron-signal', {name: 'translateleft'});
+          }
+          if (current === "review") {
+              mythis.fire('iron-signal', {name: 'reviewleft'});
+          }
+
+          setTimeout(function() {
+              return Promise.resolve(true)
+                  .then(function () {
+                      if (options.includeImages) {
+                          mythis.set('options.body', "Downloading Images. Please wait...");
+                          return App.printManager.downloadImages()
+                              .then(function(){
+                                  mythis.set('options.body', "Extracting Images. Please wait...");
+                                  return App.printManager.extractImages();
+                              });
+                      }
+                  })
+                  .then(function () {
+                      mythis.set('options.body', "Creating print preview. Please wait...");
+                      setTimeout(function() {
+                          mythis.set('currentproject.printoptions', options);
+                          mythis.$.preview.rendertext();
+                          mythis.closeLoading();
+                          App.configurator.setValue("backto", current);
+                          mythis.set('route', 'preview');
+                      }, 500);
+                  })
+                  .catch(function(err){
+                      var errmessage = "An error occurred while downloading images";
+                      if(err !== null) {
+                          errmessage = err;
+                      }
+                      mythis.showErrorMessage("Download Failed", errmessage, err);
+                  });
+          }, 500);
+      },
+
+      checkUsfm: function () {
+          var projectmeta = this.currentproject.projectmeta;
+
+          this.$.export.close();
+
+          if (this.route === "home") {
+              this.fire('iron-signal', {name: 'loadproject', data: {projectmeta: projectmeta, nav: "export"}});
+          } else {
+              this.exportUsfm();
+          }
+      },
+
+      exportUsfm: function () {
+          var mythis = this;
+          var projectmeta = this.currentproject.projectmeta;
+          var translation = this.currentproject.chunks;
+          var conflicts = this.currentproject.conflicts;
+          var mediaServer = "https://api.unfoldingword.org/";
+          var name = projectmeta.unique_id;
+          var filePath;
+
+          if (conflicts) {
+              mythis.showMessage("Conflicts Exist", "You must resolve all conflicts before exporting to USFM.");
+              return;
+          }
+
+          if (projectmeta.format === 'markdown') {
+              filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'Zip Files', extensions: ['zip']}]}});
+          } else {
+              filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'USFM Files', extensions: ['usfm']}]}});
+          }
           if (!filePath) {
               return;
           }
 
-          mythis.$.import.close();
-          mythis.showLoadingMessage('Restoring.  Please wait...');
+          mythis.showLoadingMessage("Exporting Project.  Please wait...");
 
           setTimeout(function() {
-              return App.importManager.extractBackup(filePath[0])
-                  .then(function (list) {
-                      return Promise.all(list.map(function (item) {
-                          return App.utils.fs.mover(item.tmpPath, item.targetPath);
-                      }))
-                  })
+              return App.exportManager.exportTranslation(translation, projectmeta, filePath, mediaServer)
                   .then(function () {
-                      return App.utils.fs.remove(App.configurator.getValue('tempDir'));
+                      mythis.showMessage("Project Exported", "Your project has been successfully exported to a file.");
                   })
-                  .then(function() {
-                      mythis.showMessage('Restore Complete', 'Your project has been successfully restored.');
-
-                      setTimeout(function() {
-                          mythis.updateList();
-                      }, 250);
-                  })
-                  .catch(function(err) {
-                      mythis.showErrorMessage('Restore Failed', 'An error occurred while trying to restore your project', err);
-
-                      return App.utils.fs.remove(App.configurator.getValue('tempDir'));
+                  .catch(function (err) {
+                      var errmessage = "An error occurred while trying to export your project";
+                      if(err !== null) {
+                          errmessage = err;
+                      }
+                      mythis.showErrorMessage("Export Failed", errmessage, err);
                   });
           }, 500);
       },
@@ -775,43 +1103,81 @@
           var message = this.feedback;
           var mythis = this;
 
-          mythis.set('options', {});
-          mythis.set('options.body', "Sending Feedback.  Please wait...");
-          mythis.set('options.loading', true);
-          mythis.$.feedback.close();
-          mythis.$.loading.open();
+          mythis.closeFeedback();
+          mythis.showLoadingMessage("Sending Feedback. Please wait...");
 
           if (App.reporter.canReportToGithub()) {
-              App.reporter.reportBug(message).then(function (res) {
-                  var response;
+              return App.reporter.reportBug(message)
+                  .then(function (res) {
+                      var response;
 
-                  try {
-                    response = JSON.parse(res);
-                  } catch (e) {}
+                      try {
+                        response = JSON.parse(res);
+                      } catch (e) {}
 
-                  if (response && response.url && response.repository_url) {
-                      App.reporter.logNotice(response.url, 'Feedback Sent');
-                      mythis.showMessage('Feedback Sent', 'Your feedback has been successfully sent.');
-                  } else {
-                      !response && App.reporter.logWarning(res, 'Feedback failed with invalid JSON response');
-                      mythis.showErrorMessage('Feedback Failed', 'Unable to post the feedback. Please try again.', response || null);
-                  }
-              });
+                      if (response && response.url && response.repository_url) {
+                          App.reporter.logNotice(response.url, 'Feedback Sent');
+                          mythis.showMessage('Feedback Sent', 'Your feedback has been successfully sent.');
+                      } else {
+                          !response && App.reporter.logWarning(res, 'Feedback failed with invalid JSON response');
+                          mythis.showErrorMessage('Feedback Failed', 'Unable to post the feedback. Please try again.', response || null);
+                      }
+                  })
+                  .catch(function (err) {
+                      var errmessage = 'An error occurred while sending feedback';
+                      if (err.syscall === "getaddrinfo") {
+                          errmessage = "Unable to connect to server";
+                      }
+                      if (err.syscall === "read") {
+                          errmessage = "Lost connection to server";
+                      }
+                      mythis.showErrorMessage('Feedback Failed', errmessage, err);
+                  });
           } else {
               mythis.showErrorMessage('Feedback Failed', 'You are not set up with a token to send feedback.', null);
           }
-      },
-
-      _routeChanged: function (event) {
-          var el = this.querySelector('[data-route="' + this.route + '"]');
-          // The async delay prevents a flicker. It's a UI thing, not a logic thing.
-          el && el.forceResize && this.async(el.forceResize.bind(el), 30);
       },
 
       updateList: function () {
           var mythis = this;
 
           return App.projectsManager.loadTargetTranslationsList()
+              .then(function (list) {
+                  var promises = [];
+                  var strings = {};
+
+                  for (var i = 0; i < list.length; i++) {
+                      var proj = list[i].project.id;
+
+                      for (var j = 0; j < list[i].source_translations.length; j++) {
+                          var lang = list[i].source_translations[j].language_id;
+                          var res = list[i].source_translations[j].resource_id;
+                          var string = lang + "_" + proj + "_" + res;
+                          if (!strings[string]) {
+                              strings[string] = true;
+                              var open = App.dataManager.activateProjectContainers(lang, proj, res);
+                              promises.push(open);
+                          }
+                      }
+                  }
+                  promises.push(App.dataManager.activateContainer('en', 'bible', 'tw'));
+                  promises.push(App.dataManager.activateContainer('en', 'bible-obs', 'tw'));
+                  promises.push(App.dataManager.activateContainer('en', 'ta-audio', 'vol2'));
+                  promises.push(App.dataManager.activateContainer('en', 'ta-checking', 'vol1'));
+                  promises.push(App.dataManager.activateContainer('en', 'ta-checking', 'vol2'));
+                  promises.push(App.dataManager.activateContainer('en', 'ta-gateway', 'vol3'));
+                  promises.push(App.dataManager.activateContainer('en', 'ta-intro', 'vol1'));
+                  promises.push(App.dataManager.activateContainer('en', 'ta-process', 'vol1'));
+                  promises.push(App.dataManager.activateContainer('en', 'ta-translate', 'vol1'));
+                  promises.push(App.dataManager.activateContainer('en', 'ta-translate', 'vol2'));
+
+                  App.ipc.send('loading-status', 'Opening resource containers...');
+
+                  return Promise.all(promises)
+                      .then(function () {
+                          return list;
+                      });
+              })
               .then(function(list) {
                   App.ipc.send('loading-status', 'Updating Manifest Files...');
                   for (var i = 0; i < list.length; i++) {
@@ -830,17 +1196,18 @@
 
       ready: function() {
           var mythis = this;
-          var autobackupdir = App.configurator.getUserPath('datalocation', 'automatic_backups');
 
           App.gitManager.verifyGit()
               .then(function (version) {
                   App.reporter.logNotice('Git Version ' + version);
               })
               .then(function () {
+                  return mythis.$.settings.createInitialSettings();
+              })
+              .then(function () {
                   App.ipc.send('loading-status', 'Retrieving User Info...');
                   mythis.retrieveUser();
                   App.configurator.applyPrefAppearance();
-                  App.configurator.applyPrefBehavior();
               })
               .then(function () {
                   App.ipc.send('loading-status', 'Migrating Projects List...');
@@ -852,7 +1219,7 @@
               })
               .then(function () {
                   App.ipc.send('loading-status', 'Creating Auto Backups...');
-                  return App.exportManager.backupAllTranslations(mythis.projectlist, autobackupdir)
+                  return App.exportManager.backupAllTranslations(mythis.projectlist);
               })
               .catch(function (err) {
                   err && err.stack && App.reporter.logError(err.stack, 'Error on startup');
@@ -870,8 +1237,16 @@
                   mythis.showErrorMessage('Error on startup', msg, err);
               })
               .then(function () {
-                  App.ipc.send('loading-done');
+                  App.ipc.send('main-loading-done');
                   mythis.$.home.setsortfields();
+
+                  var appData = App.configurator.getAppData();
+                  var libraryBuild = App.configurator.getValue("libraryBuild");
+
+                  if (libraryBuild && appData.version === "11.0.0" && libraryBuild != appData.build) {
+                      App.configurator.setUserSetting("bemode", true);
+                  }
+                  App.configurator.setValue("libraryBuild", appData.build);
               });
       }
 

@@ -1,6 +1,5 @@
 
 <link rel="import" href="../../components/iron-resizable-behavior/iron-resizable-behavior.html">
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
 <link rel="import" href="../../components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../components/paper-button/paper-button.html">
@@ -10,7 +9,6 @@
 <link rel="import" href="./ts-project-menu.html">
 <link rel="import" href="./ts-book-menu.html">
 <link rel="import" href="./ts-type-menu.html">
-<link rel="import" href="../ts-main/ts-loading.html">
 
 <dom-module id="ts-new">
 
@@ -36,19 +34,22 @@
         #header {
             background-color: var(--primary-color);
             min-height: 105px;
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-start;
+            font-size: 125%;
+        }
+
+        #header iron-icon {
+            margin: 0 15px;
         }
 
         #title {
-            font-size: 125%;
             color: var(--reverse-text-color);
             display: flex;
             justify-content: flex-start;
             align-items: center;
             min-height: 45px;
-        }
-
-        [icon="arrow-back"] {
-            margin: 0 1em 0 .2em;
         }
 
         .popup {
@@ -96,11 +97,6 @@
             color: var(--accent-color);
         }
 
-        #loading {
-            width: 320px;
-            height: 220px;
-        }
-
         #confirmimport {
             width: 400px;
             height: 200px;
@@ -115,13 +111,19 @@
             flex-direction: column;
         }
 
+        .click {
+            cursor: pointer;
+        }
+
     </style>
 
     <template>
 
         <div id="header">
             <div id="title">
-                <paper-icon-button icon="arrow-back" title="Back" on-tap="back"></paper-icon-button>
+                <iron-icon class="click" icon="arrow-back" on-tap="gohome"></iron-icon>
+                <span class="click" on-tap="gohome">Home</span>
+                <iron-icon icon="chevron-right"></iron-icon>
                 <span>[[createtitle(route)]]</span>
             </div>
         </div>
@@ -144,10 +146,6 @@
                 <paper-button dialog-dismiss>Cancel</paper-button>
                 <paper-button on-tap="startimport">Confirm</paper-button>
             </div>
-        </paper-dialog>
-
-        <paper-dialog id="loading" class="popup" modal="true" exit-animation="scale-down-animation">
-            <ts-loading options="[[options]]"></ts-loading>
         </paper-dialog>
 
         <paper-dialog id="confirmchange" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -187,7 +185,8 @@
             route: {
                 type: String,
                 value: '',
-                notify: true
+                notify: true,
+                observer: 'load'
             },
             newdata: {
                 type: Object,
@@ -195,7 +194,8 @@
             },
             options: {
                 type: Object,
-                value: {}
+                value: {},
+                notify: true
             },
             projectlist: {
                 type: Array,
@@ -230,10 +230,12 @@
             }
         },
 
-        forceResize: function (event) {
-            this.set('selected', 0);
-            this.$.languages.updateList();
-            this.$.languages.notifyResize();
+        load: function (route) {
+            var lang = this.$.languages;
+            if (route === "new") {
+                lang.load();
+                this.set('selected', 0);
+            }
         },
 
         openconfirm: function () {
@@ -274,7 +276,7 @@
             mythis.set('options', {});
             mythis.set('options.body', "Creating project. Please wait...");
             mythis.set('options.loading', true);
-            mythis.$.loading.open();
+            mythis.fire('iron-signal', {name: 'openloading'});
 
             var newprojectmanifest = {
                 "package_version": 6,
@@ -305,7 +307,7 @@
                 if (projectarray[i].unique_id === newprojectmeta.unique_id) {
                     if (mythis.importdata.importing) {
                         mythis.importdata.overwrite = true;
-                        mythis.$.loading.close();
+                        mythis.fire('iron-signal', {name: 'closeloading'});
                         mythis.$.confirmimport.open();
                         return;
                     } else {
@@ -326,15 +328,15 @@
 
             if (mythis.importdata.importing) {
                 mythis.importdata.overwrite = false;
-                mythis.$.loading.close();
+                mythis.fire('iron-signal', {name: 'closeloading'});
                 mythis.startimport();
             } else {
                 mythis.animationConfig.exit.name = 'slide-left-animation';
                 App.projectsManager.createTargetTranslation([], newprojectmeta, this.currentuser)
                     .then(function() {
-                        mythis.$.loading.close();
                         mythis.fire('iron-signal', {name: 'updatelist'});
-                        mythis.fire('iron-signal', {name: 'loadproject', data: {projectmeta: newprojectmeta, type: "new"}});
+                        mythis.fire('iron-signal', {name: 'translateright'});
+                        mythis.fire('iron-signal', {name: 'loadproject', data: {projectmeta: newprojectmeta, nav: "translate"}});
                     })
                     .catch(function (err) {
                         mythis.set('options.title', "Error");
@@ -347,12 +349,12 @@
         startimport: function () {
             this.$.confirmimport.close();
             this.set('route', "home");
-            this.fire('iron-signal', {name: 'finishusfm'});
+            this.fire('finishusfm');
             this.set('selected', 0);
             this.set('importdata', {importing: false});
         },
 
-        back: function () {
+        gohome: function () {
             this.animationConfig.exit.name = 'slide-right-animation';
             this.set('selected', 0);
             this.set('importdata', {importing: false});

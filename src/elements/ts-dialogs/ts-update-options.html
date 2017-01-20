@@ -1,0 +1,149 @@
+
+<link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../components/iron-icons/notification-icons.html">
+
+<dom-module id="ts-update-options">
+
+    <style>
+
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px;
+        }
+
+        #title {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #icon {
+            margin-left: 20px;
+        }
+
+        .icon {
+            color: var(--icon-color);
+        }
+
+        #body {
+            display: flex;
+            flex-direction: column;
+            border-top: 1px solid var(--border-color);
+            padding: 0;
+        }
+
+        #footer {
+            display: flex;
+            justify-content: flex-end;
+            padding: 10px 50px;
+        }
+
+        #footer paper-button:hover {
+            color: var(--accent-color);
+        }
+
+        .option {
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background .3s, color .3s;
+            cursor: pointer;
+        }
+
+        .option:hover {
+            background: var(--accent-color-light);
+        }
+
+        .optiontitle {
+            font-size: 130%;
+            font-weight: bold;
+        }
+
+        .nooption {
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+    </style>
+
+    <template>
+
+        <div id="header">
+            <div id="title">
+                <h2>Update Options</h2>
+                <span id="icon"><a href="http://help.door43.org/en/knowledgebase/9-translationstudio/docs/5-update-options"><iron-icon class="icon" icon="info"></iron-icon></a></span>
+            </div>
+            <span><iron-icon icon="notification:wifi"></iron-icon> Requires Internet Connection</span>
+            <span>These updates may take a while.</span>
+        </div>
+        <div id="body">
+            <div class="option" on-tap="source">
+                <span class="optiontitle">Update List of Available Source Texts</span>
+            </div>
+            <div class="option" on-tap="download">
+                <span class="optiontitle">Download Available Source Texts</span>
+            </div>
+            <div class="option" on-tap="language">
+                <span class="optiontitle">Update List of Available Target Languages</span>
+            </div>
+            <div class="nooption">
+                <span class="optiontitle"><a href="https://github.com/unfoldingWord-dev/ts-desktop/releases">Check for Updates to translationStudio</a></span>
+            </div>
+        </div>
+        <div id="footer">
+            <paper-button dialog-dismiss>Cancel</paper-button>
+        </div>
+
+    </template>
+
+</dom-module>
+
+<script>
+
+    Polymer({
+
+        is: 'ts-update-options',
+
+        properties: {
+
+        },
+
+        language: function () {
+            this.fire('language');
+        },
+
+        source: function () {
+            this.fire('source');
+        },
+
+        download: function () {
+            this.fire('download');
+        },
+
+        ready: function () {
+            var shell = require('electron').shell;
+            var links = this.getElementsByTagName('a');
+            for (var i = 0; i < links.length; i++) {
+                links[i].addEventListener('click', function (event) {
+                    event.preventDefault();
+                    shell.openExternal(this.href);
+                });
+            }
+        }
+
+    });
+
+</script>

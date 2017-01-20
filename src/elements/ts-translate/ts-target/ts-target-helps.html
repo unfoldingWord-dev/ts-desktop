@@ -2,7 +2,6 @@
 <link rel="import" href="../../../components/paper-material/paper-material.html">
 <link rel="import" href="../../../components/paper-toggle-button/paper-toggle-button.html">
 <link rel="import" href="../../../components/iron-icons/iron-icons.html">
-<link rel="import" href="../../../components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../../components/neon-animation/neon-animation.html">
 <link rel="import" href="../../../components/iron-signals/iron-signals.html">
 
@@ -191,7 +190,7 @@
                 </template>
                 <template is="dom-repeat" items="{{chunk.helpscontent}}" as="help">
                     <paper-material class="contentbox" elevation="1">
-                        <div class="leftbox targetfont">
+                        <div class="leftbox targetfont targetsize">
                             <div class="contentheader">
                                 <p class$="[[chunk.projectmeta.target_language.direction]]">{{help.title}}</p>
                                 <iron-autogrow-textarea class$="[[chunk.projectmeta.target_language.direction]]" bind-value="{{help.title}}" on-change="change" on-input="input" placeholder$="[[checktitle(chunk.projectmeta.type.id)]]"></iron-autogrow-textarea>
@@ -202,7 +201,7 @@
                             </div>
                         </div>
                         <div class="rightbox">
-                            <iron-icon icon="close" on-tap="checkdelete"></iron-icon>
+                            <iron-icon icon="close" on-tap="deletehelp"></iron-icon>
                             <iron-icon icon="arrow-drop-up" on-tap="moveup"></iron-icon>
                             <iron-icon icon="arrow-drop-down" on-tap="movedown"></iron-icon>
                         </div>
@@ -216,7 +215,6 @@
         </div>
 
         <iron-signals on-iron-signal-completechunk="completechunk"></iron-signals>
-        <iron-signals on-iron-signal-deletehelp="deletehelp"></iron-signals>
 
 	</template>
 
@@ -281,8 +279,13 @@
         },
 
         movehelp: function (index, dir) {
-            var removed = this.splice('chunk.helpscontent', index, 1)[0];
-            this.splice('chunk.helpscontent', index + dir, 0, removed);
+            var helps = _.cloneDeep(this.chunk.helpscontent);
+            var removed = helps[index];
+
+            helps.splice(index, 1);
+            helps.splice(index + dir, 0, removed);
+
+            this.set('chunk.helpscontent', helps);
             this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
         },
 
@@ -293,21 +296,14 @@
             this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
         },
 
-        deletehelp: function (event, data) {
-            var chunkindex = data.index[0];
-            var noteindex = data.index[1];
-
-            if (this.chunk.index === chunkindex) {
-                this.splice('chunk.helpscontent', noteindex, 1);
-                this.fire('setheight');
-                this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
-            }
-        },
-
-        checkdelete: function (e) {
+        deletehelp: function (e) {
             var noteindex = e.model.index;
-            var chunkindex = this.chunk.index;
-            this.fire('iron-signal', {name: 'opendelete', data: {index: [chunkindex, noteindex]}});
+            var helps = _.cloneDeep(this.chunk.helpscontent);
+
+            helps.splice(noteindex, 1);
+            this.set('chunk.helpscontent', helps);
+            this.fire('setheight');
+            this.fire('iron-signal', {name: 'savechunk', data: {chunk: this.chunk}});
         },
 
         input: function () {

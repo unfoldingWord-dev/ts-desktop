@@ -67,6 +67,10 @@
             margin-left: 16px;
         }
 
+        .highlight {
+            background: var(--highlight-color);
+        }
+
         .hide {
             display: none;
         }
@@ -87,7 +91,7 @@
                     <h2>[[chunk.wordcontent]]</h2>
                 </div>
             </div>
-            <div id="content" class="sourcefont">
+            <div id="content" class="sourcefont sourcesize">
                 <div id="textholder"></div>
             </div>
         </paper-material>
@@ -110,11 +114,16 @@
             chunk: {
                 type: Object,
                 value: {}
+            },
+            searchoptions: {
+                type: Object,
+                value: {},
+                notify: true
             }
 		},
 
         observers: [
-            'rendertext(chunk.srccontent)'
+            'rendertext(chunk.srccontent, searchoptions.*)'
         ],
 
         noextantclass: function (typeclass) {
@@ -127,11 +136,26 @@
 
         rendertext: function () {
             if(this.chunk && this.chunk.srccontent) {
+                var search = this.searchoptions;
+                var text = _.cloneDeep(this.chunk.srccontent);
+                var startspan = "\<span class='style-scope ts-source-chunk highlight'\>";
+                var endspan = "\<\/span\>";
                 var direction = "ltr";
+
                 if (this.chunk.projectmeta.project_type_class !== "extant") {
                     direction = this.chunk.projectmeta.source_translations[this.chunk.projectmeta.currentsource].direction;
                 }
-                this.$.textholder.innerHTML = this.chunk.srccontent;
+                if (search.text && search.type === "source") {
+                    var regex = new RegExp(App.renderer.replaceEscapes(search.text) + "(?![^<]*>)", "gi");
+                    var matches = _.unique(text.match(regex)) || [];
+
+                    matches.forEach(function (match) {
+                        var result = new RegExp(App.renderer.replaceEscapes(match) + "(?![^<]*>)", "g");
+                        text = text.replace(result, startspan + match + endspan);
+                    });
+
+                }
+                this.$.textholder.innerHTML = text;
                 this.$.textholder.style.direction = direction;
                 var links = this.$.textholder.getElementsByTagName('a');
                 for (var j = 0, len = links.length; j < len; ++j) {

@@ -1,9 +1,9 @@
 
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../components/paper-menu/paper-menu.html">
 <link rel="import" href="../../components/paper-menu-button/paper-menu-button.html">
 <link rel="import" href="../../components/paper-item/paper-item.html">
 <link rel="import" href="../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../components/iron-signals/iron-signals.html">
 
 <link rel="import" href="../ts-icons/ts-icons.html">
 
@@ -18,22 +18,67 @@
             align-self: stretch;
             display: flex;
             flex-direction: column;
+        }
+
+        #content {
+            flex: auto;
+            display: flex;
+            flex-direction: column;
             justify-content: space-between;
             align-items: center;
         }
 
-        #top {
+        #modes {
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        paper-icon-button {
-            margin-top: 15px;
+        #modes iron-icon {
+            margin-top: 25px;
             color: var(--primary-color-light);
+            cursor: pointer;
         }
 
-        .current {
+        #modes iron-icon.current {
+            color: var(--reverse-text-color);
+        }
+
+        #nav {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #nav.hide {
+            display: none;
+        }
+
+        #nav iron-icon {
+            cursor: pointer;
+        }
+
+        .chapter {
+            --iron-icon-height: 30px;
+            --iron-icon-width: 30px;
+        }
+
+        .rotate {
+            --iron-icon-height: 35px;
+            --iron-icon-width: 35px;
+            transform: rotate(90deg);
+        }
+
+        #input {
+            height: 20px;
+            width: 30px;
+            margin: 5px 0;
+            text-align: center;
+            color: var(--primary-text-color);
+        }
+
+        #menuicon {
+            padding: 8px;
             color: var(--reverse-text-color);
         }
 
@@ -74,24 +119,41 @@
     </style>
 
     <template>
-        <div id="top">
-            <paper-icon-button id="read" class$="[[checkclass(currentproject.projectmeta.project_type_class)]]" icon="assignment" title="Read Mode" on-tap="read"></paper-icon-button>
-            <paper-icon-button id="chunk" class$="[[checkclass(currentproject.projectmeta.project_type_class)]]" icon="flip-to-front" title="Chunk Mode" on-tap="chunk"></paper-icon-button>
-            <paper-icon-button id="review" class$="[[checkclass(currentproject.projectmeta.project_type_class)]]" icon="assignment-turned-in" title="Review Mode" on-tap="review"></paper-icon-button>
-            <paper-icon-button id="conflict" class$="[[conflictclass(currentproject.projectmeta.project_type_class, currentproject.conflicts)]]" icon="assignment-late" title="Conflict Mode" on-tap="conflict"></paper-icon-button>
+
+        <div id="content">
+            <div id="modes">
+                <iron-icon class$="[[readclass(currentproject.projectmeta.project_type_class, selected, bemode)]]" icon="subject" title="Read" on-tap="readmode"></iron-icon>
+                <iron-icon class$="[[chunkclass(currentproject.projectmeta.project_type_class, selected, bemode)]]" icon="content-copy" title="Blind Edit" on-tap="chunkmode"></iron-icon>
+                <iron-icon class$="[[reviewclass(currentproject.projectmeta.project_type_class, currentproject.conflicts, selected)]]" icon="view-week" title="Edit-Review" on-tap="reviewmode"></iron-icon>
+                <iron-icon class$="[[simpleclass(currentproject.projectmeta.project_type_class, selected, bemode)]]" icon="subject" title="Read" on-tap="readmode"></iron-icon>
+                <iron-icon class$="[[conflictclass(currentproject.projectmeta.project_type_class, currentproject.conflicts, selected)]]" icon="warning" title="Conflicts" on-tap="conflictmode"></iron-icon>
+            </div>
+            <div id="nav" class$="[[nosourceclass(selected)]]">
+                <iron-icon class="rotate" icon="first-page" title="top" on-tap="gotop"></iron-icon>
+                <iron-icon class="chapter" icon="expand-less" title$="[[prevchaptitle(currentproject.projectmeta.type.id)]]" on-tap="prevchap"></iron-icon>
+                <iron-icon class$="[[navclass(selected)]]" icon="arrow-drop-up" title$="[[prevchunktitle(currentproject.projectmeta.type.id)]]" on-tap="prevchunk"></iron-icon>
+                <input is="iron-input" id="input" bind-value="{{modestatus.chapter}}" placeholder="" maxlength="3" on-change="tochapter">
+                <iron-icon class$="[[navclass(selected)]]" icon="arrow-drop-down" title$="[[nextchunktitle(currentproject.projectmeta.type.id)]]" on-tap="nextchunk"></iron-icon>
+                <iron-icon class="chapter" icon="expand-more" title$="[[nextchaptitle(currentproject.projectmeta.type.id)]]" on-tap="nextchap"></iron-icon>
+                <iron-icon class="rotate" icon="last-page" title="bottom" on-tap="gobottom"></iron-icon>
+            </div>
+            <paper-menu-button id="menu" horizontal-offset="10" vertical-offset="10" vertical-align="bottom">
+                <iron-icon id="menuicon" class="dropdown-trigger" icon="more-vert"></iron-icon>
+                <paper-menu class="dropdown-content">
+                    <paper-item on-tap="gohome"><iron-icon class="smallicon" icon="project:project"></iron-icon>Home</paper-item>
+                    <paper-item on-tap="goreview"><iron-icon class="smallicon" icon="done-all"></iron-icon>Project Review</paper-item>
+                    <paper-item on-tap="goexport"><iron-icon class="smallicon" icon="file-upload"></iron-icon>Upload/Export</paper-item>
+                    <paper-item on-tap="goprint" class$="[[printclass(currentproject.projectmeta.project_type_class, currentproject.projectmeta.source_translations)]]"><iron-icon class="smallicon" icon="print"></iron-icon>Print</paper-item>
+                    <paper-item on-tap="goacademy"><iron-icon class="smallicon" icon="book"></iron-icon>translationAcademy</paper-item>
+                    <paper-item on-tap="gofeedback"><iron-icon class="smallicon" icon="announcement"></iron-icon>Feedback</paper-item>
+                    <paper-item on-tap="gosearch" class$="[[searchclass(currentproject.projectmeta.project_type_class, selected)]]"><iron-icon class="smallicon" icon="search"></iron-icon>Search</paper-item>
+                    <paper-item on-tap="gosettings"><iron-icon class="smallicon" icon="settings"></iron-icon>Settings</paper-item>
+                </paper-menu>
+            </paper-menu-button>
         </div>
-        <paper-menu-button id="menu" horizontal-offset="10" vertical-offset="10" vertical-align="bottom">
-            <paper-icon-button class="current dropdown-trigger" icon="more-vert"></paper-icon-button>
-            <paper-menu class="dropdown-content">
-                <paper-item on-tap="home"><iron-icon class="smallicon" icon="project:project"></iron-icon>Home</paper-item>
-                <paper-item on-tap="publish"><iron-icon class="smallicon" icon="cloud-done"></iron-icon>Upload</paper-item>
-                <paper-item on-tap="backup"><iron-icon class="smallicon" icon="file-upload"></iron-icon>Backup</paper-item>
-                <paper-item on-tap="print" class$="[[checkclass(currentproject.projectmeta.project_type_class)]]"><iron-icon class="smallicon" icon="print"></iron-icon>Print</paper-item>
-                <paper-item on-tap="academy"><iron-icon class="smallicon" icon="book"></iron-icon>translationAcademy</paper-item>
-                <paper-item on-tap="feedback"><iron-icon class="smallicon" icon="announcement"></iron-icon>Feedback</paper-item>
-                <paper-item on-tap="settings"><iron-icon class="smallicon" icon="settings"></iron-icon>Settings</paper-item>
-            </paper-menu>
-        </paper-menu-button>
+
+        <iron-signals on-iron-signal-updatebemode="updatemode"></iron-signals>
+
     </template>
 
 </dom-module>
@@ -111,126 +173,264 @@
             currentproject: {
                 type: Object,
                 value: {}
+            },
+            modestatus: {
+                type: Object,
+                value: {},
+                notify: true
+            },
+            bemode: {
+                type: Boolean,
+                value: false
             }
         },
 
-        observers: [
-            'modechange(selected)'
-        ],
-
-        checkclass: function (typeclass) {
-            return typeclass === "standard" ? '' : 'hide';
+        prevchaptitle: function (id) {
+            return id === "tw" ? "previous letter" : "previous chapter";
         },
 
-        conflictclass: function (typeclass, conflicts) {
-            if (this.selected === 5) {
-                return typeclass === "standard" && conflicts > 0 ? 'current' : 'hide';
+        nextchaptitle: function (id) {
+            return id === "tw" ? "next letter" : "next chapter";
+        },
+
+        prevchunktitle: function (id) {
+            return id === "tw" ? "previous word" : "previous chunk";
+        },
+
+        nextchunktitle: function (id) {
+            return id === "tw" ? "next word" : "next chunk";
+        },
+
+        gotop: function () {
+            this.set('modestatus.index', 0);
+            this.set('modestatus.chapter', 1);
+            this.navigate();
+        },
+
+        gobottom: function () {
+            var lastindex = this.currentproject.chunks.length - 1;
+            var lastchap = this.currentproject.chunks[lastindex].chunkmeta.chapter;
+
+            this.set('modestatus.index', lastindex);
+            this.set('modestatus.chapter', lastchap);
+            this.navigate();
+        },
+
+        prevchap: function () {
+            var chapter = this.modestatus.chapter;
+            var type = this.currentproject.projectmeta.type.id;
+
+            if (type === "tw") {
+                chapter = String.fromCharCode(chapter.charCodeAt(0) - 1);
             } else {
-                return typeclass === "standard" && conflicts > 0 ? '' : 'hide';
+                chapter--;
+            }
+
+            this.set('modestatus.chapter', chapter);
+            this.tochapter();
+        },
+
+        nextchap: function () {
+            var chapter = this.modestatus.chapter;
+            var type = this.currentproject.projectmeta.type.id;
+
+            if (type === "tw") {
+                chapter = String.fromCharCode(chapter.charCodeAt(0) + 1);
+            } else {
+                chapter++;
+            }
+
+            this.set('modestatus.chapter', chapter);
+            this.tochapter();
+        },
+
+        prevchunk: function () {
+            var previous = this.modestatus.index - 1;
+
+            if (previous < 0) {
+                previous = 0;
+            }
+
+            this.set('modestatus.index', previous);
+            this.navigate();
+        },
+
+        nextchunk: function () {
+            var next = this.modestatus.index + 1;
+            var max = this.currentproject.chunks.length -1;
+
+            if (next > max) {
+                next = max;
+            }
+
+            this.set('modestatus.index', next);
+            this.navigate();
+        },
+
+        tochapter: function () {
+            var input = this.modestatus.chapter;
+            var chunks = this.currentproject.chunks;
+            var length = chunks.length;
+            var max = this.currentproject.chunks[length - 1].chunkmeta.chapter;
+            var type = this.currentproject.projectmeta.type.id;
+
+            if (type === "tw") {
+                var filtered = chunks.filter(function (chunk) {
+                    return chunk.chunkmeta.frameid.toLowerCase() >= input.toLowerCase();
+                });
+                if (input === "@") {
+                    this.set('modestatus.index', 0);
+                } else if (input === "[") {
+                    this.set('modestatus.index', length - 1);
+                } else if (filtered.length) {
+                    this.set('modestatus.index', filtered[0].index);
+                }
+            } else if (input > 0 && input <= max) {
+                this.set('modestatus.chapter', parseInt(input));
+                this.set('modestatus.index', -1);
+            } else if (input > max) {
+                this.set('modestatus.index', length - 1);
+                this.set('modestatus.chapter', max);
+            }
+            this.navigate();
+        },
+
+        navigate: function () {
+            this.fire('navigate');
+        },
+
+        updatemode: function () {
+            this.set('bemode', App.configurator.getUserSetting('bemode'));
+        },
+
+        navclass: function (selected) {
+            return selected === 1 ? 'hide' : '';
+        },
+
+        nosourceclass: function (selected) {
+            return selected === 4 ? 'hide' : '';
+        },
+
+        printclass: function (typeclass, sources) {
+            return typeclass === "standard" && sources.length ? '' : 'hide';
+        },
+
+        searchclass: function (typeclass, selected) {
+            return typeclass === "standard" && selected === 3 ? '' : 'hide';
+        },
+
+        readclass: function (typeclass, selected, mode) {
+            if (typeclass === 'standard' && mode && selected !== 4) {
+                if (selected === 1) {
+                    return 'current';
+                } else {
+                    return '';
+                }
+            } else {
+                return 'hide';
             }
         },
 
-        modechange: function (selected) {
-            var read = this.$.read;
-            var chunk = this.$.chunk;
-            var review = this.$.review;
-            var conflict = this.$.conflict;
-
-            if (selected === 1) {
-                read.classList.add("current");
-                chunk.classList.remove("current");
-                review.classList.remove("current");
-                conflict.classList.remove("current");
-                read.disabled = false;
-                chunk.disabled = false;
-                review.disabled = false;
-                conflict.disabled = false;
-            } else if (selected === 2) {
-                read.classList.remove("current");
-                chunk.classList.add("current");
-                review.classList.remove("current");
-                conflict.classList.remove("current");
-                read.disabled = false;
-                chunk.disabled = false;
-                review.disabled = false;
-                conflict.disabled = false;
-            } else if (selected === 3) {
-                read.classList.remove("current");
-                chunk.classList.remove("current");
-                review.classList.add("current");
-                conflict.classList.remove("current");
-                read.disabled = false;
-                chunk.disabled = false;
-                review.disabled = false;
-                conflict.disabled = false;
-            } else if (selected === 4 || selected === 0) {
-                read.classList.remove("current");
-                chunk.classList.remove("current");
-                review.classList.remove("current");
-                conflict.classList.remove("current");
-                read.disabled = true;
-                chunk.disabled = true;
-                review.disabled = true;
-                conflict.disabled = true;
-            } else if (selected === 5) {
-                read.classList.remove("current");
-                chunk.classList.remove("current");
-                review.classList.remove("current");
-                conflict.classList.add("current");
-                read.disabled = false;
-                chunk.disabled = false;
-                review.disabled = false;
-                conflict.disabled = false;
+        chunkclass: function (typeclass, selected, mode) {
+            if (typeclass === 'standard' && mode && selected !== 4) {
+                if (selected === 2) {
+                    return 'current';
+                } else {
+                    return '';
+                }
+            } else {
+                return 'hide';
             }
         },
 
-        read: function () {
+        reviewclass: function (typeclass, conflicts, selected) {
+            if ((typeclass === 'standard' || typeclass === 'helps' && conflicts) && selected !== 4) {
+                if (selected === 3) {
+                    return 'current';
+                } else {
+                    return '';
+                }
+            } else {
+                return 'hide';
+            }
+        },
+
+        simpleclass: function (typeclass, selected, mode) {
+            if (typeclass === 'standard' && !mode && selected !== 4) {
+                if (selected === 1) {
+                    return 'current';
+                } else {
+                    return '';
+                }
+            } else {
+                return 'hide';
+            }
+        },
+
+        conflictclass: function (typeclass, conflicts, selected) {
+            if (typeclass !== 'extant' && conflicts) {
+                if (selected === 5) {
+                    return 'current';
+                } else {
+                    return '';
+                }
+            } else {
+                return 'hide';
+            }
+        },
+
+        readmode: function () {
             this.selected = 1;
         },
 
-        chunk: function () {
+        chunkmode: function () {
             this.selected = 2;
         },
 
-        review: function () {
+        reviewmode: function () {
             this.selected = 3;
         },
 
-        conflict: function () {
+        conflictmode: function () {
             this.selected = 5;
         },
 
-        backup: function () {
+        goexport: function () {
             this.$.menu.close();
-            this.fire('gobackup');
+            this.fire('goexport');
         },
 
-        publish: function () {
+        goreview: function () {
             this.$.menu.close();
-            this.fire('gopublish');
+            this.fire('goreview');
         },
 
-        print: function () {
+        goprint: function () {
             this.$.menu.close();
             this.fire('goprint');
         },
 
-        academy: function () {
+        goacademy: function () {
             this.$.menu.close();
-            App.ipc.send('openacademy');
+            App.ipc.send('open-academy', "");
         },
 
-        home: function () {
+        gohome: function () {
             this.$.menu.close();
             this.fire('gohome');
         },
 
-        settings: function() {
+        gosettings: function() {
             this.$.menu.close();
             this.fire('gosettings');
         },
 
-        feedback: function() {
+        gosearch: function() {
+            this.$.menu.close();
+            this.fire('gosearch');
+        },
+
+        gofeedback: function() {
             this.$.menu.close();
             this.fire('iron-signal', {name: 'openfeedback'});
         },

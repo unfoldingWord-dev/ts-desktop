@@ -1,5 +1,4 @@
 
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../components/iron-icons/iron-icons.html">
 <link rel="import" href="../../components/iron-list/iron-list.html">
 
@@ -13,7 +12,7 @@
         }
 
         #main {
-            flex: 0 0 450px;
+            flex: 0 0 550px;
             display: flex;
             flex-direction: column;
         }
@@ -25,9 +24,13 @@
             display: flex;
             justify-content: flex-start;
             align-items: center;
-            padding: 0 20px;
+            padding: 0 10px;
             border-bottom: 1px solid var(--border-color);
             background: var(--card-background-color);
+        }
+
+        #header iron-icon {
+            margin: 0 10px;
         }
 
         #list {
@@ -38,9 +41,8 @@
         }
 
         .row {
-            display: block;
-            margin: 0;
-            padding: 1em;
+            display: flex;
+            padding: 15px 25px;
             border-bottom: 1px solid var(--border-color);
             transition: background .3s, color .3s;
             cursor: pointer;
@@ -50,8 +52,18 @@
             background: var(--accent-color-light);
         }
 
-        #header iron-icon {
-            padding: 0 10px;
+        .small {
+            --iron-icon-height: 18px;
+            --iron-icon-width: 18px;
+            color: var(--secondary-text-color);
+            margin-right: 15px;
+        }
+
+        .code {
+            color: var(--secondary-text-color);
+            font-style: italic;
+            font-size: 80%;
+            margin-left: 10px;
         }
 
         .click {
@@ -64,16 +76,18 @@
 
       <div id="main">
           <div id="header">
+              <iron-icon class="click" icon="arrow-back" on-tap="togroup"></iron-icon>
+              <span class="click" on-tap="tolang"><span>[[newdata.language.name]]</span><span class="code">(<span>[[newdata.language.id]]</span>)</span></span>
+              <iron-icon icon="chevron-right"></iron-icon>
               <span class="click" on-tap="togroup">[[newdata.category.name]]</span>
               <iron-icon icon="chevron-right"></iron-icon>
-              <em>Choose a book</em>
+              <span><em>Choose a project</em></span>
           </div>
           <iron-list id="list" items="[[newdata.category.data]]" as="project">
               <template>
                   <div class="row" on-tap="store">
-                      <div>
-                          <span>[[project.name]]</span>
-                      </div>
+                      <iron-icon class="small" icon$="[[checkicon(project.category_slug)]]"></iron-icon>
+                      <span>[[project.name]]</span>
                   </div>
               </template>
           </iron-list>
@@ -105,20 +119,37 @@
           Polymer.IronResizableBehavior
       ],
 
+      checkicon: function (category) {
+          return category === "other" ? 'uw-obs-icon:uw-obs-icon' : 'uw-project-icon:uw-project-icon';
+      },
+
       store: function(e) {
-          this.set('newdata.project', e.model.project);
-          if (App.configurator.getUserSetting('glmode')) {
+          var project = e.model.project;
+          this.set('newdata.project', project);
+
+          if (project.slug === "bible" || project.slug === "bible-obs") {
+              this.set('newdata.typedata', {type: {id: "tw", name: "Words"}, resource: {id: "", name: ""}, format: "markdown", allowed: true});
+              this.fire('create');
+          } else if (App.configurator.getUserSetting('glmode')) {
               this.fire('iron-signal', {name: 'createtypes'});
               this.set('selected', 3);
+          } else if (project.slug === "obs") {
+              this.set('newdata.typedata', {type: {id: "text", name: "Text"}, resource: {id: "obs", name: "Open Bible Stories"}, format: "markdown", allowed: true});
+              this.fire('create');
           } else {
               this.set('newdata.typedata', {type: {id: "text", name: "Text"}, resource: {id: "reg", name: "Regular"}, format: "usfm", allowed: true});
               this.fire('create');
           }
+
           this.$.list.scrollTop = 0;
       },
 
       togroup: function () {
           this.set('selected', 1);
+      },
+
+      tolang: function () {
+          this.set('selected', 0);
       },
 
       ready: function() {

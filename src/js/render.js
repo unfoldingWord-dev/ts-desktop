@@ -1,17 +1,18 @@
 'use strict';
 
+var path = require('path');
+
 function Renderer() {
 
     return {
 
         convertVerseMarkers: function (text) {
-            var startstr = '<verse number="';
-            var endstr = '" style="v" />';
-            var expression = new RegExp(startstr);
+            var expression = new RegExp(/(\s*<verse[^<>\"]*\")(\d+-?\d*)(\"[^<>]*>)/);
             var verses = [];
 
             while (expression.test(text)) {
-                var versestr = text.substring(text.search(startstr) + 15, text.search(endstr));
+                var versestr = expression.exec(text)[2];
+
                 if (versestr.indexOf("-") < 0) {
                     verses.push(parseInt(versestr));
                 } else {
@@ -21,117 +22,356 @@ function Renderer() {
                         verses.push(j);
                     }
                 }
-                text = text.replace(startstr, " \\v ");
-                text = text.replace(endstr, " ");
+                text = text.replace(expression, " \\v " + versestr + " ");
             }
             return {text: text, verses: verses};
         },
 
         convertNoteMarkers: function (text) {
-            var startstr = '<note';
-            var endstr = '<\/note>';
-            var expression = new RegExp(startstr);
+            var expression = new RegExp(/(<note[^<>]*>)([^]*)(<\/note>)/);
 
             while (expression.test(text)) {
-                var notestr = this.removeUsxMarkers(text.substring(text.search(startstr), text.search(endstr)));
+                var notestr = expression.exec(text)[2];
                 var marker = "\<ts-note-marker text='" + notestr + "'\>\<\/ts-note-marker\>";
 
-                text = text.replace(/<note[^]*note>/, marker);
+                text = text.replace(expression, marker);
             }
             return text;
         },
 
-        removeUsxMarkers: function (text) {
-            var mtest = new RegExp(/<[^<>]*>/g);
-            var stest = new RegExp(/  /g);
-            var mreplace = " ";
-            var sreplace = " ";
+        migrateMarkers: function (text) {
+            var vtest = new RegExp(/ ?[\\\/]v ?(?=\d)/g);
+            var ctest = new RegExp(/ ?[\\\/]c ?(?=\d)/g);
+            var vreplace = " \\v ";
+            var creplace = "\\c ";
 
-            text = text.replace(mtest, mreplace);
-            text = text.replace(stest, sreplace);
+            text = text.replace(vtest, vreplace);
+            text = text.replace(ctest, creplace);
 
             return text.trim();
         },
 
-        migrateMarkers: function (text) {
-            var vtest1 = new RegExp(/\\v/g);
-            var vtest2 = new RegExp(/\/v/g);
-            var ctest = new RegExp(/\\c/g);
-            var stest = new RegExp(/  /g);
-            var vreplace = "\\v ";
-            var creplace = "\\c ";
-            var sreplace = " ";
+        removeChapterMarkers: function (text) {
+            var expression = new RegExp(/\\c \d+\s+/g);
 
-            text = text.replace(vtest1, vreplace);
-            text = text.replace(vtest2, vreplace);
-            text = text.replace(ctest, creplace);
-            text = text.replace(stest, sreplace);
+            return text.replace(expression, "");
+        },
+
+        renderSuperscriptVerses: function (text) {
+            var expression = new RegExp(/(\\v )(\d+-?\d*)(\s+)/);
+
+            while (expression.test(text)) {
+                var versestr = expression.exec(text)[2];
+
+                text = text.replace(expression, "\<sup\>" + versestr + "\<\/sup\>");
+            }
 
             return text;
         },
 
-        removeChapterMarkers: function (text) {
-            var textarray = text.split(" ");
-            var returnstr = "";
+        renderParagraphs: function (text, module) {
+            var expression = new RegExp(/([^>\n]*)([\n])/);
+            var startp = "\<p class='style-scope " + module + "'\>";
+            var endp = "\<\/p\>";
 
-            for (var i = 0; i < textarray.length; i++) {
-                if (textarray[i] === "\\c") {
-                    i++;
-                } else {
-                    returnstr += textarray[i] + " ";
+            text = text + "\n";
+
+            while (expression.test(text)) {
+                var paragraph = expression.exec(text)[1];
+
+                if (!paragraph) {
+                    paragraph = "&nbsp";
                 }
+
+                text = text.replace(expression, startp + paragraph + endp);
             }
 
-            return returnstr.trim();
-        },
-
-        renderSourceWithVerses: function (text) {
-            var textarray = text.split(" ");
-            var numstr1 = "\<sup\>";
-            var numstr2 = "\<\/sup\>";
-            var returnstr = "";
-            var verse = 0;
-
-            for (var i = 0; i < textarray.length; i++) {
-                if (textarray[i] === "\\v") {
-                    verse = textarray[i+1];
-                    returnstr += numstr1 + verse + numstr2;
-                    i++;
-                } else {
-                    returnstr += textarray[i] + " ";
-                }
-            }
-            return returnstr.trim();
+            return text;
         },
 
         renderTargetWithVerses: function (text, module) {
-            var linearray = text.split("\n");
-            var numstr1 = "\<sup\>";
-            var numstr2 = "\<\/sup\>";
-            var startp = "\<p class='style-scope " + module + "'\>";
-            var endp = "\<\/p\>";
-            var returnstr = "";
+            text = this.renderParagraphs(text, module);
+            text = this.renderSuperscriptVerses(text);
 
-            for (var j = 0; j < linearray.length; j++) {
-                returnstr += startp;
-                if (linearray[j] === "") {
-                    returnstr += "&nbsp";
-                } else {
-                    var wordarray = linearray[j].split(" ");
-                    for (var i = 0; i < wordarray.length; i++) {
-                        if (wordarray[i] === "\\v") {
-                            var verse = wordarray[i+1];
-                            returnstr += numstr1 + verse + numstr2;
-                            i++;
-                        } else {
-                            returnstr += wordarray[i] + " ";
+            return text;
+        },
+
+        replaceConflictCode: function (text) {
+            var starttest = new RegExp(/<{7} HEAD\n/g);
+            var midtest = new RegExp(/={7}\n/g);
+            var endtest = new RegExp(/>{7} \w{40}\n?/g);
+
+            text = text.replace(starttest, "<S>");
+            text = text.replace(midtest, "<M>");
+            text = text.replace(endtest, "<E>");
+
+            return text;
+        },
+
+        parseConflicts: function (text) {
+            var conflicttest = new RegExp(/([^<>]*)(<S>)([^<>]*)(<M>)([^<>]*)(<E>)([^<>]*)/);
+            var optiontest = new RegExp(/(@s@)([^]+?)(@e@)/);
+            var confirmtest = new RegExp(/<(S|M|E)>/);
+            var startmarker = "@s@";
+            var endmarker = "@e@";
+            var exists = false;
+            var conarray = [];
+
+            while (conflicttest.test(text)) {
+                var pieces = conflicttest.exec(text);
+
+                if (!optiontest.test(pieces[3])) {
+                    pieces[3] = startmarker + pieces[3] + endmarker;
+                }
+                if (!optiontest.test(pieces[5])) {
+                    pieces[5] = startmarker + pieces[5] + endmarker;
+                }
+
+                var newcontent = pieces[3] + pieces[5];
+
+                if (pieces[1]) {
+                    newcontent = newcontent.replace(/@s@/g, startmarker + pieces[1]);
+                }
+                if (pieces[7]) {
+                    newcontent = newcontent.replace(/@e@/g, pieces[7] + endmarker);
+                }
+
+                text = text.replace(conflicttest, newcontent);
+                exists = true;
+            }
+
+            if (exists) {
+                while (optiontest.test(text)) {
+                    var option = optiontest.exec(text)[2];
+
+                    conarray.push(option.trim());
+                    text = text.replace(optiontest, "");
+                }
+
+                conarray = _.uniq(conarray);
+            }
+
+            if (confirmtest.test(text)) {
+                exists = true;
+                conarray.push("Conflict Parsing Error");
+            }
+
+            return {exists: exists, array: conarray};
+        },
+
+        consolidateHelpsConflict: function (text) {
+            var conflicttest = new RegExp(/^([^<>]*)(<S>)([^<>]*)(<M>)([^<>]*)(<E>)([^]*)/);
+            var confirmtest = new RegExp(/<(S|M|E)>/);
+            var errormsg = [{title: "Conflict Parsing Error", body: "Conflict Parsing Error"}];
+            var start = "<S>";
+            var middle = "<M>";
+            var end = "<E>";
+            var first = "";
+            var second = "";
+
+            if (conflicttest.test(text)) {
+                while (conflicttest.test(text)) {
+                    var pieces = conflicttest.exec(text);
+
+                    first += pieces[1] + pieces[3];
+                    second += pieces[1] + pieces[5];
+                    text = pieces[7];
+                }
+
+                first += text;
+                second += text;
+
+                return start + first + middle + second + end;
+            } else if (confirmtest.test(text)) {
+                return start + errormsg + middle + errormsg + end;
+            } else {
+                return text;
+            }
+        },
+
+        replaceEscapes: function (text) {
+            text = text.replace(/\\/g, "\\\\").replace(/\[/g, "\\[").replace(/\]/g, "\\]").replace(/\^/g, "\\^").replace(/\$/g, "\\$");
+            text = text.replace(/\(/g, "\\(").replace(/\)/g, "\\)").replace(/\?/g, "\\?").replace(/\./g, "\\.").replace(/\//g, "\\/");
+            text = text.replace(/\+/g, "\\+").replace(/\*/g, "\\*").replace(/\{/g, "\\{").replace(/\}/g, "\\}").replace(/\|/g, "\\|");
+
+            return text;
+        },
+
+        displayConflicts: function (content) {
+            var conflicts = this.parseConflicts(this.replaceConflictCode(content));
+            var text = "";
+
+            if (conflicts.exists) {
+                text += "\n***Start of Conflict***\n";
+                for (var i = 0; i < conflicts.array.length; i++) {
+                    text += "***Option " + (i +1) + "***\n";
+                    text += this.removeChapterMarkers(conflicts.array[i]) + "\n";
+                }
+                text += "***End of Conflict***\n";
+                return text;
+            } else {
+                return content;
+            }
+        },
+
+        renderPrintPreview: function (chunks, options) {
+            var mythis = this;
+            var module = "ts-print";
+            var startheader = "\<h2 class='style-scope " + module + "'\>";
+            var endheader = "\<\/h2\>";
+            var add = "";
+            if (options.doubleSpace) {
+                add += "double ";
+            }
+            if (options.justify) {
+                add += "justify ";
+            }
+            if (options.newpage) {
+                add += "break ";
+            }
+            var startdiv = "\<div class='style-scope " + add + module + "'\>";
+            var enddiv = "\<\/div\>";
+            var chapters = [];
+            var text = "\<div id='startnum' class='style-scope " + module + "'\>";
+
+            _.forEach(_.groupBy(chunks, function(chunk) {
+                return chunk.chunkmeta.chapter;
+            }), function (data, chap) {
+                var content = "";
+                var title = "";
+
+                _.forEach(data, function (chunk) {
+                    if (chunk.chunkmeta.frameid === "title") {
+                        title = chunk.transcontent || chunk.srccontent;
+                    }
+                    if (chunk.chunkmeta.frame > 0 && chunk.transcontent) {
+                        if (options.includeIncompleteFrames || chunk.completed) {
+                            content += mythis.displayConflicts(chunk.transcontent) + " ";
                         }
                     }
-                    returnstr = returnstr.trim();
+                });
+
+                if (chap > 0) {
+                    chapters.push({title: title, content: content.trim()});
                 }
-                returnstr += endp;
+            });
+
+            chapters.forEach(function (chapter) {
+                if (chapter.content) {
+                    text += startheader + chapter.title + endheader;
+                    text += startdiv + mythis.renderTargetWithVerses(chapter.content, module) + enddiv;
+                }
+            });
+
+            return text + enddiv;
+        },
+
+        renderObsPrintPreview: function (chunks, options, imagePath) {
+            var mythis = this;
+            var module = "ts-print";
+            var startheader = "\<h2 class='style-scope " + module + "'\>";
+            var endheader = "\<\/h2\>";
+            var startp = "\<p class='style-scope " + module + "'\>";
+            var endp = "\<\/p\>";
+            var add = "";
+            if (options.doubleSpace) {
+                add += "double ";
             }
-            return returnstr;
+            if (options.justify) {
+                add += "justify ";
+            }
+            var startbreakdiv = "\<div class='style-scope break " + add + module + "'\>";
+            var starttocdiv = "\<div class='style-scope double break toc " + module + "'\>";
+            var starttitlediv1 = "\<div id='chap";
+            var starttitlediv2 = "' class='style-scope break titles " + module + "'\>";
+            var startnobreakdiv = "\<div class='style-scope nobreak " + module + "'\>";
+            var enddiv = "\<\/div\>";
+            var chapters = [];
+            var text = "\<div id='startnum' class='style-scope " + module + "'\>";
+            var toc = starttocdiv + startheader + "Table of Contents" + endheader;
+            var startadiv1 = "\<div class='style-scope " + module + "'\>\<a class='style-scope " + module + "' href='#chap";
+            var startadiv2 = "'\>";
+            var endadiv = "\<\/a\>\<\/div\>";
+
+            _.forEach(_.groupBy(chunks, function(chunk) {
+                return chunk.chunkmeta.chapter;
+            }), function (data, chap) {
+                var content = "";
+                var title = "";
+                var ref = "";
+
+                _.forEach(data, function (chunk) {
+                    if (chunk.chunkmeta.frameid === "title") {
+                        title = chunk.transcontent || chunk.srccontent;
+                    }
+                    if (chunk.chunkmeta.frameid === "reference") {
+                        ref = chunk.transcontent || chunk.srccontent;
+                    }
+                    if (chunk.chunkmeta.frame > 0 && chunk.transcontent) {
+                        if (options.includeIncompleteFrames || chunk.completed) {
+                            if (options.includeImages) {
+                                var image = path.join(imagePath, chunk.projectmeta.resource.id + "-en-" + chunk.chunkmeta.chapterid + "-" + chunk.chunkmeta.frameid + ".jpg");
+                                content += startnobreakdiv + "\<img src='" + image + "'\>";
+                                content += startp + mythis.displayConflicts(chunk.transcontent) + endp + enddiv;
+                            } else {
+                                content += mythis.displayConflicts(chunk.transcontent) + " ";
+                            }
+                        }
+                    }
+                });
+
+                if (chap > 0) {
+                    chapters.push({chapter: chap, title: title, reference: ref, content: content.trim()});
+                }
+            });
+
+            chapters.forEach(function (chapter) {
+                if (chapter.content) {
+                    toc += startadiv1 + chapter.chapter + startadiv2 + chapter.title + endadiv;
+                    text += starttitlediv1 + chapter.chapter + starttitlediv2 + startheader + chapter.title + endheader + startheader + chapter.reference + endheader + enddiv;
+                    text += startbreakdiv + chapter.content + enddiv;
+                }
+            });
+
+            toc += enddiv;
+
+            return toc + text + enddiv;
+        },
+
+        renderResource: function (data, module) {
+            var starth2 = "\<h2 class='style-scope " + module + "'\>";
+            var endh2 = "\<\/h2\>";
+            var startdiv = "\<div class='style-scope " + module + "'\>";
+            var enddiv = "\<\/div\>";
+
+            return starth2 + data.title + endh2 + startdiv + this.renderResourceLinks(data.body, module) + enddiv;
+        },
+
+        renderResourceLinks: function (text, module) {
+            var talinktest = new RegExp(/(\[\[:en:ta)(:[^:]*:[^:]*:)([^:\]]*)(\]\])/);
+            var biblelinktest = new RegExp(/(\[\[:en:bible)(:[^:]*:)(\w*:\d*:\d*)(\|[^\]]*\]\])/);
+            var linkname;
+            var starta;
+            var enda = "\<\/a\>";
+
+            while (talinktest.test(text)) {
+                linkname = talinktest.exec(text)[3];
+                starta = "\<a href='" + linkname + "' class='style-scope talink " + module + "' id='" + linkname.replace(/_/g, "-") + "'\>";
+
+                text = text.replace(talinktest, starta + linkname + enda);
+            }
+
+            while (biblelinktest.test(text)) {
+                linkname = biblelinktest.exec(text)[3];
+                var chapter = parseInt(linkname.split(":")[1]);
+                var verse = parseInt(linkname.split(":")[2]);
+
+                starta = "\<a href='" + linkname + "' class='style-scope biblelink " + module + "' id='" + chapter + ":" + verse + "'\>";
+
+                text = text.replace(biblelinktest, starta + chapter + ":" + verse + enda);
+            }
+
+            return text;
         },
 
         validateVerseMarkers: function (text, verses) {
@@ -145,7 +385,7 @@ function Renderer() {
                         returnstr += "";
                     } else {
                         returnstr += "\n";
-                    }                    
+                    }
                 } else {
                     var wordarray = linearray[j].split(" ");
                     for (var i = 0; i < wordarray.length; i++) {
@@ -168,15 +408,15 @@ function Renderer() {
             }
 
             var addon = "";
-            
-            if (returnstr) {                
+
+            if (returnstr) {
                 for (var k = 0; k < verses.length; k++) {
                     if (used.indexOf(verses[k]) < 0) {
                         addon += "\\v " + verses[k] + " ";
                     }
                 }
             }
-            
+
             return addon + returnstr;
         },
 

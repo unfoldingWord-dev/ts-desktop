@@ -18,12 +18,14 @@
 
         #contain {
             flex: auto;
-            overflow: hidden;
         }
 
-        iron-list {
+        #chunklist {
             max-height: calc(100vh - 70px);
-            overflow-x: hidden !important;
+        }
+
+        ::-webkit-scrollbar {
+            display: none;
         }
 
         :host(.preview) {
@@ -61,7 +63,7 @@
     <template>
 
         <div id="contain">
-            <iron-list id="chunklist" items="{{chunks}}" as="chunk" on-scroll="setheights">
+            <iron-list id="chunklist" items="{{chunks}}" as="chunk" on-scroll="refresh">
                 <template>
                     <ts-chunk-card id="{{createid(index)}}" chunk="{{chunk}}" on-updateheight="updateheight"></ts-chunk-card>
                 </template>
@@ -96,6 +98,9 @@
             modename: {
                 type: String,
                 value: "chunk"
+            },
+            timer: {
+                type: Number
             }
         },
 
@@ -105,12 +110,25 @@
             list.updateSizeForItem(index);
         },
 
+        refresh: function () {
+            var mythis = this;
+
+            mythis.getlocation();
+            clearTimeout(mythis.timer);
+
+            mythis.timer = setTimeout(function() {
+                mythis.setheights();
+            }, 300);
+        },
+
         setheights: function () {
-            for (var i = 0; i < this.chunks.length; i++) {
+            var list = this.$.chunklist;
+
+            list.fire('iron-resize');
+
+            for (var i = list.firstVisibleIndex; i <= list.lastVisibleIndex; i++) {
                 var card = document.getElementById(this.modename + i);
-                if (card !== null) {
-                    card.setheight();
-                }
+                card.setheight();
             }
         },
 
@@ -122,8 +140,6 @@
         tomode: function () {
             this.setpreview();
             this.setlocation();
-            this.setheights();
-            this.setlocation();
             this.movein();
         },
 
@@ -133,9 +149,11 @@
 
             contain.classList.add("moveout");
             setTimeout(function() {
-                contain.classList.remove("moveout");
                 mythis.classList.add("hide");
-            }, 500);
+                setTimeout(function() {
+                    contain.classList.remove("moveout");
+                }, 300);
+            }, 300);
         },
 
         movein: function () {
@@ -147,6 +165,7 @@
                 contain.classList.add("movein");
                 setTimeout(function() {
                     contain.classList.remove("movein");
+                    mythis.setheights();
                 }, 500);
             }, 500);
         },
@@ -159,28 +178,33 @@
         getlocation: function () {
             var list = this.$.chunklist;
             var index = list.firstVisibleIndex || 0;
+            var chunks = this.chunks;
 
-            this.set('modestatus.chapter', this.chunks[index].chunkmeta.chapter);
-            this.set('modestatus.index', index);
+            if (chunks) {
+                this.set('modestatus.chapter', chunks[index].chunkmeta.chapter);
+                this.set('modestatus.index', index);
+            }
         },
 
         setlocation: function () {
             var list = this.$.chunklist;
-            var found = false;
-            var i = 0;
             var index = this.modestatus.index;
+            var chunks = this.chunks;
+            var chapter = this.modestatus.chapter;
 
-            if (index >= 0) {
-                list.scrollToIndex(index);
-            } else {
-                while (i < 10000 && !found) {
-                    list.scrollToIndex(i);
-                    if (this.chunks[i].chunkmeta.chapter === this.modestatus.chapter) {
-                        found = true;
-                    }
-                    i++;
+            if (index < 0) {
+                var filtered = chunks.filter(function (chunk) {
+                    return chunk.chunkmeta.chapter === chapter;
+                });
+                if (filtered.length) {
+                    index = filtered[0].index;
+                } else {
+                    index = chunks.length - 1;
                 }
             }
+
+            list.scrollToIndex(index);
+            this.getlocation();
         },
 
         createid: function (index) {

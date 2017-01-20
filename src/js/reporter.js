@@ -246,7 +246,8 @@ function Reporter (args) {
                 res.on('data', function (partialData) {
                     completeData += partialData;
                 }).on('end', function () {
-                    if(res.statusCode >= 400) {
+                    if(res.statusCode != 201) {
+                        console.log(res);
                         reject(JSON.parse(completeData));
                     } else {
                         resolve(completeData);

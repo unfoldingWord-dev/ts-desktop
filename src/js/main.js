@@ -22,8 +22,9 @@ app.setPath('userData', (function (dataDir) {
 let splashScreen;
 let mainWindow;
 let academyWindow;
+let scrollToId;
 
-function createSplashScreen() {
+function createMainSplash() {
     splashScreen = new BrowserWindow({
         width: 400,
         height: 170,
@@ -31,8 +32,11 @@ function createSplashScreen() {
         autoHideMenuBar: true,
         frame: false,
         center: true,
+        show: false,
         title: 'translationStudio'
     });
+
+    //splashScreen.webContents.openDevTools();
 
     splashScreen.loadURL('file://' + __dirname + '/../views/splash-screen.html');
 
@@ -41,12 +45,54 @@ function createSplashScreen() {
     });
 }
 
-function createWindow () {
-    // Create the browser window.
+function createAcademySplash() {
+    splashScreen = new BrowserWindow({
+        width: 400,
+        height: 170,
+        resizable: false,
+        autoHideMenuBar: true,
+        frame: false,
+        center: true,
+        show: false,
+        title: 'translationStudio'
+    });
+
+    //splashScreen.webContents.openDevTools();
+
+    splashScreen.loadURL('file://' + __dirname + '/../views/academy-screen.html');
+
+    splashScreen.on('closed', function() {
+        splashScreen = null;
+    });
+}
+
+function createReloadSplash() {
+    splashScreen = new BrowserWindow({
+        width: 400,
+        height: 170,
+        resizable: false,
+        autoHideMenuBar: true,
+        frame: false,
+        center: true,
+        show: false,
+        title: 'translationStudio'
+    });
+
+    //splashScreen.webContents.openDevTools();
+
+    splashScreen.loadURL('file://' + __dirname + '/../views/reload-screen.html');
+
+    splashScreen.on('closed', function() {
+        splashScreen = null;
+    });
+}
+
+function createMainWindow () {
+
     mainWindow = new BrowserWindow({
         width: 980,
         height: 580,
-        minWidth: 800,
+        minWidth: 980,
         minHeight: 580,
         useContentSize: true,
         center: true,
@@ -61,13 +107,9 @@ function createWindow () {
 
     // mainWindow.webContents.openDevTools();
 
-    // and load the index.html of the app.
     mainWindow.loadURL('file://' + __dirname + '/../views/index.html');
 
     mainWindow.on('closed', function() {
-        // Dereference the window object, usually you would store windows
-        // in an array if your app supports multi windows, this is the time
-        // when you should delete the corresponding element.
         mainWindow = null;
     });
 
@@ -78,8 +120,6 @@ function createWindow () {
     mainWindow.on('unmaximize', function () {
         mainWindow.webContents.send('unmaximize');
     });
-
-    mainWindow.focus();
 }
 
 function createAcademyWindow () {
@@ -94,6 +134,7 @@ function createAcademyWindow () {
         title: app.getName(),
         backgroundColor: '#00796B',
         autoHideMenuBar: true,
+        show: false,
         frame: false
     });
 
@@ -112,8 +153,12 @@ function createAcademyWindow () {
     academyWindow.on('unmaximize', function () {
         academyWindow.webContents.send('unmaximize');
     });
+}
 
-    academyWindow.focus();
+function scrollAcademyWindow () {
+    if (scrollToId) {
+        academyWindow.webContents.send('academy-scroll', scrollToId);
+    }
 }
 
 function createAppMenus() {
@@ -179,13 +224,35 @@ ipcMain.on('academy-window', function (event, arg) {
     }
 });
 
-ipcMain.on('openacademy', function (event, arg) {
+ipcMain.on('open-academy', function (event, id) {
+    scrollToId = id;
     if (academyWindow) {
         academyWindow.show();
-        academyWindow.focus();
+        scrollAcademyWindow();
     } else {
-        createAcademyWindow();
+        createAcademySplash();
+        setTimeout(function () {
+            splashScreen.show();
+            createAcademyWindow();
+        }, 500);
     }
+});
+
+ipcMain.on('fire-reload', function () {
+    if (splashScreen) {
+        splashScreen.show();
+    } else {
+        createReloadSplash();
+    }
+    setTimeout(function () {
+        splashScreen.show();
+        setTimeout(function () {
+            if (mainWindow) {
+                mainWindow.hide();
+                mainWindow.reload();
+            }
+        }, 500);
+    }, 500);
 });
 
 ipcMain.on('save-as', function (event, arg) {
@@ -202,19 +269,27 @@ ipcMain.on('loading-status', function (event, status) {
     splashScreen && splashScreen.webContents.send('loading-status', status);
 });
 
-ipcMain.on('loading-done', function (event) {
+ipcMain.on('main-loading-done', function () {
     if (splashScreen && mainWindow) {
-        splashScreen.close();
         mainWindow.show();
-        mainWindow.focus();
+        splashScreen.close();
+    }
+});
+
+ipcMain.on('ta-loading-done', function () {
+    if (splashScreen && academyWindow) {
+        academyWindow.show();
+        splashScreen.close();
+        scrollAcademyWindow();
     }
 });
 
 app.on('ready', function () {
     createAppMenus();
-    createSplashScreen();
+    createMainSplash();
     setTimeout(function () {
-        createWindow();
+        splashScreen.show();
+        createMainWindow();
     }, 500);
 });
 
@@ -230,6 +305,6 @@ app.on('activate', function () {
     // On OS X it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (mainWindow === null) {
-        createWindow();
+        createMainWindow();
     }
 });

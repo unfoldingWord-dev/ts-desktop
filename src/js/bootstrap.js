@@ -19,58 +19,87 @@ process.stdout.write = console.log.bind(console);
 
     const DATA_PATH = ipcRenderer.sendSync('main-window', 'dataPath');
 
-    setMsg('Loading path...');
-    let path = require('path');
-    let fs = require('fs');
+    // stub globals
+    let path = null;
+    let fs = null;
+    let fse = null;
+    let mkdirp = null;
+    let Db = null;
+    let Reporter = null;
+    let Configurator = null;
+    let GitManager = null;
+    let KeyManager = null;
+    let ProjectsManager = null;
+    let MigrateManager = null;
+    let DataManager = null;
+    let UserManager = null;
+    let ImportManager = null;
+    let ExportManager = null;
+    let PrintManager = null;
+    let Renderer = null;
+    let i18n = null;
+    let utils = null;
 
-    setMsg('Loading mkdirp...');
-    let mkdirp = require('mkdirp');
+    // catch startup errors
+    try {
 
-    setMsg('Loading DB...');
-    let Db = require('../js/lib/db').Db;
+        setMsg('Loading path...');
+        path = require('path');
+        fs = require('fs');
+        fse = require('fs-extra');
 
-    setMsg('Loading Reporter...');
-    let Reporter = require('../js/reporter').Reporter;
+        setMsg('Loading mkdirp...');
+        mkdirp = require('mkdirp');
 
-    setMsg('Loading Configurator...');
-    let Configurator = require('../js/configurator').Configurator;
+        setMsg('Loading DB...');
+        Db = require('door43-client');
 
-    setMsg('Loading Git Manager...');
-    let GitManager = require('../js/gitnative').GitManager;
+        setMsg('Loading Reporter...');
+        Reporter = require('../js/reporter').Reporter;
 
-    setMsg('Loading Key Manager...');
-    let KeyManager = require('../js/keys').KeyManager;
+        setMsg('Loading Configurator...');
+        Configurator = require('../js/configurator').Configurator;
 
-    setMsg('Loading Projects Manager...');
-    let ProjectsManager = require('../js/projects').ProjectsManager;
+        setMsg('Loading Git Manager...');
+        GitManager = require('../js/gitnative').GitManager;
 
-    setMsg('Loading Migrate Manager...');
-    let MigrateManager = require('../js/migrator').MigrateManager;
+        setMsg('Loading Key Manager...');
+        KeyManager = require('../js/keys').KeyManager;
 
-    setMsg('Loading Data Manager...');
-    let DataManager = require('../js/database').DataManager;
+        setMsg('Loading Projects Manager...');
+        ProjectsManager = require('../js/projects').ProjectsManager;
 
-    setMsg('Loading User Manager...');
-    let UserManager = require('../js/user').UserManager;
+        setMsg('Loading Migrate Manager...');
+        MigrateManager = require('../js/migrator').MigrateManager;
 
-    setMsg('Loading Import Manager...');
-    let ImportManager = require('../js/importer').ImportManager;
+        setMsg('Loading Data Manager...');
+        DataManager = require('../js/database').DataManager;
 
-    setMsg('Loading Export Manager...');
-    let ExportManager = require('../js/exporter').ExportManager;
+        setMsg('Loading User Manager...');
+        UserManager = require('../js/user').UserManager;
 
-    setMsg('Loading Print Manager...');
-    let PrintManager = require('../js/printer').PrintManager;
+        setMsg('Loading Import Manager...');
+        ImportManager = require('../js/importer').ImportManager;
 
-    setMsg('Loading Renderer...');
-    let Renderer = require('../js/render').Renderer;
+        setMsg('Loading Export Manager...');
+        ExportManager = require('../js/exporter').ExportManager;
 
-    setMsg('Loading Locale...');
-    let i18n = require('../js/i18n').Locale(path.resolve(path.join(__dirname, '..', '..', 'i18n')));
+        setMsg('Loading Print Manager...');
+        PrintManager = require('../js/printer').PrintManager;
 
-    setMsg('Loading Utils...');
-    let utils = require('../js/lib/utils');
+        setMsg('Loading Renderer...');
+        Renderer = require('../js/render').Renderer;
 
+        setMsg('Loading Locale...');
+        i18n = require('../js/i18n').Locale(path.resolve(path.join(__dirname, '..', '..', 'i18n')));
+
+        setMsg('Loading Utils...');
+        utils = require('../js/lib/utils');
+    } catch (err) {
+        // display error and fail
+        setMsg(err.message);
+        throw new Error(err);
+    }
     setMsg('Initializing configurator...');
 
     // TODO: refactor this so we can just pass an object to the constructor
@@ -111,33 +140,36 @@ process.stdout.write = console.log.bind(console);
         var libraryDir = configurator.getValue('libraryDir');
         var libraryPath = path.join(libraryDir, "index.sqlite");
         var srcDir = path.resolve(path.join(__dirname, '..'));
-        var schemaPath = path.join(srcDir, 'config', 'schema.sql');
+        var resourceDir = path.join(libraryDir, 'resource_containers');
         var srcDB = path.join(srcDir, 'index', 'index.sqlite');
+        var srcResource = path.join(srcDir, 'index', 'resource_containers');
         var appData = configurator.getAppData();
-        var stat;
+        var apiURL = configurator.getValue('apiUrl');
+        var libraryBuild = configurator.getValue("libraryBuild");
+        var indexstat;
 
         try {
-            stat = fs.statSync(libraryPath);
+            indexstat = fs.statSync(libraryPath);
         } catch(e) {}
 
-        if (!stat || configurator.getValue("libraryBuild") != appData.build) {
-            setMsg('Setting up index files...');            
+        if (!indexstat || libraryBuild != appData.build) {
+            setMsg('Setting up index file...');
             mkdirp.sync(libraryDir);
             var content = fs.readFileSync(srcDB);
             fs.writeFileSync(libraryPath, content);
-            configurator.setValue("libraryBuild", appData.build);
         }
+        mkdirp.sync(resourceDir);
 
-        var db = new Db(schemaPath, libraryPath);
+        var db = new Db(libraryPath, resourceDir);
 
-        return new DataManager(db);
+        return new DataManager(db, resourceDir, apiURL, srcResource);
     })();
 
     setMsg('Initializing modules...');
 
     let gitManager = new GitManager();
 
-    let migrateManager = new MigrateManager(configurator, gitManager, reporter);
+    let migrateManager = new MigrateManager(configurator, gitManager, reporter, dataManager);
 
     // TODO: where should this be?
     mkdirp.sync(configurator.getValue('targetTranslationsDir'));

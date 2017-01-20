@@ -1,7 +1,4 @@
 
-<link rel="import" href="../../../components/iron-pages/iron-pages.html">
-<link rel="import" href="../../../components/iron-signals/iron-signals.html">
-
 <link rel="import" href="../ts-target/ts-target-review.html">
 <link rel="import" href="../ts-target/ts-target-edit.html">
 <link rel="import" href="../ts-target/ts-target-helps.html">
@@ -50,10 +47,10 @@
 	<template>
 
         <div class$="[[standardclass(chunk.projectmeta.project_type_class)]]">
-            <ts-source-chunk class="left" reviewmode chunk="[[chunk]]"></ts-source-chunk>
+            <ts-source-chunk class="left" reviewmode chunk="[[chunk]]" searchoptions="{{searchoptions}}"></ts-source-chunk>
             <div class="middle">
-                <ts-target-review class$="[[reviewclass(chunk.state.review, chunk.conflicts.exists)]]" chunk="{{chunk}}" on-setheight="setheight" on-edit="focustextbox"></ts-target-review>
-                <ts-target-edit id="targetedit" class$="[[editclass(chunk.state.review, chunk.conflicts.exists)]]" chunk="{{chunk}}" on-setheight="setheight"></ts-target-edit>
+                <ts-target-review class$="[[reviewclass(chunk.state.review, chunk.conflicts.exists)]]" chunk="{{chunk}}" searchoptions="{{searchoptions}}" on-setheight="setheight" on-edit="focustextbox"></ts-target-review>
+                <ts-target-edit id="targetedit" class$="[[editclass(chunk.state.review, chunk.conflicts.exists)]]" chunk="{{chunk}}" searchoptions="{{searchoptions}}" on-setheight="setheight"></ts-target-edit>
                 <ts-target-conflict class$="[[conflictclass(chunk.conflicts.exists)]]" chunk="{{chunk}}" on-setheight="setheight"></ts-target-conflict>
             </div>
             <ts-resource-card class="right" chunk="[[chunk]]" on-setheight="setheight"></ts-resource-card>
@@ -64,13 +61,17 @@
                 <ts-target-edit chunkmode chunk="{{chunk}}"></ts-target-edit>
             </div>
             <div class="middle">
-                <ts-target-helps chunk="{{chunk}}" on-setheight="setheight"></ts-target-helps>
+                <ts-target-helps class$="[[wordsclass(chunk.conflicts.exists)]]" chunk="{{chunk}}" on-setheight="setheight"></ts-target-helps>
+                <ts-target-conflict class$="[[conflictclass(chunk.conflicts.exists)]]" chunk="{{chunk}}" on-setheight="setheight"></ts-target-conflict>
             </div>
             <ts-resource-card class="right" chunk="[[chunk]]" on-setheight="setheight"></ts-resource-card>
         </div>
         <div class$="[[extantclass(chunk.projectmeta.project_type_class)]]">
             <ts-source-chunk class="left" reviewmode wordmode chunk="[[chunk]]"></ts-source-chunk>
-            <ts-target-words class="middle" chunk="[[chunk]]" on-setheight="setheight"></ts-target-words>
+            <div class="middle">
+                <ts-target-words class$="[[wordsclass(chunk.conflicts.exists)]]" chunk="[[chunk]]" on-setheight="setheight"></ts-target-words>
+                <ts-target-conflict class$="[[conflictclass(chunk.conflicts.exists)]]" chunk="{{chunk}}" on-setheight="setheight"></ts-target-conflict>
+            </div>
         </div>
 
 	</template>
@@ -89,6 +90,11 @@
 
 		properties: {
             chunk: {
+                type: Object,
+                value: {},
+                notify: true
+            },
+            searchoptions: {
                 type: Object,
                 value: {},
                 notify: true
@@ -119,8 +125,12 @@
             return conflicts ? '' : 'hide';
         },
 
+        wordsclass: function (conflicts) {
+            return conflicts ? 'hide' : '';
+        },
+
         setheight: function () {
-            this.fire('updateheight');
+            this.fire('setheights');
         },
 
         focustextbox: function () {

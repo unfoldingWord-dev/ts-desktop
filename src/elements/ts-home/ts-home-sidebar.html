@@ -1,5 +1,4 @@
 
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../components/paper-menu/paper-menu.html">
 <link rel="import" href="../../components/paper-menu-button/paper-menu-button.html">
 <link rel="import" href="../../components/paper-item/paper-item.html">
@@ -19,6 +18,11 @@
             flex-direction: column;
             justify-content: flex-end;
             align-items: center;
+        }
+
+        #menuicon {
+            padding: 8px;
+            color: var(--reverse-text-color);
         }
 
         paper-item {
@@ -59,10 +63,10 @@
 
     <template>
         <paper-menu-button id="menu" horizontal-offset="10" vertical-offset="10" vertical-align="bottom">
-            <paper-icon-button class="dropdown-trigger" icon="more-vert"></paper-icon-button>
+            <iron-icon id="menuicon" class="dropdown-trigger" icon="more-vert"></iron-icon>
             <paper-menu class="dropdown-content">
-                <paper-item on-tap="update"><iron-icon class="smallicon" icon="maps:local-library"></iron-icon>Update Languages</paper-item>
-                <paper-item on-tap="import"><iron-icon class="smallicon" icon="file-download"></iron-icon>Import/Restore</paper-item>
+                <paper-item on-tap="update"><iron-icon class="smallicon" icon="maps:local-library"></iron-icon>Update</paper-item>
+                <paper-item on-tap="importmenu"><iron-icon class="smallicon" icon="file-download"></iron-icon>Import</paper-item>
                 <paper-item on-tap="academy"><iron-icon class="smallicon" icon="book"></iron-icon>translationAcademy</paper-item>
                 <paper-item on-tap="feedback"><iron-icon class="smallicon" icon="announcement"></iron-icon>Feedback</paper-item>
                 <paper-item on-tap="logout"><iron-icon class="smallicon" icon="perm-identity"></iron-icon>Logout</paper-item>
@@ -90,7 +94,7 @@
         settings: function () {
             this.$.menu.close();
             App.configurator.setValue("backto", this.route);
-            this.route = 'settings';
+            this.set('route', 'settings');
         },
 
         feedback: function() {
@@ -104,19 +108,19 @@
             App.keyManager.destroyKeys();
         },
 
-        import: function() {
+        importmenu: function() {
             this.$.menu.close();
             this.fire('iron-signal', {name: 'openimport'});
         },
 
         update: function() {
             this.$.menu.close();
-            this.fire('iron-signal', {name: 'updatelanguages'});
+            this.fire('iron-signal', {name: 'openupdate'});
         },
 
         academy: function () {
             this.$.menu.close();
-            App.ipc.send('openacademy');
+            App.ipc.send('open-academy', "");
         },
 
         ready: function() {

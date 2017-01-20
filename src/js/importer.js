@@ -84,26 +84,26 @@ function ImportManager(configurator, migrator, dataManager) {
             return parser.load(filepath)
                 .then(function () {
                     var parsedData = parser.parse();
-    
+
                     if (JSON.stringify(parsedData) === JSON.stringify({})) {
                         throw new Error('This is not a valid USFM file.');
                     }
                     var chunks = [];
                     var markers = dataManager.getChunkMarkers(projectmeta.project.id);
-    
+
                     for (var i = 0; i < markers.length; i++) {
-                        var frameid = markers[i].first_verse_slug;
+                        var frameid = markers[i].verse;
                         var first = parseInt(frameid);
-                        var chapter = markers[i].chapter_slug;
-                        var isLastChunkOfChapter = !markers[i+1] || markers[i+1].chapter_slug !== chapter;
-                        var last = isLastChunkOfChapter ? Number.MAX_VALUE : parseInt(markers[i+1].first_verse_slug) - 1;
-    
+                        var chapter = markers[i].chapter;
+                        var isLastChunkOfChapter = !markers[i+1] || markers[i+1].chapter !== chapter;
+                        var last = isLastChunkOfChapter ? Number.MAX_VALUE : parseInt(markers[i+1].verse) - 1;
+
                         if (parsedData[chapter]) {
                             var transcontent = _.chain(parsedData[chapter].verses).filter(function (verse) {
                                 var id = parseInt(verse.id);
                                 return id <= last && id >= first;
-                            }).map("contents").value().join("");
-    
+                            }).map("contents").value().join(" ");
+
                             chunks.push({
                                 chunkmeta: {
                                     chapterid: chapter,
@@ -114,7 +114,7 @@ function ImportManager(configurator, migrator, dataManager) {
                             });
                         }
                     }
-    
+
                     if (parsedData['00'] && parsedData['00'].contents) {
                         chunks.unshift({
                             chunkmeta: {
@@ -254,32 +254,47 @@ function UsfmParser () {
             }
         },
 
-        buildChapters: function(){
+        buildChapters: function () {
             mythis.chapters = {};
             var chap;
-            for (var m in mythis.markers) {
-                var marker = mythis.markers[m];
-                if (marker.type === "chapter") {
-                    chap = String("00" + marker.options).slice(-2);
-                    var chapter =
-                        mythis.chapters[chap] = {
-                            id: chap,
-                            verses: {}
-                        };
-                    //mythis.chapters.push(chapter);
+            var chapnum = 0;
+            var lastverse = 100;
+
+            var createchapter = function (chapnum) {
+                chap = chapnum.toString();
+                if (chap.length === 1) {
+                    chap = "0" + chap;
+                }
+                mythis.chapters[chap] = {
+                    id: chap,
+                    verses: {}
+                };
+            };
+
+            mythis.markers.forEach(function (marker) {
+                if (marker.type === "heading" && chapnum === 0) {
+                    createchapter(chapnum);
+                    mythis.chapters[chap].contents = marker.contents.trim();
+                } else if (marker.type === "chapter") {
+                    chapnum = parseInt(marker.options);
+                    createchapter(chapnum);
+                    lastverse = 0;
                 } else if (marker.type === "verse") {
+                    var thisverse = parseInt(marker.options);
+
+                    if (thisverse < lastverse) {
+                        chapnum++;
+                        createchapter(chapnum);
+                    }
+                    lastverse = thisverse;
+
                     mythis.chapters[chap].verses[marker.options] = {
                         id: marker.options,
-                        contents: marker.contents
-                    }
-                } else if (marker.type === "heading") {
-                    mythis.chapters['00'] = {
-                        id: '00',
-                        verses: {},
-                        contents: marker.contents
+                        contents: marker.contents.trim()
                     };
                 }
-            }
+            });
+
             return mythis.chapters;
         }
     }

@@ -981,6 +981,7 @@
                 });
 
                 question = _.flatten(question);
+                question = _.uniq(question, 'title');
             }
             if (question.length) {
                 resources.push({title: "Questions", array: true, data: question});

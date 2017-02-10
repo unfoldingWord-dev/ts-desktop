@@ -130,7 +130,11 @@
         },
 
         closesearch: function () {
-            this.fire('closesearch');
+            this.fire('hidesearch');
+            this.clearsearch();
+        },
+
+        clearsearch: function () {
             this.query = "";
             this.passivesearch();
         },

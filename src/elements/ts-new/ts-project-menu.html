@@ -167,6 +167,12 @@
               }
           });
 
+          if (!App.configurator.getUserSetting('glmode')) {
+              projects = projects.filter(function (item) {
+                  return item.slug !== "bible" && item.slug !== "bible-obs";
+              });
+          }
+
           _.forEach(_.groupBy(projects, 'category_slug'), function (data, category) {
               if (category === "bible-ot") {
                   temparray.push({name: "Old Testament", sort: 1, data: data});

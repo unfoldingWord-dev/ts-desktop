@@ -1,27 +1,27 @@
 'use strict';
 
-var _ = require('lodash'),
-    path = require('path'),
-    AdmZip = require('adm-zip'),
-    request = require('request'),
-    fs = require('fs'),
-    readline = require('readline'),
-    utils = require('../js/lib/utils');
+var _ = require('lodash');
+var path = require('path');
+var AdmZip = require('adm-zip');
+var request = require('request');
+var fs = require('fs');
+var readline = require('readline');
+var utils = require('../js/lib/utils');
 
 function ImportManager(configurator, migrator, dataManager) {
 
     return {
 
         extractBackup: function(filePath) {
-            var zip = new AdmZip(filePath),
-                tmpDir = configurator.getValue('tempDir'),
-                targetDir = configurator.getValue('targetTranslationsDir'),
-                basename = path.basename(filePath, '.tstudio'),
-                extractPath = path.join(tmpDir, basename);
+            var tmpDir = configurator.getValue('tempDir');
+            var targetDir = configurator.getValue('targetTranslationsDir');
+            var basename = path.basename(filePath, '.tstudio');
+            var extractPath = path.join(tmpDir, basename);
 
             return migrator.listTargetTranslations(filePath)
                 .then(function(targetPaths) {
-                    // NOTE: this will eventually be async
+                    var zip = new AdmZip(filePath);
+
                     zip.extractAllTo(extractPath, true);
                     return targetPaths;
                 })

@@ -31,7 +31,7 @@ function Renderer() {
             var expression = new RegExp(/(<note[^<>]*>)([^]*)(<\/note>)/);
 
             while (expression.test(text)) {
-                var notestr = expression.exec(text)[2];
+                var notestr = expression.exec(text)[2] + '\<\/b\>';
                 var marker = "\<ts-note-marker text='" + notestr + "'\>\<\/ts-note-marker\>";
 
                 text = text.replace(expression, marker);

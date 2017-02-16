@@ -685,7 +685,13 @@
                       }))
                   })
                   .catch(function(err) {
-                      mythis.showErrorMessage('Import Failed', 'An error occurred while importing your project', err);
+                      var errmessage = 'An error occurred while importing your project';
+
+                      if (err.includes("Error while extracting file")) {
+                          errmessage = err;
+                      }
+
+                      mythis.showErrorMessage('Import Failed', errmessage, err);
 
                       return mythis.clearTempDir();
                   });

@@ -149,6 +149,10 @@
             display: none;
         }
 
+        .highlight {
+            background: var(--highlight-color);
+        }
+
     </style>
 
     <template>
@@ -958,9 +962,14 @@
 
             for (var w = 0; w < words.length; w++) {
                 var worddata = this.currentproject.rawdata.words["01-" + words[w].slug];
-                if (worddata && worddata.helpscontent[0].body !== "" && worddata.helpscontent[0].title !== "") {
-                    words[w].title = worddata.helpscontent[0].title;
-                    words[w].body = worddata.helpscontent[0].body;
+
+                if (worddata) {
+                    var parsed = JSON.parse(worddata.helpscontent);
+
+                    if (parsed[0].body !== "" && parsed[0].title !== "") {
+                        words[w].title = parsed[0].title;
+                        words[w].body = parsed[0].body;
+                    }
                 }
             }
 
@@ -981,6 +990,7 @@
                 });
 
                 question = _.flatten(question);
+                question = _.uniq(question, 'title');
             }
             if (question.length) {
                 resources.push({title: "Questions", array: true, data: question});

@@ -50,7 +50,9 @@
 		},
 
         opennote: function () {
-            this.fire('iron-signal', {name: 'opennote', data: {text: this.text}});
+            var text = this.text;
+
+            this.fire('iron-signal', {name: 'opennote', data: {text: text}});
         },
 
 		ready: function() {

@@ -72,7 +72,7 @@
 	<template>
 
         <div id="contain">
-            <ts-search-bar id="searchbar" class="hide" chunks="[[chunks]]" searchoptions="{{searchoptions}}" results="{{results}}" on-closesearch="closesearch" on-next="next" on-previous="previous"></ts-search-bar>
+            <ts-search-bar id="searchbar" class="hide" chunks="[[chunks]]" searchoptions="{{searchoptions}}" results="{{results}}" on-hidesearch="hidesearch" on-next="next" on-previous="previous"></ts-search-bar>
             <iron-list id="reviewlist" items="{{chunks}}" as="chunk" on-scroll="refresh">
                 <template>
                     <ts-review-card chunk="{{chunk}}" searchoptions="{{searchoptions}}" on-setheights="setheights"></ts-review-card>
@@ -130,6 +130,11 @@
         },
 
         closesearch: function () {
+            this.hidesearch();
+            this.$.searchbar.clearsearch();
+        },
+
+        hidesearch: function () {
             this.$.reviewlist.classList.remove('searchmode');
             this.$.searchbar.classList.add('hide');
         },

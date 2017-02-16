@@ -228,6 +228,8 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                     meta.source_translations[j] = dataManager.getSourceDetails(manifest.project.id, manifest.source_translations[j].language_id, manifest.source_translations[j].resource_id);
                 }
 
+                meta.source_translations = _.uniq(meta.source_translations, 'unique_id');
+
                 if (manifest.source_translations.length) {
                     meta.currentsource = 0;
                 } else {

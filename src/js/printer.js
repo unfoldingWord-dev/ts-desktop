@@ -52,7 +52,7 @@ function PrintManager(configurator) {
             });
         },
 
-        savePdf: function (title, license, body, filePath) {
+        savePdf: function (title, license, body, filePath, direction) {
             var fontSizeMap = {
                 'small': '50%',
                 'normal': '100%',
@@ -68,7 +68,7 @@ function PrintManager(configurator) {
             var mainfooter = '\<\/body\>\<\/html\>';
             var titlegroup = '\<h1 id="title" class="break titles" style="font-family: ' + font + ';"\>' + title + '\<\/h1\>';
             var licensegroup = '\<div id="license" class="break"\>' + license + '\<\/div\>';
-            var bodygroup = '\<div id="textholder" style="font-family: ' + font + '; font-size: ' + size + ';"\>' + body + '\<\/div\>';
+            var bodygroup = '\<div id="textholder" style="direction: ' + direction + '; font-family: ' + font + '; font-size: ' + size + ';"\>' + body + '\<\/div\>';
 
             var princeInfo = princePackager.info(os.platform());
 

@@ -27,6 +27,10 @@
             color: var(--primary-text-color);
         }
 
+        .click {
+            cursor: pointer;
+        }
+
 	</style>
 
 	<template>
@@ -37,7 +41,7 @@
             </template>
         </template>
         <template is="dom-if" if="{{!resource.array}}">
-            <div id="textholder"></div>
+            <div id="textholder"><span class="click" on-tap="renderresource">Click to display text</span></div>
         </template>
 
 	</template>

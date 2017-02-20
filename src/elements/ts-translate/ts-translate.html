@@ -497,6 +497,8 @@
             mythis.set('options.loading', true);
             mythis.fire('iron-signal', {name: 'openloading'});
 
+            mythis.savestate();
+
             App.dataManager.getSourcesByProject(projectmeta.project.id)
                 .then(function (sources) {
                     if (projectmeta.resource.id !== "udb") {
@@ -1215,17 +1217,11 @@
         setmodestate: function () {
             var mythis = this;
             var projectmeta = this.currentproject.projectmeta;
-            var sources = projectmeta.source_translations;
             var key = projectmeta.unique_id;
             var index = App.configurator.getValue(key + "-index");
             var chapter = App.configurator.getValue(key + "-chapter");
-            var selected = App.configurator.getValue(key + "-selected");
             var bemode = App.configurator.getUserSetting('bemode');
             var typeclass = projectmeta.project_type_class;
-
-            if (selected === 2 && !bemode) {
-                selected = 3;
-            }
 
             if (chapter > 0) {
                 mythis.set('modestatus.chapter', chapter);
@@ -1238,20 +1234,6 @@
             } else {
                 mythis.set('modestatus.lastmode', 3);
             }
-
-            if ((sources !== undefined && sources.length !== 0) || typeclass === "extant") {
-                setTimeout(function() {
-                    if (selected > 0) {
-                        mythis.set('selected', selected);
-                    } else {
-                        if (typeclass === "standard" && bemode) {
-                            mythis.set('selected', 1);
-                        } else {
-                            mythis.set('selected', 3);
-                        }
-                    }
-                }, 500);
-            }
         },
 
         checksources: function () {
@@ -1261,22 +1243,32 @@
             var lastmode = this.modestatus.lastmode;
             var selected = this.selected;
             var typeclass = projectmeta.project_type_class;
+            var key = projectmeta.unique_id;
+            var previous = App.configurator.getValue(key + "-selected");
+            var bemode = App.configurator.getUserSetting('bemode');
+            var gotomode = 3;
 
-            if (selected === 4) {
-                if (sources !== undefined && sources.length !== 0) {
-                    mythis.set('selected', lastmode);
-                } else {
-                    mythis.fire('iron-signal', {name: 'closeloading'});
-                }
-            } else {
-                if ((sources === undefined || sources.length === 0) && typeclass !== "extant") {
-                    setTimeout(function() {
-                        mythis.set('selected', 4);
-                    }, 500);
-                } else {
-                    mythis.fire('iron-signal', {name: 'closeloading'});
-                }
+            if (previous === 2 && !bemode) {
+                previous = 3;
             }
+
+            if ((sources === undefined || sources.length === 0) && typeclass !== "extant") {
+                gotomode = 4;
+            } else if (selected === 4) {
+                gotomode = lastmode;
+            } else if (previous > 0) {
+                gotomode = previous;
+            } else if (typeclass === "standard" && bemode) {
+                gotomode = 1;
+            }
+
+            setTimeout(function() {
+                if (selected === gotomode) {
+                    mythis.fire('iron-signal', {name: 'closeloading'});
+                } else {
+                    mythis.set('selected', gotomode);
+                }
+            }, 500);
         },
 
         getlocation: function () {
@@ -1347,8 +1339,6 @@
                         mythis.starttimers();
                     }, 500);
                 }
-
-                mythis.fire('iron-signal', {name: 'closeloading'});
             }, 500);
         },
 

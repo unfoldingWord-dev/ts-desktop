@@ -783,7 +783,9 @@
                     mythis.set('currentproject.rawdata.main', translation);
                     mythis.createchunks();
                     mythis.createchapters();
-                    mythis.fire('iron-signal', {name: 'closeloading'});
+                    if (!full) {
+                        mythis.fire('iron-signal', {name: 'closeloading'});
+                    }
                     mythis.forceResize();
                     mythis.setlocation();
                     mythis.fire('iron-signal', {name: 'passivesearch'});
@@ -1263,12 +1265,16 @@
             if (selected === 4) {
                 if (sources !== undefined && sources.length !== 0) {
                     mythis.set('selected', lastmode);
+                } else {
+                    mythis.fire('iron-signal', {name: 'closeloading'});
                 }
             } else {
                 if ((sources === undefined || sources.length === 0) && typeclass !== "extant") {
                     setTimeout(function() {
                         mythis.set('selected', 4);
                     }, 500);
+                } else {
+                    mythis.fire('iron-signal', {name: 'closeloading'});
                 }
             }
         },

@@ -273,21 +273,25 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             var toc = this.parseYaml(container, "toc.yml");
             var sorted = [];
 
-            toc.forEach (function (chapter) {
-                chapter.chunks.forEach (function (chunk) {
-                    var results = frames.filter(function (item) {
-                        return item.chapter === chapter.chapter && item.chunk === chunk;
+            if (toc) {
+                toc.forEach (function (chapter) {
+                    chapter.chunks.forEach (function (chunk) {
+                        var results = frames.filter(function (item) {
+                            return item.chapter === chapter.chapter && item.chunk === chunk;
+                        });
+
+                        if (results.length) {
+                            sorted.push(results[0]);
+                        } else {
+                            console.log("Cannot find data for:", container, chapter, chunk);
+                        }
                     });
-
-                    if (results.length) {
-                        sorted.push(results[0]);
-                    } else {
-                        console.log("Cannot find data for:", container, chapter, chunk);
-                    }
                 });
-            });
 
-            return sorted;
+                return sorted;
+            } else {
+                return frames;
+            }
         },
 
         getProjectName: function (id) {
@@ -391,8 +395,14 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
 
         parseYaml: function (container, filename) {
             var filepath = path.join(resourceDir, container, "content", filename);
-            var file = fs.readFileSync(filepath, "utf8");
-            return yaml.load(file);
+
+            try {
+                var file = fs.readFileSync(filepath, "utf8");
+                return yaml.load(file);
+            } catch (e) {
+                console.log("Cannot read file:", filepath);
+                return null;
+            }
         },
 
         getRelatedWords: function (source, slug) {

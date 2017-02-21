@@ -377,8 +377,13 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
 
         getSourceWords: function (source) {
             var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;
+            var words = this.parseYaml(container, "config.yml");
 
-            return this.parseYaml(container, "config.yml").content;
+            if (words && words.content) {
+                return words.content;
+            } else {
+                return [];
+            }
         },
 
         parseHelps: function (content) {
@@ -414,7 +419,7 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             var container = "en_" + dict + "_tw";
             var list = this.parseYaml(container, "config.yml");
 
-            if (list[slug] && list[slug]["see_also"]) {
+            if (list && list[slug] && list[slug]["see_also"]) {
                 var slugs = list[slug]["see_also"];
 
                 return slugs.map(function (item) {
@@ -458,7 +463,7 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             var container = "en_" + dict + "_tw";
             var list = this.parseYaml(container, "config.yml");
 
-            if (list[slug] && list[slug]["examples"]) {
+            if (list && list[slug] && list[slug]["examples"]) {
                 var references = list[slug]["examples"];
 
                 return references.map(function (item) {

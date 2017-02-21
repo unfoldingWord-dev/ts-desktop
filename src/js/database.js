@@ -273,21 +273,25 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             var toc = this.parseYaml(container, "toc.yml");
             var sorted = [];
 
-            toc.forEach (function (chapter) {
-                chapter.chunks.forEach (function (chunk) {
-                    var results = frames.filter(function (item) {
-                        return item.chapter === chapter.chapter && item.chunk === chunk;
+            if (toc) {
+                toc.forEach (function (chapter) {
+                    chapter.chunks.forEach (function (chunk) {
+                        var results = frames.filter(function (item) {
+                            return item.chapter === chapter.chapter && item.chunk === chunk;
+                        });
+
+                        if (results.length) {
+                            sorted.push(results[0]);
+                        } else {
+                            console.log("Cannot find data for:", container, chapter, chunk);
+                        }
                     });
-
-                    if (results.length) {
-                        sorted.push(results[0]);
-                    } else {
-                        console.log("Cannot find data for:", container, chapter, chunk);
-                    }
                 });
-            });
 
-            return sorted;
+                return sorted;
+            } else {
+                return frames;
+            }
         },
 
         getProjectName: function (id) {
@@ -373,8 +377,13 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
 
         getSourceWords: function (source) {
             var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;
+            var words = this.parseYaml(container, "config.yml");
 
-            return this.parseYaml(container, "config.yml").content;
+            if (words && words.content) {
+                return words.content;
+            } else {
+                return [];
+            }
         },
 
         parseHelps: function (content) {
@@ -391,8 +400,14 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
 
         parseYaml: function (container, filename) {
             var filepath = path.join(resourceDir, container, "content", filename);
-            var file = fs.readFileSync(filepath, "utf8");
-            return yaml.load(file);
+
+            try {
+                var file = fs.readFileSync(filepath, "utf8");
+                return yaml.load(file);
+            } catch (e) {
+                console.log("Cannot read file:", filepath);
+                return null;
+            }
         },
 
         getRelatedWords: function (source, slug) {
@@ -404,7 +419,7 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             var container = "en_" + dict + "_tw";
             var list = this.parseYaml(container, "config.yml");
 
-            if (list[slug] && list[slug]["see_also"]) {
+            if (list && list[slug] && list[slug]["see_also"]) {
                 var slugs = list[slug]["see_also"];
 
                 return slugs.map(function (item) {
@@ -448,7 +463,7 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             var container = "en_" + dict + "_tw";
             var list = this.parseYaml(container, "config.yml");
 
-            if (list[slug] && list[slug]["examples"]) {
+            if (list && list[slug] && list[slug]["examples"]) {
                 var references = list[slug]["examples"];
 
                 return references.map(function (item) {

@@ -111,7 +111,7 @@
 
             mythis.timer = setTimeout(function() {
                 mythis.setheights();
-            }, 300);
+            }, 100);
         },
 
         setheights: function () {
@@ -162,6 +162,7 @@
                 setTimeout(function() {
                     contain.classList.remove("movein");
                     mythis.setheights();
+                    mythis.fire('iron-signal', {name: 'closeloading'});
                 }, 500);
             }, 500);
         },

@@ -83,18 +83,6 @@
             });
         });
 
-        //the below test doesn't work right
-
-        /*describe('@PurgeValues', function () {
-            it('should purge all user-set values', function () {
-                var configurator = getConfigurator();
-                configurator.setValue('willpurge', 'user set');
-                configurator.setValue('new setting', 'test this');
-                configurator.purgeValues();
-                assert.equal(configurator.getValue('willpurge'), 'this is the default');
-                assert.equal(configurator.getValue('new setting'), '');
-            });
-        });*/
     });
 
 })();

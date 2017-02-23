@@ -1,6 +1,7 @@
 
 <link rel="import" href="../../components/iron-signals/iron-signals.html">
 <link rel="import" href="../../components/paper-button/paper-button.html">
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
 
 <dom-module id="ts-export-options">
 
@@ -38,6 +39,7 @@
         .option {
             border-bottom: 1px solid var(--border-color);
             padding: 15px 30px 0;
+            min-height: 50px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -52,6 +54,11 @@
         .optiontitle {
             font-size: 130%;
             font-weight: bold;
+        }
+
+        .icon {
+            margin-left: 15px;
+            color: var(--icon-color);
         }
 
         .hide {
@@ -72,25 +79,19 @@
         </div>
         <div id="body">
             <div class="option" on-tap="upload">
-                <span class="optiontitle">Upload to Door43</span>
-                <span>Uploads project to your Door43 Account</span>
-                <span>By uploading the project to your Door43 account, the content is available to be downloaded by other translators, merged with other projects, or used as an online backup.</span>
+                <span class="optiontitle">Upload to Door43<iron-icon class="icon" icon="info" title="Uploads project to your Door43 Account - content will then be available to be downloaded by other translators, merged with other projects, or used as an online backup"></iron-icon></span>
             </div>
             <div class$="[[checkusfmclass(currentproject.projectmeta.project_type_class, currentproject.projectmeta.format, currentproject.projectmeta.source_translations)]]" on-tap="checkusfm">
-                <span class="optiontitle">Export to USFM File</span>
-                <span>Creates a .usfm file of your project</span>
+                <span class="optiontitle">Export to USFM File<iron-icon class="icon" icon="info" title="Creates a .usfm file of your project"></iron-icon></span>
             </div>
             <div class$="[[checkmarkdownclass(currentproject.projectmeta.project_type_class, currentproject.projectmeta.format, currentproject.projectmeta.source_translations)]]" on-tap="checkusfm">
-                <span class="optiontitle">Export to Text Files</span>
-                <span>Creates a .zip file of your project</span>
+                <span class="optiontitle">Export to Text Files<iron-icon class="icon" icon="info" title="Creates a .zip file of your project"></iron-icon></span>
             </div>
             <div class$="[[checkprintclass(currentproject.projectmeta.project_type_class, currentproject.projectmeta.source_translations)]]" on-tap="checkprint">
-                <span class="optiontitle">Export to PDF File</span>
-                <span>Creates a .pdf file of your project</span>
+                <span class="optiontitle">Export to PDF File<iron-icon class="icon" icon="info" title="Creates a .pdf file of your project"></iron-icon></span>
             </div>
             <div class="option" on-tap="project">
-                <span class="optiontitle">Export Project File</span>
-                <span>Creates a copy of your project file</span>
+                <span class="optiontitle">Export Project File<iron-icon class="icon" icon="info" title="Creates a copy of your project file"></iron-icon></span>
             </div>
         </div>
         <div id="footer">

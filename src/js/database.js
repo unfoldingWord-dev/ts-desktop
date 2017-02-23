@@ -273,19 +273,21 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             var toc = this.parseYaml(container, "toc.yml");
             var sorted = [];
 
-            if (toc) {
+            if (toc && typeof toc === "object") {
                 toc.forEach (function (chapter) {
-                    chapter.chunks.forEach (function (chunk) {
-                        var results = frames.filter(function (item) {
-                            return item.chapter === chapter.chapter && item.chunk === chunk;
-                        });
+                    if (chapter.chunks) {
+                        chapter.chunks.forEach (function (chunk) {
+                            var results = frames.filter(function (item) {
+                                return item.chapter === chapter.chapter && item.chunk === chunk;
+                            });
 
-                        if (results.length) {
-                            sorted.push(results[0]);
-                        } else {
-                            console.log("Cannot find data for:", container, chapter, chunk);
-                        }
-                    });
+                            if (results.length) {
+                                sorted.push(results[0]);
+                            } else {
+                                console.log("Cannot find data for:", container, chapter, chunk);
+                            }
+                        });
+                    }
                 });
 
                 return sorted;

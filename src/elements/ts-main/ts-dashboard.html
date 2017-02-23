@@ -869,8 +869,8 @@
                   .catch(function(err) {
                       var errmessage = 'An error occurred while importing your source text.';
 
-                      if (err.toString() && err.toString() === "Error: Unsupported project") {
-                          errmessage = "This source text is not a valid project";
+                      if (err.toString()) {
+                          errmessage = err.toString();
                       }
                       mythis.showErrorMessage('Import Failed', errmessage, err);
                   });

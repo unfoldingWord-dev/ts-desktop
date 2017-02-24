@@ -1,9 +1,7 @@
 
-<link rel="import" href="../../components/paper-spinner/paper-spinner.html">
-<link rel="import" href="../../components/iron-signals/iron-signals.html">
 <link rel="import" href="../../components/paper-button/paper-button.html">
-<link rel="import" href="../../components/iron-input/iron-input.html">
-<link rel="import" href="../../components/iron-list/iron-list.html">
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../components/iron-icons/notification-icons.html">
 
 <dom-module id="ts-import-options">
 
@@ -16,17 +14,9 @@
 
         #header {
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
             margin: 20px;
-        }
-
-        #icon {
-            margin-left: 20px;
-        }
-
-        .icon {
-            color: var(--icon-color);
         }
 
         #body {
@@ -39,7 +29,7 @@
         #footer {
             display: flex;
             justify-content: flex-end;
-            padding: 10px 50px;
+            padding: 10px 30px;
         }
 
         #footer paper-button:hover {
@@ -48,11 +38,11 @@
 
         .option {
             border-bottom: 1px solid var(--border-color);
-            padding: 15px 30px 0;
-            min-height: 50px;
+            min-height: 65px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             transition: background .3s, color .3s;
             cursor: pointer;
         }
@@ -66,7 +56,16 @@
             font-weight: bold;
         }
 
-        .option p {
+        .icon {
+            margin-left: 10px;
+            color: var(--icon-color);
+        }
+
+        #header iron-icon {
+            margin-left: 10px;
+        }
+
+        span {
             text-align: center;
         }
 
@@ -76,20 +75,21 @@
 
         <div id="header">
             <h2>Import Options</h2>
-            <span id="icon"><a href="http://help.door43.org/en/knowledgebase/9-translationstudio/docs/3-import-options"><iron-icon class="icon" icon="info"></iron-icon></a></span>
+            <span>For more information on these options,</span>
+            <span>see the <a href="http://help.door43.org/en/knowledgebase/9-translationstudio/docs/3-import-options">help desk webpage</a><iron-icon icon="notification:wifi"></iron-icon></span>
         </div>
         <div id="body">
             <div class="option" on-tap="repo">
-                <span class="optiontitle">Import from Door43</span>
+                <span class="optiontitle">Import from Door43<iron-icon class="icon" icon="info" title="Can be from any door43 account"></iron-icon></span>
             </div>
             <div class="option" on-tap="project">
-                <span class="optiontitle">Import Project File</span>
+                <span class="optiontitle">Import Project File<iron-icon class="icon" icon="info" title="Must have .tstudio extension"></iron-icon></span>
             </div>
             <div class="option" on-tap="usfm">
-                <span class="optiontitle">Import USFM File</span>
+                <span class="optiontitle">Import USFM File<iron-icon class="icon" icon="info" title="Must have either .usfm or .txt extension"></iron-icon></span>
             </div>
             <div class="option" on-tap="container">
-                <span class="optiontitle">Import Source Text</span>
+                <span class="optiontitle">Import Source Text<iron-icon class="icon" icon="info" title="Must be in resource container format"></iron-icon></span>
             </div>
         </div>
         <div id="footer">

@@ -19,20 +19,6 @@
             margin: 20px;
         }
 
-        #title {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #icon {
-            margin-left: 20px;
-        }
-
-        .icon {
-            color: var(--icon-color);
-        }
-
         #body {
             display: flex;
             flex-direction: column;
@@ -43,7 +29,7 @@
         #footer {
             display: flex;
             justify-content: flex-end;
-            padding: 10px 50px;
+            padding: 10px 30px;
         }
 
         #footer paper-button:hover {
@@ -52,10 +38,11 @@
 
         .option {
             border-bottom: 1px solid var(--border-color);
-            padding: 15px 30px;
+            min-height: 65px;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             transition: background .3s, color .3s;
             cursor: pointer;
         }
@@ -71,10 +58,19 @@
 
         .nooption {
             border-bottom: 1px solid var(--border-color);
-            padding: 15px 30px;
+            min-height: 65px;
             display: flex;
             justify-content: center;
             align-items: center;
+        }
+
+        .icon {
+            margin-left: 10px;
+            color: var(--icon-color);
+        }
+
+        #header iron-icon {
+            margin: 0 10px;
         }
 
     </style>
@@ -82,25 +78,24 @@
     <template>
 
         <div id="header">
-            <div id="title">
-                <h2>Update Options</h2>
-                <span id="icon"><a href="http://help.door43.org/en/knowledgebase/9-translationstudio/docs/5-update-options"><iron-icon class="icon" icon="info"></iron-icon></a></span>
-            </div>
-            <span><iron-icon icon="notification:wifi"></iron-icon> Requires Internet Connection</span>
-            <span>These updates may take a while.</span>
+            <h2>Update Options</h2>
+            <span>For more information on these options,</span>
+            <span>see the <a href="http://help.door43.org/en/knowledgebase/9-translationstudio/docs/5-update-options">help desk webpage</a><iron-icon icon="notification:wifi"></iron-icon></span>
+            <span><iron-icon icon="notification:wifi"></iron-icon>These options all require an Internet connection</span>
+            <span>Updates may take a while</span>
         </div>
         <div id="body">
             <div class="option" on-tap="source">
-                <span class="optiontitle">Update List of Available Source Texts</span>
+                <span class="optiontitle">Update List of Available Source Texts<iron-icon class="icon" icon="info" title="Only updates the list of sources. Does not download new sources"></iron-icon></span>
             </div>
             <div class="option" on-tap="download">
-                <span class="optiontitle">Download Available Source Texts</span>
+                <span class="optiontitle">Download Available Source Texts<iron-icon class="icon" icon="info" title="Choose which sources to download after updating the list"></iron-icon></span>
             </div>
             <div class="option" on-tap="language">
-                <span class="optiontitle">Update List of Available Target Languages</span>
+                <span class="optiontitle">Update List of Available Target Languages<iron-icon class="icon" icon="info" title="Will add new target languages to available list"></iron-icon></span>
             </div>
             <div class="nooption">
-                <span class="optiontitle"><a href="https://github.com/unfoldingWord-dev/ts-desktop/releases">Check for Updates to translationStudio</a></span>
+                <span class="optiontitle"><a href="https://github.com/unfoldingWord-dev/ts-desktop/releases">Check for Updates to translationStudio</a><iron-icon class="icon" icon="info" title="Open web page of most current release"></iron-icon></span>
             </div>
         </div>
         <div id="footer">

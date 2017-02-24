@@ -154,6 +154,27 @@
                         text = text.replace(result, startspan + match + endspan);
                     });
 
+                    var expression = new RegExp(/(\<ts-note-marker text)([^<>]*)(>\<\/ts-note-marker>)/);
+
+                    while (expression.test(text)) {
+                        var replacement = '<ts-note-marker class="style-scope ts-source-chunk" text';
+                        var pieces = expression.exec(text);
+                        var notetext = pieces[2];
+                        var fnregex = new RegExp(App.renderer.replaceEscapes(search.text), "gi");
+                        var fnmatches = _.unique(notetext.match(fnregex)) || [];
+
+                        fnmatches.forEach(function (match) {
+                            var fnresult = new RegExp(App.renderer.replaceEscapes(match), "g");
+                            notetext = notetext.replace(fnresult, startspan + match + endspan);
+                        });
+
+                        if (fnmatches.length) {
+                            replacement = '<ts-note-marker class="style-scope ts-source-chunk highlight" text';
+                        }
+
+                        text = text.replace(expression, replacement + notetext + pieces[3]);
+                    }
+
                 }
                 this.$.textholder.innerHTML = text;
                 this.$.textholder.style.direction = direction;

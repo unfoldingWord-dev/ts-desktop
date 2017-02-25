@@ -640,22 +640,24 @@
                     mythis.createchunks();
                     mythis.createchapters();
                 }
-                if (nav === "review") {
+
+                if (nav === "translate") {
+                    mythis.setmodestate();
+                    mythis.checksources();
+                    mythis.starttimers();
+                } else if (nav === "review") {
                     mythis.goreview();
-                } else {
+                } else if (nav === "print") {
                     mythis.fire('iron-signal', {name: 'closeloading'});
-                }
-                setTimeout(function() {
-                    if (nav === "translate") {
-                        mythis.setmodestate();
-                        mythis.checksources();
-                        mythis.starttimers();
-                    } else if (nav === "print") {
+                    setTimeout(function() {
                         mythis.fire('openprint');
-                    } else if (nav === "export") {
+                    }, 500);
+                } else if (nav === "export") {
+                    mythis.fire('iron-signal', {name: 'closeloading'});
+                    setTimeout(function() {
                         mythis.fire('exportusfm');
-                    }
-                }, 500);
+                    }, 500);
+                }
             };
 
             var loadwords = function () {

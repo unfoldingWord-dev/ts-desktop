@@ -224,8 +224,14 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                     meta.type.name = "Text";
                 }
 
+                meta.source_translations = [];
+
                 for (var j = 0; j < manifest.source_translations.length; j++) {
-                    meta.source_translations[j] = dataManager.getSourceDetails(manifest.project.id, manifest.source_translations[j].language_id, manifest.source_translations[j].resource_id);
+                    var details = dataManager.getSourceDetails(manifest.project.id, manifest.source_translations[j].language_id, manifest.source_translations[j].resource_id);
+
+                    if (details) {
+                        meta.source_translations.push(details);
+                    }
                 }
 
                 meta.source_translations = _.uniq(meta.source_translations, 'unique_id');

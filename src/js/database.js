@@ -315,6 +315,10 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             var lang = db.indexSync.getSourceLanguage(language_id);
             var id = language_id + "_" + project_id + "_" + resource_id;
 
+            if (!res || !lang) {
+                return null;
+            }
+
             return {
                 unique_id: id,
                 language_id: language_id,

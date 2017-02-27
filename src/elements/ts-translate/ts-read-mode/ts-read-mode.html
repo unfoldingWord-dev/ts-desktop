@@ -177,7 +177,7 @@
             var index = list.firstVisibleIndex;
             var chapters = this.chapters;
 
-            if (chapters) {
+            if (chapters.length) {
                 this.set('modestatus.chapter', chapters[index].chaptermeta.chapter);
                 this.set('modestatus.index', -1);
             }

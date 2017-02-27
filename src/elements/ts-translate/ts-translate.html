@@ -803,7 +803,7 @@
             var selected = projectmeta.currentsource;
             var sources = projectmeta.source_translations;
 
-            mythis.set('options.body', "Invalid source: No data. Removing source");
+            mythis.set('options.body', "Invalid source: No data found. Removing as selected source");
             mythis.set('options.loading', true);
 
             sources.splice(selected, 1);
@@ -820,6 +820,7 @@
             var projectmeta = this.currentproject.projectmeta;
             var selected = projectmeta.currentsource;
             if (selected === null || selected === undefined) {
+                this.finishLoading(nav, full);
                 return;
             }
             var source = projectmeta.source_translations[selected];

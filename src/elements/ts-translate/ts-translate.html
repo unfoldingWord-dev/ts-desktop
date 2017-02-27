@@ -636,26 +636,10 @@
             var loadsource = function () {
                 if (projectmeta.project_type_class === "extant") {
                     mythis.createextantchunks();
+                    mythis.finishLoading(nav, false);
                 } else {
-                    mythis.createchunks();
-                    mythis.createchapters();
+                    mythis.createchunks(nav, false);
                 }
-                if (nav === "review") {
-                    mythis.goreview();
-                } else {
-                    mythis.fire('iron-signal', {name: 'closeloading'});
-                }
-                setTimeout(function() {
-                    if (nav === "translate") {
-                        mythis.setmodestate();
-                        mythis.checksources();
-                        mythis.starttimers();
-                    } else if (nav === "print") {
-                        mythis.fire('openprint');
-                    } else if (nav === "export") {
-                        mythis.fire('exportusfm');
-                    }
-                }, 500);
             };
 
             var loadwords = function () {
@@ -758,13 +742,19 @@
             mythis.set('options.loading', true);
             mythis.fire('iron-signal', {name: 'openloading'});
             setTimeout(function() {
-                mythis.set('currentproject.projectmeta.source_translations', data.sources);
-                mythis.set('currentproject.projectmeta.currentsource', data.current);
-                mythis.savemanifest();
-                mythis.savesource();
+                mythis.changesources(data.sources, data.current);
                 mythis.getlocation();
                 mythis.reloaddata(data.full);
             }, 250);
+        },
+
+        changesources: function (sources, current) {
+            var mythis = this;
+
+            mythis.set('currentproject.projectmeta.source_translations', sources);
+            mythis.set('currentproject.projectmeta.currentsource', current);
+            mythis.savemanifest();
+            mythis.savesource();
         },
 
         reloaddata: function (full) {
@@ -783,17 +773,7 @@
                 })
                 .then(function (translation) {
                     mythis.set('currentproject.rawdata.main', translation);
-                    mythis.createchunks();
-                    mythis.createchapters();
-                    if (!full) {
-                        mythis.fire('iron-signal', {name: 'closeloading'});
-                    }
-                    mythis.forceResize();
-                    mythis.setlocation();
-                    mythis.fire('iron-signal', {name: 'passivesearch'});
-                    if (full) {
-                        mythis.checksources();
-                    }
+                    mythis.createchunks("reload", full);
                 });
         },
 
@@ -817,10 +797,30 @@
             }
         },
 
-        createchunks: function () {
+        invalidSource: function (nav, full) {
+            var mythis = this;
+            var projectmeta = _.cloneDeep(this.currentproject.projectmeta);
+            var selected = projectmeta.currentsource;
+            var sources = projectmeta.source_translations;
+
+            mythis.set('options.body', "Invalid source: No data found. Removing as selected source");
+            mythis.set('options.loading', true);
+
+            sources.splice(selected, 1);
+            selected = sources.length ? sources.length - 1 : null;
+
+            mythis.changesources(sources, selected);
+
+            setTimeout(function() {
+                mythis.createchunks(nav, full);
+            }, 4000);
+        },
+
+        createchunks: function (nav, full) {
             var projectmeta = this.currentproject.projectmeta;
             var selected = projectmeta.currentsource;
             if (selected === null || selected === undefined) {
+                this.finishLoading(nav, full);
                 return;
             }
             var source = projectmeta.source_translations[selected];
@@ -832,6 +832,11 @@
             var wordlist = App.dataManager.getSourceWords(source);
             var chunkarray = [];
             var title = "";
+
+            if (!frames.length) {
+                this.invalidSource(nav, full);
+                return;
+            }
 
             this.set('currentproject.conflicts', 0);
 
@@ -852,6 +857,40 @@
                 chunkarray.push(chunk);
             }
             this.set('currentproject.chunks', chunkarray);
+            this.createchapters();
+            this.finishLoading(nav, full);
+        },
+
+        finishLoading: function (nav, full) {
+            var mythis = this;
+
+            if (nav === "translate") {
+                mythis.setmodestate();
+                mythis.checksources();
+                mythis.starttimers();
+            } else if (nav === "review") {
+                mythis.goreview();
+            } else if (nav === "print") {
+                mythis.fire('iron-signal', {name: 'closeloading'});
+                setTimeout(function() {
+                    mythis.fire('openprint');
+                }, 500);
+            } else if (nav === "export") {
+                mythis.fire('iron-signal', {name: 'closeloading'});
+                setTimeout(function() {
+                    mythis.fire('exportusfm');
+                }, 500);
+            } else if (nav === "reload") {
+                if (!full) {
+                    mythis.fire('iron-signal', {name: 'closeloading'});
+                }
+                mythis.forceResize();
+                mythis.setlocation();
+                mythis.fire('iron-signal', {name: 'passivesearch'});
+                if (full) {
+                    mythis.checksources();
+                }
+            }
         },
 
         createchapters: function () {

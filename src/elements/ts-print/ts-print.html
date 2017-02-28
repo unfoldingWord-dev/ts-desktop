@@ -269,6 +269,7 @@
                         mythis.set('options.title', "PDF Created");
                         mythis.set('options.body', "Your project has been successfully saved to a PDF.");
                         mythis.set('options.loading', false);
+                        mythis.goback();
                     })
                     .catch(function (err) {
                         var errmessage = "An error occurred saving your project";

@@ -38,6 +38,9 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             return db.loadResourceContainer(filePath)
                 .then(function (container) {
                     return mythis.containerExists(container.slug);
+                })
+                .catch(function (e) {
+                    return false;
                 });
         },
 

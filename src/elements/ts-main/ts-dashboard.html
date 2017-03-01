@@ -1215,7 +1215,12 @@
           }
 
           if (libraryBuild != appData.build) {
-              var translations = App.dataManager.getTranslations();
+              var translations = [];
+
+              if (parseInt(libraryBuild) >= 110) {
+                  translations = App.dataManager.getTranslations();
+              }
+
               var imports = translations.filter(function (item) {
                   return item.resource.imported;
               });
@@ -1238,6 +1243,7 @@
                       return App.utils.fs.writeFile(libraryPath, content);
                   })
                   .then(function () {
+                      App.configurator.setValue("libraryBuild", appData.build);
                       if (imports.length) {
                           return App.utils.fs.readdir(tmpDir);
                       }
@@ -1256,12 +1262,10 @@
 
                       return importPromises;
                   })
-                  .catch(function (e) {
-                      App.configurator.setValue("libraryBuild", appData.build);
+                  .then(function () {
                       return mythis.clearTempDir();
                   })
-                  .then(function () {
-                      App.configurator.setValue("libraryBuild", appData.build);
+                  .catch(function (e) {
                       return mythis.clearTempDir();
                   });
           }
@@ -1283,6 +1287,10 @@
                   App.configurator.applyPrefAppearance();
               })
               .then(function () {
+                  App.ipc.send('loading-status', 'Updating Index File...');
+                  return mythis.updateIndex();
+              })
+              .then(function () {
                   App.ipc.send('loading-status', 'Migrating Projects List...');
                   return App.projectsManager.migrateTargetTranslationsList();
               })
@@ -1293,10 +1301,6 @@
               .then(function () {
                   App.ipc.send('loading-status', 'Creating Auto Backups...');
                   return App.exportManager.backupAllTranslations(mythis.projectlist);
-              })
-              .then(function () {
-                  App.ipc.send('loading-status', 'Updating Index File...');
-                  return mythis.updateIndex();
               })
               .catch(function (err) {
                   err && err.stack && App.reporter.logError(err.stack, 'Error on startup');

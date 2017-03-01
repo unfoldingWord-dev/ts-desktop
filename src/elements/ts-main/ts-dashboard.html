@@ -1060,6 +1060,7 @@
           var conflicts = this.currentproject.conflicts;
           var mediaServer = "https://api.unfoldingword.org/";
           var name = projectmeta.unique_id;
+          var defaultPath = App.configurator.getUserPath('datalocation', name);
           var filePath;
 
           if (conflicts) {
@@ -1068,9 +1069,9 @@
           }
 
           if (projectmeta.format === 'markdown') {
-              filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'Zip Files', extensions: ['zip']}]}});
+              filePath = App.ipc.sendSync('save-as', {options: {defaultPath: defaultPath, filters: [{name: 'Zip Files', extensions: ['zip']}]}});
           } else {
-              filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'USFM Files', extensions: ['usfm']}]}});
+              filePath = App.ipc.sendSync('save-as', {options: {defaultPath: defaultPath, filters: [{name: 'USFM Files', extensions: ['usfm']}]}});
           }
           if (!filePath) {
               return;

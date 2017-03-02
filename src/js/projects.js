@@ -229,6 +229,10 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 for (var j = 0; j < manifest.source_translations.length; j++) {
                     var details = dataManager.getSourceDetails(manifest.project.id, manifest.source_translations[j].language_id, manifest.source_translations[j].resource_id);
 
+                    if (manifest.source_translations[j].resource_id === "udb" && manifest.resource.id !== "udb") {
+                        details = false;
+                    }
+
                     if (details) {
                         meta.source_translations.push(details);
                     }

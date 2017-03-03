@@ -154,7 +154,7 @@
         search: function (passive) {
             var mythis = this;
             var query = this.query.trim().toLowerCase();
-            var chunks = _.cloneDeep(this.chunks) || [];
+            var chunks = this.chunks || [];
             var type = this.selected;
             var forward = [];
             var backward = [];

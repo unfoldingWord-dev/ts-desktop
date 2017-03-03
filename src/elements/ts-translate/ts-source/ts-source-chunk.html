@@ -154,7 +154,7 @@
                         text = text.replace(result, startspan + match + endspan);
                     });
 
-                    var expression = new RegExp(/(\<ts-note-marker text)([^<>]*)(>\<\/ts-note-marker>)/);
+                    var expression = new RegExp(/(\<ts-note-marker text=')([^<>]*)('>\<\/ts-note-marker>)/);
 
                     while (expression.test(text)) {
                         var replacement = '<ts-note-marker class="style-scope ts-source-chunk" text';

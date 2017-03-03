@@ -43,6 +43,22 @@ function Renderer() {
             return text;
         },
 
+        removeParaTags: function (text) {
+            var test = new RegExp(/<\/?para[^<>]*>/g);
+
+            text = text.replace(test, "");
+
+            return text;
+        },
+
+        removeCharTags: function (text) {
+            var test = new RegExp(/<\/?char[^<>]*>/g);
+
+            text = text.replace(test, "");
+
+            return text;
+        },
+
         migrateMarkers: function (text) {
             var vtest = new RegExp(/ ?[\\\/]v ?(?=\d)/g);
             var ctest = new RegExp(/ ?[\\\/]c ?(?=\d)/g);

@@ -170,8 +170,6 @@
                     }
                     regexstr += "([^<]*<\/span>)(?! *<\/span>)";
 
-                    var regex = new RegExp(regexstr);
-
                     if (completed) {
                         returnstr = App.renderer.renderTargetWithVerses(text, module);
                     } else {
@@ -190,12 +188,14 @@
                                 var result = new RegExp(App.renderer.replaceEscapes(match) + "(?![^<]*>)", "g");
                                 returnstr = returnstr.replace(result, startspan + match + endspan);
                             });
-
                         } else {
-                            while (regex.test(returnstr)) {
-                                var replace = startspan + regex.exec(returnstr)[0] + endspan;
-                                returnstr = returnstr.replace(regex, replace);
-                            }
+                            var regex = new RegExp(regexstr, "gi");
+                            var matches2 = _.unique(returnstr.match(regex)) || [];
+
+                            matches2.forEach(function (match) {
+                                var result = new RegExp(match, "g");
+                                returnstr = returnstr.replace(result, startspan + match + endspan);
+                            });
                         }
                     }
 

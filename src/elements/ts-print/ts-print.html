@@ -248,8 +248,9 @@
         print: function () {
             var mythis = this;
             var name = this.currentproject.projectmeta.unique_id;
+            var defaultPath = App.configurator.getUserPath('datalocation', name);
             var direction = this.currentproject.projectmeta.target_language.direction;
-            var filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'PDF Files', extensions: ['pdf']}]}});
+            var filePath = App.ipc.sendSync('save-as', {options: {defaultPath: defaultPath, filters: [{name: 'PDF Files', extensions: ['pdf']}]}});
             if (!filePath) {
                 return;
             }

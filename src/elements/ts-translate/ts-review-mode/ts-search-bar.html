@@ -153,14 +153,48 @@
 
         search: function (passive) {
             var mythis = this;
-            var query = this.query.trim();
+            var query = this.query.trim().toLowerCase();
             var chunks = this.chunks || [];
             var type = this.selected;
             var forward = [];
             var backward = [];
+            var notetest = new RegExp(/(\<ts-note-marker text=')([^<>]*)('>\<\/ts-note-marker>)/);
+            var tagtest = new RegExp(/<\/?[^<>]*>/g);
 
             chunks.forEach(function (chunk) {
-                if (query && ((type === 'source' && chunk.srccontent.toLowerCase().includes(query.toLowerCase())) || (type === 'target' && chunk.transcontent.toLowerCase().includes(query.toLowerCase())))) {
+                var match = false;
+
+                if (query) {
+                    if (type === 'source') {
+                        var srctext = chunk.srccontent.toLowerCase();
+
+                        while (notetest.test(srctext)) {
+                            var note = notetest.exec(srctext)[2];
+
+                            if (note.includes(query)) {
+                                match = true;
+                            }
+
+                            srctext = srctext.replace(notetest, "");
+                        }
+
+                        srctext = srctext.replace(tagtest, "");
+
+                        if (srctext.includes(query)) {
+                            match = true;
+                        }
+                    } else {
+                        var transtext = chunk.transcontent.toLowerCase();
+
+                        transtext = transtext.replace(tagtest, "");
+
+                        if (transtext.includes(query)) {
+                            match = true;
+                        }
+                    }
+                }
+
+                if (match) {
                     forward.push(chunk.index);
                     backward.push(chunk.index);
                 }

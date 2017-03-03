@@ -850,6 +850,8 @@
                 var chunkmeta = this.createFrameMeta(frames[i], projectmeta, sourcedata.verses, title);
                 var chunk = this.getFrameData(chunkmeta, projectmeta);
                 var sourcecontent = App.renderer.convertNoteMarkers(sourcedata.text);
+                sourcecontent = App.renderer.removeParaTags(sourcecontent);
+                sourcecontent = App.renderer.removeCharTags(sourcecontent);
                 chunk.srccontent = App.renderer.renderSuperscriptVerses(sourcecontent);
                 chunk.wordcontent = "";
                 chunk.resources = resources;

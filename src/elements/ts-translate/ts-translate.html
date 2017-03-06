@@ -819,9 +819,12 @@
         createchunks: function (nav, full) {
             var projectmeta = this.currentproject.projectmeta;
             var selected = projectmeta.currentsource;
-            if (selected === null || selected === undefined) {
+            if (selected === null || selected === undefined || !projectmeta.source_translations.length) {
                 this.finishLoading(nav, full);
                 return;
+            }
+            if (selected >= projectmeta.source_translations.length) {
+                selected = projectmeta.source_translations.length -1;
             }
             var source = projectmeta.source_translations[selected];
             var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;

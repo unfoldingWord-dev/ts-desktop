@@ -70,7 +70,11 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
         },
 
         getTargetLanguages: function () {
-            var list = db.indexSync.getTargetLanguages();
+            try {
+                var list = db.indexSync.getTargetLanguages();
+            } catch (e) {
+                return [];
+            }
 
             return list.map(function (item) {
                 return {id: item.slug, name: item.name, direction: item.direction};
@@ -83,7 +87,16 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
 
         getSourcesByProject: function (project) {
             var mythis = this;
-            var allres = db.indexSync.getResources(null, project);
+
+            try {
+                var allres = db.indexSync.getResources(null, project);
+            } catch (e) {
+                return Promise.resolve(true)
+                    .then(function () {
+                        return [];
+                    });
+            }
+
             var filterres = allres.filter(function (item) {
                 return item.type === 'book' && (item.status.checking_level === "3" || item.imported);
             });
@@ -300,7 +313,11 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
         },
 
         getProjectName: function (id) {
-            var project = db.indexSync.getProject('en', id);
+            try {
+                var project = db.indexSync.getProject('en', id);
+            } catch (e) {
+                return "";
+            }
 
             if (project) {
                 return project.name;
@@ -314,9 +331,13 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
 		},
 
         getSourceDetails: function (project_id, language_id, resource_id) {
-            var res = db.indexSync.getResource(language_id, project_id, resource_id);
-            var lang = db.indexSync.getSourceLanguage(language_id);
-            var id = language_id + "_" + project_id + "_" + resource_id;
+            try {
+                var res = db.indexSync.getResource(language_id, project_id, resource_id);
+                var lang = db.indexSync.getSourceLanguage(language_id);
+                var id = language_id + "_" + project_id + "_" + resource_id;
+            } catch (e) {
+                return null;
+            }
 
             if (!res || !lang) {
                 return null;

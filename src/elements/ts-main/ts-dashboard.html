@@ -1266,6 +1266,9 @@
                   .then(function () {
                       return mythis.clearTempDir();
                   })
+                  .then(function () {
+                      App.ipc.send('fire-reload');
+                  })
                   .catch(function (e) {
                       return mythis.clearTempDir();
                   });

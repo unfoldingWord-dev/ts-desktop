@@ -496,37 +496,44 @@
             mythis.set('options.body', "Loading source options. Please wait...");
             mythis.set('options.loading', true);
             mythis.fire('iron-signal', {name: 'openloading'});
-
             mythis.savestate();
 
-            App.dataManager.getSourcesByProject(projectmeta.project.id)
-                .then(function (sources) {
-                    if (projectmeta.resource.id !== "udb") {
-                        sources = _.filter(sources, function(source) {
-                            return source.resource_id !== "udb";
-                        });
-                    }
-
-                    sources.forEach(function (source) {
-                        var inarray = false;
-                        projectmeta.source_translations.forEach(function (current) {
-                            if (current.unique_id === source.unique_id) {
-                                inarray = true;
+            setTimeout(function() {
+                return App.dataManager.getSourcesByProject(projectmeta.project.id)
+                    .then(function (sources) {
+                        if (sources.length) {
+                            if (projectmeta.resource.id !== "udb") {
+                                sources = _.filter(sources, function(source) {
+                                    return source.resource_id !== "udb";
+                                });
                             }
-                        });
-                        source.selected = inarray;
+
+                            sources.forEach(function (source) {
+                                var inarray = false;
+                                projectmeta.source_translations.forEach(function (current) {
+                                    if (current.unique_id === source.unique_id) {
+                                        inarray = true;
+                                    }
+                                });
+                                source.selected = inarray;
+                            });
+
+                            modal.set('master', sources);
+
+                            return modal.organizeSources()
+                                .then(function () {
+                                    mythis.fire('iron-signal', {name: 'closeloading'});
+                                    setTimeout(function() {
+                                        mythis.$.sourcepopup.open();
+                                    }, 500);
+                                });
+                        } else {
+                            mythis.set('options.title', "Loading Failed");
+                            mythis.set('options.body', "Cannot find sources. Try restarting app.");
+                            mythis.set('options.loading', false);
+                        }
                     });
-
-                    modal.set('master', sources);
-
-                    return modal.organizeSources();
-                })
-                .then(function () {
-                    mythis.fire('iron-signal', {name: 'closeloading'});
-                    setTimeout(function() {
-                        mythis.$.sourcepopup.open();
-                    }, 500);
-                });
+            }, 500);
         },
 
         closesource: function () {
@@ -819,9 +826,12 @@
         createchunks: function (nav, full) {
             var projectmeta = this.currentproject.projectmeta;
             var selected = projectmeta.currentsource;
-            if (selected === null || selected === undefined) {
+            if (selected === null || selected === undefined || !projectmeta.source_translations.length) {
                 this.finishLoading(nav, full);
                 return;
+            }
+            if (selected >= projectmeta.source_translations.length) {
+                selected = projectmeta.source_translations.length -1;
             }
             var source = projectmeta.source_translations[selected];
             var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;

@@ -240,7 +240,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
 
                 meta.source_translations = _.uniq(meta.source_translations, 'unique_id');
 
-                if (manifest.source_translations.length) {
+                if (meta.source_translations.length) {
                     meta.currentsource = 0;
                 } else {
                     meta.currentsource = null;

@@ -171,6 +171,8 @@
                         while (notetest.test(srctext)) {
                             var note = notetest.exec(srctext)[2];
 
+                            note = note.replace(/&apos;/g, "'");
+
                             if (note.includes(query)) {
                                 match = true;
                             }

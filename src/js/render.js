@@ -35,6 +35,7 @@ function Renderer() {
                 var test = new RegExp(/<[^<>]*>/g);
 
                 notestr = notestr.replace(test, "");
+                notestr = notestr.replace(/'/g, '&apos;');
 
                 var marker = "\<ts-note-marker text='" + notestr + "'\>\<\/ts-note-marker\>";
 

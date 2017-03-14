@@ -214,7 +214,8 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
         },
 
         updateManifestToMeta: function (manifest) {
-            var meta = _.cloneDeep(manifest);
+            var meta = manifest;
+
             try {
                 if (manifest.project.name === "") {
                     meta.project.name = dataManager.getProjectName(manifest.project.id);
@@ -224,7 +225,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                     meta.type.name = "Text";
                 }
 
-                meta.source_translations = [];
+                var sources = [];
 
                 for (var j = 0; j < manifest.source_translations.length; j++) {
                     var details = dataManager.getSourceDetails(manifest.project.id, manifest.source_translations[j].language_id, manifest.source_translations[j].resource_id);
@@ -234,11 +235,11 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                     }
 
                     if (details) {
-                        meta.source_translations.push(details);
+                        sources.push(details);
                     }
                 }
 
-                meta.source_translations = _.uniq(meta.source_translations, 'unique_id');
+                meta.source_translations = _.uniq(sources, 'unique_id');
 
                 if (meta.source_translations.length) {
                     meta.currentsource = 0;

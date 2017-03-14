@@ -1183,7 +1183,7 @@
                       });
               })
               .then(function(list) {
-                  App.ipc.send('loading-status', 'Updating Manifest Files...');
+                  App.ipc.send('loading-status', 'Loading Projects...');
                   for (var i = 0; i < list.length; i++) {
                       list[i] = App.projectsManager.updateManifestToMeta(list[i]);
                   }
@@ -1198,7 +1198,7 @@
               });
       },
 
-      updateIndex: function () {
+      checkBuild: function () {
           var mythis = this;
           var path = require('path');
           var libraryDir = App.configurator.getValue('libraryDir');
@@ -1217,6 +1217,8 @@
 
           if (libraryBuild != appData.build) {
               var translations = [];
+
+              App.ipc.send('loading-status', 'Updating Index File...');
 
               if (parseInt(libraryBuild) >= 110) {
                   translations = App.dataManager.getTranslations();
@@ -1267,6 +1269,10 @@
                       return mythis.clearTempDir();
                   })
                   .then(function () {
+                      App.ipc.send('loading-status', 'Migrating Projects...');
+                      return App.projectsManager.migrateTargetTranslationsList();
+                  })
+                  .then(function () {
                       App.ipc.send('fire-reload');
                   })
                   .catch(function (e) {
@@ -1291,15 +1297,9 @@
                   App.configurator.applyPrefAppearance();
               })
               .then(function () {
-                  App.ipc.send('loading-status', 'Updating Index File...');
-                  return mythis.updateIndex();
+                  return mythis.checkBuild();
               })
               .then(function () {
-                  App.ipc.send('loading-status', 'Migrating Projects List...');
-                  return App.projectsManager.migrateTargetTranslationsList();
-              })
-              .then(function () {
-                  App.ipc.send('loading-status', 'Loading Projects List...');
                   return mythis.updateList();
               })
               .then(function () {

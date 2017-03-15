@@ -28,7 +28,7 @@ function Renderer() {
         },
 
         convertNoteMarkers: function (text) {
-            var expression = new RegExp(/(<note[^<>]*>)([^]*)(<\/note>)/);
+            var expression = new RegExp(/(<note[^<>]*>)([^]+?)(<\/note>)/);
 
             while (expression.test(text)) {
                 var notestr = expression.exec(text)[2];

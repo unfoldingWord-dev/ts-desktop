@@ -125,6 +125,8 @@
 
         #notebody {
             flex: 0 0 130px;
+            display: flex;
+            align-items: center;
             overflow-y: auto;
             margin: 0;
             padding: 0 30px;
@@ -1081,6 +1083,9 @@
             }
             if (udbtext) {
                 udbtext = App.renderer.convertVerseMarkers(udbtext).text;
+                udbtext = App.renderer.convertNoteMarkers(udbtext);
+                udbtext = App.renderer.removeParaTags(udbtext);
+                udbtext = App.renderer.removeCharTags(udbtext);
                 udbtext = App.renderer.renderSuperscriptVerses(udbtext);
                 resources.push({title: "UDB", array: false, data: [udbtext]});
             }

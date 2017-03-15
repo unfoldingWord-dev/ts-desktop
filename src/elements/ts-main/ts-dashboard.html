@@ -1184,10 +1184,7 @@
               })
               .then(function(list) {
                   App.ipc.send('loading-status', 'Loading Projects...');
-                  for (var i = 0; i < list.length; i++) {
-                      list[i] = App.projectsManager.updateManifestToMeta(list[i]);
-                  }
-                  return _.compact(list);
+                  return _.compact(list.map(App.projectsManager.updateManifestToMeta, App.projectsManager));
               })
               .then(function (list) {
                   var sorted = App.projectsManager.sortProjectList(list);

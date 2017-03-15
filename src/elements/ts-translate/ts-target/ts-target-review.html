@@ -181,11 +181,11 @@
                         }
 
                         if (completed || searcharray.length === 1) {
-                            var regex2 = new RegExp(App.renderer.replaceEscapes(search.text) + "(?![^<]*>)", "gi");
+                            var regex2 = new RegExp(App.renderer.replaceEscapes(search.text) + "(?!([^<]*>)|(\\d*<\/sup))", "gi");
                             var matches = _.unique(returnstr.match(regex2)) || [];
 
                             matches.forEach(function (match) {
-                                var result = new RegExp(App.renderer.replaceEscapes(match) + "(?![^<]*>)", "g");
+                                var result = new RegExp(App.renderer.replaceEscapes(match) + "(?!([^<]*>)|(\\d*<\/sup))", "g");
                                 returnstr = returnstr.replace(result, startspan + match + endspan);
                             });
                         } else {

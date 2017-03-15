@@ -49,7 +49,7 @@ function Renderer() {
 
             text = text.replace(test, "");
 
-            return text;
+            return text.trim();
         },
 
         removeCharTags: function (text) {
@@ -57,7 +57,7 @@ function Renderer() {
 
             text = text.replace(test, "");
 
-            return text;
+            return text.trim();
         },
 
         migrateMarkers: function (text) {
@@ -87,7 +87,7 @@ function Renderer() {
                 text = text.replace(expression, "\<sup\>" + versestr + "\<\/sup\>");
             }
 
-            return text;
+            return text.trim();
         },
 
         renderParagraphs: function (text, module) {

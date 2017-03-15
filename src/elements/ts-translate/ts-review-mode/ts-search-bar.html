@@ -159,40 +159,37 @@
             var forward = [];
             var backward = [];
             var notetest = new RegExp(/(\<ts-note-marker text=')([^<>]*)('>\<\/ts-note-marker>)/);
-            var tagtest = new RegExp(/<\/?[^<>]*>/g);
+            var tagtest = new RegExp(/<sup>\d+<\/sup>/g);
+            var markertest = new RegExp(/\\v \d+ /g);
 
             chunks.forEach(function (chunk) {
                 var match = false;
+                var searchtext = "";
 
                 if (query) {
                     if (type === 'source') {
-                        var srctext = chunk.srccontent.toLowerCase();
-
-                        while (notetest.test(srctext)) {
-                            var note = notetest.exec(srctext)[2];
-
-                            note = note.replace(/&apos;/g, "'");
-
-                            if (note.includes(query)) {
-                                match = true;
-                            }
-
-                            srctext = srctext.replace(notetest, "");
-                        }
-
-                        srctext = srctext.replace(tagtest, "");
-
-                        if (srctext.includes(query)) {
-                            match = true;
-                        }
+                        searchtext = chunk.srccontent.toLowerCase();
                     } else {
-                        var transtext = chunk.transcontent.toLowerCase();
+                        searchtext = chunk.transcontent.toLowerCase();
+                    }
 
-                        transtext = transtext.replace(tagtest, "");
+                    while (notetest.test(searchtext)) {
+                        var note = notetest.exec(searchtext)[2];
 
-                        if (transtext.includes(query)) {
+                        note = note.replace(/&apos;/g, "'");
+
+                        if (note.includes(query)) {
                             match = true;
                         }
+
+                        searchtext = searchtext.replace(notetest, "");
+                    }
+
+                    searchtext = searchtext.replace(tagtest, "");
+                    searchtext = searchtext.replace(markertest, "");
+
+                    if (searchtext.includes(query)) {
+                        match = true;
                     }
                 }
 

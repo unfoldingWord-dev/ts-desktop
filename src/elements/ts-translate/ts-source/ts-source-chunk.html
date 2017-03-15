@@ -146,11 +146,11 @@
                     direction = this.chunk.projectmeta.source_translations[this.chunk.projectmeta.currentsource].direction;
                 }
                 if (search.text && search.type === "source") {
-                    var regex = new RegExp(App.renderer.replaceEscapes(search.text) + "(?![^<]*>)", "gi");
+                    var regex = new RegExp(App.renderer.replaceEscapes(search.text) + "(?!([^<]*>)|(\\d*<\/sup))", "gi");
                     var matches = _.unique(text.match(regex)) || [];
 
                     matches.forEach(function (match) {
-                        var result = new RegExp(App.renderer.replaceEscapes(match) + "(?![^<]*>)", "g");
+                        var result = new RegExp(App.renderer.replaceEscapes(match) + "(?!([^<]*>)|(\\d*<\/sup))", "g");
                         text = text.replace(result, startspan + match + endspan);
                     });
 

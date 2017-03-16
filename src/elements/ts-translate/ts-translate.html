@@ -418,6 +418,8 @@
                                         App.reporter.logError(err, 'Error cleaning project');
                                     });
                             });
+                    } else {
+                        return Promise.resolve(true);
                     }
                 })
                 .then(function () {
@@ -426,10 +428,13 @@
                         return App.projectsManager.saveTargetManifest(projectmeta)
                             .then(function () {
                                 mythis.set('saveoptions.manifest', false);
+                                return Promise.resolve(true);
                             })
                             .catch(function (err) {
                                 App.reporter.logError(err, 'Error saving target manifest');
                             });
+                    } else {
+                        return Promise.resolve(true);
                     }
                 })
                 .then(function () {
@@ -438,6 +443,8 @@
                             .catch(function (err) {
                                 App.reporter.logError(err, 'Error committing project');
                             });
+                    } else {
+                        return Promise.resolve(true);
                     }
                 })
                 .then(function () {
@@ -445,6 +452,7 @@
                         return App.exportManager.autoBackupTranslation(projectmeta)
                             .then(function () {
                                 mythis.set('saveoptions.backup', false);
+                                return Promise.resolve(true);
                             })
                             .catch(function (err) {
                                 mythis.set('options', {});
@@ -455,15 +463,17 @@
                                 mythis.set('saveoptions.backup', false);
                                 App.reporter.logError(err, 'Error backing up translation');
                             });
+                    } else {
+                        return Promise.resolve(true);
                     }
                 })
                 .then(function () {
                     if (changes) {
-                        mythis.fire('iron-signal', {name: 'updatelist'});
                         mythis.set('message', "Changes Saved");
                     } else {
                         mythis.set('message', "No Changes Found");
                     }
+                    return Promise.resolve(true);
                 })
                 .then(function () {
                     setTimeout(function() {
@@ -1423,16 +1433,17 @@
         gohome: function () {
             var mythis = this;
 
-            mythis.closeresource();
             mythis.savestate();
             mythis.stoptimers();
 
             return mythis.saveAll()
                 .then(function () {
+                    mythis.fire('iron-signal', {name: 'updatelist'});
                     setTimeout(function() {
                         mythis.fire('iron-signal', {name: 'closeloading'});
                         mythis.set('route', "home");
                         mythis.reset();
+                        mythis.closeresource();
                     }, 500);
                 });
         },

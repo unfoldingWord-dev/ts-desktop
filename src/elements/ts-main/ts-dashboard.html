@@ -341,11 +341,6 @@
           this.checkUser(data);
       },
 
-      retrieveUser: function () {
-          var user = App.configurator.getValue("userdata");
-          this.checkUser(user);
-      },
-
       checkUser: function (user) {
           this.set('currentuser', user);
           if (user.full_name) {
@@ -1189,6 +1184,7 @@
               .then(function (list) {
                   var sorted = App.projectsManager.sortProjectList(list);
                   mythis.set('projectlist', sorted);
+                  return Promise.resolve(true);
               })
               .catch(function (err) {
                   mythis.showErrorMessage('Error updating projects', 'An error occurred while updating projects', err);
@@ -1270,38 +1266,62 @@
                       return App.projectsManager.migrateTargetTranslationsList();
                   })
                   .then(function () {
-                      App.ipc.send('fire-reload');
+                      return Promise.resolve(true);
                   })
                   .catch(function (e) {
                       return mythis.clearTempDir();
                   });
+          } else {
+              return Promise.resolve(false);
           }
+      },
+
+      createInitialSettings: function (version) {
+          var untildify = require('untildify');
+          var gitversion = version ? version.toString() : 'N/A';
+
+          App.configurator.refreshUserSetting();
+          App.configurator.setUserSetting('gitversion', gitversion);
+          App.configurator.setUserSetting('appversion', App.configurator.getAppData().toString());
+          App.configurator.setUserSetting('datapath', App.configurator.getValue('rootdir'));
+          App.configurator.setUserSetting('dataserver', "git.door43.org");
+          App.configurator.setUserSetting('mediaserver', "https://api.unfoldingword.org/");
+
+          var location = App.configurator.getUserSetting('datalocation');
+
+          location = untildify(location);
+          location = location.replace(/\\/g, "\/");
+          App.configurator.setUserSetting('datalocation', location);
+          App.configurator.applyPrefAppearance();
       },
 
       ready: function() {
           var mythis = this;
 
-          App.gitManager.verifyGit()
+          return App.gitManager.verifyGit()
               .then(function (version) {
+                  App.ipc.send('loading-status', 'Retrieving User Settings...');
                   App.reporter.logNotice('Git Version ' + version);
-              })
-              .then(function () {
-                  return mythis.$.settings.createInitialSettings();
-              })
-              .then(function () {
-                  App.ipc.send('loading-status', 'Retrieving User Info...');
-                  mythis.retrieveUser();
-                  App.configurator.applyPrefAppearance();
-              })
-              .then(function () {
+                  mythis.createInitialSettings(version);
+                  mythis.checkUser(App.configurator.getValue("userdata"));
+
                   return mythis.checkBuild();
               })
-              .then(function () {
-                  return mythis.updateList();
+              .then(function (updates) {
+                  if (updates) {
+                      App.ipc.send('fire-reload');
+                      return Promise.resolve(false);
+                  } else {
+                      return mythis.updateList();
+                  }
               })
-              .then(function () {
-                  App.ipc.send('loading-status', 'Creating Auto Backups...');
-                  return App.exportManager.backupAllTranslations(mythis.projectlist);
+              .then(function (list) {
+                  if (list) {
+                      App.ipc.send('loading-status', 'Creating Auto Backups...');
+                      return App.exportManager.backupAllTranslations(mythis.projectlist);
+                  } else {
+                      return Promise.resolve(false);
+                  }
               })
               .catch(function (err) {
                   err && err.stack && App.reporter.logError(err.stack, 'Error on startup');
@@ -1318,9 +1338,11 @@
 
                   mythis.showErrorMessage('Error on startup', msg, err);
               })
-              .then(function () {
-                  App.ipc.send('main-loading-done');
-                  mythis.$.home.setsortfields();
+              .then(function (backups) {
+                  if (backups) {
+                      App.ipc.send('main-loading-done');
+                      mythis.$.home.setsortfields();
+                  }
               });
       }
 

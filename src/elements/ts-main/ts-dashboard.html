@@ -159,7 +159,7 @@
       <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
           <ts-home data-route="home" route="{{route}}" currentproject="{{currentproject}}" projectlist="{{projectlist}}" importdata="{{importdata}}" id="home"></ts-home>
           <ts-new data-route="new" route="{{route}}" importdata="{{importdata}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]" options="{{options}}" on-finishusfm="finishUsfmImport"></ts-new>
-          <ts-translate data-route="translate" route="{{route}}" message="{{message}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}" id="translate" on-updatelist="updateList" on-exportusfm="exportUsfm" on-openprint="openPrint"></ts-translate>
+          <ts-translate data-route="translate" route="{{route}}" message="{{message}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}" id="translate" on-update="updateFromProject" on-exportusfm="exportUsfm" on-openprint="openPrint"></ts-translate>
           <ts-review data-route="review" route="{{route}}" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}"></ts-review>
           <ts-settings data-route="settings" route="{{route}}" currentproject="[[currentproject]]" options="{{options}}" id="settings"></ts-settings>
           <ts-profile data-route="profile" currentuser="[[currentuser]]" options="{{options}}"></ts-profile>
@@ -369,6 +369,7 @@
       },
 
       showMessage: function (title, body) {
+          this.set('options', {});
           this.set('options.title', title);
           this.set('options.body', body);
           this.set('options.loading', false);
@@ -518,7 +519,7 @@
                       App.projectsManager.unsetValues(projectmeta.unique_id);
 
                       setTimeout(function() {
-                          return mythis.updateList()
+                          return mythis.updateList(false)
                               .then(function () {
                                   mythis.showMessage('Project Deleted', 'Your project has been successfully deleted.');
                               });
@@ -545,6 +546,7 @@
                           return App.gitManager.merge(mythis.currentuser, changedata.newpaths.projectDir, changedata.oldpaths.projectDir)
                               .then(function (list) {
                                   conflicts = list;
+                                  return Promise.resolve(true);
                               })
                               .then(function () {
                                   return App.utils.fs.remove(changedata.oldpaths.projectDir);
@@ -563,7 +565,7 @@
                       App.projectsManager.unsetValues(changedata.oldmeta.unique_id);
 
                       setTimeout(function () {
-                          return mythis.updateList()
+                          return mythis.updateList(false)
                               .then(function () {
                                   mythis.showConflictsMessage('Change Complete', 'Your project has been changed.', conflicts);
                               });
@@ -713,6 +715,7 @@
                           return App.gitManager.merge(mythis.currentuser, targetPath, tmpPath)
                               .then(function (list) {
                                   conflicts = list;
+                                  return Promise.resolve(true);
                               });
                       }
                   })
@@ -721,7 +724,7 @@
                   })
                   .then(function() {
                       setTimeout(function() {
-                          return mythis.updateList()
+                          return mythis.updateList(true)
                               .then(function () {
                                   mythis.showConflictsMessage("Import Complete", "Your project has been successfully imported.", conflicts);
                               });
@@ -785,6 +788,8 @@
                   .then(function () {
                       if (overwrite) {
                           return App.exportManager.backupTranslation(projectmeta, backupPath);
+                      } else {
+                          return Promise.resolve(true);
                       }
                   })
                   .then(function () {
@@ -795,12 +800,13 @@
                   })
                   .then(function () {
                       setTimeout(function() {
-                          return mythis.updateList()
+                          return mythis.updateList(false)
                               .then(function () {
                                   mythis.showMessage('Import Complete', 'Your file has been imported. Please review it carefully. If it was not formatted properly, text may not appear as desired.');
                               });
                       }, 250);
-                  }).catch(function (err) {
+                  })
+                  .catch(function (err) {
                       mythis.showErrorMessage('Import Failed', 'Error occurred importing project', err);
 
                       if (overwrite) {
@@ -1136,11 +1142,22 @@
           }
       },
 
-      updateList: function () {
+      updateFromProject: function () {
+          return this.updateList(false);
+      },
+
+      updateList: function (withcheck) {
           var mythis = this;
 
           return App.projectsManager.loadTargetTranslationsList()
-              .then(function(list) {
+              .then(function (list) {
+                  if (withcheck) {
+                      return mythis.checkContainers(list);
+                  } else {
+                      return list;
+                  }
+              })
+              .then(function (list) {
                   App.ipc.send('loading-status', 'Loading Projects...');
                   return _.compact(list.map(App.projectsManager.updateManifestToMeta, App.projectsManager));
               })
@@ -1157,6 +1174,8 @@
       checkContainers: function (list) {
           var promises = [];
           var strings = {};
+
+          App.ipc.send('loading-status', 'Opening resource containers...');
 
           for (var i = 0; i < list.length; i++) {
               var proj = list[i].project.id;
@@ -1182,8 +1201,6 @@
           promises.push(App.dataManager.activateContainer('en', 'ta-process', 'vol1'));
           promises.push(App.dataManager.activateContainer('en', 'ta-translate', 'vol1'));
           promises.push(App.dataManager.activateContainer('en', 'ta-translate', 'vol2'));
-
-          App.ipc.send('loading-status', 'Opening resource containers...');
 
           return Promise.all(promises)
               .then(function () {
@@ -1261,15 +1278,15 @@
                   .then(function () {
                       return mythis.clearTempDir();
                   })
+                  .catch(function (e) {
+                      return mythis.clearTempDir();
+                  })
                   .then(function () {
                       App.ipc.send('loading-status', 'Migrating Projects...');
                       return App.projectsManager.migrateTargetTranslationsList();
                   })
                   .then(function () {
                       return Promise.resolve(true);
-                  })
-                  .catch(function (e) {
-                      return mythis.clearTempDir();
                   });
           } else {
               return Promise.resolve(false);
@@ -1312,7 +1329,7 @@
                       App.ipc.send('fire-reload');
                       return Promise.resolve(false);
                   } else {
-                      return mythis.updateList();
+                      return mythis.updateList(true);
                   }
               })
               .then(function (list) {
@@ -1324,11 +1341,8 @@
                   }
               })
               .catch(function (err) {
-                  err && err.stack && App.reporter.logError(err.stack, 'Error on startup');
-
-                  mythis.set('options', {});
-
                   var msg = 'Something broke.';
+                  err && err.stack && App.reporter.logError(err.stack, 'Error on startup');
 
                   if (err && typeof err === 'string') {
                       msg = err;

@@ -1438,7 +1438,7 @@
 
             return mythis.saveAll()
                 .then(function () {
-                    mythis.fire('iron-signal', {name: 'updatelist'});
+                    mythis.fire('updatelist');
                     setTimeout(function() {
                         mythis.fire('iron-signal', {name: 'closeloading'});
                         mythis.set('route', "home");

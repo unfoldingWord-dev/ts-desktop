@@ -159,7 +159,7 @@
       <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
           <ts-home data-route="home" route="{{route}}" currentproject="{{currentproject}}" projectlist="{{projectlist}}" importdata="{{importdata}}" id="home"></ts-home>
           <ts-new data-route="new" route="{{route}}" importdata="{{importdata}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]" options="{{options}}" on-finishusfm="finishUsfmImport"></ts-new>
-          <ts-translate data-route="translate" route="{{route}}" message="{{message}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}" id="translate" on-exportusfm="exportUsfm" on-openprint="openPrint"></ts-translate>
+          <ts-translate data-route="translate" route="{{route}}" message="{{message}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}" id="translate" on-updatelist="updateList" on-exportusfm="exportUsfm" on-openprint="openPrint"></ts-translate>
           <ts-review data-route="review" route="{{route}}" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}"></ts-review>
           <ts-settings data-route="settings" route="{{route}}" currentproject="[[currentproject]]" options="{{options}}" id="settings"></ts-settings>
           <ts-profile data-route="profile" currentuser="[[currentuser]]" options="{{options}}"></ts-profile>
@@ -235,7 +235,6 @@
           <ts-container-confirm on-finish="finishContainerImport"></ts-container-confirm>
       </paper-dialog>
 
-      <iron-signals on-iron-signal-updatelist="updateList"></iron-signals>
       <iron-signals on-iron-signal-openfeedback="openFeedback"></iron-signals>
       <iron-signals on-iron-signal-openimport="openImport"></iron-signals>
       <iron-signals on-iron-signal-openexport="openExport"></iron-signals>

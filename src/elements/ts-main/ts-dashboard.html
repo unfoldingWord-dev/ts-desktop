@@ -1019,6 +1019,8 @@
                                   mythis.set('options.body', "Extracting Images. Please wait...");
                                   return App.printManager.extractImages();
                               });
+                      } else {
+                          return Promise.resolve(true);
                       }
                   })
                   .then(function () {

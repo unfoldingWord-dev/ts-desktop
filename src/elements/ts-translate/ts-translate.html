@@ -479,6 +479,7 @@
                     setTimeout(function() {
                         mythis.set('message', "Idle");
                     }, 1000);
+                    return Promise.resolve(true);
                 });
 
         },
@@ -692,10 +693,11 @@
                         }
                     }
                     if (wordmeta) {
-                        App.projectsManager.loadTargetTranslation(wordmeta).then(function (words) {
-                            mythis.set('currentproject.rawdata.words', words);
-                            loadsource();
-                        });
+                        App.projectsManager.loadTargetTranslation(wordmeta)
+                            .then(function (words) {
+                                mythis.set('currentproject.rawdata.words', words);
+                                loadsource();
+                            });
                     } else {
                         mythis.set('currentproject.rawdata.words', {});
                         loadsource();
@@ -722,10 +724,11 @@
                         }
                     }
                     if (secondmeta) {
-                        App.projectsManager.loadTargetTranslation(secondmeta).then(function (secondtranslation) {
-                            mythis.set('currentproject.rawdata.second', secondtranslation);
-                            loadwords();
-                        });
+                        App.projectsManager.loadTargetTranslation(secondmeta)
+                            .then(function (secondtranslation) {
+                                mythis.set('currentproject.rawdata.second', secondtranslation);
+                                loadwords();
+                            });
                     } else {
                         mythis.set('currentproject.rawdata.second', {});
                         loadwords();
@@ -807,6 +810,8 @@
                 .then(function () {
                     if (source) {
                         return App.dataManager.activateProjectContainers(source.language_id, projectmeta.project.id, source.resource_id);
+                    } else {
+                        return Promise.resolve(true);
                     }
                 })
                 .then(function () {

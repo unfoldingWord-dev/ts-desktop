@@ -250,7 +250,7 @@
                         <span class="smallspan">{{locale.progress}}</span>
                     </div>
                     <div id="list">
-                        <template is="dom-repeat" items="[[projectlist]]" as="project">
+                        <template is="dom-repeat" items="{{projectlist}}" as="project">
                             <div class="row">
                                 <div class="left" on-tap="openproject">
                                     <span class="smallspan"><iron-icon class="icon" icon$="[[checkicon(project)]]"></iron-icon></span>
@@ -326,7 +326,8 @@
             },
             projectlist: {
                 type: Array,
-                value: []
+                value: [],
+                notify: true
             },
             importdata: {
                 type: Object,
@@ -371,7 +372,7 @@
 
             sort.project = "bible";
             App.configurator.setValue("sort", sort);
-            this.fire('iron-signal', {name: 'updatelist'});
+            this.updateSort();
             dropdown.close();
         },
 
@@ -381,7 +382,7 @@
 
             sort.project = "alpha";
             App.configurator.setValue("sort", sort);
-            this.fire('iron-signal', {name: 'updatelist'});
+            this.updateSort();
             dropdown.close();
         },
 
@@ -391,7 +392,7 @@
 
             sort.order = "project";
             App.configurator.setValue("sort", sort);
-            this.fire('iron-signal', {name: 'updatelist'});
+            this.updateSort();
             dropdown.close();
         },
 
@@ -401,7 +402,7 @@
 
             sort.order = "language";
             App.configurator.setValue("sort", sort);
-            this.fire('iron-signal', {name: 'updatelist'});
+            this.updateSort();
             dropdown.close();
         },
 
@@ -411,8 +412,15 @@
 
             sort.order = "progress";
             App.configurator.setValue("sort", sort);
-            this.fire('iron-signal', {name: 'updatelist'});
+            this.updateSort();
             dropdown.close();
+        },
+
+        updateSort: function () {
+            var list = _.cloneDeep(this.projectlist);
+            var sorted = App.projectsManager.sortProjectList(list);
+
+            this.set('projectlist', sorted);
         },
 
         openresource: function () {

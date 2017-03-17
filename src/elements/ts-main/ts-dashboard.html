@@ -1140,42 +1140,6 @@
           var mythis = this;
 
           return App.projectsManager.loadTargetTranslationsList()
-              .then(function (list) {
-                  var promises = [];
-                  var strings = {};
-
-                  for (var i = 0; i < list.length; i++) {
-                      var proj = list[i].project.id;
-
-                      for (var j = 0; j < list[i].source_translations.length; j++) {
-                          var lang = list[i].source_translations[j].language_id;
-                          var res = list[i].source_translations[j].resource_id;
-                          var string = lang + "_" + proj + "_" + res;
-                          if (!strings[string]) {
-                              strings[string] = true;
-                              var open = App.dataManager.activateProjectContainers(lang, proj, res);
-                              promises.push(open);
-                          }
-                      }
-                  }
-                  promises.push(App.dataManager.activateContainer('en', 'bible', 'tw'));
-                  promises.push(App.dataManager.activateContainer('en', 'bible-obs', 'tw'));
-                  promises.push(App.dataManager.activateContainer('en', 'ta-audio', 'vol2'));
-                  promises.push(App.dataManager.activateContainer('en', 'ta-checking', 'vol1'));
-                  promises.push(App.dataManager.activateContainer('en', 'ta-checking', 'vol2'));
-                  promises.push(App.dataManager.activateContainer('en', 'ta-gateway', 'vol3'));
-                  promises.push(App.dataManager.activateContainer('en', 'ta-intro', 'vol1'));
-                  promises.push(App.dataManager.activateContainer('en', 'ta-process', 'vol1'));
-                  promises.push(App.dataManager.activateContainer('en', 'ta-translate', 'vol1'));
-                  promises.push(App.dataManager.activateContainer('en', 'ta-translate', 'vol2'));
-
-                  App.ipc.send('loading-status', 'Opening resource containers...');
-
-                  return Promise.all(promises)
-                      .then(function () {
-                          return list;
-                      });
-              })
               .then(function(list) {
                   App.ipc.send('loading-status', 'Loading Projects...');
                   return _.compact(list.map(App.projectsManager.updateManifestToMeta, App.projectsManager));
@@ -1187,6 +1151,43 @@
               })
               .catch(function (err) {
                   mythis.showErrorMessage('Error updating projects', 'An error occurred while updating projects', err);
+              });
+      },
+
+      checkContainers: function (list) {
+          var promises = [];
+          var strings = {};
+
+          for (var i = 0; i < list.length; i++) {
+              var proj = list[i].project.id;
+
+              for (var j = 0; j < list[i].source_translations.length; j++) {
+                  var lang = list[i].source_translations[j].language_id;
+                  var res = list[i].source_translations[j].resource_id;
+                  var string = lang + "_" + proj + "_" + res;
+                  if (!strings[string]) {
+                      strings[string] = true;
+                      var open = App.dataManager.activateProjectContainers(lang, proj, res);
+                      promises.push(open);
+                  }
+              }
+          }
+          promises.push(App.dataManager.activateContainer('en', 'bible', 'tw'));
+          promises.push(App.dataManager.activateContainer('en', 'bible-obs', 'tw'));
+          promises.push(App.dataManager.activateContainer('en', 'ta-audio', 'vol2'));
+          promises.push(App.dataManager.activateContainer('en', 'ta-checking', 'vol1'));
+          promises.push(App.dataManager.activateContainer('en', 'ta-checking', 'vol2'));
+          promises.push(App.dataManager.activateContainer('en', 'ta-gateway', 'vol3'));
+          promises.push(App.dataManager.activateContainer('en', 'ta-intro', 'vol1'));
+          promises.push(App.dataManager.activateContainer('en', 'ta-process', 'vol1'));
+          promises.push(App.dataManager.activateContainer('en', 'ta-translate', 'vol1'));
+          promises.push(App.dataManager.activateContainer('en', 'ta-translate', 'vol2'));
+
+          App.ipc.send('loading-status', 'Opening resource containers...');
+
+          return Promise.all(promises)
+              .then(function () {
+                  return list;
               });
       },
 

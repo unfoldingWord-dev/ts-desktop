@@ -183,7 +183,7 @@
             var index = list.firstVisibleIndex || 0;
             var chunks = this.chunks;
 
-            if (chunks.length) {
+            if (chunks && chunks.length) {
                 this.set('modestatus.chapter', chunks[index].chunkmeta.chapter);
                 this.set('modestatus.index', index);
             }

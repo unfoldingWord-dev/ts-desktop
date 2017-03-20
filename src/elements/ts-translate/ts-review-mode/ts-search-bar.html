@@ -153,14 +153,47 @@
 
         search: function (passive) {
             var mythis = this;
-            var query = this.query.trim();
+            var query = this.query.trim().toLowerCase();
             var chunks = this.chunks || [];
             var type = this.selected;
             var forward = [];
             var backward = [];
+            var notetest = new RegExp(/(\<ts-note-marker text=')([^<>]*)('>\<\/ts-note-marker>)/);
+            var tagtest = new RegExp(/<sup>\d+<\/sup>/g);
+            var markertest = new RegExp(/\\v \d+ /g);
 
             chunks.forEach(function (chunk) {
-                if (query && ((type === 'source' && chunk.srccontent.toLowerCase().includes(query.toLowerCase())) || (type === 'target' && chunk.transcontent.toLowerCase().includes(query.toLowerCase())))) {
+                var match = false;
+                var searchtext = "";
+
+                if (query) {
+                    if (type === 'source') {
+                        searchtext = chunk.srccontent.toLowerCase();
+                    } else {
+                        searchtext = chunk.transcontent.toLowerCase();
+                    }
+
+                    while (notetest.test(searchtext)) {
+                        var note = notetest.exec(searchtext)[2];
+
+                        note = note.replace(/&apos;/g, "'");
+
+                        if (note.includes(query)) {
+                            match = true;
+                        }
+
+                        searchtext = searchtext.replace(notetest, "");
+                    }
+
+                    searchtext = searchtext.replace(tagtest, "");
+                    searchtext = searchtext.replace(markertest, "");
+
+                    if (searchtext.includes(query)) {
+                        match = true;
+                    }
+                }
+
+                if (match) {
                     forward.push(chunk.index);
                     backward.push(chunk.index);
                 }

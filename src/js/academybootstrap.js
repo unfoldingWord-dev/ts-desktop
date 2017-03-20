@@ -65,25 +65,8 @@ process.stdout.write = console.log.bind(console);
         var libraryPath = path.join(libraryDir, "index.sqlite");
         var srcDir = path.resolve(path.join(__dirname, '..'));
         var resourceDir = path.join(libraryDir, 'resource_containers');
-        var srcDB = path.join(srcDir, 'index', 'index.sqlite');
         var srcResource = path.join(srcDir, 'index', 'resource_containers');
-        var appData = configurator.getAppData();
         var apiURL = configurator.getValue('apiUrl');
-        var indexstat;
-
-        try {
-            indexstat = fs.statSync(libraryPath);
-        } catch(e) {}
-
-        if (!indexstat || configurator.getValue("libraryBuild") != appData.build) {
-
-            mkdirp.sync(libraryDir);
-            var content = fs.readFileSync(srcDB);
-            fs.writeFileSync(libraryPath, content);
-        }
-        mkdirp.sync(resourceDir);
-
-        configurator.setValue("libraryBuild", appData.build);
 
         var db = new Db(libraryPath, resourceDir);
 

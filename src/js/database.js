@@ -38,6 +38,9 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             return db.loadResourceContainer(filePath)
                 .then(function (container) {
                     return mythis.containerExists(container.slug);
+                })
+                .catch(function (e) {
+                    return false;
                 });
         },
 
@@ -67,7 +70,11 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
         },
 
         getTargetLanguages: function () {
-            var list = db.indexSync.getTargetLanguages();
+            try {
+                var list = db.indexSync.getTargetLanguages();
+            } catch (e) {
+                return [];
+            }
 
             return list.map(function (item) {
                 return {id: item.slug, name: item.name, direction: item.direction};
@@ -80,7 +87,16 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
 
         getSourcesByProject: function (project) {
             var mythis = this;
-            var allres = db.indexSync.getResources(null, project);
+
+            try {
+                var allres = db.indexSync.getResources(null, project);
+            } catch (e) {
+                return Promise.resolve(true)
+                    .then(function () {
+                        return [];
+                    });
+            }
+
             var filterres = allres.filter(function (item) {
                 return item.type === 'book' && (item.status.checking_level === "3" || item.imported);
             });
@@ -273,19 +289,21 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             var toc = this.parseYaml(container, "toc.yml");
             var sorted = [];
 
-            if (toc) {
+            if (toc && typeof toc === "object") {
                 toc.forEach (function (chapter) {
-                    chapter.chunks.forEach (function (chunk) {
-                        var results = frames.filter(function (item) {
-                            return item.chapter === chapter.chapter && item.chunk === chunk;
-                        });
+                    if (chapter.chunks) {
+                        chapter.chunks.forEach (function (chunk) {
+                            var results = frames.filter(function (item) {
+                                return item.chapter === chapter.chapter && item.chunk === chunk;
+                            });
 
-                        if (results.length) {
-                            sorted.push(results[0]);
-                        } else {
-                            console.log("Cannot find data for:", container, chapter, chunk);
-                        }
-                    });
+                            if (results.length) {
+                                sorted.push(results[0]);
+                            } else {
+                                console.log("Cannot find data for:", container, chapter, chunk);
+                            }
+                        });
+                    }
                 });
 
                 return sorted;
@@ -295,7 +313,11 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
         },
 
         getProjectName: function (id) {
-            var project = db.indexSync.getProject('en', id);
+            try {
+                var project = db.indexSync.getProject('en', id);
+            } catch (e) {
+                return "";
+            }
 
             if (project) {
                 return project.name;
@@ -309,9 +331,17 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
 		},
 
         getSourceDetails: function (project_id, language_id, resource_id) {
-            var res = db.indexSync.getResource(language_id, project_id, resource_id);
-            var lang = db.indexSync.getSourceLanguage(language_id);
-            var id = language_id + "_" + project_id + "_" + resource_id;
+            try {
+                var res = db.indexSync.getResource(language_id, project_id, resource_id);
+                var lang = db.indexSync.getSourceLanguage(language_id);
+                var id = language_id + "_" + project_id + "_" + resource_id;
+            } catch (e) {
+                return null;
+            }
+
+            if (!res || !lang) {
+                return null;
+            }
 
             return {
                 unique_id: id,

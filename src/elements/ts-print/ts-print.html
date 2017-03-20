@@ -248,8 +248,9 @@
         print: function () {
             var mythis = this;
             var name = this.currentproject.projectmeta.unique_id;
+            var defaultPath = App.configurator.getUserPath('datalocation', name);
             var direction = this.currentproject.projectmeta.target_language.direction;
-            var filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'PDF Files', extensions: ['pdf']}]}});
+            var filePath = App.ipc.sendSync('save-as', {options: {defaultPath: defaultPath, filters: [{name: 'PDF Files', extensions: ['pdf']}]}});
             if (!filePath) {
                 return;
             }
@@ -269,6 +270,7 @@
                         mythis.set('options.title', "PDF Created");
                         mythis.set('options.body', "Your project has been successfully saved to a PDF.");
                         mythis.set('options.loading', false);
+                        mythis.goback();
                     })
                     .catch(function (err) {
                         var errmessage = "An error occurred saving your project";

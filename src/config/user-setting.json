@@ -12,7 +12,7 @@
         "name": "bemode",
         "mainText": "Blind Edit Mode",
         "helpText": "Display translation mode option that allows for blind drafting (Project will re-load if changed)",
-        "value": false,
+        "value": true,
         "group": "general",
         "enabled": true,
         "visible": true

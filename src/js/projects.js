@@ -214,7 +214,8 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
         },
 
         updateManifestToMeta: function (manifest) {
-            var meta = _.cloneDeep(manifest);
+            var meta = manifest;
+
             try {
                 if (manifest.project.name === "") {
                     meta.project.name = dataManager.getProjectName(manifest.project.id);
@@ -224,13 +225,23 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                     meta.type.name = "Text";
                 }
 
+                var sources = [];
+
                 for (var j = 0; j < manifest.source_translations.length; j++) {
-                    meta.source_translations[j] = dataManager.getSourceDetails(manifest.project.id, manifest.source_translations[j].language_id, manifest.source_translations[j].resource_id);
+                    var details = dataManager.getSourceDetails(manifest.project.id, manifest.source_translations[j].language_id, manifest.source_translations[j].resource_id);
+
+                    if (manifest.source_translations[j].resource_id === "udb" && manifest.resource.id !== "udb") {
+                        details = false;
+                    }
+
+                    if (details) {
+                        sources.push(details);
+                    }
                 }
 
-                meta.source_translations = _.uniq(meta.source_translations, 'unique_id');
+                meta.source_translations = _.uniq(sources, 'unique_id');
 
-                if (manifest.source_translations.length) {
+                if (meta.source_translations.length) {
                     meta.currentsource = 0;
                 } else {
                     meta.currentsource = null;

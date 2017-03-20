@@ -90,17 +90,17 @@
 
       #import {
           width: 320px;
-          height: 400px;
+          height: 440px;
       }
 
       #export {
-          width: 450px;
-          height: 510px;
+          width: 320px;
+          height: 440px;
       }
 
       #update {
-          width: 500px;
-          height: 400px;
+          width: 480px;
+          height: 480px;
       }
 
       #repo {
@@ -848,9 +848,6 @@
                       } else {
                           return mythis.finishContainerImport();
                       }
-                  })
-                  .catch(function(err) {
-                      mythis.showErrorMessage('Import Failed', 'An error occurred while importing your source text.', err);
                   });
           }, 500);
       },
@@ -869,8 +866,8 @@
                   .catch(function(err) {
                       var errmessage = 'An error occurred while importing your source text.';
 
-                      if (err.toString() && err.toString() === "Error: Unsupported project") {
-                          errmessage = "This source text is not a valid project";
+                      if (err.toString()) {
+                          errmessage = err.toString();
                       }
                       mythis.showErrorMessage('Import Failed', errmessage, err);
                   });
@@ -1063,6 +1060,7 @@
           var conflicts = this.currentproject.conflicts;
           var mediaServer = "https://api.unfoldingword.org/";
           var name = projectmeta.unique_id;
+          var defaultPath = App.configurator.getUserPath('datalocation', name);
           var filePath;
 
           if (conflicts) {
@@ -1071,9 +1069,9 @@
           }
 
           if (projectmeta.format === 'markdown') {
-              filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'Zip Files', extensions: ['zip']}]}});
+              filePath = App.ipc.sendSync('save-as', {options: {defaultPath: defaultPath, filters: [{name: 'Zip Files', extensions: ['zip']}]}});
           } else {
-              filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'USFM Files', extensions: ['usfm']}]}});
+              filePath = App.ipc.sendSync('save-as', {options: {defaultPath: defaultPath, filters: [{name: 'USFM Files', extensions: ['usfm']}]}});
           }
           if (!filePath) {
               return;
@@ -1185,11 +1183,8 @@
                       });
               })
               .then(function(list) {
-                  App.ipc.send('loading-status', 'Updating Manifest Files...');
-                  for (var i = 0; i < list.length; i++) {
-                      list[i] = App.projectsManager.updateManifestToMeta(list[i]);
-                  }
-                  return _.compact(list);
+                  App.ipc.send('loading-status', 'Loading Projects...');
+                  return _.compact(list.map(App.projectsManager.updateManifestToMeta, App.projectsManager));
               })
               .then(function (list) {
                   var sorted = App.projectsManager.sortProjectList(list);
@@ -1198,6 +1193,89 @@
               .catch(function (err) {
                   mythis.showErrorMessage('Error updating projects', 'An error occurred while updating projects', err);
               });
+      },
+
+      checkBuild: function () {
+          var mythis = this;
+          var path = require('path');
+          var libraryDir = App.configurator.getValue('libraryDir');
+          var libraryPath = path.join(libraryDir, "index.sqlite");
+          var srcDir = path.resolve(path.join(__dirname, '..'));
+          var srcDB = path.join(srcDir, 'index', 'index.sqlite');
+          var appData = App.configurator.getAppData();
+          var libraryBuild = App.configurator.getValue("libraryBuild");
+          var tmpDir = App.configurator.getValue('tempDir');
+          var resourceDir = App.dataManager.getResourceDir();
+          var movePromises = Promise.resolve(true);
+
+          if (!libraryBuild) {
+              App.configurator.setUserSetting("bemode", false);
+          }
+
+          if (libraryBuild != appData.build) {
+              var translations = [];
+
+              App.ipc.send('loading-status', 'Updating Index File...');
+
+              if (parseInt(libraryBuild) >= 110) {
+                  translations = App.dataManager.getTranslations();
+              }
+
+              var imports = translations.filter(function (item) {
+                  return item.resource.imported;
+              });
+
+              imports.forEach(function (item) {
+                  var foldername = item.language.slug + "_" + item.project.slug + "_" + item.resource.slug;
+                  var tmpPath = path.join(tmpDir, foldername);
+                  var resourcePath = path.join(resourceDir, foldername);
+
+                  movePromises = movePromises.then(function () {
+                      return App.utils.fs.mover(resourcePath, tmpPath);
+                  });
+              });
+
+              return movePromises
+                  .then(function () {
+                      return App.utils.fs.readFile(srcDB);
+                  })
+                  .then(function (content) {
+                      return App.utils.fs.writeFile(libraryPath, content);
+                  })
+                  .then(function () {
+                      App.configurator.setValue("libraryBuild", appData.build);
+                      if (imports.length) {
+                          return App.utils.fs.readdir(tmpDir);
+                      }
+                      return [];
+                  })
+                  .then(function (temps) {
+                      var importPromises = Promise.resolve(true);
+
+                      temps.forEach(function (item) {
+                          var itemPath = path.join(tmpDir, item);
+
+                          importPromises = importPromises.then(function () {
+                              return App.dataManager.importContainer(itemPath);
+                          });
+                      });
+
+                      return importPromises;
+                  })
+                  .then(function () {
+                      return mythis.clearTempDir();
+                  })
+                  .then(function () {
+                      App.ipc.send('loading-status', 'Migrating Projects...');
+                      return App.projectsManager.migrateTargetTranslationsList();
+                  })
+                  .then(function () {
+                      App.ipc.send('fire-reload');
+                  })
+                  .catch(function (e) {
+                      return mythis.clearTempDir();
+                  });
+          }
       },
 
       ready: function() {
@@ -1216,11 +1294,9 @@
                   App.configurator.applyPrefAppearance();
               })
               .then(function () {
-                  App.ipc.send('loading-status', 'Migrating Projects List...');
-                  return App.projectsManager.migrateTargetTranslationsList();
+                  return mythis.checkBuild();
               })
               .then(function () {
-                  App.ipc.send('loading-status', 'Loading Projects List...');
                   return mythis.updateList();
               })
               .then(function () {
@@ -1245,14 +1321,6 @@
               .then(function () {
                   App.ipc.send('main-loading-done');
                   mythis.$.home.setsortfields();
-
-                  var appData = App.configurator.getAppData();
-                  var libraryBuild = App.configurator.getValue("libraryBuild");
-
-                  if (libraryBuild && appData.version === "11.0.0" && libraryBuild != appData.build) {
-                      App.configurator.setUserSetting("bemode", true);
-                  }
-                  App.configurator.setValue("libraryBuild", appData.build);
               });
       }
 

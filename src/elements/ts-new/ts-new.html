@@ -334,7 +334,6 @@
                 mythis.animationConfig.exit.name = 'slide-left-animation';
                 App.projectsManager.createTargetTranslation([], newprojectmeta, this.currentuser)
                     .then(function() {
-                        mythis.fire('iron-signal', {name: 'updatelist'});
                         mythis.fire('iron-signal', {name: 'translateright'});
                         mythis.fire('iron-signal', {name: 'loadproject', data: {projectmeta: newprojectmeta, nav: "translate"}});
                     })

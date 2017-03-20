@@ -155,6 +155,7 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             return mythis.downloadContainer(language, project, resource)
                 .then(function () {
                     item.success = true;
+                    return Promise.resolve(true);
                 })
                 .catch(function (err) {
                     var errmessage = 'Unknown Error while downloading';
@@ -176,6 +177,8 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                             .catch(function () {
                                 return true;
                             });
+                    } else {
+                        return Promise.resolve(true);
                     }
                 })
                 .then(function () {
@@ -184,6 +187,8 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                             .catch(function () {
                                 return true;
                             });
+                    } else {
+                        return Promise.resolve(true);
                     }
                 })
                 .then(function () {
@@ -192,6 +197,8 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                             .catch(function () {
                                 return true;
                             });
+                    } else {
+                        return Promise.resolve(true);
                     }
                 })
                 .then(function () {
@@ -236,6 +243,8 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                             .catch(function () {
                                 return true;
                             });
+                    } else {
+                        return Promise.resolve(true);
                     }
                 })
                 .then(function () {
@@ -244,6 +253,8 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                             .catch(function () {
                                 return true;
                             });
+                    } else {
+                        return Promise.resolve(true);
                     }
                 })
                 .then(function () {
@@ -252,6 +263,8 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                             .catch(function () {
                                 return true;
                             });
+                    } else {
+                        return Promise.resolve(true);
                     }
                 });
         },

@@ -40,6 +40,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                         utils.fs.mover(path.join(oldPath, 'automatic_backups'), path.join(newPath, 'automatic_backups'));
                         utils.fs.mover(path.join(oldPath, 'backups'), path.join(newPath, 'backups'));
                     }
+                    return Promise.resolve(true);
                 });
         },
 
@@ -431,9 +432,11 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
 
             var cleanChapterDir = function (data, chapter) {
                 var chapterpath = path.join(paths.projectDir, chapter);
-                return readdir(chapterpath).then(function (dir) {
-                    return !dir.length ? trash([chapterpath]): true;
-                }).catch(utils.ret(true));
+                return readdir(chapterpath)
+                    .then(function (dir) {
+                        return !dir.length ? trash([chapterpath]): true;
+                    })
+                    .catch(utils.ret(true));
             };
 
             var cleanChapterDirs = function () {
@@ -498,17 +501,18 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             };
 
             var readChunk = function (f) {
-                return read(f).then(function (c) {
-                    var parsed = {
-                        name: parseChunkName(f)
-                    };
-                    if (meta.project_type_class === "standard") {
-                        parsed['transcontent'] = c.toString();
-                    } else {
-                        parsed['helpscontent'] = c.toString();
-                    }
-                    return parsed;
-                });
+                return read(f)
+                    .then(function (c) {
+                        var parsed = {
+                            name: parseChunkName(f)
+                        };
+                        if (meta.project_type_class === "standard") {
+                            parsed['transcontent'] = c.toString();
+                        } else {
+                            parsed['helpscontent'] = c.toString();
+                        }
+                        return parsed;
+                    });
             };
 
             var makeFullPath = function (parent) {
@@ -519,24 +523,27 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
 
             var readdirs = function (dirs) {
                 return Promise.all(_.map(dirs, function (d) {
-                    return readdir(d).then(map(function (f) {
-                        return path.join(d, f);
-                    }));
+                    return readdir(d)
+                        .then(map(function (f) {
+                            return path.join(d, f);
+                        }));
                 }));
             };
 
             var isDir = function (f) {
-                return utils.fs.stat(f).then(function (s) {
-                    return s.isDirectory();
-                });
+                return utils.fs.stat(f)
+                    .then(function (s) {
+                        return s.isDirectory();
+                    });
             };
 
             var isVisibleDir = function (f) {
-                return isDir(f).then(function (isFolder) {
-                    var name = path.parse(f).name,
-                        isHidden = /^\..*/.test(name);
-                    return (isFolder && !isHidden) ? f : false;
-                });
+                return isDir(f)
+                    .then(function (isFolder) {
+                        var name = path.parse(f).name,
+                            isHidden = /^\..*/.test(name);
+                        return (isFolder && !isHidden) ? f : false;
+                    });
             };
 
             var filterDirs = function (dirs) {

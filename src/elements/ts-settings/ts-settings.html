@@ -200,33 +200,6 @@
             return backto === "translate" ? "Project" : "Home";
         },
 
-        createInitialSettings: function () {
-            var untildify = require('untildify');
-
-            return App.gitManager.getVersion()
-                .then(function (version) {
-                    return version ? version.toString() : 'N/A';
-                })
-                .catch(function (err) {
-                    return 'N/A';
-                })
-                .then(function (gitversion) {
-                    App.configurator.refreshUserSetting();
-                    App.configurator.setUserSetting('gitversion', gitversion);
-                    App.configurator.setUserSetting('appversion', App.configurator.getAppData().toString());
-                    App.configurator.setUserSetting('datapath', App.configurator.getValue('rootdir'));
-                    App.configurator.setUserSetting('dataserver', "git.door43.org");
-                    App.configurator.setUserSetting('mediaserver', "https://api.unfoldingword.org/");
-                })
-                .then(function () {
-                    var location = App.configurator.getUserSetting('datalocation');
-
-                    location = untildify(location);
-                    location = location.replace(/\\/g, "\/");
-                    App.configurator.setUserSetting('datalocation', location);
-                });
-        },
-
         load: function () {
             if (this.route === "settings") {
                 this.set('backto', App.configurator.getValue("backto"));

@@ -157,9 +157,9 @@
 
       <ts-app-titlebar currentuser="[[currentuser]]"></ts-app-titlebar>
       <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
-          <ts-home data-route="home" route="{{route}}" currentproject="{{currentproject}}" projectlist="[[projectlist]]" importdata="{{importdata}}" id="home"></ts-home>
+          <ts-home data-route="home" route="{{route}}" currentproject="{{currentproject}}" projectlist="{{projectlist}}" importdata="{{importdata}}" id="home"></ts-home>
           <ts-new data-route="new" route="{{route}}" importdata="{{importdata}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]" options="{{options}}" on-finishusfm="finishUsfmImport"></ts-new>
-          <ts-translate data-route="translate" route="{{route}}" message="{{message}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}" id="translate" on-exportusfm="exportUsfm" on-openprint="openPrint"></ts-translate>
+          <ts-translate data-route="translate" route="{{route}}" message="{{message}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}" id="translate" on-update="updateFromProject" on-exportusfm="exportUsfm" on-openprint="openPrint"></ts-translate>
           <ts-review data-route="review" route="{{route}}" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}"></ts-review>
           <ts-settings data-route="settings" route="{{route}}" currentproject="[[currentproject]]" options="{{options}}" id="settings"></ts-settings>
           <ts-profile data-route="profile" currentuser="[[currentuser]]" options="{{options}}"></ts-profile>
@@ -235,7 +235,6 @@
           <ts-container-confirm on-finish="finishContainerImport"></ts-container-confirm>
       </paper-dialog>
 
-      <iron-signals on-iron-signal-updatelist="updateList"></iron-signals>
       <iron-signals on-iron-signal-openfeedback="openFeedback"></iron-signals>
       <iron-signals on-iron-signal-openimport="openImport"></iron-signals>
       <iron-signals on-iron-signal-openexport="openExport"></iron-signals>
@@ -341,11 +340,6 @@
           this.checkUser(data);
       },
 
-      retrieveUser: function () {
-          var user = App.configurator.getValue("userdata");
-          this.checkUser(user);
-      },
-
       checkUser: function (user) {
           this.set('currentuser', user);
           if (user.full_name) {
@@ -375,6 +369,7 @@
       },
 
       showMessage: function (title, body) {
+          this.set('options', {});
           this.set('options.title', title);
           this.set('options.body', body);
           this.set('options.loading', false);
@@ -524,7 +519,7 @@
                       App.projectsManager.unsetValues(projectmeta.unique_id);
 
                       setTimeout(function() {
-                          return mythis.updateList()
+                          return mythis.updateList(false)
                               .then(function () {
                                   mythis.showMessage('Project Deleted', 'Your project has been successfully deleted.');
                               });
@@ -551,6 +546,7 @@
                           return App.gitManager.merge(mythis.currentuser, changedata.newpaths.projectDir, changedata.oldpaths.projectDir)
                               .then(function (list) {
                                   conflicts = list;
+                                  return Promise.resolve(true);
                               })
                               .then(function () {
                                   return App.utils.fs.remove(changedata.oldpaths.projectDir);
@@ -569,7 +565,7 @@
                       App.projectsManager.unsetValues(changedata.oldmeta.unique_id);
 
                       setTimeout(function () {
-                          return mythis.updateList()
+                          return mythis.updateList(false)
                               .then(function () {
                                   mythis.showConflictsMessage('Change Complete', 'Your project has been changed.', conflicts);
                               });
@@ -719,6 +715,7 @@
                           return App.gitManager.merge(mythis.currentuser, targetPath, tmpPath)
                               .then(function (list) {
                                   conflicts = list;
+                                  return Promise.resolve(true);
                               });
                       }
                   })
@@ -727,7 +724,7 @@
                   })
                   .then(function() {
                       setTimeout(function() {
-                          return mythis.updateList()
+                          return mythis.updateList(true)
                               .then(function () {
                                   mythis.showConflictsMessage("Import Complete", "Your project has been successfully imported.", conflicts);
                               });
@@ -791,6 +788,8 @@
                   .then(function () {
                       if (overwrite) {
                           return App.exportManager.backupTranslation(projectmeta, backupPath);
+                      } else {
+                          return Promise.resolve(true);
                       }
                   })
                   .then(function () {
@@ -801,12 +800,13 @@
                   })
                   .then(function () {
                       setTimeout(function() {
-                          return mythis.updateList()
+                          return mythis.updateList(false)
                               .then(function () {
                                   mythis.showMessage('Import Complete', 'Your file has been imported. Please review it carefully. If it was not formatted properly, text may not appear as desired.');
                               });
                       }, 250);
-                  }).catch(function (err) {
+                  })
+                  .catch(function (err) {
                       mythis.showErrorMessage('Import Failed', 'Error occurred importing project', err);
 
                       if (overwrite) {
@@ -1019,6 +1019,8 @@
                                   mythis.set('options.body', "Extracting Images. Please wait...");
                                   return App.printManager.extractImages();
                               });
+                      } else {
+                          return Promise.resolve(true);
                       }
                   })
                   .then(function () {
@@ -1142,56 +1144,69 @@
           }
       },
 
-      updateList: function () {
+      updateFromProject: function () {
+          return this.updateList(false);
+      },
+
+      updateList: function (withcheck) {
           var mythis = this;
 
           return App.projectsManager.loadTargetTranslationsList()
               .then(function (list) {
-                  var promises = [];
-                  var strings = {};
-
-                  for (var i = 0; i < list.length; i++) {
-                      var proj = list[i].project.id;
-
-                      for (var j = 0; j < list[i].source_translations.length; j++) {
-                          var lang = list[i].source_translations[j].language_id;
-                          var res = list[i].source_translations[j].resource_id;
-                          var string = lang + "_" + proj + "_" + res;
-                          if (!strings[string]) {
-                              strings[string] = true;
-                              var open = App.dataManager.activateProjectContainers(lang, proj, res);
-                              promises.push(open);
-                          }
-                      }
+                  if (withcheck) {
+                      return mythis.checkContainers(list);
+                  } else {
+                      return list;
                   }
-                  promises.push(App.dataManager.activateContainer('en', 'bible', 'tw'));
-                  promises.push(App.dataManager.activateContainer('en', 'bible-obs', 'tw'));
-                  promises.push(App.dataManager.activateContainer('en', 'ta-audio', 'vol2'));
-                  promises.push(App.dataManager.activateContainer('en', 'ta-checking', 'vol1'));
-                  promises.push(App.dataManager.activateContainer('en', 'ta-checking', 'vol2'));
-                  promises.push(App.dataManager.activateContainer('en', 'ta-gateway', 'vol3'));
-                  promises.push(App.dataManager.activateContainer('en', 'ta-intro', 'vol1'));
-                  promises.push(App.dataManager.activateContainer('en', 'ta-process', 'vol1'));
-                  promises.push(App.dataManager.activateContainer('en', 'ta-translate', 'vol1'));
-                  promises.push(App.dataManager.activateContainer('en', 'ta-translate', 'vol2'));
-
-                  App.ipc.send('loading-status', 'Opening resource containers...');
-
-                  return Promise.all(promises)
-                      .then(function () {
-                          return list;
-                      });
               })
-              .then(function(list) {
+              .then(function (list) {
                   App.ipc.send('loading-status', 'Loading Projects...');
                   return _.compact(list.map(App.projectsManager.updateManifestToMeta, App.projectsManager));
               })
               .then(function (list) {
                   var sorted = App.projectsManager.sortProjectList(list);
                   mythis.set('projectlist', sorted);
+                  return Promise.resolve(true);
               })
               .catch(function (err) {
                   mythis.showErrorMessage('Error updating projects', 'An error occurred while updating projects', err);
+              });
+      },
+
+      checkContainers: function (list) {
+          var promises = [];
+          var strings = {};
+
+          App.ipc.send('loading-status', 'Opening resource containers...');
+
+          for (var i = 0; i < list.length; i++) {
+              var proj = list[i].project.id;
+
+              for (var j = 0; j < list[i].source_translations.length; j++) {
+                  var lang = list[i].source_translations[j].language_id;
+                  var res = list[i].source_translations[j].resource_id;
+                  var string = lang + "_" + proj + "_" + res;
+                  if (!strings[string]) {
+                      strings[string] = true;
+                      var open = App.dataManager.activateProjectContainers(lang, proj, res);
+                      promises.push(open);
+                  }
+              }
+          }
+          promises.push(App.dataManager.activateContainer('en', 'bible', 'tw'));
+          promises.push(App.dataManager.activateContainer('en', 'bible-obs', 'tw'));
+          promises.push(App.dataManager.activateContainer('en', 'ta-audio', 'vol2'));
+          promises.push(App.dataManager.activateContainer('en', 'ta-checking', 'vol1'));
+          promises.push(App.dataManager.activateContainer('en', 'ta-checking', 'vol2'));
+          promises.push(App.dataManager.activateContainer('en', 'ta-gateway', 'vol3'));
+          promises.push(App.dataManager.activateContainer('en', 'ta-intro', 'vol1'));
+          promises.push(App.dataManager.activateContainer('en', 'ta-process', 'vol1'));
+          promises.push(App.dataManager.activateContainer('en', 'ta-translate', 'vol1'));
+          promises.push(App.dataManager.activateContainer('en', 'ta-translate', 'vol2'));
+
+          return Promise.all(promises)
+              .then(function () {
+                  return list;
               });
       },
 
@@ -1265,50 +1280,71 @@
                   .then(function () {
                       return mythis.clearTempDir();
                   })
+                  .catch(function (e) {
+                      return mythis.clearTempDir();
+                  })
                   .then(function () {
                       App.ipc.send('loading-status', 'Migrating Projects...');
                       return App.projectsManager.migrateTargetTranslationsList();
                   })
                   .then(function () {
-                      App.ipc.send('fire-reload');
-                  })
-                  .catch(function (e) {
-                      return mythis.clearTempDir();
+                      return Promise.resolve(true);
                   });
+          } else {
+              return Promise.resolve(false);
           }
+      },
+
+      createInitialSettings: function (version) {
+          var untildify = require('untildify');
+          var gitversion = version ? version.toString() : 'N/A';
+
+          App.configurator.refreshUserSetting();
+          App.configurator.setUserSetting('gitversion', gitversion);
+          App.configurator.setUserSetting('appversion', App.configurator.getAppData().toString());
+          App.configurator.setUserSetting('datapath', App.configurator.getValue('rootdir'));
+          App.configurator.setUserSetting('dataserver', "git.door43.org");
+          App.configurator.setUserSetting('mediaserver', "https://api.unfoldingword.org/");
+
+          var location = App.configurator.getUserSetting('datalocation');
+
+          location = untildify(location);
+          location = location.replace(/\\/g, "\/");
+          App.configurator.setUserSetting('datalocation', location);
+          App.configurator.applyPrefAppearance();
       },
 
       ready: function() {
           var mythis = this;
 
-          App.gitManager.verifyGit()
+          return App.gitManager.verifyGit()
               .then(function (version) {
+                  App.ipc.send('loading-status', 'Retrieving User Settings...');
                   App.reporter.logNotice('Git Version ' + version);
-              })
-              .then(function () {
-                  return mythis.$.settings.createInitialSettings();
-              })
-              .then(function () {
-                  App.ipc.send('loading-status', 'Retrieving User Info...');
-                  mythis.retrieveUser();
-                  App.configurator.applyPrefAppearance();
-              })
-              .then(function () {
+                  mythis.createInitialSettings(version);
+                  mythis.checkUser(App.configurator.getValue("userdata"));
+
                   return mythis.checkBuild();
               })
-              .then(function () {
-                  return mythis.updateList();
+              .then(function (updates) {
+                  if (updates) {
+                      App.ipc.send('fire-reload');
+                      return Promise.resolve(false);
+                  } else {
+                      return mythis.updateList(true);
+                  }
               })
-              .then(function () {
-                  App.ipc.send('loading-status', 'Creating Auto Backups...');
-                  return App.exportManager.backupAllTranslations(mythis.projectlist);
+              .then(function (list) {
+                  if (list) {
+                      App.ipc.send('loading-status', 'Creating Auto Backups...');
+                      return App.exportManager.backupAllTranslations(mythis.projectlist);
+                  } else {
+                      return Promise.resolve(false);
+                  }
               })
               .catch(function (err) {
-                  err && err.stack && App.reporter.logError(err.stack, 'Error on startup');
-
-                  mythis.set('options', {});
-
                   var msg = 'Something broke.';
+                  err && err.stack && App.reporter.logError(err.stack, 'Error on startup');
 
                   if (err && typeof err === 'string') {
                       msg = err;
@@ -1318,9 +1354,11 @@
 
                   mythis.showErrorMessage('Error on startup', msg, err);
               })
-              .then(function () {
-                  App.ipc.send('main-loading-done');
-                  mythis.$.home.setsortfields();
+              .then(function (backups) {
+                  if (backups) {
+                      App.ipc.send('main-loading-done');
+                      mythis.$.home.setsortfields();
+                  }
               });
       }
 

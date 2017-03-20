@@ -72,12 +72,14 @@ function GitManager() {
                     return version;
                 })
                 .catch(function (err) {
+                    var msg = "";
+
                     if (installed) {
-                        var msg = "Your version of Git is out of date. We detected "  + err + ", but the app needs at least version " + minGitVersion + " in order to run.";
-                        throw msg;
+                        msg = "Your version of Git is out of date. We detected "  + err + ", but the app needs at least version " + minGitVersion + " in order to run.";
                     } else {
-                        throw "Git is not installed. It is required to run tStudio Desktop."
+                        msg = "Git is not installed. It is required to run tStudio Desktop."
                     }
+                    throw msg;
                 });
         },
 

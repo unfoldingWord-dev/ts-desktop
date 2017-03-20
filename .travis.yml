@@ -57,7 +57,7 @@ after_success:
 # ensure prince was installed
 - test -d src/prince
 - gulp build --win
-#- gulp build --linux
+- gulp build --linux
 - gulp build --osx
 - gulp release
 deploy:

@@ -115,6 +115,10 @@
             },
             timer: {
                 type: Number
+            },
+            active: {
+                type: Boolean,
+                value: false
             }
         },
 
@@ -166,13 +170,15 @@
         refresh: function () {
             var mythis = this;
 
-            mythis.getlocation();
-            clearTimeout(mythis.timer);
+            if (mythis.active) {
+                mythis.getlocation();
+                clearTimeout(mythis.timer);
 
-            mythis.timer = setTimeout(function() {
-                mythis.setheights();
-                mythis.fire('iron-signal', {name: 'passivesearch'});
-            }, 100);
+                mythis.timer = setTimeout(function() {
+                    mythis.setheights();
+                    mythis.fire('iron-signal', {name: 'passivesearch'});
+                }, 100);
+            }
         },
 
         setheights: function () {
@@ -188,11 +194,13 @@
         },
 
         frommode: function () {
+            this.set('active', false);
             this.getlocation();
             this.moveout();
         },
 
         tomode: function () {
+            this.set('active', true);
             this.setpreview();
             this.setlocation();
             this.movein();
@@ -270,7 +278,6 @@
             }
 
             list.scrollToIndex(index);
-            this.getlocation();
         },
 
 		ready: function() {

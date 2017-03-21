@@ -67,9 +67,7 @@ after_success:
 - gulp build --osx
 - gulp release
 # upload to dropbox
-- if [ -f ~/.dropbox_uploader ]; then
-  ./dropbox_uploader.sh upload ./release/ travis-artifacts/$TRAVIS_JOB_NUMBER/
-  fi
+- '[ -f ~/.dropbox_uploader ] && ./dropbox_uploader.sh upload ./release/ travis-artifacts/$TRAVIS_JOB_NUMBER/'
 deploy:
 # develop branch
 - provider: surge

@@ -1305,6 +1305,7 @@
             nosource.classList.add("hide");
             conflict.classList.add("hide");
             mythis.stoptimers();
+            mythis.closeresource();
         },
 
         setmodestate: function () {
@@ -1438,19 +1439,20 @@
         gohome: function () {
             var mythis = this;
 
-            mythis.savestate();
-            mythis.stoptimers();
+            mythis.set('options', {});
+            mythis.set('options.body', "Closing project. Please wait...");
+            mythis.set('options.loading', true);
+            mythis.fire('iron-signal', {name: 'openloading'});
 
-            return mythis.saveAll()
-                .then(function () {
-                    mythis.fire('update');
-                    setTimeout(function() {
-                        mythis.fire('iron-signal', {name: 'closeloading'});
-                        mythis.set('route', "home");
-                        mythis.reset();
-                        mythis.closeresource();
-                    }, 500);
-                });
+            setTimeout(function() {
+                mythis.savestate();
+                mythis.stoptimers();
+
+                return mythis.saveAll()
+                    .then(function () {
+                        mythis.fire('update');
+                    });
+            }, 500);
         },
 
         goreview: function () {

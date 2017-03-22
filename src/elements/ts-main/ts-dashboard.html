@@ -1145,7 +1145,18 @@
       },
 
       updateFromProject: function () {
-          return this.updateList(false);
+          var mythis = this;
+          var translate = this.$.translate;
+
+          return mythis.updateList(false)
+              .then(function () {
+                  mythis.set('route', "home");
+                  translate.reset();
+                  return Promise.resolve(true);
+              })
+              .then(function () {
+                  mythis.closeLoading();
+              });
       },
 
       updateList: function (withcheck) {

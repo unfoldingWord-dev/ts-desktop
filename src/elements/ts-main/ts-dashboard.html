@@ -1158,7 +1158,18 @@
           var mythis = this;
           var translate = this.$.translate;
 
-          return mythis.updateList(false)
+          return Promise.resolve(true)
+              .then(function () {
+                  var list = mythis.projectlist;
+                  var meta = _.cloneDeep(mythis.currentproject.projectmeta);
+                  var newlist = list.filter(function (item) {
+                      return item.unique_id !== meta.unique_id;
+                  });
+
+                  newlist.push(App.projectsManager.updateManifestToMeta(meta));
+
+                  return mythis.sortProjects(newlist);
+              })
               .then(function () {
                   mythis.set('route', "home");
                   translate.reset();

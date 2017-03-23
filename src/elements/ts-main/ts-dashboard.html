@@ -518,12 +518,15 @@
                   .then(function() {
                       App.projectsManager.unsetValues(projectmeta.unique_id);
 
-                      setTimeout(function() {
-                          return mythis.updateList(false)
-                              .then(function () {
-                                  mythis.showMessage('Project Deleted', 'Your project has been successfully deleted.');
-                              });
-                      }, 250);
+                      var list = mythis.projectlist;
+                      var newlist = list.filter(function (item) {
+                          return item.unique_id !== projectmeta.unique_id;
+                      });
+
+                      return mythis.sortProjects(newlist);
+                  })
+                  .then(function () {
+                      mythis.showMessage('Project Deleted', 'Your project has been successfully deleted.');
                   })
                   .catch(function(err) {
                       mythis.showErrorMessage('Delete Failed', 'An error occurred while trying to delete your project', err);
@@ -1159,6 +1162,17 @@
               });
       },
 
+      sortProjects: function (list) {
+          var mythis = this;
+          var sorted = App.projectsManager.sortProjectList(list);
+
+          return Promise.resolve(true)
+              .then(function () {
+                  mythis.set('projectlist', sorted);
+                  return Promise.resolve(true);
+              });
+      },
+
       updateList: function (withcheck) {
           var mythis = this;
 
@@ -1175,9 +1189,7 @@
                   return _.compact(list.map(App.projectsManager.updateManifestToMeta, App.projectsManager));
               })
               .then(function (list) {
-                  var sorted = App.projectsManager.sortProjectList(list);
-                  mythis.set('projectlist', sorted);
-                  return Promise.resolve(true);
+                  return mythis.sortProjects(list);
               })
               .catch(function (err) {
                   mythis.showErrorMessage('Error updating projects', 'An error occurred while updating projects', err);

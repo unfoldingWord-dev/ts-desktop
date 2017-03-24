@@ -1208,38 +1208,13 @@
           return Promise.resolve(true)
               .then(function () {
                   mythis.set('projectlist', sorted);
-                  return Promise.resolve(true);
+                  return Promise.resolve(sorted);
               });
       },
 
-      updateList: function (withcheck) {
-          var mythis = this;
-
-          return App.projectsManager.loadTargetTranslationsList()
-              .then(function (list) {
-                  if (withcheck) {
-                      return mythis.checkContainers(list);
-                  } else {
-                      return list;
-                  }
-              })
-              .then(function (list) {
-                  App.ipc.send('loading-status', 'Loading Projects...');
-                  return _.compact(list.map(App.projectsManager.updateManifestToMeta, App.projectsManager));
-              })
-              .then(function (list) {
-                  return mythis.sortProjects(list);
-              })
-              .catch(function (err) {
-                  mythis.showErrorMessage('Error updating projects', 'An error occurred while updating projects', err);
-              });
-      },
-
-      checkContainers: function (list) {
+      checkAllContainers: function (list) {
           var promises = [];
           var strings = {};
-
-          App.ipc.send('loading-status', 'Opening resource containers...');
 
           for (var i = 0; i < list.length; i++) {
               var proj = list[i].project.id;
@@ -1393,15 +1368,27 @@
                       App.ipc.send('fire-reload');
                       return Promise.resolve(false);
                   } else {
-                      return mythis.updateList(true);
-                  }
-              })
-              .then(function (list) {
-                  if (list) {
-                      App.ipc.send('loading-status', 'Creating Auto Backups...');
-                      return App.exportManager.backupAllTranslations(mythis.projectlist);
-                  } else {
-                      return Promise.resolve(false);
+                      App.ipc.send('loading-status', 'Retrieving Project List...');
+                      return App.projectsManager.loadTargetTranslationsList()
+                          .then(function (list) {
+                              App.ipc.send('loading-status', 'Opening resource containers...');
+                              return mythis.checkAllContainers(list);
+                          })
+                          .then(function (list) {
+                              App.ipc.send('loading-status', 'Updating Project List...');
+                              return _.compact(list.map(App.projectsManager.updateManifestToMeta, App.projectsManager));
+                          })
+                          .then(function (list) {
+                              return mythis.sortProjects(list);
+                          })
+                          .then(function (list) {
+                              App.ipc.send('loading-status', 'Creating Auto Backups...');
+                              return App.exportManager.backupAllTranslations(list);
+                          })
+                          .then(function () {
+                              App.ipc.send('main-loading-done');
+                              mythis.$.home.setsortfields();
+                          });
                   }
               })
               .catch(function (err) {
@@ -1415,12 +1402,8 @@
                   }
 
                   mythis.showErrorMessage('Error on startup', msg, err);
-              })
-              .then(function (backups) {
-                  if (backups) {
-                      App.ipc.send('main-loading-done');
-                      mythis.$.home.setsortfields();
-                  }
+                  App.ipc.send('main-loading-done');
+                  mythis.$.home.setsortfields();
               });
       }
 

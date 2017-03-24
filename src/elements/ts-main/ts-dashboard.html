@@ -712,6 +712,7 @@
           var targetPath = this.importdata.targetpath;
           var tmpPath = this.importdata.tmppath;
           var key = targetPath.split(path.sep).pop();
+          var newmanifest = {};
 
           mythis.showLoadingMessage("Importing. Please wait...");
 
@@ -720,11 +721,19 @@
                   .then(function () {
                       if (overwrite) {
                           App.projectsManager.unsetValues(key);
-                          return App.utils.fs.mover(tmpPath, targetPath);
+                          return App.utils.fs.mover(tmpPath, targetPath)
+                              .then(function () {
+                                  return App.projectsManager.retrieveManifest(targetPath);
+                              })
+                              .then(function (manifest) {
+                                  newmanifest = manifest;
+                                  return Promise.resolve(true);
+                              });
                       } else {
                           return App.gitManager.merge(mythis.currentuser, targetPath, tmpPath)
                               .then(function (data) {
                                   conflicts = data.conflicts;
+                                  newmanifest = data.manifest;
                                   return Promise.resolve(true);
                               });
                       }
@@ -733,12 +742,18 @@
                       return mythis.clearTempDir();
                   })
                   .then(function() {
-                      setTimeout(function() {
-                          return mythis.updateList(true)
-                              .then(function () {
-                                  mythis.showConflictsMessage("Import Complete", "Your project has been successfully imported.", conflicts);
-                              });
-                      }, 250);
+                      var list = mythis.projectlist;
+                      var meta = _.cloneDeep(App.projectsManager.updateManifestToMeta(newmanifest));
+                      var newlist = list.filter(function (item) {
+                          return item.unique_id !== meta.unique_id;
+                      });
+
+                      newlist.push(App.projectsManager.updateManifestToMeta(newmanifest));
+
+                      return mythis.sortProjects(newlist);
+                  })
+                  .then(function () {
+                      mythis.showConflictsMessage("Import Complete", "Your project has been successfully imported.", conflicts);
                   })
                   .catch(function(err) {
                       mythis.showErrorMessage("Import Failed", "An error occurred while importing your project", err && err.error ? err.error : err);

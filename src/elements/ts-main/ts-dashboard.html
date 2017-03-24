@@ -809,12 +809,18 @@
                       return App.projectsManager.createTargetTranslation(chunks, projectmeta, user);
                   })
                   .then(function () {
-                      setTimeout(function() {
-                          return mythis.updateList(false)
-                              .then(function () {
-                                  mythis.showMessage('Import Complete', 'Your file has been imported. Please review it carefully. If it was not formatted properly, text may not appear as desired.');
-                              });
-                      }, 250);
+                      var list = mythis.projectlist;
+                      var meta = _.cloneDeep(projectmeta);
+                      var newlist = list.filter(function (item) {
+                          return item.unique_id !== meta.unique_id;
+                      });
+
+                      newlist.push(App.projectsManager.updateManifestToMeta(meta));
+
+                      return mythis.sortProjects(newlist);
+                  })
+                  .then(function () {
+                      mythis.showMessage('Import Complete', 'Your file has been imported. Please review it carefully. If it was not formatted properly, text may not appear as desired.');
                   })
                   .catch(function (err) {
                       mythis.showErrorMessage('Import Failed', 'Error occurred importing project', err);

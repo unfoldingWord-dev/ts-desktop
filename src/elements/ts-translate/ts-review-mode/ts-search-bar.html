@@ -166,7 +166,7 @@
                 var match = false;
                 var searchtext = "";
 
-                if (query) {
+                if (query && !chunk.conflicts.exists) {
                     if (type === 'source') {
                         searchtext = chunk.srccontent.toLowerCase();
                     } else {

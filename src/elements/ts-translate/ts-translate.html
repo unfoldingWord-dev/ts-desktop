@@ -762,6 +762,15 @@
                             if (projectmeta.type.id === "ta") {
                                 throw "At this time, translationAcademy translation projects are not supported.";
                             }
+                            var source = projectmeta.source_translations[projectmeta.currentsource];
+
+                            if (source) {
+                                return App.dataManager.activateProjectContainers(source.language_id, projectmeta.project.id, source.resource_id);
+                            } else {
+                                return Promise.resolve(true);
+                            }
+                        })
+                        .then(function () {
                             loaddata2();
                         })
                         .catch(function(err) {

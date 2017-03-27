@@ -132,6 +132,7 @@ function GitManager() {
                     mergedManifest = localManifest;
                     mergedManifest.translators = _.union(localManifest.translators, remoteManifest.translators);
                     mergedManifest.finished_chunks = _.union(localManifest.finished_chunks, remoteManifest.finished_chunks);
+                    return Promise.resolve(true);
                 })
                 .then(function () {
                     return mythis.getVersion();
@@ -172,6 +173,7 @@ function GitManager() {
                             }
                         });
                     }
+                    return Promise.resolve(true);
                 })
                 .then(function () {
                     return utils.fs.outputFile(localManifestPath, toJSON(mergedManifest));
@@ -184,7 +186,7 @@ function GitManager() {
                 })
                 .then(utils.logr("Finished merging"))
                 .then(function () {
-                    return conflicts;
+                    return {conflicts: conflicts, manifest: mergedManifest};
                 });
 
         },

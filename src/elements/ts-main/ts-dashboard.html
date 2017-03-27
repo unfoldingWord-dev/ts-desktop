@@ -741,6 +741,11 @@
                   .then(function () {
                       return mythis.clearTempDir();
                   })
+                  .then(function () {
+                      var promises = mythis.checkProjectContainers([newmanifest]);
+
+                      return Promise.all(promises);
+                  })
                   .then(function() {
                       var list = mythis.projectlist;
                       var meta = _.cloneDeep(App.projectsManager.updateManifestToMeta(newmanifest));
@@ -1212,7 +1217,7 @@
               });
       },
 
-      checkAllContainers: function (list) {
+      checkProjectContainers: function (list) {
           var promises = [];
           var strings = {};
 
@@ -1230,6 +1235,13 @@
                   }
               }
           }
+
+          return promises;
+      },
+
+      checkAllContainers: function (list) {
+          var promises = this.checkProjectContainers(list);
+
           promises.push(App.dataManager.activateContainer('en', 'bible', 'tw'));
           promises.push(App.dataManager.activateContainer('en', 'bible-obs', 'tw'));
           promises.push(App.dataManager.activateContainer('en', 'ta-audio', 'vol2'));

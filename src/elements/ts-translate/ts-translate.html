@@ -857,8 +857,10 @@
             var projectmeta = _.cloneDeep(this.currentproject.projectmeta);
             var selected = projectmeta.currentsource;
             var sources = projectmeta.source_translations;
+            var source = sources[selected];
+            var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;
 
-            mythis.set('options.body', "Invalid source: No data found. Removing as selected source");
+            mythis.set('options.body', "Removing invalid source: " + container);
             mythis.set('options.loading', true);
 
             sources.splice(selected, 1);
@@ -868,7 +870,7 @@
 
             setTimeout(function() {
                 mythis.createchunks(nav, full);
-            }, 4000);
+            }, 5000);
         },
 
         createchunks: function (nav, full) {

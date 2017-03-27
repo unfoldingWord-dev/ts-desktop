@@ -224,12 +224,15 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                                         })
                                         .then(function () {
                                             return utils.fs.remove(tempPath);
+                                        })
+                                        .then(function () {
+                                            return Promise.resolve(true);
                                         });
                                 }
-                                throw "Resource container does not exist";
+                                return Promise.resolve("Resource container " + container + " does not exist");
                             });
                     }
-                    return true;
+                    return Promise.resolve(true);
                 });
         },
 
@@ -237,32 +240,28 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             var mythis = this;
 
             return mythis.activateContainer(language, project, resource)
+                .then(function (msg) {
+                    if (typeof msg === 'string') {
+                        console.log(msg);
+                    }
+                })
                 .then(function () {
                     if (resource === "ulb" || resource === "obs") {
-                        return mythis.activateContainer(language, project, "tn")
-                            .catch(function () {
-                                return true;
-                            });
+                        return mythis.activateContainer(language, project, "tn");
                     } else {
                         return Promise.resolve(true);
                     }
                 })
                 .then(function () {
                     if (resource === "ulb" || resource === "obs") {
-                        return mythis.activateContainer(language, project, "tq")
-                            .catch(function () {
-                                return true;
-                            });
+                        return mythis.activateContainer(language, project, "tq");
                     } else {
                         return Promise.resolve(true);
                     }
                 })
                 .then(function () {
                     if (resource === "ulb") {
-                        return mythis.activateContainer(language, project, "udb")
-                            .catch(function () {
-                                return true;
-                            });
+                        return mythis.activateContainer(language, project, "udb");
                     } else {
                         return Promise.resolve(true);
                     }

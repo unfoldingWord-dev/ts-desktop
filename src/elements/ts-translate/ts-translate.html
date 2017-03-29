@@ -630,9 +630,10 @@
             if (this.route === "translate") {
                 var key = this.currentproject.projectmeta.unique_id;
                 this.getlocation();
+                var selected = this.selected !== 4 ? this.selected : null;
                 App.configurator.setValue(key + "-chapter", this.modestatus.chapter);
                 App.configurator.setValue(key + "-index", this.modestatus.index);
-                App.configurator.setValue(key + "-selected", this.selected);
+                App.configurator.setValue(key + "-selected", selected);
             }
         },
 
@@ -1271,7 +1272,7 @@
 
             this.closeresource();
 
-            if (frommode > 0) {
+            if (frommode > 0 && frommode !== 4) {
                 this.set('modestatus.lastmode', frommode);
             }
 
@@ -1359,9 +1360,9 @@
 
             if ((sources === undefined || sources.length === 0) && typeclass !== "extant") {
                 gotomode = 4;
-            } else if (selected === 4) {
+            } else if (selected === 4 && lastmode !== 4) {
                 gotomode = lastmode;
-            } else if (previous > 0) {
+            } else if (previous > 0 && previous !== 4) {
                 gotomode = previous;
             } else if (typeclass === "standard" && bemode) {
                 gotomode = 1;

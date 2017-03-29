@@ -462,6 +462,15 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             return readdir(targetDir);
         },
 
+        retrieveManifest: function (projectDir) {
+            var manifestPath = path.join(projectDir, 'manifest.json');
+
+            return read(manifestPath)
+                .then(function (data) {
+                    return fromJSON(data);
+                });
+        },
+
         loadTargetTranslationsList: function () {
             var paths = utils.makeProjectPaths.bind(utils, targetDir);
             return this.loadProjectsList()

@@ -267,8 +267,9 @@
                 mythis.set('chunk.completed', true);
                 mythis.$.toggle.checked = true;
                 setTimeout(function() {
+                    mythis.fire('setheight');
                     mythis.fire('iron-signal', {name: 'updatecompletion'});
-                }, 500);
+                }, 200);
             }
         },
 
@@ -295,7 +296,10 @@
                 }
             } else {
                 mythis.set('chunk.completed', false);
-                mythis.fire('iron-signal', {name: 'updatecompletion'});
+                setTimeout(function() {
+                    mythis.fire('setheight');
+                    mythis.fire('iron-signal', {name: 'updatecompletion'});
+                }, 200);
             }
         },
 

@@ -109,7 +109,7 @@
             </template>
             <paper-material id="new" elevation="1">
                 <div>
-                    <input is="iron-input" bind-value="{{newinfo.name}}" placeholder="Name or Pseudonym">
+                    <input is="iron-input" bind-value="{{newinfo.name}}" on-input="onInput" placeholder="Name or Pseudonym">
                 </div>
                 <div id="agree">
                     <paper-checkbox id="check"></paper-checkbox>
@@ -141,7 +141,8 @@
             selected: {
                 type: Number,
                 value: 1,
-                notify: true
+                notify: true,
+                observer: 'load'
             },
             currentproject: {
                 type: Object,
@@ -157,6 +158,23 @@
                 type: Object,
                 value: {}
             }
+        },
+
+        load: function (selected) {
+            if (selected === 1) {
+                this.reset();
+            }
+        },
+
+        reset: function () {
+            this.set('newinfo', {});
+            this.$.check.disabled = true;
+            this.$.check.checked = false;
+        },
+
+        onInput: function () {
+            this.$.check.disabled = !this.newinfo.name;
+            this.$.check.checked = false;
         },
 
         addnew: function () {
@@ -184,8 +202,7 @@
                 mythis.push('currentproject.projectmeta.translators', name);
                 mythis.fire('iron-signal', {name: 'savemanifest'});
                 mythis.fire('iron-signal', {name: 'saveall'});
-                mythis.set('newinfo', {});
-                mythis.$.check.checked = false;
+                mythis.reset();
                 if (flag) {
                     mythis.fire('next');
                 }

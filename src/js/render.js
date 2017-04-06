@@ -32,9 +32,16 @@ function Renderer() {
 
             while (expression.test(text)) {
                 var notestr = expression.exec(text)[2];
-                var test = new RegExp(/<[^<>]*>/g);
+                var tagtest = new RegExp(/<[^<>]*>/g);
+                var quotetest = new RegExp(/(<char[^<>]*fqa">)([^]+?)(<\/char>)/);
 
-                notestr = notestr.replace(test, "");
+                while (quotetest.test(notestr)) {
+                    var quotestr = quotetest.exec(notestr)[2].trim();
+
+                    notestr = notestr.replace(quotetest, '"' + quotestr + '" ');
+                }
+
+                notestr = notestr.replace(tagtest, "");
                 notestr = notestr.replace(/'/g, '&apos;');
 
                 var marker = "\<ts-note-marker text='" + notestr + "'\>\<\/ts-note-marker\>";

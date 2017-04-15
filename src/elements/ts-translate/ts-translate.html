@@ -1070,9 +1070,15 @@
                 var worddata = this.currentproject.rawdata.words["01-" + words[w].slug];
 
                 if (worddata) {
-                    var parsed = JSON.parse(worddata.helpscontent);
+                    var parsed = false;
 
-                    if (parsed[0].body !== "" && parsed[0].title !== "") {
+                    try {
+                        parsed = JSON.parse(worddata.helpscontent);
+                    } catch (e) {
+                        parsed = false;
+                    }
+
+                    if (parsed && parsed[0] && parsed[0].body !== "" && parsed[0].title !== "") {
                         words[w].title = parsed[0].title;
                         words[w].body = parsed[0].body;
                     }

@@ -23,22 +23,20 @@
             display: flex;
             flex-direction: column;
             margin-top: 20px;
-            padding: 20px 30px;
+            padding: 10px 30px;
             background: var(--card-background-color);
             width: 450px;
-            font-size: 120%;
+            max-height: 135px;
+            overflow-y: auto;
+            font-size: 100%;
             color: var(--secondary-text-color);
-        }
-
-        .user {
-            padding: 0 5px;
         }
 
         #new {
             display: flex;
             flex-direction: column;
             margin-top: 20px;
-            padding: 20px 30px;
+            padding: 0 30px 10px;
             background: var(--card-background-color);
             width: 450px;
         }
@@ -56,7 +54,7 @@
         #agree {
             display: flex;
             align-items: center;
-            font-size: 90%;
+            font-size: 70%;
             margin-top: 5px;
         }
 
@@ -103,17 +101,17 @@
             <template is="dom-if" if="{{currentproject.projectmeta.translators.length}}">
                 <paper-material id="users" elevation="1">
                     <template is="dom-repeat" items="{{currentproject.projectmeta.translators}}" as="user">
-                        <div class="user">{{user}}</div>
+                        <div>{{user}}</div>
                     </template>
                 </paper-material>
             </template>
             <paper-material id="new" elevation="1">
                 <div>
-                    <input is="iron-input" bind-value="{{newinfo.name}}" placeholder="Name or Pseudonym">
+                    <input is="iron-input" bind-value="{{newinfo.name}}" on-input="onInput" placeholder="Name or Pseudonym">
                 </div>
                 <div id="agree">
                     <paper-checkbox id="check"></paper-checkbox>
-                    <div>This person has agreed to the License Agreement, Statement of Faith, and Translation Guidelines</div>
+                    <div>This person has agreed with the Statement of Faith and Translation Guidelines and agrees to release his/her work on this project under the terms of the Creative Commons Attribution-ShareAlike 4.0 International License</div>
                 </div>
                 <div id="links">
                     <span class="link" on-tap="openlicense">License Agreement</span>
@@ -141,7 +139,8 @@
             selected: {
                 type: Number,
                 value: 1,
-                notify: true
+                notify: true,
+                observer: 'load'
             },
             currentproject: {
                 type: Object,
@@ -157,6 +156,23 @@
                 type: Object,
                 value: {}
             }
+        },
+
+        load: function (selected) {
+            if (selected === 1) {
+                this.reset();
+            }
+        },
+
+        reset: function () {
+            this.set('newinfo', {});
+            this.$.check.disabled = true;
+            this.$.check.checked = false;
+        },
+
+        onInput: function () {
+            this.$.check.disabled = !this.newinfo.name;
+            this.$.check.checked = false;
         },
 
         addnew: function () {
@@ -184,8 +200,7 @@
                 mythis.push('currentproject.projectmeta.translators', name);
                 mythis.fire('iron-signal', {name: 'savemanifest'});
                 mythis.fire('iron-signal', {name: 'saveall'});
-                mythis.set('newinfo', {});
-                mythis.$.check.checked = false;
+                mythis.reset();
                 if (flag) {
                     mythis.fire('next');
                 }

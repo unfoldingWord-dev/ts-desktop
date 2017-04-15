@@ -115,13 +115,13 @@ function ImportManager(configurator, migrator, dataManager) {
                         }
                     }
 
-                    if (parsedData['00'] && parsedData['00'].contents) {
+                    if (parsedData['front'] && parsedData['front'].contents) {
                         chunks.unshift({
                             chunkmeta: {
-                                chapterid: '00',
+                                chapterid: 'front',
                                 frameid: 'title'
                             },
-                            transcontent: parsedData['00'].contents.trim(),
+                            transcontent: parsedData['front'].contents.trim(),
                             completed: false
                         });
                     }
@@ -273,7 +273,7 @@ function UsfmParser () {
 
             mythis.markers.forEach(function (marker) {
                 if (marker.type === "heading" && chapnum === 0) {
-                    createchapter(chapnum);
+                    createchapter("front");
                     mythis.chapters[chap].contents = marker.contents.trim();
                 } else if (marker.type === "chapter") {
                     chapnum = parseInt(marker.options);

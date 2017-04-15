@@ -143,16 +143,14 @@ process.stdout.write = console.log.bind(console);
         var resourceDir = path.join(libraryDir, 'resource_containers');
         var srcDB = path.join(srcDir, 'index', 'index.sqlite');
         var srcResource = path.join(srcDir, 'index', 'resource_containers');
-        var appData = configurator.getAppData();
         var apiURL = configurator.getValue('apiUrl');
-        var libraryBuild = configurator.getValue("libraryBuild");
         var indexstat;
 
         try {
             indexstat = fs.statSync(libraryPath);
         } catch(e) {}
 
-        if (!indexstat || libraryBuild != appData.build) {
+        if (!indexstat) {
             setMsg('Setting up index file...');
             mkdirp.sync(libraryDir);
             var content = fs.readFileSync(srcDB);

@@ -38,6 +38,9 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             return db.loadResourceContainer(filePath)
                 .then(function (container) {
                     return mythis.containerExists(container.slug);
+                })
+                .catch(function (e) {
+                    return false;
                 });
         },
 
@@ -67,7 +70,11 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
         },
 
         getTargetLanguages: function () {
-            var list = db.indexSync.getTargetLanguages();
+            try {
+                var list = db.indexSync.getTargetLanguages();
+            } catch (e) {
+                return [];
+            }
 
             return list.map(function (item) {
                 return {id: item.slug, name: item.name, direction: item.direction};
@@ -80,7 +87,16 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
 
         getSourcesByProject: function (project) {
             var mythis = this;
-            var allres = db.indexSync.getResources(null, project);
+
+            try {
+                var allres = db.indexSync.getResources(null, project);
+            } catch (e) {
+                return Promise.resolve(true)
+                    .then(function () {
+                        return [];
+                    });
+            }
+
             var filterres = allres.filter(function (item) {
                 return item.type === 'book' && (item.status.checking_level === "3" || item.imported);
             });
@@ -139,6 +155,7 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             return mythis.downloadContainer(language, project, resource)
                 .then(function () {
                     item.success = true;
+                    return Promise.resolve(true);
                 })
                 .catch(function (err) {
                     var errmessage = 'Unknown Error while downloading';
@@ -160,6 +177,8 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                             .catch(function () {
                                 return true;
                             });
+                    } else {
+                        return Promise.resolve(true);
                     }
                 })
                 .then(function () {
@@ -168,6 +187,8 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                             .catch(function () {
                                 return true;
                             });
+                    } else {
+                        return Promise.resolve(true);
                     }
                 })
                 .then(function () {
@@ -176,6 +197,8 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                             .catch(function () {
                                 return true;
                             });
+                    } else {
+                        return Promise.resolve(true);
                     }
                 })
                 .then(function () {
@@ -201,12 +224,15 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                                         })
                                         .then(function () {
                                             return utils.fs.remove(tempPath);
+                                        })
+                                        .then(function () {
+                                            return Promise.resolve(true);
                                         });
                                 }
-                                throw "Resource container does not exist";
+                                return Promise.resolve("Resource container " + container + " does not exist");
                             });
                     }
-                    return true;
+                    return Promise.resolve(true);
                 });
         },
 
@@ -214,28 +240,30 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             var mythis = this;
 
             return mythis.activateContainer(language, project, resource)
-                .then(function () {
-                    if (resource === "ulb" || resource === "obs") {
-                        return mythis.activateContainer(language, project, "tn")
-                            .catch(function () {
-                                return true;
-                            });
+                .then(function (msg) {
+                    if (typeof msg === 'string') {
+                        console.log(msg);
                     }
                 })
                 .then(function () {
                     if (resource === "ulb" || resource === "obs") {
-                        return mythis.activateContainer(language, project, "tq")
-                            .catch(function () {
-                                return true;
-                            });
+                        return mythis.activateContainer(language, project, "tn");
+                    } else {
+                        return Promise.resolve(true);
+                    }
+                })
+                .then(function () {
+                    if (resource === "ulb" || resource === "obs") {
+                        return mythis.activateContainer(language, project, "tq");
+                    } else {
+                        return Promise.resolve(true);
                     }
                 })
                 .then(function () {
                     if (resource === "ulb") {
-                        return mythis.activateContainer(language, project, "udb")
-                            .catch(function () {
-                                return true;
-                            });
+                        return mythis.activateContainer(language, project, "udb");
+                    } else {
+                        return Promise.resolve(true);
                     }
                 });
         },
@@ -273,25 +301,35 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             var toc = this.parseYaml(container, "toc.yml");
             var sorted = [];
 
-            toc.forEach (function (chapter) {
-                chapter.chunks.forEach (function (chunk) {
-                    var results = frames.filter(function (item) {
-                        return item.chapter === chapter.chapter && item.chunk === chunk;
-                    });
+            if (toc && typeof toc === "object") {
+                toc.forEach (function (chapter) {
+                    if (chapter.chunks) {
+                        chapter.chunks.forEach (function (chunk) {
+                            var results = frames.filter(function (item) {
+                                return item.chapter === chapter.chapter && item.chunk === chunk;
+                            });
 
-                    if (results.length) {
-                        sorted.push(results[0]);
-                    } else {
-                        console.log("Cannot find data for:", container, chapter, chunk);
+                            if (results.length) {
+                                sorted.push(results[0]);
+                            } else {
+                                console.log("Cannot find data for:", container, chapter, chunk);
+                            }
+                        });
                     }
                 });
-            });
 
-            return sorted;
+                return sorted;
+            } else {
+                return frames;
+            }
         },
 
         getProjectName: function (id) {
-            var project = db.indexSync.getProject('en', id);
+            try {
+                var project = db.indexSync.getProject('en', id);
+            } catch (e) {
+                return "";
+            }
 
             if (project) {
                 return project.name;
@@ -305,9 +343,17 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
 		},
 
         getSourceDetails: function (project_id, language_id, resource_id) {
-            var res = db.indexSync.getResource(language_id, project_id, resource_id);
-            var lang = db.indexSync.getSourceLanguage(language_id);
-            var id = language_id + "_" + project_id + "_" + resource_id;
+            try {
+                var res = db.indexSync.getResource(language_id, project_id, resource_id);
+                var lang = db.indexSync.getSourceLanguage(language_id);
+                var id = language_id + "_" + project_id + "_" + resource_id;
+            } catch (e) {
+                return null;
+            }
+
+            if (!res || !lang) {
+                return null;
+            }
 
             return {
                 unique_id: id,
@@ -373,8 +419,13 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
 
         getSourceWords: function (source) {
             var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;
+            var words = this.parseYaml(container, "config.yml");
 
-            return this.parseYaml(container, "config.yml").content;
+            if (words && words.content) {
+                return words.content;
+            } else {
+                return [];
+            }
         },
 
         parseHelps: function (content) {
@@ -391,8 +442,14 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
 
         parseYaml: function (container, filename) {
             var filepath = path.join(resourceDir, container, "content", filename);
-            var file = fs.readFileSync(filepath, "utf8");
-            return yaml.load(file);
+
+            try {
+                var file = fs.readFileSync(filepath, "utf8");
+                return yaml.load(file);
+            } catch (e) {
+                console.log("Cannot read file:", filepath);
+                return null;
+            }
         },
 
         getRelatedWords: function (source, slug) {
@@ -404,7 +461,7 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             var container = "en_" + dict + "_tw";
             var list = this.parseYaml(container, "config.yml");
 
-            if (list[slug] && list[slug]["see_also"]) {
+            if (list && list[slug] && list[slug]["see_also"]) {
                 var slugs = list[slug]["see_also"];
 
                 return slugs.map(function (item) {
@@ -448,7 +505,7 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             var container = "en_" + dict + "_tw";
             var list = this.parseYaml(container, "config.yml");
 
-            if (list[slug] && list[slug]["examples"]) {
+            if (list && list[slug] && list[slug]["examples"]) {
                 var references = list[slug]["examples"];
 
                 return references.map(function (item) {

@@ -90,17 +90,17 @@
 
       #import {
           width: 320px;
-          height: 400px;
+          height: 440px;
       }
 
       #export {
-          width: 450px;
-          height: 510px;
+          width: 320px;
+          height: 440px;
       }
 
       #update {
-          width: 500px;
-          height: 400px;
+          width: 480px;
+          height: 480px;
       }
 
       #repo {
@@ -157,9 +157,9 @@
 
       <ts-app-titlebar currentuser="[[currentuser]]"></ts-app-titlebar>
       <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
-          <ts-home data-route="home" route="{{route}}" currentproject="{{currentproject}}" projectlist="[[projectlist]]" importdata="{{importdata}}" id="home"></ts-home>
+          <ts-home data-route="home" route="{{route}}" currentproject="{{currentproject}}" projectlist="{{projectlist}}" importdata="{{importdata}}" id="home"></ts-home>
           <ts-new data-route="new" route="{{route}}" importdata="{{importdata}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]" options="{{options}}" on-finishusfm="finishUsfmImport"></ts-new>
-          <ts-translate data-route="translate" route="{{route}}" message="{{message}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}" id="translate" on-exportusfm="exportUsfm" on-openprint="openPrint"></ts-translate>
+          <ts-translate data-route="translate" route="{{route}}" message="{{message}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}" id="translate" on-update="updateFromProject" on-exportusfm="exportUsfm" on-openprint="openPrint"></ts-translate>
           <ts-review data-route="review" route="{{route}}" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}"></ts-review>
           <ts-settings data-route="settings" route="{{route}}" currentproject="[[currentproject]]" options="{{options}}" id="settings"></ts-settings>
           <ts-profile data-route="profile" currentuser="[[currentuser]]" options="{{options}}"></ts-profile>
@@ -235,7 +235,6 @@
           <ts-container-confirm on-finish="finishContainerImport"></ts-container-confirm>
       </paper-dialog>
 
-      <iron-signals on-iron-signal-updatelist="updateList"></iron-signals>
       <iron-signals on-iron-signal-openfeedback="openFeedback"></iron-signals>
       <iron-signals on-iron-signal-openimport="openImport"></iron-signals>
       <iron-signals on-iron-signal-openexport="openExport"></iron-signals>
@@ -341,11 +340,6 @@
           this.checkUser(data);
       },
 
-      retrieveUser: function () {
-          var user = App.configurator.getValue("userdata");
-          this.checkUser(user);
-      },
-
       checkUser: function (user) {
           this.set('currentuser', user);
           if (user.full_name) {
@@ -375,6 +369,7 @@
       },
 
       showMessage: function (title, body) {
+          this.set('options', {});
           this.set('options.title', title);
           this.set('options.body', body);
           this.set('options.loading', false);
@@ -523,12 +518,15 @@
                   .then(function() {
                       App.projectsManager.unsetValues(projectmeta.unique_id);
 
-                      setTimeout(function() {
-                          return mythis.updateList()
-                              .then(function () {
-                                  mythis.showMessage('Project Deleted', 'Your project has been successfully deleted.');
-                              });
-                      }, 250);
+                      var list = mythis.projectlist;
+                      var newlist = list.filter(function (item) {
+                          return item.unique_id !== projectmeta.unique_id;
+                      });
+
+                      return mythis.sortProjects(newlist);
+                  })
+                  .then(function () {
+                      mythis.showMessage('Project Deleted', 'Your project has been successfully deleted.');
                   })
                   .catch(function(err) {
                       mythis.showErrorMessage('Delete Failed', 'An error occurred while trying to delete your project', err);
@@ -540,6 +538,7 @@
           var mythis = this;
           var conflicts = [];
           var changedata = data;
+          var newmanifest = changedata.newmeta;
 
           mythis.set('route', 'home');
           mythis.showLoadingMessage('Changing project.  Please wait...');
@@ -549,8 +548,10 @@
                   .then(function () {
                       if (changedata.exists) {
                           return App.gitManager.merge(mythis.currentuser, changedata.newpaths.projectDir, changedata.oldpaths.projectDir)
-                              .then(function (list) {
-                                  conflicts = list;
+                              .then(function (data) {
+                                  conflicts = data.conflicts;
+                                  newmanifest = data.manifest;
+                                  return Promise.resolve(true);
                               })
                               .then(function () {
                                   return App.utils.fs.remove(changedata.oldpaths.projectDir);
@@ -568,12 +569,17 @@
                   .then(function () {
                       App.projectsManager.unsetValues(changedata.oldmeta.unique_id);
 
-                      setTimeout(function () {
-                          return mythis.updateList()
-                              .then(function () {
-                                  mythis.showConflictsMessage('Change Complete', 'Your project has been changed.', conflicts);
-                              });
-                      }, 250);
+                      var list = mythis.projectlist;
+                      var newlist = list.filter(function (item) {
+                          return item.unique_id !== changedata.oldmeta.unique_id && item.unique_id !== changedata.newmeta.unique_id;
+                      });
+
+                      newlist.push(App.projectsManager.updateManifestToMeta(newmanifest));
+
+                      return mythis.sortProjects(newlist);
+                  })
+                  .then(function () {
+                      mythis.showConflictsMessage('Change Complete', 'Your project has been changed.', conflicts);
                   })
                   .catch(function(err) {
                       mythis.showErrorMessage('Change Failed', 'An error occurred while trying to change the project', err);
@@ -685,7 +691,13 @@
                       }))
                   })
                   .catch(function(err) {
-                      mythis.showErrorMessage('Import Failed', 'An error occurred while importing your project', err);
+                      var errmessage = 'An error occurred while importing your project';
+
+                      if (err.includes("Error while extracting file")) {
+                          errmessage = err;
+                      }
+
+                      mythis.showErrorMessage('Import Failed', errmessage, err);
 
                       return mythis.clearTempDir();
                   });
@@ -700,6 +712,7 @@
           var targetPath = this.importdata.targetpath;
           var tmpPath = this.importdata.tmppath;
           var key = targetPath.split(path.sep).pop();
+          var newmanifest = {};
 
           mythis.showLoadingMessage("Importing. Please wait...");
 
@@ -708,24 +721,44 @@
                   .then(function () {
                       if (overwrite) {
                           App.projectsManager.unsetValues(key);
-                          return App.utils.fs.mover(tmpPath, targetPath);
+                          return App.utils.fs.mover(tmpPath, targetPath)
+                              .then(function () {
+                                  return App.projectsManager.retrieveManifest(targetPath);
+                              })
+                              .then(function (manifest) {
+                                  newmanifest = manifest;
+                                  return Promise.resolve(true);
+                              });
                       } else {
                           return App.gitManager.merge(mythis.currentuser, targetPath, tmpPath)
-                              .then(function (list) {
-                                  conflicts = list;
+                              .then(function (data) {
+                                  conflicts = data.conflicts;
+                                  newmanifest = data.manifest;
+                                  return Promise.resolve(true);
                               });
                       }
                   })
                   .then(function () {
                       return mythis.clearTempDir();
                   })
+                  .then(function () {
+                      var promises = mythis.checkProjectContainers([newmanifest]);
+
+                      return Promise.all(promises);
+                  })
                   .then(function() {
-                      setTimeout(function() {
-                          return mythis.updateList()
-                              .then(function () {
-                                  mythis.showConflictsMessage("Import Complete", "Your project has been successfully imported.", conflicts);
-                              });
-                      }, 250);
+                      var list = mythis.projectlist;
+                      var meta = _.cloneDeep(App.projectsManager.updateManifestToMeta(newmanifest));
+                      var newlist = list.filter(function (item) {
+                          return item.unique_id !== meta.unique_id;
+                      });
+
+                      newlist.push(App.projectsManager.updateManifestToMeta(newmanifest));
+
+                      return mythis.sortProjects(newlist);
+                  })
+                  .then(function () {
+                      mythis.showConflictsMessage("Import Complete", "Your project has been successfully imported.", conflicts);
                   })
                   .catch(function(err) {
                       mythis.showErrorMessage("Import Failed", "An error occurred while importing your project", err && err.error ? err.error : err);
@@ -785,6 +818,8 @@
                   .then(function () {
                       if (overwrite) {
                           return App.exportManager.backupTranslation(projectmeta, backupPath);
+                      } else {
+                          return Promise.resolve(true);
                       }
                   })
                   .then(function () {
@@ -794,13 +829,20 @@
                       return App.projectsManager.createTargetTranslation(chunks, projectmeta, user);
                   })
                   .then(function () {
-                      setTimeout(function() {
-                          return mythis.updateList()
-                              .then(function () {
-                                  mythis.showMessage('Import Complete', 'Your file has been imported. Please review it carefully. If it was not formatted properly, text may not appear as desired.');
-                              });
-                      }, 250);
-                  }).catch(function (err) {
+                      var list = mythis.projectlist;
+                      var meta = _.cloneDeep(projectmeta);
+                      var newlist = list.filter(function (item) {
+                          return item.unique_id !== meta.unique_id;
+                      });
+
+                      newlist.push(App.projectsManager.updateManifestToMeta(meta));
+
+                      return mythis.sortProjects(newlist);
+                  })
+                  .then(function () {
+                      mythis.showMessage('Import Complete', 'Your file has been imported. Please review it carefully. If it was not formatted properly, text may not appear as desired.');
+                  })
+                  .catch(function (err) {
                       mythis.showErrorMessage('Import Failed', 'Error occurred importing project', err);
 
                       if (overwrite) {
@@ -842,9 +884,6 @@
                       } else {
                           return mythis.finishContainerImport();
                       }
-                  })
-                  .catch(function(err) {
-                      mythis.showErrorMessage('Import Failed', 'An error occurred while importing your source text.', err);
                   });
           }, 500);
       },
@@ -863,8 +902,8 @@
                   .catch(function(err) {
                       var errmessage = 'An error occurred while importing your source text.';
 
-                      if (err.toString() && err.toString() === "Error: Unsupported project") {
-                          errmessage = "This source text is not a valid project";
+                      if (err.toString()) {
+                          errmessage = err.toString();
                       }
                       mythis.showErrorMessage('Import Failed', errmessage, err);
                   });
@@ -1016,6 +1055,8 @@
                                   mythis.set('options.body', "Extracting Images. Please wait...");
                                   return App.printManager.extractImages();
                               });
+                      } else {
+                          return Promise.resolve(true);
                       }
                   })
                   .then(function () {
@@ -1057,6 +1098,7 @@
           var conflicts = this.currentproject.conflicts;
           var mediaServer = "https://api.unfoldingword.org/";
           var name = projectmeta.unique_id;
+          var defaultPath = App.configurator.getUserPath('datalocation', name);
           var filePath;
 
           if (conflicts) {
@@ -1065,9 +1107,9 @@
           }
 
           if (projectmeta.format === 'markdown') {
-              filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'Zip Files', extensions: ['zip']}]}});
+              filePath = App.ipc.sendSync('save-as', {options: {defaultPath: defaultPath, filters: [{name: 'Zip Files', extensions: ['zip']}]}});
           } else {
-              filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'USFM Files', extensions: ['usfm']}]}});
+              filePath = App.ipc.sendSync('save-as', {options: {defaultPath: defaultPath, filters: [{name: 'USFM Files', extensions: ['usfm']}]}});
           }
           if (!filePath) {
               return;
@@ -1138,95 +1180,232 @@
           }
       },
 
-      updateList: function () {
+      updateFromProject: function () {
           var mythis = this;
+          var translate = this.$.translate;
 
-          return App.projectsManager.loadTargetTranslationsList()
-              .then(function (list) {
-                  var promises = [];
-                  var strings = {};
+          return Promise.resolve(true)
+              .then(function () {
+                  var list = mythis.projectlist;
+                  var meta = _.cloneDeep(mythis.currentproject.projectmeta);
+                  var newlist = list.filter(function (item) {
+                      return item.unique_id !== meta.unique_id;
+                  });
 
-                  for (var i = 0; i < list.length; i++) {
-                      var proj = list[i].project.id;
+                  newlist.push(App.projectsManager.updateManifestToMeta(meta));
 
-                      for (var j = 0; j < list[i].source_translations.length; j++) {
-                          var lang = list[i].source_translations[j].language_id;
-                          var res = list[i].source_translations[j].resource_id;
-                          var string = lang + "_" + proj + "_" + res;
-                          if (!strings[string]) {
-                              strings[string] = true;
-                              var open = App.dataManager.activateProjectContainers(lang, proj, res);
-                              promises.push(open);
-                          }
-                      }
-                  }
-                  promises.push(App.dataManager.activateContainer('en', 'bible', 'tw'));
-                  promises.push(App.dataManager.activateContainer('en', 'bible-obs', 'tw'));
-                  promises.push(App.dataManager.activateContainer('en', 'ta-audio', 'vol2'));
-                  promises.push(App.dataManager.activateContainer('en', 'ta-checking', 'vol1'));
-                  promises.push(App.dataManager.activateContainer('en', 'ta-checking', 'vol2'));
-                  promises.push(App.dataManager.activateContainer('en', 'ta-gateway', 'vol3'));
-                  promises.push(App.dataManager.activateContainer('en', 'ta-intro', 'vol1'));
-                  promises.push(App.dataManager.activateContainer('en', 'ta-process', 'vol1'));
-                  promises.push(App.dataManager.activateContainer('en', 'ta-translate', 'vol1'));
-                  promises.push(App.dataManager.activateContainer('en', 'ta-translate', 'vol2'));
-
-                  App.ipc.send('loading-status', 'Opening resource containers...');
-
-                  return Promise.all(promises)
-                      .then(function () {
-                          return list;
-                      });
+                  return mythis.sortProjects(newlist);
               })
-              .then(function(list) {
-                  App.ipc.send('loading-status', 'Updating Manifest Files...');
-                  for (var i = 0; i < list.length; i++) {
-                      list[i] = App.projectsManager.updateManifestToMeta(list[i]);
-                  }
-                  return _.compact(list);
+              .then(function () {
+                  mythis.set('route', "home");
+                  translate.reset();
+                  return Promise.resolve(true);
               })
-              .then(function (list) {
-                  var sorted = App.projectsManager.sortProjectList(list);
-                  mythis.set('projectlist', sorted);
-              })
-              .catch(function (err) {
-                  mythis.showErrorMessage('Error updating projects', 'An error occurred while updating projects', err);
+              .then(function () {
+                  mythis.closeLoading();
               });
+      },
+
+      sortProjects: function (list) {
+          var mythis = this;
+          var sorted = App.projectsManager.sortProjectList(list);
+
+          return Promise.resolve(true)
+              .then(function () {
+                  mythis.set('projectlist', sorted);
+                  return Promise.resolve(sorted);
+              });
+      },
+
+      checkProjectContainers: function (list) {
+          var promises = [];
+          var strings = {};
+
+          for (var i = 0; i < list.length; i++) {
+              var proj = list[i].project.id;
+
+              for (var j = 0; j < list[i].source_translations.length; j++) {
+                  var lang = list[i].source_translations[j].language_id;
+                  var res = list[i].source_translations[j].resource_id;
+                  var string = lang + "_" + proj + "_" + res;
+                  if (!strings[string]) {
+                      strings[string] = true;
+                      var open = App.dataManager.activateProjectContainers(lang, proj, res);
+                      promises.push(open);
+                  }
+              }
+          }
+
+          return promises;
+      },
+
+      checkAllContainers: function (list) {
+          var promises = this.checkProjectContainers(list);
+
+          promises.push(App.dataManager.activateContainer('en', 'bible', 'tw'));
+          promises.push(App.dataManager.activateContainer('en', 'bible-obs', 'tw'));
+          promises.push(App.dataManager.activateContainer('en', 'ta-audio', 'vol2'));
+          promises.push(App.dataManager.activateContainer('en', 'ta-checking', 'vol1'));
+          promises.push(App.dataManager.activateContainer('en', 'ta-checking', 'vol2'));
+          promises.push(App.dataManager.activateContainer('en', 'ta-gateway', 'vol3'));
+          promises.push(App.dataManager.activateContainer('en', 'ta-intro', 'vol1'));
+          promises.push(App.dataManager.activateContainer('en', 'ta-process', 'vol1'));
+          promises.push(App.dataManager.activateContainer('en', 'ta-translate', 'vol1'));
+          promises.push(App.dataManager.activateContainer('en', 'ta-translate', 'vol2'));
+
+          return Promise.all(promises)
+              .then(function () {
+                  return list;
+              });
+      },
+
+      checkBuild: function () {
+          var mythis = this;
+          var path = require('path');
+          var libraryDir = App.configurator.getValue('libraryDir');
+          var libraryPath = path.join(libraryDir, "index.sqlite");
+          var srcDir = path.resolve(path.join(__dirname, '..'));
+          var srcDB = path.join(srcDir, 'index', 'index.sqlite');
+          var appData = App.configurator.getAppData();
+          var libraryBuild = App.configurator.getValue("libraryBuild");
+          var tmpDir = App.configurator.getValue('tempDir');
+          var resourceDir = App.dataManager.getResourceDir();
+          var movePromises = Promise.resolve(true);
+
+          if (!libraryBuild) {
+              App.configurator.setUserSetting("bemode", false);
+          }
+
+          if (libraryBuild != appData.build) {
+              var translations = [];
+
+              App.ipc.send('loading-status', 'Updating Index File...');
+
+              if (parseInt(libraryBuild) >= 110) {
+                  translations = App.dataManager.getTranslations();
+              }
+
+              var imports = translations.filter(function (item) {
+                  return item.resource.imported;
+              });
+
+              imports.forEach(function (item) {
+                  var foldername = item.language.slug + "_" + item.project.slug + "_" + item.resource.slug;
+                  var tmpPath = path.join(tmpDir, foldername);
+                  var resourcePath = path.join(resourceDir, foldername);
+
+                  movePromises = movePromises.then(function () {
+                      return App.utils.fs.mover(resourcePath, tmpPath);
+                  });
+              });
+
+              return movePromises
+                  .then(function () {
+                      return App.utils.fs.readFile(srcDB);
+                  })
+                  .then(function (content) {
+                      return App.utils.fs.writeFile(libraryPath, content);
+                  })
+                  .then(function () {
+                      App.configurator.setValue("libraryBuild", appData.build);
+                      if (imports.length) {
+                          return App.utils.fs.readdir(tmpDir);
+                      }
+                      return [];
+                  })
+                  .then(function (temps) {
+                      var importPromises = Promise.resolve(true);
+
+                      temps.forEach(function (item) {
+                          var itemPath = path.join(tmpDir, item);
+
+                          importPromises = importPromises.then(function () {
+                              return App.dataManager.importContainer(itemPath);
+                          });
+                      });
+
+                      return importPromises;
+                  })
+                  .then(function () {
+                      return mythis.clearTempDir();
+                  })
+                  .catch(function (e) {
+                      return mythis.clearTempDir();
+                  })
+                  .then(function () {
+                      App.ipc.send('loading-status', 'Migrating Projects...');
+                      return App.projectsManager.migrateTargetTranslationsList();
+                  })
+                  .then(function () {
+                      return Promise.resolve(true);
+                  });
+          } else {
+              return Promise.resolve(false);
+          }
+      },
+
+      createInitialSettings: function (version) {
+          var untildify = require('untildify');
+          var gitversion = version ? version.toString() : 'N/A';
+
+          App.configurator.refreshUserSetting();
+          App.configurator.setUserSetting('gitversion', gitversion);
+          App.configurator.setUserSetting('appversion', App.configurator.getAppData().toString());
+          App.configurator.setUserSetting('datapath', App.configurator.getValue('rootdir'));
+          App.configurator.setUserSetting('dataserver', "git.door43.org");
+          App.configurator.setUserSetting('mediaserver', "https://api.unfoldingword.org/");
+
+          var location = App.configurator.getUserSetting('datalocation');
+
+          location = untildify(location);
+          location = location.replace(/\\/g, "\/");
+          App.configurator.setUserSetting('datalocation', location);
+          App.configurator.applyPrefAppearance();
       },
 
       ready: function() {
           var mythis = this;
 
-          App.gitManager.verifyGit()
+          return App.gitManager.verifyGit()
               .then(function (version) {
+                  App.ipc.send('loading-status', 'Retrieving User Settings...');
                   App.reporter.logNotice('Git Version ' + version);
+                  mythis.createInitialSettings(version);
+                  mythis.checkUser(App.configurator.getValue("userdata"));
+
+                  return mythis.checkBuild();
               })
-              .then(function () {
-                  return mythis.$.settings.createInitialSettings();
-              })
-              .then(function () {
-                  App.ipc.send('loading-status', 'Retrieving User Info...');
-                  mythis.retrieveUser();
-                  App.configurator.applyPrefAppearance();
-              })
-              .then(function () {
-                  App.ipc.send('loading-status', 'Migrating Projects List...');
-                  return App.projectsManager.migrateTargetTranslationsList();
-              })
-              .then(function () {
-                  App.ipc.send('loading-status', 'Loading Projects List...');
-                  return mythis.updateList();
-              })
-              .then(function () {
-                  App.ipc.send('loading-status', 'Creating Auto Backups...');
-                  return App.exportManager.backupAllTranslations(mythis.projectlist);
+              .then(function (updates) {
+                  if (updates) {
+                      App.ipc.send('fire-reload');
+                      return Promise.resolve(false);
+                  } else {
+                      App.ipc.send('loading-status', 'Retrieving Project List...');
+                      return App.projectsManager.loadTargetTranslationsList()
+                          .then(function (list) {
+                              App.ipc.send('loading-status', 'Opening resource containers...');
+                              return mythis.checkAllContainers(list);
+                          })
+                          .then(function (list) {
+                              App.ipc.send('loading-status', 'Updating Project List...');
+                              return _.compact(list.map(App.projectsManager.updateManifestToMeta, App.projectsManager));
+                          })
+                          .then(function (list) {
+                              return mythis.sortProjects(list);
+                          })
+                          .then(function (list) {
+                              App.ipc.send('loading-status', 'Creating Auto Backups...');
+                              return App.exportManager.backupAllTranslations(list);
+                          })
+                          .then(function () {
+                              App.ipc.send('main-loading-done');
+                              mythis.$.home.setsortfields();
+                          });
+                  }
               })
               .catch(function (err) {
-                  err && err.stack && App.reporter.logError(err.stack, 'Error on startup');
-
-                  mythis.set('options', {});
-
                   var msg = 'Something broke.';
+                  err && err.stack && App.reporter.logError(err.stack, 'Error on startup');
 
                   if (err && typeof err === 'string') {
                       msg = err;
@@ -1235,18 +1414,8 @@
                   }
 
                   mythis.showErrorMessage('Error on startup', msg, err);
-              })
-              .then(function () {
                   App.ipc.send('main-loading-done');
                   mythis.$.home.setsortfields();
-
-                  var appData = App.configurator.getAppData();
-                  var libraryBuild = App.configurator.getValue("libraryBuild");
-
-                  if (libraryBuild && appData.version === "11.0.0" && libraryBuild != appData.build) {
-                      App.configurator.setUserSetting("bemode", true);
-                  }
-                  App.configurator.setValue("libraryBuild", appData.build);
               });
       }
 

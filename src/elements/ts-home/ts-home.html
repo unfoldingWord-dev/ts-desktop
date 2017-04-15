@@ -5,6 +5,7 @@
 <link rel="import" href="../../components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../components/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../../components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../../components/paper-item/paper-item.html">
 <link rel="import" href="../../components/neon-animation/neon-animation.html">
 
 <link rel="import" href="../ts-icons/ts-icons.html">
@@ -146,6 +147,10 @@
             color: var(--secondary-text-color);
         }
 
+        paper-item {
+            cursor: pointer;
+        }
+
         .popup {
             position: fixed;
             top: 0;
@@ -250,7 +255,7 @@
                         <span class="smallspan">{{locale.progress}}</span>
                     </div>
                     <div id="list">
-                        <template is="dom-repeat" items="[[projectlist]]" as="project">
+                        <template is="dom-repeat" items="{{projectlist}}" as="project">
                             <div class="row">
                                 <div class="left" on-tap="openproject">
                                     <span class="smallspan"><iron-icon class="icon" icon$="[[checkicon(project)]]"></iron-icon></span>
@@ -326,7 +331,8 @@
             },
             projectlist: {
                 type: Array,
-                value: []
+                value: [],
+                notify: true
             },
             importdata: {
                 type: Object,
@@ -371,7 +377,7 @@
 
             sort.project = "bible";
             App.configurator.setValue("sort", sort);
-            this.fire('iron-signal', {name: 'updatelist'});
+            this.updateSort();
             dropdown.close();
         },
 
@@ -381,7 +387,7 @@
 
             sort.project = "alpha";
             App.configurator.setValue("sort", sort);
-            this.fire('iron-signal', {name: 'updatelist'});
+            this.updateSort();
             dropdown.close();
         },
 
@@ -391,7 +397,7 @@
 
             sort.order = "project";
             App.configurator.setValue("sort", sort);
-            this.fire('iron-signal', {name: 'updatelist'});
+            this.updateSort();
             dropdown.close();
         },
 
@@ -401,7 +407,7 @@
 
             sort.order = "language";
             App.configurator.setValue("sort", sort);
-            this.fire('iron-signal', {name: 'updatelist'});
+            this.updateSort();
             dropdown.close();
         },
 
@@ -411,8 +417,15 @@
 
             sort.order = "progress";
             App.configurator.setValue("sort", sort);
-            this.fire('iron-signal', {name: 'updatelist'});
+            this.updateSort();
             dropdown.close();
+        },
+
+        updateSort: function () {
+            var list = _.cloneDeep(this.projectlist);
+            var sorted = App.projectsManager.sortProjectList(list);
+
+            this.set('projectlist', sorted);
         },
 
         openresource: function () {

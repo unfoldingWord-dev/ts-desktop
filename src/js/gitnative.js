@@ -72,12 +72,14 @@ function GitManager() {
                     return version;
                 })
                 .catch(function (err) {
+                    var msg = "";
+
                     if (installed) {
-                        var msg = "Your version of Git is out of date. We detected "  + err + ", but the app needs at least version " + minGitVersion + " in order to run.";
-                        throw msg;
+                        msg = "Your version of Git is out of date. We detected "  + err + ", but the app needs at least version " + minGitVersion + " in order to run.";
                     } else {
-                        throw "Git is not installed. It is required to run tStudio Desktop."
+                        msg = "Git is not installed. It is required to run tStudio Desktop."
                     }
+                    throw msg;
                 });
         },
 
@@ -130,6 +132,7 @@ function GitManager() {
                     mergedManifest = localManifest;
                     mergedManifest.translators = _.union(localManifest.translators, remoteManifest.translators);
                     mergedManifest.finished_chunks = _.union(localManifest.finished_chunks, remoteManifest.finished_chunks);
+                    return Promise.resolve(true);
                 })
                 .then(function () {
                     return mythis.getVersion();
@@ -170,6 +173,7 @@ function GitManager() {
                             }
                         });
                     }
+                    return Promise.resolve(true);
                 })
                 .then(function () {
                     return utils.fs.outputFile(localManifestPath, toJSON(mergedManifest));
@@ -182,7 +186,7 @@ function GitManager() {
                 })
                 .then(utils.logr("Finished merging"))
                 .then(function () {
-                    return conflicts;
+                    return {conflicts: conflicts, manifest: mergedManifest};
                 });
 
         },

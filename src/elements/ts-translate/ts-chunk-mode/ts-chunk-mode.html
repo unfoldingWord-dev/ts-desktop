@@ -101,6 +101,10 @@
             },
             timer: {
                 type: Number
+            },
+            active: {
+                type: Boolean,
+                value: false
             }
         },
 
@@ -113,12 +117,14 @@
         refresh: function () {
             var mythis = this;
 
-            mythis.getlocation();
-            clearTimeout(mythis.timer);
+            if (mythis.active) {
+                mythis.getlocation();
+                clearTimeout(mythis.timer);
 
-            mythis.timer = setTimeout(function() {
-                mythis.setheights();
-            }, 300);
+                mythis.timer = setTimeout(function() {
+                    mythis.setheights();
+                }, 100);
+            }
         },
 
         setheights: function () {
@@ -128,16 +134,20 @@
 
             for (var i = list.firstVisibleIndex; i <= list.lastVisibleIndex; i++) {
                 var card = document.getElementById(this.modename + i);
-                card.setheight();
+                if (card && this.chunks && i < this.chunks.length) {
+                    card.setheight();
+                }
             }
         },
 
         frommode: function () {
+            this.set('active', false);
             this.getlocation();
             this.moveout();
         },
 
         tomode: function () {
+            this.set('active', true);
             this.setpreview();
             this.setlocation();
             this.movein();
@@ -166,6 +176,7 @@
                 setTimeout(function() {
                     contain.classList.remove("movein");
                     mythis.setheights();
+                    mythis.fire('iron-signal', {name: 'closeloading'});
                 }, 500);
             }, 500);
         },
@@ -180,7 +191,7 @@
             var index = list.firstVisibleIndex || 0;
             var chunks = this.chunks;
 
-            if (chunks) {
+            if (chunks && chunks.length) {
                 this.set('modestatus.chapter', chunks[index].chunkmeta.chapter);
                 this.set('modestatus.index', index);
             }
@@ -204,7 +215,6 @@
             }
 
             list.scrollToIndex(index);
-            this.getlocation();
         },
 
         createid: function (index) {

@@ -101,6 +101,10 @@
             color: var(--reverse-text-color);
         }
 
+        .rtl {
+            direction: rtl;
+        }
+
     </style>
 
     <template>
@@ -122,7 +126,7 @@
                     <div class="markdown-html"></div>
                 </marked-element>
             </div>
-            <div id="textholder" class="targetfont targetsize"></div>
+            <div id="textholder" class$="[[textclass(currentproject.projectmeta.target_language.direction)]]"></div>
         </div>
 
     </template>
@@ -172,6 +176,10 @@
                     }
                 }
             }
+        },
+
+        textclass: function (direction) {
+            return direction === "rtl" ? 'targetfont targetsize rtl' : 'targetfont targetsize';
         },
 
         rendertext: function () {
@@ -240,7 +248,9 @@
         print: function () {
             var mythis = this;
             var name = this.currentproject.projectmeta.unique_id;
-            var filePath = App.ipc.sendSync('save-as', {options: {defaultPath: name, filters: [{name: 'PDF Files', extensions: ['pdf']}]}});
+            var defaultPath = App.configurator.getUserPath('datalocation', name);
+            var direction = this.currentproject.projectmeta.target_language.direction;
+            var filePath = App.ipc.sendSync('save-as', {options: {defaultPath: defaultPath, filters: [{name: 'PDF Files', extensions: ['pdf']}]}});
             if (!filePath) {
                 return;
             }
@@ -255,11 +265,12 @@
             var body = mythis.$.textholder.innerHTML;
 
             setTimeout(function() {
-                return App.printManager.savePdf(title, license, body, filePath)
+                return App.printManager.savePdf(title, license, body, filePath, direction)
                     .then(function () {
                         mythis.set('options.title', "PDF Created");
                         mythis.set('options.body', "Your project has been successfully saved to a PDF.");
                         mythis.set('options.loading', false);
+                        mythis.goback();
                     })
                     .catch(function (err) {
                         var errmessage = "An error occurred saving your project";

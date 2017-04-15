@@ -100,18 +100,24 @@
             },
             timer: {
                 type: Number
+            },
+            active: {
+                type: Boolean,
+                value: false
             }
         },
 
         refresh: function () {
             var mythis = this;
 
-            mythis.getlocation();
-            clearTimeout(mythis.timer);
+            if (mythis.active) {
+                mythis.getlocation();
+                clearTimeout(mythis.timer);
 
-            mythis.timer = setTimeout(function() {
-                mythis.setheights();
-            }, 300);
+                mythis.timer = setTimeout(function() {
+                    mythis.setheights();
+                }, 100);
+            }
         },
 
         setheights: function () {
@@ -129,11 +135,13 @@
         },
 
         frommode: function () {
+            this.set('active', false);
             this.getlocation();
             this.moveout();
         },
 
         tomode: function () {
+            this.set('active', true);
             this.setpreview();
             this.setlocation();
             this.movein();
@@ -162,6 +170,7 @@
                 setTimeout(function() {
                     contain.classList.remove("movein");
                     mythis.setheights();
+                    mythis.fire('iron-signal', {name: 'closeloading'});
                 }, 500);
             }, 500);
         },
@@ -176,7 +185,7 @@
             var index = list.firstVisibleIndex;
             var chapters = this.chapters;
 
-            if (chapters) {
+            if (chapters && chapters.length) {
                 this.set('modestatus.chapter', chapters[index].chaptermeta.chapter);
                 this.set('modestatus.index', -1);
             }
@@ -187,7 +196,6 @@
             var index = parseInt(this.modestatus.chapter) - 1;
 
             list.scrollToIndex(index);
-            this.getlocation();
         },
 
         createid: function (index) {

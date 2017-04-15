@@ -365,13 +365,15 @@ function MigrateManager(configurator, git, reporter, dataManager) {
                                         return utils.fs.remove(targetPath);
                                     })
                                     .then(function () {
-                                        var oldid = lastChapter + "-00";
-                                        var newid = lastChapter + "-" + lastChunk;
-                                        var index = manifest.finished_chunks.indexOf(oldid);
+                                        if (manifest.finished_chunks && manifest.finished_chunks.length) {
+                                            var oldid = lastChapter + "-00";
+                                            var newid = lastChapter + "-" + lastChunk;
+                                            var index = manifest.finished_chunks.indexOf(oldid);
 
-                                        if (index > -1) {
-                                            manifest.finished_chunks.splice(index, 1);
-                                            manifest.finished_chunks.push(newid);
+                                            if (index > -1) {
+                                                manifest.finished_chunks.splice(index, 1);
+                                                manifest.finished_chunks.push(newid);
+                                            }
                                         }
                                     });
                             }
@@ -386,13 +388,15 @@ function MigrateManager(configurator, git, reporter, dataManager) {
                                         return utils.fs.remove(oldPath);
                                     })
                                     .then(function () {
-                                        var oldid = "00-title";
-                                        var newid = "front-title";
-                                        var index = manifest.finished_chunks.indexOf(oldid);
+                                        if (manifest.finished_chunks && manifest.finished_chunks.length) {
+                                            var oldid = "00-title";
+                                            var newid = "front-title";
+                                            var index = manifest.finished_chunks.indexOf(oldid);
 
-                                        if (index > -1) {
-                                            manifest.finished_chunks.splice(index, 1);
-                                            manifest.finished_chunks.unshift(newid);
+                                            if (index > -1) {
+                                                manifest.finished_chunks.splice(index, 1);
+                                                manifest.finished_chunks.unshift(newid);
+                                            }
                                         }
                                     });
                             }

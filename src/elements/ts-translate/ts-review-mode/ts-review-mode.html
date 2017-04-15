@@ -72,7 +72,7 @@
 	<template>
 
         <div id="contain">
-            <ts-search-bar id="searchbar" class="hide" chunks="[[chunks]]" searchoptions="{{searchoptions}}" results="{{results}}" on-closesearch="closesearch" on-next="next" on-previous="previous"></ts-search-bar>
+            <ts-search-bar id="searchbar" class="hide" chunks="[[chunks]]" searchoptions="{{searchoptions}}" results="{{results}}" on-hidesearch="hidesearch" on-next="next" on-previous="previous"></ts-search-bar>
             <iron-list id="reviewlist" items="{{chunks}}" as="chunk" on-scroll="refresh">
                 <template>
                     <ts-review-card chunk="{{chunk}}" searchoptions="{{searchoptions}}" on-setheights="setheights"></ts-review-card>
@@ -115,6 +115,10 @@
             },
             timer: {
                 type: Number
+            },
+            active: {
+                type: Boolean,
+                value: false
             }
         },
 
@@ -130,6 +134,11 @@
         },
 
         closesearch: function () {
+            this.hidesearch();
+            this.$.searchbar.clearsearch();
+        },
+
+        hidesearch: function () {
             this.$.reviewlist.classList.remove('searchmode');
             this.$.searchbar.classList.add('hide');
         },
@@ -161,13 +170,15 @@
         refresh: function () {
             var mythis = this;
 
-            mythis.getlocation();
-            clearTimeout(mythis.timer);
+            if (mythis.active) {
+                mythis.getlocation();
+                clearTimeout(mythis.timer);
 
-            mythis.timer = setTimeout(function() {
-                mythis.setheights();
-                mythis.fire('iron-signal', {name: 'passivesearch'});
-            }, 300);
+                mythis.timer = setTimeout(function() {
+                    mythis.setheights();
+                    mythis.fire('iron-signal', {name: 'passivesearch'});
+                }, 100);
+            }
         },
 
         setheights: function () {
@@ -183,11 +194,13 @@
         },
 
         frommode: function () {
+            this.set('active', false);
             this.getlocation();
             this.moveout();
         },
 
         tomode: function () {
+            this.set('active', true);
             this.setpreview();
             this.setlocation();
             this.movein();
@@ -216,6 +229,7 @@
                 setTimeout(function() {
                     contain.classList.remove("movein");
                     mythis.setheights();
+                    mythis.fire('iron-signal', {name: 'closeloading'});
                 }, 500);
             }, 500);
         },
@@ -231,7 +245,7 @@
             var chunks = this.chunks;
             var chapter;
 
-            if (chunks) {
+            if (chunks && chunks.length) {
                 var chunk = chunks[index];
                 var type = chunk.projectmeta.type.id;
 
@@ -264,7 +278,6 @@
             }
 
             list.scrollToIndex(index);
-            this.getlocation();
         },
 
 		ready: function() {

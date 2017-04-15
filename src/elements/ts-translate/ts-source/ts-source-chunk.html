@@ -138,7 +138,7 @@
             if(this.chunk && this.chunk.srccontent) {
                 var search = this.searchoptions;
                 var text = _.cloneDeep(this.chunk.srccontent);
-                var startspan = "\<span class='style-scope ts-source-chunk highlight'\>";
+                var startspan = '\<span class="style-scope ts-source-chunk ts-translate highlight"\>';
                 var endspan = "\<\/span\>";
                 var direction = "ltr";
 
@@ -146,13 +146,39 @@
                     direction = this.chunk.projectmeta.source_translations[this.chunk.projectmeta.currentsource].direction;
                 }
                 if (search.text && search.type === "source") {
-                    var regex = new RegExp(App.renderer.replaceEscapes(search.text) + "(?![^<]*>)", "gi");
+                    var regex = new RegExp(App.renderer.replaceEscapes(search.text) + "(?!([^<]*>)|(\\d*<\/sup))", "gi");
                     var matches = _.unique(text.match(regex)) || [];
 
                     matches.forEach(function (match) {
-                        var result = new RegExp(App.renderer.replaceEscapes(match) + "(?![^<]*>)", "g");
+                        var result = new RegExp(App.renderer.replaceEscapes(match) + "(?!([^<]*>)|(\\d*<\/sup))", "g");
                         text = text.replace(result, startspan + match + endspan);
                     });
+
+                    var expression = new RegExp(/(\<ts-note-marker text=')([^<>]*)('>\<\/ts-note-marker>)/);
+
+                    while (expression.test(text)) {
+                        var replacement = "<ts-note-marker class='style-scope ts-source-chunk' text='";
+                        var pieces = expression.exec(text);
+                        var notetext = pieces[2];
+
+                        notetext = notetext.replace(/&apos;/g, "'");
+
+                        var fnregex = new RegExp(App.renderer.replaceEscapes(search.text), "gi");
+                        var fnmatches = _.unique(notetext.match(fnregex)) || [];
+
+                        fnmatches.forEach(function (match) {
+                            var fnresult = new RegExp(App.renderer.replaceEscapes(match), "g");
+                            notetext = notetext.replace(fnresult, startspan + match + endspan);
+                        });
+
+                        if (fnmatches.length) {
+                            replacement = "<ts-note-marker class='style-scope ts-source-chunk highlight' text='";
+                        }
+
+                        notetext = notetext.replace(/'/g, '&apos;');
+
+                        text = text.replace(expression, replacement + notetext + pieces[3]);
+                    }
 
                 }
                 this.$.textholder.innerHTML = text;

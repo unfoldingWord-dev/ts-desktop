@@ -110,16 +110,38 @@
         #note {
             width: 350px;
             height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
-        #notebuttons {
+        #noteheader {
+            flex: 0 0 50px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            margin: 0;
+            padding: 0 30px;
+        }
+
+        #notebody {
+            flex: 0 0 110px;
+            overflow-y: auto;
+            margin: 0;
+            padding: 20px 30px;
+        }
+
+        #notefooter {
+            flex: 0 0 50px;
             display: flex;
             justify-content: flex-end;
+            border-top: 1px solid var(--border-color);
+            margin: 0;
             padding: 0 50px;
             color: var(--secondary-text-color);
         }
 
-        #notebuttons paper-button:hover {
+        #notefooter paper-button:hover {
             color: var(--accent-color);
         }
 
@@ -147,6 +169,10 @@
 
         .nodisplay {
             display: none;
+        }
+
+        .highlight {
+            background: var(--highlight-color);
         }
 
     </style>
@@ -201,9 +227,11 @@
         </paper-dialog>
 
         <paper-dialog id="note" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <h2>Note</h2>
+            <div id="noteheader">
+                <h2>Footnote</h2>
+            </div>
             <div id="notebody"></div>
-            <div id="notebuttons">
+            <div id="notefooter">
                 <paper-button dialog-dismiss>Dismiss</paper-button>
             </div>
         </paper-dialog>
@@ -390,6 +418,8 @@
                                         App.reporter.logError(err, 'Error cleaning project');
                                     });
                             });
+                    } else {
+                        return Promise.resolve(true);
                     }
                 })
                 .then(function () {
@@ -398,10 +428,13 @@
                         return App.projectsManager.saveTargetManifest(projectmeta)
                             .then(function () {
                                 mythis.set('saveoptions.manifest', false);
+                                return Promise.resolve(true);
                             })
                             .catch(function (err) {
                                 App.reporter.logError(err, 'Error saving target manifest');
                             });
+                    } else {
+                        return Promise.resolve(true);
                     }
                 })
                 .then(function () {
@@ -410,6 +443,8 @@
                             .catch(function (err) {
                                 App.reporter.logError(err, 'Error committing project');
                             });
+                    } else {
+                        return Promise.resolve(true);
                     }
                 })
                 .then(function () {
@@ -417,6 +452,7 @@
                         return App.exportManager.autoBackupTranslation(projectmeta)
                             .then(function () {
                                 mythis.set('saveoptions.backup', false);
+                                return Promise.resolve(true);
                             })
                             .catch(function (err) {
                                 mythis.set('options', {});
@@ -427,20 +463,23 @@
                                 mythis.set('saveoptions.backup', false);
                                 App.reporter.logError(err, 'Error backing up translation');
                             });
+                    } else {
+                        return Promise.resolve(true);
                     }
                 })
                 .then(function () {
                     if (changes) {
-                        mythis.fire('iron-signal', {name: 'updatelist'});
                         mythis.set('message', "Changes Saved");
                     } else {
                         mythis.set('message', "No Changes Found");
                     }
+                    return Promise.resolve(true);
                 })
                 .then(function () {
                     setTimeout(function() {
                         mythis.set('message', "Idle");
                     }, 1000);
+                    return Promise.resolve(true);
                 });
 
         },
@@ -492,35 +531,44 @@
             mythis.set('options.body', "Loading source options. Please wait...");
             mythis.set('options.loading', true);
             mythis.fire('iron-signal', {name: 'openloading'});
+            mythis.savestate();
 
-            App.dataManager.getSourcesByProject(projectmeta.project.id)
-                .then(function (sources) {
-                    if (projectmeta.resource.id !== "udb") {
-                        sources = _.filter(sources, function(source) {
-                            return source.resource_id !== "udb";
-                        });
-                    }
-
-                    sources.forEach(function (source) {
-                        var inarray = false;
-                        projectmeta.source_translations.forEach(function (current) {
-                            if (current.unique_id === source.unique_id) {
-                                inarray = true;
+            setTimeout(function() {
+                return App.dataManager.getSourcesByProject(projectmeta.project.id)
+                    .then(function (sources) {
+                        if (sources.length) {
+                            if (projectmeta.resource.id !== "udb") {
+                                sources = _.filter(sources, function(source) {
+                                    return source.resource_id !== "udb";
+                                });
                             }
-                        });
-                        source.selected = inarray;
+
+                            sources.forEach(function (source) {
+                                var inarray = false;
+                                projectmeta.source_translations.forEach(function (current) {
+                                    if (current.unique_id === source.unique_id) {
+                                        inarray = true;
+                                    }
+                                });
+                                source.selected = inarray;
+                            });
+
+                            modal.set('master', sources);
+
+                            return modal.organizeSources()
+                                .then(function () {
+                                    mythis.fire('iron-signal', {name: 'closeloading'});
+                                    setTimeout(function() {
+                                        mythis.$.sourcepopup.open();
+                                    }, 500);
+                                });
+                        } else {
+                            mythis.set('options.title', "Loading Failed");
+                            mythis.set('options.body', "Cannot find sources. Try restarting app.");
+                            mythis.set('options.loading', false);
+                        }
                     });
-
-                    modal.set('master', sources);
-
-                    return modal.organizeSources();
-                })
-                .then(function () {
-                    mythis.fire('iron-signal', {name: 'closeloading'});
-                    setTimeout(function() {
-                        mythis.$.sourcepopup.open();
-                    }, 500);
-                });
+            }, 500);
         },
 
         closesource: function () {
@@ -582,9 +630,10 @@
             if (this.route === "translate") {
                 var key = this.currentproject.projectmeta.unique_id;
                 this.getlocation();
+                var selected = this.selected !== 4 ? this.selected : null;
                 App.configurator.setValue(key + "-chapter", this.modestatus.chapter);
                 App.configurator.setValue(key + "-index", this.modestatus.index);
-                App.configurator.setValue(key + "-selected", this.selected);
+                App.configurator.setValue(key + "-selected", selected);
             }
         },
 
@@ -630,26 +679,10 @@
             var loadsource = function () {
                 if (projectmeta.project_type_class === "extant") {
                     mythis.createextantchunks();
+                    mythis.finishLoading(nav, false);
                 } else {
-                    mythis.createchunks();
-                    mythis.createchapters();
+                    mythis.createchunks(nav, false);
                 }
-                if (nav === "review") {
-                    mythis.goreview();
-                } else {
-                    mythis.fire('iron-signal', {name: 'closeloading'});
-                }
-                setTimeout(function() {
-                    if (nav === "translate") {
-                        mythis.setmodestate();
-                        mythis.checksources();
-                        mythis.starttimers();
-                    } else if (nav === "print") {
-                        mythis.fire('openprint');
-                    } else if (nav === "export") {
-                        mythis.fire('exportusfm');
-                    }
-                }, 500);
             };
 
             var loadwords = function () {
@@ -661,10 +694,11 @@
                         }
                     }
                     if (wordmeta) {
-                        App.projectsManager.loadTargetTranslation(wordmeta).then(function (words) {
-                            mythis.set('currentproject.rawdata.words', words);
-                            loadsource();
-                        });
+                        App.projectsManager.loadTargetTranslation(wordmeta)
+                            .then(function (words) {
+                                mythis.set('currentproject.rawdata.words', words);
+                                loadsource();
+                            });
                     } else {
                         mythis.set('currentproject.rawdata.words', {});
                         loadsource();
@@ -691,10 +725,11 @@
                         }
                     }
                     if (secondmeta) {
-                        App.projectsManager.loadTargetTranslation(secondmeta).then(function (secondtranslation) {
-                            mythis.set('currentproject.rawdata.second', secondtranslation);
-                            loadwords();
-                        });
+                        App.projectsManager.loadTargetTranslation(secondmeta)
+                            .then(function (secondtranslation) {
+                                mythis.set('currentproject.rawdata.second', secondtranslation);
+                                loadwords();
+                            });
                     } else {
                         mythis.set('currentproject.rawdata.second', {});
                         loadwords();
@@ -728,6 +763,15 @@
                             if (projectmeta.type.id === "ta") {
                                 throw "At this time, translationAcademy translation projects are not supported.";
                             }
+                            var source = projectmeta.source_translations[projectmeta.currentsource];
+
+                            if (source) {
+                                return App.dataManager.activateProjectContainers(source.language_id, projectmeta.project.id, source.resource_id);
+                            } else {
+                                return Promise.resolve(true);
+                            }
+                        })
+                        .then(function () {
                             loaddata2();
                         })
                         .catch(function(err) {
@@ -752,13 +796,19 @@
             mythis.set('options.loading', true);
             mythis.fire('iron-signal', {name: 'openloading'});
             setTimeout(function() {
-                mythis.set('currentproject.projectmeta.source_translations', data.sources);
-                mythis.set('currentproject.projectmeta.currentsource', data.current);
-                mythis.savemanifest();
-                mythis.savesource();
+                mythis.changesources(data.sources, data.current);
                 mythis.getlocation();
                 mythis.reloaddata(data.full);
             }, 250);
+        },
+
+        changesources: function (sources, current) {
+            var mythis = this;
+
+            mythis.set('currentproject.projectmeta.source_translations', sources);
+            mythis.set('currentproject.projectmeta.currentsource', current);
+            mythis.savemanifest();
+            mythis.savesource();
         },
 
         reloaddata: function (full) {
@@ -770,6 +820,8 @@
                 .then(function () {
                     if (source) {
                         return App.dataManager.activateProjectContainers(source.language_id, projectmeta.project.id, source.resource_id);
+                    } else {
+                        return Promise.resolve(true);
                     }
                 })
                 .then(function () {
@@ -777,15 +829,7 @@
                 })
                 .then(function (translation) {
                     mythis.set('currentproject.rawdata.main', translation);
-                    mythis.createchunks();
-                    mythis.createchapters();
-                    mythis.fire('iron-signal', {name: 'closeloading'});
-                    mythis.forceResize();
-                    mythis.setlocation();
-                    mythis.fire('iron-signal', {name: 'passivesearch'});
-                    if (full) {
-                        mythis.checksources();
-                    }
+                    mythis.createchunks("reload", full);
                 });
         },
 
@@ -809,11 +853,36 @@
             }
         },
 
-        createchunks: function () {
+        invalidSource: function (nav, full) {
+            var mythis = this;
+            var projectmeta = _.cloneDeep(this.currentproject.projectmeta);
+            var selected = projectmeta.currentsource;
+            var sources = projectmeta.source_translations;
+            var source = sources[selected];
+            var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;
+
+            mythis.set('options.body', "Removing invalid source: " + container);
+            mythis.set('options.loading', true);
+
+            sources.splice(selected, 1);
+            selected = sources.length ? sources.length - 1 : null;
+
+            mythis.changesources(sources, selected);
+
+            setTimeout(function() {
+                mythis.createchunks(nav, full);
+            }, 5000);
+        },
+
+        createchunks: function (nav, full) {
             var projectmeta = this.currentproject.projectmeta;
             var selected = projectmeta.currentsource;
-            if (selected === null || selected === undefined) {
+            if (selected === null || selected === undefined || !projectmeta.source_translations.length) {
+                this.finishLoading(nav, full);
                 return;
+            }
+            if (selected >= projectmeta.source_translations.length) {
+                selected = projectmeta.source_translations.length -1;
             }
             var source = projectmeta.source_translations[selected];
             var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;
@@ -824,6 +893,11 @@
             var wordlist = App.dataManager.getSourceWords(source);
             var chunkarray = [];
             var title = "";
+
+            if (!frames.length) {
+                this.invalidSource(nav, full);
+                return;
+            }
 
             this.set('currentproject.conflicts', 0);
 
@@ -837,6 +911,8 @@
                 var chunkmeta = this.createFrameMeta(frames[i], projectmeta, sourcedata.verses, title);
                 var chunk = this.getFrameData(chunkmeta, projectmeta);
                 var sourcecontent = App.renderer.convertNoteMarkers(sourcedata.text);
+                sourcecontent = App.renderer.removeParaTags(sourcecontent);
+                sourcecontent = App.renderer.removeCharTags(sourcecontent);
                 chunk.srccontent = App.renderer.renderSuperscriptVerses(sourcecontent);
                 chunk.wordcontent = "";
                 chunk.resources = resources;
@@ -844,6 +920,40 @@
                 chunkarray.push(chunk);
             }
             this.set('currentproject.chunks', chunkarray);
+            this.createchapters();
+            this.finishLoading(nav, full);
+        },
+
+        finishLoading: function (nav, full) {
+            var mythis = this;
+
+            if (nav === "translate") {
+                mythis.setmodestate();
+                mythis.checksources();
+                mythis.starttimers();
+            } else if (nav === "review") {
+                mythis.goreview();
+            } else if (nav === "print") {
+                mythis.fire('iron-signal', {name: 'closeloading'});
+                setTimeout(function() {
+                    mythis.fire('openprint');
+                }, 500);
+            } else if (nav === "export") {
+                mythis.fire('iron-signal', {name: 'closeloading'});
+                setTimeout(function() {
+                    mythis.fire('exportusfm');
+                }, 500);
+            } else if (nav === "reload") {
+                if (!full) {
+                    mythis.fire('iron-signal', {name: 'closeloading'});
+                }
+                mythis.forceResize();
+                mythis.setlocation();
+                mythis.fire('iron-signal', {name: 'passivesearch'});
+                if (full) {
+                    mythis.checksources();
+                }
+            }
         },
 
         createchapters: function () {
@@ -958,9 +1068,20 @@
 
             for (var w = 0; w < words.length; w++) {
                 var worddata = this.currentproject.rawdata.words["01-" + words[w].slug];
-                if (worddata && worddata.helpscontent[0].body !== "" && worddata.helpscontent[0].title !== "") {
-                    words[w].title = worddata.helpscontent[0].title;
-                    words[w].body = worddata.helpscontent[0].body;
+
+                if (worddata) {
+                    var parsed = false;
+
+                    try {
+                        parsed = JSON.parse(worddata.helpscontent);
+                    } catch (e) {
+                        parsed = false;
+                    }
+
+                    if (parsed && parsed[0] && parsed[0].body !== "" && parsed[0].title !== "") {
+                        words[w].title = parsed[0].title;
+                        words[w].body = parsed[0].body;
+                    }
                 }
             }
 
@@ -981,6 +1102,7 @@
                 });
 
                 question = _.flatten(question);
+                question = _.uniq(question, 'title');
             }
             if (question.length) {
                 resources.push({title: "Questions", array: true, data: question});
@@ -994,6 +1116,9 @@
             }
             if (udbtext) {
                 udbtext = App.renderer.convertVerseMarkers(udbtext).text;
+                udbtext = App.renderer.convertNoteMarkers(udbtext);
+                udbtext = App.renderer.removeParaTags(udbtext);
+                udbtext = App.renderer.removeCharTags(udbtext);
                 udbtext = App.renderer.renderSuperscriptVerses(udbtext);
                 resources.push({title: "UDB", array: false, data: [udbtext]});
             }
@@ -1153,7 +1278,7 @@
 
             this.closeresource();
 
-            if (frommode > 0) {
+            if (frommode > 0 && frommode !== 4) {
                 this.set('modestatus.lastmode', frommode);
             }
 
@@ -1198,22 +1323,17 @@
             nosource.classList.add("hide");
             conflict.classList.add("hide");
             mythis.stoptimers();
+            mythis.closeresource();
         },
 
         setmodestate: function () {
             var mythis = this;
             var projectmeta = this.currentproject.projectmeta;
-            var sources = projectmeta.source_translations;
             var key = projectmeta.unique_id;
             var index = App.configurator.getValue(key + "-index");
             var chapter = App.configurator.getValue(key + "-chapter");
-            var selected = App.configurator.getValue(key + "-selected");
             var bemode = App.configurator.getUserSetting('bemode');
             var typeclass = projectmeta.project_type_class;
-
-            if (selected === 2 && !bemode) {
-                selected = 3;
-            }
 
             if (chapter > 0) {
                 mythis.set('modestatus.chapter', chapter);
@@ -1226,20 +1346,6 @@
             } else {
                 mythis.set('modestatus.lastmode', 3);
             }
-
-            if ((sources !== undefined && sources.length !== 0) || typeclass === "extant") {
-                setTimeout(function() {
-                    if (selected > 0) {
-                        mythis.set('selected', selected);
-                    } else {
-                        if (typeclass === "standard" && bemode) {
-                            mythis.set('selected', 1);
-                        } else {
-                            mythis.set('selected', 3);
-                        }
-                    }
-                }, 500);
-            }
         },
 
         checksources: function () {
@@ -1249,18 +1355,32 @@
             var lastmode = this.modestatus.lastmode;
             var selected = this.selected;
             var typeclass = projectmeta.project_type_class;
+            var key = projectmeta.unique_id;
+            var previous = App.configurator.getValue(key + "-selected");
+            var bemode = App.configurator.getUserSetting('bemode');
+            var gotomode = 3;
 
-            if (selected === 4) {
-                if (sources !== undefined && sources.length !== 0) {
-                    mythis.set('selected', lastmode);
-                }
-            } else {
-                if ((sources === undefined || sources.length === 0) && typeclass !== "extant") {
-                    setTimeout(function() {
-                        mythis.set('selected', 4);
-                    }, 500);
-                }
+            if (previous === 2 && !bemode) {
+                previous = 3;
             }
+
+            if ((sources === undefined || sources.length === 0) && typeclass !== "extant") {
+                gotomode = 4;
+            } else if (selected === 4 && lastmode !== 4) {
+                gotomode = lastmode;
+            } else if (previous > 0 && previous !== 4) {
+                gotomode = previous;
+            } else if (typeclass === "standard" && bemode) {
+                gotomode = 1;
+            }
+
+            setTimeout(function() {
+                if (selected === gotomode) {
+                    mythis.fire('iron-signal', {name: 'closeloading'});
+                } else {
+                    mythis.set('selected', gotomode);
+                }
+            }, 500);
         },
 
         getlocation: function () {
@@ -1331,26 +1451,26 @@
                         mythis.starttimers();
                     }, 500);
                 }
-
-                mythis.fire('iron-signal', {name: 'closeloading'});
             }, 500);
         },
 
         gohome: function () {
             var mythis = this;
 
-            mythis.closeresource();
-            mythis.savestate();
-            mythis.stoptimers();
+            mythis.set('options', {});
+            mythis.set('options.body', "Closing project. Please wait...");
+            mythis.set('options.loading', true);
+            mythis.fire('iron-signal', {name: 'openloading'});
 
-            return mythis.saveAll()
-                .then(function () {
-                    setTimeout(function() {
-                        mythis.fire('iron-signal', {name: 'closeloading'});
-                        mythis.set('route', "home");
-                        mythis.reset();
-                    }, 500);
-                });
+            setTimeout(function() {
+                mythis.savestate();
+                mythis.stoptimers();
+
+                return mythis.saveAll()
+                    .then(function () {
+                        mythis.fire('update');
+                    });
+            }, 500);
         },
 
         goreview: function () {

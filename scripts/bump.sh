@@ -12,7 +12,7 @@ HAS_REMOTE=$(scripts/git/has_remote.sh $REMOTE)
 if [ $HAS_REMOTE ]; then
     git remote remove $REMOTE
 fi
-git remote add $REMOTE "https://$GITHUB_TOKEN@github.com/unfoldingWord-dev/ts-desktop.git"
+git remote add $REMOTE "https://$GITHUB_BUMP_TOKEN@github.com/unfoldingWord-dev/ts-desktop.git"
 
 BUILD=$(gulp bump --silent)
 git add package.json

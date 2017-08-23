@@ -403,39 +403,24 @@ function Renderer() {
         },
 
         validateVerseMarkers: function (text, verses) {
-            var linearray = text.trim().split("\n");
-            var returnstr = "";
+            var returnstr = text.trim();
             var used = [];
+            var addon = "";
+            var versetest = new RegExp(/\s*\\v\s*(\d+)\s*/);
+            var cleantest = new RegExp(/\\fv/g);
 
-            for (var j = 0; j < linearray.length; j++) {
-                if (linearray[j] === "") {
-                    if (linearray.length === 1) {
-                        returnstr += "";
-                    } else {
-                        returnstr += "\n";
-                    }
-                } else {
-                    var wordarray = linearray[j].split(" ");
-                    for (var i = 0; i < wordarray.length; i++) {
-                        if (wordarray[i] === "\\v") {
-                            var verse = parseInt(wordarray[i+1]);
-                            if (verses.indexOf(verse) >= 0 && used.indexOf(verse) === -1) {
-                                returnstr += "\\v " + verse + " ";
-                                used.push(verse);
-                            }
-                            i++;
-                        } else {
-                            returnstr += wordarray[i] + " ";
-                        }
-                    }
-                    returnstr = returnstr.trim();
-                    if (j !== linearray.length-1) {
-                        returnstr += "\n";
-                    }
+            while (versetest.test(returnstr)) {
+                var versenum = parseInt(versetest.exec(returnstr)[1]);
+                var replace = " ";
+
+                if (verses.indexOf(versenum) >= 0 && used.indexOf(versenum) === -1) {
+                    replace = " \\fv " + versenum + " ";
+                    used.push(versenum);
                 }
+                returnstr = returnstr.replace(versetest, replace);
             }
 
-            var addon = "";
+            returnstr = returnstr.replace(cleantest, "\\v");
 
             if (returnstr) {
                 for (var k = 0; k < verses.length; k++) {
@@ -445,7 +430,7 @@ function Renderer() {
                 }
             }
 
-            return addon + returnstr;
+            return addon + returnstr.trim();
         },
 
         markersToBalloons: function (chunk, module) {

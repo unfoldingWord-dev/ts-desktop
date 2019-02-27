@@ -1,4 +1,4 @@
-const {Menu, dialog, app, BrowserWindow, ipcMain, ipcRenderer, remote} = require(
+const {Menu, dialog, app, BrowserWindow, ipcMain} = require(
     'electron');
 const path = require('path');
 
@@ -13,6 +13,15 @@ let scrollToId;
 
 function initialize() {
     makeSingleInstance();
+
+    app.setPath('userData', (function(dataDir) {
+        var base = process.env.LOCALAPPDATA ||
+            (process.platform === 'darwin'
+                ? path.join(process.env.HOME, 'Library', 'Application Support')
+                : path.join(process.env.HOME, '.config'));
+
+        return path.join(base, dataDir);
+    })('translationstudio'));
 
     app.on('ready', () => {
         // TODO: create menu
@@ -31,6 +40,22 @@ function initialize() {
             createWindow();
         }
     });
+
+    ipcMain.on('loading-status', function(event, status) {
+        console.log(status);
+        // splashScreen && splashScreen.webContents.send('loading-status', status);
+    });
+
+    ipcMain.on('main-window', function(event, arg) {
+        if (typeof mainWindow[arg] === 'function') {
+            let ret = mainWindow[arg]();
+            event.returnValue = !!ret;
+        } else if (mainWindow[arg]) {
+            event.returnValue = mainWindow[arg];
+        } else {
+            event.returnValue = null;
+        }
+    });
 }
 
 function createWindow() {
@@ -46,7 +71,9 @@ function createWindow() {
     };
 
     mainWindow = new BrowserWindow(windowOptions);
-    mainWindow.loadURL(path.join('file://', __dirname, '/src/views/index.html'));
+    mainWindow.dataPath = app.getPath('userData');
+    mainWindow.loadURL(
+        path.join('file://', __dirname, '/src/views/index.html'));
 
     // Launch fullscreen with DevTools open
     if (debug) {
@@ -85,7 +112,6 @@ function makeSingleInstance() {
         }
     });
 }
-
 
 function createMainSplash() {
     splashScreen = new BrowserWindow({

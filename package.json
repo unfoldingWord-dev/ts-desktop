@@ -51,8 +51,9 @@
         "untildify": "2.1.0"
     },
     "devDependencies": {
-        "bower": "1.7.9",
+        "bower": "^1.8.8",
         "check-for-leaks": "^1.2.0",
+        "devtron": "^1.4.0",
         "electron-packager": "^13.1.0",
         "gulp": "3.9.1",
         "gulp-mocha": "3.0.0",
@@ -62,12 +63,12 @@
         "yargs": "4.8.1"
     },
     "scripts": {
-        "start": "electron src/js/main.js",
-        "dev": "electron src/js/main.js --debug",
+        "start": "electron . -remote-debugging-port=9222",
+        "dev": "electron . --debug -remote-debugging-port=9222",
         "test": "jest",
         "prepack": "check-for-leaks",
         "prepush": "check-for-leaks"
     },
-    "main": "src/js/main.js",
+    "main": "main.js",
     "license": "GPL-2.0"
 }

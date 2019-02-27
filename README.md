@@ -6,16 +6,16 @@ translationStudio Desktop
 
 A tool to translate the Bible and [Open Bible Stories](http://distantshores.org/openbiblestories) into your own language. You can read more about the purpose of this project at [unfoldingWord](https://unfoldingword.org/apps/#tS).
 
-##Requirements
+## Requirements
 The official development requirements are available at
 * [tS Requirements](https://github.com/unfoldingWord-dev/ts-requirements)
 
 Additional documentation specific to the desktop platforms is available in the [wiki](https://github.com/unfoldingWord-dev/ts-desktop/wiki).
 
-##Contributing
+## Contributing
 If you would like to contribute to this project please read the [Contributing](https://github.com/unfoldingWord-dev/ts-desktop/wiki/Contributing) article in the wiki.
 
-##Quick Start
+## Quick Start
 First make sure you have [NodeJS](https://nodejs.org/) installed (choose the Current, not LTS). Then, in your terminal/command line window:
 
 	$ npm install -g bower
@@ -28,7 +28,7 @@ After the repository has been cloned to your computer run the following command 
 
 For more information please read the [wiki](https://github.com/unfoldingWord-dev/ts-desktop/wiki).
 
-###Commands
+### Commands
 The following commands are available from within the project directory:
 
 * `$ gulp build --win` builds a windows distribution (other available flags are `--osx` and `--linux`)

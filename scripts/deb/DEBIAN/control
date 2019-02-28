@@ -1,0 +1,8 @@
+Package: translationstudio
+Version: 12.0.0
+Maintainer: unfoldingWord <info@unfoldingword.org>
+Section: editors
+Architecture: all
+Installed-Size: 484454
+Vcs-Git: https://github.com/unfoldingWord-dev/ts-desktop
+Description: translationStudio (tS) is an open source platform for translating the and biblical content.

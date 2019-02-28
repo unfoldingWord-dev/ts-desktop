@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# install desktop launcher
+xdg-desktop-menu install /opt/translationstudio/unfoldingword-translationstudio.desktop
+
+# install icon
+xdg-icon-resource install --size 128 /opt/translationstudio/translationstudio-128.png unfoldingword-translationstudio
+xdg-icon-resource install --size 64 /opt/translationstudio/translationstudio-64.png unfoldingword-translationstudio
+xdg-icon-resource install --size 48 /opt/translationstudio/translationstudio-48.png unfoldingword-translationstudio
+xdg-icon-resource install --size 32 /opt/translationstudio/translationstudio-32.png unfoldingword-translationstudio
+xdg-icon-resource install --size 22 /opt/translationstudio/translationstudio-22.png unfoldingword-translationstudio
+xdg-icon-resource install --size 16 /opt/translationstudio/translationstudio-16.png unfoldingword-translationstudio

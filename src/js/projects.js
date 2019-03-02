@@ -218,6 +218,12 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             var meta = manifest;
 
             try {
+                if(manifest.type.id === "tn") {
+                    // TRICKY: tn projects are no longer supported
+                    console.warn('tn projects are no longer supported', manifest);
+                    return null;
+                }
+
                 if (manifest.project.name === "") {
                     meta.project.name = dataManager.getProjectName(manifest.project.id);
                 }

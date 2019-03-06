@@ -86,7 +86,8 @@
         properties: {
             selected: {
                 type: Number,
-                value: 0
+                value: 0,
+                observer: "selectionChanged"
             },
             newinfo: {
                 type: Object,
@@ -128,6 +129,10 @@
             setTimeout(function() {
                 mythis.set('selected', 0);
             }, 1000);
+        },
+
+        selectionChanged: function() {
+            this.set('newinfo', {});
         },
 
         sendlocal: function () {
@@ -229,6 +234,12 @@
                     mythis.set('options.title', "Account Creation Failed");
                     mythis.set('options.body', errmessage);
                     mythis.set('options.loading', false);
+                    mythis.set('newinfo', {
+                        full_name: user.full_name,
+                        username: user.username,
+                        email: user.email,
+                        password: user.password
+                    });
                 });
         },
 

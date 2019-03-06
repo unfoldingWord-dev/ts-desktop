@@ -1219,7 +1219,7 @@
                     conflicts = App.renderer.parseConflicts(App.renderer.consolidateHelpsConflict(App.renderer.replaceConflictCode(maindata.helpscontent)));
                     if (conflicts.exists) {
                         this.set('currentproject.conflicts', this.currentproject.conflicts + 1);
-                        helpscontent = [{title: "Dummy Data", body: "Dummy Data"}];
+                        helpscontent = [{title: "", body: ""}];
 
                         for (i = 0; i < conflicts.array.length; i++) {
                             if (conflicts.array[i] === "Conflict Parsing Error") {

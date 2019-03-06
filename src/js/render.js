@@ -356,8 +356,9 @@ function Renderer() {
             chapters.forEach(function (chapter) {
                 if (chapter.content) {
                     toc += startadiv1 + chapter.chapter + startadiv2 + chapter.title + endadiv;
-                    text += starttitlediv1 + chapter.chapter + starttitlediv2 + startheader + chapter.title + endheader + startheader + chapter.reference + endheader + enddiv;
-                    text += startbreakdiv + chapter.content + enddiv;
+                    text += starttitlediv1 + chapter.chapter + starttitlediv2 + startheader + chapter.title + endheader + enddiv;
+                    text += startbreakdiv + chapter.content;
+                    text += startp + chapter.reference + endp + enddiv;
                 }
             });
 

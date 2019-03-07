@@ -1,6 +1,7 @@
 'use strict';
 
 var path = require('path');
+var fs = require('fs');
 
 function Renderer() {
 
@@ -338,7 +339,11 @@ function Renderer() {
                     if (chunk.chunkmeta.frame > 0 && chunk.transcontent) {
                         if (options.includeIncompleteFrames || chunk.completed) {
                             if (options.includeImages) {
-                                var image = path.join(imagePath, chunk.projectmeta.resource.id + "-en-" + chunk.chunkmeta.chapterid + "-" + chunk.chunkmeta.frameid + ".jpg");
+                                // TRICKY: obs image names have changed to exclude the language id in the name
+                                var image = path.join(imagePath, chunk.projectmeta.resource.id + "-" + chunk.chunkmeta.chapterid + "-" + chunk.chunkmeta.frameid + ".jpg");
+                                if(!fs.existsSync(image)) {
+                                    image = path.join(imagePath, chunk.projectmeta.resource.id + "-en-" + chunk.chunkmeta.chapterid + "-" + chunk.chunkmeta.frameid + ".jpg");
+                                }
                                 content += startnobreakdiv + "\<img src='" + image + "'\>";
                                 content += startp + mythis.displayConflicts(chunk.transcontent) + endp + enddiv;
                             } else {

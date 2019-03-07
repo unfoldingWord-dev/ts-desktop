@@ -44,9 +44,9 @@ before_install:
 #- rm git-lfs-linux-amd64-1.3.1.tar.gz
 before_script:
 - git config --global url."https://".insteadOf git://
-- npm install
-- npm install gulp -g
-- npm install bower -g
+- npm ci
+- npm i gulp -g
+- npm i bower -g
 #- npm install door43-client -g
 script: npm test
 after_success:

@@ -1,7 +1,7 @@
 'use strict';
 
 jest.mock('https');
-jest.unmock('../src/js/reporter');
+jest.mock('../src/js/lib/utils');
 
 var config = {
     logPath: 'mylogpath.txt',
@@ -171,6 +171,7 @@ describe('Reporter', () => {
         utils = require('../src/js/lib/utils');
         var Reporter = require('../src/js/reporter').Reporter;
         reporter = new Reporter(config);
+        jest.clearAllMocks();
     });
 
     describe('logWarning', () => {
@@ -194,20 +195,18 @@ describe('Reporter', () => {
         testLogTypes(level, method);
     });
 
-    describe('clearLog', () => {
-        it('should clear the contents of the log', () => {
-            var data = 'hello world';
+    it('should clear the contents of the log', () => {
+        var data = 'hello world';
+        // expect(utils.fs.__logData[config.logPath]).toBeFalsy();
+        utils.fs.writeFile(config.logPath, data);
+        expect(utils.fs.__logData[config.logPath]).toEqual(data);
+        return reporter.clearLog().then(function() {
             expect(utils.fs.__logData[config.logPath]).toBeFalsy();
-            utils.fs.writeFile(config.logPath, data);
-            expect(utils.fs.__logData[config.logPath]).toEqual(data);
-            return reporter.clearLog().then(function() {
-                expect(utils.fs.__logData[config.logPath]).toBeFalsy();
-            }).then(function() {
-                // TRICKY: make sure multiple clears doesn't break things
-                return reporter.clearLog();
-            }).then(function() {
-                expect(utils.fs.__logData[config.logPath]).toBeFalsy();
-            });
+        }).then(function() {
+            // TRICKY: make sure multiple clears doesn't break things
+            return reporter.clearLog();
+        }).then(function() {
+            expect(utils.fs.__logData[config.logPath]).toBeFalsy();
         });
     });
 });
@@ -266,6 +265,11 @@ describe('ReporterNetworkCalls', () => {
     });
 
     describe('reportBug', () => {
+
+        beforeEach(() => {
+            jest.clearAllMocks();
+        });
+
         it('should successfully submit the report', () => {
             // success, auth failed, error
             https = require('https');

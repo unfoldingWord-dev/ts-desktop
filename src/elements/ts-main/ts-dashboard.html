@@ -1050,7 +1050,9 @@
                   .then(function () {
                       if (options.includeImages) {
                           mythis.set('options.body', "Downloading Images. Please wait...");
-                          return App.printManager.downloadImages()
+                          var forceDownload = App.configurator.getUserSetting("resetimages");
+                          App.configurator.setUserSetting("resetimages", false);
+                          return App.printManager.downloadImages(forceDownload)
                               .then(function(){
                                   mythis.set('options.body', "Extracting Images. Please wait...");
                                   return App.printManager.extractImages();

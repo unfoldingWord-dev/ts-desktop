@@ -9,6 +9,15 @@
         "visible": true
     },
     {
+        "name": "resetimages",
+        "mainText": "Update Images for Open Bible Stories",
+        "helpText": "Downloads the latest images for Open Bible Stories the next time you print",
+        "value": false,
+        "group": "advanced",
+        "enabled": true,
+        "visible": true
+    },
+    {
         "name": "bemode",
         "mainText": "Blind Edit Mode",
         "helpText": "Display translation mode option that allows for blind drafting (Project will re-load if changed)",

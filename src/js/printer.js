@@ -24,7 +24,7 @@ function PrintManager(configurator) {
 
     return {
 
-        downloadImages: function () {
+        downloadImages: function (forceDownload) {
             return utils.fs.mkdirs(imagePath)
                 .then(function () {
                     return utils.fs.stat(zipPath).then(function(stats) {
@@ -33,7 +33,7 @@ function PrintManager(configurator) {
                     }).catch(utils.ret(false));
                 })
                 .then(function (fileExists) {
-                    return fileExists ? true : download(url, zipPath, true);
+                    return fileExists && !forceDownload ? true : download(url, zipPath, true);
                 });
         },
 

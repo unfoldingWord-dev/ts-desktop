@@ -127,7 +127,7 @@ function ExportManager(configurator, git) {
                             }
 
                             // add frame
-                            if(frame.chunkmeta.frameid !== 'front') {
+                            if(frame.chunkmeta.frameid !== 'title') {
                                 chapterContent += '{{' + mediaServer +
                                     meta.project.id + '/jpg/360px/' +
                                     meta.project.id + '-' +

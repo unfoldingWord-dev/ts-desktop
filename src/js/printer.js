@@ -26,7 +26,10 @@ function PrintManager(configurator) {
         downloadImages: function () {
             return utils.fs.mkdirs(imagePath)
                 .then(function () {
-                    return utils.fs.stat(zipPath).then(utils.ret(true)).catch(utils.ret(false));
+                    return utils.fs.stat(zipPath).then(function(stats) {
+                        // TRICKY: if the images zip is 1mb or less there's a problem.
+                        return stats.size > 1000000;
+                    }).catch(utils.ret(false));
                 })
                 .then(function (fileExists) {
                     return fileExists ? true : download(url, zipPath, true);

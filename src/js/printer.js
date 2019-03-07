@@ -6,6 +6,7 @@ var _ = require('lodash'),
     utils = require('../js/lib/utils'),
     AdmZip = require('adm-zip'),
     https = require('https'),
+    rimraf = require('rimraf'),
     mkdirp = require('mkdirp'),
     os = require('os'),
     princePackager = require('../js/prince-packager'),
@@ -37,22 +38,32 @@ function PrintManager(configurator) {
         },
 
         extractImages: function () {
-            var zip = new AdmZip(zipPath);
-            zip.extractAllTo(imagePath, true);
+            try {
+                var zip = new AdmZip(zipPath);
+                zip.extractAllTo(imagePath, true);
 
-            var directories = fs.readdirSync(imagePath).filter(function (file) {
-                return fs.statSync(path.join(imagePath, file)).isDirectory();
-            });
-            directories.forEach(function (dir) {
-                var dirPath = path.join(imagePath, dir);
-                var files = fs.readdirSync(dirPath);
-                files.forEach(function (file) {
-                    var filePath = path.join(imagePath, dir, file);
-                    var newPath = path.join(imagePath, file);
-                    fs.renameSync(filePath, newPath);
+                var directories = fs.readdirSync(imagePath).
+                    filter(function(file) {
+                        return fs.statSync(path.join(imagePath, file)).
+                            isDirectory();
+                    });
+                directories.forEach(function(dir) {
+                    var dirPath = path.join(imagePath, dir);
+                    var files = fs.readdirSync(dirPath);
+                    files.forEach(function(file) {
+                        var filePath = path.join(imagePath, dir, file);
+                        var newPath = path.join(imagePath, file);
+                        fs.renameSync(filePath, newPath);
+                    });
+                    fs.rmdirSync(dirPath);
                 });
-                fs.rmdirSync(dirPath);
-            });
+            } catch (e) {
+                // TRICKY: clean up images so we can try downloading again
+                rimraf.sync(imagePath);
+                rimraf.sync(zipPath);
+                console.error(e);
+                throw new Error("Failed to download images. Please try again later. " + e);
+            }
         },
 
         savePdf: function (title, license, body, filePath, direction) {

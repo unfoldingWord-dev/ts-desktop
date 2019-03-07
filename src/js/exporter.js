@@ -127,7 +127,14 @@ function ExportManager(configurator, git) {
                             }
 
                             // add frame
-                            chapterContent += '{{' + mediaServer + meta.project.id + '/jpg/1/en/360px/' + meta.project.id + '-' + meta.target_language.id + '-' + frame.chunkmeta.chapterid + '-' + frame.chunkmeta.frameid + '.jpg}}\n\n';
+                            if(frame.chunkmeta.frameid !== 'front') {
+                                chapterContent += '{{' + mediaServer +
+                                    meta.project.id + '/jpg/360px/' +
+                                    meta.project.id + '-' +
+                                    'en' + '-' + // TRICKY: always use english images
+                                    frame.chunkmeta.chapterid + '-' +
+                                    frame.chunkmeta.frameid + '.jpg}}\n\n';
+                            }
                             chapterContent += frame.transcontent + '\n\n';
                         }
                         if(chapterContent !== '' && numFinishedFrames > 0) {

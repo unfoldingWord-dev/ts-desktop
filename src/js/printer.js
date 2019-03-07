@@ -19,8 +19,8 @@ function PrintManager(configurator) {
     var imageRoot = path.join(configurator.getValue('rootdir'), 'images');
     var imagePath = path.join(imageRoot, 'obs');
     var zipPath = path.join(imageRoot, 'obs-images.zip');
-    var server = "https://api.unfoldingword.org/";
-    var url = server + 'obs/jpg/1/en/obs-images-360px.zip';
+    var server = 'https://cdn.door43.org/';
+    var url = server + 'obs/jpg/obs-images-360px.zip';
 
     return {
 

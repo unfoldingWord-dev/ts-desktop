@@ -102,6 +102,8 @@
 
             App.ipc.send('loading-status', 'Loading Academy data...');
             mythis.set('academy', App.dataManager.getAllTa());
+            var dataserver = App.configurator.getUserSetting('dataserver');
+            var mediaserver = App.configurator.getUserSetting('mediaserver');
 
             setTimeout(function() {
                 var links = mythis.$.body.getElementsByTagName("a");
@@ -109,11 +111,11 @@
                 var imageDir = path.resolve(path.join(__dirname, '..', 'views', 'assets', 'img', 'ta'));
 
                 for (var j = 0; j < images.length; j++) {
-                    images[j].src = images[j].src.replace("http://cdn.door43.org/ta/jpg", imageDir);
+                    images[j].src = images[j].src.replace(mediaserver + "/ta/jpg", imageDir);
                 }
 
                 for (var i = 0; i < links.length; i++) {
-                    if (links[i].href.includes("git.door43.org/Door43/en-ta")) {
+                    if (links[i].href.includes(dataserver + "/Door43/en-ta")) {
                         links[i].href = "#" + links[i].href.split("/").pop().split(".")[0].replace(/_/g, "-");
                     } else {
                         links[i].addEventListener('click', function (event) {

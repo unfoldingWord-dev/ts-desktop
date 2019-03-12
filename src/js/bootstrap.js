@@ -151,7 +151,7 @@ process.stdout.write = console.log.bind(console);
             var resourceDir = path.join(libraryDir, 'resource_containers');
             var srcDB = path.join(srcDir, 'index', 'index.sqlite');
             var srcResource = path.join(srcDir, 'index', 'resource_containers');
-            var apiURL = configurator.getValue('apiUrl');
+            var apiURL = configurator.getUserSetting('mediaserver') + '/v2/ts/catalog.json';
             var indexstat;
 
             try {
@@ -250,8 +250,10 @@ process.stdout.write = console.log.bind(console);
 
             userManager: (function() {
                 return new UserManager({
-                    token: configurator.getValue('gogs-token')
-                });
+                        token: configurator.getValue('gogs-token')
+                    },
+                    configurator.getUserSetting('dataserver')
+                );
             })(),
 
             importManager: (function() {

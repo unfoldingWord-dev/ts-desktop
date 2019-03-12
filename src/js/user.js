@@ -3,9 +3,9 @@
 var _ = require('lodash'),
     Gogs = require('gogs-client');
 
-function UserManager(auth) {
+function UserManager(auth, server) {
 
-    var api = new Gogs('https://git.door43.org/api/v1'),
+    var api = new Gogs(server + '/api/v1'),
         tokenStub = {name: 'ts-desktop'};
 
     return {

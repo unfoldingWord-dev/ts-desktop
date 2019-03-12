@@ -614,8 +614,8 @@
           var repo = this.importdata.repo.repo;
           var project = this.importdata.repo.project;
           var force = this.importdata.force || false;
-          var server = "git.door43.org";
-          var repourl = "https://" + server + "/" + repo;
+          var server = App.configurator.getUserSetting('dataserver');
+          var repourl = server + "/" + repo;
           var targetDir = App.configurator.getValue('targetTranslationsDir');
           var tmpDir = App.configurator.getValue('tempDir');
           var targetPath = path.join(targetDir, project);
@@ -1098,7 +1098,7 @@
           var projectmeta = this.currentproject.projectmeta;
           var translation = this.currentproject.chunks;
           var conflicts = this.currentproject.conflicts;
-          var mediaServer = "https://cdn.door43.org/";
+          var mediaServer = App.configurator.getUserSetting("mediaserver");
           var name = projectmeta.unique_id;
           var defaultPath = App.configurator.getUserPath('datalocation', name);
           var filePath;
@@ -1354,8 +1354,6 @@
           App.configurator.setUserSetting('gitversion', gitversion);
           App.configurator.setUserSetting('appversion', App.configurator.getAppData().toString());
           App.configurator.setUserSetting('datapath', App.configurator.getValue('rootdir'));
-          App.configurator.setUserSetting('dataserver', "git.door43.org");
-          App.configurator.setUserSetting('mediaserver', "https://api.unfoldingword.org/");
 
           var location = App.configurator.getUserSetting('datalocation');
 

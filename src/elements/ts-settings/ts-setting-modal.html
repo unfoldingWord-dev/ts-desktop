@@ -70,6 +70,10 @@
             padding: 0 30px;
         }
 
+        #default {
+            padding: 15px;
+        }
+
         paper-button:hover {
             color: var(--accent-color);
         }
@@ -99,6 +103,11 @@
                 </template>
                 <template is="dom-if" if="{{text}}">
                 	<paper-input value="{{text}}"></paper-input>
+                    <template is="dom-if" if="{{default}}">
+                        <div id="default">
+                            Default value: {{default}}
+                        </div>
+                    </template>
                 </template>
             </div>
             <div id="footer">
@@ -137,6 +146,9 @@
             },
             text: {
             	type: String
+            },
+            default: {
+                type: String
             }
         },
 

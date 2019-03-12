@@ -98,7 +98,7 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             }
 
             var filterres = allres.filter(function (item) {
-                return item.type === 'book' && (item.status.checking_level === "3" || item.imported || item.slug === "uhb" || item.slug === "ugnt");
+                return item.type === 'book' && (item.status.checking_level === "3" || item.imported);
             });
 
             var mapped = filterres.map(function (res) {

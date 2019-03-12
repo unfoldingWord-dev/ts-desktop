@@ -111,11 +111,11 @@
                 var imageDir = path.resolve(path.join(__dirname, '..', 'views', 'assets', 'img', 'ta'));
 
                 for (var j = 0; j < images.length; j++) {
-                    images[j].src = images[j].src.replace(mediaserver + "/ta/jpg", imageDir);
+                    images[j].src = images[j].src.replace(mediaserver.replace(/\/+$/, '') + "/ta/jpg", imageDir);
                 }
 
                 for (var i = 0; i < links.length; i++) {
-                    if (links[i].href.includes(dataserver + "/Door43/en-ta")) {
+                    if (links[i].href.includes(dataserver.replace(/\/+$/, '') + "/Door43/en-ta")) {
                         links[i].href = "#" + links[i].href.split("/").pop().split(".")[0].replace(/_/g, "-");
                     } else {
                         links[i].addEventListener('click', function (event) {

@@ -5,7 +5,7 @@ var _ = require('lodash'),
 
 function UserManager(auth, server) {
 
-    var api = new Gogs(server + '/api/v1'),
+    var api = new Gogs(server.replace(/\/+$/, '') + '/api/v1'),
         tokenStub = {name: 'ts-desktop'};
 
     return {

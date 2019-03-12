@@ -66,7 +66,7 @@ process.stdout.write = console.log.bind(console);
         var srcDir = path.resolve(path.join(__dirname, '..'));
         var resourceDir = path.join(libraryDir, 'resource_containers');
         var srcResource = path.join(srcDir, 'index', 'resource_containers');
-        var apiURL = configurator.getUserSetting('mediaserver') + "/v2/ts/catalog.json";
+        var apiURL = configurator.getUserSetting('mediaserver').replace(/\/+$/, '') + "/v2/ts/catalog.json";
 
         var db = new Db(libraryPath, resourceDir);
 

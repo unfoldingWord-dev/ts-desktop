@@ -128,7 +128,7 @@ function ExportManager(configurator, git) {
 
                             // add frame
                             if(frame.chunkmeta.frameid !== 'title') {
-                                chapterContent += '{{' + mediaServer +
+                                chapterContent += '{{' + mediaServer.replace(/\/+$/, '') +
                                     meta.project.id + '/jpg/360px/' +
                                     meta.project.id + '-' +
                                     'en' + '-' + // TRICKY: always use english images

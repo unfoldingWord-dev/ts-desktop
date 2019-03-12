@@ -20,7 +20,7 @@ function PrintManager(configurator) {
     var imagePath = path.join(imageRoot, 'obs');
     var zipPath = path.join(imageRoot, 'obs-images.zip');
     var server = configurator.getUserSetting('mediaserver');
-    var url = server + 'obs/jpg/obs-images-360px.zip';
+    var url = server.replace(/\/+$/, '') + '/obs/jpg/obs-images-360px.zip';
 
     return {
 

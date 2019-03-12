@@ -615,7 +615,7 @@
           var project = this.importdata.repo.project;
           var force = this.importdata.force || false;
           var server = App.configurator.getUserSetting('dataserver');
-          var repourl = server + "/" + repo;
+          var repourl = server.replace(/\/+$/, '') + "/" + repo;
           var targetDir = App.configurator.getValue('targetTranslationsDir');
           var tmpDir = App.configurator.getValue('tempDir');
           var targetPath = path.join(targetDir, project);

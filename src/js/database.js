@@ -184,12 +184,6 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                         });
                 })
                 .then(function () {
-                    return mythis.downloadContainer(language, project, "tw")
-                    .catch(function () {
-                        return true;
-                    });
-                })
-                .then(function () {
                     if (resource === "ulb") {
                         return mythis.downloadContainer(language, project, "udb")
                             .catch(function () {
@@ -438,22 +432,33 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             if (source.resource_id === "obs") {
                 dict = "bible-obs";
             }
-            var container = "en_" + dict + "_tw";
+            var container = source.language_id + "_" + dict + "_tw";
             var list = this.parseYaml(container, "config.yml");
+
+            // fallback to english
+            if(!list && source.language_id !== 'en') {
+                container = "en_" + dict + "_tw";
+                list = this.parseYaml(container, "config.yml");
+            }
 
             if (list && list[slug] && list[slug]["see_also"]) {
                 var slugs = list[slug]["see_also"];
 
                 return slugs.map(function (item) {
-                    return mythis.getWord(dict, item);
+                    var word = mythis.getWord(source.language_id, dict, item);
+                    // fallback to english
+                    if(!word) {
+                        word = mythis.getWord('en', dict, item);
+                    }
+                    return word;
                 });
             } else {
                 return [];
             }
         },
 
-        getWord: function (dict, slug) {
-            var container = 'en_' + dict + '_tw';
+        getWord: function (lang, dict, slug) {
+            var container = lang + '_' + dict + '_tw';
             var contentpath = path.join(resourceDir, container, "content", slug, "01.md");
 
             try {
@@ -465,10 +470,16 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             }
         },
 
-        getAllWords: function (dict) {
+        getAllWords: function (lang, dict) {
             var mythis = this;
-            var container = "en_" + dict + "_tw";
+            var container = lang + "_" + dict + "_tw";
             var frames = this.extractContainer(container);
+
+            // fallback to english
+            if(!frames || frames.length === 0) {
+                container = "en_" + dict + "_tw";
+                frames = this.extractContainer(container);
+            }
 
             return frames.map(function (item) {
                 var data = mythis.parseHelps(item.content)[0];
@@ -482,8 +493,14 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             if (source.resource_id === "obs") {
                 dict = "bible-obs";
             }
-            var container = "en_" + dict + "_tw";
+            var container = source.language_id + "_" + dict + "_tw";
             var list = this.parseYaml(container, "config.yml");
+
+            // fallback to english
+            if(!list) {
+                container = "en_" + dict + "_tw";
+                list = this.parseYaml(container, "config.yml");
+            }
 
             if (list && list[slug] && list[slug]["examples"]) {
                 var references = list[slug]["examples"];

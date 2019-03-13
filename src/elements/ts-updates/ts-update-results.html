@@ -205,7 +205,6 @@
       download: function () {
           var mythis = this;
           var list = _.cloneDeep(this.resultslist);
-          var english = false;
           var obs = false;
           var promises = Promise.resolve(false);
           var results = [];
@@ -229,35 +228,48 @@
                       })
                       .then(function (result) {
                           completed++;
-                          var total = !english ? list.length + 1 : list.length; // TRICKY: we include english tw for other languages
+                          var total = list.length;
                           var value = Math.round(completed / total * 100);
                           mythis.set('options.value', value);
                           results.push(result);
                       });
-                  if (item.language.slug === "en") {
-                      english = true;
-                  }
                   if (item.resource.slug === "obs") {
                       obs = true;
                   }
               });
 
-              // TRICKY: get english tw as a fallback for other languages
-              if(!english) {
-                  if (obs) {
+              // download tw for selected languages + english
+              var selectedLanguages = _.unique(list.map(function(item) {
+                  return item.language.slug;
+              }));
+              selectedLanguages.forEach(function(lang) {
+                  if(obs) {
                       promises = promises.then(function() {
-                          return App.dataManager.downloadContainer('en', 'bible-obs', 'tw').catch(function() {
-                              return true;
-                          });
-                      });
-                  } else {
-                      promises = promises.then(function() {
-                          return App.dataManager.downloadContainer('en', 'bible', 'tw').catch(function() {
+                          return App.dataManager.downloadContainer(lang, 'bible-obs', 'tw').catch(function() {
                               return true;
                           });
                       });
                   }
+                  promises = promises.then(function() {
+                      return App.dataManager.downloadContainer(lang, 'bible', 'tw').catch(function() {
+                          return true;
+                      });
+                  });
+              });
+
+              // TRICKY: always download english tw as a fallback
+              if(obs) {
+                  promises = promises.then(function() {
+                      return App.dataManager.downloadContainer('en', 'bible-obs', 'tw').catch(function() {
+                          return true;
+                      });
+                  });
               }
+              promises = promises.then(function() {
+                  return App.dataManager.downloadContainer('en', 'bible', 'tw').catch(function() {
+                      return true;
+                  });
+              });
 
               return promises
                   .then(function () {

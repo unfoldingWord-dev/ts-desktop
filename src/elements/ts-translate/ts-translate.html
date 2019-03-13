@@ -907,7 +907,7 @@
                 }
 
                 var sourcedata = App.renderer.convertVerseMarkers(frames[i].content);
-                var resources = this.getFrameResources(frames[i], notes, questions, udb, wordlist, sourcedata.verses);
+                var resources = this.getFrameResources(source, frames[i], notes, questions, udb, wordlist, sourcedata.verses);
                 var chunkmeta = this.createFrameMeta(frames[i], projectmeta, sourcedata.verses, title);
                 var chunk = this.getFrameData(chunkmeta, projectmeta);
                 var sourcecontent = App.renderer.convertNoteMarkers(sourcedata.text);
@@ -1011,7 +1011,8 @@
 
             if (type === "tw") {
                 var dict = projectmeta.project.id;
-                frames = App.dataManager.getAllWords(dict);
+                // TODO: use the source language and fallback to english
+                frames = App.dataManager.getAllWords('en', dict);
             }
 
             for (var i = 0; i < frames.length; i++) {
@@ -1033,7 +1034,7 @@
             this.set('currentproject.chunks', chunkarray);
         },
 
-        getFrameResources: function (frame, notes, questions, udb, wordlist, verses) {
+        getFrameResources: function (source, frame, notes, questions, udb, wordlist, verses) {
             var resources = [];
             var note = [];
             var question = [];
@@ -1057,7 +1058,12 @@
 
             framewords.forEach(function (frameword) {
                 var split = _.compact(frameword.split("/"));
-                var word = App.dataManager.getWord(split[0], split[2]);
+                var word = App.dataManager.getWord(source.language_id, split[0], split[2]);
+
+                // fallback to english
+                if(!word) {
+                    word = App.dataManager.getWord('en', split[0], split[2]);
+                }
 
                 if (word) {
                     words.push(word);

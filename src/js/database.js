@@ -172,24 +172,22 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                     item.errmsg = errmessage;
                 })
                 .then(function () {
-                    if (resource === "ulb" || resource === "obs") {
-                        return mythis.downloadContainer(language, project, "tn")
-                            .catch(function () {
-                                return true;
-                            });
-                    } else {
-                        return Promise.resolve(true);
-                    }
+                    return mythis.downloadContainer(language, project, "tn")
+                        .catch(function () {
+                            return true;
+                        });
                 })
                 .then(function () {
-                    if (resource === "ulb" || resource === "obs") {
-                        return mythis.downloadContainer(language, project, "tq")
-                            .catch(function () {
-                                return true;
-                            });
-                    } else {
-                        return Promise.resolve(true);
-                    }
+                    return mythis.downloadContainer(language, project, "tq")
+                        .catch(function () {
+                            return true;
+                        });
+                })
+                .then(function () {
+                    return mythis.downloadContainer(language, project, "tw")
+                    .catch(function () {
+                        return true;
+                    });
                 })
                 .then(function () {
                     if (resource === "ulb") {
@@ -246,18 +244,10 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                     }
                 })
                 .then(function () {
-                    if (resource === "ulb" || resource === "obs") {
-                        return mythis.activateContainer(language, project, "tn");
-                    } else {
-                        return Promise.resolve(true);
-                    }
+                    return mythis.activateContainer(language, project, "tn");
                 })
                 .then(function () {
-                    if (resource === "ulb" || resource === "obs") {
-                        return mythis.activateContainer(language, project, "tq");
-                    } else {
-                        return Promise.resolve(true);
-                    }
+                    return mythis.activateContainer(language, project, "tq");
                 })
                 .then(function () {
                     if (resource === "ulb") {
@@ -382,39 +372,29 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
         getSourceNotes: function (source) {
             var mythis = this;
             var container = source.language_id + "_" + source.project_id + "_tn";
+            var frames = this.extractContainer(container);
 
-            if (source.resource_id === "ulb" || source.resource_id === "obs") {
-                var frames = this.extractContainer(container);
+            frames.forEach(function (item) {
+                if (item.content) {
+                    item.content = mythis.parseHelps(item.content);
+                }
+            });
 
-                frames.forEach(function (item) {
-                    if (item.content) {
-                        item.content = mythis.parseHelps(item.content);
-                    }
-                });
-
-                return frames;
-            } else {
-                return [];
-            }
+            return frames;
         },
 
         getSourceQuestions: function (source) {
             var mythis = this;
             var container = source.language_id + "_" + source.project_id + "_tq";
+            var frames = this.extractContainer(container);
 
-            if (source.resource_id === "ulb" || source.resource_id === "obs") {
-                var frames = this.extractContainer(container);
+            frames.forEach(function (item) {
+                if (item.content) {
+                    item.content = mythis.parseHelps(item.content);
+                }
+            });
 
-                frames.forEach(function (item) {
-                    if (item.content) {
-                        item.content = mythis.parseHelps(item.content);
-                    }
-                });
-
-                return frames;
-            } else {
-                return [];
-            }
+            return frames;
         },
 
         getSourceWords: function (source) {

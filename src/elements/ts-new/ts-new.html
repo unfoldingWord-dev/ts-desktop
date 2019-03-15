@@ -5,6 +5,7 @@
 <link rel="import" href="../../components/paper-button/paper-button.html">
 <link rel="import" href="../../components/iron-signals/iron-signals.html">
 
+<link rel="import" href="../ts-dialogs/ts-import-confirm.html">
 <link rel="import" href="./ts-language-menu.html">
 <link rel="import" href="./ts-project-menu.html">
 <link rel="import" href="./ts-book-menu.html">
@@ -98,7 +99,7 @@
         }
 
         #confirmimport {
-            width: 400px;
+            width: 450px;
             height: 200px;
             display: flex;
             flex-direction: column;
@@ -136,16 +137,7 @@
         </neon-animated-pages>
 
         <paper-dialog id="confirmimport" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
-            <div class="header">
-                <h2>Overwrite?</h2>
-            </div>
-            <div class="body">
-                <p>This target translation already exists. Overwrite?</p>
-            </div>
-            <div class="buttons">
-                <paper-button dialog-dismiss>Cancel</paper-button>
-                <paper-button on-tap="startimport">Confirm</paper-button>
-            </div>
+            <ts-import-confirm importdata="{{importdata}}" on-finishimport="startimport"></ts-import-confirm>
         </paper-dialog>
 
         <paper-dialog id="confirmchange" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">

@@ -1011,8 +1011,7 @@
 
             if (type === "tw") {
                 var dict = projectmeta.project.id;
-                // TODO: use the source language and fallback to english
-                frames = App.dataManager.getAllWords('en', dict);
+                frames = App.dataManager.getAllWords(projectmeta.target_language.id, dict);
             }
 
             for (var i = 0; i < frames.length; i++) {

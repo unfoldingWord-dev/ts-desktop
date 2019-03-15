@@ -289,7 +289,6 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             if (meta.type.id === "tw") {
                 var dict = meta.project.id;
                 var source = meta.source_translations[0];
-                // TODO: use the source language and fallback to english
                 frames = dataManager.getAllWords(source.language_id, dict);
             } else if (meta.source_translations.length) {
                 var source = meta.source_translations[0];

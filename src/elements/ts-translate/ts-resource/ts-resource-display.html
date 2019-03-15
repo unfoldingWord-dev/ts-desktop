@@ -165,7 +165,6 @@
             }
 
             if (data.type === "allwords") {
-                // TODO: use the source language and fallback to english
                 this.set('allwords', App.dataManager.getAllWords(currentsource.language_id, dict));
                 content = "";
             } else {

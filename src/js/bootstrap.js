@@ -42,6 +42,7 @@ process.stdout.write = console.log.bind(console);
         let Renderer = null;
         let i18n = null;
         let utils = null;
+        let submitFeedback = null;
 
         // catch startup errors
         try {
@@ -77,6 +78,9 @@ process.stdout.write = console.log.bind(console);
 
             setMsg('Loading Data Manager...');
             DataManager = require('../js/database').DataManager;
+
+            setMsg('Loading Feedback reporter...');
+            submitFeedback = require('../js/feedback').submitFeedback;
 
             setMsg('Loading User Manager...');
             UserManager = require('../js/user').UserManager;
@@ -224,6 +228,8 @@ process.stdout.write = console.log.bind(console);
             configurator: configurator,
 
             reporter: reporter,
+
+            submitFeedback: submitFeedback,
 
             dataManager: dataManager,
 

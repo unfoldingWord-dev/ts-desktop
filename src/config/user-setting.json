@@ -185,5 +185,14 @@
         "group": "advanced",
         "enabled": true,
         "visible": false
+    },
+    {
+        "name": "helpdeskemail",
+        "mainText": "Help Desk Email",
+        "helpText": "The email that will receive feedback.",
+        "value": "help@door43.org",
+        "group": "advanced",
+        "enabled": true,
+        "visible": true
     }
 ]

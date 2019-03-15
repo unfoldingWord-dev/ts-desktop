@@ -38,6 +38,11 @@
             color: var(--accent-color);
         }
 
+        .checkbox {
+            padding: 10px;
+            font-size: 120%;
+        }
+
         input {
             border: none;
             font-size: 120%;
@@ -54,7 +59,9 @@
             <p><iron-icon icon="notification:wifi"></iron-icon> This will use your internet connection</p>
         </div>
         <div id="body">
-            <input is="iron-input" bind-value="{{feedback}}" placeholder="Describe the problem you are experiencing">
+            <input is="iron-input" bind-value="{{feedback}}" autofocus placeholder="Describe the problem you are experiencing">
+            <input is="iron-input" bind-value="{{email}}" placeholder="Email address (optional)">
+            <paper-checkbox class="checkbox" checked="{{includeLogs}}">Include application logs</paper-checkbox>
         </div>
         <div id="footer">
             <paper-button on-tap="close">Cancel</paper-button>
@@ -75,6 +82,16 @@
             feedback: {
                 type: String,
                 value: "",
+                notify: true
+            },
+            email: {
+                type: String,
+                value: "",
+                notify: true
+            },
+            includeLogs: {
+                type: Boolean,
+                value: true,
                 notify: true
             }
         },

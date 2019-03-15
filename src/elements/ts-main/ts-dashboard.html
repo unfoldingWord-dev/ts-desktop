@@ -1169,9 +1169,6 @@
           if(!email && this.currentuser.email && this.currentuser.email.indexOf('noreply.door43.org') === -1) {
               // use user's account email
               email = this.currentuser.email;
-          } else if(!email) {
-              // use default email
-              email = helpdeskEmail;
           }
 
           if(!helpdeskToken) {
@@ -1201,42 +1198,6 @@
                   mythis.showErrorMessage('Feedback Failed', 'An error occurred while sending feedback', e);
               }
           });
-          // return;
-
-          // mythis.closeFeedback();
-          //
-          // mythis.showLoadingMessage("Sending Feedback. Please wait...");
-
-          // if (App.reporter.canReportToGithub()) {
-          //     return App.reporter.reportBug(message)
-          //         .then(function (res) {
-          //             var response;
-          //
-          //             try {
-          //               response = JSON.parse(res);
-          //             } catch (e) {}
-          //
-          //             if (response && response.url && response.repository_url) {
-          //                 App.reporter.logNotice(response.url, 'Feedback Sent');
-          //                 mythis.showMessage('Feedback Sent', 'Your feedback has been successfully sent.');
-          //             } else {
-          //                 !response && App.reporter.logWarning(res, 'Feedback failed with invalid JSON response');
-          //                 mythis.showErrorMessage('Feedback Failed', 'Unable to post the feedback. Please try again.', response || null);
-          //             }
-          //         })
-          //         .catch(function (err) {
-          //             var errmessage = 'An error occurred while sending feedback';
-          //             if (err.syscall === "getaddrinfo") {
-          //                 errmessage = "Unable to connect to server";
-          //             }
-          //             if (err.syscall === "read") {
-          //                 errmessage = "Lost connection to server";
-          //             }
-          //             mythis.showErrorMessage('Feedback Failed', errmessage, err);
-          //         });
-          // } else {
-          //     mythis.showErrorMessage('Feedback Failed', 'You are not set up with a token to send feedback.', null);
-          // }
       },
 
       updateFromProject: function () {

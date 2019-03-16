@@ -385,9 +385,13 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 });
         },
 
-        createTargetTranslation: function (translation, meta, user) {
+        makeProjectPaths: function(destDir, project) {
+            return utils.makeProjectPaths(destDir, project);
+        },
+
+        createTargetTranslation: function (translation, meta, user, destDir=targetDir) {
             var mythis = this;
-            var paths = utils.makeProjectPaths(targetDir, meta);
+            var paths = utils.makeProjectPaths(destDir, meta);
             var makeChapterDir = mythis.makeChapterDir.bind(this, meta);
             var updateChunk = mythis.updateChunk.bind(this, meta);
 
@@ -428,6 +432,8 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 })
                 .then(function () {
                     return mythis.commitProject(meta, user);
+                }).then(function() {
+                    return Promise.resolve(paths.projectDir);
                 })
                 .catch(function (err) {
                     throw "Error creating new project: " + err;

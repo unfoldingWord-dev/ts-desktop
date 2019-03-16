@@ -782,6 +782,7 @@
 
       startUsfmImport: function () {
           var mythis = this;
+          var path = require('path');
           var defaultPath = App.configurator.getUserPath('datalocation', 'backups');
           var filePath = App.ipc.sendSync('open-file', {options: {defaultPath: defaultPath, filters: [{name: 'USFM Files', extensions: ['txt', 'usfm']}], properties: ['openFile']}});
           if (!filePath) {
@@ -790,6 +791,7 @@
 
           mythis.$.import.close();
 
+          // TODO: do we need to create the temp dir??
           return App.importManager.retrieveUSFMProjectID(filePath[0])
               .then(function (id) {
                   var name = "";
@@ -806,12 +808,14 @@
               }).catch(function (err) {
                   var filename = (filePath && filePath[0]) || '';
                   mythis.showErrorMessage('Import Failed', 'Error occurred reading file: ' + filename, err);
+                  return mythis.clearTempDir();
               });
       },
 
       finishUsfmImport: function () {
           var mythis = this;
           var user = this.currentuser;
+          var tmpDir = App.configurator.getValue('tempDir');
           var filepath = this.importdata.filepath;
           var projectmeta = this.importdata.projectmeta;
           var overwrite = this.importdata.overwrite;
@@ -834,7 +838,17 @@
                       return App.importManager.importFromUSFM(filepath, projectmeta);
                   })
                   .then(function (chunks) {
-                      return App.projectsManager.createTargetTranslation(chunks, projectmeta, user);
+                      if(overwrite) {
+                          return App.projectsManager.createTargetTranslation(chunks, projectmeta, user);
+                      } else {
+                          return App.projectsManager.createTargetTranslation(chunks, projectmeta, user, tmpDir).then(function(tempProjectDir) {
+                              const targetDir = App.configurator.getValue('targetTranslationsDir');
+                              const paths = App.projectsManager.makeProjectPaths(targetDir, projectmeta);
+                              // TODO: the language code seems to be broken in Amarenga y'Inkinyarwanda.
+                              // TODO: merge with existing project
+                              return App.gitManager.merge(user, paths.projectDir, tempProjectDir);
+                          });
+                      }
                   })
                   .then(function () {
                       var list = mythis.projectlist;
@@ -849,6 +863,7 @@
                   })
                   .then(function () {
                       mythis.showMessage('Import Complete', 'Your file has been imported. Please review it carefully. If it was not formatted properly, text may not appear as desired.');
+                      return mythis.clearTempDir();
                   })
                   .catch(function (err) {
                       mythis.showErrorMessage('Import Failed', 'Error occurred importing project', err);
@@ -866,6 +881,8 @@
                               .catch(function () {
                                   return mythis.clearTempDir();
                               });
+                      } else {
+                          return mythis.clearTempDir();
                       }
                   });
           }, 500);

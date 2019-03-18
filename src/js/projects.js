@@ -306,8 +306,8 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             return id;
         },
 
-        updateChunk: function (meta, chunk) {
-            var paths = utils.makeProjectPaths(targetDir, meta);
+        updateChunk: function (destDir, meta, chunk) {
+            var paths = utils.makeProjectPaths(destDir, meta);
             var projectClass = meta.project_type_class;
             var file = path.join(paths.projectDir, chunk.chunkmeta.chapterid, chunk.chunkmeta.frameid + '.txt');
             var standardcontent = chunk.transcontent;
@@ -328,18 +328,18 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             return hasContent ? write(file, projectClass === "standard" ? standardcontent : toJSON(chunk.helpscontent)) : trash([file]);
         },
 
-        makeChapterDir: function (meta, chunk) {
-            var paths = utils.makeProjectPaths(targetDir, meta);
+        makeChapterDir: function (destDir, meta, chunk) {
+            var paths = utils.makeProjectPaths(destDir, meta);
 
             return mkdirp(path.join(paths.projectDir, chunk.chunkmeta.chapterid));
         },
 
-        saveTargetChunk: function (chunk, meta) {
+        saveTargetChunk: function (chunk, meta, destDir=targetDir) {
             var mythis = this;
 
-            return mythis.makeChapterDir(meta, chunk)
+            return mythis.makeChapterDir(destDir, meta, chunk)
                 .then(function () {
-                    return mythis.updateChunk(meta, chunk);
+                    return mythis.updateChunk(destDir, meta, chunk);
                 })
                 .catch(function (err) {
                     reporter.logError(err);
@@ -347,8 +347,8 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 });
         },
 
-        saveTargetManifest: function (meta) {
-            var paths = utils.makeProjectPaths(targetDir, meta);
+        saveTargetManifest: function (meta, destDir=targetDir) {
+            var paths = utils.makeProjectPaths(destDir, meta);
             var build = configurator.getAppData().build;
 
             var sources = meta.source_translations.map(function (source) {
@@ -392,8 +392,8 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
         createTargetTranslation: function (translation, meta, user, destDir=targetDir) {
             var mythis = this;
             var paths = utils.makeProjectPaths(destDir, meta);
-            var makeChapterDir = mythis.makeChapterDir.bind(this, meta);
-            var updateChunk = mythis.updateChunk.bind(this, meta);
+            var makeChapterDir = mythis.makeChapterDir.bind(this, destDir, meta);
+            var updateChunk = mythis.updateChunk.bind(this, destDir, meta);
 
             var makeChapterDirs = function (data) {
                 return function () {
@@ -416,22 +416,22 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                     });
             };
 
-            return mythis.deleteTargetTranslation(meta).then(utils.ret(true)).catch(utils.ret(false))
+            return mythis.deleteTargetTranslation(meta, destDir).then(utils.ret(true)).catch(utils.ret(false))
                 .then(function () {
                     mythis.unsetValues(meta.unique_id);
                     return mkdirp(paths.projectDir)
                 })
                 .then(setLicense())
                 .then(function () {
-                    return mythis.saveTargetManifest(meta);
+                    return mythis.saveTargetManifest(meta, destDir);
                 })
                 .then(makeChapterDirs(translation))
                 .then(updateChunks(translation))
                 .then(function () {
-                    return mythis.cleanProject(translation, meta);
+                    return mythis.cleanProject(translation, meta, destDir);
                 })
                 .then(function () {
-                    return mythis.commitProject(meta, user);
+                    return mythis.commitProject(meta, user, destDir);
                 }).then(function() {
                     return Promise.resolve(paths.projectDir);
                 })
@@ -440,8 +440,8 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 });
         },
 
-        cleanProject: function (translation, meta) {
-            var paths = utils.makeProjectPaths(targetDir, meta);
+        cleanProject: function (translation, meta, destDir=targetDir) {
+            var paths = utils.makeProjectPaths(destDir, meta);
 
             var cleanChapterDir = function (data, chapter) {
                 var chapterpath = path.join(paths.projectDir, chapter);
@@ -462,8 +462,8 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             return cleanChapterDirs();
         },
 
-        commitProject: function (meta, user) {
-            var paths = utils.makeProjectPaths(targetDir, meta);
+        commitProject: function (meta, user, destDir=targetDir) {
+            var paths = utils.makeProjectPaths(destDir, meta);
 
             return git.init(paths.projectDir)
                 .then(function () {
@@ -590,8 +590,8 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             configurator.unsetValue(key + "-source");
         },
 
-        deleteTargetTranslation: function (meta) {
-            var paths = utils.makeProjectPaths(targetDir, meta);
+        deleteTargetTranslation: function (meta, destDir=targetDir) {
+            var paths = utils.makeProjectPaths(destDir, meta);
 
             return utils.fs.stat(paths.projectDir).then(utils.ret(true)).catch(utils.ret(false))
                 .then(function (exists) {

@@ -39,7 +39,7 @@ function ExportManager(configurator, git) {
                     return filePath;
                 })
                 .catch(function (err) {
-                    throw "Error creating backup: " + err;
+                    throw "Error creating backup: " + err.stderr;
                 });
         },
 

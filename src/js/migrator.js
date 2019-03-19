@@ -321,7 +321,6 @@ function MigrateManager(configurator, git, reporter, dataManager) {
             var migrateV6 = function (project) {
                 let manifest = project.manifest;
                 let paths = project.paths;
-
                 if (manifest.package_version <= 6) {
                     var targetPath;
                     var lastChapter = "00";
@@ -414,9 +413,28 @@ function MigrateManager(configurator, git, reporter, dataManager) {
             var migrateV7 = function (project) {
                 let manifest = project.manifest;
                 let paths = project.paths;
+                let appsPath = path.join(paths.projectDir, '.apps/translationStudio');
 
                 if (manifest.package_version <= 7) {
-                    //add code here to migrate to v8
+                    return utils.fs.mkdirs(appsPath)
+                        .then(function() {
+                            return utils.fs.readdir(paths.projectDir);
+                        })
+                        .then(function(files) {
+                            // move files into .apps
+                            let moves = [];
+                            for(let i = 0, len = files.length; i < len; i ++) {
+                                if(files[i] !== '.apps') {
+                                    moves.push(utils.fs.copy(
+                                        path.join(paths.projectDir, files[i]),
+                                        path.join(appsPath, files[i], {clobber: true})));
+                                }
+                            }
+                            return Promise.all(moves);
+                        })
+                        .then(function() {
+                            // TODO: do stuff
+                        });
                 }
 
                 return {manifest: manifest, paths: paths};

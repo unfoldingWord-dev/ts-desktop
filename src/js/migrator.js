@@ -1,5 +1,7 @@
 'use strict';
 
+var {generateProjectUSFM} = require('./usfm');
+
 var _ = require('lodash'),
     AdmZip = require('adm-zip'),
     path = require('path'),
@@ -449,7 +451,11 @@ function MigrateManager(configurator, git, reporter, dataManager) {
                             }));
                         })
                         .then(function() {
-                            // TODO: generate usfm at root level
+                            var usfm = generateProjectUSFM(paths.projectDir);
+                            return write(path.join(paths.projectDir, manifest.project.id + '.usfm'), usfm);
+                        })
+                        .then(function() {
+                            // TODO: commit changes
                         });
                 }
 

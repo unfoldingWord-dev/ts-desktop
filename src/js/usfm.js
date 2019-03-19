@@ -29,8 +29,8 @@ function fileComparator(a, b) {
     var bIsBack = b === 'back';
 
     // chapter sections
-    var aIsTitle = a.startsWith('title');// === 'title.txt';
-    var bIsTitle = b.startsWith('title');// === 'title.txt';
+    var aIsTitle = path.basename(a, '.txt').startsWith('title');
+    var bIsTitle = path.basename(b, '.txt').startsWith('title');
 
     // compare book data
     if (aIsFront) return -1;
@@ -44,7 +44,7 @@ function fileComparator(a, b) {
 
     // compare numbers
     try {
-        var diff = parseInt(b) - parseInt(a);
+        var diff = parseInt(path.basename(b, '.txt')) - parseInt(path.basename(a, '.txt'));
         if(diff > 0) {
             return -1;
         } else if (diff < 0) {
@@ -68,7 +68,9 @@ function concatFiles(filepath) {
     files.sort(fileComparator);
     for (var i = 0, len = files.length; i < len; i++) {
         var itemPath = path.join(filepath, files[i]);
-        // TODO: concat files
+        if(isNaN(path.basename(files[i], '.txt')) && ['front', 'back', 'title.txt', 'reference.txt'].indexOf(files[i]) === -1) {
+            continue;
+        }
         if(fs.statSync(itemPath).isDirectory()) {
             usfm += '\n' + concatFiles(itemPath).replace(/(^\s|\s$)/, '');
         } else {

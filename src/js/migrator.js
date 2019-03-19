@@ -411,6 +411,7 @@ function MigrateManager(configurator, git, reporter, dataManager) {
             };
 
             var migrateV7 = function (project) {
+                // migrate up to v8
                 let manifest = project.manifest;
                 let paths = project.paths;
                 let appsPath = path.join(paths.projectDir, '.apps/translationStudio');
@@ -424,18 +425,50 @@ function MigrateManager(configurator, git, reporter, dataManager) {
                             // move files into .apps
                             let moves = [];
                             for(let i = 0, len = files.length; i < len; i ++) {
-                                if(files[i] !== '.apps') {
-                                    moves.push(utils.fs.copy(
-                                        path.join(paths.projectDir, files[i]),
-                                        path.join(appsPath, files[i], {clobber: true})));
+                                if(['.apps', '.DS_Store', '.git'].indexOf(files[i]) === -1) {
+                                    let src = path.join(paths.projectDir, files[i]);
+                                    let dst = path.join(appsPath, files[i]);
+                                    if(['front', 'back'].indexOf(files[i]) > -1 || !isNaN(files[i])) {
+                                        // move ts specific stuff
+                                        moves.push(utils.fs.mover(src, dst));
+                                    } else {
+                                        // copy everything else
+                                        moves.push(utils.fs.copy(src, dst, {clobber: true}));
+                                    }
                                 }
                             }
                             return Promise.all(moves);
                         })
                         .then(function() {
-                            // TODO: do stuff
+                            // write trimmed down manifest to .apps
+                            return write(path.join(appsPath, 'manifest.json'), toJSON({
+                                finished_chunks: manifest.finished_chunks,
+                                parent_draft: manifest.parent_draft,
+                                package_version: 8,
+                                format:  manifest.format
+                            }));
+                        })
+                        .then(function() {
+                            // TODO: generate usfm at root level
                         });
                 }
+
+
+                manifest.package_version = 8;
+                delete manifest.finished_chunks;
+                delete manifest.parent_draft;
+                delete manifest.format;
+                return {manifest: manifest, paths: paths};
+            };
+
+            var migrateV8 = function (project) {
+                let manifest = project.manifest;
+                let paths = project.paths;
+
+                // TODO: migrate to 9.
+                //  IMPORTANT! in the previous migration we moved everything into .apps.
+                //  This means we'll need to rewrite how migrations work because of how
+                //  it expects paths and the manifest to be maintained.
 
                 return {manifest: manifest, paths: paths};
             };
@@ -497,6 +530,7 @@ function MigrateManager(configurator, git, reporter, dataManager) {
                 .then(migrateV5)
                 .then(migrateV6)
                 .then(migrateV7)
+                .then(migrateV8)
                 .then(migrateName)
                 .then(checkVersion)
                 .then(saveManifest)

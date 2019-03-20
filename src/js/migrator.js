@@ -1,5 +1,6 @@
 'use strict';
 
+var {generateProjectMarkdown} = require('./markdown');
 var {generateProjectUSFM} = require('./usfm');
 
 var _ = require('lodash'),
@@ -451,8 +452,17 @@ function MigrateManager(configurator, git, reporter, dataManager) {
                             }));
                         })
                         .then(function() {
-                            var usfm = generateProjectUSFM(paths.projectDir);
-                            return write(path.join(paths.projectDir, manifest.project.id + '.usfm'), usfm);
+                            if(manifest.format === 'markdown') {
+                                var markdown = generateProjectMarkdown(paths.projectDir);
+                                return write(path.join(paths.projectDir, manifest.project.id + '.md'), markdown);
+                            } else if(manifest.format === 'usfm') {
+                                var usfm = generateProjectUSFM(paths.projectDir);
+                                return write(path.join(paths.projectDir, manifest.project.id + '.usfm'), usfm);
+                            } else {
+                                // TRICKY: Assume it's usfm
+                                var usfm = generateProjectUSFM(paths.projectDir);
+                                return write(path.join(paths.projectDir, manifest.project.id + '.usfm'), usfm);
+                            }
                         })
                         .then(function() {
                             // TODO: commit changes

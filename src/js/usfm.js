@@ -8,7 +8,9 @@ var fs = require('fs-extra');
  */
 function generateProjectUSFM(projectPath) {
     var srcDir = path.join(projectPath, '.apps/translationStudio');
-    var usfm = concatFiles(srcDir);
+    var manifest = JSON.parse(
+        fs.readFileSync(path.join(projectPath, 'manifest.json')));
+    var usfm = concatFiles(srcDir, manifest);
 
     usfm = usfm.replace(/(\\v\s+)/g, '\n$1');
 
@@ -39,21 +41,23 @@ function fileComparator(a, b) {
     if (bIsBack) return -1;
 
     // compare chapter sections
-    if(aIsTitle) return -1;
-    if(bIsTitle) return 1;
+    if (aIsTitle) return -1;
+    if (bIsTitle) return 1;
 
     // compare numbers
     try {
-        var diff = parseInt(path.basename(b, '.txt')) - parseInt(path.basename(a, '.txt'));
-        if(diff > 0) {
+        var diff = parseInt(path.basename(b, '.txt')) -
+            parseInt(path.basename(a, '.txt'));
+        if (diff > 0) {
             return -1;
         } else if (diff < 0) {
             return 1;
         }
     } catch (e) {
-        console.error('Unexpected value. Cannot compare "' + a + '" with "' + b + '"' , e);
+        console.error(
+            'Unexpected value. Cannot compare "' + a + '" with "' + b + '"', e);
     }
-    return 0 ;
+    return 0;
 }
 
 /**
@@ -62,23 +66,34 @@ function fileComparator(a, b) {
  * @param filepath
  * @returns {string}
  */
-function concatFiles(filepath) {
+function concatFiles(filepath, manifest) {
     var usfm = '';
     var files = fs.readdirSync(filepath);
     files.sort(fileComparator);
     for (var i = 0, len = files.length; i < len; i++) {
         var itemPath = path.join(filepath, files[i]);
-        if(isNaN(path.basename(files[i], '.txt')) && ['front', 'back', 'title.txt', 'reference.txt'].indexOf(files[i]) === -1) {
+        if (isNaN(path.basename(files[i], '.txt')) &&
+            ['front', 'back', 'title.txt', 'reference.txt'].indexOf(
+                files[i]) === -1) {
             continue;
         }
-        if(fs.statSync(itemPath).isDirectory()) {
-            usfm += '\n' + concatFiles(itemPath).replace(/(^\s|\s$)/, '');
+        if (fs.statSync(itemPath).isDirectory()) {
+            usfm += '\n' +
+                concatFiles(itemPath, manifest).replace(/(^\s|\s$)/, '');
         } else {
-            var fileData = fs.readFileSync(itemPath).toString().replace(/(^\s|\s$)/, '');
-            if(files[i] === 'title.txt') {
-                if(path.basename(filepath) === 'front') {
+            var fileData = fs.readFileSync(itemPath).
+                toString().
+                replace(/(^\s|\s$)/, '');
+            if (files[i] === 'title.txt') {
+                if (path.basename(filepath) === 'front') {
                     // book title
-                    usfm  += '\n\\h ' + fileData;
+                    usfm += '\n\\id ' + manifest.project.id + ' ' + fileData;
+                    usfm += '\n\\ide usfm';
+                    usfm += '\n\\h ' + fileData;
+                    usfm += '\n\\toc1 ' + fileData;
+                    usfm += '\n\\toc2 ' + fileData;
+                    usfm += '\n\\toc3 ' + manifest.project.id;
+                    usfm += '\n\\mt ' + fileData;
                 } else {
                     // chapter headers
                     usfm += '\n\\s1 ' + fileData;

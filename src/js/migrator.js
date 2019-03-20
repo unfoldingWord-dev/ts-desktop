@@ -452,9 +452,11 @@ function MigrateManager(configurator, git, reporter, dataManager) {
                             }));
                         })
                         .then(function() {
+                            // TODO: read the inner manifest
                             if(manifest.format === 'markdown') {
-                                var markdown = generateProjectMarkdown(paths.projectDir);
-                                return write(path.join(paths.projectDir, manifest.project.id + '.md'), markdown);
+                                // TODO: support generating markdown. Should we just use the export here?
+                                // var markdown = generateProjectMarkdown(paths.projectDir);
+                                // return write(path.join(paths.projectDir, manifest.project.id + '.md'), markdown);
                             } else if(manifest.format === 'usfm') {
                                 var usfm = generateProjectUSFM(paths.projectDir);
                                 return write(path.join(paths.projectDir, manifest.project.id + '.usfm'), usfm);
@@ -463,12 +465,8 @@ function MigrateManager(configurator, git, reporter, dataManager) {
                                 var usfm = generateProjectUSFM(paths.projectDir);
                                 return write(path.join(paths.projectDir, manifest.project.id + '.usfm'), usfm);
                             }
-                        })
-                        .then(function() {
-                            // TODO: commit changes
                         });
                 }
-
 
                 manifest.package_version = 8;
                 delete manifest.finished_chunks;

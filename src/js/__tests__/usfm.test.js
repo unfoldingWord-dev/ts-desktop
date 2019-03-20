@@ -4,7 +4,13 @@ var {generateProjectUSFM, fileComparator} = require('../usfm');
 describe('Project usfm generator', () => {
     it('produces usfm', () => {
         var usfm = generateProjectUSFM(path.join(__dirname, './usfmProject'));
-        expect(usfm).toEqual('\\h Philemon\n' +
+        expect(usfm).toEqual('\\id phl Philemon\n' +
+            '\\ide usfm\n' +
+            '\\h Philemon\n' +
+            '\\toc1 Philemon\n' +
+            '\\toc2 Philemon\n' +
+            '\\toc3 phl\n' +
+            '\\mt Philemon\n' +
             '\\s1 Chapter 1\n' +
             '\\c 1 \n' +
             '\\v 1 Paul, a prisoner of Christ Jesus, and the brother Timothy to Philemon, our dear friend and fellow worker, \n' +

@@ -382,6 +382,8 @@ var utils = {
         return {
             parentDir: targetDir,
             projectDir: projectDir,
+            appProjectDir: path.join(projectDir, '.apps/translationStudio'),
+            appManifest: path.join(projectDir, '.apps/translationStudio/manifest.json'),
             manifest: path.join(projectDir, 'manifest.json'),
             license: path.join(projectDir, 'LICENSE.md')
         };
@@ -420,9 +422,9 @@ var utils = {
                 return false;
             }
         });
-        
+
         list = _.compact(list);
-        
+
         list = list.sort(function (a, b) {
             if (a.name.toLowerCase() > b.name.toLowerCase()) {
                 return 1;
@@ -462,7 +464,7 @@ var utils = {
  * See note on 'promisify' function for example usage.
  */
 utils.fs = utils.promisifyAll(fse);
-utils.lodash = utils.guardAll(_);    
+utils.lodash = utils.guardAll(_);
 utils.fs.chmodr = utils.promisify(chmodr);
 
 utils.fs.mover = function (src, dest) {

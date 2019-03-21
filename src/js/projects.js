@@ -488,21 +488,17 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             var paths = utils.makeProjectPaths.bind(utils, targetDir);
             return this.loadProjectsList()
                 .then(map(paths))
-                .then(map('manifest'))
-                .then(function (list) {
-                    return _.filter(list, function (path) {
-                        try {
-                            // this needs changed
-                            var test = require('fs').statSync(path);
-                        } catch (e) {
-                            test = false;
+                .then(function(list) {
+                    let manifests = [];
+                    for(let p of list) {
+                        if(fs.existsSync(p.manifest) && fs.existsSync(p.appManifest)) {
+                            let manifest = JSON.parse(fs.readFileSync(p.manifest));
+                            let appManifest = JSON.parse(fs.readFileSync(p.appManifest));
+                            manifests.push(Object.assign({}, manifest, appManifest));
                         }
-                        return test;
-                    })
+                    }
+                    return Promise.resolve(manifests);
                 })
-                .then(map(read))
-                .then(Promise.all.bind(Promise))
-                .then(map(fromJSON))
         },
 
         migrateTargetTranslationsList: function () {

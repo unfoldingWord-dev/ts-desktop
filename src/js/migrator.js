@@ -1,5 +1,6 @@
 'use strict';
 
+var fs = require('fs-extra');
 var {generateProjectMarkdown} = require('./markdown');
 var {generateProjectUSFM} = require('./usfm');
 
@@ -565,20 +566,27 @@ function MigrateManager(configurator, git, reporter, dataManager) {
             };
 
             return readManifest(paths)
-                .then(migrateV2)
-                .then(migrateV3)
-                .then(migrateV4)
-                .then(migrateV5)
-                .then(migrateV6)
-                .then(migrateV7)
-                .then(migrateV8)
-                .then(migrateName)
-                .then(checkVersion)
-                .then(saveManifest)
-                .then(function (project) {
-                    return git.commitAll(user, project.paths.projectDir).then(utils.ret(project));
+                .then(function(project) {
+                    if(project.manifest.type.id === 'tn') {
+                        // skip tn projects
+                        return Promise.resolve();
+                    } else {
+                        return Promise.resolve(project)
+                            .then(migrateV2)
+                            .then(migrateV3)
+                            .then(migrateV4)
+                            .then(migrateV5)
+                            .then(migrateV6)
+                            .then(migrateV7)
+                            .then(migrateV8)
+                            .then(migrateName)
+                            .then(checkVersion)
+                            .then(saveManifest)
+                            .then(function (project) {
+                                return git.commitAll(user, project.paths.projectDir).then(utils.ret(project));
+                            })
+                    }
                 })
-
         },
 
         /**

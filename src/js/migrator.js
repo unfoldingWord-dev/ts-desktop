@@ -39,12 +39,37 @@ function MigrateManager(configurator, git, reporter, dataManager) {
         migrate: function (paths) {
             var user = configurator.getValue("userdata");
 
+            /**
+             * Loads the manifest from the disk.
+             * This will combine the root manifest and the manifest found
+             * in .apps/translationStudio
+             * @param paths
+             * @returns {Promise<any>} an object containing the manifest and project paths
+             */
             var readManifest = function (paths) {
-                return read(paths.manifest).then(function (manifest) {
-                    manifest = fromJSON(manifest);
-                    manifest.package_version = manifest.package_version || 2;
-                    return {manifest: manifest, paths: paths};
-                })
+                return new Promise(function (resolve, reject) {
+                    try {
+                        var manifest = JSON.parse(
+                            fs.readFileSync(paths.manifest));
+                        var appManifest = {};
+                        if (fs.existsSync(paths.appManifest)) {
+                            try {
+                                appManifest = JSON.parse(
+                                    fs.readFileSync(paths.appManifest));
+                            } catch (e) {
+                                console.error(e);
+                            }
+                        }
+                        manifest = Object.assign({}, manifest, appManifest);
+                        manifest.package_version = manifest.package_version || 2;
+                        resolve({
+                            manifest: manifest,
+                            paths: paths
+                        });
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
             };
 
             var migrateV2 = function (project) {
@@ -452,7 +477,6 @@ function MigrateManager(configurator, git, reporter, dataManager) {
                             }));
                         })
                         .then(function() {
-                            // TODO: read the inner manifest
                             if(manifest.format === 'markdown') {
                                 // TODO: support generating markdown. Should we just use the export here?
                                 // var markdown = generateProjectMarkdown(paths.projectDir);
@@ -465,13 +489,13 @@ function MigrateManager(configurator, git, reporter, dataManager) {
                                 var usfm = generateProjectUSFM(paths.projectDir);
                                 return write(path.join(paths.projectDir, manifest.project.id + '.usfm'), usfm);
                             }
+                        })
+                        .then(function() {
+                            manifest.package_version = 8;
+                            return {manifest: manifest, paths: paths};
                         });
                 }
 
-                manifest.package_version = 8;
-                delete manifest.finished_chunks;
-                delete manifest.parent_draft;
-                delete manifest.format;
                 return {manifest: manifest, paths: paths};
             };
 
@@ -480,9 +504,6 @@ function MigrateManager(configurator, git, reporter, dataManager) {
                 let paths = project.paths;
 
                 // TODO: migrate to 9.
-                //  IMPORTANT! in the previous migration we moved everything into .apps.
-                //  This means we'll need to rewrite how migrations work because of how
-                //  it expects paths and the manifest to be maintained.
 
                 return {manifest: manifest, paths: paths};
             };
@@ -518,7 +539,7 @@ function MigrateManager(configurator, git, reporter, dataManager) {
             };
 
             var checkVersion = function (project) {
-                if (project.manifest.package_version !== 7) {
+                if (project.manifest.package_version !== 8) {
                     throw new Error("Failed to migrate project");
                 }
                 return project;
@@ -530,6 +551,12 @@ function MigrateManager(configurator, git, reporter, dataManager) {
 
                 manifest.generator.name = 'ts-desktop';
                 manifest.generator.build = configurator.getAppData().build;
+
+                // TRICKY: these have been moved to .apps/translationStudio/manifest.json since v8
+                delete manifest.package_version;
+                delete manifest.finished_chunks;
+                delete manifest.parent_draft;
+                delete manifest.format;
 
                 return write(paths.manifest, toJSON(manifest)).then(utils.ret({
                     manifest: manifest,
@@ -554,6 +581,12 @@ function MigrateManager(configurator, git, reporter, dataManager) {
 
         },
 
+        /**
+         * This is used for listing backup target translations.
+         * Right now backups are always exported to v2
+         * @param file
+         * @returns {Promise<any>}
+         */
         listTargetTranslations: function (file) {
 
             /**

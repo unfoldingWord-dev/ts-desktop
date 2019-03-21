@@ -361,9 +361,19 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 };
             });
 
-            var manifest = {
-                package_version: meta.package_version,
-                format: meta.format,
+            var manifest = {};
+
+            if(fs.existsSync(paths.manifest)) {
+                try {
+                    manifest = JSON.parse(fs.readFileSync(paths.manifest));
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+
+            manifest = {
+                ...manifest, // TRICKY: preserve other stuff (like from tC)
+                // format: meta.format,
                 generator: {
                     name: 'ts-desktop',
                     build: build
@@ -373,12 +383,23 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 type: meta.type,
                 resource: meta.resource,
                 source_translations: sources,
-                parent_draft: meta.parent_draft,
+                // parent_draft: meta.parent_draft,
                 translators: meta.translators,
+                // finished_chunks: meta.finished_chunks
+            };
+
+            var appManifest = {
+                package_version: meta.package_version,
+                format: meta.format,
+                parent_draft: meta.parent_draft,
                 finished_chunks: meta.finished_chunks
             };
 
             return write(paths.manifest, toJSON(manifest))
+                .then(function() {
+                    // TRICKY: write manifest in .apps/translationStudio
+                    return write(paths.appManifest, toJSON(appManifest));
+                })
                 .catch(function (err) {
                     reporter.logError(err);
                     throw "Unable to write to manifest file.";

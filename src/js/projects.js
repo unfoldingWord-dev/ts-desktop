@@ -215,117 +215,38 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
         },
 
         updateManifestToMeta: function (manifest) {
-            var meta = manifest;
-
-            try {
-                if(manifest.type.id === "tn") {
-                    // TRICKY: tn projects are no longer supported
-                    console.warn('tn projects are no longer supported', manifest);
-                    return null;
-                }
-
-                if (manifest.project.name === "") {
-                    meta.project.name = dataManager.getProjectName(manifest.project.id);
-                }
-
-                if (manifest.type.name === "" && manifest.type.id === "text") {
-                    meta.type.name = "Text";
-                }
-
-                var sources = [];
-
-                for (var j = 0; j < manifest.source_translations.length; j++) {
-                    var details = dataManager.getSourceDetails(manifest.project.id, manifest.source_translations[j].language_id, manifest.source_translations[j].resource_id);
-
-                    if (manifest.source_translations[j].resource_id === "udb" && manifest.resource.id !== "udb") {
-                        details = false;
-                    }
-
-                    if (details) {
-                        sources.push(details);
-                    }
-                }
-
-                meta.source_translations = _.uniq(sources, 'unique_id');
-
-                if (meta.source_translations.length) {
-                    meta.currentsource = 0;
-                } else {
-                    meta.currentsource = null;
-                }
-
-                if (manifest.type.id === "tw") {
-                    meta.project_type_class = "extant";
-                } else if (manifest.type.id === "tn" || manifest.type.id === "tq") {
-                    meta.project_type_class = "helps";
-                } else {
-                    meta.project_type_class = "standard";
-                }
-
-                meta.unique_id = this.makeUniqueId(manifest);
-
-                if (!manifest.finished_chunks) {
-                    meta.finished_chunks = [];
-                }
-
-                var framenum = this.getProjectFrameNum(meta);
-
-                if (meta.finished_chunks && framenum) {
-                    meta.completion = Math.floor((meta.finished_chunks.length / framenum) * 100);
-                } else {
-                    meta.completion = 0;
-                }
-
-            } catch (err) {
-                reporter.logError(err);
-                return null;
-            }
-            return meta;
+            return _updateManifestToMeta(manifest, dataManager, reporter);
         },
 
         getProjectFrameNum: function (meta) {
-            var frames = [];
-
-            if (meta.type.id === "tw") {
-                var dict = meta.project.id;
-                var source = meta.source_translations[0];
-                frames = dataManager.getAllWords(source.language_id, dict);
-            } else if (meta.source_translations.length) {
-                var source = meta.source_translations[0];
-                var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;
-                frames = dataManager.getContainerData(container);
-            }
-            return frames.length;
+            return _getProjectFrameNum(meta, dataManager);
         },
 
         makeUniqueId: function (manifest) {
-            var id = manifest.target_language.id + "_" + manifest.project.id + "_" + manifest.type.id;
-            if (manifest.resource.id !== "") {
-                id += "_" + manifest.resource.id;
-            }
-            return id;
+            return _makeUniqueId(manifest);
         },
 
         updateChunk: function (destDir, meta, chunk) {
-            var paths = utils.makeProjectPaths(destDir, meta);
-            var projectClass = meta.project_type_class;
-            var file = path.join(paths.appProjectDir, chunk.chunkmeta.chapterid, chunk.chunkmeta.frameid + '.txt');
-            var standardcontent = chunk.transcontent;
-            var hasContent = false;
-
-            if (projectClass === "standard") {
-                hasContent = !!chunk.transcontent;
-            }
-            if (projectClass === "helps") {
-                hasContent = !!chunk.helpscontent.length;
-            }
-            if (projectClass === "extant" && chunk.helpscontent[0] && (!!chunk.helpscontent[0].title || !!chunk.helpscontent[0].body)) {
-                hasContent = true;
-            }
-            if (projectClass === "standard" && hasContent && chunk.chunkmeta.frame === 1 && chunk.projectmeta.project.id !== "obs") {
-                standardcontent = "\\c " + chunk.chunkmeta.chapter + " " + standardcontent;
-            }
-            return hasContent ? write(file, projectClass === "standard" ? standardcontent : toJSON(chunk.helpscontent)) : trash([file]);
+            return _updateChunk(destDir, meta, chunk);
+            // var paths = utils.makeProjectPaths(destDir, meta);
+            // var projectClass = meta.project_type_class;
+            // var file = path.join(paths.appProjectDir, chunk.chunkmeta.chapterid, chunk.chunkmeta.frameid + '.txt');
+            // var standardcontent = chunk.transcontent;
+            // var hasContent = false;
+            //
+            // if (projectClass === "standard") {
+            //     hasContent = !!chunk.transcontent;
+            // }
+            // if (projectClass === "helps") {
+            //     hasContent = !!chunk.helpscontent.length;
+            // }
+            // if (projectClass === "extant" && chunk.helpscontent[0] && (!!chunk.helpscontent[0].title || !!chunk.helpscontent[0].body)) {
+            //     hasContent = true;
+            // }
+            // if (projectClass === "standard" && hasContent && chunk.chunkmeta.frame === 1 && chunk.projectmeta.project.id !== "obs") {
+            //     standardcontent = "\\c " + chunk.chunkmeta.chapter + " " + standardcontent;
+            // }
+            // return hasContent ? write(file, projectClass === "standard" ? standardcontent : toJSON(chunk.helpscontent)) : trash([file]);
         },
 
         makeChapterDir: function (destDir, meta, chunk) {
@@ -625,4 +546,145 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
     };
 }
 
+/**
+ * Writes a chunk to the disk
+ * @param destDir
+ * @param meta
+ * @param chunk
+ * @returns {*}
+ * @private
+ */
+function _updateChunk (destDir, meta, chunk) {
+    var paths = utils.makeProjectPaths(destDir, meta);
+    var projectClass = meta.project_type_class;
+    var file = path.join(paths.appProjectDir, chunk.chunkmeta.chapterid, chunk.chunkmeta.frameid + '.txt');
+    var standardcontent = chunk.transcontent;
+    var hasContent = false;
+
+    if (projectClass === "standard") {
+        hasContent = !!chunk.transcontent;
+    }
+    if (projectClass === "helps") {
+        hasContent = !!chunk.helpscontent.length;
+    }
+    if (projectClass === "extant" && chunk.helpscontent[0] && (!!chunk.helpscontent[0].title || !!chunk.helpscontent[0].body)) {
+        hasContent = true;
+    }
+    if (projectClass === "standard" && hasContent && chunk.chunkmeta.frame === 1 && chunk.projectmeta.project.id !== "obs") {
+        standardcontent = "\\c " + chunk.chunkmeta.chapter + " " + standardcontent;
+    }
+    if(hasContent) {
+        let writableContent = standardcontent;
+        if(projectClass !== "standard") {
+            writableContent = JSON.stringify(chunk.helpscontent, null, '\t');
+        }
+        return utils.fs.outputFile(file, writableContent);
+    } else {
+        return trash([file]);
+    }
+}
+
+function _makeUniqueId(manifest) {
+    var id = manifest.target_language.id + "_" + manifest.project.id + "_" + manifest.type.id;
+    if (manifest.resource.id !== "") {
+        id += "_" + manifest.resource.id;
+    }
+    return id;
+}
+
+/**
+ * Converts manifest object into metadata.
+ * @param manifest
+ * @param dataManager
+ * @param reporter
+ * @returns {*}
+ * @private
+ */
+function _updateManifestToMeta (manifest, dataManager, reporter) {
+    var meta = manifest;
+
+    try {
+        if(manifest.type.id === "tn") {
+            // TRICKY: tn projects are no longer supported
+            console.warn('tn projects are no longer supported', manifest);
+            return null;
+        }
+
+        if (manifest.project.name === "") {
+            meta.project.name = dataManager.getProjectName(manifest.project.id);
+        }
+
+        if (manifest.type.name === "" && manifest.type.id === "text") {
+            meta.type.name = "Text";
+        }
+
+        var sources = [];
+
+        for (var j = 0; j < manifest.source_translations.length; j++) {
+            var details = dataManager.getSourceDetails(manifest.project.id, manifest.source_translations[j].language_id, manifest.source_translations[j].resource_id);
+
+            if (manifest.source_translations[j].resource_id === "udb" && manifest.resource.id !== "udb") {
+                details = false;
+            }
+
+            if (details) {
+                sources.push(details);
+            }
+        }
+
+        meta.source_translations = _.uniq(sources, 'unique_id');
+
+        if (meta.source_translations.length) {
+            meta.currentsource = 0;
+        } else {
+            meta.currentsource = null;
+        }
+
+        if (manifest.type.id === "tw") {
+            meta.project_type_class = "extant";
+        } else if (manifest.type.id === "tn" || manifest.type.id === "tq") {
+            meta.project_type_class = "helps";
+        } else {
+            meta.project_type_class = "standard";
+        }
+
+        meta.unique_id = _makeUniqueId(manifest);
+
+        if (!manifest.finished_chunks) {
+            meta.finished_chunks = [];
+        }
+
+        var framenum = _getProjectFrameNum(meta, dataManager);
+
+        if (meta.finished_chunks && framenum) {
+            meta.completion = Math.floor((meta.finished_chunks.length / framenum) * 100);
+        } else {
+            meta.completion = 0;
+        }
+
+    } catch (err) {
+        reporter.logError(err);
+        return null;
+    }
+    return meta;
+}
+
+function _getProjectFrameNum(meta, dataManager) {
+    var frames = [];
+
+    if (meta.type.id === "tw") {
+        var dict = meta.project.id;
+        var source = meta.source_translations[0];
+        frames = dataManager.getAllWords(source.language_id, dict);
+    } else if (meta.source_translations.length) {
+        var source = meta.source_translations[0];
+        var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;
+        frames = dataManager.getContainerData(container);
+    }
+    return frames.length;
+}
+
 module.exports.ProjectsManager = ProjectsManager;
+module.exports.updateChunk = _updateChunk;
+module.exports.makeUniqueId = _makeUniqueId;
+module.exports.updateManifestToMeta = _updateManifestToMeta;

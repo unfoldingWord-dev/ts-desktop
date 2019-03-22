@@ -1,8 +1,11 @@
 'use strict';
 
+var {chunkUSFM} = require('./importer');
 var fs = require('fs-extra');
+var mkdirp = require('mkdirp');
 var {generateProjectMarkdown} = require('./markdown');
 var {generateProjectUSFM} = require('./usfm');
+var {updateChunk, updateManifestToMeta} = require('./projects');
 
 var _ = require('lodash'),
     AdmZip = require('adm-zip'),
@@ -478,18 +481,18 @@ function MigrateManager(configurator, git, reporter, dataManager) {
                             }));
                         })
                         .then(function() {
-                            if(manifest.format === 'markdown') {
-                                // TODO: support generating markdown. Should we just use the export here?
-                                // var markdown = generateProjectMarkdown(paths.projectDir);
-                                // return write(path.join(paths.projectDir, manifest.project.id + '.md'), markdown);
-                            } else if(manifest.format === 'usfm') {
-                                var usfm = generateProjectUSFM(paths.projectDir);
-                                return write(path.join(paths.projectDir, manifest.project.id + '.usfm'), usfm);
-                            } else {
-                                // TRICKY: Assume it's usfm
-                                var usfm = generateProjectUSFM(paths.projectDir);
-                                return write(path.join(paths.projectDir, manifest.project.id + '.usfm'), usfm);
-                            }
+                            // if(manifest.format === 'markdown') {
+                            //     // TODO: support generating markdown. Should we just use the export here?
+                            //     // var markdown = generateProjectMarkdown(paths.projectDir);
+                            //     // return write(path.join(paths.projectDir, manifest.project.id + '.md'), markdown);
+                            // } else if(manifest.format === 'usfm') {
+                            //     var usfm = generateProjectUSFM(paths.projectDir);
+                            //     return write(path.join(paths.projectDir, manifest.project.id + '.usfm'), usfm);
+                            // } else {
+                            //     // TRICKY: Assume it's usfm
+                            //     var usfm = generateProjectUSFM(paths.projectDir);
+                            //     return write(path.join(paths.projectDir, manifest.project.id + '.usfm'), usfm);
+                            // }
                         })
                         .then(function() {
                             manifest.package_version = 8;
@@ -498,6 +501,65 @@ function MigrateManager(configurator, git, reporter, dataManager) {
                 }
 
                 return {manifest: manifest, paths: paths};
+            };
+
+            /**
+             * Performs the initial migration from tC to tS.
+             * @param project
+             * @returns {*}
+             */
+            var migrateTranslationCore = function (project) {
+                let manifest = project.manifest;
+                let paths = project.paths;
+
+                if(!fs.existsSync(paths.appManifest)) {
+                    // write trimmed down manifest to .apps
+                    return write(paths.appManifest, toJSON({
+                        finished_chunks: manifest.finished_chunks || [],
+                        parent_draft: manifest.parent_draft || {},
+                        package_version: 8,
+                        format: 'usfm'
+                    })).then(function() {
+                        // update manifest values
+                        if(!manifest.project.id && manifest.ts_project.id) {
+                            manifest.project.id = manifest.ts_project.id;
+                        }
+                        if(!manifest.project.name && manifest.ts_project.name) {
+                            manifest.project.name = manifest.ts_project.name;
+                        }
+                        manifest.resource.id = manifest.resource.id.toLowerCase();
+                        manifest.package_version = 8;
+                    }).then(function() {
+                        // rename project folder (so writing usfm works)
+                        return migrateName({
+                            manifest,
+                            paths
+                        })
+                    }).then(function() {
+                        // import usfm file.
+                        let unique_id = [manifest.target_language.id, manifest.resource.id, manifest.project.id, 'book'].join('_')
+                        let usfmPath = path.join(paths.projectDir, unique_id + ".usfm");
+                        if(!fs.existsSync(usfmPath)) {
+                            usfmPath = path.join(paths.projectDir, manifest.project.id + ".usfm");
+                        }
+
+                        if(fs.existsSync(usfmPath)) {
+                            let meta = updateManifestToMeta(manifest, dataManager, reporter);
+                            return chunkUSFM(usfmPath, manifest, dataManager)
+                                .then(function(chunks) {
+                                    // write chunks
+                                    let writes = [];
+                                    chunks.map(function(chunk) {
+                                        mkdirp.sync(path.join(paths.appProjectDir, chunk.chunkmeta.chapterid));
+                                        writes.push(updateChunk(paths.parentDir, meta, chunk));
+                                    });
+                                    return Promise.all(writes);
+                                });
+                        }
+                    }).then(function() {
+                        return {manifest: manifest, paths: paths};
+                    });
+                }
             };
 
             var migrateV8 = function (project) {
@@ -567,7 +629,20 @@ function MigrateManager(configurator, git, reporter, dataManager) {
 
             return readManifest(paths)
                 .then(function(project) {
-                    if(project.manifest.type.id === 'tn') {
+                    if(project.manifest.generator.name === 'tc-desktop') {
+                        // migrate a tc project that does not yet support v8 ts project
+                        return Promise.resolve(project)
+                            .then(migrateTranslationCore)
+                            // TRICKY: tc support was introduced at 8 so we don't perform earlier migrations
+                            .then(migrateV8)
+                            .then(migrateName)
+                            .then(checkVersion)
+                            .then(saveManifest)
+                            // TODO: check for external edits
+                            .then(function (project) {
+                                return git.commitAll(user, project.paths.projectDir).then(utils.ret(project));
+                            })
+                    } else if(project.manifest.type.id === 'tn') {
                         // skip tn projects
                         return Promise.resolve();
                     } else {
@@ -582,6 +657,7 @@ function MigrateManager(configurator, git, reporter, dataManager) {
                             .then(migrateName)
                             .then(checkVersion)
                             .then(saveManifest)
+                            // TODO: check for external edits
                             .then(function (project) {
                                 return git.commitAll(user, project.paths.projectDir).then(utils.ret(project));
                             })

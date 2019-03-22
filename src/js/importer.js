@@ -79,57 +79,58 @@ function ImportManager(configurator, migrator, dataManager) {
         },
 
         importFromUSFM: function (filepath, projectmeta) {
-            var parser = new UsfmParser();
-
-            return parser.load(filepath)
-                .then(function () {
-                    var parsedData = parser.parse();
-
-                    if (JSON.stringify(parsedData) === JSON.stringify({})) {
-                        throw new Error('This is not a valid USFM file.');
-                    }
-                    var chunks = [];
-                    var markers = dataManager.getChunkMarkers(projectmeta.project.id);
-
-                    for (var i = 0; i < markers.length; i++) {
-                        var frameid = markers[i].verse;
-                        var first = parseInt(frameid);
-                        var chapter = markers[i].chapter;
-                        var isLastChunkOfChapter = !markers[i+1] || markers[i+1].chapter !== chapter;
-                        var last = isLastChunkOfChapter ? Number.MAX_VALUE : parseInt(markers[i+1].verse) - 1;
-
-                        if (parsedData[chapter]) {
-                            var transcontent = _.chain(parsedData[chapter].verses).filter(function (verse) {
-                                var id = parseInt(verse.id);
-                                return id <= last && id >= first;
-                            }).map("contents").value().join(" ");
-
-                            chunks.push({
-                                chunkmeta: {
-                                    chapterid: chapter,
-                                    frameid: frameid
-                                },
-                                transcontent: transcontent.trim(),
-                                completed: false
-                            });
-                        }
-                    }
-
-                    if (parsedData['front'] && parsedData['front'].contents) {
-                        chunks.unshift({
-                            chunkmeta: {
-                                chapterid: 'front',
-                                frameid: 'title'
-                            },
-                            transcontent: parsedData['front'].contents.trim(),
-                            completed: false
-                        });
-                    }
-                    return chunks;
-                })
-                .catch(function (err) {
-                    throw "Error occurred parsing file: " + err;
-                });
+            return chunkUSFM(filepath, projectmeta, dataManager);
+            // var parser = new UsfmParser();
+            //
+            // return parser.load(filepath)
+            //     .then(function () {
+            //         var parsedData = parser.parse();
+            //
+            //         if (JSON.stringify(parsedData) === JSON.stringify({})) {
+            //             throw new Error('This is not a valid USFM file.');
+            //         }
+            //         var chunks = [];
+            //         var markers = dataManager.getChunkMarkers(projectmeta.project.id);
+            //
+            //         for (var i = 0; i < markers.length; i++) {
+            //             var frameid = markers[i].verse;
+            //             var first = parseInt(frameid);
+            //             var chapter = markers[i].chapter;
+            //             var isLastChunkOfChapter = !markers[i+1] || markers[i+1].chapter !== chapter;
+            //             var last = isLastChunkOfChapter ? Number.MAX_VALUE : parseInt(markers[i+1].verse) - 1;
+            //
+            //             if (parsedData[chapter]) {
+            //                 var transcontent = _.chain(parsedData[chapter].verses).filter(function (verse) {
+            //                     var id = parseInt(verse.id);
+            //                     return id <= last && id >= first;
+            //                 }).map("contents").value().join(" ");
+            //
+            //                 chunks.push({
+            //                     chunkmeta: {
+            //                         chapterid: chapter,
+            //                         frameid: frameid
+            //                     },
+            //                     transcontent: transcontent.trim(),
+            //                     completed: false
+            //                 });
+            //             }
+            //         }
+            //
+            //         if (parsedData['front'] && parsedData['front'].contents) {
+            //             chunks.unshift({
+            //                 chunkmeta: {
+            //                     chapterid: 'front',
+            //                     frameid: 'title'
+            //                 },
+            //                 transcontent: parsedData['front'].contents.trim(),
+            //                 completed: false
+            //             });
+            //         }
+            //         return chunks;
+            //     })
+            //     .catch(function (err) {
+            //         throw "Error occurred parsing file: " + err;
+            //     });
         }
     };
 }
@@ -297,8 +298,63 @@ function UsfmParser () {
 
             return mythis.chapters;
         }
-    }
+    };
+}
+
+function chunkUSFM(filepath, projectmeta, dataManager) {
+    var parser = new UsfmParser();
+
+    return parser.load(filepath)
+    .then(function () {
+        var parsedData = parser.parse();
+
+        if (JSON.stringify(parsedData) === JSON.stringify({})) {
+            throw new Error('This is not a valid USFM file.');
+        }
+        var chunks = [];
+        var markers = dataManager.getChunkMarkers(projectmeta.project.id);
+
+        for (var i = 0; i < markers.length; i++) {
+            var frameid = markers[i].verse;
+            var first = parseInt(frameid);
+            var chapter = markers[i].chapter;
+            var isLastChunkOfChapter = !markers[i+1] || markers[i+1].chapter !== chapter;
+            var last = isLastChunkOfChapter ? Number.MAX_VALUE : parseInt(markers[i+1].verse) - 1;
+
+            if (parsedData[chapter]) {
+                var transcontent = _.chain(parsedData[chapter].verses).filter(function (verse) {
+                    var id = parseInt(verse.id);
+                    return id <= last && id >= first;
+                }).map("contents").value().join(" ");
+
+                chunks.push({
+                    chunkmeta: {
+                        chapterid: chapter,
+                        frameid: frameid
+                    },
+                    transcontent: transcontent.trim(),
+                    completed: false
+                });
+            }
+        }
+
+        if (parsedData['front'] && parsedData['front'].contents) {
+            chunks.unshift({
+                chunkmeta: {
+                    chapterid: 'front',
+                    frameid: 'title'
+                },
+                transcontent: parsedData['front'].contents.trim(),
+                completed: false
+            });
+        }
+        return chunks;
+    })
+    .catch(function (err) {
+        throw "Error occurred parsing file: " + err;
+    });
 }
 
 module.exports.ImportManager = ImportManager;
 module.exports.UsfmParser = UsfmParser;
+module.exports.chunkUSFM = chunkUSFM;

@@ -150,7 +150,7 @@
               typearray.push({type: {id: "text", name: "Text"}, resource: {id: "udb", name: "Unlocked Dynamic Bible"}, format: "usfm", allowed: true});
           }
           if (!this.importdata.importing) {
-              typearray.push({type: {id: "tq", name: "Questions"}, resource: {id: "", name: ""}, format: "markdown", allowed: standardexists});
+              // typearray.push({type: {id: "tq", name: "Questions"}, resource: {id: "", name: ""}, format: "markdown", allowed: standardexists});
               for (i = 0; i < typearray.length; i++) {
                   var unique_id = language.id + "_" + projectid + "_" + typearray[i].type.id;
                   if (typearray[i].resource.id !== "") {

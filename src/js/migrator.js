@@ -642,8 +642,8 @@ function MigrateManager(configurator, git, reporter, dataManager) {
                             .then(function (project) {
                                 return git.commitAll(user, project.paths.projectDir).then(utils.ret(project));
                             })
-                    } else if(project.manifest.type.id === 'tn') {
-                        // skip tn projects
+                    } else if(project.manifest.type.id === 'tn' || project.manifest.type.id === 'tq') {
+                        // skip tn and tq projects
                         return Promise.resolve();
                     } else {
                         return Promise.resolve(project)

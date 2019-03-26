@@ -610,6 +610,12 @@ function _updateManifestToMeta (manifest, dataManager, reporter) {
             return null;
         }
 
+        if(manifest.type.id === "tq") {
+            // TRICKY: tq projects are no longer supported
+            console.warn('tq projects are no longer supported', manifest);
+            return null;
+        }
+
         if (manifest.project.name === "") {
             meta.project.name = dataManager.getProjectName(manifest.project.id);
         }

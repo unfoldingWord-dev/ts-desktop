@@ -228,25 +228,6 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
 
         updateChunk: function (destDir, meta, chunk) {
             return _updateChunk(destDir, meta, chunk);
-            // var paths = utils.makeProjectPaths(destDir, meta);
-            // var projectClass = meta.project_type_class;
-            // var file = path.join(paths.appProjectDir, chunk.chunkmeta.chapterid, chunk.chunkmeta.frameid + '.txt');
-            // var standardcontent = chunk.transcontent;
-            // var hasContent = false;
-            //
-            // if (projectClass === "standard") {
-            //     hasContent = !!chunk.transcontent;
-            // }
-            // if (projectClass === "helps") {
-            //     hasContent = !!chunk.helpscontent.length;
-            // }
-            // if (projectClass === "extant" && chunk.helpscontent[0] && (!!chunk.helpscontent[0].title || !!chunk.helpscontent[0].body)) {
-            //     hasContent = true;
-            // }
-            // if (projectClass === "standard" && hasContent && chunk.chunkmeta.frame === 1 && chunk.projectmeta.project.id !== "obs") {
-            //     standardcontent = "\\c " + chunk.chunkmeta.chapter + " " + standardcontent;
-            // }
-            // return hasContent ? write(file, projectClass === "standard" ? standardcontent : toJSON(chunk.helpscontent)) : trash([file]);
         },
 
         makeChapterDir: function (destDir, meta, chunk) {
@@ -282,19 +263,9 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 };
             });
 
-            var manifest = {};
-
-            if(fs.existsSync(paths.manifest)) {
-                try {
-                    manifest = JSON.parse(fs.readFileSync(paths.manifest));
-                } catch (e) {
-                    console.error(e);
-                }
-            }
-
-            manifest = {
-                ...manifest, // TRICKY: preserve other stuff (like from tC)
-                // format: meta.format,
+            var manifest = {
+                package_version: meta.package_version,
+                format: meta.format,
                 generator: {
                     name: 'ts-desktop',
                     build: build
@@ -304,23 +275,12 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 type: meta.type,
                 resource: meta.resource,
                 source_translations: sources,
-                // parent_draft: meta.parent_draft,
-                translators: meta.translators,
-                // finished_chunks: meta.finished_chunks
-            };
-
-            var appManifest = {
-                package_version: meta.package_version,
-                format: meta.format,
                 parent_draft: meta.parent_draft,
+                translators: meta.translators,
                 finished_chunks: meta.finished_chunks
             };
 
             return write(paths.manifest, toJSON(manifest))
-                .then(function() {
-                    // TRICKY: write manifest in .apps/translationStudio
-                    return write(paths.appManifest, toJSON(appManifest));
-                })
                 .catch(function (err) {
                     reporter.logError(err);
                     throw "Unable to write to manifest file.";
@@ -433,10 +393,9 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 .then(function(list) {
                     let manifests = [];
                     for(let p of list) {
-                        if(fs.existsSync(p.manifest) && fs.existsSync(p.appManifest)) {
+                        if(fs.existsSync(p.manifest)) {
                             let manifest = JSON.parse(fs.readFileSync(p.manifest));
-                            let appManifest = JSON.parse(fs.readFileSync(p.appManifest));
-                            manifests.push(Object.assign({}, manifest, appManifest));
+                            manifests.push(manifest);
                         }
                     }
                     return Promise.resolve(manifests);

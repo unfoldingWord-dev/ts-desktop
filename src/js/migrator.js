@@ -53,18 +53,7 @@ function MigrateManager(configurator, git, reporter, dataManager) {
             var readManifest = function (paths) {
                 return new Promise(function (resolve, reject) {
                     try {
-                        var manifest = JSON.parse(
-                            fs.readFileSync(paths.manifest));
-                        var appManifest = {};
-                        if (fs.existsSync(paths.appManifest)) {
-                            try {
-                                appManifest = JSON.parse(
-                                    fs.readFileSync(paths.appManifest));
-                            } catch (e) {
-                                console.error(e);
-                            }
-                        }
-                        manifest = Object.assign({}, manifest, appManifest);
+                        var manifest = JSON.parse(fs.readFileSync(paths.manifest));
                         manifest.package_version = manifest.package_version || 2;
                         resolve({
                             manifest: manifest,
@@ -443,61 +432,11 @@ function MigrateManager(configurator, git, reporter, dataManager) {
             };
 
             var migrateV7 = function (project) {
-                // migrate up to v8
                 let manifest = project.manifest;
                 let paths = project.paths;
-                let appsPath = path.join(paths.projectDir, '.apps/translationStudio');
 
                 if (manifest.package_version <= 7) {
-                    return utils.fs.mkdirs(appsPath)
-                        .then(function() {
-                            return utils.fs.readdir(paths.projectDir);
-                        })
-                        .then(function(files) {
-                            // move files into .apps
-                            let moves = [];
-                            for(let i = 0, len = files.length; i < len; i ++) {
-                                if(['.apps', '.DS_Store', '.git'].indexOf(files[i]) === -1) {
-                                    let src = path.join(paths.projectDir, files[i]);
-                                    let dst = path.join(appsPath, files[i]);
-                                    if(['front', 'back'].indexOf(files[i]) > -1 || !isNaN(files[i])) {
-                                        // move ts specific stuff
-                                        moves.push(utils.fs.mover(src, dst));
-                                    } else {
-                                        // copy everything else
-                                        moves.push(utils.fs.copy(src, dst, {clobber: true}));
-                                    }
-                                }
-                            }
-                            return Promise.all(moves);
-                        })
-                        .then(function() {
-                            // write trimmed down manifest to .apps
-                            return write(path.join(appsPath, 'manifest.json'), toJSON({
-                                finished_chunks: manifest.finished_chunks,
-                                parent_draft: manifest.parent_draft,
-                                package_version: 8,
-                                format:  manifest.format
-                            }));
-                        })
-                        .then(function() {
-                            // if(manifest.format === 'markdown') {
-                            //     // TODO: support generating markdown. Should we just use the export here?
-                            //     // var markdown = generateProjectMarkdown(paths.projectDir);
-                            //     // return write(path.join(paths.projectDir, manifest.project.id + '.md'), markdown);
-                            // } else if(manifest.format === 'usfm') {
-                            //     var usfm = generateProjectUSFM(paths.projectDir);
-                            //     return write(path.join(paths.projectDir, manifest.project.id + '.usfm'), usfm);
-                            // } else {
-                            //     // TRICKY: Assume it's usfm
-                            //     var usfm = generateProjectUSFM(paths.projectDir);
-                            //     return write(path.join(paths.projectDir, manifest.project.id + '.usfm'), usfm);
-                            // }
-                        })
-                        .then(function() {
-                            manifest.package_version = 8;
-                            return {manifest: manifest, paths: paths};
-                        });
+                    //add code here to migrate to v8
                 }
 
                 return {manifest: manifest, paths: paths};
@@ -602,7 +541,7 @@ function MigrateManager(configurator, git, reporter, dataManager) {
             };
 
             var checkVersion = function (project) {
-                if (project.manifest.package_version !== 8) {
+                if (project.manifest.package_version !== 7) {
                     throw new Error("Failed to migrate project");
                 }
                 return project;
@@ -615,12 +554,6 @@ function MigrateManager(configurator, git, reporter, dataManager) {
                 manifest.generator.name = 'ts-desktop';
                 manifest.generator.build = configurator.getAppData().build;
 
-                // TRICKY: these have been moved to .apps/translationStudio/manifest.json since v8
-                delete manifest.package_version;
-                delete manifest.finished_chunks;
-                delete manifest.parent_draft;
-                delete manifest.format;
-
                 return write(paths.manifest, toJSON(manifest)).then(utils.ret({
                     manifest: manifest,
                     paths: paths
@@ -629,38 +562,24 @@ function MigrateManager(configurator, git, reporter, dataManager) {
 
             return readManifest(paths)
                 .then(function(project) {
-                    if(project.manifest.generator.name === 'tc-desktop') {
-                        // migrate a tc project that does not yet support v8 ts project
-                        return Promise.resolve(project)
-                            .then(migrateTranslationCore)
-                            // TRICKY: tc support was introduced at 8 so we don't perform earlier migrations
-                            .then(migrateV8)
-                            .then(migrateName)
-                            .then(checkVersion)
-                            .then(saveManifest)
-                            // TODO: check for external edits
-                            .then(function (project) {
-                                return git.commitAll(user, project.paths.projectDir).then(utils.ret(project));
-                            })
-                    } else if(project.manifest.type.id === 'tn' || project.manifest.type.id === 'tq') {
+                    if(project.manifest.type.id === 'tn' || project.manifest.type.id === 'tq') {
                         // skip tn and tq projects
                         return Promise.resolve();
                     } else {
                         return Promise.resolve(project)
-                            .then(migrateV2)
-                            .then(migrateV3)
-                            .then(migrateV4)
-                            .then(migrateV5)
-                            .then(migrateV6)
-                            .then(migrateV7)
-                            .then(migrateV8)
-                            .then(migrateName)
-                            .then(checkVersion)
-                            .then(saveManifest)
-                            // TODO: check for external edits
-                            .then(function (project) {
-                                return git.commitAll(user, project.paths.projectDir).then(utils.ret(project));
-                            })
+                        .then(migrateV2)
+                        .then(migrateV3)
+                        .then(migrateV4)
+                        .then(migrateV5)
+                        .then(migrateV6)
+                        .then(migrateV7)
+                        .then(migrateV8)
+                        .then(migrateName)
+                        .then(checkVersion)
+                        .then(saveManifest)
+                        .then(function (project) {
+                            return git.commitAll(user, project.paths.projectDir).then(utils.ret(project));
+                        })
                     }
                 })
         },

@@ -7,10 +7,9 @@ var fs = require('fs-extra');
  * @return {string}
  */
 function generateProjectUSFM(projectPath) {
-    var srcDir = path.join(projectPath, '.apps/translationStudio');
     var manifest = JSON.parse(
         fs.readFileSync(path.join(projectPath, 'manifest.json')));
-    var usfm = concatFiles(srcDir, manifest);
+    var usfm = concatFiles(projectPath, manifest);
 
     usfm = usfm.replace(/(\\v\s+)/g, '\n$1');
 

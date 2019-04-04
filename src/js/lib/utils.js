@@ -382,8 +382,6 @@ var utils = {
         return {
             parentDir: targetDir,
             projectDir: projectDir,
-            appProjectDir: path.join(projectDir, '.apps/translationStudio'),
-            appManifest: path.join(projectDir, '.apps/translationStudio/manifest.json'),
             manifest: path.join(projectDir, 'manifest.json'),
             license: path.join(projectDir, 'LICENSE.md')
         };

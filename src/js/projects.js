@@ -233,7 +233,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
         makeChapterDir: function (destDir, meta, chunk) {
             var paths = utils.makeProjectPaths(destDir, meta);
 
-            return mkdirp(path.join(paths.appProjectDir, chunk.chunkmeta.chapterid));
+            return mkdirp(path.join(paths.projectDir, chunk.chunkmeta.chapterid));
         },
 
         saveTargetChunk: function (chunk, meta, destDir=targetDir) {
@@ -346,7 +346,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
             var paths = utils.makeProjectPaths(destDir, meta);
 
             var cleanChapterDir = function (data, chapter) {
-                var chapterpath = path.join(paths.appProjectDir, chapter);
+                var chapterpath = path.join(paths.projectDir, chapter);
                 return readdir(chapterpath)
                     .then(function (dir) {
                         return !dir.length ? trash([chapterpath]): true;
@@ -469,8 +469,8 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
                 return Promise.all(_.map(dirs, isVisibleDir)).then(utils.lodash.compact());
             };
 
-            return readdir(paths.appProjectDir)
-                .then(map(makeFullPath(paths.appProjectDir)))
+            return readdir(paths.projectDir)
+                .then(map(makeFullPath(paths.projectDir)))
                 .then(filterDirs)
                 .then(flatten())
                 .then(readdirs)
@@ -516,7 +516,7 @@ function ProjectsManager(dataManager, configurator, reporter, git, migrator) {
 function _updateChunk (destDir, meta, chunk) {
     var paths = utils.makeProjectPaths(destDir, meta);
     var projectClass = meta.project_type_class;
-    var file = path.join(paths.appProjectDir, chunk.chunkmeta.chapterid, chunk.chunkmeta.frameid + '.txt');
+    var file = path.join(paths.projectDir, chunk.chunkmeta.chapterid, chunk.chunkmeta.frameid + '.txt');
     var standardcontent = chunk.transcontent;
     var hasContent = false;
 

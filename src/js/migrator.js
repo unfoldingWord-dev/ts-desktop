@@ -3,8 +3,6 @@
 var {chunkUSFM} = require('./importer');
 var fs = require('fs-extra');
 var mkdirp = require('mkdirp');
-var {generateProjectMarkdown} = require('./markdown');
-var {generateProjectUSFM} = require('./usfm');
 var {updateChunk, updateManifestToMeta} = require('./projects');
 
 var _ = require('lodash'),
@@ -45,8 +43,6 @@ function MigrateManager(configurator, git, reporter, dataManager) {
 
             /**
              * Loads the manifest from the disk.
-             * This will combine the root manifest and the manifest found
-             * in .apps/translationStudio
              * @param paths
              * @returns {Promise<any>} an object containing the manifest and project paths
              */
@@ -443,7 +439,8 @@ function MigrateManager(configurator, git, reporter, dataManager) {
             };
 
             /**
-             * Performs the initial migration from tC to tS.
+             * Performs the migration from tC to tS.
+             * This should always migrate to the latest.
              * @param project
              * @returns {*}
              */
@@ -451,46 +448,101 @@ function MigrateManager(configurator, git, reporter, dataManager) {
                 let manifest = project.manifest;
                 let paths = project.paths;
 
-                if(!fs.existsSync(paths.appManifest)) {
-                    // write trimmed down manifest to .apps
-                    return write(paths.appManifest, toJSON({
-                        finished_chunks: manifest.finished_chunks || [],
-                        parent_draft: manifest.parent_draft || {},
-                        package_version: 8,
-                        format: 'usfm'
-                    })).then(function() {
-                        // update manifest values
-                        if(!manifest.project.id && manifest.ts_project.id) {
-                            manifest.project.id = manifest.ts_project.id;
-                        }
-                        if(!manifest.project.name && manifest.ts_project.name) {
-                            manifest.project.name = manifest.ts_project.name;
-                        }
-                        manifest.resource.id = manifest.resource.id.toLowerCase();
-                        manifest.package_version = 8;
+                if(manifest.generator.name === 'tc-desktop') {
+                    // update manifest
+                    manifest.finished_chunks = manifest.finished_chunks || [];
+                    manifest.parent_draft = manifest.parent_draft || {};
+                    manifest.package_version = 7;
+                    manifest.format = 'usfm';
+                    if(!manifest.project) {
+                        manifest.project = {};
+                    }
+                    // reconstruct project id
+                    if (!manifest.project.id && manifest.ts_project.id) {
+                        manifest.project.id = manifest.ts_project.id;
+                    }
+                    // reconstruct the project name
+                    if (!manifest.project.name &&
+                        manifest.ts_project &&
+                        manifest.ts_project.name) {
+                        manifest.project.name = manifest.ts_project.name;
+                    } else if(!manifest.project.name &&
+                        manifest.target_language.book &&
+                        manifest.target_language.book.name) {
+                        manifest.project.name = manifest.target_language.book.name;
+                    }
+                    manifest.resource.id = manifest.resource.id.toLowerCase();
+                    if(!manifest.type || !manifest.type.id || !manifest.type.name) {
+                        manifest.type = {
+                            id: 'text',
+                            name: 'Text'
+                        };
+                    }
+
+                    // clear out everything else from the manifest
+                    manifest = {
+                        generator: manifest.generator, // this will be overwritten later on
+                        package_version: manifest.package_version,
+                        project: {
+                            id: manifest.project.id,
+                            name: manifest.project.name,
+                        },
+                        type: manifest.type,
+                        resource: manifest.resource,
+                        format: manifest.format,
+                        target_language: {
+                            id: manifest.target_language.id,
+                            name: manifest.target_language.name,
+                            direction: manifest.target_language.direction
+                        },
+                        translators: manifest.translators,
+                        source_translations: manifest.source_translations,
+                        finished_chunks: manifest.finished_chunks,
+                        parent_draft: manifest.parent_draft
+                    };
+
+                    return Promise.resolve().then(function() {
+                        // TODO: delete all the extra files from tC
+                        // .apps
+                        // *.usfm
+                        // .git (start afresh)
+                        // book folder
                     }).then(function() {
                         // rename project folder (so writing usfm works)
                         return migrateName({
                             manifest,
                             paths
-                        })
-                    }).then(function() {
+                        });
+                    }).then(function(movedProject) {
+                        // TRICKY: update the paths after having moved the project
+                        paths = movedProject.paths;
                         // import usfm file.
-                        let unique_id = [manifest.target_language.id, manifest.resource.id, manifest.project.id, 'book'].join('_')
-                        let usfmPath = path.join(paths.projectDir, unique_id + ".usfm");
-                        if(!fs.existsSync(usfmPath)) {
-                            usfmPath = path.join(paths.projectDir, manifest.project.id + ".usfm");
+                        let unique_id = [
+                            manifest.target_language.id,
+                            manifest.resource.id,
+                            manifest.project.id,
+                            'book'
+                        ].join('_');
+                        let usfmPath = path.join(paths.projectDir,
+                            unique_id + ".usfm");
+                        if (!fs.existsSync(usfmPath)) {
+                            usfmPath = path.join(paths.projectDir,
+                                manifest.project.id + ".usfm");
                         }
 
-                        if(fs.existsSync(usfmPath)) {
-                            let meta = updateManifestToMeta(manifest, dataManager, reporter);
-                            return chunkUSFM(usfmPath, manifest, dataManager)
-                                .then(function(chunks) {
+                        if (fs.existsSync(usfmPath)) {
+                            let meta = updateManifestToMeta(manifest,
+                                dataManager, reporter);
+                            return chunkUSFM(usfmPath, manifest, dataManager).
+                                then(function(chunks) {
                                     // write chunks
                                     let writes = [];
                                     chunks.map(function(chunk) {
-                                        mkdirp.sync(path.join(paths.appProjectDir, chunk.chunkmeta.chapterid));
-                                        writes.push(updateChunk(paths.parentDir, meta, chunk));
+                                        mkdirp.sync(path.join(paths.projectDir,
+                                            chunk.chunkmeta.chapterid));
+                                        writes.push(
+                                            updateChunk(paths.parentDir, meta,
+                                                chunk));
                                     });
                                     return Promise.all(writes);
                                 });
@@ -498,6 +550,8 @@ function MigrateManager(configurator, git, reporter, dataManager) {
                     }).then(function() {
                         return {manifest: manifest, paths: paths};
                     });
+                } else {
+                    return project;
                 }
             };
 
@@ -567,6 +621,7 @@ function MigrateManager(configurator, git, reporter, dataManager) {
                         return Promise.resolve();
                     } else {
                         return Promise.resolve(project)
+                        .then(migrateTranslationCore)
                         .then(migrateV2)
                         .then(migrateV3)
                         .then(migrateV4)

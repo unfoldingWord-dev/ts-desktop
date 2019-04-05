@@ -1,5 +1,6 @@
 var path = require('path');
-var {generateProjectUSFM, fileComparator} = require('../usfm');
+var fs = require('fs-extra');
+var {generateProjectUSFM, fileComparator, usfm3ToUsfm2} = require('../usfm');
 
 describe('Project usfm generator', () => {
     it('produces usfm', () => {
@@ -46,4 +47,11 @@ describe('file sorter', () => {
         expect(['front', '01'].sort(fileComparator)).toEqual(['front', '01']);
         expect(['01', 'title'].sort(fileComparator)).toEqual(['title', '01']);
     });
+});
+
+describe('usfm3 to usfm2', () => {
+    const usfm3 = fs.readFileSync(path.join(__dirname, 'usfm3.usfm')).toString();
+    const usfm2 = fs.readFileSync(path.join(__dirname, 'usfm2.usfm')).toString();
+
+    expect(usfm3ToUsfm2(usfm3).trim()).toEqual(usfm2.trim());
 });

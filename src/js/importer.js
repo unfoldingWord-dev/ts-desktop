@@ -7,6 +7,7 @@ var request = require('request');
 var fs = require('fs');
 var readline = require('readline');
 var utils = require('../js/lib/utils');
+var {usfm3ToUsfm2} = require('./usfm');
 
 function ImportManager(configurator, migrator, dataManager) {
 
@@ -198,20 +199,10 @@ function UsfmParser () {
             mythis.file = file;
 
             return new Promise(function (resolve, reject) {
-
-                var lineReader = readline.createInterface({
-                    input: fs.createReadStream(mythis.file, {encoding: "utf8"})
-                });
-
-                lineReader.on('line', function (line) {
-                    if (line) {
-                        mythis.contents.push(line);
-                    }
-                });
-
-                lineReader.on('close', function() {
-                    resolve(mythis);
-                });
+                const data = fs.readFileSync(mythis.file, {encoding: 'utf8'}).toString();
+                const cleanData = usfm3ToUsfm2(data);
+                mythis.contents.push.apply(mythis.contents, cleanData.split('\n'));
+                resolve(mythis);
             });
         },
 
@@ -325,7 +316,7 @@ function chunkUSFM(filepath, projectmeta, dataManager) {
                 var transcontent = _.chain(parsedData[chapter].verses).filter(function (verse) {
                     var id = parseInt(verse.id);
                     return id <= last && id >= first;
-                }).map("contents").value().join(" ");
+                }).map("contents").value().join("\n");
 
                 chunks.push({
                     chunkmeta: {

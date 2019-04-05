@@ -17,6 +17,41 @@ function generateProjectUSFM(projectPath) {
 }
 
 /**
+ * Converts usfm3 to usfm2
+ * @param usfm3
+ * @returns {*}
+ */
+function usfm3ToUsfm2(usfm3) {
+    /** milestones */
+    let usfm2 = usfm3.replace(/\n?\\zaln-s.*\n?/mg, '');
+    usfm2 = usfm2.replace(/\n?\\zaln-e\\\*\n?/mg, '');
+
+    usfm2 = usfm2.replace(/\n?\\ks-s.*\n?/mg, '');
+    usfm2 = usfm2.replace(/\n?\\ks-e\\\*\n?/mg, '');
+
+    /** word data */
+    // remove empty word markers
+    usfm2 = usfm2.replace(/\\w\s*(\|[^\\]*)?\\w\*/g, '');
+    // place words on their own lines so regex doesn't break
+    usfm2 = usfm2.replace(/(\\w\s+)/g, '\n$1');
+    // remove words
+    usfm2 = usfm2.replace(/\\w\s+([^|\\]*).*\\w\*/g, '$1');
+    // group words onto single line
+    usfm2 = usfm2.replace(/(\n+)([^\\\n +])/g, ' $2');
+    // stick text without markup on previous line
+    usfm2 = usfm2.replace(/\n^(?![\\])(.*)/mg, ' $1');
+
+    /** whitespace */
+    usfm2 = usfm2.replace(/^[ \t]*/mg, '');
+    usfm2 = usfm2.replace(/[ \t]*$/mg, '');
+    usfm2 = usfm2.replace(/^\n{2,}/mg, '\n\n');
+    usfm2 = usfm2.replace(/ {2,}/g, ' ');
+    usfm2 = usfm2.replace(/\n*(\\s5)\s*/mg, '\n\n$1\n');
+
+    return usfm2;
+}
+
+/**
  * Compares two file names to determine sort order
  * @param a
  * @param b
@@ -107,3 +142,4 @@ function concatFiles(filepath, manifest) {
 
 module.exports.generateProjectUSFM = generateProjectUSFM;
 module.exports.fileComparator = fileComparator;
+module.exports.usfm3ToUsfm2 = usfm3ToUsfm2;

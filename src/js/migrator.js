@@ -480,7 +480,7 @@ function MigrateManager(configurator, git, reporter, dataManager) {
                     }
 
                     // clear out everything else from the manifest
-                    manifest = {
+                    const newManifest = {
                         generator: manifest.generator, // this will be overwritten later on
                         package_version: manifest.package_version,
                         project: {
@@ -501,16 +501,16 @@ function MigrateManager(configurator, git, reporter, dataManager) {
                         parent_draft: manifest.parent_draft
                     };
 
-                    return Promise.resolve().then(function() {
-                        // TODO: delete all the extra files from tC
-                        // .apps
-                        // *.usfm
-                        // .git (start afresh)
-                        // book folder
-                    }).then(function() {
+                    // TRICKY: this is a hack. see below
+                    const writableManifest = Object.assign({}, newManifest);
+
+                    // TRICKY: start by completely overwriting the manifest
+                    // because the normal manifest update keeps stuff
+                    // but we don't want to keep any tc stuff
+                    return write(paths.manifest, newManifest).then(function() {
                         // rename project folder (so writing usfm works)
                         return migrateName({
-                            manifest,
+                            manifest: newManifest,
                             paths
                         });
                     }).then(function(movedProject) {
@@ -518,22 +518,22 @@ function MigrateManager(configurator, git, reporter, dataManager) {
                         paths = movedProject.paths;
                         // import usfm file.
                         let unique_id = [
-                            manifest.target_language.id,
-                            manifest.resource.id,
-                            manifest.project.id,
+                            newManifest.target_language.id,
+                            newManifest.resource.id,
+                            newManifest.project.id,
                             'book'
                         ].join('_');
                         let usfmPath = path.join(paths.projectDir,
                             unique_id + ".usfm");
                         if (!fs.existsSync(usfmPath)) {
                             usfmPath = path.join(paths.projectDir,
-                                manifest.project.id + ".usfm");
+                                newManifest.project.id + ".usfm");
                         }
 
                         if (fs.existsSync(usfmPath)) {
-                            let meta = updateManifestToMeta(manifest,
+                            let meta = updateManifestToMeta(newManifest,
                                 dataManager, reporter);
-                            return chunkUSFM(usfmPath, manifest, dataManager).
+                            return chunkUSFM(usfmPath, newManifest, dataManager).
                                 then(function(chunks) {
                                     // write chunks
                                     let writes = [];
@@ -548,7 +548,33 @@ function MigrateManager(configurator, git, reporter, dataManager) {
                                 });
                         }
                     }).then(function() {
-                        return {manifest: manifest, paths: paths};
+                        // remove all the left over files from tC
+                        const appsPath = path.join(paths.projectDir, '.apps');
+                        const gitPath = path.join(paths.projectDir, '.git');
+                        const bookFolder = path.join(paths.projectDir, newManifest.project.id);
+
+                        return utils.fs.readdir(paths.projectDir).then(function(files) {
+                            // remove all the extra usfm files that tc creates
+                            const removes = [];
+                            files.forEach(file => {
+                                if(path.extname(file).toLowerCase() === '.usfm') {
+                                    removes.push(utils.fs.remove(path.join(paths.projectDir, file)));
+                                }
+                            });
+                            return Promise.all(removes);
+                        }).then(function() {
+                            return utils.fs.remove(appsPath);
+                        }).then(function(){}).then(function() {
+                            return utils.fs.remove(gitPath);
+                        }).then(function() {
+                            return utils.fs.remove(bookFolder);
+                        }).then(function() {
+                            return git.init(paths.projectDir);
+                        });
+                    }).then(function() {
+                        // TRICKY: this is a crazy hack because something seems to be
+                        // manipulating the manifest variable when it shouldn't be
+                        return {manifest: writableManifest, paths: paths};
                     });
                 } else {
                     return project;

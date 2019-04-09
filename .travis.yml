@@ -73,7 +73,7 @@ after_success:
   else
     echo 'missing ~/.dropbox_uploader. Skipping dropbox upload.';
   fi
-#deploy:
+deploy:
 ## develop branch
 #- provider: surge
 #  project: "./release/"
@@ -101,16 +101,16 @@ after_success:
 #    tags: false
 #    condition: "-d ./release && $TRAVIS_BRANCH =~ ^release-.*$"
 # master branch
-#- provider: releases
-#  api_key:
-#    secure: brjmL3cyCTr6swNCqka2fkc41j+PO2tqXZhE9QyNoDEXcxR1FOwPoPut/8h4N/pISfkf2FibtsWqThhW1Xz1pVNNMBlHRblJsSecfvXOtn7kneCsAV+QBngbPuA8OKzfhXTUeIQNlIpfG+rwlDg28wOthDI/7ADBOYgGQWeOd7o=
-#  file:
-#    - release/*.exe
-#    - release/*.zip
-#  file_glob: true
-#  skip_cleanup: true
-#  overwrite: true
-#  on:
-#    tags: true
-#    repo: unfoldingWord-dev/ts-desktop
-#    condition: "-d ./release"
+- provider: releases
+  api_key:
+    secure: brjmL3cyCTr6swNCqka2fkc41j+PO2tqXZhE9QyNoDEXcxR1FOwPoPut/8h4N/pISfkf2FibtsWqThhW1Xz1pVNNMBlHRblJsSecfvXOtn7kneCsAV+QBngbPuA8OKzfhXTUeIQNlIpfG+rwlDg28wOthDI/7ADBOYgGQWeOd7o=
+  file:
+    - release/*.exe
+    - release/*.zip
+  file_glob: true
+  skip_cleanup: true
+  overwrite: true
+  on:
+    tags: true
+    repo: unfoldingWord-dev/ts-desktop
+    condition: "-d ./release"

@@ -178,9 +178,19 @@
         },
 
         setLinks: function () {
+            var projectmeta = this.chunks[0].projectmeta;
+            var current = projectmeta.currentsource;
+            var currentsource = projectmeta.source_translations[current];
+
+            var dict = "bible";
+            if (currentsource.resource_id === "obs") {
+                dict = "bible-obs";
+            }
+
             var mythis = this;
             var talinks = this.$.body.getElementsByClassName("talink");
             var biblelinks = this.$.body.getElementsByClassName("biblelink");
+            var wordlinks = this.$.body.getElementsByClassName("wordlink");
 
             for (var i = 0; i < talinks.length; i++) {
                 talinks[i].addEventListener('click', function (event) {
@@ -193,6 +203,31 @@
                 biblelinks[i].addEventListener('click', function (event) {
                     event.preventDefault();
                     mythis.notescroll(this.id, mythis);
+                });
+            }
+
+            for(i = 0; i < wordlinks.length; i ++) {
+                wordlinks[i].addEventListener('click', function (event) {
+                    event.preventDefault();
+                    try {
+                        var slug = event.target.id.split('/')[1];
+                        var word = App.dataManager.getWord(currentsource.language_id, dict, slug);
+
+                        // fallback to english
+                        if(!word) {
+                            word = App.dataManager.getWord('en', dict, slug);
+                        }
+
+                        if(word) {
+                            word.type = "Words";
+                            mythis.fillresource(word);
+                        } else {
+                            console.warn('Cannot find word data for: ' + event.target.id);
+                        }
+                    } catch (e) {
+                        console.warn('failed to parse word slug ' + event.target.id);
+                    }
+
                 });
             }
         },

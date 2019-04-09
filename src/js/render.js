@@ -384,6 +384,7 @@ function Renderer() {
         renderResourceLinks: function (text, module) {
             var talinktest = new RegExp(/(\[\[:en:ta)(:[^:]*:[^:]*:)([^:\]]*)(\]\])/);
             var biblelinktest = new RegExp(/(\[\[:en:bible)(:[^:]*:)(\w*:\d*:\d*)(\|[^\]]*\]\])/);
+            var wordlinktest = new RegExp(/<a\s+href="\.\.\/([^\/"]*)\/([^\/"]*).md"\s*>/);
             var linkname;
             var starta;
             var enda = "\<\/a\>";
@@ -399,7 +400,7 @@ function Renderer() {
                 }
                 id = id.replace(/_/g, "-").trim();
                 name = name.trim();
-                starta = "\<a href='" + id + "' class='style-scope talink " + module + "' id='" + id + "'\>";
+                starta = "\<a href='" + id + "' class='style-scope link talink " + module + "' id='" + id + "'\>";
 
                 text = text.replace(talinktest, starta + name + enda);
             }
@@ -409,9 +410,16 @@ function Renderer() {
                 var chapter = parseInt(linkname.split(":")[1]);
                 var verse = parseInt(linkname.split(":")[2]);
 
-                starta = "\<a href='" + linkname + "' class='style-scope biblelink " + module + "' id='" + chapter + ":" + verse + "'\>";
+                starta = "\<a href='" + linkname + "' class='style-scope link biblelink " + module + "' id='" + chapter + ":" + verse + "'\>";
 
                 text = text.replace(biblelinktest, starta + chapter + ":" + verse + enda);
+            }
+
+            while (wordlinktest.test(text)) {
+                var parts = wordlinktest.exec(text);
+                var cat = parts[1];
+                id = parts[2];
+                text = text.replace(parts[0], `<a href="${cat}/${id}" class="style-scope link wordlink ${module}" id="${cat}/${id}">`);
             }
 
             return text;

@@ -390,9 +390,18 @@ function Renderer() {
 
             while (talinktest.test(text)) {
                 linkname = talinktest.exec(text)[3];
-                starta = "\<a href='" + linkname + "' class='style-scope talink " + module + "' id='" + linkname.replace(/_/g, "-") + "'\>";
+                var id = linkname;
+                var name = linkname;
 
-                text = text.replace(talinktest, starta + linkname + enda);
+                if(linkname.indexOf('|') >= 0) {
+                    // split title and id
+                    [id, name] = linkname.split('|', 2);
+                }
+                id = id.replace(/_/g, "-").trim();
+                name = name.trim();
+                starta = "\<a href='" + id + "' class='style-scope talink " + module + "' id='" + id + "'\>";
+
+                text = text.replace(talinktest, starta + name + enda);
             }
 
             while (biblelinktest.test(text)) {

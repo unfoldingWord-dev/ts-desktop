@@ -825,8 +825,11 @@
           setTimeout(function() {
               return App.utils.fs.stat(paths.projectDir).then(function() {
                   // project exists
+                  mythis.set('importdata.targetExists', true);
                   mythis.$.confirmimportusfm.open();
               }).catch(function() {
+                  mythis.set('importdata.overwrite', true);
+                  mythis.set('importdata.targetExists', false);
                   mythis.finishUsfmImport();
               });
           }, 500);
@@ -840,6 +843,7 @@
           var filepath = this.importdata.filepath;
           var projectmeta = this.importdata.projectmeta;
           var overwrite = this.importdata.overwrite;
+          var targetExists = this.importdata.targetExists;
           var timeString = App.utils.getTimeStamp();
           var backupName = projectmeta.unique_id + '.' + timeString + '.tstudio';
           var backupPath = App.configurator.getUserPath('datalocation', 'backups', backupName);
@@ -849,7 +853,7 @@
           setTimeout(function() {
               return Promise.resolve(true)
                   .then(function () {
-                      if (overwrite) {
+                      if (overwrite && targetExists) {
                           return App.exportManager.backupTranslation(projectmeta, backupPath);
                       } else {
                           return Promise.resolve(true);
@@ -889,7 +893,7 @@
                   .catch(function (err) {
                       mythis.showErrorMessage('Import Failed', 'Error occurred importing project', err);
 
-                      if (overwrite) {
+                      if (overwrite && targetExists) {
                           return App.importManager.extractBackup(backupPath)
                               .then(function (list) {
                                   return Promise.all(list.map(function (item) {

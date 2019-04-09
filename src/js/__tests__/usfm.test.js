@@ -1,28 +1,28 @@
 var path = require('path');
 var fs = require('fs-extra');
-var {generateProjectUSFM, fileComparator, usfm3ToUsfm2} = require('../usfm');
+var {fileComparator, usfm3ToUsfm2} = require('../usfm');
 
-describe('Project usfm generator', () => {
-    it('produces usfm', () => {
-        var usfm = generateProjectUSFM(path.join(__dirname, './usfmProject'));
-        expect(usfm).toEqual('\\id phl Philemon\n' +
-            '\\ide usfm\n' +
-            '\\h Philemon\n' +
-            '\\toc1 Philemon\n' +
-            '\\toc2 Philemon\n' +
-            '\\toc3 phl\n' +
-            '\\mt Philemon\n' +
-            '\\s1 Chapter 1\n' +
-            '\\c 1 \n' +
-            '\\v 1 Paul, a prisoner of Christ Jesus, and the brother Timothy to Philemon, our dear friend and fellow worker, \n' +
-            '\\v 2 and to Apphia our sister, and to Archippus our fellow soldier, and to the church that meets in your home. \n' +
-            '\\v 3 May grace be to you and peace from God our Father and the Lord Jesus Christ.\n' +
-            '\\s1 Chapter 10\n' +
-            '\\c 10 \n' +
-            '\\v 1 This is another verse \n' +
-            '\\v 2 And another.');
-    });
-});
+// describe('Project usfm generator', () => {
+//     it('produces usfm', () => {
+//         var usfm = generateProjectUSFM(path.join(__dirname, './usfmProject'));
+//         expect(usfm).toEqual('\\id phl Philemon\n' +
+//             '\\ide usfm\n' +
+//             '\\h Philemon\n' +
+//             '\\toc1 Philemon\n' +
+//             '\\toc2 Philemon\n' +
+//             '\\toc3 phl\n' +
+//             '\\mt Philemon\n' +
+//             '\\s1 Chapter 1\n' +
+//             '\\c 1 \n' +
+//             '\\v 1 Paul, a prisoner of Christ Jesus, and the brother Timothy to Philemon, our dear friend and fellow worker, \n' +
+//             '\\v 2 and to Apphia our sister, and to Archippus our fellow soldier, and to the church that meets in your home. \n' +
+//             '\\v 3 May grace be to you and peace from God our Father and the Lord Jesus Christ.\n' +
+//             '\\s1 Chapter 10\n' +
+//             '\\c 10 \n' +
+//             '\\v 1 This is another verse \n' +
+//             '\\v 2 And another.');
+//     });
+// });
 
 
 describe('file sorter', () => {

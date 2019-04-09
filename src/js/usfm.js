@@ -3,6 +3,7 @@ var fs = require('fs-extra');
 
 /**
  * Produces USFM from a project
+ * @deprecated this is not used
  * @param projectPath
  * @return {string}
  */

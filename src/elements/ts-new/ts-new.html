@@ -299,6 +299,7 @@
                 if (projectarray[i].unique_id === newprojectmeta.unique_id) {
                     if (mythis.importdata.importing) {
                         mythis.importdata.overwrite = true;
+                        mythis.importdata.targetExists = true;
                         mythis.fire('iron-signal', {name: 'closeloading'});
                         mythis.$.confirmimport.open();
                         return;
@@ -319,7 +320,7 @@
             }
 
             if (mythis.importdata.importing) {
-                mythis.importdata.overwrite = false;
+                mythis.importdata.overwrite = true;
                 mythis.fire('iron-signal', {name: 'closeloading'});
                 mythis.startimport();
             } else {

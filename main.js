@@ -247,7 +247,7 @@ function createReloadSplash() {
     });
 
     splashScreen.loadURL(
-        'file://' + __dirname + '/../views/reload-screen.html');
+        'file://' + path.join(__dirname, '/src/views/reload-screen.html'));
 
     splashScreen.on('closed', function() {
         splashScreen = null;
@@ -270,7 +270,7 @@ function createAcademyWindow() {
         frame: false
     });
 
-    academyWindow.loadURL('file://' + __dirname + '/../views/academy.html');
+    academyWindow.loadURL('file://' + path.join(__dirname, '/src/views/academy.html'));
 
     academyWindow.on('closed', function() {
         academyWindow = null;

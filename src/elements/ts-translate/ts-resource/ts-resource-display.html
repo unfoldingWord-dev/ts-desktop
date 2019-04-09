@@ -231,7 +231,7 @@
             var chunks = this.chunks;
 
             var filtered = chunks.filter(function (chunk) {
-                return chunk.chunkmeta.chapter === chapter && chunk.chunkmeta.frame === frame;
+                return chunk.chunkmeta.chapter === chapter && chunk.chunkmeta.verses.indexOf(frame) !== -1;
             });
             if (filtered.length) {
                 this.set('modestatus.index', filtered[0].index);

@@ -227,7 +227,7 @@ function createAcademySplash() {
     });
 
     splashScreen.loadURL(
-        'file://' + __dirname + '/../views/academy-screen.html');
+        'file://' + path.join(__dirname, '/src/views/academy-screen.html'));
 
     splashScreen.on('closed', function() {
         splashScreen = null;

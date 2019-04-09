@@ -158,7 +158,7 @@
       <ts-app-titlebar currentuser="[[currentuser]]"></ts-app-titlebar>
       <neon-animated-pages attr-for-selected="data-route" selected="{{route}}">
           <ts-home data-route="home" route="{{route}}" currentproject="{{currentproject}}" projectlist="{{projectlist}}" importdata="{{importdata}}" id="home"></ts-home>
-          <ts-new data-route="new" route="{{route}}" importdata="{{importdata}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]" options="{{options}}" on-finishusfm="finishUsfmImport"></ts-new>
+          <ts-new data-route="new" route="{{route}}" importdata="{{importdata}}" projectlist="[[projectlist]]" currentuser="[[currentuser]]" options="{{options}}" on-finishusfm="confirmUsfmImport"></ts-new>
           <ts-translate data-route="translate" route="{{route}}" message="{{message}}" projectlist="[[projectlist]]" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}" id="translate" on-update="updateFromProject" on-exportusfm="exportUsfm" on-openprint="openPrint"></ts-translate>
           <ts-review data-route="review" route="{{route}}" currentproject="{{currentproject}}" currentuser="[[currentuser]]" options="{{options}}"></ts-review>
           <ts-settings data-route="settings" route="{{route}}" currentproject="[[currentproject]]" options="{{options}}" id="settings"></ts-settings>
@@ -229,6 +229,10 @@
 
       <paper-dialog id="importconfirm" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
           <ts-import-confirm importdata="{{importdata}}" on-cancel="clearTempDir" on-finishimport="finishImport"></ts-import-confirm>
+      </paper-dialog>
+
+      <paper-dialog id="confirmimportusfm" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
+          <ts-import-confirm importdata="{{importdata}}" on-cancel="clearTempDir" on-finishimport="finishUsfmImport"></ts-import-confirm>
       </paper-dialog>
 
       <paper-dialog id="containerconfirm" class="popup" modal="true" entry-animation="scale-up-animation" exit-animation="scale-down-animation">
@@ -810,6 +814,23 @@
                   mythis.showErrorMessage('Import Failed', 'Error occurred reading file: ' + filename, err);
                   return mythis.clearTempDir();
               });
+      },
+
+      confirmUsfmImport: function() {
+          var mythis = this;
+          var projectmeta = this.importdata.projectmeta;
+          const targetDir = App.configurator.getValue('targetTranslationsDir');
+          const paths = App.projectsManager.makeProjectPaths(targetDir, projectmeta);
+
+          setTimeout(function() {
+              return App.utils.fs.stat(paths.projectDir).then(function() {
+                  // project exists
+                  mythis.$.confirmimportusfm.open();
+              }).catch(function() {
+                  mythis.finishUsfmImport();
+              });
+          }, 500);
+
       },
 
       finishUsfmImport: function () {

@@ -182,7 +182,7 @@ function GitManager() {
                     return mythis.commitAll(user, localPath);
                 })
                 .catch(function (err) {
-                    throw "Error while merging projects: " + err.stderr;
+                    throw "Error while merging projects: " + err.stderr ? err.stderr : err.message;
                 })
                 .then(utils.logr("Finished merging"))
                 .then(function () {

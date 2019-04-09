@@ -27,8 +27,8 @@ before_install:
 - sudo cp scripts/innosetup/iscc /usr/local/bin/iscc
 - iscc /? 2> /dev/null | grep "Inno Setup Preprocessor"
 # private keys for app
-- if [ "${TRAVIS_SECURE_ENV_VARS}" != "false" ]; then openssl aes-256-cbc -K $encrypted_54b2df9dba46_key
-  -iv $encrypted_54b2df9dba46_iv -in private.json.enc -out src/config/private.json
+- if [ "${TRAVIS_SECURE_ENV_VARS}" != "false" ]; then openssl aes-256-cbc -K $encrypted_8efd489acff0_key
+  -iv $encrypted_8efd489acff0_iv -in private.json.enc -out src/config/private.json
   -d; fi
 # dropbox uploader key
 - if [ "${TRAVIS_SECURE_ENV_VARS}" != "false" ]; then openssl aes-256-cbc -K $encrypted_8efd489acff0_key

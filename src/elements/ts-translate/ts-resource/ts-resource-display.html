@@ -91,7 +91,7 @@
                 <template is="dom-if" if="{{examples.length}}">
                     <h3>Examples:</h3>
                     <template is="dom-repeat" items="{{examples}}" as="example">
-                        <p class="link" on-tap="examplescroll"><span>{{chunks.0.projectmeta.project.name}}</span> <span>{{example.chapter}}</span>:<span>{{example.frame}}</span></p>
+                        <p class="link" on-tap="examplescroll"><span>Open Bible Stories</span> <span>{{example.chapter}}</span>:<span>{{example.frame}}</span></p>
                     </template>
                 </template>
                 <template is="dom-if" if="{{allwords.length}}">
@@ -265,8 +265,12 @@
             var frame = example.frame;
             var chunks = this.chunks;
 
+            if(chunks[0].projectmeta.project.id !== 'obs') {
+                return;
+            }
+
             var filtered = chunks.filter(function (chunk) {
-                return chunk.chunkmeta.chapter === chapter && chunk.chunkmeta.verses.indexOf(frame) !== -1;
+                return chunk.chunkmeta.chapter === chapter && (chunk.chunkmeta.verses.indexOf(frame) !== -1 || chunk.chunkmeta.frame === frame);
             });
             if (filtered.length) {
                 this.set('modestatus.index', filtered[0].index);

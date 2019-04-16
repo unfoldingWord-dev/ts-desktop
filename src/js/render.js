@@ -33,7 +33,12 @@ function Renderer() {
                 text = text.replace(match, link);
             }
 
-            // TODO: bible
+            // TODO: need to find a resource that has these links so we can test it.
+            // while (bookTest.test(text)) {
+            //     const [match, lang, res, book, chapter, verse] = bookTest.exec(text);
+            //     const link = `<a href='${book}/${chapter}/${verse}' class='style-scope link biblelink' id='${book}/${chapter}/${verse}'>${book} ${chapter}:${verse}</a>`;
+            //     text = text.replace(match, link);
+            // }
 
             while (wordTest.test(text)) {
                 const [match, lang, cat, slug] = wordTest.exec(text);

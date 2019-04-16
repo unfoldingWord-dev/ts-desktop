@@ -1048,7 +1048,10 @@
                 note = framenotes[0].content;
             }
             if (note.length) {
-                resources.push({title: "Notes", array: true, data: note});
+                resources.push({title: "Notes", array: true, data: note.map(n => ({
+                    title: n.title,
+                    body: App.renderer.renderMarkdown(n.body)
+                }))});
             }
 
             if (wordlist && wordlist[frame.chapter] && wordlist[frame.chapter][frame.chunk]) {

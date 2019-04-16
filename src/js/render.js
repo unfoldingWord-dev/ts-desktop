@@ -2,10 +2,45 @@
 
 var path = require('path');
 var fs = require('fs');
+var markdown = require('markdown').markdown;
 
 function Renderer() {
 
     return {
+
+        renderMarkdown: function (text) {
+            // rc://en/tw/dict/bible/kt/sin
+            // rc://en/ta/man/translate/translate-names
+            var html = markdown.toHTML(text.replace(/<br\s*\/?>/g, '\n'));
+            return this.renderResourceContainerLinks(html);
+        },
+
+        renderResourceContainerLinks: function (text) {
+            // ta
+            // rc://en/ta/man/translate/translate-names
+            var taTest = new RegExp(/\[\[rc:\/\/([^\/]+)\/ta\/man\/([^\/]+)\/([^\/]+)]]/);
+            // book
+            // rc://en/ulb/book/gen/01/02
+            var bookTest = new RegExp(/\[\[rc:\/\/([^\/]+)\/([^\/]+)\/book\/([^\/]+)\/([^\/]+)\/([^\/]+)]]/);
+            // words
+            // rc://en/tw/dict/bible/kt/sin
+            var wordTest = new RegExp(/\[\[rc:\/\/([^\/]+)\/tw\/dict\/bible\/([^\/]+)\/([^\/]+)]]/);
+
+            while (taTest.test(text)) {
+                const [match, lang, module, id] = taTest.exec(text);
+                const link = `<a href='${id}' class='style-scope link talink' id='${id}'>${id}</a>`;
+                text = text.replace(match, link);
+            }
+
+            // TODO: bible
+
+            while (wordTest.test(text)) {
+                const [match, lang, cat, slug] = wordTest.exec(text);
+                text = text.replace(match, `<a href="${cat}/${slug}" class="style-scope link wordlink" id="${cat}/${slug}">${slug}</a>`);
+            }
+
+            return text;
+        },
 
         convertVerseMarkers: function (text) {
             var expression = new RegExp(/(\s*<verse[^<>\"]*\")(\d+-?\d*)(\"[^<>]*>)/);

@@ -9,6 +9,7 @@ function Renderer() {
     return {
 
         renderMarkdown: function (text) {
+            // TODO: this should be called when we open the resource, not when we load the project
             // rc://en/tw/dict/bible/kt/sin
             // rc://en/ta/man/translate/translate-names
             var html = markdown.toHTML(text.replace(/<br\s*\/?>/g, '\n'));
@@ -413,7 +414,13 @@ function Renderer() {
             var startdiv = "\<div class='style-scope " + module + "'\>";
             var enddiv = "\<\/div\>";
 
-            return starth2 + data.title + endh2 + startdiv + this.renderResourceLinks(data.body, module) + enddiv;
+            if(data.type === 'Notes') {
+                // TRICKY: notes are in markdown
+                return starth2 + data.title + endh2 + startdiv + this.renderMarkdown(data.body) + enddiv;
+            } else {
+                // TRICKY: other resources have legacy links that need to be converted.
+                return starth2 + data.title + endh2 + startdiv + this.renderResourceContainerLinks(this.renderResourceLinks(data.body, module)) + enddiv;
+            }
         },
 
         renderResourceLinks: function (text, module) {

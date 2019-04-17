@@ -45,30 +45,39 @@ function Renderer() {
         renderResourceContainerLinks: function (text) {
             // ta
             // rc://en/ta/man/translate/translate-names
-            var taTest = new RegExp(/\[\[rc:\/\/([^\/]+)\/ta\/man\/([^\/]+)\/([^\/]+)]]/);
+            var taTest = new RegExp(/rc:\/\/([^\/]+)\/ta\/man\/([^\/]+)\/([^\/]+)/);
             // book
             // rc://en/ulb/book/gen/01/02
-            var bookTest = new RegExp(/\[\[rc:\/\/([^\/]+)\/([^\/]+)\/book\/([^\/]+)\/([^\/]+)\/([^\/]+)]]/);
+            var bookTest = new RegExp(/rc:\/\/([^\/]+)\/([^\/]+)\/book\/([^\/]+)\/([^\/]+)\/([^\/]+)/);
             // words
             // rc://en/tw/dict/bible/kt/sin
-            var wordTest = new RegExp(/\[\[rc:\/\/([^\/]+)\/tw\/dict\/bible\/([^\/]+)\/([^\/]+)]]/);
+            var wordTest = /rc:\/\/([^\/]+)\/tw\/dict\/bible\/([^\/]+)\/([^\/]+)/;
 
-            while (taTest.test(text)) {
-                const [match, lang, module, id] = taTest.exec(text);
-                const link = `<a href='${id}' class='style-scope link talink' id='${id}'>${id}</a>`;
+            let taMatch = this.matchMarkdownLink(text, taTest);
+            while (taMatch !== null) {
+                const [match, lang, module, id] = taMatch.matches;
+                const title = taMatch.title ? taMatch.title : id;
+                const link = `<a href='${id}' class='style-scope link talink' id='${id}'>${title}</a>`;
                 text = text.replace(match, link);
+                taMatch = this.matchMarkdownLink(text, taTest);
             }
 
-            // TODO: need to find a resource that has these links so we can test it.
-            // while (bookTest.test(text)) {
-            //     const [match, lang, res, book, chapter, verse] = bookTest.exec(text);
-            //     const link = `<a href='${book}/${chapter}/${verse}' class='style-scope link biblelink' id='${book}/${chapter}/${verse}'>${book} ${chapter}:${verse}</a>`;
-            //     text = text.replace(match, link);
-            // }
+            let bookMatch = this.matchMarkdownLink(text, bookTest);
+            while (bookMatch !== null) {
+                const [match, lang, res, book, chapter, verse] = bookMatch.matches;
+                const title = bookMatch.title ? bookMatch.title : `${book} ${chapter}:${verse}`;
+                // TODO: we should also include the resource and book to properly handle links from other books.
+                const link = `<a href='${res}/${book}/${chapter}/${verse}' class='style-scope link biblelink' id='${chapter}:${verse}'>${title}</a>`;
+                text = text.replace(match, link);
+                bookMatch = this.matchMarkdownLink(text, bookTest);
+            }
 
-            while (wordTest.test(text)) {
-                const [match, lang, cat, slug] = wordTest.exec(text);
-                text = text.replace(match, `<a href="${cat}/${slug}" class="style-scope link wordlink" id="${cat}/${slug}">${slug}</a>`);
+            let wordMatch = this.matchMarkdownLink(text, wordTest);
+            while (wordMatch !== null) {//wordTest.test(text)) {
+                const [match, lang, cat, slug] = wordMatch.matches;//wordTest.exec(text);
+                const title = wordMatch.title ? wordMatch.title : slug;
+                text = text.replace(match, `<a href="${cat}/${slug}" class="style-scope link wordlink" id="${cat}/${slug}">${title}</a>`);
+                wordMatch = this.matchMarkdownLink(text, wordTest);
             }
 
             return text;

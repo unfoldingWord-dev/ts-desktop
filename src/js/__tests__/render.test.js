@@ -25,12 +25,14 @@ describe('match markdown link', () => {
 describe('render rc links', () => {
     it('renders a book link', () => {
         const input = `[[rc://en/ulb/book/gen/01/02]]`;
-        const expected = ``;
+        const expected = `<a href='ulb/gen/01/02' class='style-scope link biblelink' id='01:02'>gen 01:02</a>`;
         expect(render.renderResourceContainerLinks(input)).toEqual(expected);
     });
 
     it('renders a titled book link', () => {
-
+        const input = `[Genesis 1:2](rc://en/ulb/book/gen/01/02)`;
+        const expected = `<a href='ulb/gen/01/02' class='style-scope link biblelink' id='01:02'>Genesis 1:2</a>`;
+        expect(render.renderResourceContainerLinks(input)).toEqual(expected);
     });
 
     it('renders a tA link', () => {
@@ -40,7 +42,9 @@ describe('render rc links', () => {
     });
 
     it('renders a titled tA link', () => {
-
+        const input = `[Translate Names](rc://en/ta/man/translate/translate-names)`;
+        const expected = `<a href='translate-names' class='style-scope link talink' id='translate-names'>Translate Names</a>`;
+        expect(render.renderResourceContainerLinks(input)).toEqual(expected);
     });
 
     it('renders a word link', () => {
@@ -50,7 +54,7 @@ describe('render rc links', () => {
     });
 
     it('renders a titled word link', () => {
-        const input = `[Sin](rc://en/tw/dict/bible/kt/sin]`;
+        const input = `[Sin](rc://en/tw/dict/bible/kt/sin)`;
         const expected = `<a href="kt/sin" class="style-scope link wordlink" id="kt/sin">Sin</a>`;
         expect(render.renderResourceContainerLinks(input)).toEqual(expected);
     });

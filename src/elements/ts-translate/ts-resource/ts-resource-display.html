@@ -202,6 +202,14 @@
             for (i = 0; i < biblelinks.length; i++) {
                 biblelinks[i].addEventListener('click', function (event) {
                     event.preventDefault();
+                    if(this.classname.split(' ').indexOf('rc-link') >= 0) {
+                        // do some extra validation for rc links
+                        var [res, book, chapter, verse] = this.href.split('/');
+                        if(book !== currentsource.project.id && res !== currentsource.resource_id) {
+                            console.log('Linking to other books is not currently supported');
+                            return;
+                        }
+                    }
                     // TODO: check if this is the same book
                     mythis.notescroll(this.id, mythis);
                 });

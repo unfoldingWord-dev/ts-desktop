@@ -16,6 +16,32 @@ function Renderer() {
             return this.renderResourceContainerLinks(html);
         },
 
+        /**
+         * Searches for a markdown link that matches the link expression.
+         * This will search for titled and anonymous links.
+         * This will return null if no match is found
+         */
+        matchMarkdownLink: function(text, linkExpr) {
+            const linkTest = new RegExp(`\\[\\[${linkExpr.source}]]`);
+            const titledLinkTest = new RegExp(`\\[([^\\[\\]]+)]\\(${linkExpr.source}\\)`);
+            if(linkTest.test(text)) {
+                return {
+                    title: null,
+                    matches: linkTest.exec(text)
+                };
+            } else if(titledLinkTest.test(text)) {
+                const match = titledLinkTest.exec(text);
+                const title = match[1];
+                match.splice(1, 1);
+                return {
+                    title: title,
+                    matches: match
+                };
+            } else {
+                return null;
+            }
+        },
+
         renderResourceContainerLinks: function (text) {
             // ta
             // rc://en/ta/man/translate/translate-names

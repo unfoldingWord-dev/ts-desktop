@@ -57,7 +57,7 @@ describe('Resource Container Link Rendering', () => {
     describe('render rc markdown links', () => {
         it('renders a book link', () => {
             const input = `[[rc://en/ulb/book/gen/01/02]]`;
-            const expected = `<a href="#" data-link='ulb/gen/01/02' class='style-scope rc-link link biblelink' id='01:02'>gen 01:02</a>`;
+            const expected = `<a href="#" data-link='ulb/gen/01/02' class='style-scope rc-link link biblelink' id='01:02'>gen 1:2</a>`;
             expect(render.renderResourceContainerLinks(input)).toEqual(expected);
         });
 

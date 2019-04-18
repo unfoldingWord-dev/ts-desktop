@@ -88,8 +88,15 @@ function Renderer() {
             let bookMatch = this.matchLink(text, bookTest);
             while (bookMatch !== null) {
                 const [match, lang, res, book, chapter, verse] = bookMatch.matches;
-                const title = bookMatch.title ? bookMatch.title : `${book} ${chapter}:${verse}`;
-                // TODO: we should also include the resource and book to properly handle links from other books.
+                let chapterNum = chapter;
+                let verseNum = verse;
+                try {
+                    chapterNum = parseInt(chapter);
+                    verseNum = parseInt(verse);
+                } catch (e) {
+                    console.warn('Failed to parse passage numbers in', match);
+                }
+                const title = bookMatch.title ? bookMatch.title : `${book} ${chapterNum}:${verseNum}`;
                 const link = `<a href="#" data-link='${res}/${book}/${chapter}/${verse}' class='style-scope rc-link link biblelink' id='${chapter}:${verse}'>${title}</a>`;
                 text = text.replace(match, link);
                 bookMatch = this.matchLink(text, bookTest);

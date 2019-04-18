@@ -80,7 +80,7 @@ function Renderer() {
             while (taMatch !== null) {
                 const [match, lang, module, id] = taMatch.matches;
                 const title = taMatch.title ? taMatch.title : id;
-                const link = `<a href='${module}/${id}' class='style-scope rc-link link talink' id='${id}'>${title}</a>`;
+                const link = `<a href="#" data-link='${module}/${id}' class='style-scope rc-link link talink' id='${id}'>${title}</a>`;
                 text = text.replace(match, link);
                 taMatch = this.matchLink(text, taTest);
             }
@@ -90,7 +90,7 @@ function Renderer() {
                 const [match, lang, res, book, chapter, verse] = bookMatch.matches;
                 const title = bookMatch.title ? bookMatch.title : `${book} ${chapter}:${verse}`;
                 // TODO: we should also include the resource and book to properly handle links from other books.
-                const link = `<a href='${res}/${book}/${chapter}/${verse}' class='style-scope rc-link link biblelink' id='${chapter}:${verse}'>${title}</a>`;
+                const link = `<a href="#" data-link='${res}/${book}/${chapter}/${verse}' class='style-scope rc-link link biblelink' id='${chapter}:${verse}'>${title}</a>`;
                 text = text.replace(match, link);
                 bookMatch = this.matchLink(text, bookTest);
             }
@@ -99,7 +99,7 @@ function Renderer() {
             while (wordMatch !== null) {//wordTest.test(text)) {
                 const [match, lang, cat, slug] = wordMatch.matches;//wordTest.exec(text);
                 const title = wordMatch.title ? wordMatch.title : slug;
-                text = text.replace(match, `<a href="${cat}/${slug}" class="style-scope rc-link link wordlink" id="${cat}/${slug}">${title}</a>`);
+                text = text.replace(match, `<a href="#" data-link="${cat}/${slug}" class="style-scope rc-link link wordlink" id="${cat}/${slug}">${title}</a>`);
                 wordMatch = this.matchLink(text, wordTest);
             }
 

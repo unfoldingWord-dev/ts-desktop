@@ -204,7 +204,7 @@
                     event.preventDefault();
                     if(this.className.split(' ').indexOf('rc-link') >= 0) {
                         // do some extra validation for rc links
-                        var [res, book, chapter, verse] = this.href.split('/');
+                        var [res, book, chapter, verse] = this.getAttribute('data-link').split('/');
                         // TODO: do we need to validate the resource id as well?
                         if(book !== currentsource.project_id) {
                             console.log('Linking to other books is not currently supported');

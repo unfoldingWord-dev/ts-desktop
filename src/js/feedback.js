@@ -70,7 +70,7 @@ const submitFeedback = ({category, message, name, email, state, helpdeskToken, h
                             name: 'Help Desk'
                         }
                     ],
-                    subject: `tC: ${category}`
+                    subject: `tS: ${category}`
                 }
             ],
             'from': fromContact,

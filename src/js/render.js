@@ -42,6 +42,29 @@ function Renderer() {
             }
         },
 
+        matchHtmlLink: function(text, linkExpr) {
+            const linkTest = new RegExp(`<a[^><]+href="${linkExpr.source}"[^><]*>([^<]*)</a>`);
+            if(linkTest.test(text)) {
+                const match = linkTest.exec(text);
+                const title = match[match.length -1];
+                match.splice(match.length -1, 1);
+                return {
+                    title: title ? title : null,
+                    matches: match
+                };
+            } else {
+                return null;
+            }
+        },
+
+        matchLink: function(text, linkExpr) {
+            let match = this.matchHtmlLink(text, linkExpr);
+            if(!match) {
+                match = this.matchMarkdownLink(text, linkExpr);
+            }
+            return match;
+        },
+
         renderResourceContainerLinks: function (text) {
             // ta
             // rc://en/ta/man/translate/translate-names
@@ -53,31 +76,31 @@ function Renderer() {
             // rc://en/tw/dict/bible/kt/sin
             var wordTest = /rc:\/\/([^\/]+)\/tw\/dict\/bible\/([^\/]+)\/([^\/]+)/;
 
-            let taMatch = this.matchMarkdownLink(text, taTest);
+            let taMatch = this.matchLink(text, taTest);
             while (taMatch !== null) {
                 const [match, lang, module, id] = taMatch.matches;
                 const title = taMatch.title ? taMatch.title : id;
                 const link = `<a href='${module}/${id}' class='style-scope rc-link link talink' id='${id}'>${title}</a>`;
                 text = text.replace(match, link);
-                taMatch = this.matchMarkdownLink(text, taTest);
+                taMatch = this.matchLink(text, taTest);
             }
 
-            let bookMatch = this.matchMarkdownLink(text, bookTest);
+            let bookMatch = this.matchLink(text, bookTest);
             while (bookMatch !== null) {
                 const [match, lang, res, book, chapter, verse] = bookMatch.matches;
                 const title = bookMatch.title ? bookMatch.title : `${book} ${chapter}:${verse}`;
                 // TODO: we should also include the resource and book to properly handle links from other books.
                 const link = `<a href='${res}/${book}/${chapter}/${verse}' class='style-scope rc-link link biblelink' id='${chapter}:${verse}'>${title}</a>`;
                 text = text.replace(match, link);
-                bookMatch = this.matchMarkdownLink(text, bookTest);
+                bookMatch = this.matchLink(text, bookTest);
             }
 
-            let wordMatch = this.matchMarkdownLink(text, wordTest);
+            let wordMatch = this.matchLink(text, wordTest);
             while (wordMatch !== null) {//wordTest.test(text)) {
                 const [match, lang, cat, slug] = wordMatch.matches;//wordTest.exec(text);
                 const title = wordMatch.title ? wordMatch.title : slug;
                 text = text.replace(match, `<a href="${cat}/${slug}" class="style-scope rc-link link wordlink" id="${cat}/${slug}">${title}</a>`);
-                wordMatch = this.matchMarkdownLink(text, wordTest);
+                wordMatch = this.matchLink(text, wordTest);
             }
 
             return text;

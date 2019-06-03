@@ -8,6 +8,7 @@ var fs = require('fs');
 var readline = require('readline');
 var utils = require('../js/lib/utils');
 var {usfm3ToUsfm2} = require('./usfm');
+var usfm = require('usfm-js');
 
 function ImportManager(configurator, migrator, dataManager) {
 
@@ -19,67 +20,74 @@ function ImportManager(configurator, migrator, dataManager) {
             var basename = path.basename(filePath, '.tstudio');
             var extractPath = path.join(tmpDir, basename);
 
-            return migrator.listTargetTranslations(filePath)
-                .then(function(targetPaths) {
+            return migrator.listTargetTranslations(filePath).
+                then(function(targetPaths) {
                     var zip = new AdmZip(filePath);
 
                     zip.extractAllTo(extractPath, true);
                     return targetPaths;
-                })
-                .then(function (targetPaths) {
-                    return _.map(targetPaths, function (targetPath) {
+                }).
+                then(function(targetPaths) {
+                    return _.map(targetPaths, function(targetPath) {
                         return utils.makeProjectPaths(extractPath, targetPath);
                     });
-                })
-                .then(migrator.migrateAll.bind(migrator))
-                .then(function (results) {
+                }).
+                then(migrator.migrateAll.bind(migrator)).
+                then(function(results) {
                     if (!results.length) {
-                        throw new Error ("Could not restore this project");
+                        throw new Error('Could not restore this project');
                     }
                     return results;
-                })
-                .then(function (results) {
-                    return _.map(results, function (result) {
-                        return result.paths.projectDir.substring(result.paths.projectDir.lastIndexOf(path.sep) + 1);
+                }).
+                then(function(results) {
+                    return _.map(results, function(result) {
+                        return result.paths.projectDir.substring(
+                            result.paths.projectDir.lastIndexOf(path.sep) + 1);
                     });
-                })
-                .then(function (targetPaths) {
+                }).
+                then(function(targetPaths) {
                     return _.map(targetPaths, function(p) {
                         var tmpPath = path.join(extractPath, p),
                             targetPath = path.join(targetDir, p);
 
-                        return utils.fs.stat(targetPath).then(utils.ret(true)).catch(utils.ret(false))
-                            .then(function (exists) {
-                                return {tmpPath: tmpPath, targetPath: targetPath, targetExists: exists};
+                        return utils.fs.stat(targetPath).
+                            then(utils.ret(true)).
+                            catch(utils.ret(false)).
+                            then(function(exists) {
+                                return {
+                                    tmpPath: tmpPath,
+                                    targetPath: targetPath,
+                                    targetExists: exists
+                                };
                             });
                     });
-                })
-                .catch(function (err) {
-                    throw "Error while extracting file: " + err;
-                })
-                .then(Promise.all.bind(Promise));
+                }).
+                catch(function(err) {
+                    throw 'Error while extracting file: ' + err;
+                }).
+                then(Promise.all.bind(Promise));
         },
 
-        retrieveUSFMProjectID: function (filepath) {
-            var id = "";
+        retrieveUSFMProjectID: function(filepath) {
+            var id = '';
 
-            return new Promise(function (resolve, reject) {
+            return new Promise(function(resolve, reject) {
                 var lineReader = readline.createInterface({
                     input: fs.createReadStream(filepath)
                 });
-                lineReader.on('line', function (line) {
-                    if (line && line.trim().split(" ")[0] === "\\id") {
-                        id = line.trim().split(" ")[1].toLowerCase();
+                lineReader.on('line', function(line) {
+                    if (line && line.trim().split(' ')[0] === '\\id') {
+                        id = line.trim().split(' ')[1].toLowerCase();
                         lineReader.close();
                     }
                 });
-                lineReader.on('close', function(){
+                lineReader.on('close', function() {
                     resolve(id);
                 });
             });
         },
 
-        importFromUSFM: function (filepath, projectmeta) {
+        importFromUSFM: function(filepath, projectmeta) {
             return chunkUSFM(filepath, projectmeta, dataManager);
             // var parser = new UsfmParser();
             //
@@ -136,54 +144,54 @@ function ImportManager(configurator, migrator, dataManager) {
     };
 }
 
-function UsfmParser () {
+function UsfmParser() {
     this.contents = [];
 
     var markerTypes = {
         id: {
             regEx: /\\id/,
             hasOptions: false,
-            type: "id"
+            type: 'id'
         },
         encoding: {
             regEx: /\\ide/,
             hasOptions: false,
-            type: "encoding"
+            type: 'encoding'
         },
         majorTitle: {
             regEx: /\\mt[0-9]*/,
             hasOptions: false,
-            type: "majorTitle"
+            type: 'majorTitle'
         },
         heading: {
             regEx: /\\h[0-9]*/,
             hasOptions: false,
-            type: "heading"
+            type: 'heading'
         },
         chapter: {
             regEx: /\\c/,
             hasOptions: true,
-            type: "chapter"
+            type: 'chapter'
         },
         verse: {
             regEx: /\\v/,
             hasOptions: true,
-            type: "verse"
+            type: 'verse'
         },
         sectionHeading: {
             regEx: /\\s[0-9]*/,
             hasOptions: false,
-            type: "sectionHeading"
+            type: 'sectionHeading'
         },
         tableOfContents: {
             regEx: /\\toc[0-2]*/,
             hasOptions: false,
-            type: "tableOfContents"
+            type: 'tableOfContents'
         }
     };
 
-    var getMarker = function (line) {
-        var beginMarker = line.split(" ")[0];
+    var getMarker = function(line) {
+        var beginMarker = line.split(' ')[0];
         for (var type in markerTypes) {
             if (markerTypes[type].regEx.test(beginMarker)) {
                 return markerTypes[type];
@@ -195,29 +203,31 @@ function UsfmParser () {
     var mythis = this;
 
     return {
-        load: function (file) {
+        load: function(file) {
             mythis.file = file;
 
-            return new Promise(function (resolve, reject) {
-                const data = fs.readFileSync(mythis.file, {encoding: 'utf8'}).toString();
+            return new Promise(function(resolve, reject) {
+                const data = fs.readFileSync(mythis.file, {encoding: 'utf8'}).
+                    toString();
                 const cleanData = usfm3ToUsfm2(data);
-                mythis.contents.push.apply(mythis.contents, cleanData.split('\n'));
+                mythis.contents.push.apply(mythis.contents,
+                    cleanData.split('\n'));
                 resolve(mythis);
             });
         },
 
-        parse: function(){
+        parse: function() {
             this.getMarkers();
             return this.buildChapters();
         },
 
-        getMarkers: function () {
+        getMarkers: function() {
             mythis.markers = [];
             mythis.markerCount = 0;
             var currentMarker = null;
             for (var i = 0; i < mythis.contents.length; i++) {
                 var line = mythis.contents[i];
-                var lineArray = line.split(" ");
+                var lineArray = line.split(' ');
                 for (var c = 0; c < lineArray.length; c++) {
                     var section = lineArray[c];
                     var marker = getMarker(section);
@@ -226,36 +236,38 @@ function UsfmParser () {
                         mythis.markers[mythis.markerCount] = {
                             type: marker.type,
                             line: line,
-                            contents: ""
+                            contents: ''
                         };
                         if (marker.hasOptions) {
-                            mythis.markers[mythis.markerCount].options = lineArray[c + 1];
+                            mythis.markers[mythis.markerCount].options = lineArray[c +
+                            1];
                             c++;
                         }
                         currentMarker = mythis.markers[mythis.markerCount];
-                        if (marker.type === "verse") {
-                            currentMarker.contents = section + " " + currentMarker.options + " ";
+                        if (marker.type === 'verse') {
+                            currentMarker.contents = section + ' ' +
+                                currentMarker.options + ' ';
                         }
                         mythis.markerCount++;
                     } else {
                         if (currentMarker) {
-                            currentMarker.contents += section + " ";
+                            currentMarker.contents += section + ' ';
                         }
                     }
                 }
             }
         },
 
-        buildChapters: function () {
+        buildChapters: function() {
             mythis.chapters = {};
             var chap;
             var chapnum = 0;
             var lastverse = 100;
 
-            var createchapter = function (chapnum) {
+            var createchapter = function(chapnum) {
                 chap = chapnum.toString();
                 if (chap.length === 1) {
-                    chap = "0" + chap;
+                    chap = '0' + chap;
                 }
                 mythis.chapters[chap] = {
                     id: chap,
@@ -263,15 +275,15 @@ function UsfmParser () {
                 };
             };
 
-            mythis.markers.forEach(function (marker) {
-                if (marker.type === "heading" && chapnum === 0) {
-                    createchapter("front");
+            mythis.markers.forEach(function(marker) {
+                if (marker.type === 'heading' && chapnum === 0) {
+                    createchapter('front');
                     mythis.chapters[chap].contents = marker.contents.trim();
-                } else if (marker.type === "chapter") {
+                } else if (marker.type === 'chapter') {
                     chapnum = parseInt(marker.options);
                     createchapter(chapnum);
                     lastverse = 0;
-                } else if (marker.type === "verse") {
+                } else if (marker.type === 'verse') {
                     var thisverse = parseInt(marker.options);
 
                     if (thisverse < lastverse) {
@@ -293,57 +305,86 @@ function UsfmParser () {
 }
 
 function chunkUSFM(filepath, projectmeta, dataManager) {
-    var parser = new UsfmParser();
-
-    return parser.load(filepath)
-    .then(function () {
-        var parsedData = parser.parse();
-
-        if (JSON.stringify(parsedData) === JSON.stringify({})) {
-            throw new Error('This is not a valid USFM file.');
+    return new Promise((resolve, reject) => {
+        try {
+            var data = fs.readFileSync(filepath, {encoding: 'utf8'}).toString();
+            var json = usfm.toJSON(data);
+            resolve(json);
+        } catch (e) {
+            reject(e);
         }
+    }).then(function(json) {
         var chunks = [];
         var markers = dataManager.getChunkMarkers(projectmeta.project.id);
 
         for (var i = 0; i < markers.length; i++) {
-            var frameid = markers[i].verse;
-            var first = parseInt(frameid);
-            var chapter = markers[i].chapter;
-            var isLastChunkOfChapter = !markers[i+1] || markers[i+1].chapter !== chapter;
-            var last = isLastChunkOfChapter ? Number.MAX_VALUE : parseInt(markers[i+1].verse) - 1;
+            const frameId = markers[i].verse;
+            const first = parseInt(frameId);
+            const chapterId = markers[i].chapter;
+            const chapter = parseInt(chapterId);
+            const isLastChunkOfChapter = !markers[i + 1] ||
+                markers[i + 1].chapter !== chapterId;
+            const last = isLastChunkOfChapter ?
+                Number.MAX_VALUE :
+                parseInt(markers[i + 1].verse) - 1;
 
-            if (parsedData[chapter]) {
-                var transcontent = _.chain(parsedData[chapter].verses).filter(function (verse) {
-                    var id = parseInt(verse.id);
-                    return id <= last && id >= first;
-                }).map("contents").value().join("\n");
+            const verses = json.chapters[chapter];
+            if (verses) {
+                const chunkedVerseIds = _.filter(Object.keys(verses),
+                    verseId => {
+                        var id = parseInt(verseId);
+                        return id <= last && id >= first;
+                    });
+                var chunkContent = _.map(chunkedVerseIds, verseId => {
+                    return `\\v ${parseInt(verseId)} ` +
+                        verseObjectsToText(verses[verseId].verseObjects).trim();
+                }).join(' ');
 
                 chunks.push({
                     chunkmeta: {
-                        chapterid: chapter,
-                        frameid: frameid
+                        chapterid: chapterId,
+                        frameid: frameId
                     },
-                    transcontent: transcontent.trim(),
+                    transcontent: chunkContent.trim(),
                     completed: false
                 });
             }
         }
 
-        if (parsedData['front'] && parsedData['front'].contents) {
-            chunks.unshift({
-                chunkmeta: {
-                    chapterid: 'front',
-                    frameid: 'title'
-                },
-                transcontent: parsedData['front'].contents.trim(),
-                completed: false
+        // add project title
+        if (json.headers && json.headers.length > 0) {
+            const titleHeaders = _.filter(json.headers, ({tag}) => {
+                return tag === 'h';
             });
+            if (titleHeaders.length > 0) {
+                chunks.unshift({
+                    chunkmeta: {
+                        chapterid: 'front',
+                        frameid: 'title'
+                    },
+                    transcontent: titleHeaders[0].content.trim(),
+                    completed: false
+                });
+            }
         }
         return chunks;
-    })
-    .catch(function (err) {
-        throw "Error occurred parsing file: " + err;
+    }).catch(function(err) {
+        throw 'Error occurred parsing file: ' + err;
     });
+}
+
+function verseObjectsToText(objects) {
+    let text = '';
+    for (let i = 0, len = objects.length; i < len; i++) {
+        const obj = objects[i];
+        if (obj.text) {
+            text += obj.text;
+        }
+        if (obj.children && obj.children.length > 0) {
+            text += verseObjectsToText(obj.children);
+        }
+    }
+    return text;
 }
 
 module.exports.ImportManager = ImportManager;

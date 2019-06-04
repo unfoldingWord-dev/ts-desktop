@@ -891,6 +891,48 @@
             var questions = App.dataManager.getSourceQuestions(source);
             var udb = App.dataManager.getSourceUdb(source);
             var wordlist = App.dataManager.getSourceWords(source);
+
+            // fallback to target language
+            var target = {language_id: projectmeta.target_language.id, project_id: projectmeta.project.id, resource_id: projectmeta.resource.id};
+            if(!notes.length) {
+                notes = App.dataManager.getSourceNotes(target);
+            }
+            if(!questions.length) {
+                questions = App.dataManager.getSourceQuestions(target);
+            }
+            if(!udb.length) {
+                udb = App.dataManager.getSourceUdb(target);
+            }
+            if(!Object.keys(wordlist).length) {
+                wordlist = App.dataManager.getSourceWords(target);
+            }
+
+            // fallback to english
+            target = {language_id: 'en', project_id: projectmeta.project.id, resource_id: projectmeta.resource.id};
+            if(!notes.length) {
+                notes = App.dataManager.getSourceNotes(target);
+            }
+            if(!questions.length) {
+                questions = App.dataManager.getSourceQuestions(target);
+            }
+            if(!udb.length) {
+                udb = App.dataManager.getSourceUdb(target);
+            }
+            if(!Object.keys(wordlist).length) {
+                wordlist = App.dataManager.getSourceWords(target);
+            }
+
+            // fallback to ult for words
+            target = {language_id: projectmeta.target_language.id, project_id: projectmeta.project.id, resource_id: 'ult'};
+            if(!Object.keys(wordlist).length) {
+                wordlist = App.dataManager.getSourceWords(target);
+            }
+            target = {language_id: 'en', project_id: projectmeta.project.id, resource_id: 'ult'};
+            if(!Object.keys(wordlist).length) {
+                wordlist = App.dataManager.getSourceWords(target);
+            }
+
+
             var chunkarray = [];
             var title = "";
 

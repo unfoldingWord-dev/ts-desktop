@@ -356,11 +356,11 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
         getSourceUdb: function (source) {
             var container = source.language_id + "_" + source.project_id + "_udb";
 
-            if (source.resource_id === "ulb") {
+            // if (source.resource_id === "ulb") {
                 return this.extractContainer(container);
-            } else {
-                return [];
-            }
+            // } else {
+            //     return [];
+            // }
         },
 
         getSourceNotes: function (source) {

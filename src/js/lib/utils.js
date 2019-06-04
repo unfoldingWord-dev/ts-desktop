@@ -424,12 +424,25 @@ var utils = {
         list = _.compact(list);
 
         list = list.sort(function (a, b) {
-            if (a.name.toLowerCase() > b.name.toLowerCase()) {
-                return 1;
-            } else if (a.name.toLowerCase() < b.name.toLowerCase()) {
-                return -1;
-            } else {
-                return 0;
+            let aName = a.name;
+            let bName = b.name;
+            if (typeof aName !== 'string') {
+              aName = a.name.toString();
+            }
+            if (typeof bName !== 'string') {
+              bName = b.name.toString();
+            }
+            try {
+              if (aName.toLowerCase() > bName.toLowerCase()) {
+                  return 1;
+              } else if (aName.toLowerCase() < bName.toLowerCase()) {
+                  return -1;
+              } else {
+                  return 0;
+              }
+            } catch (e) {
+              console.log('Oops! Error sorting fonts', e, a, b);
+              return 0;
             }
         });
 

@@ -46,6 +46,15 @@ process.stdout.write = console.log.bind(console);
 
         // catch startup errors
         try {
+            // check version change
+            let nextVersion = require('../../package.json').version;
+            let lastVersion = window.localStorage['version'];
+
+            window.localStorage['version-changed'] = lastVersion !== nextVersion;
+            window.localStorage['version'] = nextVersion;
+            if(lastVersion !== nextVersion) {
+                window.localStorage['last-version'] = lastVersion;
+            }
 
             setMsg('Loading path...');
             path = require('path');
@@ -115,6 +124,10 @@ process.stdout.write = console.log.bind(console);
             var c = new Configurator();
 
             c.setStorage(window.localStorage);
+            if(window.localStorage['version-changed'] === 'true') {
+                console.info('Restoring default settings');
+                c.restoreDefaultSettings();
+            }
 
             let defaults = require('../config/defaults');
 

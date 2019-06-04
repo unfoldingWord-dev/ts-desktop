@@ -247,6 +247,15 @@
             },
 
             /**
+             * Removes the users's cached settings and restores the default values
+             */
+            restoreDefaultSettings: function() {
+                const mappedSettings = mapUserSettings(this._userSetting());
+                this.saveUserSettingArr(mappedSettings);
+                return mappedSettings;
+            },
+
+            /**
              * Apply user preferences for app's look
              */
             applyPrefAppearance: function() {

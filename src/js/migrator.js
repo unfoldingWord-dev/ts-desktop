@@ -448,7 +448,7 @@ function MigrateManager(configurator, git, reporter, dataManager) {
                 let manifest = project.manifest;
                 let paths = project.paths;
 
-                if(manifest.generator.name === 'tc-desktop') {
+                if(manifest.generator.name === 'tc-desktop' || manifest.tcInitialized) {
                     // update manifest
                     manifest.finished_chunks = manifest.finished_chunks || [];
                     manifest.parent_draft = manifest.parent_draft || {};

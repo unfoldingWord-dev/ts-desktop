@@ -13,7 +13,7 @@ function Renderer() {
             // rc://en/tw/dict/bible/kt/sin
             // rc://en/ta/man/translate/translate-names
             var html = markdown.toHTML(text.replace(/<br\s*\/?>/g, '\n'));
-            return this.renderResourceContainerLinks(html);
+            return this.renderRelativeLinks(this.renderResourceContainerLinks(html));
         },
 
         /**
@@ -65,6 +65,32 @@ function Renderer() {
             return match;
         },
 
+        /**
+         * This renders relative passage links like ../php/01/21.md
+         */
+        renderRelativeLinks: function (text) {
+            var bookTest = new RegExp(/(\.\.\/)+([a-z]+)\/(\d+)\/(\d+)\.md/);
+
+            let bookMatch = this.matchLink(text, bookTest);
+            while(bookMatch !== null) {
+                const [match, relative, book, chapter, verse] = bookMatch.matches;
+                let chapterNum = chapter;
+                let verseNum = verse;
+                try {
+                    chapterNum = parseInt(chapter);
+                    verseNum = parseInt(verse);
+                } catch (e) {
+                    console.warn('Failed to parse passage numbers in', match);
+                }
+                const title = bookMatch.title ? bookMatch.title : `${book} ${chapterNum}:${verseNum}`;
+                // TRICKY: spoof resource type to ult
+                const link = `<a href="#" data-link='ult/${book}/${chapter}/${verse}' class='style-scope rc-link link ts-resource-display biblelink' id='${chapter}:${verse}'>${title}</a>`;
+                text = text.replace(match, link);
+                bookMatch = this.matchLink(text, bookTest);
+            }
+            return text;
+        },
+
         renderResourceContainerLinks: function (text) {
             // ta
             // rc://en/ta/man/translate/translate-names
@@ -80,7 +106,7 @@ function Renderer() {
             while (taMatch !== null) {
                 const [match, lang, module, id] = taMatch.matches;
                 const title = taMatch.title ? taMatch.title : id;
-                const link = `<a href="#" data-link='${module}/${id}' class='style-scope rc-link link talink' id='${id}'>${title}</a>`;
+                const link = `<a href="#" data-link='${module}/${id}' class='style-scope rc-link link ts-resource-display talink' id='${id}'>${title}</a>`;
                 text = text.replace(match, link);
                 taMatch = this.matchLink(text, taTest);
             }
@@ -97,7 +123,7 @@ function Renderer() {
                     console.warn('Failed to parse passage numbers in', match);
                 }
                 const title = bookMatch.title ? bookMatch.title : `${book} ${chapterNum}:${verseNum}`;
-                const link = `<a href="#" data-link='${res}/${book}/${chapter}/${verse}' class='style-scope rc-link link biblelink' id='${chapter}:${verse}'>${title}</a>`;
+                const link = `<a href="#" data-link='${res}/${book}/${chapter}/${verse}' class='style-scope rc-link link ts-resource-display biblelink' id='${chapter}:${verse}'>${title}</a>`;
                 text = text.replace(match, link);
                 bookMatch = this.matchLink(text, bookTest);
             }
@@ -106,7 +132,7 @@ function Renderer() {
             while (wordMatch !== null) {//wordTest.test(text)) {
                 const [match, lang, cat, slug] = wordMatch.matches;//wordTest.exec(text);
                 const title = wordMatch.title ? wordMatch.title : slug;
-                text = text.replace(match, `<a href="#" data-link="${cat}/${slug}" class="style-scope rc-link link wordlink" id="${cat}/${slug}">${title}</a>`);
+                text = text.replace(match, `<a href="#" data-link="${cat}/${slug}" class="style-scope rc-link link ts-resource-display wordlink" id="${cat}/${slug}">${title}</a>`);
                 wordMatch = this.matchLink(text, wordTest);
             }
 
@@ -489,7 +515,7 @@ function Renderer() {
                 return starth2 + data.title + endh2 + startdiv + this.renderMarkdown(data.body) + enddiv;
             } else {
                 // TRICKY: other resources have legacy links that need to be converted.
-                return starth2 + data.title + endh2 + startdiv + this.renderResourceContainerLinks(this.renderResourceLinks(data.body, module)) + enddiv;
+                return starth2 + data.title + endh2 + startdiv + this.renderRelativeLinks(this.renderResourceContainerLinks(this.renderResourceLinks(data.body, module))) + enddiv;
             }
         },
 

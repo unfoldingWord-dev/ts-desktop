@@ -640,7 +640,12 @@ function _getProjectFrameNum(meta, dataManager) {
     if (meta.type.id === "tw") {
         var dict = meta.project.id;
         var source = meta.source_translations[0];
-        frames = dataManager.getAllWords(source.language_id, dict);
+        if(source) {
+            frames = dataManager.getAllWords(source.language_id, dict);
+        } else {
+            // TRICKY: starting new tw projects defaults to english.
+            frames = dataManager.getAllWords('en', dict);
+        }
     } else if (meta.source_translations.length) {
         var source = meta.source_translations[0];
         var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;

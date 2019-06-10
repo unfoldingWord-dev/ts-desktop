@@ -86,7 +86,7 @@ gulp.task('build', ['clean'], function (done) {
     });
 
     packager({
-        'arch': 'all',
+        'arch': argv.win ? 'all' : 'x64',
         'platform': platforms,
         'dir': '.',
         'ignore': function (name) {

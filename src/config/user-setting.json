@@ -192,7 +192,7 @@
         "helpText": "The email that will receive feedback.",
         "value": "help@door43.org",
         "group": "advanced",
-        "enabled": false,
-        "visible": false
+        "enabled": true,
+        "visible": true
     }
 ]

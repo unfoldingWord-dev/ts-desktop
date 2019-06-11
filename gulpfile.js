@@ -13,7 +13,7 @@ const gulp = require('gulp'),
     path = require('path'),
     mkdirp = require('mkdirp'),
     fs = require('fs'),
-    util = require('./src/js/lib/utils');
+    util = require('./src/js/lib/utils'),
     princePackager = require('./src/js/prince-packager');
 
 const APP_NAME = 'translationStudio',

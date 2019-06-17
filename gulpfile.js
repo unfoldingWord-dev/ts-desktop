@@ -86,6 +86,7 @@ gulp.task('build', ['clean'], function (done) {
     });
 
     packager({
+        'asar': true,
         'arch': argv.win ? 'all' : 'x64',
         'platform': platforms,
         'dir': '.',

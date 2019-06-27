@@ -101,7 +101,7 @@
             var path = require('path');
 
             App.ipc.send('loading-status', 'Loading Academy data...');
-            mythis.set('academy', App.dataManager.getAllTa());
+            mythis.set('academy', App.dataManager.getAllTaLocalized('hr'));
             var dataserver = App.configurator.getUserSetting('dataserver');
             var mediaserver = App.configurator.getUserSetting('mediaserver');
 

@@ -38,3 +38,8 @@ The following commands are available from within the project directory:
 * `$ npm start` runs the application (without building it)
 
 > Note: You can open the Chrome Developer Tools while the app is running by pressing `Ctrl+Shift+I` on Windows/Linux or `Cmd-Shift-I` on macOS.
+
+### Included Resources
+The application is bundled with resources from the following languages
+
+ar, as, bn, ceb, el-x-koine, en, es-419, fr, gu, hbo, hi, hr, id, ilo, kn, ml, mr, ne, or, pa, pt-br, ru, sw, ta, te, th, tl, vi

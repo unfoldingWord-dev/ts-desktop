@@ -514,6 +514,44 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             }
         },
 
+        getAllTaLocalized: function (lang) {
+            var mythis = this;
+            var containers = [
+                "_ta-intro_vol1",
+                "_ta-process_vol1",
+                "_ta-translate_vol1",
+                "_ta-translate_vol2",
+                "_ta-checking_vol1",
+                "_ta-checking_vol2",
+                "_ta-audio_vol2",
+                "_ta-gateway_vol3"
+            ];
+            var allchunks = [];
+
+            containers.forEach(function (container) {
+                var localizedContainer = lang + container;
+                var filepath = path.join(resourceDir, localizedContainer);
+                if(fs.existsSync(filepath)) {
+                    allchunks.push(mythis.getContainerData(localizedContainer));
+                } else {
+                    allchunks.push(mythis.getContainerData('en' + container));
+                }
+            });
+
+            allchunks = _.flatten(allchunks);
+
+            allchunks.forEach(function (item) {
+                if (item.chunk === "title") {
+                    item.content = "# " + item.content;
+                }
+                if (item.chunk === "sub-title") {
+                    item.content = "## " + item.content;
+                }
+            });
+
+            return allchunks;
+        },
+
         getAllTa: function () {
             var mythis = this;
             var containers = [

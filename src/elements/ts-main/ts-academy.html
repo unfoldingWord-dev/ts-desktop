@@ -101,7 +101,8 @@
             var path = require('path');
 
             App.ipc.send('loading-status', 'Loading Academy data...');
-            mythis.set('academy', App.dataManager.getAllTaLocalized('hr'));
+            // TODO: pass in the select source language instead of hardcoding it
+            mythis.set('academy', App.dataManager.getAllTaLocalized('en'));
             var dataserver = App.configurator.getUserSetting('dataserver');
             var mediaserver = App.configurator.getUserSetting('mediaserver');
 
@@ -115,6 +116,7 @@
                 }
 
                 for (var i = 0; i < links.length; i++) {
+                    // TODO: attempt to link to the localized path. We'll need to know if the loaded content is localized.
                     if (links[i].href.includes(dataserver.replace(/\/+$/, '') + "/Door43/en-ta")) {
                         links[i].href = "#" + links[i].href.split("/").pop().split(".")[0].replace(/_/g, "-");
                     } else {

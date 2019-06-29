@@ -244,11 +244,10 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                     return mythis.activateContainer(language, project, "tq");
                 })
                 .then(function () {
-                    if (resource === "ulb") {
-                        return mythis.activateContainer(language, project, "udb");
-                    } else {
-                        return Promise.resolve(true);
-                    }
+                    return mythis.activateContainer(language, 'bible', "tw");
+                })
+                .then(function () {
+                    return mythis.activateContainer(language, project, "udb");
                 });
         },
 

@@ -184,10 +184,15 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                         });
                 })
                 .then(function () {
-                    if (resource === "ulb") {
-                        return mythis.downloadContainer(language, project, "udb")
+                    if (resource !== "ust") {
+                        // TRICKY: always include the simplified text.
+                        return mythis.downloadContainer(language, project, "ust")
                             .catch(function () {
-                                return true;
+                                // TRICKY: fallback to udb
+                                return mythis.downloadContainer(language, project, "udb")
+                                    .catch(function() {
+                                        return true;
+                                });
                             });
                     } else {
                         return Promise.resolve(true);
@@ -245,6 +250,9 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                 })
                 .then(function () {
                     return mythis.activateContainer(language, 'bible', "tw");
+                })
+                .then(function () {
+                    return mythis.activateContainer(language, project, "ust");
                 })
                 .then(function () {
                     return mythis.activateContainer(language, project, "udb");

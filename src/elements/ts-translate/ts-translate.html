@@ -904,7 +904,7 @@
                 wordlist = App.dataManager.getSourceWords(target);
             }
 
-            // fallback to english
+            // fallback to english form of resources
             target = {language_id: 'en', project_id: projectmeta.project.id, resource_id: projectmeta.resource.id};
             if(!notes.length) {
                 notes = App.dataManager.getSourceNotes(target);
@@ -916,12 +916,24 @@
                 wordlist = App.dataManager.getSourceWords(target);
             }
 
+            // TRICKY: the mapping of words to the source is stored in the source container. So we look around a bit more for them.
+
             // fallback to ult for words
             target = {language_id: projectmeta.target_language.id, project_id: projectmeta.project.id, resource_id: 'ult'};
             if(!Object.keys(wordlist).length) {
                 wordlist = App.dataManager.getSourceWords(target);
             }
             target = {language_id: 'en', project_id: projectmeta.project.id, resource_id: 'ult'};
+            if(!Object.keys(wordlist).length) {
+                wordlist = App.dataManager.getSourceWords(target);
+            }
+
+            // fallback to ulb for words
+            target = {language_id: projectmeta.target_language.id, project_id: projectmeta.project.id, resource_id: 'ulb'};
+            if(!Object.keys(wordlist).length) {
+                wordlist = App.dataManager.getSourceWords(target);
+            }
+            target = {language_id: 'en', project_id: projectmeta.project.id, resource_id: 'ulb'};
             if(!Object.keys(wordlist).length) {
                 wordlist = App.dataManager.getSourceWords(target);
             }

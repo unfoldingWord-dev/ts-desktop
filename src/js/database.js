@@ -448,6 +448,11 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             return frames;
         },
 
+        /**
+         * Retrieves a list of words found in the source
+         * @param source
+         * @returns {Array|*}
+         */
         getSourceWords: function (source) {
             var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;
             var words = this.parseYaml(container, "config.yml");

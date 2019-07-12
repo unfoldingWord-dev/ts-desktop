@@ -188,12 +188,19 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                         // TRICKY: always include the simplified text.
                         return mythis.downloadContainer(language, project, "ust")
                             .catch(function () {
-                                // TRICKY: fallback to udb
-                                return mythis.downloadContainer(language, project, "udb")
-                                    .catch(function() {
-                                        return true;
-                                });
+                                return true;
                             });
+                    } else {
+                        return Promise.resolve(true);
+                    }
+                })
+                .then(function () {
+                    if (resource !== "udb") {
+                        // TRICKY: always include udb
+                        return mythis.downloadContainer(language, project, "udb")
+                        .catch(function() {
+                            return true;
+                        });
                     } else {
                         return Promise.resolve(true);
                     }
@@ -386,6 +393,8 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
          * Returns a simplified form of the source text.
          * This will attempt to use the source language if not it will fallback to english.
          * It will try to get the ult, if not it will return the udb.
+         * As a side effect this will extract all of the possible containers.
+         * This ensures we can access all of the resources later (like tw catalog). Kinda hacky, but it works.
          * @param source
          */
         getSourceSimplifiedText: function (source) {
@@ -395,14 +404,15 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                 "en_" + source.project_id + "_ust",
                 "en_" + source.project_id + "_udb"
             ];
+            var result = [];
             for(var container of variations) {
                 var data = this.extractContainer(container);
-                if(data.length > 0) {
-                    return data;
+                if(data.length > 0 && result.length === 0) {
+                    result = data;
                 }
             }
 
-            return [];
+            return result;
         },
 
         /**

@@ -918,22 +918,22 @@
 
             // TRICKY: the mapping of words to the source is stored in the source container. So we look around a bit more for them.
 
-            // fallback to ult for words
-            target = {language_id: projectmeta.target_language.id, project_id: projectmeta.project.id, resource_id: 'ult'};
+            // fallback to ust for words
+            target = {language_id: projectmeta.target_language.id, project_id: projectmeta.project.id, resource_id: 'ust'};
             if(!Object.keys(wordlist).length) {
                 wordlist = App.dataManager.getSourceWords(target);
             }
-            target = {language_id: 'en', project_id: projectmeta.project.id, resource_id: 'ult'};
+            target = {language_id: 'en', project_id: projectmeta.project.id, resource_id: 'ust'};
             if(!Object.keys(wordlist).length) {
                 wordlist = App.dataManager.getSourceWords(target);
             }
 
             // fallback to ulb for words
-            target = {language_id: projectmeta.target_language.id, project_id: projectmeta.project.id, resource_id: 'ulb'};
+            target = {language_id: projectmeta.target_language.id, project_id: projectmeta.project.id, resource_id: 'udb'};
             if(!Object.keys(wordlist).length) {
                 wordlist = App.dataManager.getSourceWords(target);
             }
-            target = {language_id: 'en', project_id: projectmeta.project.id, resource_id: 'ulb'};
+            target = {language_id: 'en', project_id: projectmeta.project.id, resource_id: 'udb'};
             if(!Object.keys(wordlist).length) {
                 wordlist = App.dataManager.getSourceWords(target);
             }

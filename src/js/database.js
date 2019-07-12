@@ -233,58 +233,84 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                                             return Promise.resolve(true);
                                         });
                                 }
-                                return Promise.resolve("Resource container " + container + " does not exist");
+                                // the container could not be found
+                                return Promise.reject("Resource container " + container + " does not exist");
                             });
                     }
+                    // the container is already open
                     return Promise.resolve(true);
                 });
         },
 
+        /**
+         * Activates (opens) the source container along with all it's supplemental containers.
+         * Supplemental containers may have several fallbacks.
+         * If no fallbacks are available they just won't be available in the ui.
+         * @param language
+         * @param project
+         * @param resource
+         * @returns {*}
+         */
         activateProjectContainers: function (language, project, resource) {
             var mythis = this;
 
+            /**
+             * Produces an error handler that will activate a fallback container
+             * @returns {Function}
+             * @param language {string}
+             * @param project {string}
+             * @param resource {string}
+             */
+            var fallbackWith = (language, project, resource) => {
+                return e => {
+                    console.warn(e);
+                    return mythis.activateContainer(language, project, resource);
+                };
+            };
+
+            // TRICKY: errors activating the source container bubble up, but errors with supplemental resources are caught.
             return mythis.activateContainer(language, project, resource)
-                .then(function (msg) {
-                    if (typeof msg === 'string') {
-                        console.log(msg);
-                    }
+                .then(function () {
+                    // open translation notes
+                    return mythis.activateContainer(language, project, "tn")
+                    .catch(fallbackWith("en", project, "tn"))
+                    .catch((e) => {
+                        console.warn(e);
+                        console.warn(`Could not find translationNotes for ${language}_${project}_${resource}`);
+                        return Promise.resolve();
+                    });
                 })
                 .then(function () {
-                    return mythis.activateContainer(language, project, "tn");
+                    // open translationQuestions
+                    return mythis.activateContainer(language, project, "tq")
+                    .catch(fallbackWith("en", project, "tq"))
+                    .catch((e) => {
+                        console.warn(e);
+                        console.warn(`Could not find translationQuestions for ${language}_${project}_${resource}`);
+                        return Promise.resolve();
+                    });
                 })
                 .then(function () {
-                    return mythis.activateContainer(language, project, "tq");
+                    // open translationWords
+                    return mythis.activateContainer(language, "bible", "tw")
+                    .catch(fallbackWith("en", "bible", "tw"))
+                    .catch((e) => {
+                        console.warn(e);
+                        console.warn(`Could not find translationWords for ${language}_${project}_${resource}`);
+                        return Promise.resolve();
+                    });
                 })
                 .then(function () {
-                    return mythis.activateContainer(language, 'bible', "tw");
-                })
-                .then(function () {
-                    // resource text
+                    // open simplified text
                     return mythis.activateContainer(language, project, "ust")
-                        .then(function(msg) {
-                            if(typeof msg === 'string') {
-                                // TRICKY: opening failed. Try to open udb
-                                return mythis.activateContainer(language, project, "udb");
-                            } else {
-                                return Promise.resolve();
-                            }
-                        })
-                        .then(function(msg) {
-                            if(typeof msg === 'string') {
-                                // TRICKY: opening failed. Try to open english ust
-                                return mythis.activateContainer('en', project, "ust");
-                            } else {
-                                return Promise.resolve();
-                            }
-                        })
-                        .then(function(msg) {
-                            if(typeof msg === 'string') {
-                                // TRICKY: opening failed. Try to open english udb
-                                return mythis.activateContainer('en', project, "udb");
-                            } else {
-                                return Promise.resolve();
-                            }
-                        });
+                    .catch(fallbackWith(language, project, "udb"))
+                    .catch(fallbackWith("en", project, "ust"))
+                    .catch(fallbackWith("en", project, "udb"))
+                    .catch(e => {
+                        console.warn(e);
+                        console.warn(`Could not find simplified text for ${language}_${project}_${resource}`);
+                        return Promise.resolve();
+                    });
                 });
         },
 
@@ -395,6 +421,7 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
          * It will try to get the ult, if not it will return the udb.
          * As a side effect this will extract all of the possible containers.
          * This ensures we can access all of the resources later (like tw catalog). Kinda hacky, but it works.
+         * TODO: this need to return the language and resource identifier so we know what text it returned.
          * @param source
          */
         getSourceSimplifiedText: function (source) {

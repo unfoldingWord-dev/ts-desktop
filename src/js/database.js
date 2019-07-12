@@ -252,10 +252,32 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                     return mythis.activateContainer(language, 'bible', "tw");
                 })
                 .then(function () {
-                    return mythis.activateContainer(language, project, "ust");
-                })
-                .then(function () {
-                    return mythis.activateContainer(language, project, "udb");
+                    // resource text
+                    return mythis.activateContainer(language, project, "ust")
+                        .then(function(msg) {
+                            if(typeof msg === 'string') {
+                                // TRICKY: opening failed. Try to open udb
+                                return mythis.activateContainer(language, project, "udb");
+                            } else {
+                                return Promise.resolve();
+                            }
+                        })
+                        .then(function(msg) {
+                            if(typeof msg === 'string') {
+                                // TRICKY: opening failed. Try to open english ust
+                                return mythis.activateContainer('en', project, "ust");
+                            } else {
+                                return Promise.resolve();
+                            }
+                        })
+                        .then(function(msg) {
+                            if(typeof msg === 'string') {
+                                // TRICKY: opening failed. Try to open english udb
+                                return mythis.activateContainer('en', project, "udb");
+                            } else {
+                                return Promise.resolve();
+                            }
+                        });
                 });
         },
 
@@ -360,6 +382,34 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             }
         },
 
+        /**
+         * Returns a simplified form of the source text.
+         * This will attempt to use the source language if not it will fallback to english.
+         * It will try to get the ult, if not it will return the udb.
+         * @param source
+         */
+        getSourceSimplifiedText: function (source) {
+            const variations = [
+                source.language_id + "_" + source.project_id + "_ust",
+                source.language_id + "_" + source.project_id + "_udb",
+                "en_" + source.project_id + "_ust",
+                "en_" + source.project_id + "_udb"
+            ];
+            for(var container of variations) {
+                var data = this.extractContainer(container);
+                if(data.length > 0) {
+                    return data;
+                }
+            }
+
+            return [];
+        },
+
+        /**
+         * @deprecated use {@link getSourceSimplifiedText} instead
+         * @param source
+         * @returns {*|Array}
+         */
         getSourceUdb: function (source) {
             var container = source.language_id + "_" + source.project_id + "_udb";
 

@@ -889,7 +889,7 @@
             var frames = App.dataManager.getContainerData(container);
             var notes = App.dataManager.getSourceNotes(source);
             var questions = App.dataManager.getSourceQuestions(source);
-            var udb = App.dataManager.getSourceUdb(source);
+            var udb = App.dataManager.getSourceSimplifiedText(source);
             var wordlist = App.dataManager.getSourceWords(source);
 
             // fallback to target language
@@ -899,9 +899,6 @@
             }
             if(!questions.length) {
                 questions = App.dataManager.getSourceQuestions(target);
-            }
-            if(!udb.length) {
-                udb = App.dataManager.getSourceUdb(target);
             }
             if(!Object.keys(wordlist).length) {
                 wordlist = App.dataManager.getSourceWords(target);
@@ -914,9 +911,6 @@
             }
             if(!questions.length) {
                 questions = App.dataManager.getSourceQuestions(target);
-            }
-            if(!udb.length) {
-                udb = App.dataManager.getSourceUdb(target);
             }
             if(!Object.keys(wordlist).length) {
                 wordlist = App.dataManager.getSourceWords(target);

@@ -889,7 +889,7 @@
             var frames = App.dataManager.getContainerData(container);
             var notes = App.dataManager.getSourceNotes(source);
             var questions = App.dataManager.getSourceQuestions(source);
-            var udb = App.dataManager.getSourceSimplifiedText(source);
+            var simplifiedText = App.dataManager.getSourceSimplifiedText(source);
             var wordlist = App.dataManager.getSourceWords(source);
 
             // fallback to target language
@@ -955,7 +955,7 @@
                 }
 
                 var sourcedata = App.renderer.convertVerseMarkers(frames[i].content);
-                var resources = this.getFrameResources(source, frames[i], notes, questions, udb, wordlist, sourcedata.verses);
+                var resources = this.getFrameResources(source, frames[i], notes, questions, simplifiedText, wordlist, sourcedata.verses);
                 var chunkmeta = this.createFrameMeta(frames[i], projectmeta, sourcedata.verses, title);
                 var chunk = this.getFrameData(chunkmeta, projectmeta);
                 var sourcecontent = App.renderer.convertNoteMarkers(sourcedata.text);
@@ -1081,13 +1081,24 @@
             this.set('currentproject.chunks', chunkarray);
         },
 
-        getFrameResources: function (source, frame, notes, questions, udb, wordlist, verses) {
+        /**
+         *
+         * @param source
+         * @param frame
+         * @param notes
+         * @param questions
+         * @param simplifiedTextObject - an object with a data array and a container key
+         * @param wordlist
+         * @param verses
+         * @returns {Array}
+         */
+        getFrameResources: function (source, frame, notes, questions, simplifiedTextObject, wordlist, verses) {
             var resources = [];
             var note = [];
             var question = [];
             var words = [];
             var framewords = [];
-            var udbtext = null;
+            var referenceText = null;
 
             var framenotes = notes.filter(function (note) {
                 return note.chapter === frame.chapter && note.chunk === frame.chunk;
@@ -1161,19 +1172,20 @@
                 resources.push({title: "Questions", array: true, data: question});
             }
 
-            var frameudb = udb.filter(function (chunk) {
+            var frameSimplifiedText = simplifiedTextObject.data.filter(function (chunk) {
                 return chunk.chapter === frame.chapter && chunk.chunk === frame.chunk;
             });
-            if (frameudb.length && frame.chunk !== "title") {
-                udbtext = frameudb[0].content;
+            if (frameSimplifiedText.length && frame.chunk !== "title") {
+                referenceText = frameSimplifiedText[0].content;
             }
-            if (udbtext) {
-                udbtext = App.renderer.convertVerseMarkers(udbtext).text;
-                udbtext = App.renderer.convertNoteMarkers(udbtext);
-                udbtext = App.renderer.removeParaTags(udbtext);
-                udbtext = App.renderer.removeCharTags(udbtext);
-                udbtext = App.renderer.renderSuperscriptVerses(udbtext);
-                resources.push({title: "UDB", array: false, data: [udbtext]});
+            if (referenceText) {
+                referenceText = App.renderer.convertVerseMarkers(referenceText).text;
+                referenceText = App.renderer.convertNoteMarkers(referenceText);
+                referenceText = App.renderer.removeParaTags(referenceText);
+                referenceText = App.renderer.removeCharTags(referenceText);
+                referenceText = App.renderer.renderSuperscriptVerses(referenceText);
+                const resId = simplifiedTextObject.container.split("_")[2];
+                resources.push({title: resId.toUpperCase(), array: false, data: [referenceText]});
             }
 
             return resources;

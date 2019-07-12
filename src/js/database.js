@@ -421,8 +421,8 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
          * It will try to get the ult, if not it will return the udb.
          * As a side effect this will extract all of the possible containers.
          * This ensures we can access all of the resources later (like tw catalog). Kinda hacky, but it works.
-         * TODO: this need to return the language and resource identifier so we know what text it returned.
          * @param source
+         * @returns an object container a data array and a container key.
          */
         getSourceSimplifiedText: function (source) {
             const variations = [
@@ -431,11 +431,17 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                 "en_" + source.project_id + "_ust",
                 "en_" + source.project_id + "_udb"
             ];
-            var result = [];
+            var result = {
+                container: null,
+                data: []
+            };
             for(var container of variations) {
                 var data = this.extractContainer(container);
-                if(data.length > 0 && result.length === 0) {
-                    result = data;
+                if(data.length > 0 && result.data.length === 0) {
+                    result = {
+                        container,
+                        data
+                    };
                 }
             }
 

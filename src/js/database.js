@@ -255,27 +255,24 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             var mythis = this;
 
             /**
-             * Produces an error handler that will activate a fallback container
+             * Produces an error handler that will eat the error and activate a fallback container
              * @returns {Function}
              * @param language {string}
              * @param project {string}
              * @param resource {string}
              */
             var fallbackWith = (language, project, resource) => {
-                return e => {
-                    console.warn(e);
+                return () => {
                     return mythis.activateContainer(language, project, resource);
                 };
             };
 
-            // TRICKY: errors activating the source container bubble up, but errors with supplemental resources are caught.
             return mythis.activateContainer(language, project, resource)
                 .then(function () {
                     // open translation notes
                     return mythis.activateContainer(language, project, "tn")
                     .catch(fallbackWith("en", project, "tn"))
-                    .catch((e) => {
-                        console.warn(e);
+                    .catch(() => {
                         console.warn(`Could not find translationNotes for ${language}_${project}_${resource}`);
                         return Promise.resolve();
                     });
@@ -284,8 +281,7 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                     // open translationQuestions
                     return mythis.activateContainer(language, project, "tq")
                     .catch(fallbackWith("en", project, "tq"))
-                    .catch((e) => {
-                        console.warn(e);
+                    .catch(() => {
                         console.warn(`Could not find translationQuestions for ${language}_${project}_${resource}`);
                         return Promise.resolve();
                     });
@@ -294,8 +290,7 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                     // open translationWords
                     return mythis.activateContainer(language, "bible", "tw")
                     .catch(fallbackWith("en", "bible", "tw"))
-                    .catch((e) => {
-                        console.warn(e);
+                    .catch(() => {
                         console.warn(`Could not find translationWords for ${language}_${project}_${resource}`);
                         return Promise.resolve();
                     });
@@ -306,11 +301,14 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                     .catch(fallbackWith(language, project, "udb"))
                     .catch(fallbackWith("en", project, "ust"))
                     .catch(fallbackWith("en", project, "udb"))
-                    .catch(e => {
-                        console.warn(e);
+                    .catch(() => {
                         console.warn(`Could not find simplified text for ${language}_${project}_${resource}`);
                         return Promise.resolve();
                     });
+                })
+                .catch(e => {
+                    // TRICKY: catch errors so the project can still open.
+                    console.warn(e);
                 });
         },
 

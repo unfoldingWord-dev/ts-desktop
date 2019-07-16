@@ -44,6 +44,21 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                 });
         },
 
+        /**
+         * Checks if a resource container is open on the disk
+         * @param container
+         * @returns {Promise<boolean>}
+         */
+        isContainerOpen: function (container) {
+            var resourcePath = path.join(resourceDir, container);
+            return utils.fs.stat(resourcePath).then(utils.ret(true)).catch(utils.ret(false));
+        },
+
+        /**
+         * Checks if a resource container exists on the disk
+         * @param container
+         * @returns {*}
+         */
         containerExists: function (container) {
             var resourcePath = path.join(resourceDir, container);
             var sourcePath = path.join(sourceDir, container + ".tsrc");
@@ -125,17 +140,19 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             var lang = source.language_id;
             var proj = source.project_id;
             var res = source.resource_id;
-            var container = lang + "_" + proj + "_" + res;
-            var manifest = path.join(resourceDir, container, "package.json");
 
             return mythis.activateProjectContainers(lang, proj, res)
-                .then(function () {
-                    return utils.fs.readFile(manifest)
-                        .then(function (contents) {
-                            var json = JSON.parse(contents);
-                            source.current = json.resource.status.pub_date === source.date_modified;
-                            return source;
-                        });
+                .then(() => mythis.isContainerUpToDate(lang, proj, res))
+                .then(() => mythis.isContainerUpToDate(lang, proj, "tq"))
+                .then(() => mythis.isContainerUpToDate(lang, proj, "tn"))
+                .then(() => mythis.isContainerUpToDate(lang, "bible", "tw"))
+                .then(() => {
+                    source.current = true;
+                    return source;
+                })
+                .catch((e) => {
+                    source.current = false;
+                    return source;
                 });
         },
 
@@ -315,6 +332,48 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                 .catch(e => {
                     // TRICKY: catch errors so the project can still open.
                     console.warn(e);
+                });
+        },
+
+        /**
+         * Checks if a container is up to date.
+         * If the container is not up to date this will reject. Otherwise, it will resolve.
+         * @param language
+         * @param project
+         * @param resource
+         * @return {Promise}
+         */
+        isContainerUpToDate: function (language, project, resource) {
+            var mythis = this;
+            var containerId = language + "_" + project + "_" + resource;
+            return this.containerExists(containerId)
+                .then(function(exists) {
+                    if(exists) {
+                        // make sure container is open
+                        return mythis.activateContainer(language, project, resource)
+                            .then(function() {
+                                // get db details
+                                var dbDetails = mythis.getSourceDetails(project, language, resource);
+                                if(!dbDetails) {
+                                    // there's no record of any update
+                                    return Promise.resolve();
+                                }
+
+                                // get disk details
+                                var manifest = path.join(resourceDir, containerId, "package.json");
+                                return utils.fs.readFile(manifest)
+                                    .then(function(contents) {
+                                        var diskDetails = JSON.parse(contents);
+                                        // compare versions
+                                        var uptodate = diskDetails.resource.status.pub_date === dbDetails.date_modified;
+                                        if(!uptodate) {
+                                            return Promise.reject();
+                                        }
+                                    });
+                            });
+                    } else {
+                        return Promise.reject();
+                    }
                 });
         },
 

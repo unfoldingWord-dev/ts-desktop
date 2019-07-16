@@ -184,6 +184,12 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                         });
                 })
                 .then(function () {
+                    return mythis.downloadContainer(language, "bible", "tw")
+                    .catch(function () {
+                        return true;
+                    });
+                })
+                .then(function () {
                     if (resource !== "ust") {
                         // TRICKY: always include the simplified text.
                         return mythis.downloadContainer(language, project, "ust")

@@ -372,7 +372,15 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                                     });
                             });
                     } else {
-                        return Promise.reject();
+                        // there's no file on the disk
+
+                        var dbDetails = mythis.getSourceDetails(project, language, resource);
+                        if(!dbDetails) {
+                            // there's no record of any update
+                            return Promise.resolve();
+                        } else {
+                            return Promise.reject();
+                        }
                     }
                 });
         },

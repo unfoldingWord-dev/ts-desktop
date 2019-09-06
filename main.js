@@ -7,7 +7,6 @@ const debug = /--debug/.test(process.argv[2]);
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let splashScreen;
-let academyLanguageWindow;
 let mainWindow = null;
 let academyWindow;
 let scrollToId;
@@ -92,24 +91,6 @@ function initialize() {
     ipcMain.on('open-academy', function(event, lang, id) {
         scrollToId = id;
 
-        // // todo: validate translation exists from `lang`
-        // const translationExists = false;
-        //
-        // if(!translationExists) {
-        //     // close academy if open
-        //     if(academyWindow) {
-        //         academyWindow.close();
-        //         academyWindow = null;
-        //     }
-        //     // open dialog to choose tA translation and/or download a new translation.
-        //     createAcademyLanguageWindow();
-        //     academyLanguageWindow.on();
-        //     setTimeout(function() {
-        //         academyLanguageWindow.show();
-        //
-        //     }, 300);
-        // }
-
         if (academyWindow) {
             academyWindow.show();
             // send props to window
@@ -161,14 +142,6 @@ function initialize() {
         var input = dialog.showOpenDialog(mainWindow, arg.options);
         event.returnValue = input || false;
     });
-
-    // ipcMain.on('ta-loading-done', function() {
-    //     if (splashScreen && academyWindow) {
-    //         academyWindow.show();
-    //         splashScreen.close();
-    //         scrollAcademyWindow();
-    //     }
-    // });
 }
 
 function createWindow() {
@@ -297,27 +270,6 @@ function createReloadSplash() {
     });
 }
 
-// function createAcademyLanguageWindow() {
-//     academyLanguageWindow = new BrowserWindow({
-//         width: 400,
-//         height: 170,
-//         resizable: false,
-//         autoHideMenuBar: true,
-//         frame: false,
-//         center: true,
-//         show: false,
-//         useContentSize: true,
-//         title: app.getName(),
-//     });
-//
-//     academyLanguageWindow.loadURL(
-//         'file://' + path.join(__dirname, '/src/views/academy-language-screen.html'));
-//
-//     academyLanguageWindow.on('closed', function() {
-//         academyLanguageWindow = null;
-//     });
-// }
-
 function createAcademyWindow() {
 
     academyWindow = new BrowserWindow({
@@ -348,11 +300,5 @@ function createAcademyWindow() {
         academyWindow.webContents.send('unmaximize');
     });
 }
-
-// function scrollAcademyWindow() {
-//     if (scrollToId) {
-//         academyWindow.webContents.send('academy-scroll', scrollToId);
-//     }
-// }
 
 initialize();

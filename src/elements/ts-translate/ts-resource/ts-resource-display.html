@@ -204,7 +204,7 @@
             for (var i = 0; i < talinks.length; i++) {
                 talinks[i].addEventListener('click', function (event) {
                     event.preventDefault();
-                    App.ipc.send('open-academy', this.id);
+                    App.ipc.send('open-academy', currentsource.language_id, this.id);
                 });
             }
 

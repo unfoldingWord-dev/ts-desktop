@@ -23,8 +23,11 @@
         (function () {
             var ipcRenderer = require('electron').ipcRenderer;
 
-            ipcRenderer.on('academy-scroll', function (event, id) {
-                var element = document.getElementById(id);
+            ipcRenderer.on('props', function (event, props) {
+                const {lang, articleId} = props;
+                console.log('academy lang is ' + lang);
+                // TODO: load correct translation or show selector.
+                var element = document.getElementById(articleId);
 
                 if (element) {
                     element.scrollIntoView();

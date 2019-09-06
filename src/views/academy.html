@@ -3,6 +3,7 @@
 <head>
     <title>translationAcademy</title>
 
+
     <script src="../components/webcomponentsjs/webcomponents-lite.min.js"></script>
     <script src="../components/lodash/lodash.min.js"></script>
     <script src="../js/academybootstrap.js"></script>
@@ -17,24 +18,8 @@
 </head>
 <body>
     <ts-academy-titlebar></ts-academy-titlebar>
+    <div id="react-app"></div>
     <ts-academy></ts-academy>
-
-    <script>
-        (function () {
-            var ipcRenderer = require('electron').ipcRenderer;
-
-            ipcRenderer.on('props', function (event, props) {
-                const {lang, articleId} = props;
-                console.log('academy lang is ' + lang);
-                // TODO: load correct translation or show selector.
-                var element = document.getElementById(articleId);
-
-                if (element) {
-                    element.scrollIntoView();
-                }
-            });
-
-        })();
-    </script>
+    <script src="../js/reactapp.js"></script>
 </body>
 </html>

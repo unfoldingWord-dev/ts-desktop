@@ -520,7 +520,7 @@ function Renderer() {
         },
 
         renderResourceLinks: function (text, module) {
-            var talinktest = new RegExp(/(\[\[:en:ta)(:[^:]*:[^:]*:)([^:\]]*)(\]\])/);
+            var talinktest = new RegExp(/(\[\[:([^:]+):ta)(:[^:]*:[^:]*:)([^:\]]*)(\]\])/);
             var biblelinktest = new RegExp(/(\[\[:en:bible)(:[^:]*:)(\w*:\d*:\d*)(\|[^\]]*\]\])/);
             var wordlinktest = new RegExp(/<a\s+href="\.\.\/([^\/"]*)\/([^\/"]*).md"\s*>/);
             var linkname;
@@ -528,7 +528,9 @@ function Renderer() {
             var enda = "\<\/a\>";
 
             while (talinktest.test(text)) {
-                linkname = talinktest.exec(text)[3];
+                var linkData = talinktest.exec(text);
+                // var lang = linkData[2];
+                linkname = linkData[4];
                 var id = linkname;
                 var name = linkname;
 

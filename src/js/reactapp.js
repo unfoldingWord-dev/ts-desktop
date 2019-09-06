@@ -5,6 +5,41 @@ const ReactDOM = require('react-dom');
 const e = React.createElement;
 const ipcRenderer = require('electron').ipcRenderer;
 
+/**
+ * Renders a single tA article
+ * @param props
+ * @returns
+ * @constructor
+ */
+function Article(props) {
+    return e(
+        'div',
+        {},
+        'This is an article'
+    );
+}
+
+/**
+ * Renders a list of tA articles
+ * @param articles
+ * @returns
+ * @constructor
+ */
+function ArticleList({articles}) {
+    return e(
+        'div',
+        {
+            id: 'articles'
+        },
+        articles.map((a, i) => e(Article, {...a, key: i}))
+    );
+}
+
+/**
+ * Renders the tA page
+ * @returns
+ * @constructor
+ */
 function App() {
     const [lang, setLang] = useState(null);
 
@@ -41,17 +76,11 @@ function App() {
 
     if (lang) {
         // TODO: render tA translation
-        return `You are viewing ${lang}`;
+        return e(ArticleList, {articles: [1, 2, 3]});
     } else {
         // TODO: pick a translation
         return `choose a translation`;
     }
-
-    // return e(
-    //     'button',
-    //     {onClick: () => setLang('en')},
-    //     'Choose a language'
-    // );
 }
 
 ReactDOM.render(e(App), document.getElementById('react-app'));

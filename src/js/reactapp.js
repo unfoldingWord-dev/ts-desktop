@@ -1,37 +1,57 @@
 const React = require('react');
+const useState = require('react').useState;
+const useEffect = require('react').useEffect;
 const ReactDOM = require('react-dom');
 const e = React.createElement;
 const ipcRenderer = require('electron').ipcRenderer;
 
-// bind to electron events
-ipcRenderer.on('props', function (event, props) {
-    const {lang, articleId} = props;
-    console.log('academy lang is ' + lang);
-    // TODO: load correct translation or show selector.
-    var element = document.getElementById(articleId);
+function App() {
+    const [lang, setLang] = useState(null);
 
-    if (element) {
-        element.scrollIntoView();
-    }
-});
+    // listen to prop changes
+    useEffect(() => {
+        function handlePropsChange(event, props) {
+            const {lang: newLang, articleId} = props;
+            if(newLang !== lang) {
+                setLang(newLang);
+            }
 
-class App extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = { liked: false };
-    }
-
-    render() {
-        if (this.state.liked) {
-            return 'You liked this.';
+            var element = document.getElementById(articleId);
+            if (element) {
+                element.scrollIntoView();
+            }
         }
 
-        return e(
-            'button',
-            { onClick: () => this.setState({ liked: true }) },
-            'Like'
-        );
+        ipcRenderer.on('props', handlePropsChange);
+
+        return () => {
+            ipcRenderer.removeListener('props', handlePropsChange);
+        };
+    }, []);
+
+    // monitor translation validity
+    useEffect(() => {
+        // TODO: check if translation exists.
+        console.log('TODO: check if the translation exists');
+        const exists = true;
+        if(!exists) {
+            setLang(null);
+        }
+    }, [lang]);
+
+    if (lang) {
+        // TODO: render tA translation
+        return `You are viewing ${lang}`;
+    } else {
+        // TODO: pick a translation
+        return `choose a translation`;
     }
+
+    // return e(
+    //     'button',
+    //     {onClick: () => setLang('en')},
+    //     'Choose a language'
+    // );
 }
 
 ReactDOM.render(e(App), document.getElementById('react-app'));

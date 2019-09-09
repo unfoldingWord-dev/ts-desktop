@@ -1,7 +1,10 @@
+console.log('the app is loaded');
 import React, {useState, useEffect} from 'react';
 import ReactDOM from 'react-dom';
 import {ipcRenderer} from 'electron';
-// import ConfirmationDialog from '../js/components/Dialog';
+import ConfirmationDialog from './components/ConfirmationDialog';
+
+
 
 /**
  * Renders a single tA article
@@ -81,9 +84,9 @@ function TranslationAcademyApp() {
         return <ArticleList articles={[1, 2, 3]}/>;
     } else {
         // TODO: pick a translation
-        return 'hello';
-        // return <ConfirmationDialog open={true}
-        //                            onClose={handleSelectTranslation}/>;
+        // return 'hello';
+        return <ConfirmationDialog open={true}
+                                   onClose={handleSelectTranslation}/>;
     }
 }
 

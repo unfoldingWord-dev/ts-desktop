@@ -1,4 +1,4 @@
-import React from 'react';
+const React = require('react');
 const e = React.createElement;
 const makeStyles = require('@material-ui/core/styles').makeStyles;
 const Modal = require('@material-ui/core/Modal').default;
@@ -25,7 +25,7 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-function TransitionsModal(props) {
+export default function TransitionsModal(props) {
     const classes = useStyles();
 
     return e(
@@ -59,4 +59,4 @@ function TransitionsModal(props) {
     );
 }
 
-module.exports = TransitionsModal;
+// module.exports = TransitionsModal;

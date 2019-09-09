@@ -28,7 +28,7 @@ export function ConfirmationDialogRaw(props) {
     }
 
     function handleCancel() {
-        onClose();
+        onClose(null);
     }
 
     function handleOk() {

@@ -1,40 +1,8 @@
-console.log('the app is loaded');
 import React, {useState, useEffect} from 'react';
 import ReactDOM from 'react-dom';
 import {ipcRenderer} from 'electron';
 import ChooseTranslationDialog from './components/ChooseTranslationDialog';
-
-
-
-/**
- * Renders a single tA article
- * @param props
- * @returns
- * @constructor
- */
-function Article(props) {
-    return (
-        <div>
-            This is an article
-        </div>
-    );
-}
-
-/**
- * Renders a list of tA articles
- * @param articles
- * @returns
- * @constructor
- */
-function ArticleList({articles}) {
-    return (
-        <div id="articles">
-            {articles.map((a, i) => (
-                <Article {...a} key={i}/>
-            ))}
-        </div>
-    );
-}
+import Articles from './components/Articles';
 
 /**
  * Renders the tA page
@@ -43,9 +11,14 @@ function ArticleList({articles}) {
  */
 function TranslationAcademyApp() {
     const [lang, setLang] = useState(null);
+    const [articles, setArticles] = useState([]);
 
     function handleSelectTranslation(lang) {
         console.log('selected translation', lang);
+        if(lang === null) {
+            console.log('closing window');
+            ipcRenderer.sendSync("academy-window", "close");
+        }
     }
 
     // listen to prop changes
@@ -69,25 +42,26 @@ function TranslationAcademyApp() {
         };
     }, []);
 
-    // monitor translation validity
+    // monitor translation validity and load articles
     useEffect(() => {
         // TODO: check if translation exists.
         console.log('TODO: check if the translation exists');
-        const exists = true;
+        const exists = false;
         if (!exists) {
             setLang(null);
+            setArticles([]);
+        } else {
+            setArticles([1, 2, 3]);
         }
     }, [lang]);
 
-    if (lang) {
-        // TODO: render tA translation
-        return <ArticleList articles={[1, 2, 3]}/>;
-    } else {
-        // TODO: pick a translation
-        // return 'hello';
-        return <ChooseTranslationDialog open={true}
-                                        onClose={handleSelectTranslation}/>;
-    }
+    return (
+        <>
+            <Articles articles={articles}/>
+            <ChooseTranslationDialog open={articles.length === 0}
+                                     onClose={handleSelectTranslation}/>
+        </>
+    );
 }
 
 ReactDOM.render(<TranslationAcademyApp/>, document.getElementById('react-app'));

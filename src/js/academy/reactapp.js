@@ -16,8 +16,9 @@ function TranslationAcademyApp() {
     function handleSelectTranslation(lang) {
         console.log('selected translation', lang);
         if(lang === null) {
-            console.log('closing window');
             ipcRenderer.sendSync("academy-window", "close");
+        } else {
+            setLang(lang);
         }
     }
 
@@ -44,13 +45,14 @@ function TranslationAcademyApp() {
 
     // monitor translation validity and load articles
     useEffect(() => {
-        // TODO: check if translation exists.
-        console.log('TODO: check if the translation exists');
-        const exists = false;
+        // TODO: check if the translation exists.
+        const exists = lang !== null;
+
         if (!exists) {
             setLang(null);
             setArticles([]);
         } else {
+            // TODO: load the articles
             setArticles([1, 2, 3]);
         }
     }, [lang]);
@@ -58,7 +60,7 @@ function TranslationAcademyApp() {
     return (
         <>
             <Articles articles={articles}/>
-            <ChooseTranslationDialog open={articles.length === 0}
+            <ChooseTranslationDialog open={!lang}
                                      onClose={handleSelectTranslation}/>
         </>
     );

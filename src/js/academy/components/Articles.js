@@ -25,7 +25,8 @@ const useStyles = makeStyles(theme => ({
 }));
 
 /**
- * Renders a list of tA articles
+ * Renders a list of tA articles.
+ * While the list is empty a placeholder will be displayed.
  * @param articles
  * @returns
  * @constructor

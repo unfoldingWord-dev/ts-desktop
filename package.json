@@ -21,6 +21,8 @@
         ]
     },
     "dependencies": {
+        "@babel/standalone": "^7.6.0",
+        "@material-ui/core": "^4.4.1",
         "adm-zip": "0.4.7",
         "archiver": "0.21.0",
         "async": "1.4.2",

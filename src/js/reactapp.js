@@ -1,9 +1,7 @@
-const React = require('react');
-const useState = require('react').useState;
-const useEffect = require('react').useEffect;
-const ReactDOM = require('react-dom');
-const e = React.createElement;
-const ipcRenderer = require('electron').ipcRenderer;
+import React, {useState, useEffect} from 'react';
+import ReactDOM from 'react-dom';
+import {ipcRenderer} from 'electron';
+// import ConfirmationDialog from '../js/components/Dialog';
 
 /**
  * Renders a single tA article
@@ -12,10 +10,10 @@ const ipcRenderer = require('electron').ipcRenderer;
  * @constructor
  */
 function Article(props) {
-    return e(
-        'div',
-        {},
-        'This is an article'
+    return (
+        <div>
+            This is an article
+        </div>
     );
 }
 
@@ -26,12 +24,12 @@ function Article(props) {
  * @constructor
  */
 function ArticleList({articles}) {
-    return e(
-        'div',
-        {
-            id: 'articles'
-        },
-        articles.map((a, i) => e(Article, {...a, key: i}))
+    return (
+        <div id="articles">
+            {articles.map((a, i) => (
+                <Article {...a} key={i}/>
+            ))}
+        </div>
     );
 }
 
@@ -40,14 +38,18 @@ function ArticleList({articles}) {
  * @returns
  * @constructor
  */
-function App() {
+function TranslationAcademyApp() {
     const [lang, setLang] = useState(null);
+
+    function handleSelectTranslation(lang) {
+        console.log('selected translation', lang);
+    }
 
     // listen to prop changes
     useEffect(() => {
         function handlePropsChange(event, props) {
             const {lang: newLang, articleId} = props;
-            if(newLang !== lang) {
+            if (newLang !== lang) {
                 setLang(newLang);
             }
 
@@ -69,18 +71,20 @@ function App() {
         // TODO: check if translation exists.
         console.log('TODO: check if the translation exists');
         const exists = true;
-        if(!exists) {
+        if (!exists) {
             setLang(null);
         }
     }, [lang]);
 
     if (lang) {
         // TODO: render tA translation
-        return e(ArticleList, {articles: [1, 2, 3]});
+        return <ArticleList articles={[1, 2, 3]}/>;
     } else {
         // TODO: pick a translation
-        return `choose a translation`;
+        return 'hello';
+        // return <ConfirmationDialog open={true}
+        //                            onClose={handleSelectTranslation}/>;
     }
 }
 
-ReactDOM.render(e(App), document.getElementById('react-app'));
+ReactDOM.render(<TranslationAcademyApp/>, document.getElementById('react-app'));

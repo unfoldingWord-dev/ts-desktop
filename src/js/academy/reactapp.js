@@ -2,7 +2,7 @@ console.log('the app is loaded');
 import React, {useState, useEffect} from 'react';
 import ReactDOM from 'react-dom';
 import {ipcRenderer} from 'electron';
-import ConfirmationDialog from './components/ConfirmationDialog';
+import ChooseTranslationDialog from './components/ChooseTranslationDialog';
 
 
 
@@ -85,8 +85,8 @@ function TranslationAcademyApp() {
     } else {
         // TODO: pick a translation
         // return 'hello';
-        return <ConfirmationDialog open={true}
-                                   onClose={handleSelectTranslation}/>;
+        return <ChooseTranslationDialog open={true}
+                                        onClose={handleSelectTranslation}/>;
     }
 }
 

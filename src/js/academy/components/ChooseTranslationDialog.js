@@ -2,9 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {makeStyles} from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -14,32 +11,15 @@ import Radio from '@material-ui/core/Radio';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 
 const options = [
-    'None',
-    'Atria',
-    'Callisto',
-    'Dione',
-    'Ganymede',
-    'Hangouts Call',
-    'Luna',
-    'Oberon',
-    'Phobos',
-    'Pyxis',
-    'Sedna',
-    'Titania',
-    'Triton',
-    'Umbriel'
+    'English',
+    'Croatian',
+    'French'
 ];
 
-function ConfirmationDialogRaw(props) {
-    const {onClose, value: valueProp, open, ...other} = props;
-    const [value, setValue] = React.useState(valueProp);
+export function ConfirmationDialogRaw(props) {
+    const {onClose, open, ...other} = props;
+    const [value, setValue] = React.useState(null);
     const radioGroupRef = React.useRef(null);
-
-    React.useEffect(() => {
-        if (!open) {
-            setValue(valueProp);
-        }
-    }, [valueProp, open]);
 
     function handleEntering() {
         if (radioGroupRef.current != null) {
@@ -69,8 +49,9 @@ function ConfirmationDialogRaw(props) {
             open={open}
             {...other}
         >
-            <DialogTitle id="confirmation-dialog-title">Phone
-                Ringtone</DialogTitle>
+            <DialogTitle id="confirmation-dialog-title">
+                translationAcademy Translation
+            </DialogTitle>
             <DialogContent dividers>
                 <RadioGroup
                     ref={radioGroupRef}
@@ -99,8 +80,7 @@ function ConfirmationDialogRaw(props) {
 
 ConfirmationDialogRaw.propTypes = {
     onClose: PropTypes.func.isRequired,
-    open: PropTypes.bool.isRequired,
-    value: PropTypes.string.isRequired
+    open: PropTypes.bool.isRequired
 };
 
 const useStyles = makeStyles(theme => ({
@@ -115,55 +95,24 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-export default function ConfirmationDialog() {
+export default function ChooseTranslationDialog(props) {
     const classes = useStyles();
-    const [open, setOpen] = React.useState(false);
-    const [value, setValue] = React.useState('Dione');
-
-    function handleClickListItem() {
-        setOpen(true);
-    }
-
-    function handleClose(newValue) {
-        setOpen(false);
-
-        if (newValue) {
-            setValue(newValue);
-        }
-    }
+    const {onClose} = props;
 
     return (
-        <div className={classes.root}>
-            <List component="div" role="list">
-                <ListItem button divider disabled role="listitem">
-                    <ListItemText primary="Interruptions"/>
-                </ListItem>
-                <ListItem
-                    button
-                    divider
-                    aria-haspopup="true"
-                    aria-controls="ringtone-menu"
-                    aria-label="phone ringtone"
-                    onClick={handleClickListItem}
-                    role="listitem"
-                >
-                    <ListItemText primary="Phone ringtone" secondary={value}/>
-                </ListItem>
-                <ListItem button divider disabled role="listitem">
-                    <ListItemText primary="Default notification ringtone"
-                                  secondary="Tethys"/>
-                </ListItem>
-                <ConfirmationDialogRaw
-                    classes={{
-                        paper: classes.paper
-                    }}
-                    id="ringtone-menu"
-                    keepMounted
-                    open={open}
-                    onClose={handleClose}
-                    value={value}
-                />
-            </List>
-        </div>
+        <ConfirmationDialogRaw
+            classes={{
+                paper: classes.paper
+            }}
+            id="translation-menu"
+            keepMounted
+            open={props.open}
+            onClose={onClose}
+        />
     );
 }
+
+ChooseTranslationDialog.propTypes = {
+    onClose: PropTypes.func.isRequired,
+    open: PropTypes.bool.isRequired,
+};

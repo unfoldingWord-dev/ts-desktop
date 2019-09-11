@@ -42,6 +42,7 @@ export default function ArticleList({articles}) {
             </div>
         );
     } else {
+        // placeholder while articles are loading
         return (
             <div id="articles" className={classes.root}>
                 <List speed={2}/>

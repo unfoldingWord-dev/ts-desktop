@@ -1,39 +1,27 @@
 import React, {useState, useEffect} from 'react';
 import ReactDOM from 'react-dom';
 import {ipcRenderer} from 'electron';
-import ChooseTranslationDialog from './components/ChooseTranslationDialog';
-import Articles from './components/Articles';
+import Academy from './components/Academy';
 
 /**
- * Renders the tA page
- * @returns
- * @constructor
+ * Binds the translationAcademy app to the window and proxies messages from
+ * the main thread.
  */
 function TranslationAcademyApp() {
     const [lang, setLang] = useState(null);
-    const [articles, setArticles] = useState([]);
+    const [articleId, setArticleId] = useState(null);
 
-    function handleSelectTranslation(lang) {
-        console.log('selected translation', lang);
-        if(lang === null) {
-            ipcRenderer.sendSync("academy-window", "close");
-        } else {
-            setLang(lang);
-        }
+    // closes the academy app
+    function handleClose() {
+        ipcRenderer.sendSync("academy-window", "close");
     }
 
-    // listen to prop changes
+    // listen for props from the main thread
     useEffect(() => {
         function handlePropsChange(event, props) {
-            const {lang: newLang, articleId} = props;
-            if (newLang !== lang) {
-                setLang(newLang);
-            }
-
-            var element = document.getElementById(articleId);
-            if (element) {
-                element.scrollIntoView();
-            }
+            const {lang: newLang, articleId: newArticleId} = props;
+            setLang(newLang);
+            setArticleId(newArticleId);
         }
 
         ipcRenderer.on('props', handlePropsChange);
@@ -43,26 +31,9 @@ function TranslationAcademyApp() {
         };
     }, []);
 
-    // monitor translation validity and load articles
-    useEffect(() => {
-        // TODO: check if the translation exists.
-        const exists = lang !== null;
-
-        if (!exists) {
-            setLang(null);
-            setArticles([]);
-        } else {
-            // TODO: load the articles
-            setArticles([1, 2, 3]);
-        }
-    }, [lang]);
 
     return (
-        <>
-            <Articles articles={articles}/>
-            <ChooseTranslationDialog open={!lang}
-                                     onClose={handleSelectTranslation}/>
-        </>
+        <Academy lang={lang} articleId={articleId} onClose={handleClose}/>
     );
 }
 

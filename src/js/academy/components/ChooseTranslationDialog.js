@@ -9,17 +9,36 @@ import Dialog from '@material-ui/core/Dialog';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import Radio from '@material-ui/core/Radio';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+import WifiIcon from '@material-ui/icons/Wifi';
+import DownloadIcon from '@material-ui/icons/CloudDownload';
+import Typography from '@material-ui/core/Typography';
 
-const options = [
-    'English',
-    'Croatian',
-    'French'
-];
+const useRawStyles = makeStyles(theme => ({
+    leftIcon: {
+        marginRight: theme.spacing(1)
+    },
+    listIcon: {
+        // marginRight: theme.spacing(1)
+    },
+    label: {
+        display: 'flex',
+        width: '100%'
+    },
+    title: {
+        flexGrow: 1
+    },
+    radio: {
+        '&:hover': {
+            backgroundColor: '#eee'
+        }
+    }
+}));
 
 export function ConfirmationDialogRaw(props) {
-    const {onClose, open, ...other} = props;
+    const {onClose, onUpdate, catalog, options, open, ...other} = props;
     const [value, setValue] = React.useState(null);
     const radioGroupRef = React.useRef(null);
+    const classes = useRawStyles();
 
     function handleEntering() {
         if (radioGroupRef.current != null) {
@@ -39,6 +58,15 @@ export function ConfirmationDialogRaw(props) {
         setValue(event.target.value);
     }
 
+    function handleUpdate() {
+        onUpdate();
+    }
+
+    let instructions = '';
+    if(options.length === 0) {
+        instructions = 'You have not downloaded translationAcademy yet. Check for updates to download translationAcademy.';
+    }
+
     return (
         <Dialog
             disableBackdropClick
@@ -53,6 +81,7 @@ export function ConfirmationDialogRaw(props) {
                 translationAcademy Translation
             </DialogTitle>
             <DialogContent dividers>
+                {instructions}
                 <RadioGroup
                     ref={radioGroupRef}
                     aria-label="ringtone"
@@ -61,16 +90,33 @@ export function ConfirmationDialogRaw(props) {
                     onChange={handleChange}
                 >
                     {options.map(option => (
-                        <FormControlLabel value={option} key={option}
-                                          control={<Radio/>} label={option}/>
+                        <FormControlLabel value={option.language}
+                                          key={option.language}
+                                          control={<Radio/>}
+                                          classes={{
+                                              label: classes.label,
+                                              root: classes.radio
+                                          }}
+                                          label={(
+                                              <>
+                                                  <Typography variant="body" className={classes.title}>{option.title}</Typography>
+                                                  <DownloadIcon className={classes.listIcon}/>
+                                              </>
+                                          )}/>
+
                     ))}
                 </RadioGroup>
             </DialogContent>
             <DialogActions>
+                <Button onClick={handleUpdate} color="secondary">
+                    <WifiIcon className={classes.leftIcon}/>
+                    Check for updates
+                </Button>
                 <Button onClick={handleCancel} color="primary">
                     Cancel
                 </Button>
-                <Button onClick={handleOk} color="primary">
+                <Button onClick={handleOk} color="primary"
+                        disabled={value === null}>
                     Ok
                 </Button>
             </DialogActions>
@@ -80,7 +126,9 @@ export function ConfirmationDialogRaw(props) {
 
 ConfirmationDialogRaw.propTypes = {
     onClose: PropTypes.func.isRequired,
-    open: PropTypes.bool.isRequired
+    open: PropTypes.bool.isRequired,
+    onUpdate: PropTypes.func.isRequired,
+    options: PropTypes.array.isRequired
 };
 
 const useStyles = makeStyles(theme => ({
@@ -97,16 +145,18 @@ const useStyles = makeStyles(theme => ({
 
 export default function ChooseTranslationDialog(props) {
     const classes = useStyles();
-    const {onClose} = props;
+    const {onClose, onUpdate, options} = props;
 
     return (
         <ConfirmationDialogRaw
             classes={{
                 paper: classes.paper
             }}
+            options={options}
             id="translation-menu"
             keepMounted
             open={props.open}
+            onUpdate={onUpdate}
             onClose={onClose}
         />
     );
@@ -114,5 +164,11 @@ export default function ChooseTranslationDialog(props) {
 
 ChooseTranslationDialog.propTypes = {
     onClose: PropTypes.func.isRequired,
-    open: PropTypes.bool.isRequired,
+    onUpdate: PropTypes.func.isRequired,
+    options: PropTypes.arrayOf(PropTypes.shape({
+        title: PropTypes.string.isRequired,
+        direction: PropTypes.string.isRequired,
+        language: PropTypes.string.isRequired
+    })),
+    open: PropTypes.bool.isRequired
 };

@@ -31,8 +31,33 @@ const useRawStyles = makeStyles(theme => ({
         '&:hover': {
             backgroundColor: '#eee'
         }
+    },
+    labelRTL: {
+        direction: 'rtl',
+        display: 'flex',
+        width: '100%'
     }
 }));
+
+/**
+ * Renders a title with text in the correct position
+ * based on the language direction.
+ * @param props
+ * @returns {*}
+ * @constructor
+ */
+function LocalizedTitle(props) {
+    const {title, language, direction, classes} = props;
+
+    let displayedTitle = `${title} - ${language}`;
+    if (direction === 'rtl') {
+        displayedTitle = `${language} - ${title}`;
+    }
+    return (
+        <Typography variant="body1"
+                    className={classes.title}>{displayedTitle}</Typography>
+    );
+}
 
 export function ConfirmationDialogRaw(props) {
     const {onClose, onUpdate, catalog, options, open, ...other} = props;
@@ -63,7 +88,7 @@ export function ConfirmationDialogRaw(props) {
     }
 
     let instructions = '';
-    if(options.length === 0) {
+    if (options.length === 0) {
         instructions = 'You have not downloaded translationAcademy yet. Check for updates to download translationAcademy.';
     }
 
@@ -94,13 +119,24 @@ export function ConfirmationDialogRaw(props) {
                                           key={option.language}
                                           control={<Radio/>}
                                           classes={{
-                                              label: classes.label,
+                                              label: option.direction ===
+                                              'rtl' ?
+                                                  classes.labelRTL :
+                                                  classes.label,
                                               root: classes.radio
                                           }}
                                           label={(
                                               <>
-                                                  <Typography variant="body" className={classes.title}>{option.title}</Typography>
-                                                  <DownloadIcon className={classes.listIcon}/>
+                                                  <LocalizedTitle
+                                                      title={option.title}
+                                                      language={option.language}
+                                                      direction={option.direction}
+                                                      classes={{
+                                                          title: classes.title
+                                                      }}/>
+                                                  <DownloadIcon
+                                                      visibility={option.update ? 'visible' : 'hidden'}
+                                                      className={classes.listIcon}/>
                                               </>
                                           )}/>
 
@@ -146,6 +182,8 @@ const useStyles = makeStyles(theme => ({
 export default function ChooseTranslationDialog(props) {
     const classes = useStyles();
     const {onClose, onUpdate, options} = props;
+
+    // TODO: maybe perform all of the downloading here.
 
     return (
         <ConfirmationDialogRaw

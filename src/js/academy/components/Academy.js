@@ -17,6 +17,7 @@ export default function Academy(props) {
     const [lang, setLang] = useState(translationLang);
     const [articles, setArticles] = useState([]);
     const [catalog, setCatalog] = useState([]);
+    // TODO: have state for confirming the type of download. update, or fresh download.
 
     function handleSelectTranslation(lang) {
         if (lang === null) {
@@ -26,9 +27,37 @@ export default function Academy(props) {
         }
     }
 
-    function handleUpdate() {
+    function handleCheckForUpdate() {
         axios.get(catalogUrl).then(response => {
-            setCatalog(response.data);
+            const resources = response.data.map(d => {
+
+                // filter down to the first valid resource container
+                let format = {};
+                try {
+                    format = d.resources[0].formats.filter(f => {
+                        return f.format.includes('application/zip;') &&
+                            f.format.includes('type=man') &&
+                            f.format.includes('conformsto=rc0.2');
+                    })[0];
+                } catch (error) {
+                    console.error('The resource is invalid', error, d);
+                }
+
+                // TODO: check if it's been downloaded
+                // TODO: check if it's out of date.
+
+                return {
+                    title: d.title,
+                    direction: d.direction,
+                    language: d.language,
+                    update: true,
+                    downloaded: false,
+                    url: format.url,
+                    size: format.size,
+                    modified: format.modified
+                };
+            }).filter(r => !!r.url);
+            setCatalog(resources);
         }).catch(error => {
             // TODO: show error to user
             setCatalog([]);
@@ -45,24 +74,33 @@ export default function Academy(props) {
 
     // monitor translation validity and load articles
     useEffect(() => {
-        // TODO: check if the translation exists.
-        const exists = lang !== null;
+        const translation = catalog.filter(t => t.language === lang)[0];
 
-        if (!exists) {
+        if(!translation) {
+            setLang(null);
+            setArticles([]);
+            return;
+        }
+
+        if (!translation.downloaded) {
+            // TODO: confirm download
             setLang(null);
             setArticles([]);
         } else {
+            if(translation.update) {
+                // TODO: ask if they would like to download the update
+            }
             // TODO: load the articles
             setArticles([1, 2, 3]);
         }
+        console.log(translation);
     }, [lang]);
-
     return (
         <>
             <Articles articles={articles}/>
             <ChooseTranslationDialog open={!lang}
                                      options={catalog}
-                                     onUpdate={handleUpdate}
+                                     onUpdate={handleCheckForUpdate}
                                      onClose={handleSelectTranslation}/>
         </>
     );

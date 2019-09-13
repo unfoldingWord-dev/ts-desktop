@@ -36,67 +36,23 @@ export default function Academy(props) {
         axios.get(translation.url, {
             responseType: 'blob'
         }).then(response => {
-
-            console.log(response);
-
+            // write data to file
             var fileReader = new FileReader();
             fileReader.onload = function() {
-                fs.writeFileSync(dest,
-                    Buffer.from(new Uint8Array(this.result)));
+                const buffer = Buffer.from(new Uint8Array(this.result));
+                fs.writeFileSync(dest, buffer);
+
+                // TODO: extract file
+                console.log('download finished', dest);
+                setConfirmDownload(false);
             };
             fileReader.readAsArrayBuffer(response.data);
-
-            // TODO: extract file
-
-            console.log('download finished', dest);
-            // TODO: write data to dest
-            setConfirmDownload(false);
         }).catch(error => {
             // TODO: show error to user
             // TODO: clean up dest
             setTranslation(null);
             console.log(error);
         });
-
-        // try {
-        //     console.log('downloading translation', translation);
-        //     const dest = `/home/joel/Downloads/tA-${translation.language}.zip`;
-        //
-        //     const writer = fs.createWriteStream(dest);
-        //
-        //     const response = await axios.get(translation.url, {
-        //         responseType: 'stream',
-        //         onDownloadProgress: progressEvent => {
-        //         }
-        //     });
-        //
-        //     response.data.pipe(writer);
-        //
-        //     await new Promise((resolve, reject) => {
-        //         writer.on('finish', resolve);
-        //         writer.on('error', reject);
-        //     });
-        //
-        //     console.log('Download finished!');
-        //     setConfirmDownload(false);
-        //
-        // } catch(error) {
-        //     // TODO: show error to user
-        //     // TODO: clean up dest
-        //     setTranslation(null);
-        //     console.log(error);
-        // }
-
-        // .then(response => {
-        //     response.data.pipe(writer);
-        //     console.log('Download finished!');
-        //     setConfirmDownload(false);
-        // }).catch(error => {
-        //     // TODO: show error to user
-        //     // TODO: clean up dest
-        //     setTranslation(null);
-        //     console.log(error);
-        // });
     }
 
     function handleSelectTranslation(newTranslation) {

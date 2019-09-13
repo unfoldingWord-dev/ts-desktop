@@ -6,6 +6,7 @@ import axios from 'axios';
 import ConfirmDownloadDialog from './ConfirmDownloadDialog';
 import fs from 'fs';
 import SimpleCache, {LOCAL_STORAGE} from '../SimpleCache';
+import AdmZip from 'adm-zip';
 
 const catalogUrl = 'https://api.door43.org/v3/subjects/Translation_Academy.json';
 
@@ -37,6 +38,7 @@ export default function Academy(props) {
     async function handleConfirmDownload() {
         // TODO: display loading dialog
         const dest = `/home/joel/Downloads/ta-${translation.language}.zip`;
+        const extractDest = `/home/joel/Downloads/ta-${translation.language}`;
 
         axios.get(translation.url, {
             responseType: 'blob'
@@ -46,6 +48,9 @@ export default function Academy(props) {
             fileReader.onload = function() {
                 const buffer = Buffer.from(new Uint8Array(this.result));
                 fs.writeFileSync(dest, buffer);
+
+                const zip = new AdmZip(dest);
+                zip.extractAllTo(extractDest, true);
 
                 setConfirmDownload(false);
 
@@ -60,7 +65,7 @@ export default function Academy(props) {
             fileReader.readAsArrayBuffer(response.data);
         }).catch(error => {
             // TODO: show error to user
-            // TODO: clean up dest
+            // TODO: delete failed download
             setTranslation(null);
             console.log(error);
         });
@@ -136,7 +141,6 @@ export default function Academy(props) {
         }
 
         const catalog = getCachedCatalog();
-        // TODO: re-check if items were downloaded/outdated.
         catalog.map(r => {
             const resourcePath = `/home/joel/Downloads/ta-${r.language}.zip`;
             r.downloaded = fs.existsSync(resourcePath);

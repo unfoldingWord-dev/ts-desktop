@@ -14,21 +14,17 @@ const catalogUrl = 'https://api.door43.org/v3/subjects/Translation_Academy.json'
  * @constructor
  */
 export default function Academy(props) {
-    const {lang: translationLang, onClose, articleId} = props;
-
-    const [lang, setLang] = useState(translationLang);
+    const {lang, onClose, articleId} = props;
     const [articles, setArticles] = useState([]);
     const [catalog, setCatalog] = useState([]);
     const [confirmDownload, setConfirmDownload] = useState(false);
     const [translation, setTranslation] = useState(null);
 
-    // TODO: have state for confirming the type of download. update, or fresh download.
-
     function handleCancelDownload() {
         setConfirmDownload(false);
 
         // close the aborted translation
-        if(!translation.downloaded) {
+        if (!translation.downloaded) {
             setTranslation(null);
         }
     }
@@ -38,12 +34,12 @@ export default function Academy(props) {
         console.log('download stuff');
     }
 
-    function handleSelectTranslation(lang) {
-        console.log('selected language', lang);
-        if (lang === null) {
+    function handleSelectTranslation(newTranslation) {
+        console.log('selected translation', newTranslation);
+        if (newTranslation === null) {
             onClose();
         } else {
-            setLang(lang);
+            setTranslation(newTranslation);
         }
     }
 
@@ -87,25 +83,22 @@ export default function Academy(props) {
 
     // listen to prop changes
     useEffect(() => {
-        setLang(translationLang);
+        // TODO: watching the translation and article should be in two separate effects.
+        const newTranslation = catalog.filter(
+            t => t.language === lang)[0];
+        setTranslation(newTranslation);
 
         // TODO: scroll article into view
-    }, [translationLang, articleId]);
+    }, [lang, articleId]);
 
     // monitor translation validity and load articles
     useEffect(() => {
-        const translation = catalog.filter(t => t.language === lang)[0];
         console.log('selected translation', translation);
-        setTranslation(translation);
 
-        // reset everything if the translation is invalid
         if (!translation) {
-            setLang(null);
+            // reset everything if the translation is invalid
             setArticles([]);
-            return;
-        }
-
-        if (!translation.downloaded) {
+        } else if (!translation.downloaded) {
             setArticles([]);
             // ask user if they would like to download
             setConfirmDownload(true);
@@ -117,7 +110,7 @@ export default function Academy(props) {
             // TODO: load the articles
             setArticles([1, 2, 3]);
         }
-    }, [lang]);
+    }, [translation]);
 
     // TODO: provide dialog for confirming the download.
     // this should be told if this is an update or a download. The translation will know this.

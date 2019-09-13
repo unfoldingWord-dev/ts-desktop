@@ -136,7 +136,7 @@ export function ConfirmationDialogRaw(props) {
                                                           title: classes.title
                                                       }}/>
                                                   <DownloadIcon
-                                                      visibility={option.update ?
+                                                      visibility={option.update || !option.downloaded ?
                                                           'visible' :
                                                           'hidden'}
                                                       className={classes.listIcon}/>
@@ -207,7 +207,9 @@ ChooseTranslationDialog.propTypes = {
     options: PropTypes.arrayOf(PropTypes.shape({
         title: PropTypes.string.isRequired,
         direction: PropTypes.string.isRequired,
-        language: PropTypes.string.isRequired
+        language: PropTypes.string.isRequired,
+        update: PropTypes.bool.isRequired,
+        downloaded: PropTypes.bool.isRequired
     }).isRequired),
     open: PropTypes.bool.isRequired
 };

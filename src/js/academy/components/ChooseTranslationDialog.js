@@ -60,7 +60,7 @@ function LocalizedTitle(props) {
 }
 
 export function ConfirmationDialogRaw(props) {
-    const {onClose, onUpdate, catalog, options, open, ...other} = props;
+    const {onClose, onUpdate, options, open, ...other} = props;
     const [value, setValue] = React.useState(null);
     const radioGroupRef = React.useRef(null);
     const classes = useRawStyles();
@@ -76,7 +76,8 @@ export function ConfirmationDialogRaw(props) {
     }
 
     function handleOk() {
-        onClose(value);
+        const translation = options.filter(o => o.language === value)[0];
+        onClose(translation);
     }
 
     function handleChange(event) {
@@ -184,8 +185,6 @@ const useStyles = makeStyles(theme => ({
 export default function ChooseTranslationDialog(props) {
     const classes = useStyles();
     const {onClose, onUpdate, options} = props;
-
-    // TODO: maybe perform all of the downloading here.
 
     return (
         <ConfirmationDialogRaw

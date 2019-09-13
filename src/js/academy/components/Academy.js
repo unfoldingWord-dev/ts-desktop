@@ -3,6 +3,8 @@ import ChooseTranslationDialog from './ChooseTranslationDialog';
 import Articles from './Articles';
 import PropTypes from 'prop-types';
 import axios from 'axios';
+import ConfirmationDialog from './ConfirmationDialog';
+import ConfirmDownloadDialog from './ConfirmDownloadDialog';
 
 const catalogUrl = 'https://api.door43.org/v3/subjects/Translation_Academy.json';
 
@@ -17,9 +19,27 @@ export default function Academy(props) {
     const [lang, setLang] = useState(translationLang);
     const [articles, setArticles] = useState([]);
     const [catalog, setCatalog] = useState([]);
+    const [confirmDownload, setConfirmDownload] = useState(false);
+    const [translation, setTranslation] = useState(null);
+
     // TODO: have state for confirming the type of download. update, or fresh download.
 
+    function handleCancelDownload() {
+        setConfirmDownload(false);
+
+        // close the aborted translation
+        if(!translation.downloaded) {
+            setTranslation(null);
+        }
+    }
+
+    function handleConfirmDownload() {
+        // TODO: start downloading
+        console.log('download stuff');
+    }
+
     function handleSelectTranslation(lang) {
+        console.log('selected language', lang);
         if (lang === null) {
             onClose();
         } else {
@@ -75,33 +95,46 @@ export default function Academy(props) {
     // monitor translation validity and load articles
     useEffect(() => {
         const translation = catalog.filter(t => t.language === lang)[0];
+        console.log('selected translation', translation);
+        setTranslation(translation);
 
-        if(!translation) {
+        // reset everything if the translation is invalid
+        if (!translation) {
             setLang(null);
             setArticles([]);
             return;
         }
 
         if (!translation.downloaded) {
-            // TODO: confirm download
-            setLang(null);
             setArticles([]);
+            // ask user if they would like to download
+            setConfirmDownload(true);
         } else {
-            if(translation.update) {
-                // TODO: ask if they would like to download the update
+            if (translation.update) {
+                // ask user if they would like the update
+                setConfirmDownload(true);
             }
             // TODO: load the articles
             setArticles([1, 2, 3]);
         }
-        console.log(translation);
     }, [lang]);
+
+    // TODO: provide dialog for confirming the download.
+    // this should be told if this is an update or a download. The translation will know this.
+    // TODO: unset the confirmation bit when the dialog is dismissed.
+
     return (
         <>
             <Articles articles={articles}/>
-            <ChooseTranslationDialog open={!lang}
+            <ChooseTranslationDialog open={!translation}
                                      options={catalog}
                                      onUpdate={handleCheckForUpdate}
                                      onClose={handleSelectTranslation}/>
+            <ConfirmDownloadDialog
+                translation={translation}
+                open={confirmDownload}
+                onCancel={handleCancelDownload}
+                onOk={handleConfirmDownload}/>
         </>
     );
 }

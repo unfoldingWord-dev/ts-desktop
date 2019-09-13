@@ -135,7 +135,9 @@ export function ConfirmationDialogRaw(props) {
                                                           title: classes.title
                                                       }}/>
                                                   <DownloadIcon
-                                                      visibility={option.update ? 'visible' : 'hidden'}
+                                                      visibility={option.update ?
+                                                          'visible' :
+                                                          'hidden'}
                                                       className={classes.listIcon}/>
                                               </>
                                           )}/>
@@ -207,6 +209,6 @@ ChooseTranslationDialog.propTypes = {
         title: PropTypes.string.isRequired,
         direction: PropTypes.string.isRequired,
         language: PropTypes.string.isRequired
-    })),
+    }).isRequired),
     open: PropTypes.bool.isRequired
 };

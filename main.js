@@ -1,6 +1,7 @@
 const {dialog, app, BrowserWindow, ipcMain} = require(
     'electron');
 const path = require('path');
+const mkdirp = require('mkdirp');
 
 const debug = /--debug/.test(process.argv[2]);
 
@@ -11,15 +12,20 @@ let mainWindow = null;
 let academyWindow;
 let scrollToId;
 
+function getDataPath() {
+    var base = process.env.LOCALAPPDATA || (process.platform === 'darwin' ?
+        path.join(process.env.HOME, 'Library', 'Application Support') :
+        path.join(process.env.HOME, '.config'));
+
+    const dir = path.join(base, 'translationstudio');
+    mkdirp.sync(dir);
+    return dir;
+}
+
 function initialize() {
     makeSingleInstance();
 
-    app.setPath('userData', (function(dataDir) {
-        var base = process.env.LOCALAPPDATA ||
-            (process.platform === 'darwin' ? path.join(process.env.HOME, 'Library', 'Application Support') : path.join(process.env.HOME, '.config'));
-
-        return path.join(base, dataDir);
-    })('translationstudio'));
+    app.setPath('userData', getDataPath());
 
     app.on('ready', () => {
         createSplashWindow();
@@ -107,9 +113,11 @@ function initialize() {
                     splashScreen.close();
                     academyWindow.show();
                     // send props to window
+                    console.log('sending data path', getDataPath());
                     academyWindow.webContents.send('props', {
                         lang,
-                        articleId: id
+                        articleId: id,
+                        dataPath: getDataPath()
                     });
                 });
             }, 500);
@@ -168,7 +176,7 @@ function createWindow() {
         path.join('file://', __dirname, '/src/views/index.html'));
 
     mainWindow.on('closed', () => {
-        if(academyWindow) {
+        if (academyWindow) {
             academyWindow.close();
             academyWindow = null;
         }
@@ -286,7 +294,8 @@ function createAcademyWindow() {
         frame: false
     });
 
-    academyWindow.loadURL('file://' + path.join(__dirname, '/src/views/academy.html'));
+    academyWindow.loadURL(
+        'file://' + path.join(__dirname, '/src/views/academy.html'));
 
     academyWindow.on('closed', function() {
         academyWindow = null;

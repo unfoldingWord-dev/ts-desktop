@@ -8,8 +8,7 @@ import Academy from './components/Academy';
  * the main thread.
  */
 function TranslationAcademyApp() {
-    const [lang, setLang] = useState(null);
-    const [articleId, setArticleId] = useState(null);
+    const [props, setProps] = useState(null);
 
     // closes the academy app
     function handleClose() {
@@ -19,9 +18,7 @@ function TranslationAcademyApp() {
     // listen for props from the main thread
     useEffect(() => {
         function handlePropsChange(event, props) {
-            const {lang: newLang, articleId: newArticleId} = props;
-            setLang(newLang);
-            setArticleId(newArticleId);
+            setProps(props);
         }
 
         ipcRenderer.on('props', handlePropsChange);
@@ -33,7 +30,7 @@ function TranslationAcademyApp() {
 
 
     return (
-        <Academy lang={lang} articleId={articleId} onClose={handleClose}/>
+        <Academy {...props} onClose={handleClose}/>
     );
 }
 

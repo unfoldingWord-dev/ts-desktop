@@ -5,8 +5,12 @@ import PropTypes from 'prop-types';
 import axios from 'axios';
 import ConfirmDownloadDialog from './ConfirmDownloadDialog';
 import fs from 'fs';
+import path from 'path';
 import SimpleCache, {LOCAL_STORAGE} from '../SimpleCache';
 import AdmZip from 'adm-zip';
+import mkdirp from 'mkdirp';
+import rimraf from 'rimraf';
+import yaml from 'js-yaml';
 
 const catalogUrl = 'https://api.door43.org/v3/subjects/Translation_Academy.json';
 
@@ -14,13 +18,21 @@ const cache = new SimpleCache(LOCAL_STORAGE);
 
 const TA_CACHE_KEY = 'ta-cache';
 
+function safeRead(filePath) {
+    if (fs.existsSync(filePath)) {
+        return fs.readFileSync(filePath);
+    } else {
+        return null;
+    }
+}
+
 /**
  * Renders the tA page
  * @returns
  * @constructor
  */
 export default function Academy(props) {
-    const {lang, onClose, articleId} = props;
+    const {lang, onClose, articleId, dataPath} = props;
     const [articles, setArticles] = useState([]);
     const [catalog, setCatalog] = useState([]);
     const [confirmDownload, setConfirmDownload] = useState(false);
@@ -35,10 +47,27 @@ export default function Academy(props) {
         }
     }
 
+    function getTranslationPath(translation) {
+        return path.join(dataPath,
+            `translationAcademy/${translation.language}`);
+    }
+
+    function isTranslationDownloaded(translation) {
+        return fs.existsSync(getTranslationPath(translation));
+    }
+
+    function isTranslationOutdated(translation) {
+        const resourcePath = getTranslationPath(translation);
+        // TODO: check if the translation is outdated
+        return false;
+    }
+
     async function handleConfirmDownload() {
         // TODO: display loading dialog
-        const dest = `/home/joel/Downloads/ta-${translation.language}.zip`;
-        const extractDest = `/home/joel/Downloads/ta-${translation.language}`;
+        const extractDest = path.join(dataPath,
+            `translationAcademy/${translation.language}`);
+        const dest = `${extractDest}.zip`;
+        mkdirp.sync(extractDest);
 
         axios.get(translation.url, {
             responseType: 'blob'
@@ -51,6 +80,7 @@ export default function Academy(props) {
 
                 const zip = new AdmZip(dest);
                 zip.extractAllTo(extractDest, true);
+                rimraf.sync(dest);
 
                 setConfirmDownload(false);
 
@@ -96,16 +126,12 @@ export default function Academy(props) {
                     console.error('The resource is invalid', error, d);
                 }
 
-                const resourcePath = `/home/joel/Downloads/ta-${d.language}.zip`;
-
-                // TODO: check if it's out of date.
-
                 return {
                     title: d.title,
                     direction: d.direction,
                     language: d.language,
-                    update: false,
-                    downloaded: fs.existsSync(resourcePath),
+                    update: isTranslationOutdated(d),
+                    downloaded: isTranslationDownloaded(d),
                     url: format.url,
                     size: format.size,
                     modified: format.modified
@@ -121,7 +147,7 @@ export default function Academy(props) {
 
     // keep catalog cached
     useEffect(() => {
-        if(catalog && catalog.length) {
+        if (catalog && catalog.length) {
             cache.set(TA_CACHE_KEY, JSON.stringify(catalog));
         }
     }, [catalog]);
@@ -130,7 +156,7 @@ export default function Academy(props) {
     useEffect(() => {
         function getCachedCatalog() {
             let cachedCatalog = cache.get(TA_CACHE_KEY);
-            if(cachedCatalog) {
+            if (cachedCatalog) {
                 try {
                     return JSON.parse(cachedCatalog);
                 } catch (error) {
@@ -140,15 +166,17 @@ export default function Academy(props) {
             return [];
         }
 
-        const catalog = getCachedCatalog();
-        catalog.map(r => {
-            const resourcePath = `/home/joel/Downloads/ta-${r.language}.zip`;
-            r.downloaded = fs.existsSync(resourcePath);
-            // TODO: check if the resource is outdated.
-            r.update = false;
-        });
-        setCatalog(catalog);
-    }, []);
+        // TRICKY: we need the dataPath to check if things are downloaded
+        if (dataPath) {
+            const catalog = getCachedCatalog();
+            // TRICKY: re-check available resources in case something changed offline.
+            catalog.map(r => {
+                r.downloaded = isTranslationDownloaded(r);
+                r.update = isTranslationOutdated(r);
+            });
+            setCatalog(catalog);
+        }
+    }, [dataPath]);
 
     // listen to prop changes
     useEffect(() => {
@@ -176,8 +204,44 @@ export default function Academy(props) {
 
         // content available
         if (translation && translation.downloaded) {
-            // TODO: load the articles
-            setArticles([1, 2, 3]);
+            const dir = getTranslationPath(translation);
+            try {
+                const manifestPath = path.join(dir,
+                    `${translation.language}_ta`,
+                    'manifest.yaml');
+                const manifest = yaml.load(manifestPath);
+                const newArticles = [];
+                console.log(manifest);
+                manifest.projects.forEach(p => {
+                    // load articles in each project
+                    const projectPath = path.join(dir, p.path);
+                    const tocPath = path.join(projectPath, 'toc.yaml');
+                    const toc = yaml.load(tocPath);
+                    // fall back to file list if toc does not exist
+                    toc.sections.forEach(s => {
+                        // load articles in each section
+                        const articleDir = path.join(projectPath, s.link);
+                        const articleTitle = safeRead(path.join(articleDir,
+                            'title.md'));
+                        const articleSubTitle = safeRead(path.join(articleDir,
+                            'sub-title.md'));
+                        const articleBody = safeRead(
+                            path.join(articleDir, '01.md'));
+
+                        newArticles.push({
+                            title: articleTitle,
+                            subTitle: articleSubTitle,
+                            body: articleBody
+                        });
+                    });
+                });
+
+                setArticles(newArticles);
+            } catch (error) {
+                console.error(error);
+                // TODO: the translation is corrupt. Delete it.
+                // TODO: show error to user.
+            }
         }
     }, [translation]);
 

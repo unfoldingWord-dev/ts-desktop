@@ -9,9 +9,11 @@ import {makeStyles} from '@material-ui/core/styles';
  * @constructor
  */
 function Article(props) {
+    const {title, subTitle, body} = props;
     return (
         <div>
-            This is an article
+            <h1>{title}</h1>
+            <h2>{subTitle}</h2>
         </div>
     );
 }

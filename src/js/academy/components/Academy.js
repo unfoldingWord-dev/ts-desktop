@@ -20,7 +20,7 @@ const TA_CACHE_KEY = 'ta-cache';
 
 function safeRead(filePath) {
     if (fs.existsSync(filePath)) {
-        return fs.readFileSync(filePath);
+        return fs.readFileSync(filePath).toString();
     } else {
         return null;
     }
@@ -190,6 +190,36 @@ export default function Academy(props) {
 
     // monitor translation validity and load articles
     useEffect(() => {
+
+        function readTOCSection(section, dir) {
+            let sectionArticles = [];
+            if (section.link) {
+                const articleDir = path.join(dir, section.link);
+                const articleTitle = safeRead(
+                    path.join(articleDir, 'title.md'));
+                const articleSubTitle = safeRead(path.join(articleDir,
+                    'sub-title.md'));
+                const articleBody = safeRead(
+                    path.join(articleDir, '01.md'));
+
+                sectionArticles.push({
+                    title: articleTitle,
+                    subTitle: articleSubTitle,
+                    body: articleBody
+                });
+            }
+
+            // recurse
+            if (section.sections) {
+                section.sections.forEach(s => {
+                    sectionArticles.push.apply(
+                        sectionArticles, readTOCSection(s, dir));
+                });
+            }
+
+            return sectionArticles;
+        }
+
         // no translation
         if (!translation || !translation.downloaded) {
             setArticles([]);
@@ -209,30 +239,20 @@ export default function Academy(props) {
                 const manifestPath = path.join(dir,
                     `${translation.language}_ta`,
                     'manifest.yaml');
-                const manifest = yaml.load(manifestPath);
-                const newArticles = [];
-                console.log(manifest);
+                const manifest = yaml.safeLoad(
+                    fs.readFileSync(manifestPath, 'utf8'));
+                // TODO: check if manifest is empty
+                let newArticles = [];
                 manifest.projects.forEach(p => {
                     // load articles in each project
-                    const projectPath = path.join(dir, p.path);
+                    const projectPath = path.join(dir,
+                        `${translation.language}_ta`, p.path);
                     const tocPath = path.join(projectPath, 'toc.yaml');
-                    const toc = yaml.load(tocPath);
+                    const toc = yaml.safeLoad(fs.readFileSync(tocPath, 'utf8'));
+                    // TODO: check if toc is empty
                     // fall back to file list if toc does not exist
                     toc.sections.forEach(s => {
-                        // load articles in each section
-                        const articleDir = path.join(projectPath, s.link);
-                        const articleTitle = safeRead(path.join(articleDir,
-                            'title.md'));
-                        const articleSubTitle = safeRead(path.join(articleDir,
-                            'sub-title.md'));
-                        const articleBody = safeRead(
-                            path.join(articleDir, '01.md'));
-
-                        newArticles.push({
-                            title: articleTitle,
-                            subTitle: articleSubTitle,
-                            body: articleBody
-                        });
+                        newArticles.push.apply(newArticles, readTOCSection(s, projectPath));
                     });
                 });
 

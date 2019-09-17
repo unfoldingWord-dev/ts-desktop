@@ -11,6 +11,7 @@ import AdmZip from 'adm-zip';
 import mkdirp from 'mkdirp';
 import rimraf from 'rimraf';
 import yaml from 'js-yaml';
+import {makeStyles} from '@material-ui/core';
 
 const catalogUrl = 'https://api.door43.org/v3/subjects/Translation_Academy.json';
 
@@ -25,6 +26,12 @@ function safeRead(filePath) {
         return null;
     }
 }
+
+const useStyles = makeStyles(theme => ({
+    root: {
+        height: '100%'
+    }
+}));
 
 /**
  * Renders the tA page
@@ -203,6 +210,7 @@ export default function Academy(props) {
                     path.join(articleDir, '01.md'));
 
                 sectionArticles.push({
+                    id: section.link,
                     title: articleTitle,
                     subTitle: articleSubTitle,
                     body: articleBody
@@ -264,6 +272,8 @@ export default function Academy(props) {
             }
         }
     }, [translation]);
+
+    const classes = useStyles();
 
     return (
         <>

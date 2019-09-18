@@ -44,6 +44,10 @@ export default function Article(props) {
                     />
                 ),
                 div: (props) => <div {...props} style={{width: '100%'}}/>,
+                img: props => {
+                    console.log('rendering image', props);
+                    return <img {...props} />;
+                }
             }
         };
         // TODO: set rendering options
@@ -62,7 +66,7 @@ export default function Article(props) {
     }, [body]);
 
     return (
-        <div id={`${manualId}_${articleId}`} className={direction === 'rtl' ? classes.rtl : classes.ltr}>
+        <div id={articleId} className={direction === 'rtl' ? classes.rtl : classes.ltr}>
             <h1>{title}</h1>
             <h2>{subTitle}</h2>
             {component}

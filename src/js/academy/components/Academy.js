@@ -194,9 +194,11 @@ export default function Academy(props) {
         const newTranslation = catalog.filter(
             t => t.language === lang)[0];
         setTranslation(newTranslation);
+    }, [lang]);
 
-        // TODO: scroll article into view
-    }, [lang, articleId]);
+    useEffect(() => {
+        handleScroll(articleId);
+    }, [articleId]);
 
     // monitor translation validity and load articles
     useEffect(() => {
@@ -279,16 +281,18 @@ export default function Academy(props) {
     }, [translation]);
 
     function handleClickLink(link) {
-        console.log('clicked link', link);
         if (link.articleId) {
-            const id = `${link.manualId}_${link.articleId}`;
-            const element = document.getElementById(id);
-            if (element) {
-                element.scrollIntoView();
-            }
+            handleScroll(link.articleId);
         } else if (link.href) {
             setClickedLink(link.href);
             setConfirmLink(true);
+        }
+    }
+
+    function handleScroll(articleId) {
+        const element = document.getElementById(articleId);
+        if (element) {
+            element.scrollIntoView();
         }
     }
 

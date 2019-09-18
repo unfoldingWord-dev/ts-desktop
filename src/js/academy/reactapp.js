@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import ReactDOM from 'react-dom';
-import {ipcRenderer} from 'electron';
+import {ipcRenderer, shell} from 'electron';
 import Academy from './components/Academy';
 
 /**
@@ -12,7 +12,7 @@ function TranslationAcademyApp() {
 
     // closes the academy app
     function handleClose() {
-        ipcRenderer.sendSync("academy-window", "close");
+        ipcRenderer.sendSync('academy-window', 'close');
     }
 
     // listen for props from the main thread
@@ -28,9 +28,12 @@ function TranslationAcademyApp() {
         };
     }, []);
 
+    function handleOpenLink(href) {
+        shell.openExternal(href);
+    }
 
     return (
-        <Academy {...props} onClose={handleClose}/>
+        <Academy {...props} onClose={handleClose} onOpenLink={handleOpenLink}/>
     );
 }
 

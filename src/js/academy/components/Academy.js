@@ -12,6 +12,7 @@ import mkdirp from 'mkdirp';
 import rimraf from 'rimraf';
 import yaml from 'js-yaml';
 import {makeStyles} from '@material-ui/core';
+import ConfirmRemoteLinkDialog from './ConfirmRemoteLinkDialog';
 
 const catalogUrl = 'https://api.door43.org/v3/subjects/Translation_Academy.json';
 
@@ -39,11 +40,13 @@ const useStyles = makeStyles(theme => ({
  * @constructor
  */
 export default function Academy(props) {
-    const {lang, onClose, articleId, dataPath} = props;
+    const {lang, onClose, articleId, dataPath, onOpenLink} = props;
     const [articles, setArticles] = useState([]);
     const [catalog, setCatalog] = useState([]);
     const [confirmDownload, setConfirmDownload] = useState(false);
     const [translation, setTranslation] = useState(null);
+    const [confirmLink, setConfirmLink] = useState(false);
+    const [clickedLink, setClickedLink] = useState(null);
 
     function handleCancelDownload() {
         setConfirmDownload(false);
@@ -210,7 +213,8 @@ export default function Academy(props) {
                     path.join(articleDir, '01.md'));
 
                 sectionArticles.push({
-                    id: section.link,
+                    manualId: path.basename(dir),
+                    articleId: section.link,
                     title: articleTitle,
                     subTitle: articleSubTitle,
                     body: articleBody
@@ -260,7 +264,8 @@ export default function Academy(props) {
                     // TODO: check if toc is empty
                     // fall back to file list if toc does not exist
                     toc.sections.forEach(s => {
-                        newArticles.push.apply(newArticles, readTOCSection(s, projectPath));
+                        newArticles.push.apply(newArticles,
+                            readTOCSection(s, projectPath));
                     });
                 });
 
@@ -273,11 +278,32 @@ export default function Academy(props) {
         }
     }, [translation]);
 
-    const classes = useStyles();
+    function handleClickLink(link) {
+        console.log('clicked link', link);
+        if (link.articleId) {
+            const id = `${link.manualId}_${link.articleId}`;
+            const element = document.getElementById(id);
+            if (element) {
+                element.scrollIntoView();
+            }
+        } else if (link.href) {
+            setClickedLink(link.href);
+            setConfirmLink(true);
+        }
+    }
+
+    function handleConfirmLink() {
+        onOpenLink(clickedLink);
+        setConfirmLink(false);
+    }
+
+    function handleCancelLink() {
+        setConfirmLink(false);
+    }
 
     return (
         <>
-            <Articles articles={articles}/>
+            <Articles articles={articles} onClickLink={handleClickLink}/>
             <ChooseTranslationDialog open={!translation}
                                      options={catalog}
                                      onUpdate={handleCheckForUpdate}
@@ -287,6 +313,10 @@ export default function Academy(props) {
                 open={confirmDownload}
                 onCancel={handleCancelDownload}
                 onOk={handleConfirmDownload}/>
+            <ConfirmRemoteLinkDialog href={clickedLink}
+                                     open={confirmLink}
+                                     onCancel={handleCancelLink}
+                                     onOk={handleConfirmLink}/>
         </>
     );
 }
@@ -294,5 +324,6 @@ export default function Academy(props) {
 Academy.propTypes = {
     onClose: PropTypes.func.isRequired,
     lang: PropTypes.string,
-    articleId: PropTypes.string
+    articleId: PropTypes.string,
+    onOpenLink: PropTypes.func.isRequired
 };

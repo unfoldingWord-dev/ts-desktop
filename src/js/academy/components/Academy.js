@@ -91,6 +91,17 @@ export default function Academy(props) {
                 fileReader.readAsArrayBuffer(response.data);
             });
         }).then(() => {
+            const reader = new TranslationReader(
+                getTranslationPath(translation));
+            reader.listArticles(article => {
+                console.log('parsing article', article.title);
+                const regexpImage = /<img\s+src="([^"]*)"\s*>/;
+                let result;
+                while ((result = regexpImage.exec(article.body))) {
+                    console.log('found image', result[1]);
+                    // TODO: cache image
+                }
+            });
             // TODO: find and cache images
 
             return Promise.resolve();

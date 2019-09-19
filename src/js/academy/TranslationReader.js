@@ -19,10 +19,10 @@ function safeRead(filePath) {
  * Returns an array of articles based on the section in a table of contents
  * @param section
  * @param dir
- * @param handler - optional callback to do extra processing for each article
+ * @param [handler] - optional callback to do extra processing for each article
  * @returns {[]}
  */
-function readTOCSection(section, dir, handler = null) {
+function readTOCSection(section, dir, handler) {
     let sectionArticles = [];
     if (section.link) {
         const articleDir = path.join(dir, section.link);
@@ -59,15 +59,18 @@ function readTOCSection(section, dir, handler = null) {
 export default class TranslationReader {
     constructor(dir) {
         this.dir = dir;
+        this.listArticles = this.listArticles.bind(this);
     }
 
     /**
      * Returns a list of article paths
-     * @param handler - optional callback to do extra processing for each article.
+     * @param [handler] - optional callback to do extra processing for each article.
      * @throws {Error} if the translation is corrupt.
      * @returns {[]}
      */
-    listArticles(handler = null) {
+    listArticles(handler=null) {
+        handler('test');
+        console.log('handler', handler);
         const manifestPath = path.join(this.dir, 'manifest.yaml');
         const manifest = yaml.safeLoad(fs.readFileSync(manifestPath, 'utf8'));
         let articles = [];

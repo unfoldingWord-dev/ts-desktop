@@ -45,6 +45,7 @@ export default function Article(props) {
                 ),
                 div: (props) => <div {...props} style={{width: '100%'}}/>,
                 img: props => {
+                    // TODO: render local images
                     console.log('rendering image', props);
                     return <img {...props} />;
                 }

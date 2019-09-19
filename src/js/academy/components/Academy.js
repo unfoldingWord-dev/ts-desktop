@@ -10,29 +10,14 @@ import SimpleCache, {LOCAL_STORAGE} from '../SimpleCache';
 import AdmZip from 'adm-zip';
 import mkdirp from 'mkdirp';
 import rimraf from 'rimraf';
-import yaml from 'js-yaml';
-import {makeStyles} from '@material-ui/core';
 import ConfirmRemoteLinkDialog from './ConfirmRemoteLinkDialog';
+import TranslationReader from '../TranslationReader';
 
 const catalogUrl = 'https://api.door43.org/v3/subjects/Translation_Academy.json';
 
 const cache = new SimpleCache(LOCAL_STORAGE);
 
 const TA_CACHE_KEY = 'ta-cache';
-
-function safeRead(filePath) {
-    if (fs.existsSync(filePath)) {
-        return fs.readFileSync(filePath).toString();
-    } else {
-        return null;
-    }
-}
-
-const useStyles = makeStyles(theme => ({
-    root: {
-        height: '100%'
-    }
-}));
 
 /**
  * Renders the tA page
@@ -59,7 +44,7 @@ export default function Academy(props) {
 
     function getTranslationPath(translation) {
         return path.join(dataPath,
-            `translationAcademy/${translation.language}`);
+            `translationAcademy/${translation.language}/${translation.language}_ta`);
     }
 
     function isTranslationDownloaded(translation) {
@@ -73,6 +58,7 @@ export default function Academy(props) {
     }
 
     async function handleConfirmDownload() {
+
         // TODO: display loading dialog
         const extractDest = path.join(dataPath,
             `translationAcademy/${translation.language}`);
@@ -83,26 +69,42 @@ export default function Academy(props) {
             responseType: 'blob'
         }).then(response => {
             // write data to file
-            var fileReader = new FileReader();
-            fileReader.onload = function() {
-                const buffer = Buffer.from(new Uint8Array(this.result));
-                fs.writeFileSync(dest, buffer);
+            return new Promise((resolve, reject) => {
+                var fileReader = new FileReader();
+                fileReader.onload = function() {
+                    try {
+                        const buffer = Buffer.from(new Uint8Array(this.result));
+                        fs.writeFileSync(dest, buffer);
 
-                const zip = new AdmZip(dest);
-                zip.extractAllTo(extractDest, true);
-                rimraf.sync(dest);
+                        const zip = new AdmZip(dest);
+                        zip.extractAllTo(extractDest, true);
+                        rimraf.sync(dest);
+                        resolve();
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                fileReader.onerror = event => {
+                    fileReader.abort();
+                    reject(event);
+                };
+                fileReader.readAsArrayBuffer(response.data);
+            });
+        }).then(() => {
+            // TODO: find and cache images
 
-                setConfirmDownload(false);
+            return Promise.resolve();
+        }).then(() => {
+            // set state
+            setConfirmDownload(false);
 
-                // update translation
-                setTranslation({
-                    ...translation,
-                    downloaded: true,
-                    update: false
-                });
-                // TODO: update the catalog as well so it's saved in the cache and displayed in the ui the next time the dialog opens.
-            };
-            fileReader.readAsArrayBuffer(response.data);
+            // update translation
+            setTranslation({
+                ...translation,
+                downloaded: true,
+                update: false
+            });
+            // TODO: update the catalog as well so it's saved in the cache and displayed in the ui the next time the dialog opens.
         }).catch(error => {
             // TODO: show error to user
             // TODO: delete failed download
@@ -203,37 +205,6 @@ export default function Academy(props) {
     // monitor translation validity and load articles
     useEffect(() => {
 
-        function readTOCSection(section, dir) {
-            let sectionArticles = [];
-            if (section.link) {
-                const articleDir = path.join(dir, section.link);
-                const articleTitle = safeRead(
-                    path.join(articleDir, 'title.md'));
-                const articleSubTitle = safeRead(path.join(articleDir,
-                    'sub-title.md'));
-                const articleBody = safeRead(
-                    path.join(articleDir, '01.md'));
-
-                sectionArticles.push({
-                    manualId: path.basename(dir),
-                    articleId: section.link,
-                    title: articleTitle,
-                    subTitle: articleSubTitle,
-                    body: articleBody
-                });
-            }
-
-            // recurse
-            if (section.sections) {
-                section.sections.forEach(s => {
-                    sectionArticles.push.apply(
-                        sectionArticles, readTOCSection(s, dir));
-                });
-            }
-
-            return sectionArticles;
-        }
-
         // no translation
         if (!translation || !translation.downloaded) {
             setArticles([]);
@@ -248,30 +219,10 @@ export default function Academy(props) {
 
         // content available
         if (translation && translation.downloaded) {
-            const dir = getTranslationPath(translation);
+            const reader = new TranslationReader(
+                getTranslationPath(translation));
             try {
-                const manifestPath = path.join(dir,
-                    `${translation.language}_ta`,
-                    'manifest.yaml');
-                const manifest = yaml.safeLoad(
-                    fs.readFileSync(manifestPath, 'utf8'));
-                // TODO: check if manifest is empty
-                let newArticles = [];
-                manifest.projects.forEach(p => {
-                    // load articles in each project
-                    const projectPath = path.join(dir,
-                        `${translation.language}_ta`, p.path);
-                    const tocPath = path.join(projectPath, 'toc.yaml');
-                    const toc = yaml.safeLoad(fs.readFileSync(tocPath, 'utf8'));
-                    // TODO: check if toc is empty
-                    // fall back to file list if toc does not exist
-                    toc.sections.forEach(s => {
-                        newArticles.push.apply(newArticles,
-                            readTOCSection(s, projectPath));
-                    });
-                });
-
-                setArticles(newArticles);
+                setArticles(reader.listArticles());
             } catch (error) {
                 console.error(error);
                 // TODO: the translation is corrupt. Delete it.

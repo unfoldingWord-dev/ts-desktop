@@ -19,6 +19,26 @@ const cache = new SimpleCache(LOCAL_STORAGE);
 
 const TA_CACHE_KEY = 'ta-cache';
 
+function saveBlob(blob, dest) {
+    return new Promise((resolve, reject) => {
+        var fileReader = new FileReader();
+        fileReader.onload = function() {
+            try {
+                const buffer = Buffer.from(new Uint8Array(this.result));
+                fs.writeFileSync(dest, buffer);
+                resolve();
+            } catch (error) {
+                reject(error);
+            }
+        };
+        fileReader.onerror = event => {
+            fileReader.abort();
+            reject(event);
+        };
+        fileReader.readAsArrayBuffer(blob);
+    });
+}
+
 /**
  * Renders the tA page
  * @returns
@@ -69,42 +89,49 @@ export default function Academy(props) {
             responseType: 'blob'
         }).then(response => {
             // write data to file
-            return new Promise((resolve, reject) => {
-                var fileReader = new FileReader();
-                fileReader.onload = function() {
-                    try {
-                        const buffer = Buffer.from(new Uint8Array(this.result));
-                        fs.writeFileSync(dest, buffer);
-
-                        const zip = new AdmZip(dest);
-                        zip.extractAllTo(extractDest, true);
-                        rimraf.sync(dest);
-                        resolve();
-                    } catch (error) {
-                        reject(error);
-                    }
-                };
-                fileReader.onerror = event => {
-                    fileReader.abort();
-                    reject(event);
-                };
-                fileReader.readAsArrayBuffer(response.data);
-            });
-        }).then(() => {
-            const reader = new TranslationReader(
-                getTranslationPath(translation));
-            reader.listArticles(article => {
-                console.log('parsing article', article.title);
-                const regexpImage = /<img\s+src="([^"]*)"\s*>/;
-                let result;
-                while ((result = regexpImage.exec(article.body))) {
-                    console.log('found image', result[1]);
-                    // TODO: cache image
+            return saveBlob(response.data, dest).then(() => {
+                try {
+                    const zip = new AdmZip(dest);
+                    zip.extractAllTo(extractDest, true);
+                    rimraf.sync(dest);
+                    return Promise.resolve();
+                } catch (error) {
+                    return Promise.reject(error);
                 }
             });
-            // TODO: find and cache images
+        }).then(() => {
+            // find images
+            const reader = new TranslationReader(
+                getTranslationPath(translation));
+            const imageLinks = [];
+            try {
+                reader.listArticles(article => {
+                    const result = article.body.match(/!\[]\(([^)]*)\)/g);
+                    if (result) {
+                        const links = result.map(img => {
+                            return img.match(/!\[]\(([^)]*)\)/)[1];
+                        });
+                        imageLinks.push.apply(imageLinks, links);
+                    }
+                });
+            } catch (error) {
+                return Promise.reject(error);
+            }
 
-            return Promise.resolve();
+            return Promise.resolve(imageLinks);
+        }).then(async links => {
+            const cacheDir = path.join(getTranslationPath(translation),
+                'cachedImages');
+            await mkdirp(cacheDir);
+
+            for (let i = 0, len = links.length; i < len; i++) {
+                const response = await axios.get(links[i], {
+                    responseType: 'blob'
+                });
+                const imageDest = path.join(cacheDir,
+                    `${i}-${path.basename(links[i])}`);
+                await saveBlob(response.data, imageDest);
+            }
         }).then(() => {
             // set state
             setConfirmDownload(false);
@@ -119,8 +146,11 @@ export default function Academy(props) {
         }).catch(error => {
             // TODO: show error to user
             // TODO: delete failed download
+            rimraf.sync(dest);
+            rimraf.sync(extractDest);
+
             setTranslation(null);
-            console.log(error);
+            console.error(error);
         });
     }
 

@@ -69,8 +69,6 @@ export default class TranslationReader {
      * @returns {[]}
      */
     listArticles(handler=null) {
-        handler('test');
-        console.log('handler', handler);
         const manifestPath = path.join(this.dir, 'manifest.yaml');
         const manifest = yaml.safeLoad(fs.readFileSync(manifestPath, 'utf8'));
         let articles = [];

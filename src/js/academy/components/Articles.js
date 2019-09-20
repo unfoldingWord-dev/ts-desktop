@@ -14,6 +14,11 @@ const useStyles = makeStyles(theme => ({
     },
     frame: {
         padding: 30
+    },
+    loading: {
+        maxWidth: 600,
+        // margin: '0 auto',
+        // height: 1000
     }
 }));
 
@@ -42,8 +47,14 @@ export default function ArticleList({articles, onClickLink}) {
         // placeholder while articles are loading
         return (
             <div id="articles" className={classes.root}>
-                <List speed={2}/>
-                <BulletList speed={2}/>
+                <div className={classes.frame}>
+                    <div className={classes.loading}>
+                        <List speed={2}/>
+                        <BulletList speed={2}/>
+                        <List speed={2}/>
+                        <List speed={2}/>
+                    </div>
+                </div>
             </div>
 
         );

@@ -107,6 +107,7 @@ export default function Academy(props) {
             `translationAcademy/${translation.language}`);
         const dest = `${extractDest}.zip`;
         mkdirp.sync(extractDest);
+        console.log('downloading to ', extractDest);
 
         axios.get(translation.url, {
             responseType: 'blob'
@@ -229,6 +230,19 @@ export default function Academy(props) {
             console.log(error);
         });
     }
+
+    useEffect(() => {
+        function handleKeyDown(event) {
+            if(event.ctrlKey && event.key === "o") {
+                setTranslation(null);
+            }
+        }
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []);
 
     // keep catalog cached
     useEffect(() => {

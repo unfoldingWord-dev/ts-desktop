@@ -59,12 +59,12 @@ export default function Article(props) {
                 ),
                 div: (props) => <div {...props} style={{width: '100%'}}/>,
                 img: props => {
-                    // console.log('image props', props);
                     if (props.src) {
                         return <img {...props}
                                     src={path.join(articlePath, '.cache',
                                         path.basename(props.src))}/>;
                     } else {
+                        console.warn('Unable to display image', props);
                         return <ImageLoader id="broken-image"/>;
                     }
                 }

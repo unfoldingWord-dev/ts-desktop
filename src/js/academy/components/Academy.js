@@ -12,6 +12,8 @@ import mkdirp from 'mkdirp';
 import rimraf from 'rimraf';
 import ConfirmRemoteLinkDialog from './ConfirmRemoteLinkDialog';
 import TranslationReader from '../TranslationReader';
+import semver from 'semver';
+import {compareAsc} from 'date-fns';
 
 const catalogUrl = 'https://api.door43.org/v3/subjects/Translation_Academy.json';
 
@@ -72,9 +74,30 @@ export default function Academy(props) {
     }
 
     function isTranslationOutdated(translation) {
-        const resourcePath = getTranslationPath(translation);
-        // TODO: check if the translation is outdated
-        return false;
+        if (!translation.downloaded) {
+            return false;
+        }
+
+        try {
+            const reader = new TranslationReader(
+                getTranslationPath(translation));
+            const manifest = reader.readManifest();
+
+            // check version
+            const localVersion = semver.coerce(manifest.dublin_core.version);
+            const remoteVersion = semver.coerce(translation.version);
+            if(semver.gt(remoteVersion, localVersion)) {
+                return true;
+            }
+
+            // check modified
+            const localModified = manifest.dublin_core.modified;
+            const remoteModified = translation.modified;
+            return compareAsc(new Date(remoteModified), new Date(localModified)) > 0;
+        } catch (error) {
+            console.error('Invalid translation', translation, error);
+            return true;
+        }
     }
 
     async function handleConfirmDownload() {
@@ -168,29 +191,36 @@ export default function Academy(props) {
         // TODO: display loading dialog
         axios.get(catalogUrl).then(response => {
             const resources = response.data.map(d => {
-
                 // filter down to the first valid resource container
-                let format = {};
                 try {
-                    format = d.resources[0].formats.filter(f => {
+                    const format = d.resources[0].formats.filter(f => {
                         return f.format.includes('application/zip;') &&
                             f.format.includes('type=man') &&
                             f.format.includes('conformsto=rc0.2');
                     })[0];
+
+                    const trans = {
+                        title: d.title,
+                        direction: d.direction,
+                        language: d.language,
+                        url: format.url,
+                        size: format.size,
+                        // TODO: there seems to be a bug in the api because it does not have the correct modified date in the format.
+                        //  I think the api is using the real modified date from the commit, while the modified date in the manifest is manual.
+                        modified: d.resources[0].modified, // format.modified,
+                        version: d.resources[0].version,
+                        downloaded: isTranslationDownloaded(d)
+                    };
+
+                    return {
+                        ...trans,
+                        update: isTranslationOutdated(trans)
+                    };
+
                 } catch (error) {
                     console.error('The resource is invalid', error, d);
+                    return {};
                 }
-
-                return {
-                    title: d.title,
-                    direction: d.direction,
-                    language: d.language,
-                    update: isTranslationOutdated(d),
-                    downloaded: isTranslationDownloaded(d),
-                    url: format.url,
-                    size: format.size,
-                    modified: format.modified
-                };
             }).filter(r => !!r.url);
             setCatalog(resources);
         }).catch(error => {
@@ -227,6 +257,7 @@ export default function Academy(props) {
             // TRICKY: re-check available resources in case something changed offline.
             catalog.map(r => {
                 r.downloaded = isTranslationDownloaded(r);
+                // TRICKY: check if outdated after checking if downloaded.
                 r.update = isTranslationOutdated(r);
             });
             setCatalog(catalog);

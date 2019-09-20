@@ -25,7 +25,8 @@ const useStyles = makeStyles(theme => ({
 export default function RCLinkContainer(props) {
     const {href, children, onClick} = props;
     const classes = useStyles();
-    const [link, setLink] = useState({title: href ? href : children[0]});
+    const child = children ? children[0] : null;
+    const [link, setLink] = useState({title: href ? href : child});
 
     function handleOpen() {
         if(link.clickable) {
@@ -81,7 +82,7 @@ export default function RCLinkContainer(props) {
             };
         }
 
-        const parsedLink = parseHref(href, children[0]);
+        const parsedLink = parseHref(href, children ? children[0] : null);
 
         if (parsedLink) {
             setLink(parsedLink);
@@ -125,8 +126,6 @@ export default function RCLinkContainer(props) {
 }
 
 RCLinkContainer.propTypes = {
-    href: PropTypes.string.isRequired
-    // addTab: PropTypes.func.isRequired,
-    // context: PropTypes.object.isRequired,
-    // setContext: PropTypes.func.isRequired,
+    href: PropTypes.string.isRequired,
+    children: PropTypes.array
 };

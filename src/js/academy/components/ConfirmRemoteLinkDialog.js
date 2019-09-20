@@ -13,8 +13,12 @@ export default function ConfirmRemoteLinkDialog(props) {
 }
 
 ConfirmRemoteLinkDialog.propTypes = {
-    href: PropTypes.string.isRequired,
+    href: PropTypes.string,
     open: PropTypes.bool.isRequired,
     onOk: PropTypes.func.isRequired,
     onCancel: PropTypes.func.isRequired
+};
+
+ConfirmRemoteLinkDialog.defaultProps = {
+    href: ''
 };

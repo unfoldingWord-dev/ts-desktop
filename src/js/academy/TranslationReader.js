@@ -61,6 +61,16 @@ export default class TranslationReader {
     constructor(dir) {
         this.dir = dir;
         this.listArticles = this.listArticles.bind(this);
+        this.readManifest = this.readManifest.bind(this);
+    }
+
+    /**
+     * @throws {Error} if the translation is corrupt
+     * @returns {*}
+     */
+    readManifest() {
+        const manifestPath = path.join(this.dir, 'manifest.yaml');
+        return yaml.safeLoad(fs.readFileSync(manifestPath, 'utf8'));
     }
 
     /**
@@ -70,20 +80,32 @@ export default class TranslationReader {
      * @returns {[]}
      */
     listArticles(handler=null) {
-        const manifestPath = path.join(this.dir, 'manifest.yaml');
-        const manifest = yaml.safeLoad(fs.readFileSync(manifestPath, 'utf8'));
+        const manifest = this.readManifest();
         let articles = [];
         manifest.projects.forEach(p => {
             // load articles in each project
             const projectPath = path.join(this.dir, p.path);
             const tocPath = path.join(projectPath, 'toc.yaml');
             const toc = yaml.safeLoad(fs.readFileSync(tocPath, 'utf8'));
-            // TODO: check if toc is empty
-            //  fall back to file list if toc does not exist
-            toc.sections.forEach(s => {
-                articles.push.apply(articles,
-                    readTOCSection(s, projectPath, handler));
-            });
+            if(toc) {
+                toc.sections.forEach(s => {
+                    articles.push.apply(articles,
+                        readTOCSection(s, projectPath, handler));
+                });
+            } else {
+                // TODO: test this
+                // fallback to directory listing
+                console.warn(`Table of contents not found in ${projectPath}`);
+                const files = fs.readdirSync(projectPath);
+                files.forEach(f => {
+                    const dir = path.join(projectPath, f);
+                    const isDir = fs.existsSync(dir) && fs.lstatSync(dir).isDirectory();
+                    if(isDir) {
+                        articles.push.apply(articles,
+                            readTOCSection(f, projectPath, handler));
+                    }
+                });
+            }
         });
 
         return articles;

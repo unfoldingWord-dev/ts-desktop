@@ -1,11 +1,24 @@
 import React, {useEffect, useState} from 'react';
-import {List} from 'react-content-loader';
+import ContentLoader, {List} from 'react-content-loader';
 import remark from 'remark';
 import remark2react from 'remark-react';
 import PropTypes from 'prop-types';
 import {makeStyles} from '@material-ui/core';
 import path from 'path';
 import RCLinkContainer from './RCLinkContainer';
+
+const ImageLoader = () => (
+    <ContentLoader
+        height={400}
+        width={400}
+        speed={2}
+        style={{height: 400}}
+        primaryColor="#f3f3f3"
+        secondaryColor="#ecebeb"
+    >
+        <rect x="28" y="24" rx="5" ry="5" width="344" height="344" />
+    </ContentLoader>
+);
 
 const useStyles = makeStyles(theme => ({
     ltr: {
@@ -46,7 +59,14 @@ export default function Article(props) {
                 ),
                 div: (props) => <div {...props} style={{width: '100%'}}/>,
                 img: props => {
-                    return <img {...props} src={path.join(articlePath, '.cache', path.basename(props.src))}/>;
+                    // console.log('image props', props);
+                    if (props.src) {
+                        return <img {...props}
+                                    src={path.join(articlePath, '.cache',
+                                        path.basename(props.src))}/>;
+                    } else {
+                        return <ImageLoader id="broken-image"/>;
+                    }
                 }
             }
         };
@@ -66,7 +86,8 @@ export default function Article(props) {
     }, [body]);
 
     return (
-        <div id={articleId} className={direction === 'rtl' ? classes.rtl : classes.ltr}>
+        <div id={articleId}
+             className={direction === 'rtl' ? classes.rtl : classes.ltr}>
             <h1>{title}</h1>
             <h2>{subTitle}</h2>
             {component}

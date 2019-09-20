@@ -109,7 +109,10 @@ export default function Academy(props) {
                     const result = article.body.match(/!\[]\(([^)]*)\)/g);
                     if (result) {
                         const links = result.map(img => {
-                            return img.match(/!\[]\(([^)]*)\)/)[1];
+                            return {
+                                articlePath: article.path,
+                                href: img.match(/!\[]\(([^)]*)\)/)[1]
+                            };
                         });
                         imageLinks.push.apply(imageLinks, links);
                     }
@@ -120,16 +123,15 @@ export default function Academy(props) {
 
             return Promise.resolve(imageLinks);
         }).then(async links => {
-            const cacheDir = path.join(getTranslationPath(translation),
-                'cachedImages');
-            await mkdirp(cacheDir);
-
             for (let i = 0, len = links.length; i < len; i++) {
-                const response = await axios.get(links[i], {
+                const link = links[i];
+                const response = await axios.get(link.href, {
                     responseType: 'blob'
                 });
+                const cacheDir = path.join(link.articlePath, '.cache');
+                await mkdirp(cacheDir);
                 const imageDest = path.join(cacheDir,
-                    `${i}-${path.basename(links[i])}`);
+                    `${path.basename(link.href)}`);
                 await saveBlob(response.data, imageDest);
             }
         }).then(() => {

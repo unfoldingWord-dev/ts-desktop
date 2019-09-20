@@ -4,6 +4,7 @@ import remark from 'remark';
 import remark2react from 'remark-react';
 import PropTypes from 'prop-types';
 import {makeStyles} from '@material-ui/core';
+import path from 'path';
 import RCLinkContainer from './RCLinkContainer';
 
 const useStyles = makeStyles(theme => ({
@@ -22,7 +23,7 @@ const useStyles = makeStyles(theme => ({
  * @constructor
  */
 export default function Article(props) {
-    const {title, subTitle, body, manualId, articleId, direction, onClickLink} = props;
+    const {title, subTitle, body, manualId, path: articlePath, articleId, direction, onClickLink} = props;
     const [component, setComponent] = useState(<List speed={2}/>);
     const classes = useStyles();
 
@@ -45,9 +46,7 @@ export default function Article(props) {
                 ),
                 div: (props) => <div {...props} style={{width: '100%'}}/>,
                 img: props => {
-                    // TODO: render local images
-                    console.log('rendering image', props);
-                    return <img {...props} />;
+                    return <img {...props} src={path.join(articlePath, '.cache', path.basename(props.src))}/>;
                 }
             }
         };
@@ -79,6 +78,7 @@ Article.propTypes = {
     manualId: PropTypes.string.isRequired,
     articleId: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
+    path: PropTypes.string.isRequired,
     subTitle: PropTypes.string,
     body: PropTypes.string,
     direction: PropTypes.string.isRequired,

@@ -31,6 +31,7 @@ function readTOCSection(section, dir, handler) {
         const articleBody = safeRead(path.join(articleDir, '01.md'));
 
         let article = {
+            path: articleDir,
             manualId: path.basename(dir),
             articleId: section.link,
             title: articleTitle,

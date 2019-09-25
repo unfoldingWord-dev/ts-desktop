@@ -47,7 +47,8 @@ function saveBlob(blob, dest) {
  * @constructor
  */
 export default function Academy(props) {
-    const {lang, onClose, articleId, dataPath, onOpenLink} = props;
+    const {lang : initialLang, onClose, articleId, dataPath, onOpenLink} = props;
+    const [lang, setLang] = useState(initialLang);
     const [articles, setArticles] = useState([]);
     const [catalog, setCatalog] = useState([]);
     const [confirmDownload, setConfirmDownload] = useState(false);
@@ -237,6 +238,7 @@ export default function Academy(props) {
     useEffect(() => {
         function handleKeyDown(event) {
             if (event.ctrlKey && event.key === 'o') {
+                setLang(null);
                 setTranslation(null);
             }
         }

@@ -70,7 +70,6 @@ export default function Article(props) {
                 }
             }
         };
-        // TODO: set rendering options
         setTimeout(() => {
             remark().
                 use(remark2react, options).

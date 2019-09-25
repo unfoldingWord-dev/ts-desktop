@@ -73,6 +73,7 @@ export default function Academy(props) {
         return fs.existsSync(getTranslationPath(translation));
     }
 
+    // TODO: test this
     function isTranslationOutdated(translation) {
         if (!translation.downloaded) {
             return false;
@@ -86,14 +87,15 @@ export default function Academy(props) {
             // check version
             const localVersion = semver.coerce(manifest.dublin_core.version);
             const remoteVersion = semver.coerce(translation.version);
-            if(semver.gt(remoteVersion, localVersion)) {
+            if (semver.gt(remoteVersion, localVersion)) {
                 return true;
             }
 
             // check modified
             const localModified = manifest.dublin_core.modified;
             const remoteModified = translation.modified;
-            return compareAsc(new Date(remoteModified), new Date(localModified)) > 0;
+            return compareAsc(new Date(remoteModified),
+                new Date(localModified)) > 0;
         } catch (error) {
             console.error('Invalid translation', translation, error);
             return true;
@@ -171,7 +173,7 @@ export default function Academy(props) {
             // TODO: update the catalog as well so it's saved in the cache and displayed in the ui the next time the dialog opens.
         }).catch(error => {
             // TODO: show error to user
-            // TODO: delete failed download
+
             rimraf.sync(dest);
             rimraf.sync(extractDest);
 
@@ -207,7 +209,7 @@ export default function Academy(props) {
                         url: format.url,
                         size: format.size,
                         // TODO: there seems to be a bug in the api because it does not have the correct modified date in the format.
-                        //  I think the api is using the real modified date from the commit, while the modified date in the manifest is manual.
+                        //  I think the api is using the real modified date from the commit, while the modified date in the manifest is manually updated and can become stale.
                         modified: d.resources[0].modified, // format.modified,
                         version: d.resources[0].version,
                         downloaded: isTranslationDownloaded(d)
@@ -227,13 +229,14 @@ export default function Academy(props) {
         }).catch(error => {
             // TODO: show error to user
             setCatalog([]);
-            console.log(error);
+            console.error(error);
         });
     }
 
+    // listen to keyboard
     useEffect(() => {
         function handleKeyDown(event) {
-            if(event.ctrlKey && event.key === "o") {
+            if (event.ctrlKey && event.key === 'o') {
                 setTranslation(null);
             }
         }
@@ -278,14 +281,17 @@ export default function Academy(props) {
         }
     }, [dataPath]);
 
-    // listen to prop changes
+    // load correct translation
     useEffect(() => {
-        // TODO: watching the translation and article should be in two separate effects.
-        const newTranslation = catalog.filter(
-            t => t.language === lang)[0];
-        setTranslation(newTranslation);
+        const filtered = catalog.filter(t => t.language === lang);
+        if (filtered.length > 0) {
+            setTranslation(filtered[0]);
+        } else {
+            setTranslation(null);
+        }
     }, [lang]);
 
+    // scroll to article
     useEffect(() => {
         handleScroll(articleId);
     }, [articleId]);
@@ -312,8 +318,9 @@ export default function Academy(props) {
             try {
                 setArticles(reader.listArticles());
             } catch (error) {
-                console.error(error);
-                // TODO: the translation is corrupt. Delete it.
+                console.error('The translation is corrupt', error);
+                const dir = getTranslationPath(translation);
+                rimraf.sync(dir);
                 // TODO: show error to user.
             }
         }

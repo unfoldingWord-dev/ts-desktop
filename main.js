@@ -94,15 +94,20 @@ function initialize() {
      * @param lang - the translation to view
      * @param id - the article id
      */
-    ipcMain.on('open-academy', function(event, lang, id) {
-        scrollToId = id;
+    ipcMain.on('open-academy', function(event, args) {
+        let lang, id;
+        if(args) {
+            lang = args.lang;
+            id = args.id;
+        }
 
         if (academyWindow) {
             academyWindow.show();
             // send props to window
             academyWindow.webContents.send('props', {
                 lang,
-                articleId: id
+                articleId: id,
+                dataPath: getDataPath()
             });
         } else {
             createAcademySplash();
@@ -113,7 +118,6 @@ function initialize() {
                     splashScreen.close();
                     academyWindow.show();
                     // send props to window
-                    console.log('sending data path', getDataPath());
                     academyWindow.webContents.send('props', {
                         lang,
                         articleId: id,

@@ -54,6 +54,7 @@ export default function Academy(props) {
     const [translation, setTranslation] = useState(null);
     const [confirmLink, setConfirmLink] = useState(false);
     const [clickedLink, setClickedLink] = useState(null);
+    const [loadingCatalog, setLoadingCatalog] = useState(true);
 
     function handleCancelDownload() {
         setConfirmDownload(false);
@@ -109,7 +110,6 @@ export default function Academy(props) {
             `translationAcademy/${translation.language}`);
         const dest = `${extractDest}.zip`;
         mkdirp.sync(extractDest);
-        console.log('downloading to ', extractDest);
 
         axios.get(translation.url, {
             responseType: 'blob'
@@ -270,6 +270,7 @@ export default function Academy(props) {
 
         // TRICKY: we need the dataPath to check if things are downloaded
         if (dataPath) {
+            setLoadingCatalog(true);
             const catalog = getCachedCatalog();
             // TRICKY: re-check available resources in case something changed offline.
             catalog.map(r => {
@@ -279,6 +280,7 @@ export default function Academy(props) {
             });
             setCatalog(catalog);
         }
+        setLoadingCatalog(false);
     }, [dataPath]);
 
     // load correct translation
@@ -289,12 +291,12 @@ export default function Academy(props) {
         } else {
             setTranslation(null);
         }
-    }, [lang]);
+    }, [lang, catalog]);
 
     // scroll to article
     useEffect(() => {
         handleScroll(articleId);
-    }, [articleId]);
+    }, [articleId, articles]);
 
     // monitor translation validity and load articles
     useEffect(() => {
@@ -354,7 +356,7 @@ export default function Academy(props) {
     return (
         <>
             <Articles articles={articles} onClickLink={handleClickLink}/>
-            <ChooseTranslationDialog open={!translation}
+            <ChooseTranslationDialog open={!translation && !loadingCatalog}
                                      options={catalog}
                                      onUpdate={handleCheckForUpdate}
                                      onClose={handleSelectTranslation}/>

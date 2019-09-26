@@ -234,6 +234,11 @@ export default function Academy(props) {
         });
     }
 
+    // get the language updates.
+    useEffect(() => {
+        setLang(initialLang);
+    }, [initialLang]);
+
     // listen to keyboard
     useEffect(() => {
         function handleKeyDown(event) {
@@ -360,6 +365,7 @@ export default function Academy(props) {
             <Articles articles={articles} onClickLink={handleClickLink}/>
             <ChooseTranslationDialog open={!translation && !loadingCatalog}
                                      options={catalog}
+                                     initialValue={lang}
                                      onUpdate={handleCheckForUpdate}
                                      onClose={handleSelectTranslation}/>
             <ConfirmDownloadDialog

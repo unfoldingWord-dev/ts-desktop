@@ -60,8 +60,8 @@ function LocalizedTitle(props) {
 }
 
 export function ConfirmationDialogRaw(props) {
-    const {onClose, onUpdate, options, open, ...other} = props;
-    const [value, setValue] = React.useState(null);
+    const {onClose, onUpdate, initialValue, options, open, ...other} = props;
+    const [value, setValue] = React.useState(initialValue);
     const radioGroupRef = React.useRef(null);
     const classes = useRawStyles();
 
@@ -165,6 +165,7 @@ export function ConfirmationDialogRaw(props) {
 
 ConfirmationDialogRaw.propTypes = {
     onClose: PropTypes.func.isRequired,
+    initialValue: PropTypes.string,
     open: PropTypes.bool.isRequired,
     onUpdate: PropTypes.func.isRequired,
     options: PropTypes.array.isRequired
@@ -184,7 +185,7 @@ const useStyles = makeStyles(theme => ({
 
 export default function ChooseTranslationDialog(props) {
     const classes = useStyles();
-    const {onClose, onUpdate, options} = props;
+    const {onClose, onUpdate, initialValue, options} = props;
 
     return (
         <ConfirmationDialogRaw
@@ -192,6 +193,7 @@ export default function ChooseTranslationDialog(props) {
                 paper: classes.paper
             }}
             options={options}
+            initialValue={initialValue}
             id="translation-menu"
             keepMounted
             open={props.open}
@@ -204,6 +206,7 @@ export default function ChooseTranslationDialog(props) {
 ChooseTranslationDialog.propTypes = {
     onClose: PropTypes.func.isRequired,
     onUpdate: PropTypes.func.isRequired,
+    initialValue: PropTypes.string,
     options: PropTypes.arrayOf(PropTypes.shape({
         title: PropTypes.string.isRequired,
         direction: PropTypes.string.isRequired,

@@ -189,6 +189,7 @@ export default function Academy(props) {
             };
 
             // TODO: update catalog as well so that ctr+o will display an updated dialog
+            //  this action is hidden from the UI though, so it won't be too common.
             setTranslation(updatedTranslation);
 
             // TRICKY: set loading to finished

@@ -86,26 +86,30 @@ export default class TranslationReader {
             // load articles in each project
             const projectPath = path.join(this.dir, p.path);
             const tocPath = path.join(projectPath, 'toc.yaml');
-            const toc = yaml.safeLoad(fs.readFileSync(tocPath, 'utf8'));
-            if(toc) {
-                toc.sections.forEach(s => {
-                    articles.push.apply(articles,
-                        readTOCSection(s, projectPath, handler));
-                });
-            } else {
-                // TODO: test this
-                // fallback to directory listing
-                console.warn(`Table of contents not found in ${projectPath}`);
-                const files = fs.readdirSync(projectPath);
-                files.forEach(f => {
-                    const dir = path.join(projectPath, f);
-                    const isDir = fs.existsSync(dir) && fs.lstatSync(dir).isDirectory();
-                    if(isDir) {
+            if(fs.existsSync(tocPath)) {
+                const toc = yaml.safeLoad(fs.readFileSync(tocPath, 'utf8'));
+                if (toc) {
+                    toc.sections.forEach(s => {
                         articles.push.apply(articles,
-                            readTOCSection(f, projectPath, handler));
-                    }
-                });
+                            readTOCSection(s, projectPath, handler));
+                    });
+                    return;
+                }
             }
+
+            // fallback to directory listing
+            console.warn(`Table of contents not found in ${projectPath}`);
+            const files = fs.readdirSync(projectPath);
+            files.forEach(f => {
+                const dir = path.join(projectPath, f);
+                const isDir = fs.existsSync(dir) && fs.lstatSync(dir).isDirectory();
+                if (isDir) {
+                    articles.push.apply(articles,
+                        readTOCSection({
+                            link: f
+                        }, projectPath, handler));
+                }
+            });
         });
 
         return articles;

@@ -81,7 +81,6 @@ export default function Academy(props) {
         return fs.existsSync(getTranslationPath(translation));
     }
 
-    // TODO: test this
     function isTranslationOutdated(translation) {
         if (!translation.downloaded) {
             return false;
@@ -188,20 +187,14 @@ export default function Academy(props) {
                 downloaded: true,
                 update: false
             };
+
+            // TODO: update catalog as well so that ctr+o will display an updated dialog
             setTranslation(updatedTranslation);
-
-            // TRICKY: update catalog so menu is updated.
-            const updatedCatalog = catalog.filter(c => {
-                return c.language !== updatedTranslation.language;
-            });
-            updatedCatalog.push(updatedTranslation);
-            // setCatalog(updatedCatalog);
-
 
             // TRICKY: set loading to finished
             setLoading({
                 loadingTitle: 'Downloading',
-                loadingMessage: 'Downloading translationAcademy. Almost done.',
+                loadingMessage: 'Downloading translationAcademy. Please wait.',
                 progress: 1
             });
 
@@ -210,7 +203,6 @@ export default function Academy(props) {
                 setLoading({});
             }, 1000);
         }).catch(error => {
-            // TODO: test
             setError('Unable to download translationAcademy. Please try again.');
             setLoading({});
             setConfirmDownload(false);
@@ -253,7 +245,7 @@ export default function Academy(props) {
                         language: d.language,
                         url: format.url,
                         size: format.size,
-                        // TODO: there seems to be a bug in the api because it does not have the correct modified date in the format.
+                        // TRICKY: there seems to be a bug in the api because it does not have the correct modified date in the format.
                         //  I think the api is using the real modified date from the commit, while the modified date in the manifest is manually updated and can become stale.
                         modified: d.resources[0].modified, // format.modified,
                         version: d.resources[0].version,
@@ -275,7 +267,7 @@ export default function Academy(props) {
             // TRICKY: set loading to finished
             setLoading({
                 loadingTitle: 'Updating',
-                loadingMessage: 'Looking for updates to translationAcademy. Almost done.',
+                loadingMessage: 'Looking for updates to translationAcademy. Please wait.',
                 progress: 1
             });
 
@@ -285,9 +277,7 @@ export default function Academy(props) {
             }, 1000);
         }).catch(error => {
             setLoading({});
-            // TODO: test
             setError('Unable to check for updates. Please try again.');
-            setCatalog([]);
             console.error(error);
         });
     }
@@ -388,8 +378,8 @@ export default function Academy(props) {
                 console.error('The translation is corrupt', error);
                 const dir = getTranslationPath(translation);
                 rimraf.sync(dir);
-                // TODO: test
                 setError('The translation is corrupt. Please try again.');
+                setTranslation(null);
             }
         }
     }, [translation]);

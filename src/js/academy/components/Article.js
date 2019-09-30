@@ -75,8 +75,7 @@ export default function Article(props) {
                 use(remark2react, options).
                 process(body, (error, file) => {
                     if (error) {
-                        // TODO: render error
-                        console.error(error);
+                        console.error(`Failed to render the article at ${articlePath}`, error);
                     } else {
                         setComponent(file.contents);
                     }

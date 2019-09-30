@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import ChooseTranslationDialog from './ChooseTranslationDialog';
 import Articles from './Articles';
 import PropTypes from 'prop-types';
@@ -14,6 +14,7 @@ import ConfirmRemoteLinkDialog from './ConfirmRemoteLinkDialog';
 import TranslationReader from '../TranslationReader';
 import semver from 'semver';
 import {compareAsc} from 'date-fns';
+import LoadingDialog from "./LoadingDialog";
 
 const catalogUrl = 'https://api.door43.org/v3/subjects/Translation_Academy.json';
 
@@ -24,7 +25,7 @@ const TA_CACHE_KEY = 'ta-cache';
 function saveBlob(blob, dest) {
     return new Promise((resolve, reject) => {
         var fileReader = new FileReader();
-        fileReader.onload = function() {
+        fileReader.onload = function () {
             try {
                 const buffer = Buffer.from(new Uint8Array(this.result));
                 fs.writeFileSync(dest, buffer);
@@ -47,7 +48,7 @@ function saveBlob(blob, dest) {
  * @constructor
  */
 export default function Academy(props) {
-    const {lang : initialLang, onClose, articleId, dataPath, onOpenLink} = props;
+    const {lang: initialLang, onClose, articleId, dataPath, onOpenLink} = props;
     const [lang, setLang] = useState(initialLang);
     const [articles, setArticles] = useState([]);
     const [catalog, setCatalog] = useState([]);
@@ -56,6 +57,9 @@ export default function Academy(props) {
     const [confirmLink, setConfirmLink] = useState(false);
     const [clickedLink, setClickedLink] = useState(null);
     const [loadingCatalog, setLoadingCatalog] = useState(true);
+    const [loading, setLoading] = useState({});
+
+    const {loadingTitle, loadingMessage, progress: loadingProgress} = loading;
 
     function handleCancelDownload() {
         setConfirmDownload(false);
@@ -105,15 +109,29 @@ export default function Academy(props) {
     }
 
     async function handleConfirmDownload() {
-
-        // TODO: display loading dialog
+        setConfirmDownload(false);
+        setLoading({
+            loadingTitle: 'Downloading',
+            loadingMessage: 'Please wait',
+            progress: 0
+        });
         const extractDest = path.join(dataPath,
             `translationAcademy/${translation.language}`);
         const dest = `${extractDest}.zip`;
         mkdirp.sync(extractDest);
 
         axios.get(translation.url, {
-            responseType: 'blob'
+            responseType: 'blob',
+            onDownloadProgress: progressEvent => {
+                if(progressEvent.lengthComputable) {
+                    const progress = progressEvent.loaded / progressEvent.total;
+                    setLoading({
+                        loadingTitle: 'Downloading',
+                        loadingMessage: 'Please wait',
+                        progress
+                    });
+                }
+            }
         }).then(response => {
             // write data to file
             return saveBlob(response.data, dest).then(() => {
@@ -133,12 +151,12 @@ export default function Academy(props) {
             const imageLinks = [];
             try {
                 reader.listArticles(article => {
-                    const result = article.body.match(/!\[]\(([^)]*)\)/g);
+                    const result = article.body.match(/!\[]\(([^)]+)\)/g);
                     if (result) {
                         const links = result.map(img => {
                             return {
                                 articlePath: article.path,
-                                href: img.match(/!\[]\(([^)]*)\)/)[1]
+                                href: img.match(/!\[]\(([^)]+)\)/)[1]
                             };
                         });
                         imageLinks.push.apply(imageLinks, links);
@@ -162,18 +180,30 @@ export default function Academy(props) {
                 await saveBlob(response.data, imageDest);
             }
         }).then(() => {
-            // set state
-            setConfirmDownload(false);
-
             // update translation
             setTranslation({
                 ...translation,
                 downloaded: true,
                 update: false
             });
+
+            // TRICKY: set loading to finished
+            setLoading({
+                loadingTitle: 'Downloading',
+                loadingMessage: 'Please wait',
+                progress: 1
+            });
+
+            // TRICKY: wait a moment to ensure minimum loading time
+            setTimeout(() => {
+                setLoading({});
+            }, 1000);
             // TODO: update the catalog as well so it's saved in the cache and displayed in the ui the next time the dialog opens.
         }).catch(error => {
             // TODO: show error to user
+            console.warn('cleaning up failed download', extractDest);
+            setLoading({});
+            setConfirmDownload(false);
 
             rimraf.sync(dest);
             rimraf.sync(extractDest);
@@ -377,6 +407,7 @@ export default function Academy(props) {
                                      open={confirmLink}
                                      onCancel={handleCancelLink}
                                      onOk={handleConfirmLink}/>
+            <LoadingDialog open={!!loadingTitle} title={loadingTitle} message={loadingMessage} progress={loadingProgress}/>
         </>
     );
 }

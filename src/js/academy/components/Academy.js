@@ -15,6 +15,7 @@ import TranslationReader from '../TranslationReader';
 import semver from 'semver';
 import {compareAsc} from 'date-fns';
 import LoadingDialog from "./LoadingDialog";
+import ErrorDialog from "./ErrorDialog";
 
 const catalogUrl = 'https://api.door43.org/v3/subjects/Translation_Academy.json';
 
@@ -58,6 +59,7 @@ export default function Academy(props) {
     const [clickedLink, setClickedLink] = useState(null);
     const [loadingCatalog, setLoadingCatalog] = useState(true);
     const [loading, setLoading] = useState({});
+    const [errorMessage, setError] = useState(null);
 
     const {loadingTitle, loadingMessage, progress: loadingProgress} = loading;
 
@@ -112,7 +114,7 @@ export default function Academy(props) {
         setConfirmDownload(false);
         setLoading({
             loadingTitle: 'Downloading',
-            loadingMessage: 'Please wait',
+            loadingMessage: 'Downloading translationAcademy. Please wait.',
             progress: 0
         });
         const extractDest = path.join(dataPath,
@@ -123,11 +125,11 @@ export default function Academy(props) {
         axios.get(translation.url, {
             responseType: 'blob',
             onDownloadProgress: progressEvent => {
-                if(progressEvent.lengthComputable) {
+                if (progressEvent.lengthComputable) {
                     const progress = progressEvent.loaded / progressEvent.total;
                     setLoading({
                         loadingTitle: 'Downloading',
-                        loadingMessage: 'Please wait',
+                        loadingMessage: 'Downloading translationAcademy. Please wait.',
                         progress
                     });
                 }
@@ -181,16 +183,25 @@ export default function Academy(props) {
             }
         }).then(() => {
             // update translation
-            setTranslation({
+            const updatedTranslation = {
                 ...translation,
                 downloaded: true,
                 update: false
+            };
+            setTranslation(updatedTranslation);
+
+            // TRICKY: update catalog so menu is updated.
+            const updatedCatalog = catalog.filter(c => {
+                return c.language !== updatedTranslation.language;
             });
+            updatedCatalog.push(updatedTranslation);
+            // setCatalog(updatedCatalog);
+
 
             // TRICKY: set loading to finished
             setLoading({
                 loadingTitle: 'Downloading',
-                loadingMessage: 'Please wait',
+                loadingMessage: 'Downloading translationAcademy. Almost done.',
                 progress: 1
             });
 
@@ -198,10 +209,9 @@ export default function Academy(props) {
             setTimeout(() => {
                 setLoading({});
             }, 1000);
-            // TODO: update the catalog as well so it's saved in the cache and displayed in the ui the next time the dialog opens.
         }).catch(error => {
-            // TODO: show error to user
-            console.warn('cleaning up failed download', extractDest);
+            // TODO: test
+            setError('Unable to download translationAcademy. Please try again.');
             setLoading({});
             setConfirmDownload(false);
 
@@ -222,7 +232,11 @@ export default function Academy(props) {
     }
 
     function handleCheckForUpdate() {
-        // TODO: display loading dialog
+        setLoading({
+            loadingTitle: 'Updating',
+            loadingMessage: 'Looking for updates to translationAcademy. Please wait.',
+            progress: 0
+        });
         axios.get(catalogUrl).then(response => {
             const resources = response.data.map(d => {
                 // filter down to the first valid resource container
@@ -257,8 +271,22 @@ export default function Academy(props) {
                 }
             }).filter(r => !!r.url);
             setCatalog(resources);
+
+            // TRICKY: set loading to finished
+            setLoading({
+                loadingTitle: 'Updating',
+                loadingMessage: 'Looking for updates to translationAcademy. Almost done.',
+                progress: 1
+            });
+
+            // TRICKY: wait a moment to ensure minimum loading time
+            setTimeout(() => {
+                setLoading({});
+            }, 1000);
         }).catch(error => {
-            // TODO: show error to user
+            setLoading({});
+            // TODO: test
+            setError('Unable to check for updates. Please try again.');
             setCatalog([]);
             console.error(error);
         });
@@ -360,7 +388,8 @@ export default function Academy(props) {
                 console.error('The translation is corrupt', error);
                 const dir = getTranslationPath(translation);
                 rimraf.sync(dir);
-                // TODO: show error to user.
+                // TODO: test
+                setError('The translation is corrupt. Please try again.');
             }
         }
     }, [translation]);
@@ -390,6 +419,10 @@ export default function Academy(props) {
         setConfirmLink(false);
     }
 
+    function handleDismissError() {
+        setError(null);
+    }
+
     return (
         <>
             <Articles articles={articles} onClickLink={handleClickLink}/>
@@ -407,7 +440,9 @@ export default function Academy(props) {
                                      open={confirmLink}
                                      onCancel={handleCancelLink}
                                      onOk={handleConfirmLink}/>
-            <LoadingDialog open={!!loadingTitle} title={loadingTitle} message={loadingMessage} progress={loadingProgress}/>
+            <LoadingDialog open={!!loadingTitle} title={loadingTitle} message={loadingMessage}
+                           progress={loadingProgress}/>
+            <ErrorDialog title="Error" message={errorMessage} open={errorMessage !== null} onClose={handleDismissError}/>
         </>
     );
 }

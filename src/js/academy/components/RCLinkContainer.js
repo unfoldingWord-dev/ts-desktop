@@ -68,7 +68,7 @@ export default function RCLinkContainer(props) {
             }
 
             if (!linkTitle) {
-                // TODO: load the title
+                // TODO: load the title from the file system
                 console.warn('missing title for', props);
                 linkTitle = href;
             }

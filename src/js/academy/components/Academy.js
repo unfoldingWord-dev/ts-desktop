@@ -50,7 +50,7 @@ function saveBlob(blob, dest) {
  */
 export default function Academy(props) {
     const {lang: initialLang, onClose, articleId, dataPath, onOpenLink} = props;
-    const [lang, setLang] = useState(initialLang);
+    const [lang, setLang] = useLanguage(initialLang);
     const [articles, setArticles] = useState([]);
     const [catalog, setCatalog] = useState([]);
     const [confirmDownload, setConfirmDownload] = useState(false);
@@ -295,11 +295,6 @@ export default function Academy(props) {
         });
     }
 
-    // get the language updates.
-    useEffect(() => {
-        setLang(initialLang);
-    }, [initialLang]);
-
     // listen to keyboard
     useEffect(() => {
         function handleKeyDown(event) {
@@ -456,3 +451,17 @@ Academy.propTypes = {
     articleId: PropTypes.string,
     onOpenLink: PropTypes.func.isRequired
 };
+
+/**
+ * Provides control over the current language while still receiving updates from the parent component
+ * @param initialLang
+ */
+function useLanguage(initialLang) {
+    const [lang, setLang] = useState(initialLang);
+
+    useEffect(() => {
+        setLang(initialLang);
+    }, [initialLang]);
+
+    return [lang, setLang];
+}

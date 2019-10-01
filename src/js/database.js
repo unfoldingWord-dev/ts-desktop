@@ -1,5 +1,7 @@
 'use strict';
 
+const requireES6 = require('./require-es6');
+const {downloadtACatalog, cacheCatalog} = requireES6('../js/academy/util');
 var _ = require('lodash');
 var request = require('request');
 var utils = require('../js/lib/utils');
@@ -8,7 +10,25 @@ var path = require('path');
 var yaml = require('js-yaml');
 var mkdirp = require('mkdirp');
 
-function DataManager(db, resourceDir, apiURL, sourceDir) {
+function DataManager(db, resourceDir, apiURL, sourceDir, dataPath) {
+
+    /**
+     * This will safely download and cache the tA catalog.
+     * @returns {*|undefined|Promise<any | void>}
+     */
+    function updateTACatalog() {
+        return downloadtACatalog(dataPath).then(catalog => {
+            try {
+                cacheCatalog(catalog);
+            } catch(error) {
+                console.error('Failed to cache the tA catalog', error);
+            }
+            return Promise.resolve();
+        }).catch(error => {
+            console.error('Failed to download the tA catalog', error);
+            return Promise.resolve();
+        });
+    }
 
     return {
 
@@ -17,11 +37,19 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
         },
 
         updateLanguages: function (onProgress) {
-            return db.updateCatalogs(onProgress);
+            // TRICKY: inject the tA update
+            return updateTACatalog().then(() => {
+                // continue with normal update
+                return db.updateCatalogs(onProgress);
+            });
         },
 
         updateSources: function (onProgress) {
-            return db.updateSources(apiURL, onProgress);
+            // TRICKY: inject the tA update
+            return updateTACatalog().then(() => {
+                // continue with normal update
+                return db.updateSources(apiURL, onProgress);
+            });
         },
 
         updateChunks: function () {

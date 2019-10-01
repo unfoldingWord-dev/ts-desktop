@@ -69,7 +69,7 @@ function isTranslationOutdated(translation, datapath) {
  * @param datapath {string} the directory where translationStudio data is stored.
  * @returns {Promise<AxiosResponse<any>>}
  */
-async function downloadtACatalog(datapath) {
+export async function downloadtACatalog(datapath) {
     const response = await axios.get(catalogUrl);
     const resources = response.data.map(d => {
         // filter down to the first valid resource container
@@ -105,6 +105,12 @@ async function downloadtACatalog(datapath) {
     }).filter(r => !!r.url);
 
     return resources;
+}
+
+export function cacheCatalog(catalog) {
+    if (catalog && catalog.length) {
+        cache.set(TA_CACHE_KEY, JSON.stringify(catalog));
+    }
 }
 
 /**
@@ -161,9 +167,7 @@ export function useCatalog(dataPath) {
 
     // keep catalog cached
     useEffect(() => {
-        if (catalog && catalog.length) {
-            cache.set(TA_CACHE_KEY, JSON.stringify(catalog));
-        }
+        cacheCatalog(catalog);
     }, [catalog]);
 
     return {

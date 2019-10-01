@@ -1,4 +1,3 @@
-require("@babel/register");
-require("core-js/stable");
-require("regenerator-runtime/runtime");
-require("../js/academy/reactapp");
+const requireES6 = require('../js/require-es6');
+
+requireES6("../js/academy/reactapp");

@@ -5,6 +5,7 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { makeStyles } from '@material-ui/core/styles';
+import Grid from "@material-ui/core/Grid";
 
 const useStyles = makeStyles(theme => ({
     progress: {
@@ -24,16 +25,21 @@ export default function LoadingDialog(props) {
                 {title}
             </DialogTitle>
             <DialogContent>
-
-                <CircularProgress
-                    className={classes.progress}
-                    variant={indeterminate ? "indeterminate" : "determinate"}
-                    value={progress * 100}
-                    color="primary"
-                />
-                <span>
-                    {message}
-                </span>
+                <Grid container spacing={1} alignItems="center">
+                    <Grid item>
+                        <CircularProgress
+                            className={classes.progress}
+                            variant={indeterminate ? "indeterminate" : "determinate"}
+                            value={progress * 100}
+                            color="primary"
+                        />
+                    </Grid>
+                    <Grid item>
+                        <span>
+                            {message}
+                        </span>
+                    </Grid>
+                </Grid>
             </DialogContent>
         </Dialog>
     );

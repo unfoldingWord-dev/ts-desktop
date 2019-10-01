@@ -66,9 +66,14 @@ export default function Academy(props) {
     function handleCancelDownload() {
         setConfirmDownload(false);
 
-        // close the aborted translation
+        // close the aborted download
         if (!translation.downloaded) {
-            setTranslation(null);
+            if(translation.language !== 'en') {
+                // fall back to english
+                setLang('en');
+            } else {
+                setTranslation(null);
+            }
         }
     }
 

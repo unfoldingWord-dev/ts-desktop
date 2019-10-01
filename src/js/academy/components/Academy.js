@@ -6,22 +6,14 @@ import axios from 'axios';
 import ConfirmDownloadDialog from './ConfirmDownloadDialog';
 import fs from 'fs';
 import path from 'path';
-import SimpleCache, {LOCAL_STORAGE} from '../SimpleCache';
 import AdmZip from 'adm-zip';
 import mkdirp from 'mkdirp';
 import rimraf from 'rimraf';
 import ConfirmRemoteLinkDialog from './ConfirmRemoteLinkDialog';
 import TranslationReader from '../TranslationReader';
-import semver from 'semver';
-import {compareAsc} from 'date-fns';
 import LoadingDialog from "./LoadingDialog";
 import ErrorDialog from "./ErrorDialog";
-
-const catalogUrl = 'https://api.door43.org/v3/subjects/Translation_Academy.json';
-
-const cache = new SimpleCache(LOCAL_STORAGE);
-
-const TA_CACHE_KEY = 'ta-cache';
+import {useCatalog} from "../util";
 
 function saveBlob(blob, dest) {
     return new Promise((resolve, reject) => {
@@ -52,12 +44,11 @@ export default function Academy(props) {
     const {lang: initialLang, onClose, articleId, dataPath, onOpenLink} = props;
     const [lang, setLang] = useLanguage(initialLang);
     const [articles, setArticles] = useState([]);
-    const [catalog, setCatalog] = useState([]);
+    const {loading: loadingCatalog, catalog, updateCatalog} = useCatalog(dataPath);
     const [confirmDownload, setConfirmDownload] = useState(false);
     const [translation, setTranslation] = useState(null);
     const [confirmLink, setConfirmLink] = useState(false);
     const [clickedLink, setClickedLink] = useState(null);
-    const [loadingCatalog, setLoadingCatalog] = useState(true);
     const [loading, setLoading] = useState({});
     const [errorMessage, setError] = useState(null);
 
@@ -80,38 +71,6 @@ export default function Academy(props) {
     function getTranslationPath(translation) {
         return path.join(dataPath,
             `translationAcademy/${translation.language}/${translation.language}_ta`);
-    }
-
-    function isTranslationDownloaded(translation) {
-        return fs.existsSync(getTranslationPath(translation));
-    }
-
-    function isTranslationOutdated(translation) {
-        if (!translation.downloaded) {
-            return false;
-        }
-
-        try {
-            const reader = new TranslationReader(
-                getTranslationPath(translation));
-            const manifest = reader.readManifest();
-
-            // check version
-            const localVersion = semver.coerce(manifest.dublin_core.version);
-            const remoteVersion = semver.coerce(translation.version);
-            if (semver.gt(remoteVersion, localVersion)) {
-                return true;
-            }
-
-            // check modified
-            const localModified = manifest.dublin_core.modified;
-            const remoteModified = translation.modified;
-            return compareAsc(new Date(remoteModified),
-                new Date(localModified)) > 0;
-        } catch (error) {
-            console.error('Invalid translation', translation, error);
-            return true;
-        }
     }
 
     /**
@@ -236,63 +195,21 @@ export default function Academy(props) {
         }
     }
 
-    function handleCheckForUpdate() {
+    async function handleCheckForUpdate() {
         setLoading({
             loadingTitle: 'Updating',
             loadingMessage: 'Looking for updates to translationAcademy. Please wait.',
             progress: 0
         });
-        axios.get(catalogUrl).then(response => {
-            const resources = response.data.map(d => {
-                // filter down to the first valid resource container
-                try {
-                    const format = d.resources[0].formats.filter(f => {
-                        return f.format.includes('application/zip;') &&
-                            f.format.includes('type=man') &&
-                            f.format.includes('conformsto=rc0.2');
-                    })[0];
 
-                    const trans = {
-                        title: d.title,
-                        direction: d.direction,
-                        language: d.language,
-                        url: format.url,
-                        size: format.size,
-                        // TRICKY: there seems to be a bug in the api because it does not have the correct modified date in the format.
-                        //  I think the api is using the real modified date from the commit, while the modified date in the manifest is manually updated and can become stale.
-                        modified: d.resources[0].modified, // format.modified,
-                        version: d.resources[0].version,
-                        downloaded: isTranslationDownloaded(d)
-                    };
-
-                    return {
-                        ...trans,
-                        update: isTranslationOutdated(trans)
-                    };
-
-                } catch (error) {
-                    console.error('The resource is invalid', error, d);
-                    return {};
-                }
-            }).filter(r => !!r.url);
-            setCatalog(resources);
-
-            // TRICKY: set loading to finished
-            setLoading({
-                loadingTitle: 'Updating',
-                loadingMessage: 'Looking for updates to translationAcademy. Please wait.',
-                progress: 1
-            });
-
-            // TRICKY: wait a moment to ensure minimum loading time
-            setTimeout(() => {
-                setLoading({});
-            }, 1000);
-        }).catch(error => {
-            setLoading({});
+        try {
+            await updateCatalog();
+        } catch (error) {
             setError('Unable to check for updates. Please try again.');
             console.error(error);
-        });
+        } finally {
+            setLoading({});
+        }
     }
 
     // listen to keyboard
@@ -309,42 +226,6 @@ export default function Academy(props) {
             window.removeEventListener('keydown', handleKeyDown);
         };
     }, []);
-
-    // keep catalog cached
-    useEffect(() => {
-        if (catalog && catalog.length) {
-            cache.set(TA_CACHE_KEY, JSON.stringify(catalog));
-        }
-    }, [catalog]);
-
-    // load cached catalog
-    useEffect(() => {
-        function getCachedCatalog() {
-            let cachedCatalog = cache.get(TA_CACHE_KEY);
-            if (cachedCatalog) {
-                try {
-                    return JSON.parse(cachedCatalog);
-                } catch (error) {
-                    console.error('Cached tA catalog was corrupt', error);
-                }
-            }
-            return [];
-        }
-
-        // TRICKY: we need the dataPath to check if things are downloaded
-        if (dataPath) {
-            setLoadingCatalog(true);
-            const catalog = getCachedCatalog();
-            // TRICKY: re-check available resources in case something changed offline.
-            catalog.map(r => {
-                r.downloaded = isTranslationDownloaded(r);
-                // TRICKY: check if outdated after checking if downloaded.
-                r.update = isTranslationOutdated(r);
-            });
-            setCatalog(catalog);
-        }
-        setLoadingCatalog(false);
-    }, [dataPath]);
 
     // load correct translation
     useEffect(() => {

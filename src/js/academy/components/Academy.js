@@ -114,13 +114,28 @@ export default function Academy(props) {
         }
     }
 
+    /**
+     * Utility to set the proper loading status for the translation download.
+     * @param translation
+     * @param progress
+     */
+    function setDownloadingTranslation(translation, progress) {
+        const {update, title, language} = translation;
+
+        let loadingTitle = 'Downloading';
+        if(update) {
+            loadingTitle = 'Updating';
+        }
+        setLoading({
+            loadingTitle,
+            loadingMessage: `${loadingTitle} ${title} (${language}) translationAcademy. Please wait.`,
+            progress
+        });
+    }
+
     async function handleConfirmDownload() {
         setConfirmDownload(false);
-        setLoading({
-            loadingTitle: 'Downloading',
-            loadingMessage: 'Downloading translationAcademy. Please wait.',
-            progress: 0
-        });
+        setDownloadingTranslation(translation, 0);
         const extractDest = path.join(dataPath,
             `translationAcademy/${translation.language}`);
         const dest = `${extractDest}.zip`;
@@ -131,11 +146,7 @@ export default function Academy(props) {
             onDownloadProgress: progressEvent => {
                 if (progressEvent.lengthComputable) {
                     const progress = progressEvent.loaded / progressEvent.total;
-                    setLoading({
-                        loadingTitle: 'Downloading',
-                        loadingMessage: 'Downloading translationAcademy. Please wait.',
-                        progress
-                    });
+                    setDownloadingTranslation(translation, progress);
                 }
             }
         }).then(response => {
@@ -198,11 +209,7 @@ export default function Academy(props) {
             setTranslation(updatedTranslation);
 
             // TRICKY: set loading to finished
-            setLoading({
-                loadingTitle: 'Downloading',
-                loadingMessage: 'Downloading translationAcademy. Please wait.',
-                progress: 1
-            });
+            setDownloadingTranslation(translation, 1);
 
             // TRICKY: wait a moment to ensure minimum loading time
             setTimeout(() => {

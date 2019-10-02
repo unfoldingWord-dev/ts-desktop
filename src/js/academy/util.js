@@ -121,6 +121,7 @@ export function cacheCatalog(catalog) {
 export function useCatalog(dataPath) {
     const [loading, setLoading] = useState(true);
     const [catalog, setCatalog] = useState([]);
+    const [ready, setReady] = useState(false);
 
     /**
      * Utility to download the latest catalog
@@ -161,6 +162,10 @@ export function useCatalog(dataPath) {
                 r.update = isTranslationOutdated(r, dataPath);
             });
             setCatalog(catalog);
+            if(!ready) {
+                // the catalog is ready to go
+                setReady(true);
+            }
             setLoading(false);
         }
     }, [dataPath]);
@@ -173,6 +178,7 @@ export function useCatalog(dataPath) {
     return {
         loading,
         catalog,
+        ready,
         updateCatalog
     };
 }

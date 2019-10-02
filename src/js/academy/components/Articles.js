@@ -37,6 +37,7 @@ export default function ArticleList({articles, onClickLink}) {
         return (
             <div id="articles" className={classes.root}>
                 <div className={classes.frame}>
+                    <div id="scroll-top"/>
                     {articles.map((a, i) => (
                         <Article {...a} key={i} onClickLink={onClickLink}/>
                     ))}
@@ -48,6 +49,7 @@ export default function ArticleList({articles, onClickLink}) {
         return (
             <div id="articles" className={classes.root}>
                 <div className={classes.frame}>
+                    <div id="scroll-top"/>
                     <div className={classes.loading}>
                         <List speed={2}/>
                         <BulletList speed={2}/>

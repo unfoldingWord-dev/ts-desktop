@@ -13,7 +13,7 @@ import ConfirmRemoteLinkDialog from './ConfirmRemoteLinkDialog';
 import TranslationReader from '../TranslationReader';
 import LoadingDialog from "./LoadingDialog";
 import ErrorDialog from "./ErrorDialog";
-import {useCatalog, useControlledProp} from "../util";
+import {useCatalog} from "../util";
 
 function saveBlob(blob, dest) {
     return new Promise((resolve, reject) => {
@@ -41,9 +41,8 @@ function saveBlob(blob, dest) {
  * @constructor
  */
 export default function Academy(props) {
-    const {lang: initialLang, onClose, articleId, dataPath, onOpenLink} = props;
-    const {loading: loadingCatalog, catalog, updateCatalog} = useCatalog(dataPath);
-    const [lang, setLang] = useControlledProp(initialLang);
+    const {lang, onClose, articleId, dataPath, onOpenLink, onChangeProp} = props;
+    const {loading: loadingCatalog, catalog, updateCatalog, ready: catalogIsReady} = useCatalog(dataPath);
     const [articles, setArticles] = useState([]);
     const [confirmDownload, setConfirmDownload] = useState(false);
     const [translation, setTranslation] = useState(null);
@@ -57,20 +56,14 @@ export default function Academy(props) {
     function handleCancelDownload() {
         setConfirmDownload(false);
 
-        // close the aborted download
+        // close translation if not already downloaded
         if (!translation.downloaded) {
-            if(translation.language !== 'en') {
-                // fall back to english
-                setLang('en');
-            } else {
-                setTranslation(null);
-            }
+            setTranslation(null);
         }
     }
 
     function getTranslationPath(translation) {
-        return path.join(dataPath,
-            `translationAcademy/${translation.language}/${translation.language}_ta`);
+        return path.join(dataPath, `translationAcademy/${translation.language}/${translation.language}_ta`);
     }
 
     /**
@@ -191,7 +184,10 @@ export default function Academy(props) {
         if (newTranslation === null) {
             onClose();
         } else {
-            setTranslation(newTranslation);
+            onChangeProp({
+                lang: newTranslation.language,
+                articleId: null
+            });
         }
     }
 
@@ -226,19 +222,35 @@ export default function Academy(props) {
         };
     }, []);
 
-    // load correct translation
+    // update translation when the props change
     useEffect(() => {
+        // TRICKY: scroll to the top so that new translations don't open in the middle.
+        handleScroll('scroll-top');
+
+        if (!catalogIsReady) {
+            return;
+        }
+
         const filtered = catalog.filter(t => t.language === lang);
         if (filtered.length > 0) {
             setTranslation(filtered[0]);
         } else {
             setTranslation(null);
         }
-    }, [lang, catalog]);
+    }, [lang, catalogIsReady]);
 
     // scroll to article
     useEffect(() => {
-        handleScroll(articleId);
+        if(articles.length) {
+            handleScroll(articleId);
+
+            // clear this prop so subsequent link clicks trigger an update
+            if(articleId !== null) {
+                onChangeProp({
+                    articleId: null
+                });
+            }
+        }
     }, [articleId, articles]);
 
     // monitor translation validity and load articles
@@ -281,8 +293,8 @@ export default function Academy(props) {
         }
     }
 
-    function handleScroll(articleId) {
-        const element = document.getElementById(articleId);
+    function handleScroll(id) {
+        const element = document.getElementById(id);
         if (element) {
             element.scrollIntoView();
         }
@@ -329,5 +341,6 @@ Academy.propTypes = {
     onClose: PropTypes.func.isRequired,
     lang: PropTypes.string,
     articleId: PropTypes.string,
-    onOpenLink: PropTypes.func.isRequired
+    onOpenLink: PropTypes.func.isRequired,
+    onChangeProp: PropTypes.func.isRequired
 };

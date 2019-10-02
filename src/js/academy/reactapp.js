@@ -20,11 +20,19 @@ const theme = createMuiTheme({
  * the main thread.
  */
 function TranslationAcademyApp() {
-    const [props, setProps] = useState(null);
+    const [props, setProps] = useState({});
 
     // closes the academy app
     function handleClose() {
         ipcRenderer.sendSync('academy-window', 'close');
+    }
+
+    // modifies the prop list
+    function handleChangeProp(newProps) {
+        setProps({
+            ...props,
+            ...newProps
+        });
     }
 
     // listen for props from the main thread
@@ -46,7 +54,7 @@ function TranslationAcademyApp() {
 
     return (
         <ThemeProvider theme={theme}>
-            <Academy {...props} onClose={handleClose} onOpenLink={handleOpenLink}/>
+            <Academy {...props} onClose={handleClose} onOpenLink={handleOpenLink} onChangeProp={handleChangeProp}/>
         </ThemeProvider>
     );
 }

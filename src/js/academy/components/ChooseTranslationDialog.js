@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import PropTypes from 'prop-types';
 import {makeStyles} from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -12,6 +12,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import WifiIcon from '@material-ui/icons/Wifi';
 import DownloadIcon from '@material-ui/icons/CloudDownload';
 import Typography from '@material-ui/core/Typography';
+import {useControlledProp} from "../util";
 
 const useRawStyles = makeStyles(theme => ({
     leftIcon: {
@@ -61,7 +62,7 @@ function LocalizedTitle(props) {
 
 export function ConfirmationDialogRaw(props) {
     const {onClose, onUpdate, initialValue, options, open, ...other} = props;
-    const [value, setValue] = React.useState(initialValue);
+    const [value, setValue] = useControlledProp(initialValue);
     const radioGroupRef = React.useRef(null);
     const classes = useRawStyles();
 
@@ -215,4 +216,8 @@ ChooseTranslationDialog.propTypes = {
         downloaded: PropTypes.bool.isRequired
     }).isRequired),
     open: PropTypes.bool.isRequired
+};
+
+ChooseTranslationDialog.defaultProps = {
+    initialValue: 'en'
 };

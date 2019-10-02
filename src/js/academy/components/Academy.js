@@ -13,7 +13,7 @@ import ConfirmRemoteLinkDialog from './ConfirmRemoteLinkDialog';
 import TranslationReader from '../TranslationReader';
 import LoadingDialog from "./LoadingDialog";
 import ErrorDialog from "./ErrorDialog";
-import {useCatalog} from "../util";
+import {useCatalog, useControlledProp} from "../util";
 
 function saveBlob(blob, dest) {
     return new Promise((resolve, reject) => {
@@ -42,7 +42,7 @@ function saveBlob(blob, dest) {
  */
 export default function Academy(props) {
     const {lang: initialLang, onClose, articleId, dataPath, onOpenLink} = props;
-    const [lang, setLang] = useLanguage(initialLang);
+    const [lang, setLang] = useControlledProp(initialLang);
     const [articles, setArticles] = useState([]);
     const {loading: loadingCatalog, catalog, updateCatalog} = useCatalog(dataPath);
     const [confirmDownload, setConfirmDownload] = useState(false);
@@ -216,7 +216,6 @@ export default function Academy(props) {
     useEffect(() => {
         function handleKeyDown(event) {
             if (event.ctrlKey && event.key === 'o') {
-                setLang(null);
                 setTranslation(null);
             }
         }
@@ -332,17 +331,3 @@ Academy.propTypes = {
     articleId: PropTypes.string,
     onOpenLink: PropTypes.func.isRequired
 };
-
-/**
- * Provides control over the current language while still receiving updates from the parent component
- * @param initialLang
- */
-function useLanguage(initialLang) {
-    const [lang, setLang] = useState(initialLang);
-
-    useEffect(() => {
-        setLang(initialLang);
-    }, [initialLang]);
-
-    return [lang, setLang];
-}

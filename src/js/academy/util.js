@@ -176,3 +176,18 @@ export function useCatalog(dataPath) {
         updateCatalog
     };
 }
+
+/**
+ * Allows the prop to override the state when changed
+ * @param propValue
+ * @returns {[unknown, (value: unknown) => void]}
+ */
+export function useControlledProp(propValue) {
+    const [value, setValue] = useState(propValue);
+
+    useEffect(() => {
+        setValue(propValue);
+    }, propValue);
+
+    return [value, setValue];
+}

@@ -119,7 +119,7 @@ export function cacheCatalog(catalog) {
  * @returns {{updateCatalog: *, catalog: *, loading: *}}
  */
 export function useCatalog(dataPath) {
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [catalog, setCatalog] = useState([]);
 
     /**
@@ -161,8 +161,8 @@ export function useCatalog(dataPath) {
                 r.update = isTranslationOutdated(r, dataPath);
             });
             setCatalog(catalog);
+            setLoading(false);
         }
-        setLoading(false);
     }, [dataPath]);
 
     // keep catalog cached

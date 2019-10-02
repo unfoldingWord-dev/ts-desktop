@@ -42,9 +42,9 @@ function saveBlob(blob, dest) {
  */
 export default function Academy(props) {
     const {lang: initialLang, onClose, articleId, dataPath, onOpenLink} = props;
+    const {loading: loadingCatalog, catalog, updateCatalog} = useCatalog(dataPath);
     const [lang, setLang] = useControlledProp(initialLang);
     const [articles, setArticles] = useState([]);
-    const {loading: loadingCatalog, catalog, updateCatalog} = useCatalog(dataPath);
     const [confirmDownload, setConfirmDownload] = useState(false);
     const [translation, setTranslation] = useState(null);
     const [confirmLink, setConfirmLink] = useState(false);

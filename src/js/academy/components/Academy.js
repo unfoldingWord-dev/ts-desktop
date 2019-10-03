@@ -13,7 +13,7 @@ import ConfirmRemoteLinkDialog from './ConfirmRemoteLinkDialog';
 import TranslationReader from '../TranslationReader';
 import LoadingDialog from "./LoadingDialog";
 import ErrorDialog from "./ErrorDialog";
-import {useCatalog} from "../util";
+import {useCatalog, useHistoricState} from "../util";
 import {ipcRenderer} from "electron";
 
 function saveBlob(blob, dest) {
@@ -45,7 +45,7 @@ export default function Academy(props) {
     const {onClose, onOpenLink} = props;
 
     const [dataPath, setDataPath] = useState();
-    const [lang, setLang] = useState();
+    const [lang, previousLang, setLang] = useHistoricState();
     const [articleId, setArticleId] = useState();
     const {loading: loadingCatalog, catalog, updateCatalog, syncCatalog, ready: catalogIsReady} = useCatalog(dataPath);
     const [articles, setArticles] = useState([]);
@@ -343,12 +343,15 @@ export default function Academy(props) {
     }
 
     const isChooseDialogOpen = !translation && !loadingCatalog;
+    // TRICKY: 1) assign to null when closed to ensure state triggers change.
+    //         2) always use the previous lang since the active lang will always be null.
+    const selectedLanguage = isChooseDialogOpen ? previousLang : null;
     return (
         <>
             <Articles articles={articles} onClickLink={handleClickLink}/>
             <ChooseTranslationDialog open={isChooseDialogOpen}
                                      options={catalog}
-                                     initialValue={isChooseDialogOpen ? lang : null}
+                                     initialValue={selectedLanguage}
                                      onUpdate={handleCheckForUpdate}
                                      onDelete={handleDeleteTranslation}
                                      onClose={handleSelectTranslation}/>

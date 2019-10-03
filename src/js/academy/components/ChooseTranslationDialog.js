@@ -62,7 +62,7 @@ function LocalizedTitle(props) {
 
 export function ConfirmationDialogRaw(props) {
     const {onClose, onDelete, onUpdate, initialValue, options, open, ...other} = props;
-    const [value, setValue] = useState(initialValue);
+    const [value, setValue] = useControlledProp(initialValue);
     const keys = useKeyboard();
     const radioGroupRef = React.useRef(null);
     const classes = useRawStyles();

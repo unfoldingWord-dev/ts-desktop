@@ -137,7 +137,7 @@ export function useCatalog(dataPath) {
      * @private
      */
     function _syncCatalog(c) {
-        if(dataPath) {
+        if (dataPath) {
             const newCatalog = c.map(r => {
                 const record = {...r};
                 record.downloaded = isTranslationDownloaded(record, dataPath);
@@ -249,4 +249,26 @@ export function useControlledProp(propValue) {
     }, propValue);
 
     return [value, setValue];
+}
+
+/**
+ * Keeps a record of the previous non-null value.
+ * @param [initialValue]
+ * @returns {[value, history, setValue]}
+ */
+export function useHistoricState(initialValue=undefined) {
+    const [value, setValue] = useState(initialValue);
+    const [history, setHistory] = useState();
+
+    useEffect(() => {
+        if(value !== null && value !== undefined) {
+            setHistory(value);
+        }
+    }, [value]);
+
+    return [
+        value,
+        history,
+        setValue
+    ];
 }

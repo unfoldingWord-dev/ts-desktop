@@ -4,7 +4,6 @@ import Articles from './Articles';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import ConfirmDownloadDialog from './ConfirmDownloadDialog';
-import fs from 'fs';
 import path from 'path';
 import AdmZip from 'adm-zip';
 import mkdirp from 'mkdirp';
@@ -13,28 +12,8 @@ import ConfirmRemoteLinkDialog from './ConfirmRemoteLinkDialog';
 import TranslationReader from '../TranslationReader';
 import LoadingDialog from "./LoadingDialog";
 import ErrorDialog from "./ErrorDialog";
-import {useCatalog, useHistoricState} from "../util";
+import {saveBlob, useCatalog, useHistoricState} from "../util";
 import {ipcRenderer} from "electron";
-
-function saveBlob(blob, dest) {
-    return new Promise((resolve, reject) => {
-        var fileReader = new FileReader();
-        fileReader.onload = function () {
-            try {
-                const buffer = Buffer.from(new Uint8Array(this.result));
-                fs.writeFileSync(dest, buffer);
-                resolve();
-            } catch (error) {
-                reject(error);
-            }
-        };
-        fileReader.onerror = event => {
-            fileReader.abort();
-            reject(event);
-        };
-        fileReader.readAsArrayBuffer(blob);
-    });
-}
 
 /**
  * Renders the tA page

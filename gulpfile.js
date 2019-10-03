@@ -14,7 +14,9 @@ const gulp = require('gulp'),
     mkdirp = require('mkdirp'),
     fs = require('fs'),
     util = require('./src/js/lib/utils'),
-    princePackager = require('./src/js/prince-packager');
+    princePackager = require('./src/js/prince-packager'),
+    requireES6 = require('./src/js/require-es6'),
+    packagetA = requireES6('./scripts/package-ta');
 
 const APP_NAME = 'translationStudio',
     JS_FILES = './src/js/**/*.js',
@@ -129,6 +131,10 @@ gulp.task('build', ['clean'], function (done) {
     //         }
     //     });
     // }
+});
+
+gulp.task('package-ta', function() {
+    return packagetA('./src/index/ta');
 });
 
 gulp.task('release', function(done) {

@@ -7,6 +7,9 @@ import semver from "semver";
 import {compareAsc} from "date-fns";
 import SimpleCache, {LOCAL_STORAGE} from "./SimpleCache";
 import {ipcRenderer} from "electron";
+import mkdirp from "mkdirp";
+import AdmZip from "adm-zip";
+import rimraf from "rimraf";
 
 const cache = new SimpleCache(LOCAL_STORAGE);
 const TA_CACHE_KEY = 'ta-cache';
@@ -271,4 +274,84 @@ export function useHistoricState(initialValue=undefined) {
         history,
         setValue
     ];
+}
+
+export function saveBlob(blob, dest) {
+    return new Promise((resolve, reject) => {
+        var fileReader = new FileReader();
+        fileReader.onload = function () {
+            try {
+                const buffer = Buffer.from(new Uint8Array(this.result));
+                fs.writeFileSync(dest, buffer);
+                resolve();
+            } catch (error) {
+                reject(error);
+            }
+        };
+        fileReader.onerror = event => {
+            fileReader.abort();
+            reject(event);
+        };
+        fileReader.readAsArrayBuffer(blob);
+    });
+}
+
+/**
+ * Downloads a tA translation to the destination and caches the images.
+ * @param translation
+ * @param dest
+ * @param [onProgress]
+ * @returns {Promise<void>}
+ */
+export async function downloadtATranslation(translation, dest, onProgress=null) {
+    const zipDest = `${dest}.zip`;
+    await mkdirp(dest);
+
+    // download zip
+    const response = await axios.get(translation.url, {
+        responseType: 'blob',
+        onDownloadProgress: progressEvent => {
+            if (progressEvent.lengthComputable && typeof onProgress === 'function') {
+                const progress = progressEvent.loaded / progressEvent.total;
+                onProgress(translation, progress);
+            }
+        }
+    });
+
+    // write data to file
+    await saveBlob(response.data, zipDest);
+
+    // extract zip
+    const zip = new AdmZip(zipDest);
+    zip.extractAllTo(dest, true);
+    rimraf.sync(zipDest);
+
+    // find images
+    const reader = new TranslationReader(getTranslationPath(translation));
+    const imageLinks = [];
+    reader.listArticles(article => {
+        const result = article.body.match(/!\[]\(([^)]+)\)/g);
+        if (result) {
+            const links = result.map(img => {
+                return {
+                    articlePath: article.path,
+                    href: img.match(/!\[]\(([^)]+)\)/)[1]
+                };
+            });
+            imageLinks.push.apply(imageLinks, links);
+        }
+    });
+
+    // download images
+    for (let i = 0, len = links.length; i < len; i++) {
+        const link = links[i];
+        const response = await axios.get(link.href, {
+            responseType: 'blob'
+        });
+        const cacheDir = path.join(link.articlePath, '.cache');
+        await mkdirp(cacheDir);
+        const imageDest = path.join(cacheDir,
+            `${path.basename(link.href)}`);
+        await saveBlob(response.data, imageDest);
+    }
 }

@@ -1,6 +1,7 @@
 import mkdirp from 'mkdirp';
 import fs from 'fs';
 import rimraf from 'rimraf';
+import archiver from 'archiver';
 import path from 'path';
 import {downloadtACatalog, downloadtATranslation} from "../src/js/academy/util";
 import FileReader from 'filereader';
@@ -21,5 +22,19 @@ export async function pack(dest) {
         await downloadtATranslation(catalog[i], dest);
     }
 
-    // TODO: zip everything up
+    // zip everything up
+    console.log('zipping everything');
+    const academyDir = path.join(dest, 'translationAcademy');
+    const destZip = `${academyDir}.zip`;
+    await new Promise((resolve, reject) => {
+        var writer = fs.createWriteStream(destZip);
+        writer.on('finish', resolve);
+        writer.on('error', reject);
+        const zip = archiver.create('zip');
+        zip.pipe(writer);
+        zip.directory(academyDir, 'translationAcademy/');
+        zip.finalize();
+    });
+
+    rimraf.sync(academyDir);
 }

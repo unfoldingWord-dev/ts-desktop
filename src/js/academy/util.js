@@ -16,13 +16,23 @@ const TA_CACHE_KEY = 'ta-cache';
 const catalogUrl = 'https://api.door43.org/v3/subjects/Translation_Academy.json';
 
 /**
- *
+ * Returns the path to the translation content
  * @param translation
  * @param datapath {string} the directory where translationStudio data is stored.
  * @returns {*}
  */
 function getTranslationPath(translation, dataPath) {
-    return path.join(dataPath, `translationAcademy/${translation.language}/${translation.language}_ta`);
+    return path.join(getTranslationBaseDir(translation, dataPath), `${translation.language}_ta`);
+}
+
+/**
+ * Returns the path to the top translation directory.
+ * @param translate
+ * @param dataPath
+ * @returns {*}
+ */
+function getTranslationBaseDir(translation, dataPath) {
+    return path.join(dataPath, `translationAcademy/${translation.language}`);
 }
 
 /**
@@ -297,6 +307,30 @@ export function saveBlob(blob, dest) {
 }
 
 /**
+ * Creates a response writer that will handle the type of data correctly.
+ * @param dest
+ * @param type
+ * @returns {(function(*): (*|Promise<unknown>|Promise))|(function(*): Promise<unknown>)}
+ */
+function makeResponseWriter(dest, type) {
+    if(type === 'blob') {
+        return (response) => {
+            return saveBlob(response.data, dest);
+        };
+    } else {
+        // stream
+        return (response) => {
+            const writer = fs.createWriteStream(dest);
+            response.data.pipe(writer);
+            return new Promise((resolve, reject) => {
+                writer.on('finish', resolve);
+                writer.on('error', reject);
+            });
+        };
+    }
+}
+
+/**
  * Downloads a tA translation to the destination and caches the images.
  * @param translation
  * @param dest
@@ -304,12 +338,14 @@ export function saveBlob(blob, dest) {
  * @returns {Promise<void>}
  */
 export async function downloadtATranslation(translation, dest, onProgress=null) {
-    const zipDest = `${dest}.zip`;
-    await mkdirp(dest);
+    const translationDest = getTranslationBaseDir(translation, dest);
+    const zipDest = `${translationDest}.zip`;
+    mkdirp.sync(translationDest);
+    const responseType = 'stream'; // 'blob';
 
     // download zip
     const response = await axios.get(translation.url, {
-        responseType: 'blob',
+        responseType,
         onDownloadProgress: progressEvent => {
             if (progressEvent.lengthComputable && typeof onProgress === 'function') {
                 const progress = progressEvent.loaded / progressEvent.total;
@@ -319,15 +355,15 @@ export async function downloadtATranslation(translation, dest, onProgress=null) 
     });
 
     // write data to file
-    await saveBlob(response.data, zipDest);
+    await makeResponseWriter(zipDest, responseType)(response);
 
     // extract zip
     const zip = new AdmZip(zipDest);
-    zip.extractAllTo(dest, true);
+    zip.extractAllTo(translationDest, true);
     rimraf.sync(zipDest);
 
     // find images
-    const reader = new TranslationReader(getTranslationPath(translation));
+    const reader = new TranslationReader(getTranslationPath(translation, dest));
     const imageLinks = [];
     reader.listArticles(article => {
         const result = article.body.match(/!\[]\(([^)]+)\)/g);
@@ -343,15 +379,14 @@ export async function downloadtATranslation(translation, dest, onProgress=null) 
     });
 
     // download images
-    for (let i = 0, len = links.length; i < len; i++) {
-        const link = links[i];
+    for (let i = 0, len = imageLinks.length; i < len; i++) {
+        const link = imageLinks[i];
         const response = await axios.get(link.href, {
-            responseType: 'blob'
+            responseType,
         });
         const cacheDir = path.join(link.articlePath, '.cache');
-        await mkdirp(cacheDir);
-        const imageDest = path.join(cacheDir,
-            `${path.basename(link.href)}`);
-        await saveBlob(response.data, imageDest);
+        mkdirp.sync(cacheDir);
+        const imageDest = path.join(cacheDir, `${path.basename(link.href)}`);
+        await makeResponseWriter(imageDest, responseType)(response);
     }
 }

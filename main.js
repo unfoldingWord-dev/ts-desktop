@@ -312,6 +312,11 @@ function createAcademyWindow() {
     academyWindow.on('unmaximize', function() {
         academyWindow.webContents.send('unmaximize');
     });
+
+    academyWindow.on('blur', function() {
+        // manually pass blur to the page because window.blur doesn't work properly.
+        academyWindow.webContents.send('blur');
+    });
 }
 
 initialize();

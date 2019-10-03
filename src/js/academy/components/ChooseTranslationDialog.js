@@ -12,6 +12,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import WifiIcon from '@material-ui/icons/Wifi';
 import DownloadIcon from '@material-ui/icons/CloudDownload';
 import Typography from '@material-ui/core/Typography';
+import {useKeyboard} from "../util";
 
 const useRawStyles = makeStyles(theme => ({
     leftIcon: {
@@ -60,8 +61,9 @@ function LocalizedTitle(props) {
 }
 
 export function ConfirmationDialogRaw(props) {
-    const {onClose, onUpdate, initialValue, options, open, ...other} = props;
+    const {onClose, onDelete, onUpdate, initialValue, options, open, ...other} = props;
     const [value, setValue] = useState(initialValue);
+    const keys = useKeyboard();
     const radioGroupRef = React.useRef(null);
     const classes = useRawStyles();
 
@@ -77,7 +79,11 @@ export function ConfirmationDialogRaw(props) {
 
     function handleOk() {
         const translation = options.filter(o => o.language === value)[0];
-        onClose(translation);
+        if(keys.ctrlKey) {
+            onDelete(translation);
+        } else {
+            onClose(translation);
+        }
     }
 
     function handleChange(event) {
@@ -156,7 +162,7 @@ export function ConfirmationDialogRaw(props) {
                 </Button>
                 <Button onClick={handleOk} color="primary"
                         disabled={value === null}>
-                    Ok
+                    { keys.ctrlKey ? 'Delete' : 'Ok' }
                 </Button>
             </DialogActions>
         </Dialog>
@@ -168,6 +174,7 @@ ConfirmationDialogRaw.propTypes = {
     initialValue: PropTypes.string,
     open: PropTypes.bool.isRequired,
     onUpdate: PropTypes.func.isRequired,
+    onDelete: PropTypes.func.isRequired,
     options: PropTypes.array.isRequired
 };
 
@@ -185,20 +192,15 @@ const useStyles = makeStyles(theme => ({
 
 export default function ChooseTranslationDialog(props) {
     const classes = useStyles();
-    const {onClose, onUpdate, initialValue, options} = props;
 
     return (
         <ConfirmationDialogRaw
             classes={{
                 paper: classes.paper
             }}
-            options={options}
-            initialValue={initialValue}
             id="translation-menu"
             keepMounted
-            open={props.open}
-            onUpdate={onUpdate}
-            onClose={onClose}
+            {...props}
         />
     );
 }
@@ -206,6 +208,7 @@ export default function ChooseTranslationDialog(props) {
 ChooseTranslationDialog.propTypes = {
     onClose: PropTypes.func.isRequired,
     onUpdate: PropTypes.func.isRequired,
+    onDelete: PropTypes.func.isRequired,
     initialValue: PropTypes.string,
     options: PropTypes.arrayOf(PropTypes.shape({
         title: PropTypes.string.isRequired,

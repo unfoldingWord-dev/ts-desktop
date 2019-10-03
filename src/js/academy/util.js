@@ -6,6 +6,7 @@ import TranslationReader from "./TranslationReader";
 import semver from "semver";
 import {compareAsc} from "date-fns";
 import SimpleCache, {LOCAL_STORAGE} from "./SimpleCache";
+import {ipcRenderer} from "electron";
 
 const cache = new SimpleCache(LOCAL_STORAGE);
 const TA_CACHE_KEY = 'ta-cache';
@@ -124,6 +125,31 @@ export function useCatalog(dataPath) {
     const [ready, setReady] = useState(false);
 
     /**
+     * Synchronizes the catalog with the filesystem
+     */
+    function syncCatalog() {
+        _syncCatalog(catalog);
+    }
+
+    /**
+     * Private sync method
+     * @param c - the catalog to sync
+     * @private
+     */
+    function _syncCatalog(c) {
+        if(dataPath) {
+            const newCatalog = c.map(r => {
+                const record = {...r};
+                record.downloaded = isTranslationDownloaded(record, dataPath);
+                // TRICKY: check if outdated after checking if downloaded.
+                record.update = isTranslationOutdated(record, dataPath);
+                return record;
+            });
+            setCatalog(newCatalog);
+        }
+    }
+
+    /**
      * Utility to download the latest catalog
      * @returns {Promise<void>}
      */
@@ -155,14 +181,10 @@ export function useCatalog(dataPath) {
         if (dataPath) {
             setLoading(true);
             const catalog = getCachedCatalog();
-            // TRICKY: re-check available resources in case something changed offline.
-            catalog.map(r => {
-                r.downloaded = isTranslationDownloaded(r, dataPath);
-                // TRICKY: check if outdated after checking if downloaded.
-                r.update = isTranslationOutdated(r, dataPath);
-            });
-            setCatalog(catalog);
-            if(!ready) {
+
+            _syncCatalog(catalog);
+
+            if (!ready) {
                 // the catalog is ready to go
                 setReady(true);
             }
@@ -179,8 +201,39 @@ export function useCatalog(dataPath) {
         loading,
         catalog,
         ready,
-        updateCatalog
+        updateCatalog,
+        syncCatalog
     };
+}
+
+/**
+ * Subscribes to keyboard events
+ * @returns {KeyboardEvent}
+ */
+export function useKeyboard() {
+    const [keys, setKeys] = useState({});
+
+    useEffect(() => {
+        function handleKeyDown(event) {
+            setKeys(event);
+        }
+
+        function handleBlur() {
+            // TRICKY: clear keys when window does not have focus
+            setKeys({});
+        }
+
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keyup', handleKeyDown);
+        ipcRenderer.on('blur', handleBlur);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('keyup', handleKeyDown);
+            ipcRenderer.removeListener('blur', handleBlur);
+        };
+    }, []);
+
+    return keys;
 }
 
 /**

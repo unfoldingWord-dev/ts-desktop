@@ -47,7 +47,7 @@ export default function Academy(props) {
     const [dataPath, setDataPath] = useState();
     const [lang, setLang] = useState();
     const [articleId, setArticleId] = useState();
-    const {loading: loadingCatalog, catalog, updateCatalog, ready: catalogIsReady} = useCatalog(dataPath);
+    const {loading: loadingCatalog, catalog, updateCatalog, syncCatalog, ready: catalogIsReady} = useCatalog(dataPath);
     const [articles, setArticles] = useState([]);
     const [translation, setTranslation] = useState(null);
 
@@ -184,6 +184,16 @@ export default function Academy(props) {
             // setTranslation(null);
             console.error(error);
         });
+    }
+
+    function handleDeleteTranslation(selectedTranslation) {
+        try {
+            const dir = getTranslationPath(selectedTranslation);
+            rimraf.sync(dir);
+            syncCatalog();
+        } catch (error) {
+            console.error(`failed to delete ${selectedTranslation.language} translation`, error);
+        }
     }
 
     function handleSelectTranslation(newTranslation) {
@@ -341,6 +351,7 @@ export default function Academy(props) {
                                      options={catalog}
                                      initialValue={isChooseDialogOpen ? lang : null}
                                      onUpdate={handleCheckForUpdate}
+                                     onDelete={handleDeleteTranslation}
                                      onClose={handleSelectTranslation}/>
             <ConfirmDownloadDialog
                 translation={translation}

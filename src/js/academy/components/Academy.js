@@ -161,8 +161,10 @@ export default function Academy(props) {
                 update: false
             };
 
-            // TODO: update catalog as well so that ctr+o will display an updated dialog
-            //  this action is hidden from the UI though, so it won't be too common.
+            // update list of what's been downloaded
+            syncCatalog();
+            // TRICKY: for now the translation object is not updated when the catalog is updated,
+            //  so we manually update it now.
             setTranslation(updatedTranslation);
 
             // TRICKY: set loading to finished
@@ -181,7 +183,6 @@ export default function Academy(props) {
             rimraf.sync(extractDest);
 
             setLang(null);
-            // setTranslation(null);
             console.error(error);
         });
     }
@@ -243,7 +244,6 @@ export default function Academy(props) {
         function handleKeyDown(event) {
             if (event.ctrlKey && event.key === 'o') {
                 setLang(null);
-                // setTranslation(null);
             }
         }
 
@@ -309,7 +309,6 @@ export default function Academy(props) {
                 rimraf.sync(dir);
                 setError('The translation is corrupt. Please try again.');
                 setLang(null);
-                // setTranslation(null);
             }
         }
     }, [translation]);

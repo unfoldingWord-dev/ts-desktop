@@ -12,7 +12,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import WifiIcon from '@material-ui/icons/Wifi';
 import DownloadIcon from '@material-ui/icons/CloudDownload';
 import Typography from '@material-ui/core/Typography';
-import {useKeyboard} from "../util";
+import {useControlledProp, useKeyboard} from "../util";
 
 const useRawStyles = makeStyles(theme => ({
     leftIcon: {

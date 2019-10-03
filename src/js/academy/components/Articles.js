@@ -16,9 +16,7 @@ const useStyles = makeStyles(theme => ({
         padding: 30
     },
     loading: {
-        maxWidth: 600,
-        // margin: '0 auto',
-        // height: 1000
+        maxWidth: 600
     }
 }));
 

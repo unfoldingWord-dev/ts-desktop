@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import {ipcRenderer, shell} from 'electron';
 import Academy from './components/Academy';
@@ -20,36 +20,11 @@ const theme = createMuiTheme({
  * the main thread.
  */
 function TranslationAcademyApp() {
-    const [props, setProps] = useState({});
 
     // closes the academy app
     function handleClose() {
         ipcRenderer.sendSync('academy-window', 'close');
     }
-
-    // modifies the prop list
-    function handleChangeProp(newProps) {
-        const updatedProps = {
-            ...props,
-            ...newProps
-        };
-        console.log(props, newProps, updatedProps);
-        setProps(updatedProps);
-    }
-
-    // listen for props from the main thread
-    // useEffect(() => {
-    //     function handlePropsChange(event, props) {
-    //         console.log('props changed', props);
-    //         setProps(props);
-    //     }
-    //
-    //     ipcRenderer.on('props', handlePropsChange);
-    //
-    //     return () => {
-    //         ipcRenderer.removeListener('props', handlePropsChange);
-    //     };
-    // }, []);
 
     function handleOpenLink(href) {
         shell.openExternal(href);
@@ -57,7 +32,7 @@ function TranslationAcademyApp() {
 
     return (
         <ThemeProvider theme={theme}>
-            <Academy {...props} onClose={handleClose} onOpenLink={handleOpenLink} onChangeProp={handleChangeProp}/>
+            <Academy onClose={handleClose} onOpenLink={handleOpenLink} />
         </ThemeProvider>
     );
 }

@@ -43,6 +43,7 @@ function saveBlob(blob, dest) {
  */
 export default function Academy(props) {
     const {onClose, onOpenLink} = props;
+
     const [dataPath, setDataPath] = useState();
     const [lang, setLang] = useState();
     const [articleId, setArticleId] = useState();
@@ -63,7 +64,6 @@ export default function Academy(props) {
         // close translation if not already downloaded
         if (!translation.downloaded) {
             setLang(null);
-            // setTranslation(null);
         }
     }
 
@@ -360,7 +360,5 @@ export default function Academy(props) {
 
 Academy.propTypes = {
     onClose: PropTypes.func.isRequired,
-    lang: PropTypes.string,
-    articleId: PropTypes.string,
     onOpenLink: PropTypes.func.isRequired
 };

@@ -343,15 +343,12 @@ export default function Academy(props) {
     }
 
     const isChooseDialogOpen = !translation && !loadingCatalog;
-    // TRICKY: 1) assign to null when closed to ensure state triggers change.
-    //         2) always use the previous lang since the active lang will always be null.
-    const selectedLanguage = isChooseDialogOpen ? previousLang : null;
     return (
         <>
             <Articles articles={articles} onClickLink={handleClickLink}/>
             <ChooseTranslationDialog open={isChooseDialogOpen}
                                      options={catalog}
-                                     initialValue={selectedLanguage}
+                                     initialValue={previousLang}
                                      onUpdate={handleCheckForUpdate}
                                      onDelete={handleDeleteTranslation}
                                      onClose={handleSelectTranslation}/>

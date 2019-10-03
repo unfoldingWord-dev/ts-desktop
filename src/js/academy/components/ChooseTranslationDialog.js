@@ -86,7 +86,7 @@ export function ConfirmationDialogRaw(props) {
         }
     }
 
-    function handleChange(event) {
+    function handleClick(event) {
         setValue(event.target.value);
     }
 
@@ -119,12 +119,11 @@ export function ConfirmationDialogRaw(props) {
                     aria-label="ringtone"
                     name="ringtone"
                     value={value}
-                    onChange={handleChange}
                 >
                     {options.map(option => (
                         <FormControlLabel value={option.language}
                                           key={option.language}
-                                          control={<Radio/>}
+                                          control={<Radio onClick={handleClick}/>}
                                           classes={{
                                               label: option.direction ===
                                               'rtl' ?
@@ -199,7 +198,6 @@ export default function ChooseTranslationDialog(props) {
                 paper: classes.paper
             }}
             id="translation-menu"
-            keepMounted
             {...props}
         />
     );

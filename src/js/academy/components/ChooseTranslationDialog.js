@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useState} from 'react';
 import PropTypes from 'prop-types';
 import {makeStyles} from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -62,7 +62,7 @@ function LocalizedTitle(props) {
 
 export function ConfirmationDialogRaw(props) {
     const {onClose, onUpdate, initialValue, options, open, ...other} = props;
-    const [value, setValue] = useControlledProp(initialValue);
+    const [value, setValue] = useState(initialValue);
     const radioGroupRef = React.useRef(null);
     const classes = useRawStyles();
 

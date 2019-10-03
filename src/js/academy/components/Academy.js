@@ -14,6 +14,7 @@ import TranslationReader from '../TranslationReader';
 import LoadingDialog from "./LoadingDialog";
 import ErrorDialog from "./ErrorDialog";
 import {useCatalog} from "../util";
+import {ipcRenderer} from "electron";
 
 function saveBlob(blob, dest) {
     return new Promise((resolve, reject) => {
@@ -41,16 +42,19 @@ function saveBlob(blob, dest) {
  * @constructor
  */
 export default function Academy(props) {
-    const {lang, onClose, articleId, dataPath, onOpenLink, onChangeProp} = props;
+    const {onClose, onOpenLink} = props;
+    const [dataPath, setDataPath] = useState();
+    const [lang, setLang] = useState();
+    const [articleId, setArticleId] = useState();
     const {loading: loadingCatalog, catalog, updateCatalog, ready: catalogIsReady} = useCatalog(dataPath);
     const [articles, setArticles] = useState([]);
-    const [confirmDownload, setConfirmDownload] = useState(false);
     const [translation, setTranslation] = useState(null);
+
+    const [confirmDownload, setConfirmDownload] = useState(false);
     const [confirmLink, setConfirmLink] = useState(false);
     const [clickedLink, setClickedLink] = useState(null);
-    const [loading, setLoading] = useState({});
     const [errorMessage, setError] = useState(null);
-
+    const [loading, setLoading] = useState({});
     const {loadingTitle, loadingMessage, progress: loadingProgress} = loading;
 
     function handleCancelDownload() {
@@ -58,7 +62,8 @@ export default function Academy(props) {
 
         // close translation if not already downloaded
         if (!translation.downloaded) {
-            setTranslation(null);
+            setLang(null);
+            // setTranslation(null);
         }
     }
 
@@ -175,7 +180,8 @@ export default function Academy(props) {
             rimraf.sync(dest);
             rimraf.sync(extractDest);
 
-            setTranslation(null);
+            setLang(null);
+            // setTranslation(null);
             console.error(error);
         });
     }
@@ -184,10 +190,8 @@ export default function Academy(props) {
         if (newTranslation === null) {
             onClose();
         } else {
-            onChangeProp({
-                lang: newTranslation.language,
-                articleId: null
-            });
+            setArticleId(null);
+            setLang(newTranslation.language);
         }
     }
 
@@ -208,11 +212,28 @@ export default function Academy(props) {
         }
     }
 
+    // listen to events from main thread
+    useEffect(() => {
+        function handlePropsChange(event, props) {
+            // TODO: reload stuff
+            setDataPath(props.dataPath);
+            setLang(props.lang);
+            setArticleId(props.articleId);
+        }
+
+        ipcRenderer.on('props', handlePropsChange);
+
+        return () => {
+            ipcRenderer.removeListener('props', handlePropsChange);
+        };
+    }, []);
+
     // listen to keyboard
     useEffect(() => {
         function handleKeyDown(event) {
             if (event.ctrlKey && event.key === 'o') {
-                setTranslation(null);
+                setLang(null);
+                // setTranslation(null);
             }
         }
 
@@ -246,9 +267,7 @@ export default function Academy(props) {
 
             // clear this prop so subsequent link clicks trigger an update
             if(articleId !== null) {
-                onChangeProp({
-                    articleId: null
-                });
+                setArticleId(null);
             }
         }
     }, [articleId, articles]);
@@ -279,7 +298,8 @@ export default function Academy(props) {
                 const dir = getTranslationPath(translation);
                 rimraf.sync(dir);
                 setError('The translation is corrupt. Please try again.');
-                setTranslation(null);
+                setLang(null);
+                // setTranslation(null);
             }
         }
     }, [translation]);
@@ -313,12 +333,13 @@ export default function Academy(props) {
         setError(null);
     }
 
+    const isChooseDialogOpen = !translation && !loadingCatalog;
     return (
         <>
             <Articles articles={articles} onClickLink={handleClickLink}/>
-            <ChooseTranslationDialog open={!translation && !loadingCatalog}
+            <ChooseTranslationDialog open={isChooseDialogOpen}
                                      options={catalog}
-                                     initialValue={lang}
+                                     initialValue={isChooseDialogOpen ? lang : null}
                                      onUpdate={handleCheckForUpdate}
                                      onClose={handleSelectTranslation}/>
             <ConfirmDownloadDialog
@@ -341,6 +362,5 @@ Academy.propTypes = {
     onClose: PropTypes.func.isRequired,
     lang: PropTypes.string,
     articleId: PropTypes.string,
-    onOpenLink: PropTypes.func.isRequired,
-    onChangeProp: PropTypes.func.isRequired
+    onOpenLink: PropTypes.func.isRequired
 };

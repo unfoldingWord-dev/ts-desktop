@@ -29,24 +29,27 @@ function TranslationAcademyApp() {
 
     // modifies the prop list
     function handleChangeProp(newProps) {
-        setProps({
+        const updatedProps = {
             ...props,
             ...newProps
-        });
+        };
+        console.log(props, newProps, updatedProps);
+        setProps(updatedProps);
     }
 
     // listen for props from the main thread
-    useEffect(() => {
-        function handlePropsChange(event, props) {
-            setProps(props);
-        }
-
-        ipcRenderer.on('props', handlePropsChange);
-
-        return () => {
-            ipcRenderer.removeListener('props', handlePropsChange);
-        };
-    }, []);
+    // useEffect(() => {
+    //     function handlePropsChange(event, props) {
+    //         console.log('props changed', props);
+    //         setProps(props);
+    //     }
+    //
+    //     ipcRenderer.on('props', handlePropsChange);
+    //
+    //     return () => {
+    //         ipcRenderer.removeListener('props', handlePropsChange);
+    //     };
+    // }, []);
 
     function handleOpenLink(href) {
         shell.openExternal(href);

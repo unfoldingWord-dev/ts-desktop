@@ -117,6 +117,31 @@ process.stdout.write = console.log.bind(console);
             setMsg(err.message);
             throw new Error(err);
         }
+
+        // deploy packaged tA material. See src/js/academy/util.js for implementation details.
+        const tADir = path.join(DATA_PATH, 'translationAcademy');
+        if(window.localStorage['version-changed'] || !fs.existsSync(tADir)) {
+            try {
+                console.log('Installing tA.');
+                const src = path.join(__dirname, '../index/ta');
+                const dest = DATA_PATH;
+                const requireES6 = require('../js/require-es6');
+                const {cacheCatalog} = requireES6("./academy/util");
+                const AdmZip = require("adm-zip");
+
+                const catalogPath = path.join(src, 'catalog.json');
+                const catalog = JSON.parse(fs.readFileSync(catalogPath).toString());
+                cacheCatalog(catalog);
+
+                const articlesZip = path.join(src, 'translationAcademy.zip');
+                const zip = new AdmZip(articlesZip);
+                zip.extractAllTo(dest, true);
+            } catch (error) {
+                // NOTE: the user can recover from this later by opening tA.
+                console.error('Failed to install tA');
+            }
+        }
+
         setMsg('Initializing configurator...');
 
         // TODO: refactor this so we can just pass an object to the constructor

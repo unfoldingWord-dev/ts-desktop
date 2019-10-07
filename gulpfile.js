@@ -16,7 +16,7 @@ const gulp = require('gulp'),
     util = require('./src/js/lib/utils'),
     princePackager = require('./src/js/prince-packager'),
     requireES6 = require('./src/js/require-es6'),
-    { pack: packagetA } = requireES6(path.join(__dirname, './scripts/package-ta'));
+    { pack: packagetA } = requireES6(path.join(__dirname, './src/js/academy/package-ta'));
 
 const APP_NAME = 'translationStudio',
     JS_FILES = './src/js/**/*.js',
@@ -29,10 +29,11 @@ function test() {
         .pipe(mocha({reporter: 'spec', grep: (argv.grep || argv.g)}));
 }
 
-function clean() {
+function clean(done) {
     rimraf.sync('src/logs');
     rimraf.sync('logs');
     rimraf.sync('ssh');
+    done();
 }
 
 function bump() {
@@ -82,7 +83,7 @@ function build(done) {
         RELEASE_DIR,
         'vendor',
         'scripts',
-        '\\.'
+        '\\.(?!babelrc)'
     ]).map(function (name) {
         return new RegExp('(^/' + name + '|' + '^/node_modules/' + name + ')');
     });

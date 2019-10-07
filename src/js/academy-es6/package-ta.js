@@ -3,7 +3,7 @@ import fs from 'fs';
 import rimraf from 'rimraf';
 import archiver from 'archiver';
 import path from 'path';
-import {cacheCatalog, downloadtACatalog, downloadtATranslation} from "../src/js/academy/util";
+import {cacheCatalog, downloadtACatalog, downloadtATranslation} from "../academy/util";
 import FileReader from 'filereader';
 import AdmZip from 'adm-zip';
 

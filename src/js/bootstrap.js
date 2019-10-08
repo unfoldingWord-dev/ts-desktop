@@ -121,7 +121,7 @@ require("regenerator-runtime/runtime");
 
         // deploy packaged tA material. See src/js/academy/util.js for implementation details.
         const tADir = path.join(DATA_PATH, 'translationAcademy');
-        if(window.localStorage['version-changed'] || !fs.existsSync(tADir)) {
+        if(window.localStorage['version-changed'] === 'true' || !fs.existsSync(tADir)) {
             try {
                 console.log('Installing tA.');
                 const src = path.join(__dirname, '../index/ta');

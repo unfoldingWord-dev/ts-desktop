@@ -1,7 +1,8 @@
 'use strict';
 
-const requireES6 = require('./require-es6');
-const {downloadtACatalog, cacheCatalog} = requireES6('../js/academy/util');
+var academyUtil = require('../js/academy/util');
+var downloadtACatalog = academyUtil.downloadtACatalog;
+var cacheCatalog = academyUtil.cacheCatalog;
 var _ = require('lodash');
 var request = require('request');
 var utils = require('../js/lib/utils');

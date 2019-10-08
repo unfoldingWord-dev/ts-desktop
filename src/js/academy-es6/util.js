@@ -259,7 +259,7 @@ export function useControlledProp(propValue) {
 
     useEffect(() => {
         setValue(propValue);
-    }, propValue);
+    }, [propValue]);
 
     return [value, setValue];
 }

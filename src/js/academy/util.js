@@ -388,7 +388,7 @@ function useControlledProp(propValue) {
 
   (0, _react.useEffect)(function () {
     setValue(propValue);
-  }, propValue);
+  }, [propValue]);
   return [value, setValue];
 }
 /**

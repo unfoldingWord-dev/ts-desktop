@@ -10,6 +10,7 @@
  */
 process.stderr.write = console.error.bind(console);
 process.stdout.write = console.log.bind(console);
+require("regenerator-runtime/runtime");
 
 (function() {
     let ipcRenderer = require('electron').ipcRenderer;
@@ -125,8 +126,7 @@ process.stdout.write = console.log.bind(console);
                 console.log('Installing tA.');
                 const src = path.join(__dirname, '../index/ta');
                 const dest = DATA_PATH;
-                const requireES6 = require('../js/require-es6');
-                const {cacheCatalog} = requireES6("./academy/util");
+                const cacheCatalog = require("../js/academy/util").cacheCatalog;
                 const AdmZip = require("adm-zip");
 
                 const catalogPath = path.join(src, 'catalog.json');
@@ -138,7 +138,7 @@ process.stdout.write = console.log.bind(console);
                 zip.extractAllTo(dest, true);
             } catch (error) {
                 // NOTE: the user can recover from this later by opening tA.
-                console.error('Failed to install tA');
+                console.error('Failed to install tA', error);
             }
         }
 

@@ -1304,16 +1304,19 @@
       checkAllContainers: function (list) {
           var promises = this.checkProjectContainers(list);
 
-          promises.push(App.dataManager.activateContainer('en', 'bible', 'tw'));
-          promises.push(App.dataManager.activateContainer('en', 'bible-obs', 'tw'));
-          promises.push(App.dataManager.activateContainer('en', 'ta-audio', 'vol2'));
-          promises.push(App.dataManager.activateContainer('en', 'ta-checking', 'vol1'));
-          promises.push(App.dataManager.activateContainer('en', 'ta-checking', 'vol2'));
-          promises.push(App.dataManager.activateContainer('en', 'ta-gateway', 'vol3'));
-          promises.push(App.dataManager.activateContainer('en', 'ta-intro', 'vol1'));
-          promises.push(App.dataManager.activateContainer('en', 'ta-process', 'vol1'));
-          promises.push(App.dataManager.activateContainer('en', 'ta-translate', 'vol1'));
-          promises.push(App.dataManager.activateContainer('en', 'ta-translate', 'vol2'));
+          // TRICKY: activating a container can throw an error
+          const errHandler = e => console.error(e);
+
+          promises.push(App.dataManager.activateContainer('en', 'bible', 'tw').catch(errHandler));
+          promises.push(App.dataManager.activateContainer('en', 'bible-obs', 'tw').catch(errHandler));
+          promises.push(App.dataManager.activateContainer('en', 'ta-audio', 'vol2').catch(errHandler));
+          promises.push(App.dataManager.activateContainer('en', 'ta-checking', 'vol1').catch(errHandler));
+          promises.push(App.dataManager.activateContainer('en', 'ta-checking', 'vol2').catch(errHandler));
+          promises.push(App.dataManager.activateContainer('en', 'ta-gateway', 'vol3').catch(errHandler));
+          promises.push(App.dataManager.activateContainer('en', 'ta-intro', 'vol1').catch(errHandler));
+          promises.push(App.dataManager.activateContainer('en', 'ta-process', 'vol1').catch(errHandler));
+          promises.push(App.dataManager.activateContainer('en', 'ta-translate', 'vol1').catch(errHandler));
+          promises.push(App.dataManager.activateContainer('en', 'ta-translate', 'vol2').catch(errHandler));
 
           return Promise.all(promises)
               .then(function () {

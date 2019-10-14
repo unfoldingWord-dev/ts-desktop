@@ -889,7 +889,7 @@
             var frames = App.dataManager.getContainerData(container);
             var notes = App.dataManager.getSourceNotes(source);
             var questions = App.dataManager.getSourceQuestions(source);
-            var udb = App.dataManager.getSourceUdb(source);
+            var simplifiedText = App.dataManager.getSourceSimplifiedText(source);
             var wordlist = App.dataManager.getSourceWords(source);
 
             // fallback to target language
@@ -900,14 +900,11 @@
             if(!questions.length) {
                 questions = App.dataManager.getSourceQuestions(target);
             }
-            if(!udb.length) {
-                udb = App.dataManager.getSourceUdb(target);
-            }
             if(!Object.keys(wordlist).length) {
                 wordlist = App.dataManager.getSourceWords(target);
             }
 
-            // fallback to english
+            // fallback to english form of resources
             target = {language_id: 'en', project_id: projectmeta.project.id, resource_id: projectmeta.resource.id};
             if(!notes.length) {
                 notes = App.dataManager.getSourceNotes(target);
@@ -915,19 +912,28 @@
             if(!questions.length) {
                 questions = App.dataManager.getSourceQuestions(target);
             }
-            if(!udb.length) {
-                udb = App.dataManager.getSourceUdb(target);
-            }
             if(!Object.keys(wordlist).length) {
                 wordlist = App.dataManager.getSourceWords(target);
             }
 
-            // fallback to ult for words
-            target = {language_id: projectmeta.target_language.id, project_id: projectmeta.project.id, resource_id: 'ult'};
+            // TRICKY: the mapping of words to the source is stored in the source container. So we look around a bit more for them.
+
+            // fallback to ust for words
+            target = {language_id: projectmeta.target_language.id, project_id: projectmeta.project.id, resource_id: 'ust'};
             if(!Object.keys(wordlist).length) {
                 wordlist = App.dataManager.getSourceWords(target);
             }
-            target = {language_id: 'en', project_id: projectmeta.project.id, resource_id: 'ult'};
+            target = {language_id: 'en', project_id: projectmeta.project.id, resource_id: 'ust'};
+            if(!Object.keys(wordlist).length) {
+                wordlist = App.dataManager.getSourceWords(target);
+            }
+
+            // fallback to ulb for words
+            target = {language_id: projectmeta.target_language.id, project_id: projectmeta.project.id, resource_id: 'udb'};
+            if(!Object.keys(wordlist).length) {
+                wordlist = App.dataManager.getSourceWords(target);
+            }
+            target = {language_id: 'en', project_id: projectmeta.project.id, resource_id: 'udb'};
             if(!Object.keys(wordlist).length) {
                 wordlist = App.dataManager.getSourceWords(target);
             }
@@ -949,7 +955,7 @@
                 }
 
                 var sourcedata = App.renderer.convertVerseMarkers(frames[i].content);
-                var resources = this.getFrameResources(source, frames[i], notes, questions, udb, wordlist, sourcedata.verses);
+                var resources = this.getFrameResources(source, frames[i], notes, questions, simplifiedText, wordlist, sourcedata.verses);
                 var chunkmeta = this.createFrameMeta(frames[i], projectmeta, sourcedata.verses, title);
                 var chunk = this.getFrameData(chunkmeta, projectmeta);
                 var sourcecontent = App.renderer.convertNoteMarkers(sourcedata.text);
@@ -1075,13 +1081,24 @@
             this.set('currentproject.chunks', chunkarray);
         },
 
-        getFrameResources: function (source, frame, notes, questions, udb, wordlist, verses) {
+        /**
+         *
+         * @param source
+         * @param frame
+         * @param notes
+         * @param questions
+         * @param simplifiedTextObject - an object with a data array and a container key
+         * @param wordlist
+         * @param verses
+         * @returns {Array}
+         */
+        getFrameResources: function (source, frame, notes, questions, simplifiedTextObject, wordlist, verses) {
             var resources = [];
             var note = [];
             var question = [];
             var words = [];
             var framewords = [];
-            var udbtext = null;
+            var referenceText = null;
 
             var framenotes = notes.filter(function (note) {
                 return note.chapter === frame.chapter && note.chunk === frame.chunk;
@@ -1155,19 +1172,20 @@
                 resources.push({title: "Questions", array: true, data: question});
             }
 
-            var frameudb = udb.filter(function (chunk) {
+            var frameSimplifiedText = simplifiedTextObject.data.filter(function (chunk) {
                 return chunk.chapter === frame.chapter && chunk.chunk === frame.chunk;
             });
-            if (frameudb.length && frame.chunk !== "title") {
-                udbtext = frameudb[0].content;
+            if (frameSimplifiedText.length && frame.chunk !== "title") {
+                referenceText = frameSimplifiedText[0].content;
             }
-            if (udbtext) {
-                udbtext = App.renderer.convertVerseMarkers(udbtext).text;
-                udbtext = App.renderer.convertNoteMarkers(udbtext);
-                udbtext = App.renderer.removeParaTags(udbtext);
-                udbtext = App.renderer.removeCharTags(udbtext);
-                udbtext = App.renderer.renderSuperscriptVerses(udbtext);
-                resources.push({title: "UDB", array: false, data: [udbtext]});
+            if (referenceText) {
+                referenceText = App.renderer.convertVerseMarkers(referenceText).text;
+                referenceText = App.renderer.convertNoteMarkers(referenceText);
+                referenceText = App.renderer.removeParaTags(referenceText);
+                referenceText = App.renderer.removeCharTags(referenceText);
+                referenceText = App.renderer.renderSuperscriptVerses(referenceText);
+                const resId = simplifiedTextObject.container.split("_")[2];
+                resources.push({title: resId.toUpperCase(), array: false, data: [referenceText]});
             }
 
             return resources;

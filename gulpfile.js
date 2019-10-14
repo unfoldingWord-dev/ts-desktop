@@ -13,7 +13,7 @@ const gulp = require('gulp'),
     path = require('path'),
     mkdirp = require('mkdirp'),
     fs = require('fs'),
-    util = require('./src/js/lib/utils');
+    util = require('./src/js/lib/utils'),
     princePackager = require('./src/js/prince-packager');
 
 const APP_NAME = 'translationStudio',
@@ -86,7 +86,8 @@ gulp.task('build', ['clean'], function (done) {
     });
 
     packager({
-        'arch': 'all',
+        'asar': true,
+        'arch': argv.win ? 'all' : 'x64',
         'platform': platforms,
         'dir': '.',
         'ignore': function (name) {

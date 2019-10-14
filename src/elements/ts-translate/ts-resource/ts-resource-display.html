@@ -188,6 +188,15 @@
             }
 
             var mythis = this;
+
+            // disable default link behavior to prevent crashing when clicking unsupported links
+            var links = this.$.body.getElementsByTagName("a");
+            for(var lpos = 0, len = links.length; lpos < len; lpos ++) {
+                links[lpos].addEventListener('click', function(event) {
+                    event.preventDefault();
+                });
+            }
+
             var talinks = this.$.body.getElementsByClassName("talink");
             var biblelinks = this.$.body.getElementsByClassName("biblelink");
             var wordlinks = this.$.body.getElementsByClassName("wordlink");

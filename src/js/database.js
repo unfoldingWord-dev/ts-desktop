@@ -44,6 +44,21 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                 });
         },
 
+        /**
+         * Checks if a resource container is open on the disk
+         * @param container
+         * @returns {Promise<boolean>}
+         */
+        isContainerOpen: function (container) {
+            var resourcePath = path.join(resourceDir, container);
+            return utils.fs.stat(resourcePath).then(utils.ret(true)).catch(utils.ret(false));
+        },
+
+        /**
+         * Checks if a resource container exists on the disk
+         * @param container
+         * @returns {*}
+         */
         containerExists: function (container) {
             var resourcePath = path.join(resourceDir, container);
             var sourcePath = path.join(sourceDir, container + ".tsrc");
@@ -125,17 +140,19 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             var lang = source.language_id;
             var proj = source.project_id;
             var res = source.resource_id;
-            var container = lang + "_" + proj + "_" + res;
-            var manifest = path.join(resourceDir, container, "package.json");
 
             return mythis.activateProjectContainers(lang, proj, res)
-                .then(function () {
-                    return utils.fs.readFile(manifest)
-                        .then(function (contents) {
-                            var json = JSON.parse(contents);
-                            source.current = json.resource.status.pub_date === source.date_modified;
-                            return source;
-                        });
+                .then(() => mythis.isContainerUpToDate(lang, proj, res))
+                .then(() => mythis.isContainerUpToDate(lang, proj, "tq"))
+                .then(() => mythis.isContainerUpToDate(lang, proj, "tn"))
+                .then(() => mythis.isContainerUpToDate(lang, "bible", "tw"))
+                .then(() => {
+                    source.current = true;
+                    return source;
+                })
+                .catch((e) => {
+                    source.current = false;
+                    return source;
                 });
         },
 
@@ -184,11 +201,29 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                         });
                 })
                 .then(function () {
-                    if (resource === "ulb") {
-                        return mythis.downloadContainer(language, project, "udb")
+                    return mythis.downloadContainer(language, "bible", "tw")
+                    .catch(function () {
+                        return true;
+                    });
+                })
+                .then(function () {
+                    if (resource !== "ust") {
+                        // TRICKY: always include the simplified text.
+                        return mythis.downloadContainer(language, project, "ust")
                             .catch(function () {
                                 return true;
                             });
+                    } else {
+                        return Promise.resolve(true);
+                    }
+                })
+                .then(function () {
+                    if (resource !== "udb") {
+                        // TRICKY: always include udb
+                        return mythis.downloadContainer(language, project, "udb")
+                        .catch(function() {
+                            return true;
+                        });
                     } else {
                         return Promise.resolve(true);
                     }
@@ -221,33 +256,131 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
                                             return Promise.resolve(true);
                                         });
                                 }
-                                return Promise.resolve("Resource container " + container + " does not exist");
+                                // the container could not be found
+                                return Promise.reject("Resource container " + container + " does not exist");
                             });
                     }
+                    // the container is already open
                     return Promise.resolve(true);
                 });
         },
 
+        /**
+         * Activates (opens) the source container along with all it's supplemental containers.
+         * Supplemental containers may have several fallbacks.
+         * If no fallbacks are available they just won't be available in the ui.
+         * @param language
+         * @param project
+         * @param resource
+         * @returns {*}
+         */
         activateProjectContainers: function (language, project, resource) {
             var mythis = this;
 
+            /**
+             * Produces an error handler that will eat the error and activate a fallback container
+             * @returns {Function}
+             * @param language {string}
+             * @param project {string}
+             * @param resource {string}
+             */
+            var fallbackWith = (language, project, resource) => {
+                return () => {
+                    return mythis.activateContainer(language, project, resource);
+                };
+            };
+
             return mythis.activateContainer(language, project, resource)
-                .then(function (msg) {
-                    if (typeof msg === 'string') {
-                        console.log(msg);
-                    }
+                .then(function () {
+                    // open translation notes
+                    return mythis.activateContainer(language, project, "tn")
+                    .catch(fallbackWith("en", project, "tn"))
+                    .catch(() => {
+                        console.warn(`Could not find translationNotes for ${language}_${project}_${resource}`);
+                        return Promise.resolve();
+                    });
                 })
                 .then(function () {
-                    return mythis.activateContainer(language, project, "tn");
+                    // open translationQuestions
+                    return mythis.activateContainer(language, project, "tq")
+                    .catch(fallbackWith("en", project, "tq"))
+                    .catch(() => {
+                        console.warn(`Could not find translationQuestions for ${language}_${project}_${resource}`);
+                        return Promise.resolve();
+                    });
                 })
                 .then(function () {
-                    return mythis.activateContainer(language, project, "tq");
+                    // open translationWords
+                    return mythis.activateContainer(language, "bible", "tw")
+                    .catch(fallbackWith("en", "bible", "tw"))
+                    .catch(() => {
+                        console.warn(`Could not find translationWords for ${language}_${project}_${resource}`);
+                        return Promise.resolve();
+                    });
                 })
                 .then(function () {
-                    if (resource === "ulb") {
-                        return mythis.activateContainer(language, project, "udb");
+                    // open simplified text
+                    return mythis.activateContainer(language, project, "ust")
+                    .catch(fallbackWith(language, project, "udb"))
+                    .catch(fallbackWith("en", project, "ust"))
+                    .catch(fallbackWith("en", project, "udb"))
+                    .catch(() => {
+                        console.warn(`Could not find simplified text for ${language}_${project}_${resource}`);
+                        return Promise.resolve();
+                    });
+                })
+                .catch(e => {
+                    // TRICKY: catch errors so the project can still open.
+                    console.warn(e);
+                });
+        },
+
+        /**
+         * Checks if a container is up to date.
+         * If the container is not up to date this will reject. Otherwise, it will resolve.
+         * @param language
+         * @param project
+         * @param resource
+         * @return {Promise}
+         */
+        isContainerUpToDate: function (language, project, resource) {
+            var mythis = this;
+            var containerId = language + "_" + project + "_" + resource;
+            return this.containerExists(containerId)
+                .then(function(exists) {
+                    if(exists) {
+                        // make sure container is open
+                        return mythis.activateContainer(language, project, resource)
+                            .then(function() {
+                                // get db details
+                                var dbDetails = mythis.getSourceDetails(project, language, resource);
+                                if(!dbDetails) {
+                                    // there's no record of any update
+                                    return Promise.resolve();
+                                }
+
+                                // get disk details
+                                var manifest = path.join(resourceDir, containerId, "package.json");
+                                return utils.fs.readFile(manifest)
+                                    .then(function(contents) {
+                                        var diskDetails = JSON.parse(contents);
+                                        // compare versions
+                                        var uptodate = diskDetails.resource.status.pub_date === dbDetails.date_modified;
+                                        if(!uptodate) {
+                                            return Promise.reject();
+                                        }
+                                    });
+                            });
                     } else {
-                        return Promise.resolve(true);
+                        // there's no file on the disk
+
+                        var dbDetails = mythis.getSourceDetails(project, language, resource);
+                        if(!dbDetails) {
+                            // there's no record of any update
+                            return Promise.resolve();
+                        } else {
+                            return Promise.reject();
+                        }
                     }
                 });
         },
@@ -353,6 +486,44 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             }
         },
 
+        /**
+         * Returns a simplified form of the source text.
+         * This will attempt to use the source language if not it will fallback to english.
+         * It will try to get the ult, if not it will return the udb.
+         * As a side effect this will extract all of the possible containers.
+         * This ensures we can access all of the resources later (like tw catalog). Kinda hacky, but it works.
+         * @param source
+         * @returns an object container a data array and a container key.
+         */
+        getSourceSimplifiedText: function (source) {
+            const variations = [
+                source.language_id + "_" + source.project_id + "_ust",
+                source.language_id + "_" + source.project_id + "_udb",
+                "en_" + source.project_id + "_ust",
+                "en_" + source.project_id + "_udb"
+            ];
+            var result = {
+                container: null,
+                data: []
+            };
+            for(var container of variations) {
+                var data = this.extractContainer(container);
+                if(data.length > 0 && result.data.length === 0) {
+                    result = {
+                        container,
+                        data
+                    };
+                }
+            }
+
+            return result;
+        },
+
+        /**
+         * @deprecated use {@link getSourceSimplifiedText} instead
+         * @param source
+         * @returns {*|Array}
+         */
         getSourceUdb: function (source) {
             var container = source.language_id + "_" + source.project_id + "_udb";
 
@@ -391,6 +562,11 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             return frames;
         },
 
+        /**
+         * Retrieves a list of words found in the source
+         * @param source
+         * @returns {Array|*}
+         */
         getSourceWords: function (source) {
             var container = source.language_id + "_" + source.project_id + "_" + source.resource_id;
             var words = this.parseYaml(container, "config.yml");
@@ -512,6 +688,44 @@ function DataManager(db, resourceDir, apiURL, sourceDir) {
             } else {
                 return [];
             }
+        },
+
+        getAllTaLocalized: function (lang) {
+            var mythis = this;
+            var containers = [
+                "_ta-intro_vol1",
+                "_ta-process_vol1",
+                "_ta-translate_vol1",
+                "_ta-translate_vol2",
+                "_ta-checking_vol1",
+                "_ta-checking_vol2",
+                "_ta-audio_vol2",
+                "_ta-gateway_vol3"
+            ];
+            var allchunks = [];
+
+            containers.forEach(function (container) {
+                var localizedContainer = lang + container;
+                var filepath = path.join(resourceDir, localizedContainer);
+                if(fs.existsSync(filepath)) {
+                    allchunks.push(mythis.getContainerData(localizedContainer));
+                } else {
+                    allchunks.push(mythis.getContainerData('en' + container));
+                }
+            });
+
+            allchunks = _.flatten(allchunks);
+
+            allchunks.forEach(function (item) {
+                if (item.chunk === "title") {
+                    item.content = "# " + item.content;
+                }
+                if (item.chunk === "sub-title") {
+                    item.content = "## " + item.content;
+                }
+            });
+
+            return allchunks;
         },
 
         getAllTa: function () {

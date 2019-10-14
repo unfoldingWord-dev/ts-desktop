@@ -1,4 +1,4 @@
-const {dialog, app, BrowserWindow, ipcMain} = require(
+const {dialog, app, Menu, BrowserWindow, ipcMain} = require(
     'electron');
 const path = require('path');
 
@@ -42,18 +42,7 @@ const menuTemplate = [
             }
         ]
     },
-    {
-      label: 'Edit',
-      submenu: [
-        { role: 'undo' },
-        { role: 'redo' },
-        { type: 'separator' },
-        { role: 'cut' },
-        { role: 'copy' },
-        { role: 'paste' },
-        { role: 'selectAll' }
-      ]
-    }
+    { role: 'editMenu' }
 ];
 
 function initialize() {
@@ -85,6 +74,10 @@ function initialize() {
             createWindow();
         }
     });
+
+    // build menu
+    const menu = Menu.buildFromTemplate(menuTemplate);
+    Menu.setApplicationMenu(menu);
 
     ipcMain.on('loading-status', function(event, status) {
         splashScreen && splashScreen.webContents.send('loading-status', status);

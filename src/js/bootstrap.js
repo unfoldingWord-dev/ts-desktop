@@ -20,8 +20,6 @@ process.stdout.write = console.log.bind(console);
     try {
         const DATA_PATH = ipcRenderer.sendSync('main-window', 'dataPath');
 
-        setMsg(DATA_PATH);
-
         // stub globals
         let path = null;
         let fs = null;

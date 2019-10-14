@@ -11,6 +11,51 @@ let mainWindow = null;
 let academyWindow;
 let scrollToId;
 
+const menuTemplate = [
+    {
+        label: 'Window',
+        role: 'window',
+        submenu: [
+            {
+                label: 'Minimize',
+                accelerator: 'CmdOrCtrl+M',
+                role: 'minimize'
+            },
+            {
+                label: 'Reload',
+                accelerator: 'CmdOrCtrl+R',
+                click: function(item, focusedWindow) {
+                    if (focusedWindow) {
+                        focusedWindow.reload();
+                    }
+                }
+            },
+            {
+                label: 'Toggle Developer Tools',
+                accelerator:
+                    process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
+                click: function(item, focusedWindow) {
+                    if (focusedWindow) {
+                        focusedWindow.webContents.toggleDevTools();
+                    }
+                }
+            }
+        ]
+    },
+    {
+      label: 'Edit',
+      submenu: [
+        { role: 'undo' },
+        { role: 'redo' },
+        { type: 'separator' },
+        { role: 'cut' },
+        { role: 'copy' },
+        { role: 'paste' },
+        { role: 'selectAll' }
+      ]
+    }
+];
+
 function initialize() {
     makeSingleInstance();
 

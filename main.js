@@ -1,4 +1,4 @@
-const {dialog, app, BrowserWindow, ipcMain} = require(
+const {dialog, app, Menu, BrowserWindow, ipcMain} = require(
     'electron');
 const path = require('path');
 
@@ -10,6 +10,40 @@ let splashScreen;
 let mainWindow = null;
 let academyWindow;
 let scrollToId;
+
+const menuTemplate = [
+    {
+        label: 'Window',
+        role: 'window',
+        submenu: [
+            {
+                label: 'Minimize',
+                accelerator: 'CmdOrCtrl+M',
+                role: 'minimize'
+            },
+            {
+                label: 'Reload',
+                accelerator: 'CmdOrCtrl+R',
+                click: function(item, focusedWindow) {
+                    if (focusedWindow) {
+                        focusedWindow.reload();
+                    }
+                }
+            },
+            {
+                label: 'Toggle Developer Tools',
+                accelerator:
+                    process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
+                click: function(item, focusedWindow) {
+                    if (focusedWindow) {
+                        focusedWindow.webContents.toggleDevTools();
+                    }
+                }
+            }
+        ]
+    },
+    { role: 'editMenu' }
+];
 
 function initialize() {
     makeSingleInstance();
@@ -40,6 +74,10 @@ function initialize() {
             createWindow();
         }
     });
+
+    // build menu
+    const menu = Menu.buildFromTemplate(menuTemplate);
+    Menu.setApplicationMenu(menu);
 
     ipcMain.on('loading-status', function(event, status) {
         splashScreen && splashScreen.webContents.send('loading-status', status);

@@ -42,7 +42,8 @@ const menuTemplate = [
                 }
             }
         ]
-    }
+    },
+    { role: 'editMenu' }
 ];
 
 function getDataPath() {

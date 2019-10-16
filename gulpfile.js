@@ -89,7 +89,7 @@ function build(done) {
     });
 
     packager({
-        'asar': true,
+        'asar': false,
         'arch': argv.win ? 'all' : 'x64',
         'platform': platforms,
         'dir': '.',

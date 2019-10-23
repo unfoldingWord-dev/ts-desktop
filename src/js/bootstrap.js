@@ -10,6 +10,7 @@
  */
 process.stderr.write = console.error.bind(console);
 process.stdout.write = console.log.bind(console);
+require("regenerator-runtime/runtime");
 
 (function() {
     let ipcRenderer = require('electron').ipcRenderer;
@@ -115,6 +116,30 @@ process.stdout.write = console.log.bind(console);
             setMsg(err.message);
             throw new Error(err);
         }
+
+        // deploy packaged tA material. See src/js/academy/util.js for implementation details.
+        const tADir = path.join(DATA_PATH, 'translationAcademy');
+        if(window.localStorage['version-changed'] === 'true' || !fs.existsSync(tADir)) {
+            try {
+                console.log('Installing tA.');
+                const src = path.join(__dirname, '../index/ta');
+                const dest = DATA_PATH;
+                const cacheCatalog = require("../js/academy/util").cacheCatalog;
+                const AdmZip = require("adm-zip");
+
+                const catalogPath = path.join(src, 'catalog.json');
+                const catalog = JSON.parse(fs.readFileSync(catalogPath).toString());
+                cacheCatalog(catalog);
+
+                const articlesZip = path.join(src, 'translationAcademy.zip');
+                const zip = new AdmZip(articlesZip);
+                zip.extractAllTo(dest, true);
+            } catch (error) {
+                // NOTE: the user can recover from this later by opening tA.
+                console.error('Failed to install tA', error);
+            }
+        }
+
         setMsg('Initializing configurator...');
 
         // TODO: refactor this so we can just pass an object to the constructor
@@ -184,7 +209,7 @@ process.stdout.write = console.log.bind(console);
 
             var db = new Db(libraryPath, resourceDir);
 
-            return new DataManager(db, resourceDir, apiURL, srcResource);
+            return new DataManager(db, resourceDir, apiURL, srcResource, DATA_PATH);
         })();
 
         setMsg('Initializing modules...');

@@ -18,6 +18,9 @@
     "jest": {
         "testPathIgnorePatterns": [
             "out"
+        ],
+        "modulePathIgnorePatterns": [
+            "out"
         ]
     },
     "dependencies": {

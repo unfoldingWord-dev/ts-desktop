@@ -39,6 +39,9 @@ The following commands are available from within the project directory:
 
 > Note: You can open the Chrome Developer Tools while the app is running by pressing `Ctrl+Shift+I` on Windows/Linux or `Cmd-Shift-I` on macOS.
 
+### Building tA
+tA has been built using react and es6. If you need to work on this part of the code, work in `src/js/academy-es6` and then run `npm run compile-ta`.
+
 ### Included Resources
 The application is bundled with resources from the following languages
 

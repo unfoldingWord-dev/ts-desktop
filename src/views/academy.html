@@ -2,36 +2,21 @@
 <html>
 <head>
     <title>translationAcademy</title>
+    <meta charset="utf-8"/>
 
     <script src="../components/webcomponentsjs/webcomponents-lite.min.js"></script>
-    <script src="../components/lodash/lodash.min.js"></script>
-    <script src="../js/academybootstrap.js"></script>
 
     <link rel="stylesheet" href="../css/main.css">
 
     <link rel="import" href="../components/polymer/polymer.html">
     <link rel="import" href="../elements/ts-main/ts-academy-titlebar.html">
-    <link rel="import" href="../elements/ts-main/ts-academy.html">
     <link rel="import" href="../elements/ts-main/app-theme.html">
 
 </head>
 <body>
     <ts-academy-titlebar></ts-academy-titlebar>
-    <ts-academy></ts-academy>
-
-    <script>
-        (function () {
-            var ipcRenderer = require('electron').ipcRenderer;
-
-            ipcRenderer.on('academy-scroll', function (event, id) {
-                var element = document.getElementById(id);
-
-                if (element) {
-                    element.scrollIntoView();
-                }
-            });
-
-        })();
-    </script>
+    <div id="react-app"></div>
+    <script src="../../node_modules/regenerator-runtime/runtime.js"></script>
+    <script src="../js/academy/es6-bootstrap.js"></script>
 </body>
 </html>

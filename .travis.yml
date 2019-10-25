@@ -17,23 +17,23 @@ env:
 #  - node_modules
 before_install:
 - ./scripts/skip_travis_commits.sh
-- sudo add-apt-repository --yes ppa:ubuntu-wine/ppa
-- sudo add-apt-repository --yes ppa:arx/release
-- sudo apt-get update -d
-- sudo apt-get install -y -q innoextract wine python-software-properties
-- wine --version
-- innoextract --version
-- "./scripts/innosetup/innoinstall.sh"
-- sudo cp scripts/innosetup/iscc /usr/local/bin/iscc
-- iscc /? 2> /dev/null | grep "Inno Setup Preprocessor"
-# private keys for app
-- if [ "${TRAVIS_SECURE_ENV_VARS}" != "false" ]; then openssl aes-256-cbc -K $encrypted_8efd489acff0_key
-  -iv $encrypted_8efd489acff0_iv -in private.json.enc -out src/config/private.json
-  -d; fi
-# dropbox uploader key
-- if [ "${TRAVIS_SECURE_ENV_VARS}" != "false" ]; then openssl aes-256-cbc -K $encrypted_8efd489acff0_key
-  -iv $encrypted_8efd489acff0_iv -in .dropbox_uploader.enc -out ~/.dropbox_uploader
-  -d; fi
+#- sudo add-apt-repository --yes ppa:ubuntu-wine/ppa
+#- sudo add-apt-repository --yes ppa:arx/release
+#- sudo apt-get update -d
+#- sudo apt-get install -y -q innoextract wine python-software-properties
+#- wine --version
+#- innoextract --version
+#- "./scripts/innosetup/innoinstall.sh"
+#- sudo cp scripts/innosetup/iscc /usr/local/bin/iscc
+#- iscc /? 2> /dev/null | grep "Inno Setup Preprocessor"
+## private keys for app
+#- if [ "${TRAVIS_SECURE_ENV_VARS}" != "false" ]; then openssl aes-256-cbc -K $encrypted_8efd489acff0_key
+#  -iv $encrypted_8efd489acff0_iv -in private.json.enc -out src/config/private.json
+#  -d; fi
+## dropbox uploader key
+#- if [ "${TRAVIS_SECURE_ENV_VARS}" != "false" ]; then openssl aes-256-cbc -K $encrypted_8efd489acff0_key
+#  -iv $encrypted_8efd489acff0_iv -in .dropbox_uploader.enc -out ~/.dropbox_uploader
+#  -d; fi
 
 # install git lfs
 #- mkdir -p $HOME/bin
@@ -50,29 +50,29 @@ before_script:
 #- npm install door43-client -g
 script: npm test
 after_success:
-- test $TRAVIS_TEST_RESULT == 0 && $TRAVIS_PULL_REQUEST == "false"
-- test -z $TRAVIS_TAG && ./scripts/bump.sh
-#- door43-client index -i src/index/index.sqlite -f
-- test -f src/index/index.sqlite
-#- door43-client download -i src/index/index.sqlite -d src/index/resource_containers -f -c
-- test -d src/index/resource_containers
-- bower install
-# ensure bower installed correctly
-- test -d src/components
-- gulp prince
-# ensure prince was installed
-- test -d src/prince
-- gulp build --win
-- gulp build --linux
-- gulp build --osx
-- gulp release
-# upload to dropbox
-- if [ -f ~/.dropbox_uploader ]; then
-    echo 'uploading build to dropbox';
-    ./dropbox_uploader.sh -q upload ./release/ travis-artifacts/$TRAVIS_JOB_NUMBER/;
-  else
-    echo 'missing ~/.dropbox_uploader. Skipping dropbox upload.';
-  fi
+#- test $TRAVIS_TEST_RESULT == 0 && $TRAVIS_PULL_REQUEST == "false"
+#- test -z $TRAVIS_TAG && ./scripts/bump.sh
+##- door43-client index -i src/index/index.sqlite -f
+#- test -f src/index/index.sqlite
+##- door43-client download -i src/index/index.sqlite -d src/index/resource_containers -f -c
+#- test -d src/index/resource_containers
+#- bower install
+## ensure bower installed correctly
+#- test -d src/components
+#- gulp prince
+## ensure prince was installed
+#- test -d src/prince
+#- gulp build --win
+#- gulp build --linux
+#- gulp build --osx
+#- gulp release
+## upload to dropbox
+#- if [ -f ~/.dropbox_uploader ]; then
+#    echo 'uploading build to dropbox';
+#    ./dropbox_uploader.sh -q upload ./release/ travis-artifacts/$TRAVIS_JOB_NUMBER/;
+#  else
+#    echo 'missing ~/.dropbox_uploader. Skipping dropbox upload.';
+#  fi
 deploy:
 ## develop branch
 #- provider: surge
@@ -101,17 +101,17 @@ deploy:
 #    tags: false
 #    condition: "-d ./release && $TRAVIS_BRANCH =~ ^release-.*$"
 # master branch
-- provider: releases
-  api_key:
-    secure: brjmL3cyCTr6swNCqka2fkc41j+PO2tqXZhE9QyNoDEXcxR1FOwPoPut/8h4N/pISfkf2FibtsWqThhW1Xz1pVNNMBlHRblJsSecfvXOtn7kneCsAV+QBngbPuA8OKzfhXTUeIQNlIpfG+rwlDg28wOthDI/7ADBOYgGQWeOd7o=
-  file:
-    - release/*.exe
-    - release/*.zip
-  file_glob: true
-  skip_cleanup: true
-  overwrite: true
-  draft: true
-  on:
-    tags: true
-    repo: unfoldingWord-dev/ts-desktop
-    condition: "-d ./release"
+#- provider: releases
+#  api_key:
+#    secure: brjmL3cyCTr6swNCqka2fkc41j+PO2tqXZhE9QyNoDEXcxR1FOwPoPut/8h4N/pISfkf2FibtsWqThhW1Xz1pVNNMBlHRblJsSecfvXOtn7kneCsAV+QBngbPuA8OKzfhXTUeIQNlIpfG+rwlDg28wOthDI/7ADBOYgGQWeOd7o=
+#  file:
+#    - release/*.exe
+#    - release/*.zip
+#  file_glob: true
+#  skip_cleanup: true
+#  overwrite: true
+#  draft: true
+#  on:
+#    tags: true
+#    repo: unfoldingWord-dev/ts-desktop
+#    condition: "-d ./release"

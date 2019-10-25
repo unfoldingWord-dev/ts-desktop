@@ -14,7 +14,9 @@ const gulp = require('gulp'),
     mkdirp = require('mkdirp'),
     fs = require('fs'),
     util = require('./src/js/lib/utils'),
-    princePackager = require('./src/js/prince-packager');
+    princePackager = require('./src/js/prince-packager'),
+    requireES6 = require('./src/js/require-es6'),
+    { pack: packagetA } = requireES6(path.join(__dirname, './src/js/academy/package-ta'));
 
 const APP_NAME = 'translationStudio',
     JS_FILES = './src/js/**/*.js',
@@ -22,18 +24,19 @@ const APP_NAME = 'translationStudio',
     BUILD_DIR = 'out/',
     RELEASE_DIR = 'release/';
 
-gulp.task('test', function () {
+function test() {
     return gulp.src(UNIT_TEST_FILES, { read: false })
         .pipe(mocha({reporter: 'spec', grep: (argv.grep || argv.g)}));
-});
+}
 
-gulp.task('clean', function () {
+function clean(done) {
     rimraf.sync('src/logs');
     rimraf.sync('logs');
     rimraf.sync('ssh');
-});
+    done();
+}
 
-gulp.task('bump', function () {
+function bump() {
     var build = require('./package').build;
 
     var bumped = ++build;
@@ -44,12 +47,12 @@ gulp.task('bump', function () {
     return gulp.src(['package.json'])
         .pipe(replace(/("build"\s*:\s*)"\d+"(.*)/, replaceString))
         .pipe(gulp.dest('./'));
-});
+}
 
 /**
  * This will download and install prince binaries for all os'
  */
-gulp.task('prince', function(done) {
+function prince(done) {
     var tempDir = 'src/prince';
 
     util.chain(princePackager.install.bind(null, tempDir))(['win', 'linux', 'osx'])
@@ -57,10 +60,10 @@ gulp.task('prince', function(done) {
             done();
         })
         .catch(done);
-});
+}
 
 // pass parameters like: gulp build --win --osx --linux
-gulp.task('build', ['clean'], function (done) {
+function build(done) {
 
     var platforms = [];
 
@@ -80,13 +83,13 @@ gulp.task('build', ['clean'], function (done) {
         RELEASE_DIR,
         'vendor',
         'scripts',
-        '\\.'
+        '\\.(?!babelrc)'
     ]).map(function (name) {
         return new RegExp('(^/' + name + '|' + '^/node_modules/' + name + ')');
     });
 
     packager({
-        'asar': true,
+        'asar': false,
         'arch': argv.win ? 'all' : 'x64',
         'platform': platforms,
         'dir': '.',
@@ -129,9 +132,9 @@ gulp.task('build', ['clean'], function (done) {
     //         }
     //     });
     // }
-});
+}
 
-gulp.task('release', function(done) {
+function release(done) {
     const p = require('./package');
     const archiver = require('archiver');
     const exec = require('child_process').exec;
@@ -329,6 +332,18 @@ gulp.task('release', function(done) {
             done();
         }).catch(done);
     });
-});
+}
 
-gulp.task('default', ['test']);
+function packTA() {
+    return packagetA(path.join(__dirname, './src/index/ta'));
+}
+
+
+module.exports.default = test;
+module.exports.test = test;
+module.exports.release = release;
+module.exports.packTA = packTA;
+module.exports.build = gulp.series(clean, build);
+module.exports.prince = prince;
+module.exports.bump = bump;
+module.exports.clean = clean;

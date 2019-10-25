@@ -1,6 +1,7 @@
-const {dialog, app, BrowserWindow, ipcMain} = require(
+const {dialog, app, Menu, BrowserWindow, ipcMain} = require(
     'electron');
 const path = require('path');
+const mkdirp = require('mkdirp');
 
 const debug = /--debug/.test(process.argv[2]);
 
@@ -11,15 +12,54 @@ let mainWindow = null;
 let academyWindow;
 let scrollToId;
 
+const menuTemplate = [
+    {
+        label: 'Window',
+        role: 'window',
+        submenu: [
+            {
+                label: 'Minimize',
+                accelerator: 'CmdOrCtrl+M',
+                role: 'minimize'
+            },
+            {
+                label: 'Reload',
+                accelerator: 'CmdOrCtrl+R',
+                click: function(item, focusedWindow) {
+                    if (focusedWindow) {
+                        focusedWindow.reload();
+                    }
+                }
+            },
+            {
+                label: 'Toggle Developer Tools',
+                accelerator:
+                    process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
+                click: function(item, focusedWindow) {
+                    if (focusedWindow) {
+                        focusedWindow.webContents.toggleDevTools();
+                    }
+                }
+            }
+        ]
+    },
+    { role: 'editMenu' }
+];
+
+function getDataPath() {
+    var base = process.env.LOCALAPPDATA || (process.platform === 'darwin' ?
+        path.join(process.env.HOME, 'Library', 'Application Support') :
+        path.join(process.env.HOME, '.config'));
+
+    const dir = path.join(base, 'translationstudio');
+    mkdirp.sync(dir);
+    return dir;
+}
+
 function initialize() {
     makeSingleInstance();
 
-    app.setPath('userData', (function(dataDir) {
-        var base = process.env.LOCALAPPDATA ||
-            (process.platform === 'darwin' ? path.join(process.env.HOME, 'Library', 'Application Support') : path.join(process.env.HOME, '.config'));
-
-        return path.join(base, dataDir);
-    })('translationstudio'));
+    app.setPath('userData', getDataPath());
 
     app.on('ready', () => {
         createSplashWindow();
@@ -40,6 +80,10 @@ function initialize() {
             createWindow();
         }
     });
+
+    // build menu
+    const menu = Menu.buildFromTemplate(menuTemplate);
+    Menu.setApplicationMenu(menu);
 
     ipcMain.on('loading-status', function(event, status) {
         splashScreen && splashScreen.webContents.send('loading-status', status);
@@ -82,16 +126,42 @@ function initialize() {
         }
     });
 
-    ipcMain.on('open-academy', function(event, id) {
-        scrollToId = id;
+    /**
+     * Handles an event to open translationAcademy
+     * @param event
+     * @param lang - the translation to view
+     * @param id - the article id
+     */
+    ipcMain.on('open-academy', function(event, args) {
+        let lang, id;
+        if(args) {
+            lang = args.lang;
+            id = args.id;
+        }
+
         if (academyWindow) {
             academyWindow.show();
-            scrollAcademyWindow();
+            // send props to window
+            academyWindow.webContents.send('props', {
+                lang,
+                articleId: id,
+                dataPath: getDataPath()
+            });
         } else {
             createAcademySplash();
             setTimeout(function() {
                 splashScreen.show();
                 createAcademyWindow();
+                academyWindow.once('ready-to-show', () => {
+                    splashScreen.close();
+                    academyWindow.show();
+                    // send props to window
+                    academyWindow.webContents.send('props', {
+                        lang,
+                        articleId: id,
+                        dataPath: getDataPath()
+                    });
+                });
             }, 500);
         }
     });
@@ -122,14 +192,6 @@ function initialize() {
         var input = dialog.showOpenDialog(mainWindow, arg.options);
         event.returnValue = input || false;
     });
-
-    ipcMain.on('ta-loading-done', function() {
-        if (splashScreen && academyWindow) {
-            academyWindow.show();
-            splashScreen.close();
-            scrollAcademyWindow();
-        }
-    });
 }
 
 function createWindow() {
@@ -156,6 +218,10 @@ function createWindow() {
         path.join('file://', __dirname, '/src/views/index.html'));
 
     mainWindow.on('closed', () => {
+        if (academyWindow) {
+            academyWindow.close();
+            academyWindow = null;
+        }
         mainWindow = null;
     });
 
@@ -270,7 +336,8 @@ function createAcademyWindow() {
         frame: false
     });
 
-    academyWindow.loadURL('file://' + path.join(__dirname, '/src/views/academy.html'));
+    academyWindow.loadURL(
+        'file://' + path.join(__dirname, '/src/views/academy.html'));
 
     academyWindow.on('closed', function() {
         academyWindow = null;
@@ -283,12 +350,11 @@ function createAcademyWindow() {
     academyWindow.on('unmaximize', function() {
         academyWindow.webContents.send('unmaximize');
     });
-}
 
-function scrollAcademyWindow() {
-    if (scrollToId) {
-        academyWindow.webContents.send('academy-scroll', scrollToId);
-    }
+    academyWindow.on('blur', function() {
+        // manually pass blur to the page because window.blur doesn't work properly.
+        academyWindow.webContents.send('blur');
+    });
 }
 
 initialize();

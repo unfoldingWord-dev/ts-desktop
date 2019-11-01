@@ -76,6 +76,7 @@ function build(done) {
     var ignored = Object.keys(p['devDependencies']).concat([
         'unit_tests',
         'acceptance_tests',
+        // TRICKY: this was causing the windows install to fail.
         'src\/components\/prism\/gulpfile\.js',
         '__tests__',
         '__mocks__',

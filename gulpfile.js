@@ -76,6 +76,7 @@ function build(done) {
     var ignored = Object.keys(p['devDependencies']).concat([
         'unit_tests',
         'acceptance_tests',
+        'src\/components\/prism\/gulpfile\.js',
         '__tests__',
         '__mocks__',
         'out',

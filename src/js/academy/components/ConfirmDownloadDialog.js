@@ -30,11 +30,11 @@ function ConfirmDownloadDialog(props) {
     var update = translation.update,
         title = translation.title,
         language = translation.language;
-    message = "Do you want to download the ".concat(title, " (").concat(language, ") translationAcademy?");
+    message = "Do you want to download translationAcademy ".concat(title, " (").concat(language, ")?");
 
     if (update) {
       dialogTitle = 'Update translationAcademy';
-      message = "An update is available for the ".concat(title, " (").concat(language, ") translationAcademy. Would you like to download it now?");
+      message = "An update is available for translationAcademy ".concat(title, " (").concat(language, "). Would you like to download it now?");
     }
   }
 

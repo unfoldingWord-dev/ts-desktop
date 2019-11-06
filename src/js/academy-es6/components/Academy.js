@@ -64,7 +64,7 @@ export default function Academy(props) {
         }
         setLoading({
             loadingTitle,
-            loadingMessage: `${loadingTitle} ${title} (${language}) translationAcademy. Please wait.`,
+            loadingMessage: `${loadingTitle} translationAcademy ${title} (${language}). Please wait.`,
             progress
         });
     }
@@ -154,7 +154,10 @@ export default function Academy(props) {
                 setLoading({});
             }, 1000);
         }).catch(error => {
-            setError('Unable to download translationAcademy. Please try again.');
+            setError({
+                message: `Unable to download translationAcademy ${translation.title} (${translation.language}). Check for updates and try again.`,
+                error
+            });
             setLoading({});
             setConfirmDownload(false);
 
@@ -162,7 +165,7 @@ export default function Academy(props) {
             rimraf.sync(extractDest);
 
             setLang(null);
-            console.error(error);
+            console.error(`Could not download ${translation.url}`, error);
         });
     }
 
@@ -172,7 +175,10 @@ export default function Academy(props) {
             rimraf.sync(dir);
             syncCatalog();
         } catch (error) {
-            console.error(`failed to delete ${selectedTranslation.language} translation`, error);
+            setError({
+                message: `Failed to delete translationAcademy ${selectedTranslation.title} (${selectedTranslation.language}).`,
+                error
+            });
         }
     }
 
@@ -194,7 +200,10 @@ export default function Academy(props) {
         try {
             await updateCatalog();
         } catch (error) {
-            setError('Unable to check for updates. Please try again.');
+            setError({
+                message: 'Unable to check for updates. Please try again.',
+                error
+            });
             console.error(error);
         } finally {
             setLoading({});
@@ -285,7 +294,10 @@ export default function Academy(props) {
                 console.error('The translation is corrupt', error);
                 const dir = getTranslationPath(translation);
                 rimraf.sync(dir);
-                setError('The translation is corrupt. Please try again.');
+                setError({
+                    message: `translationAcademy ${translation.title} (${translation.language}) is corrupt. Please check for updates and download again.`,
+                    error
+                });
                 setLang(null);
             }
         }
@@ -341,7 +353,7 @@ export default function Academy(props) {
                                      onOk={handleConfirmLink}/>
             <LoadingDialog open={!!loadingTitle} title={loadingTitle} message={loadingMessage}
                            progress={loadingProgress}/>
-            <ErrorDialog title="Error" message={errorMessage} open={errorMessage !== null} onClose={handleDismissError}/>
+            <ErrorDialog title="Error" error={errorMessage} open={errorMessage !== null} onClose={handleDismissError}/>
         </>
     );
 }

@@ -162,7 +162,7 @@ function Academy(props) {
 
     setLoading({
       loadingTitle: loadingTitle,
-      loadingMessage: "".concat(loadingTitle, " ").concat(title, " (").concat(language, ") translationAcademy. Please wait."),
+      loadingMessage: "".concat(loadingTitle, " translationAcademy ").concat(title, " (").concat(language, "). Please wait."),
       progress: progress
     });
   }
@@ -304,7 +304,10 @@ function Academy(props) {
                   setLoading({});
                 }, 1000);
               })["catch"](function (error) {
-                setError('Unable to download translationAcademy. Please try again.');
+                setError({
+                  message: "Unable to download translationAcademy ".concat(translation.title, " (").concat(translation.language, "). Check for updates and try again."),
+                  error: error
+                });
                 setLoading({});
                 setConfirmDownload(false);
 
@@ -313,7 +316,7 @@ function Academy(props) {
                 _rimraf["default"].sync(extractDest);
 
                 setLang(null);
-                console.error(error);
+                console.error("Could not download ".concat(translation.url), error);
               });
 
             case 6:
@@ -334,7 +337,10 @@ function Academy(props) {
 
       syncCatalog();
     } catch (error) {
-      console.error("failed to delete ".concat(selectedTranslation.language, " translation"), error);
+      setError({
+        message: "Failed to delete translationAcademy ".concat(selectedTranslation.title, " (").concat(selectedTranslation.language, ")."),
+        error: error
+      });
     }
   }
 
@@ -375,7 +381,10 @@ function Academy(props) {
             case 6:
               _context3.prev = 6;
               _context3.t0 = _context3["catch"](1);
-              setError('Unable to check for updates. Please try again.');
+              setError({
+                message: 'Unable to check for updates. Please try again.',
+                error: _context3.t0
+              });
               console.error(_context3.t0);
 
             case 10:
@@ -475,7 +484,10 @@ function Academy(props) {
 
         _rimraf["default"].sync(dir);
 
-        setError('The translation is corrupt. Please try again.');
+        setError({
+          message: "translationAcademy ".concat(translation.title, " (").concat(translation.language, ") is corrupt. Please check for updates and download again."),
+          error: error
+        });
         setLang(null);
       }
     }
@@ -539,7 +551,7 @@ function Academy(props) {
     progress: loadingProgress
   }), _react["default"].createElement(_ErrorDialog["default"], {
     title: "Error",
-    message: errorMessage,
+    error: errorMessage,
     open: errorMessage !== null,
     onClose: handleDismissError
   }));

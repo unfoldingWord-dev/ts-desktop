@@ -30,6 +30,10 @@ function readTOCSection(section, dir, handler) {
         const articleSubTitle = safeRead(path.join(articleDir, 'sub-title.md'));
         const articleBody = safeRead(path.join(articleDir, '01.md'));
 
+        if(!articleBody) {
+            throw new Error(`Could not find the article '${section.link}'`);
+        }
+
         let article = {
             path: articleDir,
             manualId: path.basename(dir),

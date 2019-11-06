@@ -10,10 +10,10 @@ export default function ConfirmDownloadDialog(props) {
     if(translation) {
         const {update, title, language} = translation;
 
-        message = `Do you want to download the ${title} (${language}) translationAcademy?`;
+        message = `Do you want to download translationAcademy ${title} (${language})?`;
         if (update) {
             dialogTitle = 'Update translationAcademy';
-            message = `An update is available for the ${title} (${language}) translationAcademy. Would you like to download it now?`;
+            message = `An update is available for translationAcademy ${title} (${language}). Would you like to download it now?`;
         }
     }
 

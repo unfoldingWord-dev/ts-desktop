@@ -320,7 +320,7 @@ export default function Academy(props) {
         setError(null);
     }
 
-    const isChooseDialogOpen = !translation && !loadingCatalog;
+    const isChooseDialogOpen = !translation && !loadingCatalog && !errorMessage;
     return (
         <>
             <Articles articles={articles} onClickLink={handleClickLink}/>

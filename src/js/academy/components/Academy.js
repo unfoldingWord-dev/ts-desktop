@@ -511,7 +511,7 @@ function Academy(props) {
     setError(null);
   }
 
-  var isChooseDialogOpen = !translation && !loadingCatalog;
+  var isChooseDialogOpen = !translation && !loadingCatalog && !errorMessage;
   return _react["default"].createElement(_react["default"].Fragment, null, _react["default"].createElement(_Articles["default"], {
     articles: articles,
     onClickLink: handleClickLink

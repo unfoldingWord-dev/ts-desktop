@@ -89,7 +89,9 @@
         "dev": "electron . --debug -remote-debugging-port=9222",
         "test": "jest",
         "compile-ta": "babel src/js/academy-es6 --out-dir src/js/academy",
-        "pack-ta": "gulp packTA",
+        "pack:ta": "gulp packTA",
+        "pack:rcs": "door43-client index -f -i src/index/index.sqlite.tmp && door43-client download -i src/index/index.sqlite.tmp -d src/index/resource_containers.tmp -c -l ar as bn ceb el-x-koine en es-419 fr gu hbo hi hr id ilo kn ml mr ne or pa pt-br ru sw ta te th tl vi",
+        "postpack:rcs": "mv src/index/index.sqlite.tmp src/index/index.sqlite && rm -rf src/index/resource_containers && mv src/index/resource_containers.tmp src/index/resource_containers",
         "prepack": "check-for-leaks",
         "prepush": "check-for-leaks"
     },

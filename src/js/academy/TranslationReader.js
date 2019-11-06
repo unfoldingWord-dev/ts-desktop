@@ -51,7 +51,7 @@ function readTOCSection(section, dir, handler) {
     var articleBody = safeRead(_path["default"].join(articleDir, '01.md'));
 
     if (!articleBody) {
-      throw new Error("Could not find the article '".concat(section.link, "'"));
+      throw new Error("Could not find the article '".concat(section.link, "' while reading the table of contents in ").concat(dir));
     }
 
     var article = {

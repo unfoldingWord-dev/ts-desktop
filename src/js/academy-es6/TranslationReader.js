@@ -31,7 +31,7 @@ function readTOCSection(section, dir, handler) {
         const articleBody = safeRead(path.join(articleDir, '01.md'));
 
         if(!articleBody) {
-            throw new Error(`Could not find the article '${section.link}'`);
+            throw new Error(`Could not find the article '${section.link}' while reading the table of contents in ${dir}`);
         }
 
         let article = {

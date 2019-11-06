@@ -342,7 +342,6 @@ function Academy(props) {
     if (newTranslation === null) {
       onClose();
     } else {
-      setArticleId(null);
       setLang(newTranslation.language);
     }
   }

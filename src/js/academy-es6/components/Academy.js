@@ -14,6 +14,7 @@ import LoadingDialog from "./LoadingDialog";
 import ErrorDialog from "./ErrorDialog";
 import {saveBlob, useCatalog, useHistoricState} from "../util";
 import {ipcRenderer} from "electron";
+import {useStableResize} from "../hooks";
 
 /**
  * Renders the tA page
@@ -36,6 +37,7 @@ export default function Academy(props) {
     const [errorMessage, setError] = useState(null);
     const [loading, setLoading] = useState({});
     const {loadingTitle, loadingMessage, progress: loadingProgress} = loading;
+    useStableResize(document.getElementById('articles'));
 
     function handleCancelDownload() {
         setConfirmDownload(false);

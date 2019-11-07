@@ -37,6 +37,8 @@ var _util = require("../util");
 
 var _electron = require("electron");
 
+var _hooks = require("../hooks");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
@@ -131,6 +133,7 @@ function Academy(props) {
   var loadingTitle = loading.loadingTitle,
       loadingMessage = loading.loadingMessage,
       loadingProgress = loading.progress;
+  (0, _hooks.useStableResize)(document.getElementById('articles'));
 
   function handleCancelDownload() {
     setConfirmDownload(false); // close translation if not already downloaded

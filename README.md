@@ -36,6 +36,8 @@ The following commands are available from within the project directory:
 * `$ gulp test --grep [string]` runs the Mocha unit tests that match the string
 * `$ gulp` runs the `test` task
 * `$ npm start` runs the application (without building it)
+* `$ npm run pack:ta` will update the packaged tA content.
+* `$ npm run pack:rcs` will update the packaged resource containers. This will take a long time.
 
 > Note: You can open the Chrome Developer Tools while the app is running by pressing `Ctrl+Shift+I` on Windows/Linux or `Cmd-Shift-I` on macOS.
 

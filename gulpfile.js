@@ -3,7 +3,7 @@
  *
  * Copyright 2016
  */
-
+require("regenerator-runtime/runtime");
 const gulp = require('gulp'),
     mocha = require('gulp-mocha'),
     rimraf = require('rimraf'),
@@ -15,8 +15,7 @@ const gulp = require('gulp'),
     fs = require('fs'),
     util = require('./src/js/lib/utils'),
     princePackager = require('./src/js/prince-packager'),
-    requireES6 = require('./src/js/require-es6'),
-    { pack: packagetA } = requireES6(path.join(__dirname, './src/js/academy/package-ta'));
+    { pack: packagetA } = require('./src/js/academy/package-ta');
 
 const APP_NAME = 'translationStudio',
     JS_FILES = './src/js/**/*.js',
@@ -76,6 +75,8 @@ function build(done) {
     var ignored = Object.keys(p['devDependencies']).concat([
         'unit_tests',
         'acceptance_tests',
+        // TRICKY: this was causing the windows install to fail.
+        'src\/components\/prism\/gulpfile\.js',
         '__tests__',
         '__mocks__',
         'out',

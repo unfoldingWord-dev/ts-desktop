@@ -30,7 +30,7 @@
         "adm-zip": "0.4.7",
         "archiver": "0.21.0",
         "async": "1.4.2",
-        "axios": "^0.18.0",
+        "axios": "^0.21.1",
         "chmodr": "1.0.2",
         "date-fns": "^2.2.1",
         "door43-client": "^0.9.8",

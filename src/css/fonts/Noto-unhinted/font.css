@@ -31,3 +31,1146 @@
   font-weight: 700;
   src: url('NotoSans-BoldItalic.ttf');
 }
+/* Noto Sans, Bold */
+@font-face {
+    font-family: "Noto Sans";
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSans-Bold.ttf")
+}
+
+/* Noto Sans, Bold Italic */
+@font-face {
+    font-family: "Noto Sans";
+    font-weight: bold;
+    font-style: italic;
+    font-stretch: normal;
+    src: url("NotoSans-BoldItalic.ttf")
+}
+
+/* Noto Sans, Italic */
+@font-face {
+    font-family: "Noto Sans";
+    font-weight: normal;
+    font-style: italic;
+    font-stretch: normal;
+    src: url("NotoSans-Italic.ttf")
+}
+
+/* Noto Sans, Regular */
+@font-face {
+    font-family: "Noto Sans";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSans-Regular.ttf")
+}
+
+/* Noto Sans Adlam, Regular */
+@font-face {
+    font-family: "Noto Sans Adlam";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansAdlam-Regular.ttf")
+}
+
+/* Noto Sans Adlam Unjoined, Regular */
+@font-face {
+    font-family: "Noto Sans Adlam Unjoined";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansAdlamUnjoined-Regular.ttf")
+}
+
+/* Noto Sans Anatolian Hieroglyphs, Regular */
+@font-face {
+    font-family: "Noto Sans Anatolian Hieroglyphs";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansAnatolianHieroglyphs-Regular.ttf")
+}
+
+/* Noto Sans Arabic, Bold */
+@font-face {
+    font-family: "Noto Sans Arabic";
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansArabic-Bold.ttf")
+}
+
+/* Noto Sans Arabic, Regular */
+@font-face {
+    font-family: "Noto Sans Arabic";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansArabic-Regular.ttf")
+}
+
+/* Noto Sans Armenian, Bold */
+@font-face {
+    font-family: "Noto Sans Armenian";
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansArmenian-Bold.ttf")
+}
+
+/* Noto Sans Armenian, Regular */
+@font-face {
+    font-family: "Noto Sans Armenian";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansArmenian-Regular.ttf")
+}
+
+/* Noto Sans Avestan, Regular */
+@font-face {
+    font-family: "Noto Sans Avestan";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansAvestan-Regular.ttf")
+}
+
+/* Noto Sans Balinese, Regular */
+@font-face {
+    font-family: "Noto Sans Balinese";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansBalinese-Regular.ttf")
+}
+
+/* Noto Sans Bamum, Regular */
+@font-face {
+    font-family: "Noto Sans Bamum";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansBamum-Regular.ttf")
+}
+
+/* Noto Sans Batak, Regular */
+@font-face {
+    font-family: "Noto Sans Batak";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansBatak-Regular.ttf")
+}
+
+/* Noto Sans Bengali, Bold */
+@font-face {
+    font-family: "Noto Sans Bengali";
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansBengali-Bold.ttf")
+}
+
+/* Noto Sans Bengali, Regular */
+@font-face {
+    font-family: "Noto Sans Bengali";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansBengali-Regular.ttf")
+}
+
+/* Noto Sans Brahmi, Regular */
+@font-face {
+    font-family: "Noto Sans Brahmi";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansBrahmi-Regular.ttf")
+}
+
+/* Noto Sans Buginese, Regular */
+@font-face {
+    font-family: "Noto Sans Buginese";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansBuginese-Regular.ttf")
+}
+
+/* Noto Sans Buhid, Regular */
+@font-face {
+    font-family: "Noto Sans Buhid";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansBuhid-Regular.ttf")
+}
+
+/* Noto Sans Canadian Aboriginal, Regular */
+@font-face {
+    font-family: "Noto Sans Canadian Aboriginal";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansCanadianAboriginal-Regular.ttf")
+}
+
+/* Noto Sans Carian, Regular */
+@font-face {
+    font-family: "Noto Sans Carian";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansCarian-Regular.ttf")
+}
+
+/* Noto Sans Chakma, Regular */
+@font-face {
+    font-family: "Noto Sans Chakma";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansChakma-Regular.ttf")
+}
+
+/* Noto Sans Cham, Bold */
+@font-face {
+    font-family: "Noto Sans Cham";
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansCham-Bold.ttf")
+}
+
+/* Noto Sans Cham, Regular */
+@font-face {
+    font-family: "Noto Sans Cham";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansCham-Regular.ttf")
+}
+
+/* Noto Sans Cherokee, Bold */
+@font-face {
+    font-family: "Noto Sans Cherokee";
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansCherokee-Bold.ttf")
+}
+
+/* Noto Sans Cherokee, Regular */
+@font-face {
+    font-family: "Noto Sans Cherokee";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansCherokee-Regular.ttf")
+}
+
+/* Noto Sans Coptic, Regular */
+@font-face {
+    font-family: "Noto Sans Coptic";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansCoptic-Regular.ttf")
+}
+
+/* Noto Sans Cuneiform, Regular */
+@font-face {
+    font-family: "Noto Sans Cuneiform";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansCuneiform-Regular.ttf")
+}
+
+/* Noto Sans Cypriot, Regular */
+@font-face {
+    font-family: "Noto Sans Cypriot";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansCypriot-Regular.ttf")
+}
+
+/* Noto Sans Deseret, Regular */
+@font-face {
+    font-family: "Noto Sans Deseret";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansDeseret-Regular.ttf")
+}
+
+/* Noto Sans Devanagari, Bold */
+@font-face {
+    font-family: "Noto Sans Devanagari";
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansDevanagari-Bold.ttf")
+}
+
+/* Noto Sans Devanagari, Regular */
+@font-face {
+    font-family: "Noto Sans Devanagari";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansDevanagari-Regular.ttf")
+}
+
+/* Noto Sans Display, Bold */
+@font-face {
+    font-family: "Noto Sans Display";
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansDisplay-Bold.ttf")
+}
+
+/* Noto Sans Display, Bold Italic */
+@font-face {
+    font-family: "Noto Sans Display";
+    font-weight: bold;
+    font-style: italic;
+    font-stretch: normal;
+    src: url("NotoSansDisplay-BoldItalic.ttf")
+}
+
+/* Noto Sans Display, Italic */
+@font-face {
+    font-family: "Noto Sans Display";
+    font-weight: normal;
+    font-style: italic;
+    font-stretch: normal;
+    src: url("NotoSansDisplay-Italic.ttf")
+}
+
+/* Noto Sans Display, Regular */
+@font-face {
+    font-family: "Noto Sans Display";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansDisplay-Regular.ttf")
+}
+
+/* Noto Sans Egyptian Hieroglyphs, Regular */
+@font-face {
+    font-family: "Noto Sans Egyptian Hieroglyphs";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansEgyptianHieroglyphs-Regular.ttf")
+}
+
+/* Noto Sans Ethiopic, Bold */
+@font-face {
+    font-family: "Noto Sans Ethiopic";
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansEthiopic-Bold.ttf")
+}
+
+/* Noto Sans Ethiopic, Regular */
+@font-face {
+    font-family: "Noto Sans Ethiopic";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansEthiopic-Regular.ttf")
+}
+
+/* Noto Sans Georgian, Bold */
+@font-face {
+    font-family: "Noto Sans Georgian";
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansGeorgian-Bold.ttf")
+}
+
+/* Noto Sans Georgian, Regular */
+@font-face {
+    font-family: "Noto Sans Georgian";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansGeorgian-Regular.ttf")
+}
+
+/* Noto Sans Glagolitic, Regular */
+@font-face {
+    font-family: "Noto Sans Glagolitic";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansGlagolitic-Regular.ttf")
+}
+
+/* Noto Sans Gothic, Regular */
+@font-face {
+    font-family: "Noto Sans Gothic";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansGothic-Regular.ttf")
+}
+
+/* Noto Sans Gujarati, Bold */
+@font-face {
+    font-family: "Noto Sans Gujarati";
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansGujarati-Bold.ttf")
+}
+
+/* Noto Sans Gujarati, Regular */
+@font-face {
+    font-family: "Noto Sans Gujarati";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansGujarati-Regular.ttf")
+}
+
+/* Noto Sans Gurmukhi, Bold */
+@font-face {
+    font-family: "Noto Sans Gurmukhi";
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansGurmukhi-Bold.ttf")
+}
+
+/* Noto Sans Gurmukhi, Regular */
+@font-face {
+    font-family: "Noto Sans Gurmukhi";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansGurmukhi-Regular.ttf")
+}
+
+/* Noto Sans Hanunoo, Regular */
+@font-face {
+    font-family: "Noto Sans Hanunoo";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansHanunoo-Regular.ttf")
+}
+
+/* Noto Sans Hebrew, Bold */
+@font-face {
+    font-family: "Noto Sans Hebrew";
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansHebrew-Bold.ttf")
+}
+
+/* Noto Sans Hebrew, Regular */
+@font-face {
+    font-family: "Noto Sans Hebrew";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansHebrew-Regular.ttf")
+}
+
+/* Noto Sans Imperial Aramaic, Regular */
+@font-face {
+    font-family: "Noto Sans Imperial Aramaic";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansImperialAramaic-Regular.ttf")
+}
+
+/* Noto Sans Inscriptional Pahlavi, Regular */
+@font-face {
+    font-family: "Noto Sans Inscriptional Pahlavi";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansInscriptionalPahlavi-Regular.ttf")
+}
+
+/* Noto Sans Inscriptional Parthian, Regular */
+@font-face {
+    font-family: "Noto Sans Inscriptional Parthian";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansInscriptionalParthian-Regular.ttf")
+}
+
+/* Noto Sans Javanese, Regular */
+@font-face {
+    font-family: "Noto Sans Javanese";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansJavanese-Regular.ttf")
+}
+
+/* Noto Sans Kaithi, Regular */
+@font-face {
+    font-family: "Noto Sans Kaithi";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansKaithi-Regular.ttf")
+}
+
+/* Noto Sans Kannada, Bold */
+@font-face {
+    font-family: "Noto Sans Kannada";
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansKannada-Bold.ttf")
+}
+
+/* Noto Sans Kannada, Regular */
+@font-face {
+    font-family: "Noto Sans Kannada";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansKannada-Regular.ttf")
+}
+
+/* Noto Sans Kayah Li, Regular */
+@font-face {
+    font-family: "Noto Sans Kayah Li";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansKayahLi-Regular.ttf")
+}
+
+/* Noto Sans Kharoshthi, Regular */
+@font-face {
+    font-family: "Noto Sans Kharoshthi";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansKharoshthi-Regular.ttf")
+}
+
+/* Noto Sans Khmer, Bold */
+@font-face {
+    font-family: "Noto Sans Khmer";
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansKhmer-Bold.ttf")
+}
+
+/* Noto Sans Khmer, Regular */
+@font-face {
+    font-family: "Noto Sans Khmer";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansKhmer-Regular.ttf")
+}
+
+/* Noto Sans Lao, Bold */
+@font-face {
+    font-family: "Noto Sans Lao";
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansLao-Bold.ttf")
+}
+
+/* Noto Sans Lao, Regular */
+@font-face {
+    font-family: "Noto Sans Lao";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansLao-Regular.ttf")
+}
+
+/* Noto Sans Lepcha, Regular */
+@font-face {
+    font-family: "Noto Sans Lepcha";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansLepcha-Regular.ttf")
+}
+
+/* Noto Sans Limbu, Regular */
+@font-face {
+    font-family: "Noto Sans Limbu";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansLimbu-Regular.ttf")
+}
+
+/* Noto Sans Linear B, Regular */
+@font-face {
+    font-family: "Noto Sans Linear B";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansLinearB-Regular.ttf")
+}
+
+/* Noto Sans Lisu, Regular */
+@font-face {
+    font-family: "Noto Sans Lisu";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansLisu-Regular.ttf")
+}
+
+/* Noto Sans Lycian, Regular */
+@font-face {
+    font-family: "Noto Sans Lycian";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansLycian-Regular.ttf")
+}
+
+/* Noto Sans Lydian, Regular */
+@font-face {
+    font-family: "Noto Sans Lydian";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansLydian-Regular.ttf")
+}
+
+/* Noto Sans Malayalam, Bold */
+@font-face {
+    font-family: "Noto Sans Malayalam";
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansMalayalam-Bold.ttf")
+}
+
+/* Noto Sans Malayalam, Regular */
+@font-face {
+    font-family: "Noto Sans Malayalam";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansMalayalam-Regular.ttf")
+}
+
+/* Noto Sans Mandaic, Regular */
+@font-face {
+    font-family: "Noto Sans Mandaic";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansMandaic-Regular.ttf")
+}
+
+/* Noto Sans Meetei Mayek, Regular */
+@font-face {
+    font-family: "Noto Sans Meetei Mayek";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansMeeteiMayek-Regular.ttf")
+}
+
+/* Noto Sans Mongolian, Regular */
+@font-face {
+    font-family: "Noto Sans Mongolian";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansMongolian-Regular.ttf")
+}
+
+/* Noto Sans Mono, Bold */
+@font-face {
+    font-family: "Noto Sans Mono";
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansMono-Bold.ttf")
+}
+
+/* Noto Sans Mono, Regular */
+@font-face {
+    font-family: "Noto Sans Mono";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansMono-Regular.ttf")
+}
+
+/* Noto Sans Myanmar, Bold */
+@font-face {
+    font-family: "Noto Sans Myanmar";
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansMyanmar-Bold.ttf")
+}
+
+/* Noto Sans Myanmar, Regular */
+@font-face {
+    font-family: "Noto Sans Myanmar";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansMyanmar-Regular.ttf")
+}
+
+/* Noto Sans NKo, Regular */
+@font-face {
+    font-family: "Noto Sans NKo";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansNKo-Regular.ttf")
+}
+
+/* Noto Sans New Tai Lue, Regular */
+@font-face {
+    font-family: "Noto Sans New Tai Lue";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansNewTaiLue-Regular.ttf")
+}
+
+/* Noto Sans Ogham, Regular */
+@font-face {
+    font-family: "Noto Sans Ogham";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansOgham-Regular.ttf")
+}
+
+/* Noto Sans Ol Chiki, Regular */
+@font-face {
+    font-family: "Noto Sans Ol Chiki";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansOlChiki-Regular.ttf")
+}
+
+/* Noto Sans Old Italic, Regular */
+@font-face {
+    font-family: "Noto Sans Old Italic";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansOldItalic-Regular.ttf")
+}
+
+/* Noto Sans Old Persian, Regular */
+@font-face {
+    font-family: "Noto Sans Old Persian";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansOldPersian-Regular.ttf")
+}
+
+/* Noto Sans Old South Arabian, Regular */
+@font-face {
+    font-family: "Noto Sans Old South Arabian";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansOldSouthArabian-Regular.ttf")
+}
+
+/* Noto Sans Old Turkic, Regular */
+@font-face {
+    font-family: "Noto Sans Old Turkic";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansOldTurkic-Regular.ttf")
+}
+
+/* Noto Sans Oriya, Bold */
+@font-face {
+    font-family: "Noto Sans Oriya";
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansOriya-Bold.ttf")
+}
+
+/* Noto Sans Oriya, Regular */
+@font-face {
+    font-family: "Noto Sans Oriya";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansOriya-Regular.ttf")
+}
+
+/* Noto Sans Osage, Regular */
+@font-face {
+    font-family: "Noto Sans Osage";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansOsage-Regular.ttf")
+}
+
+/* Noto Sans Osmanya, Regular */
+@font-face {
+    font-family: "Noto Sans Osmanya";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansOsmanya-Regular.ttf")
+}
+
+/* Noto Sans Phags Pa, Regular */
+@font-face {
+    font-family: "Noto Sans Phags Pa";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansPhagsPa-Regular.ttf")
+}
+
+/* Noto Sans Phoenician, Regular */
+@font-face {
+    font-family: "Noto Sans Phoenician";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansPhoenician-Regular.ttf")
+}
+
+/* Noto Sans Rejang, Regular */
+@font-face {
+    font-family: "Noto Sans Rejang";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansRejang-Regular.ttf")
+}
+
+/* Noto Sans Runic, Regular */
+@font-face {
+    font-family: "Noto Sans Runic";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansRunic-Regular.ttf")
+}
+
+/* Noto Sans Samaritan, Regular */
+@font-face {
+    font-family: "Noto Sans Samaritan";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansSamaritan-Regular.ttf")
+}
+
+/* Noto Sans Saurashtra, Regular */
+@font-face {
+    font-family: "Noto Sans Saurashtra";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansSaurashtra-Regular.ttf")
+}
+
+/* Noto Sans Shavian, Regular */
+@font-face {
+    font-family: "Noto Sans Shavian";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansShavian-Regular.ttf")
+}
+
+/* Noto Sans Sinhala, Bold */
+@font-face {
+    font-family: "Noto Sans Sinhala";
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansSinhala-Bold.ttf")
+}
+
+/* Noto Sans Sinhala, Regular */
+@font-face {
+    font-family: "Noto Sans Sinhala";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansSinhala-Regular.ttf")
+}
+
+/* Noto Sans Sundanese, Regular */
+@font-face {
+    font-family: "Noto Sans Sundanese";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansSundanese-Regular.ttf")
+}
+
+/* Noto Sans Syloti Nagri, Regular */
+@font-face {
+    font-family: "Noto Sans Syloti Nagri";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansSylotiNagri-Regular.ttf")
+}
+
+/* Noto Sans Symbols, Bold */
+@font-face {
+    font-family: "Noto Sans Symbols";
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansSymbols-Bold.ttf")
+}
+
+/* Noto Sans Symbols, Regular */
+@font-face {
+    font-family: "Noto Sans Symbols";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansSymbols-Regular.ttf")
+}
+
+/* Noto Sans Symbols2, Regular */
+@font-face {
+    font-family: "Noto Sans Symbols2";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansSymbols2-Regular.ttf")
+}
+
+/* Noto Sans Syriac Eastern, Regular */
+@font-face {
+    font-family: "Noto Sans Syriac Eastern";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansSyriacEastern-Regular.ttf")
+}
+
+/* Noto Sans Syriac Estrangela, Regular */
+@font-face {
+    font-family: "Noto Sans Syriac Estrangela";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansSyriacEstrangela-Regular.ttf")
+}
+
+/* Noto Sans Syriac Western, Regular */
+@font-face {
+    font-family: "Noto Sans Syriac Western";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansSyriacWestern-Regular.ttf")
+}
+
+/* Noto Sans Tagalog, Regular */
+@font-face {
+    font-family: "Noto Sans Tagalog";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansTagalog-Regular.ttf")
+}
+
+/* Noto Sans Tagbanwa, Regular */
+@font-face {
+    font-family: "Noto Sans Tagbanwa";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansTagbanwa-Regular.ttf")
+}
+
+/* Noto Sans Tai Le, Regular */
+@font-face {
+    font-family: "Noto Sans Tai Le";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansTaiLe-Regular.ttf")
+}
+
+/* Noto Sans Tai Tham, Regular */
+@font-face {
+    font-family: "Noto Sans Tai Tham";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansTaiTham-Regular.ttf")
+}
+
+/* Noto Sans Tai Viet, Regular */
+@font-face {
+    font-family: "Noto Sans Tai Viet";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansTaiViet-Regular.ttf")
+}
+
+/* Noto Sans Tamil, Bold */
+@font-face {
+    font-family: "Noto Sans Tamil";
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansTamil-Bold.ttf")
+}
+
+/* Noto Sans Tamil, Regular */
+@font-face {
+    font-family: "Noto Sans Tamil";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansTamil-Regular.ttf")
+}
+
+/* Noto Sans Telugu, Bold */
+@font-face {
+    font-family: "Noto Sans Telugu";
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansTelugu-Bold.ttf")
+}
+
+/* Noto Sans Telugu, Regular */
+@font-face {
+    font-family: "Noto Sans Telugu";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansTelugu-Regular.ttf")
+}
+
+/* Noto Sans Thaana, Bold */
+@font-face {
+    font-family: "Noto Sans Thaana";
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansThaana-Bold.ttf")
+}
+
+/* Noto Sans Thaana, Regular */
+@font-face {
+    font-family: "Noto Sans Thaana";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansThaana-Regular.ttf")
+}
+
+/* Noto Sans Thai, Bold */
+@font-face {
+    font-family: "Noto Sans Thai";
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansThai-Bold.ttf")
+}
+
+/* Noto Sans Thai, Regular */
+@font-face {
+    font-family: "Noto Sans Thai";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansThai-Regular.ttf")
+}
+
+/* Noto Sans Tibetan, Bold */
+@font-face {
+    font-family: "Noto Sans Tibetan";
+    font-weight: bold;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansTibetan-Bold.ttf")
+}
+
+/* Noto Sans Tibetan, Regular */
+@font-face {
+    font-family: "Noto Sans Tibetan";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansTibetan-Regular.ttf")
+}
+
+/* Noto Sans Tifinagh, Regular */
+@font-face {
+    font-family: "Noto Sans Tifinagh";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansTifinagh-Regular.ttf")
+}
+
+/* Noto Sans Ugaritic, Regular */
+@font-face {
+    font-family: "Noto Sans Ugaritic";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansUgaritic-Regular.ttf")
+}
+
+/* Noto Sans Vai, Regular */
+@font-face {
+    font-family: "Noto Sans Vai";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansVai-Regular.ttf")
+}
+
+/* Noto Sans Yi, Regular */
+@font-face {
+    font-family: "Noto Sans Yi";
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    src: url("NotoSansYi-Regular.ttf")
+}
+

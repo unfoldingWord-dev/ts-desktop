@@ -399,6 +399,11 @@ var utils = {
             return path.join(fontDir, name);
         });
 
+        var notoDir = path.resolve(path.join(__dirname, '..', '..', 'css', 'fonts', 'Noto-unhinted'));
+        fontpaths = fontpaths.concat(fs.readdirSync(notoDir).map( function (name) {
+            return path.join(notoDir, name);
+        }));
+
         var list = fontpaths.map(function (fontpath) {
             var font = false;
             try {

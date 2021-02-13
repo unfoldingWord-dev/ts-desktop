@@ -29,8 +29,8 @@ function install(dir, os) {
         url = 'http://www.princexml.com/download/prince-14-win32.zip';
         tempfile += ".zip";
     } else if(os === 'osx') {
-        url = 'http://www.princexml.com/download/prince-14-macosx.tar.gz';
-        tempfile += ".tar.gz";
+        url = 'http://www.princexml.com/download/prince-14-macos.zip';
+        tempfile += ".zip";
     } else if(os === 'linux') {
         url = 'http://www.princexml.com/download/prince-14-linux-generic-x86_64.tar.gz';
         tempfile += ".tar.gz";

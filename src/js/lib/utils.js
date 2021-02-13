@@ -390,10 +390,13 @@ var utils = {
 
     getSystemFonts: function () {
         var fontDir = path.resolve({
-            win32:  '/Windows/fonts',
+	    win32:  '/Windows/fonts',
             darwin: '/Library/Fonts',
             linux:  '/usr/share/fonts/truetype'
         }[process.platform]);
+	if (process.platform == "win32" && ! fs.existsSync(fontDir)) {
+	    fontDir = path.resolve('C:/Windows/fonts');
+	}
 
         var fontpaths = fs.readdirSync(fontDir).map(function (name) {
             return path.join(fontDir, name);

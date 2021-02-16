@@ -78,7 +78,7 @@ function PrintManager(configurator) {
             var font = configurator.getUserSetting('targetfont').name;
             var sizeValue = configurator.getUserSetting('targetsize').name.toLowerCase();
             var size = fontSizeMap[sizeValue];
-            var mainheader = '\<!DOCTYPE html\>\<html\>\<head\>\<link rel="stylesheet" href="' + cssPath + '"\>\<\/head\>\<body\>';
+            var mainheader = '\<!DOCTYPE html\>\<html\>\<head\>\<link rel="stylesheet" href="' + cssPath + '"\>\<style\>body {font-family:"'+ font +'","Noto Sans",Roboto,sans-serif;font-size:'+size+'}</style>\<\/head\>\<body\>';
             var mainfooter = '\<\/body\>\<\/html\>';
             var titlegroup = '\<h1 id="title" class="break titles" style="font-family: ' + font + ';"\>' + title + '\<\/h1\>';
             var licensegroup = '\<div id="license" class="break"\>' + license + '\<\/div\>';

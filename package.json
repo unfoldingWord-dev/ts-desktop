@@ -29,7 +29,7 @@
         "@material-ui/styles": "^4.4.3",
         "adm-zip": "0.4.7",
         "archiver": "0.21.0",
-        "async": "1.4.2",
+        "async": "2.6.4",
         "axios": "^0.18.0",
         "chmodr": "1.0.2",
         "date-fns": "^2.2.1",
